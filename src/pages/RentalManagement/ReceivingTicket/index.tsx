@@ -1,8 +1,7 @@
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, DateRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { Link } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
@@ -26,7 +25,8 @@ import {
   COLOUR_MASTER,
   REPAIR_JOB_STATUS,
   repairOrder,
-  sidebarResource
+  sidebarResource,
+  dateFormat
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
@@ -37,7 +37,6 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { makeStyles } from '@material-ui/core/styles';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { getRentalProductAssets, getRentalDeliveryTicket, uniqueProduct } from './../rentalOfflineHelper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -63,6 +62,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
+import moment from 'moment';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -85,56 +85,44 @@ const ReceivingTicket = ({
   renderedFrom,
   allowedToEdit,
   isProcessor,
-  allowUpdateStatus
+  allowUpdateStatus,
+  stepFullScreen
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
+
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
-
   const [showConformationConsume, setShowConformationConsume] = useState({ open: false, type: 'add' });
   const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
   const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
   const [showConformationCancleTicket, setShowConformationCancleTicket] = useState({ open: false, type: null });
-
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
-
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
-
   const [showQtyDialog, setShowQtyDialog] = useState({ open: false, data: null });
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {} });
-
   const { isOffline } = useContext(CustomOfflineContext);
-
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
-
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
-
   const [showRepairOrderDialog, setShowRepairOrderDialog] = useState(false);
-
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
-
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
-
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
   const [seletedProducts, setSeletedProducts] = useState([]);
   const [columnHeader, setColumnHeader] = useState(null);
-
   const [invoiceData, setInvoiceData] = useState(null);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, data: null, loading: false });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
-
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
@@ -180,12 +168,11 @@ const ReceivingTicket = ({
     setLoadingData(true);
     try {
       setNextStep(false);
-      setNextStepToolTip(null)
+      setNextStepToolTip(null);
+
+      dispatch({ type: 'selection', selectedRecords: [] });
       dispatch({ type: 'loading', loading: true });
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
-      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+
       var productAssets: any = [];
       var deliveryTicketList: any = [];
       var material: any = [];
@@ -298,7 +285,8 @@ const ReceivingTicket = ({
       }
 
       const loadingTicketProducts = [];
-      const returnTicketProducts = {};
+      const returnTicketProducts = [];
+
       deliveryTicketList?.forEach((element) => {
         if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products && element?.products?.length) {
           element?.products?.forEach((ele) => {
@@ -312,7 +300,12 @@ const ReceivingTicket = ({
         }
         if (element.ticketType === DELIVERY_TICKET_TYPE.return && element?.products && element?.products?.length) {
           element?.products?.forEach((ele) => {
-            returnTicketProducts[ele?.product] = ele?.qty;
+            returnTicketProducts.push({
+              ...ele,
+              returnTicketId: element._id,
+              returnTicket: element?.ticketName,
+              returnTicketStatus: element?.status
+            });
           });
         }
       });
@@ -328,6 +321,8 @@ const ReceivingTicket = ({
           });
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
+          const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
+
           const obj: any = {};
           obj.uniqueId = element._id;
           obj.serialized = element?.productDetail?.serializedProduct;
@@ -345,16 +340,13 @@ const ReceivingTicket = ({
                   : '';
           obj.qty = ele.qty;
           obj.consumeQty = consumeQty;
-          obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicketProducts[element?.materialId] || 0 : 0;
+          obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicket?.qty || 0 : 0;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-          obj.status =
-            element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true
-              ? element?.status
-              : 'N/A';
+          obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
@@ -362,7 +354,7 @@ const ReceivingTicket = ({
               ? 'Consumed'
               : consumeQty < ele.qty && consumeQty > 0
                 ? 'Partially Consumed'
-                : ele.qty === returnTicketProducts[element?.materialId]
+                : ele.qty === (returnTicket?.qty || 0)
                   ? 'Returned'
                   : ''
             : element?.status;
@@ -378,6 +370,13 @@ const ReceivingTicket = ({
             element?.currentLocation?.optionValue ||
             rentalManagementData?.shippingAddress?.optionValue ||
             rentalManagementData?.billingAddress?.optionValue;
+
+          if (returnTicket) {
+            returnTicket.isCount = true;
+            obj.returnTicket = returnTicket?.returnTicket;
+            obj.returnTicketId = returnTicket?.returnTicketId;
+            obj.returnTicketStatus = returnTicket?.returnTicketStatus;
+          }
           productAssets.push(obj);
           qty = qty - ele.qty;
         });
@@ -400,22 +399,20 @@ const ReceivingTicket = ({
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.consumeQty = consumeQty;
-          obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicketProducts[element?.materialId] || 0 : 0;
+          obj.returnQty = 0;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
-          obj.status = element?.status;
+          obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
             ? qty === consumeQty
               ? 'Consumed'
               : consumeQty < qty && consumeQty > 0
                 ? 'Partially Consumed'
-                : qty === returnTicketProducts[element?.materialId]
-                  ? 'Returned'
-                  : ''
+                : ''
             : element?.status;
           obj.currentLocation =
             element?.currentLocation?.optionValue ||
@@ -455,18 +452,18 @@ const ReceivingTicket = ({
               productAssets[index]['returnTicketStatus'] = obj?.status;
             }
           }
-          if (obj?.products?.some((p) => d?._id?.split('_')[0] === p?.product)) {
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving && productAssets[index]['loadingTicketId']) {
-              productAssets[index]['receivingTicket'] = obj?.ticketName;
-              productAssets[index]['receivingTicketId'] = obj?._id;
-              productAssets[index]['receivingTicketStatus'] = obj?.status;
-            }
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['loadingTicketId']) {
-              productAssets[index]['returnTicket'] = obj?.ticketName;
-              productAssets[index]['returnTicketId'] = obj?._id;
-              productAssets[index]['returnTicketStatus'] = obj?.status;
-            }
-          }
+          // if (obj?.products?.some((p) => d?._id?.split('_')[0] === p?.product)) {
+          //   if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving && productAssets[index]['loadingTicketId']) {
+          //     productAssets[index]['receivingTicket'] = obj?.ticketName;
+          //     productAssets[index]['receivingTicketId'] = obj?._id;
+          //     productAssets[index]['receivingTicketStatus'] = obj?.status;
+          //   }
+          //   if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['loadingTicketId']) {
+          //     productAssets[index]['returnTicket'] = obj?.ticketName;
+          //     productAssets[index]['returnTicketId'] = obj?._id;
+          //     productAssets[index]['returnTicketStatus'] = obj?.status;
+          //   }
+          // }
         });
       });
 
@@ -501,9 +498,8 @@ const ReceivingTicket = ({
         ).length === productAssets.length
       ) {
         setNextStep(true);
-      }
-      else {
-        setNextStepToolTip(rentalManagementMessage.receivingCreatedAndDelivered)
+      } else {
+        setNextStepToolTip(rentalManagementMessage.receivingCreatedAndDelivered);
       }
 
       setUniqueReceivingTicket([...new Set(productAssets.filter((d) => d.receivingTicketId !== undefined).map((d) => d.receivingTicketId))]);
@@ -524,198 +520,6 @@ const ReceivingTicket = ({
       toastConfig.setToastConfig(error);
       setLoadingData(false);
     }
-  };
-
-  const InventoryRenderer = (params) => (
-    <div className="d-flex gap-2 align-items-center">
-      <p className="text-truncate">{params.value}</p>
-      <IconButton
-        size="small"
-        onClick={() => {
-          window.open(
-            `${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`
-          );
-        }}
-      >
-        <OpenInNewIcon fontSize="small" color="primary" />
-      </IconButton>
-      {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
-        <HtmlTooltip title="This asset will be shipped from different facility">
-          <IconButton size="small">
-            <HelpIcon fontSize="small" color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0 && (
-        <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
-          <IconButton
-            size="small"
-            onClick={() => {
-              setShowNonSerializeAsset({
-                open: true,
-                data: { productName: params?.data?.productName, nonSerializeAsset: params?.data?.nonSerializeAsset }
-              });
-            }}
-          >
-            <InfoIcon fontSize="small" color={'primary'} />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {params?.data?.isReplaced && (
-        <HtmlTooltip
-          title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}
-        >
-          <InfoIcon fontSize="small" color={'primary'} />
-        </HtmlTooltip>
-      )}
-      {params?.data?.isRepairJob && (
-        <HtmlTooltip title={`${routes.repairJob.title}`}>
-          <IconButton
-            size="small"
-            onClick={() => {
-              window.open(`${routes.repairJobDetail.path}/${params?.data?.repairJob}`);
-            }}
-          >
-            <MdHomeRepairService fontSize="20" color="#163340" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {params?.data?.isRepairOrder && (
-        <HtmlTooltip title={`${routes.repairOrder.title}`}>
-          <IconButton
-            size="small"
-            onClick={() => {
-              window.open(`${routes.repairOrderDetail.path}/${params?.data?.repairOrder}`);
-            }}
-          >
-            <MdHandyman fontSize="20" color="#163340" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-    </div>
-  );
-
-  const ProductNameRenderer = (params) => (
-    <div className="d-flex gap-2 align-items-center">
-      <p className="text-truncate">{params?.value}</p>
-      <IconButton
-        size="small"
-        onClick={() => {
-          window.open(`${routes.productDetail.path}/${params.data?.productId}`);
-        }}
-      >
-        <OpenInNewIcon fontSize="small" color="primary" />
-      </IconButton>
-    </div>
-  );
-
-  const ParentNameRenderer = (params) => (params.data?.parentId ? <span>{params?.data?.parentName}</span> : <NoDataCell />);
-
-  const WarehouseRenderer = (params) =>
-    params?.value ? (
-      <div className="d-flex gap-2 align-items-center">
-        <p className="text-truncate">{params?.value}</p>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`);
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-      </div>
-    ) : (
-      <NoDataCell />
-    );
-
-  const DeliveryTicketRenderer = (params) =>
-    params?.value ? (
-      <div className="d-flex gap-2 align-items-center">
-        <p className="text-truncate">{params?.value}</p>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`);
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-      </div>
-    ) : (
-      <NoDataCell />
-    );
-
-  const ReceivingTicketRenderer = (params) =>
-    params?.value ? (
-      <div className="d-flex gap-2 align-items-center">
-        <p className="text-truncate">{params?.value}</p>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`);
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-      </div>
-    ) : (
-      <NoDataCell />
-    );
-
-  const ReturnTicketRenderer = (params) =>
-    params?.value ? (
-      <div className="d-flex gap-2 align-items-center">
-        <p className="text-truncate">{params?.value}</p>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(`${routes.deliveryTicketDetail.path}/${params.data.returnTicketId}`);
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-      </div>
-    ) : (
-      <NoDataCell />
-    );
-
-  const ActionRenderer = (params) => {
-    return allowedToEdit ? (
-      <HtmlTooltip
-        title={
-          params?.data?.isAllowedStartDate === false && params?.data?.isAllowedEndDate === false
-            ? `Invoice Created - Cannot change Start Date`
-            : params?.data?.isAllowedEndDate === false && params?.data?.isAllowedStartDate !== true
-              ? `Can change the End Date after received`
-              : 'Update - Start Date/End Date'
-        }
-      >
-        <span>
-          <IconButton
-            size="small"
-            disabled={params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate ? false : true}
-            onClick={() => {
-              setOpenDateDialog({ ...openDateDialog, open: true, data: params?.data });
-            }}
-          >
-            <Edit fontSize="small" color={params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate ? 'primary' : 'inherit'} />
-          </IconButton>
-        </span>
-      </HtmlTooltip>
-    ) : null;
-  };
-
-  const frameworkComponents = {
-    receivingTicketRenderer: ReceivingTicketRenderer,
-    deliveryTicketRenderer: DeliveryTicketRenderer,
-    returnTicketRenderer: ReturnTicketRenderer,
-    inventoryRenderer: InventoryRenderer,
-    productNameRenderer: ProductNameRenderer,
-    parentNameRenderer: ParentNameRenderer,
-    warehouseRenderer: WarehouseRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer,
-    actionsRenderer: ActionRenderer
   };
 
   const getColumn = async () => {
@@ -744,52 +548,335 @@ const ReceivingTicket = ({
   };
 
   const columns = [
-    { field: 'index', headerName: 'Index', show: true, disabled: true, cellRenderer: 'commonRenderer', width: 100 },
     {
-      field: 'assetNumber',
-      headerName: 'Details',
-      show: true,
+      accessor: 'index',
+      Header: 'Index',
+      minWidth: 100,
+      width: 100,
       disabled: true,
-      cellRenderer: 'inventoryRenderer',
-      cellStyle: (params) => {
-        if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
-          return { backgroundColor: COLOUR_MASTER.lostAssets.background };
-        }
-        return null;
-      }
+      Cell: ({ row }) => (row?.original?.index ? <h5 className="text-truncate">{row?.original?.index}</h5> : <NoDataCell />)
     },
-    { field: 'displayType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'parentName', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
-    { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'serialNumber', headerName: findHeader(columnHeader?.assetFields, 'serialNumber'), show: true, cellRenderer: 'commonRenderer' },
-    { field: 'productName', headerName: findHeader(columnHeader?.productFields, 'productName'), show: true, cellRenderer: 'productNameRenderer' },
-    { field: 'description', headerName: 'Description', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
-    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'deliveryTicketRenderer' },
-    { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingTicketRenderer' },
-    { field: 'returnTicket', headerName: 'Return Ticket', show: true, cellRenderer: 'returnTicketRenderer' },
-    { field: 'returnQty', headerName: 'Returned Qty', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'manualStartDate', headerName: 'Start Date', show: true, cellRenderer: 'dateRenderer' },
-    { field: 'manualEndDate', headerName: 'End Date', show: true, cellRenderer: 'dateRenderer' },
-    { field: 'startDate', headerName: 'System Start Date', show: false, cellRenderer: 'dateRenderer' },
-    { field: 'endDate', headerName: 'System End Date', show: false, cellRenderer: 'dateRenderer' },
-    { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' }
+    {
+      accessor: 'assetNumber',
+      Header: 'Details',
+      disabled: true,
+      Cell: ({ row }) => (
+        <div
+          className="d-flex gap-2 align-items-center"
+          style={{
+            backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(
+              row?.original?.status
+            )
+              ? COLOUR_MASTER.lostAssets.background
+              : ''
+          }}
+        >
+          <p className="text-truncate">{row?.original?.assetNumber}</p>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(
+                `${row?.original?.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${row?.original?._id?.split('_')[0]
+                }`
+              );
+            }}
+          >
+            <OpenInNewIcon fontSize="small" color="primary" />
+          </IconButton>
+          {row?.original?.warehouseId && row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
+            <HtmlTooltip title="This asset will be shipped from different facility">
+              <IconButton size="small">
+                <HelpIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          {row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0 && (
+            <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setShowNonSerializeAsset({
+                    open: true,
+                    data: { productName: row?.original?.productName, nonSerializeAsset: row?.original?.nonSerializeAsset }
+                  });
+                }}
+              >
+                <InfoIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          {row?.original?.isReplaced && (
+            <HtmlTooltip
+              title={`This Asset has been Replaced by ${row?.original?.replaceAsset} (Due to following reason-"${row?.original?.replaceReason}")`}
+            >
+              <InfoIcon fontSize="small" color={'primary'} />
+            </HtmlTooltip>
+          )}
+          {row?.original?.isRepairJob && (
+            <HtmlTooltip title={`${routes.repairJob.title}`}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.repairJobDetail.path}/${row?.original?.repairJob}`);
+                }}
+              >
+                <MdHomeRepairService fontSize="20" color="#163340" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          {row?.original?.isRepairOrder && (
+            <HtmlTooltip title={`${routes.repairOrder.title}`}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.repairOrderDetail.path}/${row?.original?.repairOrder}`);
+                }}
+              >
+                <MdHandyman fontSize="20" color="#163340" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+        </div>
+      )
+    },
+    {
+      accessor: 'displayType',
+      Header: 'Type',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.displayType ? <h5 className="text-truncate">{row?.original?.displayType}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'parentName',
+      Header: 'Parent',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.parentId ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'qty',
+      Header: 'Qty',
+      disabled: true,
+      Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
+    },
+    {
+      accessor: 'serialNumber',
+      Header: findHeader(columnHeader?.assetFields, 'serialNumber'),
+      Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'productName',
+      Header: findHeader(columnHeader?.productFields, 'productName'),
+      Cell: ({ row }) =>
+        row?.original?.productName ? (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <h5 className="text-truncate">{row?.original?.productName}</h5>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'description',
+      Header: 'Description',
+      Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'warehouse',
+      Header: 'Plant',
+      Cell: ({ row }) =>
+        row?.original?.warehouse ? (
+          <Link
+            className="link text-truncate"
+            target="_blank"
+            title={row?.original?.warehouse}
+            to={`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`}
+          >
+            {row?.original?.warehouse}
+          </Link>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'loadingTicket',
+      Header: 'Loading Ticket',
+      Cell: ({ row }) =>
+        row?.original?.loadingTicket ? (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'receivingTicket',
+      Header: 'Receiving Ticket',
+      Cell: ({ row }) =>
+        row?.original?.receivingTicket ? (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <h5 className="text-truncate">{row?.original?.receivingTicket}</h5>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'returnTicket',
+      Header: 'Return Ticket',
+      Cell: ({ row }) =>
+        row?.original?.returnTicket ? (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <h5 className="text-truncate">{row?.original?.returnTicket}</h5>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.returnTicketId}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'returnQty',
+      Header: 'Returned Qty',
+      Cell: ({ row }) => (row?.original?.returnQty ? <h5 className="text-truncate">{row?.original?.returnQty}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'status',
+      Header: 'Asset Status',
+      Cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'manualStartDate',
+      Header: 'Start Date',
+      Cell: ({ row }) =>
+        row?.original?.manualStartDate ? (
+          <h5 className="text-truncate" title={`${moment(row?.original?.manualStartDate).format(dateFormat)}`}>
+            {moment(row?.original?.manualStartDate)?.format(dateFormat)}
+          </h5>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'manualEndDate',
+      Header: 'End Date',
+      Cell: ({ row }) =>
+        row?.original?.manualEndDate ? (
+          <h5 className="text-truncate" title={`${moment(row?.original?.manualEndDate).format(dateFormat)}`}>
+            {moment(row?.original?.manualEndDate)?.format(dateFormat)}
+          </h5>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'startDate',
+      Header: 'System Start Date',
+      Cell: ({ row }) =>
+        row?.original?.startDate ? (
+          <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
+            {moment(row?.original?.startDate)?.format(dateFormat)}
+          </h5>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'endDate',
+      Header: 'System End Date',
+      Cell: ({ row }) =>
+        row?.original?.endDate ? (
+          <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
+            {moment(row?.original?.endDate)?.format(dateFormat)}
+          </h5>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'rentalAssetStatus',
+      Header: 'Rental Asset Status',
+      Cell: ({ row }) => (row?.original?.rentalAssetStatus ? <h5 className="text-truncate">{row?.original?.rentalAssetStatus}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'consumeQty',
+      Header: 'Consumed Qty',
+      Cell: ({ row }) => (row?.original?.consumeQty ? <h5 className="text-truncate">{row?.original?.consumeQty}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) =>
+        allowedToEdit ? (
+          <HtmlTooltip
+            title={
+              row?.original?.isAllowedStartDate === false && row?.original?.isAllowedEndDate === false
+                ? `Invoice Created - Cannot change Start Date`
+                : row?.original?.isAllowedEndDate === false && row?.original?.isAllowedStartDate !== true
+                  ? `Can change the End Date after received`
+                  : 'Update - Start Date/End Date'
+            }
+          >
+            <span>
+              <IconButton
+                size="small"
+                disabled={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? false : true}
+                onClick={() => {
+                  setOpenDateDialog({ ...openDateDialog, open: true, data: row?.original });
+                }}
+              >
+                <Edit fontSize="small" color={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? 'primary' : 'inherit'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        ) : null
+    }
   ];
 
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns?.forEach((item) => {
-      columnState?.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-
-  const handleTicketDialog = (ticketType, deliveryToType) => {
+  const handleTicketDialog = (ticketType, deliveryToType, open = true) => {
     const data = {};
     data['ticketName'] = rentalManagementData.rentalJobName;
     data['referenceId'] = rentalManagementData._id;
@@ -827,7 +914,7 @@ const ReceivingTicket = ({
     }
     data['status'] = DELIVERY_TICKET_STATUS.indTransit;
 
-    setShowTicketDialog({ open: ticketType === DELIVERY_TICKET_TYPE.receiving ? true : false, ticketType: ticketType, data: data });
+    setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
     closeActions();
   };
 
@@ -1084,14 +1171,22 @@ const ReceivingTicket = ({
 
   const handelRevertTickets = () => {
     setOkBtnLoading(true);
-    const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
-    if (receivingTicketIds.length) {
+    const receivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketId), 'receivingTicketId'));
+    const returnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketId), 'returnTicketId'));
+    if (receivingTicketIds?.length || returnTicketIds?.length) {
       let data = [];
       receivingTicketIds?.forEach((receivingTicketId) => {
         const ele: any = {};
         ele._id = receivingTicketId;
         ele.products = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === 'Product')?.map((e) => e?.productId);
         ele.assets = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === 'Asset')?.map((e) => e?._id);
+        data.push(ele);
+      });
+      returnTicketIds?.forEach((returnTicketId) => {
+        const ele: any = {};
+        ele._id = returnTicketId;
+        ele.products = selectedRecords?.filter((e) => e?.returnTicketId === returnTicketId && e?.type === 'Product')?.map((e) => e?.productId);
+        ele.assets = selectedRecords?.filter((e) => e?.returnTicketId === returnTicketId && e?.type === 'Asset')?.map((e) => e?._id);
         data.push(ele);
       });
       axiosInstance()
@@ -1115,10 +1210,11 @@ const ReceivingTicket = ({
 
   const handelCancleTickets = () => {
     setOkBtnLoading(true);
-    const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
-    if (receivingTicketIds.length) {
+    const receivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketId), 'receivingTicketId'));
+    const returnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketId), 'returnTicketId'));
+    if (receivingTicketIds.length || returnTicketIds.length) {
       axiosInstance()
-        .put(`${deliveryTicket.api}/revert`, { ids: receivingTicketIds })
+        .put(`${deliveryTicket.api}/revert`, { ids: [...receivingTicketIds, ...returnTicketIds] })
         .then(({ data: { data } }) => {
           setOkBtnLoading(false);
           setShowConformationCancleTicket({ open: false, type: '' });
@@ -1193,134 +1289,121 @@ const ReceivingTicket = ({
       if (action === rentalManagementActions.createReceivingTicket) {
         if (e?.type !== 'Asset') {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotProduct });
-        }
-        else if (!e?.hasOwnProperty('loadingTicketId')) {
+        } else if (!e?.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        }
-        else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
+        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        }
-        else if (e?.hasOwnProperty('receivingTicketId')) {
+        } else if (e?.hasOwnProperty('receivingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingAlreadyCreated });
-        }
-        else if (e?.hasOwnProperty('returnTicketId')) {
+        } else if (e?.hasOwnProperty('returnTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.returnAlreadyCreated });
-        }
-        else if ([ASSET_STATUS.lost]?.includes(e?.status)) {
+        } else if ([ASSET_STATUS.lost]?.includes(e?.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotForLost });
-        }
-        else if (![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
-        ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.notApplied]?.includes(e?.status)
+        } else if (
+          ![
+            ASSET_STATUS.inUse,
+            ASSET_STATUS.standBy,
+            ASSET_STATUS.standByNotChargeable,
+            ASSET_STATUS.scrap,
+            ASSET_STATUS.needRepair,
+            ASSET_STATUS.needRecert,
+            ASSET_STATUS.notApplied
+          ]?.includes(e?.status)
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotValidStatus });
         }
-      }
-      else if (action === rentalManagementActions.createReturnTicket) {
+      } else if (action === rentalManagementActions.createReturnTicket) {
         if (!e?.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        }
-        else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
+        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        }
-        else if (e?.hasOwnProperty('receivingTicketId')) {
+        } else if (e?.hasOwnProperty('receivingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingAlreadyCreated });
-        }
-        else if (e?.hasOwnProperty('returnTicketId')) {
+        } else if (e?.hasOwnProperty('returnTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.returnAlreadyCreated });
-        }
-        else if ([ASSET_STATUS.lost]?.includes(e?.status)) {
+        } else if ([ASSET_STATUS.lost]?.includes(e?.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotForLost });
-        }
-        else if (![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
-        ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.notApplied]?.includes(e?.status) && !e?.isReplaced) {
+        } else if (
+          ![
+            ASSET_STATUS.inUse,
+            ASSET_STATUS.standBy,
+            ASSET_STATUS.standByNotChargeable,
+            ASSET_STATUS.scrap,
+            ASSET_STATUS.needRepair,
+            ASSET_STATUS.needRecert,
+            ASSET_STATUS.notApplied
+          ]?.includes(e?.status) &&
+          !e?.isReplaced
+        ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotValidStatus });
         }
-      }
-      else if (action === rentalManagementActions.receiveItems) {
+      } else if (action === rentalManagementActions.receiveItems) {
         if (!e?.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        }
-        else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
+        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        }
-        else if (!e?.hasOwnProperty('receivingTicketId') && !e?.hasOwnProperty('returnTicketId')) {
+        } else if (!e?.hasOwnProperty('receivingTicketId') && !e?.hasOwnProperty('returnTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingOrReturnNotCreated });
-        }
-        else if ([e?.receivingTicketStatus].includes(DELIVERY_TICKET_STATUS.delivered)) {
+        } else if ([e?.receivingTicketStatus].includes(DELIVERY_TICKET_STATUS.delivered)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingAlreadyDelivered });
-        }
-        else if ([e?.returnTicketStatus].includes(DELIVERY_TICKET_STATUS.delivered)) {
+        } else if ([e?.returnTicketStatus].includes(DELIVERY_TICKET_STATUS.delivered)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.returnAlreadyDelivered });
         }
-      }
-      else if (action === rentalManagementActions.createSupplierDeliveryTicket) {
+      } else if (action === rentalManagementActions.createSupplierDeliveryTicket) {
         if (!e?.subleaseAsset) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.notSubleaseAsset });
-        }
-        else if (!e?.hasOwnProperty('loadingTicketId')) {
+        } else if (!e?.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        }
-        else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
+        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        }
-        else if (e?.hasOwnProperty('receivingTicketId')) {
+        } else if (e?.hasOwnProperty('receivingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingAlreadyCreated });
-        }
-        else if (e?.hasOwnProperty('returnTicketId')) {
+        } else if (e?.hasOwnProperty('returnTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.returnAlreadyCreated });
-        }
-        else if ([ASSET_STATUS.lost]?.includes(e?.status)) {
+        } else if ([ASSET_STATUS.lost]?.includes(e?.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotForLost });
         }
-      }
-      else if (action === rentalManagementActions.cancelInTransitReceivingTicket) {
-        if (!e.hasOwnProperty('receivingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotCreated });
-        }
-        else if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.indTransit) {
+      } else if (action === rentalManagementActions.cancelInTransitTicket) {
+        if (!e.hasOwnProperty('receivingTicketId') && !e.hasOwnProperty('returnTicketId')) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingReturnNotCreated });
+        } else if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.indTransit &&
+          e?.returnTicketStatus !== DELIVERY_TICKET_STATUS.indTransit) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.cancelInTransitLineItems });
         }
-      }
-      else if (action === rentalManagementActions.cancelDeliveredReceivingTicket) {
-        if (!e.hasOwnProperty('receivingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotCreated });
-        }
-        else if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotDeliverd });
-        }
-        else if (![ASSET_STATUS.underReview]?.includes(e?.status)) {
+      } else if (action === rentalManagementActions.cancelDeliveredTicket) {
+        if (!e.hasOwnProperty('receivingTicketId') && !e.hasOwnProperty('returnTicketId')) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingReturnNotCreated });
+        } else if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.delivered &&
+          e?.returnTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingReturnNotDeliverd });
+        } else if (![ASSET_STATUS.underReview]?.includes(e?.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.statusURForCancelReceiving });
-        }
-        else if (![RENTAL_INTERNAL_ASSET_STATUS.complete]?.includes(e?.rentalAssetStatus)) {
+        } else if (![RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return]?.includes(e?.rentalAssetStatus)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusCompleteCancelReceiving });
         }
-      }
-      else if (action === rentalManagementActions.createRepairJob || action === rentalManagementActions.createRepairOrder) {
+      } else if (action === rentalManagementActions.createRepairJob || action === rentalManagementActions.createRepairOrder) {
         if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.delivered && e?.returnTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingOrReturnNotDelivered });
-        }
-        else if (e.subleaseAsset) {
+        } else if (e.subleaseAsset) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.notSubleaseAsset });
-        }
-        else if (![ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)) {
+        } else if (
+          ![ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)
+        ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.repairCanForThisAsset });
-        }
-        else if (!checkUniqWarehouse()) {
+        } else if (!checkUniqWarehouse()) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.repairSameWarehouse });
         }
-      }
-      else if (action === rentalManagementActions.transferToAnotherRental) {
+      } else if (action === rentalManagementActions.transferToAnotherRental) {
         if ([ASSET_STATUS.lost]?.includes(e?.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotForLost });
-        }
-        else if (!e?.hasOwnProperty('loadingTicketId')) {
+        } else if (!e?.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        }
-        else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
+        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        }
-        else if ([ASSET_STATUS.inUse, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status) &&
-          [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.complete].includes(e.rentalAssetStatus)) {
+        } else if (
+          ![ASSET_STATUS.inUse, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status) &&
+          ![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.complete].includes(e.rentalAssetStatus)
+        ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
         }
       }
@@ -1331,7 +1414,6 @@ const ReceivingTicket = ({
     }
     return false;
   };
-
 
   return (
     <>
@@ -1408,14 +1490,14 @@ const ReceivingTicket = ({
             }}
           >
             {selectedRecords?.filter((f) => f.type === 'Asset').length === selectedRecords.length && allowUpdateStatus && (
-              <Fragment>
+              <>
                 {selectedRecords?.filter(
                   (f) =>
                     ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                       (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
                     [ASSET_STATUS.underReview].includes(f.status)
                 )?.length === selectedRecords?.length && (
-                    <Fragment>
+                    <>
                       <MenuItem
                         onClick={() => {
                           setAnchorEl(null);
@@ -1424,7 +1506,7 @@ const ReceivingTicket = ({
                       >
                         {ASSET_STATUS.available}
                       </MenuItem>
-                    </Fragment>
+                    </>
                   )}
                 <MenuItem
                   onClick={() => {
@@ -1458,7 +1540,7 @@ const ReceivingTicket = ({
                 >
                   {ASSET_STATUS.needRecert}
                 </MenuItem>
-              </Fragment>
+              </>
             )}
           </Menu>
           <Button
@@ -1510,8 +1592,13 @@ const ReceivingTicket = ({
             <MenuItem
               onClick={() => {
                 if (!validateAction(rentalManagementActions.createReturnTicket)) {
-                  setShowQtyDialog({ open: true, data: null });
-                  handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                  if (selectedRecords?.every((e) => e.type === 'Asset')) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                  }
+                  else {
+                    setShowQtyDialog({ open: true, data: null });
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
+                  }
                 }
                 closeActions();
               }}
@@ -1534,10 +1621,11 @@ const ReceivingTicket = ({
                   handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
                 }
                 closeActions();
-              }} >
+              }}
+            >
               Create Supplier Delivery Ticket
             </MenuItem>
-            {!isOffline &&
+            {!isOffline && (
               <MenuItem
                 onClick={() => {
                   if (!validateAction(rentalManagementActions.transferToAnotherRental)) {
@@ -1547,30 +1635,35 @@ const ReceivingTicket = ({
                 }}
               >
                 {`Transfer to another ${routes.rentalManagement.title}`}
-              </MenuItem>}
-            {permissions?.repairJob?.isCreate && !isOffline &&
+              </MenuItem>
+            )}
+            {permissions?.repairJob?.isCreate && !isOffline && (
               <MenuItem
                 onClick={() => {
                   if (!validateAction(rentalManagementActions.createRepairJob)) {
                     setShowRepairJobDialog(true);
                   }
                   closeActions();
-                }} >
+                }}
+              >
                 {`Create ${routes.repairJob.title}`}
-              </MenuItem>}
-            {permissions?.repairOrder?.isCreate && !isOffline &&
+              </MenuItem>
+            )}
+            {permissions?.repairOrder?.isCreate && !isOffline && (
               <MenuItem
                 onClick={() => {
                   if (!validateAction(rentalManagementActions.createRepairOrder)) {
                     setShowRepairOrderDialog(true);
                   }
                   closeActions();
-                }} >
+                }}
+              >
                 {`Create ${routes.repairOrder.title}`}
-              </MenuItem>}
+              </MenuItem>
+            )}
             <MenuItem
               onClick={() => {
-                if (!validateAction(rentalManagementActions.cancelInTransitReceivingTicket)) {
+                if (!validateAction(rentalManagementActions.cancelInTransitTicket)) {
                   setShowConformationRevertTicket(true);
                 }
                 closeActions();
@@ -1580,23 +1673,23 @@ const ReceivingTicket = ({
             </MenuItem>
             <MenuItem
               onClick={() => {
-                if (!validateAction(rentalManagementActions.cancelInTransitReceivingTicket)) {
+                if (!validateAction(rentalManagementActions.cancelInTransitTicket)) {
                   setShowConformationCancleTicket({ open: true, type: 'Non-Delivered' });
                 }
                 closeActions();
               }}
             >
-              Cancel In-Transit Receiving Ticket(s)
+              Cancel In-Transit Ticket(s)
             </MenuItem>
             <MenuItem
               onClick={() => {
-                if (!validateAction(rentalManagementActions.cancelDeliveredReceivingTicket)) {
+                if (!validateAction(rentalManagementActions.cancelDeliveredTicket)) {
                   setShowConformationCancleTicket({ open: true, type: 'Delivered' });
                 }
                 closeActions();
               }}
             >
-              Cancel Delivered Receiving Ticket(s)
+              Cancel Delivered Ticket(s)
             </MenuItem>
             {selectedRecords?.filter(
               (f) =>
@@ -1682,7 +1775,7 @@ const ReceivingTicket = ({
             )}
           </Menu>
           {showProcessDeliveryTicket && !isOffline && (
-            <Fragment>
+            <>
               <Tooltip title="Process Multiple Receiving/Return Ticket(s)">
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -1695,87 +1788,23 @@ const ReceivingTicket = ({
                   {isMobile && !isTablet ? <AddBoxRoundedIcon /> : 'Process Ticket'}
                 </Button>
               </Tooltip>
-            </Fragment>
+            </>
           )}
         </Box>
       </Box>
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
-          isMobile ? (
-            <CustomSwipableList
-              allowSelection={allowedToEdit || isProcessor}
-              allowSwipe={true}
-              permissions={true}
-              primaryField={columns?.find((d) => d.field)}
-              onClick={(data) => {
-                history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={false}
-              extraParamsToCheckDelete={true}
-              onDelete={false}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              actionCol={(data) => {
-                const params = { data };
-                return <ActionRenderer {...params} />;
-              }}
-              chips={[
-                {
-                  label: 'Status : ',
-                  field: 'status'
-                },
-                {
-                  label: 'Receiving Ticket : ',
-                  field: 'receivingTicket',
-                  onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`)
-                },
-                {
-                  label: 'Loading Ticket : ',
-                  field: 'loadingTicket',
-                  onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
-                },
-                {
-                  label: 'Return Ticket : ',
-                  field: 'returnTicket',
-                  onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.returnTicketId}`)
-                }
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={false}
-              onClone={() => { }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={true}
-              loading={loading || loadingData}
-              isClientSideGrid={true}
-              renderedFrom={renderedFrom}
-              allowSelection={allowedToEdit || isProcessor}
-              refreshGrid={fetchRecords}
-              actionWidth={80}
-              rowClassRules={{
-                'light-grey-data-row': function (params) {
-                  return params?.data?.isReplaced;
-                }
-              }}
-            />
-          )
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            refreshGrid={fetchRecords}
+            hideAction={!(allowedToEdit || isProcessor)}
+            hideSelection={!(allowedToEdit || isProcessor)}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -2018,7 +2047,7 @@ const ReceivingTicket = ({
       {showConformationRevertTicket && (
         <ConfirmationDialog
           open={showConformationRevertTicket}
-          message={`Are you sure you want to revert receiving ticket for the selected line item ?`}
+          message={`Are you sure you want to revert ticket for the selected line item ?`}
           onClose={() => {
             setShowConformationRevertTicket(false);
           }}
@@ -2031,7 +2060,7 @@ const ReceivingTicket = ({
       {showConformationCancleTicket.open && (
         <ConfirmationDialog
           open={showConformationCancleTicket.open}
-          message={`This action will cancel the complete Receiving Ticket(s). Are you sure?`}
+          message={`This action will cancel the complete Receiving/Return Ticket(s). Are you sure?`}
           onClose={() => {
             setShowConformationCancleTicket({ open: false, type: '' });
           }}

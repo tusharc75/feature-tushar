@@ -1,6 +1,6 @@
 import React, { useState, useContext, useCallback, useEffect, useRef } from 'react';
 import { Badge, Fab } from '@material-ui/core';
-import { Chat, Clear } from '@material-ui/icons';
+import { Chat, Clear, Close } from '@material-ui/icons';
 
 import ChatsPopover from './ChatsPopover';
 import { useData } from '../../StateProvider/Provider';
@@ -8,6 +8,8 @@ import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 import axiosInstance from '../../axios/axiosInstance';
 import { SET_CHATTER } from '../../StateProvider/actionTypes';
 import './chatStyles.scss';
+import { RiCloseLine } from 'react-icons/ri';
+import { IoCloseSharp } from 'react-icons/io5';
 
 const GlobalUserChat = () => {
   const {
@@ -43,9 +45,9 @@ const GlobalUserChat = () => {
               d.group && d.group !== ''
                 ? d.group
                 : d.users
-                  .filter((d) => d._id !== user?.user?._id)
-                  .map((_d) => `${_d.firstName} ${_d.lastName}`)
-                  .join(', '),
+                    .filter((d) => d._id !== user?.user?._id)
+                    .map((_d) => `${_d.firstName} ${_d.lastName}`)
+                    .join(', '),
             message: d?.message,
             timeStamp: new Date(d?.message.date).getTime(),
             ...d
@@ -62,7 +64,7 @@ const GlobalUserChat = () => {
           dispatch({ type: SET_CHATTER, payload: null });
         }
       })
-      .catch(() => { });
+      .catch(() => {});
   }, [chatter, selectedChat]);
 
   useEffect(() => {
@@ -88,14 +90,28 @@ const GlobalUserChat = () => {
   };
 
   return (
-    <div className="global-chat">
+    <div className={`global-chat ${open ? 'chat-open' : ''}`}>
       <span
+        onClick={(e) => {
+          if (Boolean(anchorEl)) {
+            closeChat();
+          } else {
+            setAnchorEl(e.currentTarget);
+          }
+        }}
+        role="button"
+        className={`chat-close-button ${open ? 'chat-open' : ''}`}
         ref={buttonRef}
         id={open ? 'chats-popover' : undefined}
-        onClick={(e) => setAnchorEl(e.currentTarget)}
         color="primary"
         aria-label="Chats"
-      ></span>
+      >
+        <span className=" sr-only">close chat</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 28 28">
+          <path stroke="currentcolor" strokeLinecap="round" strokeWidth="4" d="M22 21L7 6m15 0L7 21"></path>
+        </svg>
+      </span>
+
       {open && Boolean(anchorEl) && <ChatsPopover open={open} anchorEl={anchorEl} onClose={closeChat} getChats={getChats} />}
     </div>
   );

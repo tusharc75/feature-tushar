@@ -136,6 +136,9 @@ export default function ImportExportLinks({
     let exportApi = apiUrl ? apiUrl : `${api}/template?export=true`;
 
     if (additionalParams) {
+      if (exportApi?.includes('?') && additionalParams?.includes('?')) {
+        additionalParams = additionalParams?.replace(`?`, `&`)
+      }
       exportApi = `${exportApi}${additionalParams}`;
     }
 

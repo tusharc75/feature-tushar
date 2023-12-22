@@ -1,11 +1,10 @@
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, productInventory, purchaseOrder } from 'src/constants/helpers';
-import { CommonRenderer, NumberRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, productInventory } from 'src/constants/helpers';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Dialog from '@material-ui/core/Dialog';
 import { CustomDialogTransition } from '../../../constants/helpers';
@@ -17,31 +16,196 @@ import { useData } from 'src/StateProvider/Provider';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
+import moment from 'moment';
 
 const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueId }) => {
-
   const renderedFrom = `${camelCase(routes?.productInventory.title)}_history`;
-
 
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+  const { state, dispatch } = useTableReducer();
+  const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user }
   }: any = useData();
 
   useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  useEffect(() => {
     fetchRecords();
   }, []);
 
+  const fetchGridColumns = () => {
+    let columns = [
+      {
+        accessor: 'date',
+        Header: 'Date',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.type ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.qty ? (
+            <div
+              style={{
+                backgroundColor:
+                  row?.original?.type === 'Debit'
+                    ? isDarkTheme
+                      ? 'hsl(1 100% 65% / 1)'
+                      : '#FFCCCB'
+                    : isDarkTheme
+                    ? 'hsl(120 73% 40% / 1)'
+                    : '#90ee90'
+              }}
+            >
+              {row?.original?.type === 'Debit' ? `-${row?.original?.qty}` : row?.original?.qty}
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'price',
+        Header: 'Cost',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.price ? <p className="text-truncate">{row.original.price}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'totalPrice',
+        Header: 'Amount',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.totalPrice ? (
+            <div
+              style={{
+                backgroundColor:
+                  row?.original?.type === 'Debit'
+                    ? isDarkTheme
+                      ? 'hsl(1 100% 65% / 1)'
+                      : '#FFCCCB'
+                    : isDarkTheme
+                    ? 'hsl(120 73% 40% / 1)'
+                    : '#90ee90'
+              }}
+            >
+              {row?.original?.type === 'Debit' ? `-${row?.original?.totalPrice}` : row?.original?.totalPrice}{' '}
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'warehouse',
+        Header: routes?.warehouse?.title,
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.warehouse ? (
+            <Link
+              className="link text-truncate"
+              title={row.original?.warehouse}
+              to={`${routes.warehouseDetail.path}/${row.original?.warehouseId}`}
+            >
+              {row.original?.warehouse}
+            </Link>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      ...(user?.user?.brandPolicy?.storageLocation
+        ? [
+            {
+              accessor: 'storageLocation',
+              Header: 'Storage Location',
+              width: 200,
+              Cell: ({ row }) => {
+                return row?.original?.storageLocation ? (
+                  <Link
+                    className="link"
+                    title={row?.original?.storageLocation}
+                    to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
+                  >
+                    {row?.original?.storageLocation}
+                  </Link>
+                ) : (
+                  <NoDataCell />
+                );
+              }
+            }
+          ]
+        : []),
+      {
+        accessor: 'supplierPartNumber',
+        Header: 'Supplier Part Number',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.supplierPartNumber ? <p className="text-truncate">{row.original.supplierPartNumber}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'comment',
+        Header: 'Comment',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.comment ? <p className="text-truncate">{row.original.comment}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'user',
+        Header: 'Transacted By',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original?.user ? (
+            <Link
+              className="link text-truncate"
+              title={row?.original?.user}
+              to={`${routes.userDetail.path}/${row?.original?.userId}`}
+            >
+              {row?.original?.user}
+            </Link>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'transactionDate',
+        Header: 'Actual Transaction Date',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.transactionDate ? (
+            <p className="text-truncate">{moment(row?.original?.transactionDate)?.format(dateTimeFormat)}</p>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      }
+    ];
+    setColumns(columns)
+  };
+
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`${productInventory.api}/ledger/${referenceId}/${uniqueId}/${product}`)
       .then(({ data: { data } }) => {
@@ -61,122 +225,6 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       });
   };
 
-  const columns = [
-    { field: 'date', headerName: 'Date', show: true, disabled: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
-    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer', filter: true, sortable: true },
-    {
-      field: 'qty',
-      headerName: 'Qty',
-      show: true,
-      cellRenderer: 'creditDebitRenderer',
-      filter: false,
-      sortable: false,
-      disabled: true,
-      cellStyle: (params) => {
-        if (params?.data?.type === 'Credit') {
-          return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
-        }
-        if (params?.data?.type === 'Debit') {
-          return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
-        }
-      }
-    },
-    { field: 'price', headerName: 'Cost', show: true, cellRenderer: 'numberRenderer', filter: false, sortable: false },
-    {
-      field: 'totalPrice',
-      headerName: 'Amount',
-      show: true,
-      cellRenderer: 'creditDebitRenderer',
-      filter: false,
-      sortable: false,
-      cellStyle: (params) => {
-        if (params?.data?.type === 'Credit') {
-          return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
-        }
-        if (params?.data?.type === 'Debit') {
-          return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
-        }
-      }
-    },
-    {
-      field: 'warehouse',
-      headerName: routes.warehouse.title,
-      show: true,
-      filter: false,
-      sortable: false,
-      cellRenderer: 'warehouseRenderer'
-    },
-    ...(user?.user?.brandPolicy?.storageLocation
-      ? [
-        {
-          field: 'storageLocation',
-          headerName: 'Storage Location',
-          show: true,
-          filter: false,
-          sortable: false,
-          cellRenderer: 'storageLocationRenderer'
-        }
-      ]
-      : []),
-    { field: 'supplierPartNumber', headerName: 'Supplier Part Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'userRenderer' },
-    { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
-  ];
-
-  const WarehouseRenderer = (params) =>
-    params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const StorageLocationRenderer = (params) =>
-    params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.storageLocationDetail.path}/${params.data.storageLocationId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const UserRenderer = (params) =>
-    params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.userDetail.path}/${params.data.userId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const CreditDebitRenderer = (params: any) => (
-    <span>{params?.value ? params?.data?.type === 'Debit' ? `-${params?.value}` : params?.value : <NoDataCell />}</span>
-  );
-
-  const frameworkComponents = {
-    creditDebitRenderer: CreditDebitRenderer,
-    warehouseRenderer: WarehouseRenderer,
-    storageLocationRenderer: StorageLocationRenderer,
-    userRenderer: UserRenderer,
-    commonRenderer: CommonRenderer,
-    numberRenderer: NumberRenderer,
-    dateTimeRenderer: DateTimeRenderer
-  };
-
-
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-
   return (
     <>
       <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
@@ -184,23 +232,17 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         <CustomDialogContent>
           <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ? (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameworkComponents}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                allowAction={false}
-                loading={loading}
-                isClientSideGrid={true}
-                allowSelection={false}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchRecords}
-              />
+              <CustomReactTable
+              height={'calc(100vh - 150px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              refreshGrid={fetchRecords}
+              hideAction={true}
+              hideSelection={true}
+            />
             ) : (
               <Box p={2} height={500}>
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />

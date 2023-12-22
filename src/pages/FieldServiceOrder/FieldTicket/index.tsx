@@ -1,10 +1,9 @@
-import { Fragment, useState, useEffect, useReducer, useContext } from 'react';
+import { Fragment, useState, useEffect, useContext } from 'react';
 import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
-import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
+import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -16,11 +15,16 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, handleChangeStatus }) => {
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
+
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
+  const { generateColumns } = useColumns();
+
   const [openDialog, setOpenDialog] = useState({ open: false, isClone: false, id: null });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -28,13 +32,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [gridApi, setGridApi] = useState(null);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const { getColumnData } = useColumns();
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -42,112 +40,77 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
-
-
-  const FieldTicketNumberRenderer = (params) => (
-    <>
-      {params?.data?.allowedToEdit ?
-        <span
-          className="link line-clamp-1"
-          onClick={() => {
-            setOpenDialog({ open: true, isClone: false, id: params.data._id });
-          }}
-        >
-          <CustomRenderCell value={params?.value} />
-        </span> :
-        <p className='line-clamp-1'>{params?.value}</p>}
-      <Box ml={1}>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(`${routes.fieldTicketDetail.path}/${params?.data?._id}`);
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Box>
-    </>
-  );
+  }, [selectedEntity, serviceOrderData]);
 
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.fieldTicket}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          if (o?.fieldData?.fieldName === 'fieldTicketNumber') {
-            columns = [
-              ...columns,
-              {
-                ...o?.fieldData,
-                pivotIndex: 0,
-                field: o?.fieldData?.fieldName,
-                headerName: o?.fieldData?.fieldLabel,
-                show: true,
-                disabled: true,
-                cellRenderer: 'fieldTicketNumberRenderer'
-              }
-            ];
-          } else {
-            let currentColumn = getColumnData(routes.fieldTicket?.title, o?.fieldData, routes.fieldTicketDetail.path);
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                rendererNames.push(currentColumn?.rendererName);
-              }
-            }
+
+        const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
+        newColumns?.forEach((o) => {
+          if (o.accessor === 'fieldTicketNumber') {
+            o.cell = ({ row }) =>
+              row?.original?.fieldTicketNumber ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <h5
+                    className="link text-truncate"
+                    onClick={() => {
+                      setOpenDialog({ open: true, isClone: false, id: row?.original?._id });
+                    }}
+                  >
+                    {row?.original?.fieldTicketNumber}
+                  </h5>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
           }
         });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          fieldTicketNumberRenderer: FieldTicketNumberRenderer,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 
   const fetchData = () => {
     setNextStep(false);
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     const queryString = getQueryString();
     axiosInstance()
       .get(`${routes.fieldTicket.path}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          finalObject['allowedToEdit'] = isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
-          finalObject['canDelete'] = u?.canDelete && permissions?.fieldTicket?.isDelete && u?.owner?.optionValue === user?.user?._id && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status)
+          finalObject['allowedToEdit'] =
+            isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+          finalObject['canDelete'] =
+            u?.canDelete &&
+            permissions?.fieldTicket?.isDelete &&
+            u?.owner?.optionValue === user?.user?._id &&
+            ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
           let res = {
             ...finalObject
           };
           return res;
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
+        dispatch({
+          type: 'initialize',
+          data: rows,
+          count: count
+        });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -160,34 +123,34 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+    // let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+    let deepFilter = '?';
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
-    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    // const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    filterByIds.push({ field: 'fieldServiceOrder', term: serviceOrderData?._id });
+    const filterByIds = [{ field: 'fieldServiceOrder', term: serviceOrderData?._id }];
 
     if (filterByIds?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
     }
-    if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-    }
-    if (filterByIds?.length || deepFilters?.length) {
-      deepFilter = `${deepFilter}&filterType=and`;
-    }
+    // if (deepFilters?.length) {
+    //   deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    // }
+    // if (filterByIds?.length || deepFilters?.length) {
+    //   deepFilter = `${deepFilter}&filterType=and`;
+    // }
 
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    }
-    if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
-    }
-    if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
-    }
+    // if (sorting.length > 0) {
+    //   deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    // }
+    // if (search) {
+    //   deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    // }
+    // if (showFilteredRecordsOnly) {
+    //   deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
+    // }
     return deepFilter;
   };
 
@@ -205,55 +168,65 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
       });
   };
 
-  const ActionsRenderer = (params) => (
-    <>
-      <HtmlTooltip title="Edit">
-        <IconButton
-          size="small"
-          aria-label="Edit"
-          onClick={() => {
-            setOpenDialog({ open: true, isClone: false, id: params.data._id });
-          }}
-          disabled={params?.data?.allowedToEdit ? false : true}
-        >
-          <EditIcon color={params?.data?.allowedToEdit ? "primary" : "disabled"} fontSize="small" />
-        </IconButton>
-      </HtmlTooltip>
-      {allowedToEdit &&
-        <HtmlTooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setOpenDialog({ open: true, isClone: true, id: params.data._id });
-            }}
-          >
-            <FileCopyIcon color={"primary"} fontSize="small" />
-          </IconButton>
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 150,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={row?.original?.allowedToEdit ? 'Edit' : 'You can not Delete'}>
+          <span>
+            <IconButton
+              disabled={row?.original?.allowedToEdit ? false : true}
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                setOpenDialog({ open: true, isClone: false, id: row?.original?._id });
+              }}
+            >
+              <EditIcon fontSize="small" color={row?.original?.allowedToEdit ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      }
-      {params?.data?.canDelete ? (
-        <HtmlTooltip title="Delete">
-          <IconButton
-            aria-label="Delete"
-            size="small"
-            onClick={() => {
-              setDeleteRecord([params.data._id]);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
+
+        <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
+            <IconButton
+              disabled={permissions?.fieldTicket?.isCreate ? false : true}
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setOpenDialog({ open: true, isClone: true, id: row?.original?._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      ) : (
-        <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton size="small" aria-label="Delete">
-            <DeleteIcon fontSize="small" color="disabled" />
-          </IconButton>
+
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              disabled={row?.original?.canDelete ? false : true}
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord([row?.original?._id]);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      )}
-    </>
-  );
+      </>
+    )
+  };
 
   const openActions = (event) => {
     setAnchorActionEl(event.currentTarget);
@@ -268,17 +241,19 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
       <Box p={1} pb={2}>
         <Grid container>
           <Grid item xs={3} md={3} sm={3}>
-            {allowedToEdit && <Button
-              size="small"
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                setOpenDialog({ open: true, isClone: false, id: null });
-              }}
-              startIcon={<AddOutlined />}
-            >
-              {`Create ${routes.fieldTicket.title}`}
-            </Button>}
+            {allowedToEdit && (
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  setOpenDialog({ open: true, isClone: false, id: null });
+                }}
+                startIcon={<AddOutlined />}
+              >
+                {`Create ${routes.fieldTicket.title}`}
+              </Button>
+            )}
           </Grid>
           <Grid item xs={9} md={9} sm={9}>
             <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
@@ -307,7 +282,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
                 onClose={closeActions}
               >
                 <MenuItem
-                  disabled={!selectedRecords?.every(s => s.canDelete)}
+                  disabled={!selectedRecords?.every((s) => s.canDelete)}
                   onClick={() => {
                     closeActions();
                     setShowDeleteConfirmBox(true);
@@ -321,21 +296,15 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           </Grid>
         </Grid>
       </Box>
-      {columns && Object.keys(frameWorkComponent).length > 0 ? (
-        <CustomAgGrid
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 393px)'}
           columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
+          state={state}
           dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={loading}
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
+          isClientSideGrid={true}
         />
       ) : (
         <Box p={2} height={500}>
@@ -359,7 +328,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             billingAddress: serviceOrderData?.billingAddress?.optionValue || '',
             shippingAddress: serviceOrderData?.shippingAddress?.optionValue || '',
             taxCode: serviceOrderData?.taxCode?.optionValue || '',
-            collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || [],
+            collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || []
           }}
           onSuccess={() => {
             if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {

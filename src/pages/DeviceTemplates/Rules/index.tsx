@@ -1,37 +1,33 @@
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
-import { Box, Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers';
-import { gridFilterParser } from 'src/constants/useColumns';
+import { dateFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ExpandMore } from '@material-ui/icons';
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import ManageRules from './ManageRules';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import moment from 'moment';
+import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 
 export default function Rules({ deviceTemplate }) {
-  
-  const renderedFrom = camelCase('Rules');
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
+  const renderedFrom = `${camelCase(routes?.deviceTemplateAlert.title)}_rules`;
+  const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { selectedEntity }
   }: any = useData();
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
-
-  const [gridApi, setGridApi] = useState(null);
-  const [columns, setColumns] = useState([]);
+  const { page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const [columns, setColumns] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false, id: null });
@@ -46,18 +42,121 @@ export default function Rules({ deviceTemplate }) {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
-    setColumns([
-      { field: 'ruleName', headerName: 'Rule Name', show: true, disabled: true, cellRenderer: 'ruleNameRenderer' },
-      { field: 'createdBy', headerName: 'Created By', show: true, filter: false, cellRenderer: 'createdByRenderer' },
-      { field: 'updatedBy', headerName: 'Updated By', show: true, filter: false, cellRenderer: 'updatedByRenderer' }
-    ]);
+    const column = [
+      {
+        accessor: 'ruleName',
+        Header: 'Rule Name',
+        show: true,
+        disabled: true,
+        Cell: ({ row }) =>
+          row.original?.ruleName ? (
+            <p
+              onClick={() => {
+                setOpen({ open: true, isClone: false, id: row.original?._id });
+              }}
+              className="link text-truncate"
+            >
+              {row.original?.ruleName}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'createdBy',
+        Header: 'Created By',
+        show: true,
+        filter: false,
+        Cell: ({ row }) =>
+          row.original?.createdBy ? (
+            <h5 className="createBy" title={`${row.original?.createdBy} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
+              {row.original?.createdBy}
+              <span className="createdAtTime badge-date">{moment(row.original?.createdByDate)?.format(dateFormat)}</span>
+            </h5>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'updatedBy',
+        Header: 'Updated By',
+        show: true,
+        filter: false,
+        Cell: ({ row }) =>
+          row.original?.updatedBy ? (
+            <h5
+              className="updateBy"
+              style={{ minWidth: 'min-content' }}
+              title={`${row.original?.updatedBy} • ${moment(row.original?.updatedByDate).format(dateFormat)}`}
+            >
+              <span>{row.original?.updatedBy}</span>
+              <span className="updatedAtTime badge-date">{moment(row.original?.updatedByDate)?.format(dateFormat)}</span>
+            </h5>
+          ) : (
+            <NoDataCell />
+          )
+      }
+    ];
+    setColumns([...column, ActionsRenderer]);
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 150,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={row.original?.allowedToEdit ? 'Edit' : editDisable}>
+          <span>
+            <IconButton
+              disabled={!row.original?.allowedToEdit}
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                setOpen({ open: true, isClone: false, id: row.original?._id });
+              }}
+            >
+              <EditIcon fontSize="small" color={row.original?.allowedToEdit ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+
+        <HtmlTooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setOpen({ open: true, isClone: true, id: row.original?.id });
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+
+        <HtmlTooltip title={row.original?.canDelete ? 'Delete' : deleteDisable}>
+          <IconButton
+            disabled={!row.original?.canDelete}
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+    )
   };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`${routes?.deviceTemplates?.path}/rule?deviceTemplate=${deviceTemplate}`)
       .then(({ data }) => {
@@ -71,105 +170,13 @@ export default function Rules({ deviceTemplate }) {
             ...finalObject
           };
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       });
-  };
-
-  const ActionsRenderer = (params) => (
-    <Fragment>
-      {params?.data?.allowedToEdit ? (
-        <Tooltip title="Edit">
-          <IconButton
-            size="small"
-            aria-label="Edit"
-            onClick={() => {
-              setOpen({ open: true, isClone: false, id: params?.data?._id });
-            }}
-          >
-            <EditIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to edit">
-          <IconButton aria-label="Clone" size="small">
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-
-      <Tooltip title="Clone">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setOpen({ open: true, isClone: true, id: params?.data?.id });
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-
-      {params?.data?.canDelete ? (
-        <Tooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton aria-label="Delete" size="small">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Fragment>
-  );
-
-  const RuleNameRenderer = (params) =>
-    params?.value ? (
-      <p
-        onClick={() => {
-          setOpen({ open: true, isClone: false, id: params?.data?._id });
-        }}
-        className="link text-truncate"
-      >
-        {params.value}
-      </p>
-    ) : (
-      <NoDataCell />
-    );
-
-  const frameworkComponents = {
-    commonRenderer: CommonRenderer,
-    ruleNameRenderer: RuleNameRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer
   };
 
   const handleDelete = () => {
@@ -180,17 +187,17 @@ export default function Rules({ deviceTemplate }) {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`${routes?.deviceTemplates?.path}/rule/remove`, { ids: ids })
+      .put(`${routes?.deviceTemplates?.path}/rule/remove`, { ids })
       .then(({ data }) => {
-        removeLocalStorage(localStorageSelectedRecords);
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data?.message
         });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -261,22 +268,16 @@ export default function Rules({ deviceTemplate }) {
           </Grid>
         </Grid>
       </Box>
-      {columns && Object.keys(frameworkComponents).length > 0 ? (
-        <CustomAgGrid
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
           columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
+          state={state}
           dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={loading}
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           showOnlyShowFilteredRecordSwitch={true}
+          showFilters={false}
           isClientSideGrid={true}
         />
       ) : (

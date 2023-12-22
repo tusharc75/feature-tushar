@@ -9,8 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import TreeViewNew from './TreeView';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
-
+const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [dateFilters, setDateFilters] = useState({
@@ -33,7 +32,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
 
   const fetchCategory = async () => {
     axiosInstance()
-      .get(`/dynamic-form`, {
+      .get(`/dynamic-form?sortBy=order&orderBy=asc`, {
         headers: {
           Resource: 'Iot Data Points Category'
         }
@@ -44,7 +43,6 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
           element.child = data?.filter((e) => e?.parentCategory?.optionValue === element?._id);
         });
         setCategories(categoryData);
-
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -76,7 +74,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
             <div className="sm:h-[calc(574px-48px)] h-[250px] px-2 overflow-auto py-1">
               <FormGroup>
                 <div className="grid gap-2">
-                  {categories ?
+                  {categories ? (
                     categories?.map((category: any, index) => (
                       <TreeViewNew
                         expandedAccordition={expandedAccordition}
@@ -91,11 +89,11 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
                         setSelected={setSelected}
                       />
                     ))
-                    :
+                  ) : (
                     <Box p={2} height={500}>
                       <CommonSkeleton lenArray={[...Array(10).keys()]} />
                     </Box>
-                  }
+                  )}
                 </div>
               </FormGroup>
             </div>
@@ -103,6 +101,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
           <div className="container-with-border sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
             {Object.keys(selected.dataPoints).filter((item) => selected.dataPoints[item]).length ? (
               <Chart
+                deviceTemplate={deviceTemplate}
                 dateFilters={dateFilters}
                 assetId={assetId}
                 dataPoints={

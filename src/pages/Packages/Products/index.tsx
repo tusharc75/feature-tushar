@@ -11,17 +11,16 @@ import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase, startCase } from 'lodash';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
-import { Link } from 'react-router-dom';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { flattenArray } from 'src/constants/columns';
 
-const ProductsTable = ({ packageId, packageData }) => {
+const Products = ({ packageId, packageData }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
   const { setToastConfig } = useContext(CustomToastContext);
 
@@ -29,18 +28,18 @@ const ProductsTable = ({ packageId, packageData }) => {
     state: { permissions }
   }: any = useData();
 
-  const [columns, setColumns] = useState([]);
-  const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
+  const [columns, setColumns] = useState(null);
+  const [showProductConfirmBox, setShowProductConfirmBox] = useState({ open: false, data: null });
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
   const [isRemovingProducts, setRemovingProducts] = useState(false);
-  const [selectedRecords, setSelectedRecords] = useState([]);
-  const [rowsData, setRowsData] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const [assignAssetDialog, setAssignAssetDialog] = useState({ open: false, products: [] });
   const [isAssetAdding, setIsAssetAdding] = useState(false);
 
   const [isSubmitting, setSubmitting] = useState(false);
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
 
   useEffect(() => {
     fetchColumns();
@@ -48,6 +47,8 @@ const ProductsTable = ({ packageId, packageData }) => {
   }, []);
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     const allAssetsResponce: any = await axiosInstance().get(`${packages.api}/${packageId}/products/assets`);
     const assets = allAssetsResponce?.data?.data || [];
 
@@ -67,7 +68,8 @@ const ProductsTable = ({ packageId, packageData }) => {
           parent.assetQty = assets?.filter((i) => i.product === parent._id)?.length;
           parent.subRows = generateNestedData(assets, parent);
         });
-        setRowsData(rows);
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
       })
       .catch((err) => {
         setToastConfig(err);
@@ -173,7 +175,7 @@ const ProductsTable = ({ packageId, packageData }) => {
       {
         accessor: 'qty',
         Header: 'Qty',
-        width: 200,
+        width: 150,
         editable: true,
         Cell: ({ row }) => {
           return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
@@ -183,8 +185,8 @@ const ProductsTable = ({ packageId, packageData }) => {
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -198,8 +200,7 @@ const ProductsTable = ({ packageId, packageData }) => {
                 aria-label="Details"
                 disabled={row.original.hideSelection}
                 onClick={() => {
-                  setSelectedRecords([row.original]);
-                  setShowProductConfirmBox(true);
+                  setShowProductConfirmBox({ open: true, data: [row.original] });
                 }}
               >
                 <DeleteIcon fontSize="small" color={'error'} />
@@ -223,7 +224,12 @@ const ProductsTable = ({ packageId, packageData }) => {
           ids: [row._id],
           qty: Number(row.qty)
         })
-        .then(() => {
+        .then(({ data }) => {
+          setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
           fetchData();
         })
         .catch((err) => setToastConfig(err));
@@ -240,7 +246,7 @@ const ProductsTable = ({ packageId, packageData }) => {
 
   const removeProducts = () => {
     setRemovingProducts(true);
-    const allRecords = [...selectedRecords];
+    const allRecords = [...showProductConfirmBox?.data];
     selectedRecords?.forEach((record) => {
       for (let i = 0; i < (record?.subRows || [])?.length; i++) {
         allRecords.push(record.subRows[i]);
@@ -251,31 +257,38 @@ const ProductsTable = ({ packageId, packageData }) => {
     if (productIds?.length) {
       axiosInstance()
         .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds })
-        .then(() => {
+        .then(({ data }) => {
           setRemovingProducts(false);
-          setShowProductConfirmBox(false);
+          setShowProductConfirmBox({ open: false, data: null });
           fetchData();
+          setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
         })
         .catch((err) => {
           setRemovingProducts(false);
-          setShowProductConfirmBox(false);
-          setSelectedRecords([]);
+          setShowProductConfirmBox({ open: false, data: null });
           setToastConfig(err);
         });
     }
     if (assetIds?.length) {
       axiosInstance()
         .put(`${packages.api}/${packageId}/products/asset/remove`, { ids: assetIds })
-        .then(() => {
+        .then(({ data }) => {
           setRemovingProducts(false);
-          setShowProductConfirmBox(false);
-          setSelectedRecords([]);
+          setShowProductConfirmBox({ open: false, data: null });
           fetchData();
+          setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
         })
         .catch((err) => {
           setRemovingProducts(false);
-          setShowProductConfirmBox(false);
-          setSelectedRecords([]);
+          setShowProductConfirmBox({ open: false, data: null });
           setToastConfig(err);
         });
     }
@@ -389,7 +402,7 @@ const ProductsTable = ({ packageId, packageData }) => {
             <MenuItem
               disabled={permissions?.packages?.isUpdate && (selectedRecords.length === 0 || isRemovingProducts)}
               onClick={() => {
-                setShowProductConfirmBox(true);
+                setShowProductConfirmBox({ open: true, data: selectedRecords });
                 handleClose();
               }}
             >
@@ -410,19 +423,17 @@ const ProductsTable = ({ packageId, packageData }) => {
           />
         </Box>
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <CustomReactTable
           height={'calc(100vh - 393px)'}
           columns={columns}
-          data={rowsData}
-          onSelect={setSelectedRecords}
-          childrenProperty="subRows"
-          uniqueKey="_id"
-          hideSelection={false}
-          hideAction={false}
-          renderedFrom="package_product_serialized_asset"
+          state={state}
+          dispatch={dispatch}
+          refreshGrid={fetchData}
+          renderedFrom={renderedFrom}
           isClientSideGrid={true}
           onSaveEdit={onSaveInlineEdit}
+          expander={true}
         />
       ) : (
         <Box p={2} height={500}>
@@ -433,20 +444,19 @@ const ProductsTable = ({ packageId, packageData }) => {
         <AssignProductDialog
           serialized={packageData?.packageType === 'Service' ? false : null}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
-          ids={[...rowsData?.map((e) => e._id)]}
+          ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
           isSubmitting={isSubmitting}
         />
       )}
-      {showProductConfirmBox && (
+      {showProductConfirmBox.open && (
         <ConfirmationDialog
-          open={showProductConfirmBox}
+          open={true}
           message={`Are you sure you want to delete ?`}
           onClose={() => {
-            setShowProductConfirmBox(false);
-            setSelectedRecords([]);
+            setShowProductConfirmBox({ open: false, data: null });
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}
@@ -455,7 +465,7 @@ const ProductsTable = ({ packageId, packageData }) => {
       {assignAssetDialog.open && (
         <AssignSerializedAssetDialog
           reference={'package'}
-          ids={flattenArray(rowsData)
+          ids={flattenArray(dataRows)
             ?.filter((e) => e.type === 'asset')
             ?.map((e) => e._id)}
           handleClose={() => setAssignAssetDialog({ open: false, products: [] })}
@@ -468,4 +478,4 @@ const ProductsTable = ({ packageId, packageData }) => {
   );
 };
 
-export default ProductsTable;
+export default Products;

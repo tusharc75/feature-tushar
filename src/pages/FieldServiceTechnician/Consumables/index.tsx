@@ -1,15 +1,11 @@
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import { camelCase } from 'lodash';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Typography } from '@material-ui/core';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import ConsumablesQtyDialog from './ConsumablesQtyDialog';
-import { isMobile } from 'react-device-detect';
 import CustomTableWithCard, { CardInterface, createBodyColumns, ColumnInterface } from 'src/components/CustomTableWithCard';
 
 const Consumables = ({ selectedFieldService, recall }) => {
@@ -105,18 +101,6 @@ const Consumables = ({ selectedFieldService, recall }) => {
                 height={'calc(100vh - 290px)'}
                 showSelectAll={true}
               />
-              {/* <CustomReactTable
-                height={'calc(100vh - 345px)'}
-                columns={columns}
-                data={dataRows}
-                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-                onSelect={setSelectedRecords}
-                childrenProperty="subRows"
-                uniqueKey="_id"
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-                hideExpander={true}
-              /> */}
             </Box>
           ) : (
             <Box p={2} height={500}>

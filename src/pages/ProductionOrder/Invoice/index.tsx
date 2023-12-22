@@ -4,31 +4,26 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import {
-  CHILD_RESOURCE,
-  MATERIAL_TYPE,
-  WORK_ORDER_STATUS,
-  productionOrder,
-  sidebarResource
-} from '../../../constants/helpers';
-import { startCase } from 'lodash';
+import { CHILD_RESOURCE, MATERIAL_TYPE, WORK_ORDER_STATUS, productionOrder, sidebarResource } from '../../../constants/helpers';
+import { orderBy, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import PreviewDownload from 'src/components/PreviewDownload';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
-  
   const {
     state: { user, permissions }
   }: any = useData();
 
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, filters, sorting } = state;
+
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -41,14 +36,14 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, productionOrderData?.currency || 'USD');
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        sticky: 'left',
+        Cell: ({ row }) => <h5 className="text-truncate">{row.original.index}</h5>,
         Footer: () => {
           return <>Total</>;
         }
@@ -57,18 +52,19 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },
       {
         accessor: 'detail',
         Header: ' Details',
         minWidth: 200,
         width: 200,
-        Cell: ({ row, rows }) => (
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p className="text-truncate">{row.original?.detail}</p>
+            <h5 className="text-truncate">{row.original?.detail}</h5>
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -93,7 +89,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
         }
       },
       {
@@ -103,7 +99,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         Cell: ({ row }) =>
           row.original.workOrder ? (
             <div className="d-flex gap-2 align-items-center">
-              <p className="text-truncate">{row.original.workOrderNumber}</p>
+              <h5 className="text-truncate">{row.original.workOrderNumber}</h5>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -118,10 +114,17 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
           )
       },
       {
-        accessor: 'workOrderStatus',
+        accessor: 'status',
+        Header: 'Status',
+        Cell: ({ row }) => <div>{row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />}</div>
+      },
+      {
+        accessor: 'serviceStatus',
         Header: 'Result',
         width: 200,
-        Cell: ({ row }) => (row?.original['workOrderStatus'] ? <p> {row?.original?.workOrderStatus}</p> : <NoDataCell />)
+        Cell: ({ row }) => <div>
+          {row?.original['serviceStatus'] ? <h5> {row?.original?.serviceStatus}</h5> : <NoDataCell />}
+        </div>
       },
       {
         accessor: 'assignedUsers',
@@ -129,7 +132,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
-          row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
+          <div>{row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers']?.map((e, i) => {
               return i === row?.original['assignedUsers'].length - 1 ? (
                 <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
@@ -143,7 +146,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
             })
           ) : (
             <NoDataCell />
-          )
+          )}</div>
       }
     ];
     if (permissions?.workStations?.isRead) {
@@ -153,7 +156,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
-          row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
+          <div>{row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
             row?.original['assignedWorkStations']?.map((e, i) => {
               return i === row?.original['assignedWorkStations'].length - 1 ? (
                 <a className="link text-truncate" target="_blank" href={`${routes.workStationsDetail.path}/${e.optionValue}`} rel="noreferrer">
@@ -167,41 +170,78 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
             })
           ) : (
             <NoDataCell />
-          )
+          )}</div>
       });
     }
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
+  };
+
+  useEffect(() => {
     fetchData();
+  }, [page, limit, filters, sorting]);
+
+  const getQueryString = (isExport = false) => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
+    }
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    return deepFilter;
   };
 
   const fetchData = async () => {
-    var data: any = [];
-    const response = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service`);
-    data = response?.data?.data;
-    let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product && e?.parentId === null);
+    dispatch({ type: 'loading', loading: true });
+
+    const queryString = getQueryString();
+    const {
+      data: { data, count }
+    } = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service${queryString}`);
+
+    let rows = data?.material.filter((e) => e.type === MATERIAL_TYPE.product && e?.parentId === null);
+    const totalPrev = page * limit;
     rows.forEach((parent, i) => {
-      parent.index = i + 1;
-      parent.detail = parent.detail ? parent.detail :
-        parent.type === MATERIAL_TYPE.service
+      parent.index = i + 1 + totalPrev;
+      parent.detail = parent.detail
+        ? parent.detail
+        : parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent.type === MATERIAL_TYPE.product
             ? parent.productDetail?.productName
             : parent.packageDetail?.packageName;
-      parent.description = parent.description ? parent.description :
-        parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+      parent.description = parent.description
+        ? parent.description
+        : parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productDescription
+          : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         parent.workOrderStatus = parent?.workOrder?.status;
+        parent.status = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
     });
-    setRowsData(rows);
+    dispatch({ type: 'initialize', data: rows, count: count });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
-    const subRows: any = material.filter((e) => e?.parentId === parent?._id);
+    var subRows: any = material.filter((e) => e?.parentId === parent?._id);
+    subRows = orderBy(subRows, ['type'], ['desc']);
     let productIndex = 0;
     let serviceIndex = 0;
     subRows.forEach((_subRow, index) => {
@@ -235,31 +275,31 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
             fileName={`${routes.productionOrder.title}-${productionOrderData?.productionOrderNumber}`}
             resource={sidebarResource.productionOrder}
             referenceId={productionOrderData._id}
+            referenceLabel={productionOrderData?.productionOrderNumber}
             columns={columns}
             isSendEmail={true}
+            isAsyncDownload={true}
+            defaultColumns={['index', `detail`, `description`, `workOrder`, `qty`, `unit`, 'weightlb', 'engRef']}
           />
         </Box>
       </Box>
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
-            <>
-              <Box zIndex={5} width={'100%'}>
-                <CustomReactTable
-                  height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-                  columns={columns}
-                  data={rowsData}
-                  onSelect={() => { }}
-                  setWholeRowsCellColor={(rowData) => (rowData.type === MATERIAL_TYPE.service ? 'isService' : '')}
-                  childrenProperty="subRows"
-                  uniqueKey="_id"
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                  hideSelection={true}
-                  hideAction={true}
-                />
-              </Box>
-            </>
+          {columns ? (
+            <Box zIndex={5} width={'100%'}>
+              <CustomReactTable
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+                columns={columns}
+                state={state}
+                setWholeRowsCellColor={(rowData) => (rowData.type === MATERIAL_TYPE.service ? 'isService' : '')}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                hideSelection={true}
+                hideAction={true}
+                expander={true}
+              />
+            </Box>
           ) : (
             <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />

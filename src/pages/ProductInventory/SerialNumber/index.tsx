@@ -1,21 +1,20 @@
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
+import { useEffect } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, productInventory } from 'src/constants/helpers';
+import { dateFormat, gridLoadingTimeout, productInventory } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import { CommonRenderer, CreatedByRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import routes from 'src/components/Helpers/Routes';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import moment from 'moment';
 
 const SerialNumber = ({ product, warehouse }) => {
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+  const { state, dispatch } = useTableReducer();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user }
   }: any = useData();
 
   useEffect(() => {
@@ -24,9 +23,6 @@ const SerialNumber = ({ product, warehouse }) => {
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     let data;
     const query = warehouse ? `?warehouse=${warehouse}&isAll=true` : `?isAll=true`;
     const response = await axiosInstance().get(`${productInventory.api}/serial-number/${product}${query}`);
@@ -40,42 +36,78 @@ const SerialNumber = ({ product, warehouse }) => {
       dispatch({ type: 'loading', loading: false });
     }, gridLoadingTimeout);
   };
-
   const columns = [
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
-    { field: 'active', headerName: 'Status', show: true, cellRenderer: 'statusRenderer' },
-    { field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' }
+    {
+      accessor: 'serialNumber',
+      Header: 'Serial Number',
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.serialNumber ? (
+            <h5 className="text-truncate" title={row?.original?.serialNumber}>
+              {row?.original?.serialNumber}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'warehouse',
+      Header: routes.warehouse.title,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.warehouse ? (
+            <h5 className="text-truncate" title={row?.original?.warehouse}>
+              {row?.original?.warehouse}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'active',
+      Header: 'Status',
+      Cell: ({ row }) => (
+        <h5 className="text-truncate" title={row?.original?.warehouse}>
+          {row?.original?.active ? 'Available' : 'Unavailable'}
+        </h5>
+      )
+    },
+    {
+      accessor: 'createdBy',
+      Header: 'Created By',
+      disableFilters: true,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.createdBy ? (
+            <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate).format(dateFormat)}`}>
+              {row?.original?.createdBy}
+              <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate)?.format(dateFormat)}</span>
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    }
   ];
-
-  const StatusRenderer = (params) => (params?.value ? 'Available' : 'Unavailable');
-
-  const frameworkComponents = {
-    statusRenderer: StatusRenderer,
-    createdByRenderer: CreatedByRenderer,
-    commonRenderer: CommonRenderer
-  };
 
   return (
     <>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ? (
-          <CustomAgGrid
+          <CustomReactTable
+            height={'calc(100vh - 300px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            loading={loading}
-            isClientSideGrid={true}
-            allowSelection={false}
             renderedFrom={'serialNumber_grid'}
+            isClientSideGrid={true}
             refreshGrid={fetchRecords}
+            hideSelection={true}
           />
         ) : (
           <Box p={2} height={500}>

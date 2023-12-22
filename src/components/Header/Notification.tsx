@@ -2,7 +2,7 @@ import { Badge, Box, Button, IconButton, List, ListItem, Menu, MenuItem, Popover
 import { ClearAll, DoneAllOutlined, Settings } from '@material-ui/icons';
 import { useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Accepted, Assigned, Rejected } from 'src/assets/notificationIcons';
+import { Accepted, Assigned, Rejected, Changed, Created } from 'src/assets/notificationIcons';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -56,8 +56,8 @@ const Notification = () => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-      : '';
+        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+        : '';
 
   const getAllNotifications = (event) => {
     setAnchorEl(event.currentTarget);
@@ -84,7 +84,7 @@ const Notification = () => {
       .put('/notification/all-read', { toggle: true })
       .then(({ data }) => {
         let updatedNotificationList = [];
-        notificationList.map((notification) => {
+        notificationList.forEach((notification) => {
           notification.read = true;
           updatedNotificationList.push(notification);
         });
@@ -124,26 +124,37 @@ const Notification = () => {
       axiosInstance()
         .put('/user/notification/read', {
           toggle: true,
-          notificationId: d.notificationId
+          _id: d._id
         })
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
+
     handleNotificationClose();
+    const resourcePath = returnResourcePath(d?.resourceId, d?.resourcePath);
     if (d?.entity) {
-      handleRedirect(d?.entity, d?.resourceId, d?.resourcePath);
+      handleRedirect(d?.entity, d?.resourceId, resourcePath);
     } else {
-      history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath, { data: d?.of ? d?.of : null });
+      history.push(resourcePath, { data: d?.of ? d?.of : null });
     }
+  };
+
+  const returnResourcePath = (resourceId, resourcePath) => {
+    const splittedPath = resourcePath.split('/');
+    if (splittedPath[splittedPath.length - 1] === resourceId) {
+      splittedPath.pop();
+      return splittedPath.join('/');
+    }
+    return resourcePath;
   };
 
   return (
     <>
       {isMobile ? (
         <>
-          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => {}}>
+          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => { }}>
             <Badge
               variant="dot"
               overlap="circular"
@@ -224,9 +235,11 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
 
   const getIcon = (title: string) => {
     let icon = Assigned;
+
     const compareTitle = (nameList: string[], title) => {
       return nameList.some((s) => title.toLowerCase().includes(s.toLowerCase()));
     };
+
     switch (true) {
       case compareTitle(['accepted', 'completed', 'finished'], title):
         icon = Accepted;
@@ -237,12 +250,24 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
       case compareTitle(['rejected', 'failed', 'closed'], title):
         icon = Rejected;
         break;
+      case compareTitle(['changes', 'changed', 'change'], title):
+        icon = Changed;
+        break;
+      case compareTitle(['Created', 'Creates', 'create'], title):
+        icon = Created;
+        break;
       default:
         icon = Assigned;
         break;
     }
     return icon;
   };
+
+  const boldMatchPattern = (title: string) => {
+    const regex = new RegExp(`([A-Z]+_[0-9]+)|([0-9]+)|(fail)(ed|s)?|(pass)(ed)?|(complete)(d|s)?|(start)(ed|s)?|(assign)(ed)?|(reject)(ed|s)?|(accept)(ed|s)?|(create)(d|s)?|(change)(s|d)?`, 'gi');
+    const data = title.replace(regex, '<strong>$&</strong>');
+    return data;
+  }
 
   return (
     <>
@@ -274,9 +299,8 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
               <div className={`${tab === 'all' ? 'bg-[var(--primary)]' : 'bg-[transparent]'} ${otherClasses}`} />
               All{' '}
               <span
-                className={`text-[#D3E0FF] px-2 py-[1px] block rounded-[5px] ml-2 bg-[#2A3042] text-[12px] font-semibold ${
-                  isLoading || tab === 'all' ? 'grayscale dark:opacity-50 opacity-70' : ''
-                }`}
+                className={`text-[#D3E0FF] px-2 py-[1px] block rounded-[5px] ml-2 bg-[#2A3042] text-[12px] font-semibold ${isLoading || tab === 'all' ? 'grayscale dark:opacity-50 opacity-70' : ''
+                  }`}
               >
                 {data.all.length || 0}
               </span>
@@ -285,9 +309,8 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
               <div className={`${tab === 'unread' ? 'bg-[var(--primary)]' : 'bg-[transparent]'} ${otherClasses}`} />
               Unread{' '}
               <span
-                className={`text-[#2A3042] px-2 py-[1px] block rounded-[5px] ml-2 bg-[#D3E0FF] text-[12px] font-semibold ${
-                  isLoading || tab === 'unread' ? 'grayscale dark:opacity-50 opacity-70' : ''
-                }`}
+                className={`text-[#2A3042] px-2 py-[1px] block rounded-[5px] ml-2 bg-[#D3E0FF] text-[12px] font-semibold ${isLoading || tab === 'unread' ? 'grayscale dark:opacity-50 opacity-70' : ''
+                  }`}
               >
                 {data.unread.length || 0}
               </span>
@@ -323,8 +346,8 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
                         </div>
                       </div>
                       <div className="flex-grow">
-                        <h4 className="text-[12px] text-[var(--dark-primary-text,var(--primary))] font-medium mb-[8px]">{d.title}</h4>
-                        <h5 className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal mb-[6px]">{d.description}</h5>
+                        <h4 className="text-[12px] font-medium mb-[8px] [&>strong]:font-semibold dark:[&>strong]:font-bold leading-[22px] text-[#6B6F77] dark:text-gray-300 [&>strong]:text-[var(--primary-text)]" dangerouslySetInnerHTML={{ __html: boldMatchPattern(d.title) }}></h4>
+                        <h5 className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal mb-[2px]">{d.description}</h5>
                         <p className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal">{displayCardDate(d?.date)}</p>
                       </div>
                     </div>

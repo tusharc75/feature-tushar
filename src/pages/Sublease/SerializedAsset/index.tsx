@@ -1,31 +1,31 @@
 import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import { startCase, uniqBy } from 'lodash';
-import React, { Fragment, useContext, useEffect, useState } from 'react'
-import { isMobile } from 'react-device-detect';
+import { Fragment, useContext, useEffect, useState } from 'react'
+import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
-import { ASSET_STATUS, sublease, treeToFlatArray } from 'src/constants/helpers';
+import { flattenArray } from 'src/constants/columns';
+import { ASSET_STATUS, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE, deliveryTicket, sublease, treeToFlatArray } from 'src/constants/helpers';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import { subleaseMessage } from 'src/constants/messageHelpers';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 
 function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowedToEdit, stepFullScreen, renderedFrom }) {
-
     const toastConfig = useContext(CustomToastContext);
+    const { generateColumns } = useColumns();
+    const { state, dispatch } = useTableReducer();
+    const { dataRows, selectedRecords } = state;
 
     const [columns, setColumns] = useState(null);
-    const [rowsData, setRowsData] = useState(null);
-    const [selectedRecords, setSelectedRecords] = useState([]);
     const [anchorActionEl, setAnchorActionEl] = useState(null);
     const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
     const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
@@ -44,13 +44,13 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         data?.forEach((e) => {
             e.isColumnEditable = false;
         });
-        const newColumns = generateCustomTableColumns(data, subleaseData?.currency, '');
+        const newColumns = generateColumns(renderedFrom, data, null, false, subleaseData?.currency);
         let coloum: any = [
             {
                 accessor: 'index',
                 Header: 'Index',
                 width: 70,
-                sticky: isMobile ? 'none' : 'left',
+                sticky: 'left',
                 Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
                 Footer: () => {
                     return <>Total</>;
@@ -59,9 +59,8 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             {
                 accessor: 'type',
                 Header: 'Type',
-                sticky: isMobile ? 'none' : 'left',
-                disableFilters: true,
-                width: 200,
+                sticky: isMobile || isTablet ? 'none' : 'left',
+                width: 100,
                 Cell: ({ row }) =>
                     row.original['type'] ? (
                         <p>
@@ -74,8 +73,9 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             {
                 accessor: 'detail',
                 Header: 'Details',
-                width: 300,
-                sticky: isMobile ? 'none' : 'left',
+                width: 200,
+                disabled: true,
+                sticky: isMobile || isTablet ? 'none' : 'left',
                 Cell: ({ row }) => (
                     <div className="d-flex gap-2 align-items-center">
                         <p className="text-truncate" title={row.original.detail}>
@@ -113,39 +113,37 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             {
                 accessor: 'assets',
                 Header: 'Asset Assigned',
-                disableFilters: false,
+                disableFilters: true,
+                disableSortBy: true,
                 Cell: ({ row }) => getAssetAssignedValues(row)
             }
         ];
         coloum = [...coloum, ...newColumns];
         coloum.push({
             accessor: 'action',
-            Header: 'Action',
+            Header: 'Actions',
             sticky: 'right',
             disableFilters: true,
             canDrag: false,
             Cell: ({ row }) => {
                 return <div>
-                    {
-                        row.original?.type === 'asset' && (
-                            <span className="d-flex align-items-center gap-2">
-                                {allowedToEdit && row?.original?.canRemove && (
-                                    <HtmlTooltip title={`Remove`}>
-                                        <IconButton
-                                            size="small"
-                                            disabled={row.original.status !== ASSET_STATUS.reserved}
-                                            onClick={() => {
-                                                setShowConfirmBox(true);
-                                                setDeleteData([row.original.inventory]);
-                                            }}
-                                        >
-                                            <Delete fontSize="small" color={row.original.status !== ASSET_STATUS.reserved ? 'disabled' : 'error'} />
-                                        </IconButton>
-                                    </HtmlTooltip>
-                                )}
-                            </span>
-                        )
-                    }
+                    {row.original?.type === 'asset' && (
+                        <span className="d-flex align-items-center gap-2">
+                            {allowedToEdit && (
+                                <HtmlTooltip title={`Remove`}>
+                                    <IconButton
+                                        size="small"
+                                        disabled={!row?.original?.canDelete}
+                                        onClick={() => {
+                                            setShowConfirmBox(true);
+                                            setDeleteData([row.original.inventory]);
+                                        }}
+                                    >
+                                        <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+                                    </IconButton>
+                                </HtmlTooltip>
+                            )}
+                        </span>)}
                 </div>
             }
         });
@@ -155,34 +153,16 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
 
     const getAssetAssignedValues = (row) => {
         if (row?.original?.type === 'asset' || row?.original?.assetQty === 0) {
-            return ' N/A ';
+            return <div>N/A</div>;
         }
         return (
-            <p>
-                {row?.original?.assetAssignedQty} / {row?.original?.assetQty}
-            </p>
+            <div>{row?.original?.assetAssignedQty} / {row?.original?.assetQty}</div>
         );
     };
 
-    const checkProductInside = (item, material) => {
-        if (item?.type === 'product') {
-            return true;
-        }
-        const child = material?.filter(e => e.parentId === item?._id);
-        if (child?.some(e => e?.type === 'product')) {
-            return true;
-        }
-        if (child?.length) {
-            for (var ele in child) {
-                return checkProductInside(child[ele], material)
-            }
-        }
-        else {
-            return false
-        }
-    }
-
     const fetchRowData = async () => {
+        dispatch({ type: 'loading', loading: true });
+        dispatch({ type: 'selection', selectedRecords: [] });
         setNextStep(false);
         setNextStepToolTip(null);
         try {
@@ -191,9 +171,14 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`);
             data = response?.data?.data;
 
-            const material = data.material;
-            let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
-
+            const { data: { data: loadingTicket } } = await axiosInstance().get(
+                `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.sublease}&referenceId=${subleaseData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+            );
+            var loadingTicketAssets = []
+            loadingTicket?.forEach(element => {
+                loadingTicketAssets = [...loadingTicketAssets, ...element?.productInventory]
+            });
+            let rows = data.material.filter((e) => !e.parentId);
             rows.forEach((parent, i) => {
                 parent.index = i + 1;
                 parent.detail = `${parent.type === 'service'
@@ -215,7 +200,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 parent.assetAssignedQty = parent.serializedProduct ? data.inventory?.filter((e) => e._id === parent._id).length : 0;
                 parent.realAssetQty = parent.assetQty;
                 parent.realAssetAssignedQty = parent.assetAssignedQty;
-                parent.subRows = generateNestedData(data.material, data.inventory, parent);
+                parent.subRows = generateNestedData(data.material, data.inventory, parent, loadingTicketAssets);
                 parent.assetQty =
                     parent.subRows.filter((d) => d.type !== 'asset').length === 0
                         ? parent.assetQty
@@ -235,7 +220,6 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                         parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
                         parent.subRows.every((d) => d.isValid)
                         : true;
-
                 if (parent.subRows.length && parent.isValid) {
                     if (parent.subRows.every((d) => d.isValid)) {
                         parent.isValid = true;
@@ -245,7 +229,6 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 }
             });
 
-            setRowsData(rows);
             if (rows.every((d) => d.isValid)) {
                 setNextStep(true)
                 setNextStepToolTip(null)
@@ -253,13 +236,14 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 setNextStep(false)
                 setNextStepToolTip(subleaseMessage.assignAssets)
             }
-            setSelectedRecords([]);
+            dispatch({ type: 'initialize', data: rows, count: rows?.length });
+            dispatch({ type: 'loading', loading: false });
         } catch (error) {
             toastConfig.setToastConfig(error);
         }
     };
 
-    const generateNestedData = (material, inventory, parent) => {
+    const generateNestedData = (material, inventory, parent, loadingTicketAssets) => {
         const subRows: any = [];
         const inventory_result = inventory?.filter((e) => e._id === parent._id);
         inventory_result?.forEach((_inventory, k) => {
@@ -276,12 +260,11 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 warehouse: _inventory.inventoryDetail?.warehouse,
                 _id: _inventory.inventory,
                 isValid: _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved ? false : true,
-                canRemove: true
+                canDelete: loadingTicketAssets?.find((e) => e.optionValue === _inventory.inventory) ? false : true
             });
         });
 
         const childProduct: any = material.filter((e) => e.parentId === parent._id);
-        var assetQtySUM = 0;
         var assetAssignedQtySUM = 0;
         childProduct.forEach((_subRow, j) => {
             _subRow.index = parent.index + '.' + (j + 1);
@@ -309,7 +292,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             _subRow.assetAssignedQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : 0;
             _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.realAssetQty : 0;
             _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
-            let tempSubRows = generateNestedData(material, inventory, _subRow);
+            let tempSubRows = generateNestedData(material, inventory, _subRow, loadingTicketAssets);
             _subRow.subRows = tempSubRows;
             _subRow.assetQty =
                 tempSubRows.filter((d) => d.type !== 'asset').length === 0
@@ -348,7 +331,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 .then(({ data }) => {
                     setAddSerializedAssetDialog(false);
                     fetchRowData()
-                    setSelectedRecords([]);
+                    dispatch({ type: 'selection', selectedRecords: [] });
                     setAssetAssignedProduct([]);
                     setAdding(false);
                     toastConfig.setToastConfig({
@@ -441,6 +424,8 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                                 onClose={closeActions}
                             >
                                 <MenuItem
+                                    disabled={selectedRecords?.length && selectedRecords?.filter((e) => e.type === 'asset' && e.canDelete)?.length ===
+                                        selectedRecords?.filter((e) => e.type === 'asset')?.length ? false : true}
                                     onClick={() => {
                                         const inventories = uniqBy(flattenArray(selectedRecords), '_id')?.filter((e) => e.type === 'asset')?.map((e) => e.inventory);
                                         setShowConfirmBox(true);
@@ -457,23 +442,20 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             )}
             <Grid container spacing={2}>
                 <Grid item xs={12} md={12} sm={12}>
-                    {columns && rowsData ? (
-                        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+                    {columns ? (
+                        <Box zIndex={5} >
                             <CustomReactTable
-                                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+                                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                                 columns={columns}
-                                data={rowsData}
-                                setWholeRowsCellColor={(rowData) => {
-                                    if (!rowData.isValid) return 'error';
-                                    return '';
-                                }}
-                                onSelect={setSelectedRecords}
-                                childrenProperty="subRows"
-                                uniqueKey="_id"
+                                state={state}
+                                dispatch={dispatch}
+                                refreshGrid={fetchRowData}
+                                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
                                 hideSelection={!allowedToEdit}
-                                hideAction={false}
+                                hideAction={!allowedToEdit}
                                 renderedFrom={renderedFrom}
                                 isClientSideGrid={true}
+                                expander={true}
                             />
                         </Box>
                     ) : (
@@ -491,7 +473,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                         setAddSerializedAssetDialog(false);
                         setAssetAssignedProduct([]);
                     }}
-                    ids={flattenArray(rowsData)?.filter((e) => e.type === 'serializedAsset')?.map((e) => e.materialId)}
+                    ids={flattenArray(dataRows)?.filter((e) => e.type === 'serializedAsset')?.map((e) => e.materialId)}
                     handleSucess={(rows) => {
                         handleAssignAssets(rows);
                     }}

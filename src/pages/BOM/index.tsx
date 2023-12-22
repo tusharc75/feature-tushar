@@ -1,55 +1,57 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import MaterialTable from 'material-table';
-import { Avatar, Box, Chip, Grid, Button, Menu, MenuItem } from '@material-ui/core';
-import { Link, useParams, useLocation } from 'react-router-dom';
-import { materialTableIcons, product, isObjectEmpty, prepareDataForGrid } from '../../constants/helpers';
+import { useState, useEffect, useContext } from 'react';
+import { Box, Button, Menu, MenuItem } from '@material-ui/core';
+import { useParams } from 'react-router-dom';
+import { product, prepareDataForGrid, gridLoadingTimeout } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
-import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import { AiOutlineApartment } from 'react-icons/ai';
-import { MdAdd } from 'react-icons/md';
-import { isMobile, isTablet } from 'react-device-detect';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Delete } from '@material-ui/icons';
-import { IconButton, Tooltip } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
-import CustomAgGridEditable from '../../components/AgGridComponents/CustomAgGridEditable';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CustomContainer from 'src/components/CustomContainer';
 
 const BOMTable = () => {
   const { id } = useParams();
 
   const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
-  const localStorageSelectedRecords = `${routes.product.title}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
+
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, filters, sorting, selectedRecords } = state;
+  const { generateColumns } = useColumns();
+
+  const {
+    state: { permissions, selectedEntity }
+  }: any = useData();
+
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
   const [isDeleting, setIsDeleting] = useState(false);
-  const [gridApi, setGridApi] = useState(null);
-  const {
-    state: { permissions, user, selectedEntity }
-  }: any = useData();
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
   const [parts, setParts] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
-  const { getColumnData } = useColumns();
-
   const [isSubmitting, setSubmitting] = useState(false);
 
   const defaultColumns = [
-    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
+    {
+      accessor: 'qty',
+      Header: 'Qty',
+      minWidth: 180,
+      width: 180,
+      editable: true,
+      Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
+    }
   ];
 
   useEffect(() => {
@@ -61,24 +63,36 @@ const BOMTable = () => {
       .get('/field?resource=Product&view=true')
       .then(({ data: { data } }) => {
         let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent, actionsRenderer: ActionsRenderer });
-        columns = [...columns, ...getStaticFields()];
+        const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true)
+        columns = [...newColumns, ...getStaticFields(), ActionsRenderer];
         setColumns([...defaultColumns, ...columns]);
       });
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setShowConfirmBox({ open: true, data: [row?.original] });
+            }}
+          >
+            <Delete fontSize="small" color="error" />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+    )
   };
 
   useEffect(() => {
@@ -111,9 +125,6 @@ const BOMTable = () => {
 
   const fetchBOMData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`/product/${id}/bom`)
       .then(({ data: { data } }) => {
@@ -124,40 +135,16 @@ const BOMTable = () => {
           };
           return prepareDataForGrid(finalObject);
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...data],
-            count: data.length,
-            selectedRecords: [...dataRows, ...data].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: data,
-            count: data.length,
-            selectedRecords: data.filter((f) => f.isChecked === true)
-          });
-        }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
-        }
+        dispatch({ type: 'initialize', data: data, count: data?.length });
         setParts([...data]);
-        dispatch({ type: 'loading', loading: false });
       })
       .catch((err) => {
-        dispatch({ type: 'loading', loading: false });
+        toastConfig.setToastConfig(err);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -198,27 +185,16 @@ const BOMTable = () => {
           setIsDeleting(false);
         });
     }
+    dispatch({ type: 'selection', selectedRecords: [] });
   };
 
-  const ActionsRenderer = (params) => (
-    <Tooltip title="Delete">
-      <IconButton
-        onClick={() => {
-          setShowConfirmBox({ open: true, data: [params.data] });
-        }}
-      >
-        <Delete fontSize="small" color="error" />
-      </IconButton>
-    </Tooltip>
-  );
-
-  const handleValueUpdate = (row) => {
-    if (!row || !row?.data) return;
-    const bomId = row.data._id;
+  const handleValueUpdate = (data, row) => {
+    if (!data || !data?.qty) return;
+    const bomId = row?._id;
 
     axiosInstance()
       .put(`${product.api}/${id}/bom/${bomId}`, {
-        qty: Number(row.data.qty)
+        qty: Number(data?.qty)
       })
       .then(() => {
         fetchBOMData();
@@ -229,8 +205,12 @@ const BOMTable = () => {
   };
 
   const handleAdd = async (rows) => {
-    setSubmitting(true)
-    const dataObj = rows.filter((d) => d.qty > 0).map((d) => { return { childProduct: d.id, qty: Number(d.qty) }; });
+    setSubmitting(true);
+    const dataObj = rows
+      .filter((d) => d.qty > 0)
+      .map((d) => {
+        return { childProduct: d.id, qty: Number(d.qty) };
+      });
     await axiosInstance()
       .post(`/product/${id}/bom`, dataObj)
       .then(({ data }) => {
@@ -241,11 +221,11 @@ const BOMTable = () => {
           message: data.message
         });
         setOpenAssignProductDialog(false);
-        setSubmitting(false)
+        setSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setSubmitting(false)
+        setSubmitting(false);
       });
   };
 
@@ -255,40 +235,38 @@ const BOMTable = () => {
         <CustomBreadCrumbs routes={customizedRoutes} />
       </div>
       <div className="main-container">
-        <div className="header-panel">
-          <Grid className={styles.filter_side_container} container justify="space-between">
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
+        <CustomContainer>
+          <div className="header-panel">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'flex justify-between align-items-center gap-1 w-full'}>
                 <AiOutlineApartment className="headerLogo" />
                 <span className="listingHeader">Child Product</span>
               </div>
-            </Grid>
-            <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', gap: '5px' }}>
+              <div className="flex flex-wrap gap-[8px] justify-end">
+                <div className="flex gap-[8px] flex-wrap items-center">
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    variant={'contained'}
                     color="primary"
                     size="small"
-                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                    className={`no-shadow`}
                     onClick={() => {
                       setOpenAssignProductDialog(true);
                     }}
+                    startIcon={<AddOutlined />}
                   >
-                    {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                    Add
                   </Button>
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    variant={'outlined'}
                     color="default"
                     size="small"
-                    className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn} new-dropdown-v1`}
                     onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
+                    className={`new-dropdown-v1`}
                     aria-controls="action-menu"
                     endIcon={<ExpandMore />}
+                    disabled={selectedRecords?.length ? false : true}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'}
+                    Actions
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -302,38 +280,32 @@ const BOMTable = () => {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}
                   >
-                    <MenuItem onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}>Delete</MenuItem>
+                    <MenuItem onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}>
+                      {`Delete (${selectedRecords?.length})`}
+                    </MenuItem>
                   </Menu>
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
-        </div>
-        <Box component="div">
-          {frameWorkComponent ? (
-            <CustomAgGridEditable
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {columns ? (
+            <CustomReactTable
+              height={'calc(100vh - 350px)'}
               columns={columns}
-              dataRows={dataRows}
-              isClientSideGrid={true}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
+              state={state}
               dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={150}
-              loading={gridLoading}
+              onSaveEdit={handleValueUpdate}
               renderedFrom={renderedFrom}
+              isClientSideGrid={true}
               refreshGrid={fetchBOMData}
-              onCellValueChanged={handleValueUpdate}
             />
           ) : (
             <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
-        </Box>
+        </CustomContainer>
       </div>
       {showConfirmBox.open && (
         <ConfirmationDialogRaw

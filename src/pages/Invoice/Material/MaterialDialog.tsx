@@ -62,11 +62,84 @@ const MaterialDialog: FC<EditDialogProps> = ({
     var data = await fetch_invoice_product_fields(invoiceData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
+      let unitArray: any = [];
+      let pricingMethodArray: any = [];
+      selectedProducts?.forEach((element) => {
+        if (element?.[`${element.type}Detail`]?.unit) {
+          unitArray.push([...element?.[`${element.type}Detail`]?.unit]);
+        }
+        if (element?.[`${element.type}Detail`]?.pricingMethod) {
+          pricingMethodArray.push([...element?.[`${element.type}Detail`]?.pricingMethod]);
+        }
+      });
+      let unit: any = unitArray?.shift()?.filter(function (v) {
+        return unitArray?.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      let pricingMethod: any = pricingMethodArray?.shift()?.filter(function (v) {
+        return pricingMethodArray?.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      const unitOptions: any = arrayToDropwdownOption(unit);
+      const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
+      data.forEach((element) => {
+        if (element.fieldName === 'unit') {
+          element.option = unitOptions;
+        }
+        if (element.fieldName === 'pricingMethod') {
+          element.option = pricingMethodOptions;
+        }
+        element.required = false;
+        element.isFormula = false;
+        element.isMulitFormula = false;
+      });
       setInitialData({
         fields: data,
-        values: { ...getObjKeys('', data), estimateStartDate: '', estimateEndDate: '', actualStartDate: '', actualEndDate: '', tenure: '' }
+        values: { ...getObjKeys('', data), estimateStartDate: '', estimateEndDate: '', actualStartDate: '', actualEndDate: '' }
       });
     } else {
+      let unitOptions: any = [];
+      let pricingMethodOptions: any = [];
+      if (rowData?.[`${rowData.type}Detail`]?.unit) {
+        unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.unit);
+      }
+      if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
+        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
+      }
+      data.forEach((element) => {
+        if (rowData?.type === 'serializedAsset') {
+          if (element.fieldName === 'qty') {
+            element.disabled = true;
+          }
+          if (element.fieldName === 'unit') {
+            element.option = [
+              {
+                optionLabel: 'Piece',
+                optionValue: 'Piece'
+              }
+            ];
+            element.value = 'Piece';
+          }
+          if (element.fieldName === 'pricingMethod') {
+            element.option = [
+              {
+                optionValue: 'Per Job',
+                optionLabel: 'Per Job'
+              }
+            ];
+            element.value = 'Per Job';
+          }
+        } else {
+          if (element.fieldName === 'unit') {
+            element.option = unitOptions;
+          }
+          if (element.fieldName === 'pricingMethod') {
+            element.option = pricingMethodOptions;
+          }
+        }
+      });
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(rowData, data)
@@ -134,6 +207,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
       }
     }
   };
+
   function validate(values) {
     const errors = {};
     let startDate = moment(values?.estimateStartDate);

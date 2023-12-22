@@ -12,29 +12,36 @@ import { isMobile } from 'react-device-detect';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
 import { CHILD_RESOURCE } from '../../../constants/helpers';
-import { generateCustomTableColumns, flattenArray } from '../../../constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { GrBusinessService } from 'react-icons/all';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { camelCase } from 'lodash';
+import routes from 'src/components/Helpers/Routes';
 
-const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
+const AdditionalCost = ({ salesOrderData, setNextStep, stepFullScreen, allowedToEdit }) => {
+
+  const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Cost`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
-  const [columns, setColumns] = useState([]);
-  const [rowsData, setRowsData] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
   const [selectedCostData, setSelectedCostData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecords, setDeleteRecords] = useState(null);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -54,13 +61,13 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
     data = response?.data?.data;
     const fields = CURReplaceByCurrencySingle(data, salesOrderData.currency);
     setAllFields(JSON.parse(JSON.stringify(fields)));
-    const newColumns = generateCustomTableColumns(fields, salesOrderData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, fields, null, false, salesOrderData?.currency);
     let column: any = [
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        width: 100,
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -77,7 +84,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) =>
+      Cell: ({ row, table }) =>
         allowedToEdit && (
           <Fragment>
             <HtmlTooltip title="Edit">
@@ -85,7 +92,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
                 size="small"
                 aria-label="Clone"
                 onClick={() => {
-                  handleOpen(row, rows);
+                  handleOpen(row, table.getRowModel().rows);
                 }}
               >
                 <EditIcon color="primary" />
@@ -110,6 +117,8 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
 
   const fetchAdditionalCost = async () => {
     try {
+      dispatch({ type: 'loading', loading: true });
+      dispatch({ type: 'selection', selectedRecords: [] });
       setNextStep(false);
       const response = await axiosInstance().get(`${salesOrder.api}/additionalcost/${salesOrderData._id}`);
       let rows = response?.data?.data;
@@ -117,7 +126,8 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
         parent.index = i + 1;
       });
       setNextStep(true);
-      setRowsData(rows);
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -144,11 +154,6 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
   };
 
   const handleUpdateCost = (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.isValid;
-      delete element.hideSelection;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${salesOrder.api}/additionalcost/${salesOrderData._id}/update`, { additionalCost: rows })
@@ -160,11 +165,11 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          setSelectedCostData(rowsData[rowIndex + 1]);
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          setSelectedCostData(dataRows[rowIndex + 1]);
           setShowCostDialog({
             open: true,
-            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
           });
         } else {
           setShowCostDialog({ open: false, showSaveAndNext: false });
@@ -195,9 +200,9 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleUpdateCost(rows);
   };
 
@@ -268,19 +273,16 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
           </Menu>
         </div>
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <Box zIndex={5}>
           <CustomReactTable
-            height={'calc(100vh - 395px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
-            data={rowsData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-            onSelect={setSelectedRecords}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchAdditionalCost}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            hideExpander={true}
             onSaveEdit={onSaveInlineEdit}
           />
         </Box>

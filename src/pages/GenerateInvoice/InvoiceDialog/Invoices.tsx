@@ -1,10 +1,8 @@
 import { Box, Grid, IconButton } from '@material-ui/core';
-import { useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -16,22 +14,20 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
+import CustomReactTable, { checkStaticField, getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { deleteDisable } from 'src/constants/messageHelpers';
 
 const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
   const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`;
-
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
   const {
     state: { user, permissions }
   }: any = useData();
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-  const { getColumnData } = useColumns();
-  const [frameworkComponent, setFrameworkComponent] = useState({});
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -44,110 +40,96 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=Invoice`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.invoice}`);
     data = response?.data?.data;
-    let columns = [];
-    let rendererNames = [];
-    data.forEach((o) => {
-      if (o?.fieldData?.fieldName === 'invoiceNumber') {
-        columns = [
-          ...columns,
-          {
-            ...o?.fieldData,
-            pivotIndex: 0,
-            field: o?.fieldData?.fieldName,
-            headerName: o?.fieldData?.fieldLabel,
-            show: true,
-            disabled: true,
-            cellRenderer: 'invoiceMaterialRenderer'
-          }
-        ];
-      } else {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.invoiceDetail.path);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
-          }
-        }
-      }
-      return o?.fieldData;
-    });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer,
-      invoiceMaterialRenderer: InvoiceMaterialRenderer
-    };
-    setFrameworkComponent({ ...tempFrameworkComponent });
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.projectSales.title, field));
-    });
-    setColumns([...columns]);
-  };
+    const newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path);
+    newColumns?.forEach((o) => {
+      if (o.accessor === 'invoiceNumber') {
+        o.show = true;
+        o.disabled = true;
+        o.index = 0;
+        o.cell = ({ row }) => (
 
-  const InvoiceMaterialRenderer = (params) => (
-    <>
-      <span
-        className="link"
-        onClick={() => {
-          setViewInvoiceDialog({ open: true, invoice: params.data._id });
-        }}
-      >
-        <CustomRenderCell value={params?.value} />
-      </span>
-      <Box ml={1}>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(`${routes.invoiceDetail.path}/${params?.data?._id}`);
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Box>
-    </>
-  );
-
-  const ActionsRenderer = (params) => (
-    <>
-      <HtmlTooltip title="View Invoice">
-        <IconButton
-          size="small"
-          onClick={() => {
-            setViewInvoiceDialog({ open: true, invoice: params.data._id });
-          }}
-        >
-          <VisibilityIcon fontSize="small" color="primary" />
-        </IconButton>
-      </HtmlTooltip>
-      {params?.data?.canDelete && (
-        <HtmlTooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
+          <span
+            className="link"
             onClick={() => {
-              setDeleteRecord(params.data);
-              setIsConformDialogVisible(true);
+              setViewInvoiceDialog({ open: true, invoice: row.original?._id });
             }}
           >
-            <DeleteIcon color="error" />
-          </IconButton>
+            <CustomRenderCell value={row.original?.invoiceNumber} />
+
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.invoiceDetail.path}/${row.original?._id}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </span>
+
+        );
+      }
+    });
+    let staticFields = getStaticFields();
+    staticFields.forEach((field) => {
+      newColumns.push(checkStaticField(routes.projectSales.title, field));
+    });
+    setColumns([...newColumns, ActionsRenderer]);
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title="View Invoice">
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => {
+                setViewInvoiceDialog({ open: true, invoice: row.original?._id });
+              }}
+            >
+              <VisibilityIcon fontSize="small" color="primary" />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      )}
-    </>
-  );
+        <HtmlTooltip title={row.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              disabled={!row.original?.canDelete}
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setIsConformDialogVisible(true);
+              }}
+            >
+              <DeleteIcon color={row.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  };
 
   useEffect(() => {
-    fetchBilling();
-  }, [page, limit, filters, sorting]);
+    fetchData();
+  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&${invoiceFieldName}=${resourceId}`;
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
@@ -169,19 +151,14 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
     return deepFilter;
   };
 
-  const fetchBilling = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     await axiosInstance()
       .get(`${invoice.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u, idx) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject['isLatestInvoice'] = idx === 0 ? true : false;
-          finalObject['isChecked'] = false;
           finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
           return finalObject;
         });
@@ -219,7 +196,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
-          fetchBilling();
+          fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -230,26 +207,16 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
   };
 
   return (
-    <>
+    <Box>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
-        {columns?.length ? (
-          <CustomAgGrid
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponent}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={100}
-            loading={loading}
             renderedFrom={renderedFrom}
-            allowSelection={false}
-            allowAction={true}
-            isClientSideGrid={true}
-            refreshGrid={fetchBilling}
+            refreshGrid={fetchData}
           />
         ) : (
           <Box p={2} height={500}>
@@ -265,6 +232,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
           }}
           onSuccess={() => {
             setViewInvoiceDialog({ open: false, invoice: null });
+            fetchData();
           }}
           resource={resource}
         />
@@ -281,7 +249,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
           onOk={handleDeleteInvoice}
         />
       ) : null}
-    </>
+    </Box>
   );
 };
 export default Invoices;

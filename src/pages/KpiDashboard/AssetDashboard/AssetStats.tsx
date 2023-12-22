@@ -4,6 +4,7 @@ import { Autocomplete, Skeleton } from '@material-ui/lab';
 import axiosInstance from 'src/axios/axiosInstance';
 import VirtualizedList from 'src/components/VirtualizedList';
 import moment from 'moment';
+import { round } from 'lodash';
 
 const AssetStats = () => {
   const [selectedAssets, setSelectedAssets] = React.useState([]);
@@ -15,11 +16,11 @@ const AssetStats = () => {
 
   React.useEffect(() => {
     if (selectedAssets.length > 0) {
-      loadAssetsStats();
+      featchData();
     }
   }, [selectedAssets]);
 
-  const loadAssetsStats = () => {
+  const featchData = () => {
     setLoadingStats(true);
     axiosInstance()
       .post('serialized-asset/inventory-stats', {
@@ -111,86 +112,93 @@ const AssetStats = () => {
 
         {assetStats && selectedAssets.length > 0 && !loadingStats && (
           <>
-            <Grid item xs={12} sm={4} md={3}>
+            <Grid item xs={12} sm={4} md={4}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
-                    Total no of repair job
+                    Total Rental Jobs
                   </Typography>
                   <Box display="flex" alignItems="flex-end">
                     <Typography variant="h5" component="h2">
-                      {assetStats['totalNoOfRentalJob'] ?? 0}
+                      {assetStats?.totalRentalJobs || 0}
                     </Typography>
                   </Box>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={3}>
+            <Grid item xs={12} sm={4} md={4}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
-                    No. of jobs after last repair
+                    Total Repair
                   </Typography>
                   <Box display="flex" alignItems="flex-end">
                     <Typography variant="h5" component="h2">
-                      {assetStats['noOfJobFromLastRepair'] ?? 0}
+                      {assetStats?.totalRepairJobs || 0}
                     </Typography>
                   </Box>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={3}>
+            <Grid item xs={12} sm={4} md={4}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
-                    No. of days after repair
+                    Total Utilization
+                  </Typography>
+                  <Box display="flex" alignItems="flex-end">
+                    <Box ml={1}>
+                      <Typography variant="h5" component="h2">
+                        {assetStats?.totalUtilization ? `${round(moment.duration(assetStats?.totalUtilization).asHours())}:${Math.floor(moment.duration(assetStats?.totalUtilization).asMinutes() % 60)}` : 0}
+                      </Typography>
+                    </Box >
+                    <Box ml={1}>
+                      <Typography variant="body1">Hours</Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4} md={4}>
+              <Card>
+                <CardContent>
+                  <Typography color="textSecondary" gutterBottom>
+                    No. Of Rental Jobs After Last Repair
                   </Typography>
                   <Box display="flex" alignItems="flex-end">
                     <Typography variant="h5" component="h2">
-                      {assetStats['noOfDaysAfterRepair'] ?? 0}
+                      {assetStats?.noOfRentalJobsAfterLastRepair || 0}
                     </Typography>
                   </Box>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={3}>
+            <Grid item xs={12} sm={4} md={4}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
-                    Use time after last repair
+                    No. Of Days After Last Repair
                   </Typography>
                   <Box display="flex" alignItems="flex-end">
                     <Typography variant="h5" component="h2">
-                      {assetStats['useTimeFromLastRepair'] ?? 0}
+                      {assetStats?.noOfDaysAfterLastRepair || 0}
                     </Typography>
                   </Box>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4} md={3}>
+            <Grid item xs={12} sm={4} md={4}>
               <Card>
                 <CardContent>
                   <Typography color="textSecondary" gutterBottom>
-                    Total repair
+                    Total In-Use Time After Last Repair
                   </Typography>
                   <Box display="flex" alignItems="flex-end">
-                    <Typography variant="h5" component="h2">
-                      {assetStats['totalRepair'] ?? 0}
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={4} md={3}>
-              <Card>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total utilization
-                  </Typography>
-                  <Box display="flex" alignItems="flex-end">
-                    <Typography variant="h5" component="h2">
-                      {assetStats['totalUtilization'] ? Math.floor(moment.duration(assetStats['totalUtilization']).asHours()) : 0}
-                    </Typography>
+                    <Box ml={1}>
+                      <Typography variant="h5" component="h2">
+                        {assetStats?.totalInUseTimeAfterLastRepair ? `${round(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}` : 0}
+                      </Typography>
+                    </Box >
                     <Box ml={1}>
                       <Typography variant="body1">Hours</Typography>
                     </Box>

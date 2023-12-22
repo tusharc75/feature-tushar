@@ -4,6 +4,7 @@ import { useData } from './../StateProvider/Provider';
 import { FiLogOut, FiUser, FiSettings } from 'react-icons/fi';
 import './sidebar.scss';
 import { userType } from '../constants/helpers';
+import { MdOutlineSupportAgent } from 'react-icons/md';
 
 export default function UserProfile(props) {
   const {
@@ -57,6 +58,16 @@ export default function UserProfile(props) {
                   </MenuList>
                 </ClickAwayListener>
               ) : null}
+              <ClickAwayListener onClickAway={onClose}>
+                <MenuList autoFocusItem={open} id="menu-list-grow" onKeyDown={onListKeyDown}>
+                  <MenuItem onClick={(e) => onClose(e, { supportTicket: true })}>
+                    <ListItemIcon style={{ minWidth: '30px' }}>
+                      <MdOutlineSupportAgent />
+                    </ListItemIcon>
+                    <Typography>Support Ticket</Typography>
+                  </MenuItem>
+                </MenuList>
+              </ClickAwayListener>
               <ClickAwayListener onClickAway={onClose}>
                 <MenuList autoFocusItem={open} id="menu-list-grow" onKeyDown={onListKeyDown}>
                   <MenuItem onClick={(e) => onClose(e, { logout: true })}>

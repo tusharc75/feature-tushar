@@ -11,7 +11,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SearchBox from 'src/components/Helpers/SearchBox';
 
-export default function Current({ assetId }) {
+export default function Current({ deviceTemplate, assetId }) {
   const toastConfig = useContext(CustomToastContext);
 
   const [errorData, setErrorData] = useState(null);
@@ -28,7 +28,7 @@ export default function Current({ assetId }) {
 
   const fetchCategory = async () => {
     axiosInstance()
-      .get(`/dynamic-form`, {
+      .get(`/dynamic-form?sortBy=order&orderBy=asc`, {
         headers: {
           Resource: 'Iot Data Points Category'
         }
@@ -67,13 +67,14 @@ export default function Current({ assetId }) {
   const fetchErrorData = async () => {
     setErrorData(null);
     axiosInstance()
-      .get(`/report/iot/asset-error-message`, {
-        params: {
-          asset: assetId
-        }
-      })
+      .get(`/report/iot/alerts?asset=${assetId}`)
       .then(({ data: { data } }) => {
-        setErrorData(data);
+        setErrorData(
+          data
+            ?.sort((a, b) => moment(b.time).diff(moment(a.time)))
+            ?.filter((e) => e?.message)
+            ?.slice(0, 10)
+        );
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -123,6 +124,8 @@ export default function Current({ assetId }) {
                         ? currentData
                         : currentData?.filter((e) => e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase()))
                     }
+                    assetId={assetId}
+                    deviceTemplate={deviceTemplate}
                   />
                 ))}
               </div>
@@ -151,18 +154,15 @@ export default function Current({ assetId }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {errorData
-                    ?.sort((a, b) => moment(a.time).diff(moment(b.time)))
-                    ?.filter((e) => e?.message)
-                    ?.map((data: any, index) => (
-                      <TableRow key={'row ' + index + 1}>
-                        <TableCell key={'cell ' + index + 1} align="left">
-                          {data?.message}
-                          <br />
-                          {moment(data?.time).format(dateTimeFormat)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                  {errorData?.map((data: any, index) => (
+                    <TableRow key={'row ' + index + 1}>
+                      <TableCell key={'cell ' + index + 1} align="left">
+                        {data?.message}
+                        <br />
+                        {moment(data?.time).format(dateTimeFormat)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>

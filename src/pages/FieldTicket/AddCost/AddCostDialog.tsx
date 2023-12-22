@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -9,7 +9,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { isEqual, map, orderBy, uniq } from 'lodash';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import InputField from 'src/components/Helpers/InputField';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -23,6 +22,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
+  const [allFields, setAllFields] = useState([]);
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -38,6 +38,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`);
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
+    setAllFields(JSON.parse(JSON.stringify(data)));
     if (costData) {
       setInitialData({
         fields: data,
@@ -66,7 +67,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
     setSubmitting(true);
     if (costData) {
       axiosInstance()
-        .put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [{ ...values, _id: costData._id }])
+        .put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [{ ...getObjKeysWithValues(values, allFields), _id: costData._id }])
         .then(({ data }) => {
           setLoading(false);
           onSuccess(data.data);
@@ -84,7 +85,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
         });
     } else {
       axiosInstance()
-        .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [values])
+        .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [{ ...getObjKeysWithValues(values, allFields)}])
         .then(({ data }) => {
           setLoading(false);
           onSuccess(data.data);

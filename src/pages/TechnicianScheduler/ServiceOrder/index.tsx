@@ -2,7 +2,7 @@ import { Box, IconButton, TextField } from '@material-ui/core';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -10,7 +10,6 @@ import { dateFormat, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -27,16 +26,17 @@ const TECHNICIAN_RESOURCE = [
   }
 ];
 
-function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selectedRecords, setSelectedRecords }) {
+function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
   const {
     state: { permissions }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
-  const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
   const [selectedType, setSelectedType] = useState(serviceTypes[0]?.key || '');
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
 
   useEffect(() => {
     const options: any = [];
@@ -49,17 +49,21 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
     setSelectedType(options[0]?.key || '');
   }, []);
 
+  useEffect(()=>{
+    updateSelectedRecord(selectedRecords) 
+  },[selectedRecords])
+
   useEffect(() => {
     fetchData();
-    fetchColumns();
+    fetchGridColumns();
   }, [selectedType]);
 
   const fetchData = (type = '') => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     if (type === '') {
       type = serviceTypes?.find((e) => e.key === selectedType)?.resource || serviceTypes[0]?.resource || '';
     }
-    setSelectedRecords([]);
-    setRowsData(null);
     axiosInstance()
       .get(`/technician-scheduler/un-assign-service?type=${type}`)
       .then(({ data: { data } }) => {
@@ -81,14 +85,15 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
           obj.estimateEndDate = ele?.service?.estimateEndDate;
           rows.push(obj);
         });
-        setRowsData(rows);
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
-  const fetchColumns = () => {
+  const fetchGridColumns = () => {
     setColumns(null);
     const columns = [
       {
@@ -276,19 +281,17 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
         />
       </Box>
 
-      {columns && rowsData ? (
+      {columns  ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={`${height}px`}
             columns={columns}
-            data={rowsData}
-            onSelect={setSelectedRecords}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchData}
             hideAction={true}
             renderedFrom={`service_order_technician`}
-            isClientSideGrid={false}
-            hideExpander={true}
+            isClientSideGrid={true}
           />
         </Box>
       ) : (

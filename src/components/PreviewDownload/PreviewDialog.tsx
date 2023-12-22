@@ -10,7 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ViewDialog } from './ViewDialog';
 import { PreviewFields } from './PreviewFields';
-
+import DownloadHistory from './DownloadHistory';
 
 export const PreviewDialog = ({
   type,
@@ -21,19 +21,20 @@ export const PreviewDialog = ({
   hideDetailButton,
   allColumn,
   resource,
+  referenceId,
   defaultColumns,
   columns,
   button1Title,
   button2Title,
   operation,
-  isExcelDownload
+  isExcelDownload,
+  isAsyncDownload
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [views, setViews] = useState([]);
   const [showSaveViewDialog, setShowSaveViewDialog] = useState({ open: false, data: null });
-
 
   const [selectedPdfView, setSelectedPdfView] = useState(null);
   const [visibleColumnsPdf, setVisibleColumnsPdf] = useState([]);
@@ -80,6 +81,8 @@ export const PreviewDialog = ({
       setVisibleColumnsExcel(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
     }
   };
+
+
 
   return (
     <>
@@ -139,6 +142,13 @@ export const PreviewDialog = ({
                 </Box>
               }
             </Grid>
+            {isAsyncDownload &&
+              <DownloadHistory
+                referenceId={referenceId}
+                resource={resource}
+                loadingType={loadingType}
+              />
+            }
           </Grid>
         </CustomDialogContent>
         <CustomDialogFooter>

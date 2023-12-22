@@ -6,20 +6,18 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import Add from '@material-ui/icons/Add';
 import { MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { isMobile } from 'react-device-detect';
-import { startCase } from 'lodash';
+import { isMobile, isTablet } from 'react-device-detect';
+import { camelCase, startCase } from 'lodash';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 import LeadTimeDialog from './LeadTimeDialog';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -28,14 +26,18 @@ import AddIcon from '@material-ui/icons/Add';
 import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
-const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
+
+const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
+
+  const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false, showSaveAndNext: false });
   const [recordToUpdate, setRecordToUpdate] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
@@ -44,12 +46,15 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
   const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -64,7 +69,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -75,8 +80,8 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        width: 100,
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -86,7 +91,8 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
         accessor: 'type',
         Header: 'Type',
         width: 100,
-        sticky: isMobile ? 'none' : 'left',
+        disableFilters: false,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{`${startCase(row.original?.type)} `}</p>
@@ -96,22 +102,21 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
       {
         accessor: 'detail',
         Header: 'Detail',
+        disableFilters: false,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         minWidth: 300,
         width: 300,
-        Cell: ({ row, rows }) => (
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {
-              <p
-                onClick={() => {
-                  handleOpen(row, rows);
-                }}
-                className="link text-truncate"
-                title={row.original?.detail}
-              >
-                {row.original?.detail}
-              </p>
-            }
-
+            {<p
+              onClick={() => {
+                handleOpen(row, table.getRowModel().rows);
+              }}
+              className="link text-truncate"
+              title={row.original?.detail}
+            >
+              {row.original?.detail}
+            </p>}
             {row?.original?.type !== MATERIAL_TYPE.service && (
               <Box ml={1} className="d-flex align-items-center">
                 {row.original?.subRows?.length > 0 && (
@@ -161,11 +166,11 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
           {
             accessor: 'leadTime',
             Header: 'Lead Time (Days)',
-            Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+            Cell: ({ row }) => <div>{(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)}</div>,
             Footer: (info) => {
-              const total = info.rows
-                .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-                .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
               return <>{total}</>;
             }
           }
@@ -182,53 +187,56 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) =>
-        !row.original.hideSelection && (
-          <>
-            <HtmlTooltip title={'Edit'} placement="top" enterTouchDelay={0} arrow>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  handleOpen(row, rows);
-                }}
-              >
-                <EditIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-            {permissions?.leadTimeMaster && (
-              <HtmlTooltip title={'Lead Time'} placement="top" enterTouchDelay={0} arrow>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setLeadTimeDialog({ open: true, data: row.original });
-                  }}
-                >
-                  <DateRangeIcon fontSize="small" color="primary" />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-            <HtmlTooltip title={'Delete'} placement="top" enterTouchDelay={0} arrow>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  getNestedSubRows(obj, row.original);
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            </HtmlTooltip>
-          </>
-        )
+      Cell: ({ row, table }) =>
+      (<>
+        <HtmlTooltip title={'Edit'} placement="top" enterTouchDelay={0} arrow>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            onClick={() => {
+              handleOpen(row, table.getRowModel().rows);
+            }}
+          >
+            <EditIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+        {permissions?.leadTimeMaster && (
+          <HtmlTooltip title={'Lead Time'} placement="top" enterTouchDelay={0} arrow>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                setLeadTimeDialog({ open: true, data: row.original });
+              }}
+            >
+              <DateRangeIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+        <HtmlTooltip title={'Delete'} placement="top" enterTouchDelay={0} arrow>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            onClick={() => {
+              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+              getNestedSubRows(obj, row.original);
+              setDeleteData(obj);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+      )
     });
     setColumns(coloum);
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${salesOrder.api}/material/${salesOrderData._id}`);
@@ -260,8 +268,10 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
     } else {
       setNextStep(true);
     }
-    setRowsData(rows);
-    setSelectedProducts([]);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
+
   };
 
   const generateNestedData = (material, parent) => {
@@ -359,21 +369,6 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.description;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.subRows;
-      delete element.leadTime;
-      delete element.leadTimeData;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${salesOrder.api}/material/${salesOrderData._id}`, { material: rows })
@@ -385,12 +380,12 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          setRecordToUpdate(rowsData[rowIndex + 1]);
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          setRecordToUpdate(dataRows[rowIndex + 1]);
           setIsProductEdit({
             open: true,
             isBulkedit: false,
-            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
           });
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
@@ -514,13 +509,13 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
           </Menu>
         </Box>
         <Box display="flex">
-          <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+          <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
             <span>
               <Button
                 variant="outlined"
                 color="primary"
                 size="small"
-                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
                 onClick={openActions}
                 endIcon={<KeyboardArrowDown fontSize="small" />}
                 className="new-dropdown-v1"
@@ -552,8 +547,8 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
             <MenuItem
               onClick={() => {
                 const dataToDelete =
-                  selectedProducts &&
-                  selectedProducts
+                  selectedRecords &&
+                  selectedRecords
                     .filter((e) => !e.hideSelection)
                     .map((rec: any) => {
                       const obj: any = {};
@@ -571,17 +566,17 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
           </Menu>
         </Box>
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <>
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={rowsData}
-              onSelect={setSelectedProducts}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom="sales_order_product_package"
+              state={state}
+              dispatch={dispatch}
+              expander={true}
+              refreshGrid={fetchData}
+              renderedFrom={renderedFrom}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
               isClientSideGrid={true}
             />
@@ -612,7 +607,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
           handleSaveData={handleSaveData}
           rowData={recordToUpdate}
           material={material}
-          selectedProducts={selectedProducts}
+          selectedProducts={selectedRecords}
           salesOrderData={salesOrderData}
           loadingEdit={isUpdating}
           showSaveAndNext={isProductEdit?.showSaveAndNext}
@@ -684,6 +679,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
           }}
           isSubmitting={isSubmitting}
           extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
+          serialized={false}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.service && (

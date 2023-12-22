@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, IconButton, MenuItem, Menu } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -10,25 +10,25 @@ import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { prepareDataForGrid } from 'src/constants/helpers';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_po_cost_fields, fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
 import InventoryStatesDialog from './InventoryStatesDialog';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CostDialog from './CostDialog';
 import ServiceDialog from './ServiceDialog';
 import AddIcon from '@material-ui/icons/Add';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { isEmpty, map, startCase, uniq } from 'lodash';
+import { isEmpty, map, uniq } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { fetchTaxRate } from './helper';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -41,36 +41,27 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   const [addProductDialog, setAddProductDialog] = useState(false);
   const [isAddingProducts, setAddingProducts] = useState(false);
   const [addServiceDialog, setAddServiceDialog] = useState(false);
-
   const [showInventoryStatesDialog, setShowInventoryStatesDialog] = useState({ open: false, product: null, qty: 0 });
-
   const [showProductDialog, setShowProductDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [showServiceDialog, setShowServiceDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
-
   const [loadingEdit, setLoadingEdit] = useState(false);
-
   const [isBulkEdit, setIsBulkEdit] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([]);
-
   const [anchorEl, setAnchorEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
-
   const [isRateRequired, setIsRateRequired] = useState(false);
-
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
-
   const [productFields, setProductFields] = useState([]);
   const [serviceFields, setServiceFields] = useState([]);
   const [costFields, setCostFields] = useState([]);
-
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deletePurchaseOrderItem, setDeletePurchaseOrderItem] = useState([]);
-
   const [material, setMaterial] = useState([]);
-
   const [isSubmitting, setSubmitting] = useState(false);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -89,8 +80,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     columns.push({
       accessor: 'index',
       Header: 'Index',
-      width: 50,
+      width: 70,
       primaryField: true,
+      sticky: 'left',
       Cell: ({ row }) => {
         return row.original['index'] ? <p className="text-truncate">{row.original.index}</p> : <NoDataCell />;
       },
@@ -101,8 +93,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     columns.push({
       accessor: 'type',
       Header: 'Type',
-      width: 100,
-      primaryField: true,
+      disabled: true,
+      sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => {
         return row.original['type'] ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
       }
@@ -112,15 +104,16 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       Header: 'Detail',
       minWidth: 300,
       width: 300,
-      primaryField: true,
-      Cell: ({ row, rows }) => (
+      disabled: true,
+      sticky: isMobile || isTablet ? 'none' : 'left',
+      Cell: ({ row, table }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {!allowedToEdit ? (
             <p className="text-truncate"> {row.original.detail}</p>
           ) : (
             <p
               onClick={() => {
-                openMaterial(row.original, rows);
+                openMaterial(row.original, table.getRowModel().rows);
               }}
               className="link text-truncate"
               title={row.original.detail}
@@ -206,7 +199,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     });
 
     setProductFields(JSON.parse(JSON.stringify(p_fields)));
-    const newColumns = generateCustomTableColumns(p_fields, purchaseOrderData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, p_fields, null, false, purchaseOrderData?.currency);
     columns = [...columns, ...newColumns];
     columns.push({
       accessor: 'action',
@@ -216,7 +209,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) => {
+      Cell: ({ row, table }) => {
         return allowedToEdit ? (
           <>
             <HtmlTooltip title="Edit">
@@ -225,7 +218,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 size="small"
                 aria-label="Edit"
                 onClick={() => {
-                  openMaterial(row.original, rows);
+                  openMaterial(row.original, table.getRowModel().rows);
                 }}
               >
                 <EditIcon color="primary" />
@@ -287,6 +280,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
 
     const productResponce: any = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`);
@@ -314,7 +310,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     setMaterial(JSON.parse(JSON.stringify(data)));
     let rows = data?.map((item, index) => {
       let finalObject = prepareDataForGrid(item);
-      finalObject['isChecked'] = selectedProducts.some((s) => s._id === item._id);
+      finalObject['isChecked'] = selectedRecords?.some((s) => s._id === item._id);
       finalObject['allowedToEdit'] = allowedToEdit;
       let res: any = {
         ...finalObject
@@ -364,7 +360,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       setNextStep(true);
     }
     checkReceivedProduct(data);
-    setRowsData(rows);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const openActions = (event) => {
@@ -423,16 +420,16 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         setAddingProducts(false);
         setIsBulkEdit(false);
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          if (rowIndex < rowsData?.length - 1) {
-            if (rowsData[rowIndex + 1]?.type === 'Product') {
-              setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-            } else if (rowsData[rowIndex + 1]?.type === 'Service') {
+          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
+          if (rowIndex < dataRows?.length - 1) {
+            if (dataRows[rowIndex + 1]?.type === 'Product') {
+              setShowProductDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            } else if (dataRows[rowIndex + 1]?.type === 'Service') {
               setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-            } else if (rowsData[rowIndex + 1]?.type === 'Manual Entry') {
+              setShowServiceDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            } else if (dataRows[rowIndex + 1]?.type === 'Manual Entry') {
               setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+              setShowCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
             } else {
               setShowProductDialog({ open: false, data: null, showSaveAndNext: false });
             }
@@ -491,16 +488,16 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       .then(() => {
         fetchData();
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          if (rowIndex < rowsData?.length - 1) {
-            if (rowsData[rowIndex + 1]?.type === 'Product') {
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          if (rowIndex < dataRows?.length - 1) {
+            if (dataRows[rowIndex + 1]?.type === 'Product') {
               setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-            } else if (rowsData[rowIndex + 1]?.type === 'Service') {
+              setShowProductDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            } else if (dataRows[rowIndex + 1]?.type === 'Service') {
               setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-            } else if (rowsData[rowIndex + 1]?.type === 'Manual Entry') {
-              setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+              setShowServiceDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            } else if (dataRows[rowIndex + 1]?.type === 'Manual Entry') {
+              setShowCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
             } else {
               setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
             }
@@ -550,16 +547,16 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       .then(() => {
         fetchData();
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          if (rowIndex < rowsData?.length - 1) {
-            if (rowsData[rowIndex + 1]?.type === 'Product') {
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          if (rowIndex < dataRows?.length - 1) {
+            if (dataRows[rowIndex + 1]?.type === 'Product') {
               setShowServiceDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowProductDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-            } else if (rowsData[rowIndex + 1]?.type === 'Service') {
-              setShowServiceDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-            } else if (rowsData[rowIndex + 1]?.type === 'Manual Entry') {
+              setShowProductDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            } else if (dataRows[rowIndex + 1]?.type === 'Service') {
+              setShowServiceDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            } else if (dataRows[rowIndex + 1]?.type === 'Manual Entry') {
               setShowServiceDialog({ open: false, data: null, showSaveAndNext: false });
-              setShowCostDialog({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+              setShowCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
             } else {
               setShowServiceDialog({ open: false, data: null, showSaveAndNext: false });
             }
@@ -589,18 +586,18 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         }
       }
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsFieldNew(material, inputField, productFields, updatedData);
-      rows?.forEach(element => {
-        element.productId = updatedData?.productId
+      rows = await calculateRowsField(material, inputField, productFields, updatedData);
+      rows?.forEach((element) => {
+        element.productId = updatedData?.productId;
       });
       handleUpdateQty(rows);
     } else if (rowData?.type === 'Service') {
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsFieldNew(material, inputField, serviceFields, updatedData);
+      rows = await calculateRowsField(material, inputField, serviceFields, updatedData);
       handleUpdateService(rows);
     } else if (rowData?.type === 'Manual Entry') {
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsFieldNew(material, inputField, costFields, updatedData);
+      rows = await calculateRowsField(material, inputField, costFields, updatedData);
       handleUpdateCost(rows);
     }
   };
@@ -685,7 +682,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 color="default"
                 size="small"
                 onClick={openActions}
-                disabled={selectedProducts?.filter((e) => !e.hideSelection)?.length ? false : true}
+                disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length ? false : true}
                 aria-controls="action-menu"
                 className="new-dropdown-v1"
               >
@@ -707,10 +704,10 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             >
               <MenuItem
                 disabled={
-                  selectedProducts?.filter((e) => !e.hideSelection).length > 0 &&
+                  selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
                   uniq(
                     map(
-                      selectedProducts?.filter((e) => !e.hideSelection),
+                      selectedRecords?.filter((e) => !e.hideSelection),
                       'type'
                     )
                   )?.length === 1
@@ -722,7 +719,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   setIsBulkEdit(true);
                   const typeUniq: any = uniq(
                     map(
-                      selectedProducts?.filter((e) => !e.hideSelection),
+                      selectedRecords?.filter((e) => !e.hideSelection),
                       'type'
                     )
                   );
@@ -742,7 +739,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   onClick={() => {
                     closeActions();
                     setShowDeleteConfirmBox(true);
-                    setDeletePurchaseOrderItem(selectedProducts?.filter((e) => !e.hideSelection));
+                    setDeletePurchaseOrderItem(selectedRecords?.filter((e) => !e.hideSelection));
                   }}
                 >
                   Delete
@@ -752,22 +749,20 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           </div>
         </Box>
       )}
-      {columns && rowsData ? (
-        <Box zIndex={5} mt={2} width={'100%'} height={'calc(100vh - 393px)'}>
+      {columns  ? (
+        <Box zIndex={5} >
           <CustomReactTable
             height={'calc(100vh - 393px)'}
             columns={columns}
-            data={rowsData}
+            state={state}
+            dispatch={dispatch}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={setSelectedProducts}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            refreshGrid={fetchData}
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
-            renderedFrom="purchase_order_product"
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
-            hideExpander={true}
           />
         </Box>
       ) : (
@@ -810,7 +805,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             setIsBulkEdit(false);
           }}
           onSubmit={handleUpdateQty}
-          productData={!isBulkEdit ? showProductDialog.data : selectedProducts?.filter((e) => !e.hideSelection)}
+          productData={!isBulkEdit ? showProductDialog.data : selectedRecords?.filter((e) => !e.hideSelection)}
           bulkEdit={isBulkEdit}
           purchaseOrderData={purchaseOrderData}
           showSaveAndNext={showProductDialog.showSaveAndNext}
@@ -825,7 +820,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           }}
           handleUpdateService={handleUpdateService}
           purchaseOrderData={purchaseOrderData}
-          serviceData={!isBulkEdit ? showServiceDialog.data : selectedProducts?.filter((e) => !e.hideSelection)}
+          serviceData={!isBulkEdit ? showServiceDialog.data : selectedRecords?.filter((e) => !e.hideSelection)}
           bulkEdit={isBulkEdit}
           showSaveAndNext={showServiceDialog.showSaveAndNext}
           loadingEdit={loadingEdit}
@@ -840,7 +835,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           handleAddCost={handleAddCost}
           handleUpdateCost={handleUpdateCost}
           purchaseOrderData={purchaseOrderData}
-          costData={!isBulkEdit ? showCostDialog.data : selectedProducts?.filter((e) => !e.hideSelection)}
+          costData={!isBulkEdit ? showCostDialog.data : selectedRecords?.filter((e) => !e.hideSelection)}
           bulkEdit={isBulkEdit}
           showSaveAndNext={showCostDialog.showSaveAndNext}
           loadingEdit={loadingEdit}

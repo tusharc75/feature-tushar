@@ -1,45 +1,38 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import styles from 'src/pages/Leads/Header.module.scss';
-import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
+import routes from '../Helpers/Routes';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-const AssignDynamicDialog = ({ reference, onSuccess, handleClose, ids, extraStaticFilter = [], resource, path }) => {
-  const renderedFrom = `${resource}_${reference}_selected`;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, ids = [], extraDeepFilter = [], extraFilterById = [] }) => {
+  const renderedFrom = camelCase(`${routes[resource]?.title || resource}`);
+
   const {
-    state: { permissions, selectedEntity }
+    state: { selectedEntity }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
-  const [isAssigning, setIsAssigning] = useState(false);
-  const [disableSaveButton, setDisableSaveButton] = useState(false);
 
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
-  const [columns, setColumns] = useState([]);
-  const { getColumnData } = useColumns();
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { generateColumns } = useColumns();
+
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
-    localStorage.removeItem(localStorageSelectedRecords);
     fetchGridColumns();
   }, []);
-
-  useEffect(() => {
-    setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)].some((d) => d.qty === 0));
-  }, [selectedRecords]);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -55,50 +48,64 @@ const AssignDynamicDialog = ({ reference, onSuccess, handleClose, ids, extraStat
     axiosInstance()
       .get(`/field?resource=${resource}&view=true`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${path}/detail`);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns(columns);
+        let newColumns = generateColumns(renderedFrom, data, `${routes[`${camelCase(resource)}Detail`]?.path}`, false);
+        setColumns([...newColumns, ...getStaticFields()]);
       });
   };
 
   const fetchData = () => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
+    if (ids?.length > 25) {
+      fetchDataPost();
+    } else {
+      fetchDataGet();
     }
+  };
+
+  const fetchDataGet = () => {
+    dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${path}${queryString}`)
-      .then(({ data }) => {
-        let rows = data.data.map((u) => {
+      .get(`dynamic-form/${queryString}`, {
+        headers: {
+          Resource: resource
+        }
+      })
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = false;
-          finalObject['id'] = u._id;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           return {
             ...finalObject
           };
         });
-        const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-        dispatch({
-          type: 'selection',
-          selectedRecords: savedRecords
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const fetchDataPost = () => {
+    dispatch({ type: 'loading', loading: true });
+    const postData = getPostData();
+    axiosInstance()
+      .post(`dynamic-form/findAll`, postData, {
+        headers: {
+          Resource: resource
+        }
+      })
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          return {
+            ...finalObject
+          };
         });
-        dispatch({ type: 'initialize', data: rows, count: data.count });
+        dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -109,118 +116,147 @@ const AssignDynamicDialog = ({ reference, onSuccess, handleClose, ids, extraStat
   };
 
   const getQueryString = () => {
-    const ignoreIds = ids && ids?.length > 0 ? ids : [];
-    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (ids?.length > 0) {
+      deepFilter = `${deepFilter}&ignoreIds=${JSON.stringify(ids)}`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
-    if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
-    }
 
-    const updatedFilters = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (extraStaticFilter?.length) {
-      extraStaticFilter?.forEach((e) => {
-        updatedFilters.push(e);
+    if (extraDeepFilter?.length > 0) {
+      extraDeepFilter?.map((e) => {
+        deepFilters.push(e);
       });
     }
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
+
+    if (extraFilterById?.length > 0) {
+      extraFilterById?.map((e) => {
+        filterByIds.push(e);
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=or`;
-    } else {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=or`;
     }
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
+
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+    if (showFilteredRecordsOnly) {
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
 
-  const handleSubmit = () => {
-    onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+  const getPostData = () => {
+    const data: any = {};
+    data.page = page;
+    data.limit = limit;
+    if (ids?.length) {
+      data.ignoreIds = ids;
+    }
+    if (selectedEntity) {
+      data.selectedEntity = selectedEntity;
+    }
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    if (extraDeepFilter?.length > 0) {
+      extraDeepFilter?.map((e) => {
+        deepFilters.push(e);
+      });
+    }
+    if (extraFilterById?.length > 0) {
+      extraFilterById?.map((e) => {
+        filterByIds.push(e);
+      });
+    }
+    if (filterByIds) {
+      data.filterById = filterByIds;
+    }
+    if (deepFilters) {
+      data.deepFilter = deepFilters;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      data.filterType = 'and';
+    }
+    if (sorting.length > 0) {
+      data.sortBy = sorting[0].colId;
+      data.orderBy = sorting[0].sort;
+    }
+    if (search) {
+      data.search = search;
+    }
+    if (showFilteredRecordsOnly) {
+      data.getById = selectedRecords?.map((m) => m._id);
+    }
+    return data;
   };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const onCellValueChanged = (row) => {
-    if (!row || !row?.data) return;
-    const { data } = row;
-    const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)];
-    if (!selectedFromStorage || selectedFromStorage.length === 0) return;
-    const updatedRecords = selectedFromStorage.map((d) => {
-      if (data._id === d._id) {
-        d.qty = data.qty;
-      }
-      return d;
-    });
-    localStorage.setItem(localStorageSelectedRecords, JSON.stringify(updatedRecords));
-    setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((d) => d.qty === 0));
-  };
-
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
-      <CustomDialogHeader title={`Assign ${resource}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
+      <CustomDialogHeader
+        title={`Assign ${routes[camelCase(resource)]?.title || resource}`}
+        showManimizeMaximize={false}
+        showRequiredLabel={false}
+        onClose={handleClose}
+      />
       <CustomDialogContent>
-        <>
-          <div className="header-panel">
-            <Grid container className={styles.filter_side_container}>
-              <Grid item xs={12} className={styles.filter_side}>
-                <Box className={styles.filter_side_header} component="div">
-                  <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
-                  <Button
-                    disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                    onClick={handleSubmit}
-                    color="primary"
-                    size="small"
-                    variant="contained"
-                    endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
-                  >
-                    Add{' '}
-                    {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
-                      ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
-                      : ''}
-                  </Button>
-                </Box>
-              </Grid>
+        <div className="header-panel">
+          <Grid container className={styles.filter_side_container}>
+            <Grid item xs={12} className={styles.filter_side}>
+              <Box className={styles.filter_side_header} component="div">
+                <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
+                <Button
+                  disabled={isSubmitting || selectedRecords?.length === 0}
+                  onClick={() => {
+                    onSuccess(selectedRecords);
+                  }}
+                  color="primary"
+                  size="small"
+                  variant="contained"
+                  endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
+                >
+                  {`Add ${selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}`}
+                </Button>
+              </Box>
             </Grid>
-          </div>
-          {frameWorkComponent && Object?.keys(frameWorkComponent)?.length > 0 ? (
-            <CustomAgGridEditable
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={false}
-              loading={loading}
-              allowSelection={true}
-              onCellValueChanged={onCellValueChanged}
-              showOnlyShowFilteredRecordSwitch={true}
-              refreshGrid={fetchData}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </>
+          </Grid>
+        </div>
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 250px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={resource}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomDialogContent>
     </Dialog>
   );

@@ -1,39 +1,53 @@
-import { IconButton, Tooltip } from '@material-ui/core';
-import { Delete as DeleteIcon } from '@material-ui/icons';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, Delete as DeleteIcon, ExpandMore } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
-import { FC, useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CiUser, IoCreateSharp, MdDescription } from 'react-icons/all';
-import { Link, useHistory } from 'react-router-dom';
+import { FC, useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/AssignRegionalRolesUserDialog';
 import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialog';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { PERMISSION } from '../../constants/Roles';
-import { ROLE_TIER, gridLoadingTimeout, isObjectEmpty, localStorageKeys, prepareDataForGrid, roleTypes, sidebarResource } from '../../constants/helpers';
+import {
+  ROLE_TIER,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  localStorageKeys,
+  prepareDataForGrid,
+  roleTypes,
+  sidebarResource
+} from '../../constants/helpers';
+import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CreateRole from './CreateRole';
-import RoleHeader from './RoleHeader';
 import AssignUnassignResourceDialog from './AssignUnassignResource';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
-let roleTimeout;
+let searchTimeout;
 
 const Roles: FC = () => {
+  const renderedFrom = camelCase(routes.role.title);
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
+
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, search, filters, sorting, selectedRecords } = state;
+
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
+
   const [selectedType, setSelectedType] = useState(
     localStorage.getItem(localStorageKeys.currentSelectedRoleType)
       ? roleTypes.find((d) => d.key === localStorage.getItem(localStorageKeys.currentSelectedRoleType)).value
@@ -47,38 +61,126 @@ const Roles: FC = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
   const [showUpdateResourceDialog, setShowUpdateResourceDialog] = useState({ open: false, action: null });
-  const renderedFrom = camelCase(routes.role.title);
-  //  Grid Variables - Start
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const columns = [
-    { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
-    { field: 'description', headerName: 'Description', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'tier', headerName: 'Tier', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
-  ];
+    {
+      accessor: 'name',
+      Header: 'Name',
+      minWidth: 150,
+      width: 150,
+      primaryField: true,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.name ? (
+            <Link title={row?.original?.name} className="text-truncate link" to={`${routes.roleDetail.path}/${row?.original?.id}`}>
+              {row?.original?.name}
+            </Link>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'description',
+      Header: 'Description',
+      minWidth: 150,
+      width: 150,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.description ? (
+            <h5 className="text-truncate" title={row?.original?.description}>
+              {row?.original?.description}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'tier',
+      Header: 'Tier',
+      minWidth: 150,
+      width: 150,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.tier ? (
+            <h5 className="text-truncate" title={row?.original?.tier}>
+              {row?.original?.tier}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    ...getStaticFields(),
+    {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 110,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          <HtmlTooltip title={permissions?.role.isCreate ? 'Clone' : cloneDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                disabled={!permissions?.role.isCreate}
+                onClick={() => {
+                  setIsOpen({ open: true, isClone: true, idToClone: row?.original?._id });
+                }}
+              >
+                <FileCopyIcon fontSize="small" color={permissions?.role.isCreate ? 'primary' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
 
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-  //  Grid Variables - End
+          <HtmlTooltip
+            title={
+              permissions?.role.isDelete
+                ? rolePermissionArray.indexOf(row?.original?.permission) >= 0
+                  ? row?.original?.type === 'Global Role'
+                    ? 'Global brand admin role can not be deleted'
+                    : 'Regional brand admin role can not be deleted'
+                  : 'Delete'
+                : deleteDisable
+            }
+          >
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={!(permissions?.role.isDelete && rolePermissionArray.indexOf(row?.original?.permission) < 0)}
+                onClick={() => {
+                  showConfirmBox(row?.original);
+                }}
+              >
+                <DeleteIcon
+                  fontSize="small"
+                  color={permissions?.role.isDelete && rolePermissionArray.indexOf(row?.original?.permission) < 0 ? 'error' : 'disabled'}
+                />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </>
+      )
+    }
+  ];
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (roleTimeout) {
-      clearTimeout(roleTimeout);
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
-    roleTimeout = setTimeout(() => {
+    searchTimeout = setTimeout(() => {
       fetchRoles();
     }, millisec);
   }, [search]);
@@ -88,65 +190,6 @@ const Roles: FC = () => {
       fetchRoles();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting]);
-
-  const NameRenderer = (params) => (
-    <Link title={params.value} className="text-truncate link" to={`${routes.roleDetail.path}/${params.data.id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const ActionsRenderer = (params) => (
-    <>
-      <Tooltip
-        className={permissions?.role.isCreate ? '' : 'cursor-stop'}
-        title={permissions?.role.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
-      >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setIsOpen({ open: true, isClone: true, idToClone: params.data._id });
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-      {permissions?.role.isDelete ? (
-        <span title="Delete Role">
-          {rolePermissionArray.indexOf(params.data.permission) >= 0 ? (
-            <Tooltip
-              className="cursor-stop"
-              title={
-                params.data.type === 'Global Role' ? 'Global brand admin role can not be deleted' : 'Regional brand admin role can not be deleted'
-              }
-            >
-              <IconButton size="small" aria-label="Delete">
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
-              <DeleteIcon color="error" />
-            </IconButton>
-          )}
-        </span>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to delete role">
-          <IconButton aria-label="Delete">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </>
-  );
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    commonRenderer: CommonRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer
-  };
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&type=2`;
@@ -175,33 +218,33 @@ const Roles: FC = () => {
   };
 
   const fetchRoles = async () => {
-    const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    axiosInstance().get(`/role/${queryString}`).then(({ data: { data, count } }) => {
-      let rows = data.map((u) => {
-        let finalObject = prepareDataForGrid(u);
-        finalObject['canDelete'] = permissions?.role.isDelete;
-        finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-        finalObject['allowedToEdit'] = permissions?.role.isUpdate;
-        finalObject['tier'] = u?.tier ? u?.tier : ROLE_TIER.tier1;
-        return {
-          ...finalObject,
-          type: `${u.type === roleTypes.find((d) => d.key === 'Global')?.value ? 'Global' : 'Regional'} Role`
-        };
+    const queryString = getQueryString();
+
+    axiosInstance()
+      .get(`/role/${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          finalObject['canDelete'] = permissions?.role.isDelete;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = permissions?.role.isUpdate;
+          finalObject['tier'] = u?.tier ? u?.tier : ROLE_TIER.tier1;
+          return {
+            ...finalObject,
+            type: `${u.type === roleTypes.find((d) => d.key === 'Global')?.value ? 'Global' : 'Regional'} Role`
+          };
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
-      dispatch({ type: 'initialize', data: rows, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        dispatch({ type: 'loading', loading: false });
-      });
-    // eslint-disable-next-line
   };
 
   const showConfirmBox = (row) => {
@@ -234,6 +277,7 @@ const Roles: FC = () => {
       axiosInstance()
         .put(`/role/remove`, { ids: [...records] })
         .then(({ data }) => {
+          dispatch({ type: 'selection', selectedRecords: [] });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -256,16 +300,8 @@ const Roles: FC = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleCreate = () => {
-    setIsOpen({ open: true, isClone: false, idToClone: null });
-  };
-
   const handleClose = () => {
     setIsOpen({ open: false, isClone: false, idToClone: null });
-  };
-  const handleRoleTypeSelect = (filteredValue) => {
-    dispatch({ type: 'setPage', page: 0 });
-    setSelectedType(filteredValue);
   };
 
   const userDialogOpen = () => {
@@ -278,8 +314,16 @@ const Roles: FC = () => {
 
   const updateResourceOpen = (props: any) => {
     setShowUpdateResourceDialog({ open: true, action: props.action });
-  }
-  
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   const disableDelete = selectedRecords.some((o) => rolePermissionArray.indexOf(o?.permission) >= 0);
 
   return (
@@ -319,8 +363,8 @@ const Roles: FC = () => {
             }}
           />
         ))}
-      {showUpdateResourceDialog &&
-        (<AssignUnassignResourceDialog
+      {showUpdateResourceDialog && (
+        <AssignUnassignResourceDialog
           showUpdateResourceDialog={showUpdateResourceDialog}
           handleCloseDialog={() => {
             setShowUpdateResourceDialog({ open: false, action: null });
@@ -328,106 +372,132 @@ const Roles: FC = () => {
           roleIds={selectedRecords.map((d) => d._id)}
           onSuccess={() => {
             setShowUpdateResourceDialog({ open: false, action: null });
-            fetchRoles()
+            fetchRoles();
           }}
           selectedEntity={selectedEntity || ''}
           setToastConfig={toastConfig.setToastConfig}
           roleType={2}
         />
-        )}
+      )}
       <section className="main-container-v1">
         <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[routes.role]} />
         </div>
         <CustomContainer>
           <div className="header-panel">
-            <RoleHeader
-              selectedType={selectedType}
-              onTypeChange={handleRoleTypeSelect}
-              options={roleTypes}
-              onSearch={handleSearch}
-              search={search}
-              rolePermissions={permissions.role}
-              onCreate={handleCreate}
-              showConfirmBox={showConfirmBox}
-              canDelete={!disableDelete}
-              selectedRecords={selectedRecords}
-              userDialogOpen={userDialogOpen}
-              dispatch={dispatch}
-              columns={columns}
-              filters={filters}
-              resource={sidebarResource.role}
-              updateResourceOpen={updateResourceOpen}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
+              <div className="flex flex-wrap gap-[8px] justify-end">
+                <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+                <div className="flex gap-[8px] flex-wrap items-center">
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    className={`no-shadow`}
+                    disabled={!(permissions?.role?.isCreate && (selectedType === 1 || (selectedType === 2 && selectedEntity)))}
+                    onClick={() => {
+                      setIsOpen({ open: true, isClone: false, idToClone: null });
+                    }}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    className={`new-dropdown-v1`}
+                    aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
+                    disabled={selectedRecords?.length === 0}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={!(permissions.role.isDelete && Boolean(!disableDelete))}
+                      onClick={() => {
+                        closeActions();
+                        showConfirmBox(null);
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                    <MenuItem
+                      disabled={!permissions?.role?.isUpdate}
+                      onClick={() => {
+                        closeActions();
+                        userDialogOpen();
+                      }}
+                    >
+                      Assign users
+                    </MenuItem>
+                    <MenuItem
+                      disabled={
+                        permissions?.role?.isUpdate &&
+                        permissions?.role?.isDelete &&
+                        selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+                          ? true
+                          : false
+                      }
+                      onClick={() => {
+                        closeActions();
+                        updateResourceOpen({ action: 'Assign' });
+                      }}
+                    >
+                      Assign Resource
+                    </MenuItem>
+                    <MenuItem
+                      disabled={
+                        permissions?.role?.isUpdate &&
+                        permissions?.role?.isDelete &&
+                        selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+                          ? true
+                          : false
+                      }
+                      onClick={() => {
+                        closeActions();
+                        updateResourceOpen({ action: 'Remove' });
+                      }}
+                    >
+                      Remove Resource
+                    </MenuItem>
+                  </Menu>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {isMobile && !isTablet ? (
-            <CustomSwipableList
-              key={selectedType}
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions.role}
-              primaryField={columns?.find((d) => d.field === 'name')}
-              onClick={(d) => {
-                history.push(`${routes.roleDetail.path}/${d._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(d) => {
-                history.push(`${routes.roleDetail.path}/${d._id}`);
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(d) => { }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[
-                {
-                  icon: <CiUser size={18} />,
-                  field: 'type'
-                }
-              ]}
-              chips={[
-                {
-                  icon: <MdDescription />,
-                  label: 'Description: ',
-                  field: 'description'
-                },
-                {
-                  icon: <IoCreateSharp />,
-                  label: 'Created By: ',
-                  field: 'createdBy'
-                }
-              ]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={false}
-              onClone={() => { }}
-              renderedFrom={'role'}
-            />
-          ) : (
-            <CustomAgGrid
+          {columns ? (
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
               columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
+              state={state}
               dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              isClientSideGrid={true}
-              refreshGrid={fetchRoles}
               renderedFrom={renderedFrom}
-              showOnlyShowFilteredRecordSwitch={false}
-              showFilters={false}
+              refreshGrid={fetchRoles}
               resource={sidebarResource.role}
             />
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
           )}
         </CustomContainer>
+
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -435,6 +505,7 @@ const Roles: FC = () => {
             onClose={() => setShowDeleteWarningConfirmBox(false)}
           />
         ) : null}
+
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}

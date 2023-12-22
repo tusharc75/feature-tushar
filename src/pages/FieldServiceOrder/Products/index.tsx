@@ -8,18 +8,17 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { fieldServiceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import { startCase } from 'lodash';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import AddOnDialog from './AddOnDialog';
 import AddIcon from '@material-ui/icons/Add';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
@@ -30,23 +29,19 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     state: { user, permissions }
   }: any = useData();
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
-
   const [addProductDialog, setAddProductDialog] = useState({ open: false, parentId: null });
-  const [isAddingProducts, setAddingProducts] = useState(false);
-
   const [showAddOnDialog, setShowAddOnDialog] = useState({ open: false, data: null, showSaveAndNext: false, parentId: null });
-
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [assignAssetDialog, setAssignAssetDialog] = useState({ open: false, products: [] });
   const [isAssetAdding, setIsAssetAdding] = useState(false);
-
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -61,7 +56,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     allFields?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, allFields, null, false, serviceOrderData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -71,7 +66,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -81,7 +76,8 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
@@ -90,7 +86,8 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         Header: ' Details',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {row.original.type === 'Manual Entry' ? (
@@ -138,8 +135,8 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -153,7 +150,12 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   size="small"
                   aria-label="Details"
                   onClick={() => {
-                    setAssignAssetDialog({ open: true, products: [{ _id: row.original?._id, product: row.original?.materialId, qty: row.original?.qty, productName: row.original?.detail }] });
+                    setAssignAssetDialog({
+                      open: true,
+                      products: [
+                        { _id: row.original?._id, product: row.original?.materialId, qty: row.original?.qty, productName: row.original?.detail }
+                      ]
+                    });
                   }}
                 >
                   <AddIcon fontSize="small" color={'primary'} />
@@ -184,10 +186,11 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
 
     var data: any = [];
-
     const materialResponse = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`);
     const materialData = materialResponse?.data?.data?.material;
 
@@ -228,8 +231,8 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       setNextStep(true);
     }
 
-    setRowsData(rows);
-    setSelectedProducts([]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -259,7 +262,6 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   };
 
   const handleAdd = (rows) => {
-    setAddingProducts(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -273,12 +275,10 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     axiosInstance()
       .post(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`, { material: material })
       .then(({ data }) => {
-        setAddingProducts(false);
         setAddProductDialog({ open: false, parentId: null });
         fetchData();
       })
       .catch((error) => {
-        setAddingProducts(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -314,7 +314,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    const dataToDelete = selectedProducts.filter((e) => e.type === 'product' || e.type === 'Manual Entry');
+    const dataToDelete = selectedRecords?.filter((e) => e.type === 'product' || e.type === 'Manual Entry');
     dataToDelete?.forEach((ele) => {
       obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     });
@@ -324,9 +324,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     setDeleteData(obj);
   };
 
-  const handleAssignAssets = (data) => {
-
-  };
+  const handleAssignAssets = (data) => { };
 
   return (
     <Fragment>
@@ -341,7 +339,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   color="primary"
                   size="small"
                   onClick={handleClick}
-                  disabled={selectedProducts.length ? false : true}
+                  disabled={selectedRecords?.length ? false : true}
                   endIcon={<BiChevronDown />}
                   className="new-dropdown-v1"
                 >
@@ -358,22 +356,22 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   onClose={handleClose}
                 >
                   <MenuItem
-                    disabled={selectedProducts?.filter((e) => e.type === 'service')?.length === 1 ? false : true}
+                    disabled={selectedRecords?.filter((e) => e.type === 'service')?.length === 1 ? false : true}
                     onClick={() => {
-                      setAddProductDialog({ open: true, parentId: selectedProducts?.filter((e) => e.type === 'service')[0]?._id });
+                      setAddProductDialog({ open: true, parentId: selectedRecords?.filter((e) => e.type === 'service')[0]?._id });
                       handleClose();
                     }}
                   >
                     Add Products
                   </MenuItem>
                   <MenuItem
-                    disabled={selectedProducts?.filter((e) => e.type === 'service')?.length === 1 ? false : true}
+                    disabled={selectedRecords?.filter((e) => e.type === 'service')?.length === 1 ? false : true}
                     onClick={() => {
                       setShowAddOnDialog({
                         open: true,
                         data: null,
                         showSaveAndNext: false,
-                        parentId: selectedProducts?.filter((e) => e.type === 'service')[0]?._id
+                        parentId: selectedRecords?.filter((e) => e.type === 'service')[0]?._id
                       });
                       handleClose();
                     }}
@@ -381,7 +379,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                     Add Manual Entry
                   </MenuItem>
                   <MenuItem
-                    disabled={selectedProducts?.filter((e) => e.type === 'product')?.length > 0 ? false : true}
+                    disabled={selectedRecords?.filter((e) => e.type === 'product')?.length > 0 ? false : true}
                     onClick={() => {
                       handleDeleteMultiple();
                       handleClose();
@@ -395,19 +393,19 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
           </Grid>
         )}
         <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+          {columns ? (
+            <Box zIndex={5}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
-                data={rowsData}
-                onSelect={setSelectedProducts}
-                childrenProperty="subRows"
-                uniqueKey="_id"
+                state={state}
+                dispatch={dispatch}
+                refreshGrid={fetchData}
                 hideSelection={!allowedToEdit}
                 hideAction={!allowedToEdit}
                 renderedFrom={renderedFrom}
                 isClientSideGrid={true}
+                expander={true}
               />
             </Box>
           ) : (

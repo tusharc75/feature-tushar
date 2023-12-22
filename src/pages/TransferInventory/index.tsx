@@ -1,4 +1,4 @@
-import { Box, Tooltip } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
@@ -7,31 +7,27 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import React, { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CiUser, GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
+import { useContext, useEffect, useReducer, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
-import MobileSortDialog from 'src/components/MobileSortDialog';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { TRANSFER_INVENTORY_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferInventory } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferInventory } from 'src/constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import ManageTransferInventory from './ManageTransferInventory';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 const TransferInventory = () => {
-  const TransferInventoryType = [
+
+  const types = [
     {
       key: `My ${routes.transferInventory.title}`,
       value: 1
@@ -47,101 +43,92 @@ const TransferInventory = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [isDeleting, setDeleting] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, appendRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
-    state;
-  const [open, setOpen] = React.useState(false);
-  const [isOpenDialog, setisOpenDialog] = useState(false);
+  const [columns, setColumns] = useState(null);
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const history = useHistory();
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const { type }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
-  const [filter, setFilter] = useState(`All ${routes.transferInventory.title}`);
 
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    fetchTransferInventory();
+    fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get('/field?resource=Transfer Inventory')
+      .get(`/field?resource=${sidebarResource.transferInventory}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.transferInventoryDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.transferInventoryDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 
-  const fetchTransferInventory = () => {
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.transferInventory?.isCreate ? "Clone" : cloneDisable}  >
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={permissions?.transferInventory?.isCreate ? false : true}
+              onClick={() => {
+                setShowManageTransferInventoryDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.transferInventory?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  };
+
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-
     const queryString = getQueryString();
     axiosInstance()
       .get(`${transferInventory.api}${queryString}`)
-      .then(({ data }) => {
-        let rows = data.data?.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
-          // finalObject['canDelete'] =
-          //   permissions?.transferInventory?.isDelete &&
-          //   u?.status === TRANSFER_INVENTORY_STATUS.new &&
-          //   u?.products?.length === 0 &&
-          //   [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          finalObject['canDelete'] = permissions?.transferInventory?.isDelete && u?.canDelete;
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] =
-            permissions?.transferInventory?.isUpdate && [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u) => {
+          let finalObject: any = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = false;
+          finalObject['canDelete'] = permissions?.transferInventory?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           return finalObject;
         });
-        data.data = data.data?.map((u, i) => ({
-          ...prepareDataForGrid(u, user)
-        }));
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: data.count
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: data.count
-          });
-        }
-        // dispatch({ type: 'initialize', data: rows, count: data.count });
+        dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -182,22 +169,10 @@ const TransferInventory = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
-
-  const columnState = JSON.parse(localStorage.getItem(routes.transferInventory?.title));
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId == item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
 
   const handleDelete = () => {
     let ids = [];
@@ -210,10 +185,10 @@ const TransferInventory = () => {
     axiosInstance()
       .put(`${transferInventory.api}/remove`, { ids: ids })
       .then(() => {
-        fetchTransferInventory();
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setDeleting(false);
       })
       .catch((error) => {
@@ -222,103 +197,16 @@ const TransferInventory = () => {
       });
   };
 
-  const handleTransferInventoryTypeSel = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
-    setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
-  };
-
-  const handleFilter = (event, newFilter) => {
-    if (newFilter != null) {
-      setFilter(newFilter);
-      handleTransferInventoryTypeSel(TransferInventoryType.find((d) => d.key === newFilter).value);
-    }
-  };
-
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.transferInventory?.isCreate && (
-        <Tooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageTransferInventoryDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon color="primary" />
-          </IconButton>
-        </Tooltip>
-      )}
-
-      {params?.data?.canDelete ? (
-        <Tooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Don't have the permissions to Delete">
-          <IconButton size="small" aria-label="Delete" className="cursor-stop">
-            <DeleteIcon color="disabled" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </>
-  );
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+    const value = types.find((d) => d.key === type).value;
+    setSelectedType(value);
+    history.push(`?type=${value}`);
   };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClose = () => {
-    setisOpenDialog(false);
-  };
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClickClose = () => {
-    setOpen(false);
-  };
-
-  const toggleInner = TransferInventoryType && (
-    <ToggleButtonGroup
-      size="small"
-      className="toggle-button-layout"
-      value={TransferInventoryType[selectedType - 1].key}
-      exclusive
-      onChange={handleFilter}
-    >
-      {TransferInventoryType.map((k, index) => {
-        return (
-          <ToggleButton value={k.key} key={index}>
-            {k.key}
-          </ToggleButton>
-        );
-      })}
-    </ToggleButtonGroup>
-  );
 
   return (
     <section className="main-container-v1">
@@ -329,15 +217,14 @@ const TransferInventory = () => {
           module="transfer inventory"
           api={transferInventory.api}
           afterImportCompleted={() => {
-            fetchTransferInventory();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={selectedRecords.length}
-          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchTransferInventory();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -346,79 +233,30 @@ const TransferInventory = () => {
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'d-flex flex-wrap align-items-center gap-1'}>
-              <div className="d-flex align-items-center"></div>
-              {isMobile && !isTablet ? (
-                <div className="d-flex flex-wrap items-center justify-between w-full gap-2">
-                  <div>{toggleInner}</div>
-                  <div className="flex flex-wrap items-center gap-1">
-                    <IconButton
-                      onClick={handleClickOpen}
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      // aria-expanded={open ? 'true' : undefined}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                    >
-                      <TbArrowsSort className="rotate-90" size={16} />
-                    </IconButton>
-                    <MobileSortDialog
-                      isOpen={open}
-                      handleClose={handleClickClose}
-                      contentPart={null}
-                      secHeading={['Sort Transfer Inventories']}
-                      columns={columns}
-                      dispatch={dispatch}
-                    />
-                    <IconButton
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      // aria-expanded={open ? 'true' : undefined}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                      onClick={handleOpen}
-                    >
-                      <MdOutlineFilterAlt size={16} />
-                    </IconButton>
-                    <MobileFilterDialog
-                      isOpen={isOpenDialog}
-                      handleClose={handleClose}
-                      contentPart={null}
-                      columns={columns}
-                      dispatch={dispatch}
-                      title={routes?.transferInventory?.title}
-                      filters={filters}
-                      resource={sidebarResource.transferInventory}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <HideWhenOffline>
-                  <div className={`align-items-center gap-1 layout-for-mobile `}>
-                    {TransferInventoryType && (
-                      <ToggleButtonGroup
-                        size="small"
-                        className="ml-2"
-                        value={TransferInventoryType[selectedType - 1].key}
-                        exclusive
-                        onChange={handleFilter}
-                      >
-                        {TransferInventoryType.map((k, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
-                  </div>
-                </HideWhenOffline>
-              )}
+              <div className="d-flex align-items-center">
+                <ToggleButtonGroup
+                  size="small"
+                  className="toggle-button-layout"
+                  value={types[selectedType - 1].key}
+                  exclusive
+                  onChange={onTypeChange}
+                >
+                  {types.map((k, index) => {
+                    return (
+                      <ToggleButton value={k.key} key={index}>
+                        {k.key}
+                      </ToggleButton>
+                    );
+                  })}
+                </ToggleButtonGroup>
+              </div>
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+              <SearchBox
+                onChange={handleSearch}
+                className={styles.search_box_input}
+                size="small"
+                value={search} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.transferInventory?.isCreate && (
                   <Button
@@ -436,92 +274,20 @@ const TransferInventory = () => {
                 )}
               </div>
             </div>
-            <DisplayFiltersForMobile resource={sidebarResource.transferInventory} />
           </div>
         </div>
         {columns ? (
-          Object.keys(frameWorkComponent).length > 0 ? (
-            isMobile && !isTablet ? (
-              <CustomSwipableList
-                key={selectedType}
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions?.transferInventory}
-                primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {
-                  history.push(`${routes.transferInventoryDetail.path}/${data._id}`);
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(data) => {
-                  history.push(`${routes.transferInventoryDetail.path}/${data._id}`);
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
-                  setDeleteRecord(data);
-                  setShowDeleteConfirmBox(true);
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                chips={[
-                  {
-                    icons: <RiFileTransferFill />,
-                    label: 'Transfer From Plant: ',
-                    field: 'transferFromPlant'
-                  },
-                  {
-                    icons: <RiFolderTransferFill />,
-                    label: 'Transfer To Plant: ',
-                    field: 'transferToPlant'
-                  },
-                  {
-                    icons: <GiCargoShip />,
-                    label: 'Plant Ship To: ',
-                    field: 'plantShipTo'
-                  },
-                  {
-                    icon: <SiStatuspage />,
-                    label: 'Status: ',
-                    field: 'status: '
-                  }
-                ]}
-                additionalDetails={[
-                  {
-                    icon: <CiUser size={18} />,
-                    field: 'transferType'
-                  }
-                ]}
-                owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                onCreate={false}
-                showClone={true}
-                onClone={(data) => {
-                  setShowManageTransferInventoryDialog({ open: true, isClone: true, idToClone: data._id });
-                }}
-                renderedFrom={renderedFrom}
-              />
-            ) : (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchTransferInventory}
-                showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={sidebarResource.transferInventory}
-              />
-            )
-          ) : null
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.transferInventory}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -535,7 +301,7 @@ const TransferInventory = () => {
           onClose={() => setShowManageTransferInventoryDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={(data) => {
             setShowManageTransferInventoryDialog({ open: false, isClone: false, idToClone: null });
-            fetchTransferInventory();
+            fetchData();
             history.push(`${routes.transferInventoryDetail.path}/${data._id}`);
           }}
         />

@@ -8,7 +8,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { fieldServiceOrder } from '../../../constants/helpers';
@@ -17,11 +17,10 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { startCase } from 'lodash';
-import { calculateRowsFieldNew, getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ServiceOrderQty from './ServiceOrderQty';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { flattenArray } from 'src/constants/columns';
 import AddIcon from '@material-ui/icons/Add';
 import { ExpandMore } from '@material-ui/icons';
@@ -34,21 +33,18 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
-
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
-  const [material, setMaterial] = useState([]);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [allFields, setAllFields] = useState([]);
-
   const [isSubmitting, setSubmitting] = useState(false);
 
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -61,7 +57,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const fetchFields = async () => {
     var allFields = await fetch_service_order_detail_fields(serviceOrderData?.currency);
     setAllFields(allFields);
-    const newColumns = generateCustomTableColumns(allFields, serviceOrderData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, allFields, null, false, serviceOrderData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -71,7 +67,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -81,7 +77,8 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 70,
         Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
@@ -90,8 +87,9 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         Header: ' Details',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p
               onClick={() => {
@@ -99,7 +97,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   open: true,
                   data: row.original,
                   bulkedit: false,
-                  showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                  showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                 });
               }}
               className="link text-truncate"
@@ -148,8 +146,8 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -190,13 +188,13 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   };
 
   const fetchProductInventory = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
 
     var data: any = [];
-
     const response = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`);
     data = response?.data?.data;
-    setMaterial(JSON.parse(JSON.stringify(data.material)));
     const responseTechnician = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/technician`);
     const technician = responseTechnician?.data?.data;
 
@@ -229,8 +227,8 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       setNextStep(true);
     }
 
-    setRowsData(rows);
-    setSelectedProducts([]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent, technician) => {
@@ -302,12 +300,12 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
           setIsProductEdit({
             open: true,
-            data: rowsData[rowIndex + 1],
+            data: dataRows[rowIndex + 1],
             bulkedit: false,
-            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
           });
         } else {
           setIsProductEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -348,7 +346,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    const dataToDelete = selectedProducts && selectedProducts.filter((e) => e.canDelete);
+    const dataToDelete = selectedRecords?.length && selectedRecords?.filter((e) => e.canDelete);
     dataToDelete?.forEach((ele) => {
       obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     });
@@ -359,12 +357,12 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -423,7 +421,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   color="primary"
                   size="small"
                   onClick={handleClick}
-                  disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => e.canDelete).length)}
+                  disabled={!Boolean(selectedRecords?.length && selectedRecords?.filter((e) => e.canDelete).length)}
                   endIcon={<BiChevronDown />}
                   className="new-dropdown-v1"
                 >
@@ -452,7 +450,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                     onClick={() => {
                       setIsProductEdit({
                         open: true,
-                        data: selectedProducts?.filter((e) => !e.hideSelection),
+                        data: selectedRecords?.filter((e) => !e.hideSelection),
                         bulkedit: true,
                         showSaveAndNext: false
                       });
@@ -467,20 +465,20 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
           </Grid>
         )}
         <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+          {columns ? (
+            <Box zIndex={5}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
-                data={rowsData}
-                onSelect={setSelectedProducts}
-                childrenProperty="subRows"
-                uniqueKey="_id"
+                state={state}
+                dispatch={dispatch}
+                refreshGrid={fetchProductInventory}
                 hideSelection={!allowedToEdit}
                 hideAction={!allowedToEdit}
-                renderedFrom={`${renderedFrom}_sevices_1`}
+                renderedFrom={renderedFrom}
                 onSaveEdit={onSaveInlineEdit}
                 isClientSideGrid={true}
+                expander={true}
               />
             </Box>
           ) : (

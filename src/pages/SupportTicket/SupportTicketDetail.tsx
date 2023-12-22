@@ -34,7 +34,7 @@ const SupportTicketDetail = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const {
-    state: { permissions, user }
+    state: { user }
   }: any = useData();
 
   useEffect(() => {
@@ -46,9 +46,9 @@ const SupportTicketDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get('/field?resource=Support Ticket')
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead && field?.fieldData?.sectionName !== 'Internal Information'));
+      .get(`${routes.supportTicket.path}/fields?brand=${user?.user?.brand}`)
+      .then(({ data: { data } }) => {
+        setFields(data?.filter((field) => field.isRead && field?.fieldData?.sectionName !== 'Internal Information'));
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -84,7 +84,7 @@ const SupportTicketDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.supportTicket.path}`)
+          history.push(`${routes.supportTicket.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -125,12 +125,12 @@ const SupportTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.supportTicket?.isUpdate && allowedToEdit && (
+            {allowedToEdit && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
-            {permissions?.supportTicket?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>

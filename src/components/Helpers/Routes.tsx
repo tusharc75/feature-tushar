@@ -1039,6 +1039,11 @@ const routes = {
       : RESOURCE_LABEL.iotReport,
     path: '/iot-report'
   },
+  sendOutboundMessage: {
+    title: storedRoutes && storedRoutes.sendOutboundMessage && storedRoutes.sendOutboundMessage?.title ? storedRoutes.sendOutboundMessage?.title
+      : RESOURCE_LABEL.sendOutboundMessage,
+    path: '/send-outbound-message'
+  },
   accountsReceivable: {
     title:
       storedRoutes && storedRoutes.accountsReceivable && storedRoutes.accountsReceivable.title
@@ -1110,6 +1115,10 @@ const routes = {
     title: storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo?.title ? storedRoutes.creditMemo?.title
       : RESOURCE_LABEL.creditMemo,
     path: '/credit-memo'
+  },
+  userDownloadRequest: {
+    title: RESOURCE_LABEL.userDownloadRequest,
+    path: '/user-download-request'
   },
   creditMemoDetail: {
     title:

@@ -9,7 +9,6 @@ import { NewAddressOptionListProvider } from './StateProvider/AddressProvider';
 import { MsalProvider } from '@azure/msal-react';
 import AzureInstance from './AzureInstance';
 import { init } from '@sentry/react';
-import 'ag-grid-community/dist/styles/ag-grid.min.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './styles/index.scss';
 import './styles/custom-react-table.scss';

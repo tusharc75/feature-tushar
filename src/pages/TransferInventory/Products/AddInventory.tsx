@@ -1,103 +1,76 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useContext } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Box, Dialog, Button, CircularProgress, Typography } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from 'src/pages/Leads/Header.module.scss';
-import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage, productInventory } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import { prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer, } from 'src/components/CustomReactTable';
 
 const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, renderedFrom, ignoreIds }) => {
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
+  const { state, dispatch } = useTableReducer();
+  const { page, dataRows, limit, selectedRecords, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user }
   }: any = useData();
 
   useEffect(() => {
-    removeLocalStorage(localStorageSelectedRecords);
     fetchFields();
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchData();
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const fetchFields = async () => {
-    const productResult = await axiosInstance().get('/field?resource=Product&view=true');
+    const productResult = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
     const data = productResult?.data?.data;
-    let columns = [];
-    let rendererNames = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
-      }
-    });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    columns.unshift(
+    const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true);
+    newColumns.unshift(
       {
-        field: 'qty',
-        headerName: 'Quantity',
+        accessor: 'qty',
+        Header: 'Quantity',
         show: true,
-        disabled: false,
-        cellRenderer: 'commonRenderer',
-        cellEditor: 'numericCellEditor',
+        Cell: ({ row }) => <div>{row.original.qty}</div>,
         editable: true,
-        filter: false
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
       },
       {
-        field: 'inventory',
-        headerName: 'Inventory',
+        accessor: 'inventory',
+        Header: 'Inventory',
         show: true,
-        disabled: false,
-        cellRenderer: 'commonRenderer',
-        cellEditor: 'numericCellEditor',
+        Cell: ({ row }) => <div>{row.original.inventory}</div>,
         editable: false,
-        filter: false
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
       }
     );
-    setColumns([...columns, ...getStaticFields()]);
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
-  const fetchProductInventory = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const queryString = getQueryString();
     axiosInstance()
       .get(`${productInventory.api}?wareHouse=${warehouse}&${queryString}`)
       .then(({ data: { data, count } }) => {
-        const selectedProducts = getLocalStorageArrayData(localStorageSelectedRecords);
         let rows = data?.map((u: any) => {
-          const selectedData = selectedProducts.find((d: any) => d._id === u._id);
+          const selectedData = selectedRecords.find((d: any) => d._id === u._id);
           let finalObject = prepareDataForGrid(u);
-          finalObject['productId'] = u._id;
+          finalObject['_id'] = u._id;
           finalObject['inventory'] = u?.inventory ? u?.inventory - (u?.softHold || 0) : 0;
           finalObject['qty'] = selectedData ? selectedData.qty : finalObject['inventory'] ? 1 : 0;
           finalObject['hideSelection'] = finalObject['inventory'] ? false : true;
@@ -105,9 +78,6 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
             ...finalObject
           };
         });
-        if (selectedProducts.length > 0 && showFilteredRecordsOnly) {
-          rows = selectedProducts;
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -153,7 +123,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     }
 
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords?.filter((e) => !e?.hideSelection)?.map((m) => m._id))}`;
     }
 
     if (sorting.length > 0) {
@@ -168,35 +138,51 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   };
 
   const handleClickSave = () => {
-    const _data = getLocalStorageArrayData(localStorageSelectedRecords)?.map((d) => ({
-      product: d.productId,
+    const _data = selectedRecords?.filter((e) => !e?.hideSelection)?.map((d) => ({
+      product: d._id,
       qty: Number(d.qty)
     }));
     submit(_data);
   };
 
-  const onCellValueChanged = ({ data }) => {
-    if (Number(data.qty) > Number(data.inventory)) {
+  const onCellValueChanged = (data, row) => {
+    if (!data || !data?.qty) return;
+    if (Number(data.qty) > Number(row.inventory)) {
       toastConfig.setToastConfig({
         type: 'warning',
         message: "Qty can't be greater then inventory",
         open: true
       });
+      return;
     }
-    const newRecords = getLocalStorageArrayData(localStorageSelectedRecords)?.map((d: any) => {
-      if (data?._id === d?._id) {
-        return data;
+    const rows = [...dataRows];
+    rows?.forEach((d) => {
+      if (row?._id === d._id) {
+        d.qty = parseInt(data.qty);
+        d.isChecked = true;
       }
-      return d;
     });
-    localStorage.setItem(localStorageSelectedRecords, JSON.stringify(newRecords));
-    dispatch({ type: 'selection', selectedRecords: newRecords });
+    if (!selectedRecords?.find((e) => e._id === row?._id)) {
+      const editRow = rows?.find((e) => e._id === row?._id);
+      if (editRow) {
+        dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
+      }
+    } else {
+      const updatedSelectedRecords = selectedRecords?.map((e) => {
+        if (e?._id === row?._id) {
+          return { ...e, qty: parseInt(data?.qty), isChecked: true };
+        }
+        return e;
+      });
+      dispatch({ type: 'selection', selectedRecords: updatedSelectedRecords });
+    }
+    dispatch({ type: 'update', data: rows });
   };
 
   let disableSave =
-    getLocalStorageArrayData(localStorageSelectedRecords)?.length === 0 ||
-    getLocalStorageArrayData(localStorageSelectedRecords)?.filter((d: any) => Number(d.qty) === 0).length > 0 ||
-    getLocalStorageArrayData(localStorageSelectedRecords)?.filter((d: any) => Number(d.qty) > Number(d.inventory)).length > 0 ||
+    selectedRecords?.filter((e) => !e?.hideSelection)?.length === 0 ||
+    selectedRecords?.filter((d: any) => Number(d.qty) === 0 && !d?.hideSelection).length > 0 ||
+    selectedRecords?.filter((d: any) => Number(d.qty) > Number(d.inventory) && !d?.hideSelection).length > 0 ||
     isAdding;
 
   return (
@@ -211,12 +197,12 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
           alignItems={isMobile ? 'flex-start' : 'center'}
         >
           <div style={{ order: isMobile ? 2 : 1 }}>
-            {getLocalStorageArrayData(localStorageSelectedRecords)?.filter((d: any) => d.qty === 0).length > 0 && (
+            {selectedRecords?.filter((d: any) => d.qty === 0 && !d?.hideSelection).length > 0 && (
               <Typography variant="body2" color="error">
                 Enter quantity before you save
               </Typography>
             )}
-            {getLocalStorageArrayData(localStorageSelectedRecords)?.filter((d: any) => Number(d.qty) > Number(d.inventory)).length > 0 && (
+            {selectedRecords?.filter((d: any) => Number(d.qty) > Number(d.inventory) && !d?.hideSelection).length > 0 && (
               <Typography variant="body2" color="error">
                 Quantity should be less then inventory
               </Typography>
@@ -242,32 +228,23 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
                 size="small"
               >
                 Add{' '}
-                {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
-                  ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
+                {selectedRecords?.filter((e) => !e?.hideSelection).length > 0
+                  ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')'
                   : ''}
               </Button>
             </Box>
           </Box>
         </Box>
         {columns ? (
-          <CustomAgGridEditable
-            allowSelection={true}
-            allowAction={false}
+          <CustomReactTable
+            height={'calc(100vh - 250px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            onCellValueChanged={onCellValueChanged}
-            showOnlyShowFilteredRecordSwitch={true}
-            actionWidth={150}
-            loading={loading}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchProductInventory}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            onSaveEdit={onCellValueChanged}
           />
         ) : (
           <Box p={2} height={500}>

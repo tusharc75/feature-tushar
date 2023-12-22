@@ -6,7 +6,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -279,6 +278,7 @@ const BulkAssetCreationDetailsPage = () => {
                       bulkAssetCreationData={bulkAssetCreationData}
                       renderedFrom={`${renderedFrom}_grid-2`}
                       allowedToEdit={allowedToEdit}
+                      stepFullScreen={stepFullScreen}
                     />
                   )}
                 </ContentFullScreen>

@@ -212,10 +212,6 @@ export const userType = {
   brandAdmin: 2
 };
 
-export const AgGridHeaderHeight = 45;
-export const AgGridRowHeight = 45;
-export const AgGridFloatingFiltersHeight = 38;
-
 export const gridPageSizes = [25, 50, 75];
 export const gridLoadingTimeout = 500;
 export const processFieldName = 'process';
@@ -333,6 +329,7 @@ export const sidebarResource = {
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`,
   resourceLogs: `Resource Logs`,
+  userDownloadRequest: 'User Download Request',
   truckMaster: `Truck Master`,
   job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
@@ -355,7 +352,8 @@ export const sidebarResource = {
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
   rentalManagementInvoice: 'Rental Management Invoice',
-  creditMemo: 'Credit Memo'
+  creditMemo: 'Credit Memo',
+  outboundMessage: 'Outbound Message'
 };
 
 export const primaryFields = {
@@ -369,6 +367,7 @@ export const primaryFields = {
 
 export const RESOURCE_LABEL = {
   account: 'Supplier Accounts',
+  userDownloadRequest: 'User Download Request',
   warehouse: 'Plants',
   customerAccount: 'Customer Accounts',
   user: 'Users',
@@ -482,6 +481,7 @@ export const RESOURCE_LABEL = {
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
   iotReport: 'IoT Report',
+  sendOutboundMessage: 'Send Outbound Message',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
@@ -755,9 +755,9 @@ export const productCategory = {
 };
 
 export const budget = {
-  budgetApi: '/budget',
-  budgetRoute: '/budget',
-  budgetPermission: 'budget',
+  api: '/budget',
+  route: '/budget',
+  permission: 'budget',
   resource: 'budget'
 };
 
@@ -955,7 +955,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
   return obj;
 };
 
-export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
+export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false) => {
   const obj = {};
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
@@ -1011,7 +1011,13 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
     } else if (key.type === 'dateTime') {
-      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : new Date();
+      if (dataObj[key.fieldName] && !isClone) {
+        obj[key.fieldName] = dataObj[key.fieldName];
+      }
+    } else if (key.type === 'date') {
+      if (dataObj[key.fieldName] && !isClone) {
+        obj[key.fieldName] = dataObj[key.fieldName];
+      }
     } else if (key.type === 'lookUpDisplay') {
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
@@ -1057,7 +1063,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'multiSelect') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
-      schema[input.fieldName] = input.required ? number().required(`${input.fieldLabel} is required`).nullable() : number().nullable();
+      schema[input.fieldName] = input.required ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable() : number().nullable();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail
@@ -1069,7 +1075,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       input.displayUnits &&
         input.displayUnits.forEach((_unit) => {
           schema[input.fieldName + '_' + _unit.toLowerCase()] = input.required
-            ? number().required(`${input.fieldLabel} is required`).nullable()
+            ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
             : number().nullable();
         });
     } else if (input.type === 'currencyAmount') {
@@ -1078,12 +1084,12 @@ export const yupSchema = (fields: any[], validEmail = true) => {
           if (input.isConverter && input.displayUnits.length) {
             input.displayUnits.forEach((_unit) => {
               schema[input.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] = input.required
-                ? number().required(`${input.fieldLabel} is required`).nullable()
+                ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
                 : number().nullable();
             });
           } else {
             schema[input.fieldName + '_' + _currency.toLowerCase()] = input.required
-              ? number().required(`${input.fieldLabel} is required`).nullable()
+              ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
               : number().nullable();
           }
         });
@@ -1165,6 +1171,7 @@ export const initializeDropdownById = (field, fieldName, id) => {
 export const dateFormat = localStorage.getItem('dateFormat') ?? 'MM/DD/YYYY';
 export const dateTimeFormat = localStorage.getItem('dateTimeFormat') ?? 'MM/DD/YYYY hh:mm A';
 export const cardDateFormat = localStorage.getItem('cardDateFormat') ?? 'MMM DD, YYYY';
+export const dateTimeFormat24Hours = `${dateFormat} HH:mm`;
 
 export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/dd/yyyy';
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
@@ -2204,14 +2211,6 @@ export const INTERVALS = [
   {
     optionValue: '1day',
     optionLabel: '1 Day'
-  },
-  {
-    optionValue: '7days',
-    optionLabel: '7 Days'
-  },
-  {
-    optionValue: '30days',
-    optionLabel: '30 Days'
   }
 ];
 
@@ -2326,58 +2325,56 @@ export const REPORT_LIST = [
   {
     title: 'Purchase Order Details',
     permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    key: 'standardReport',
     type: 'purchaseOrderDetails'
   },
   {
     title: 'Inventory Evaluation',
     permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    key: 'standardReport',
     type: 'inventoryEvaluation'
   },
   {
     title: 'Inventory History',
     permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    key: 'standardReport',
     type: 'inventoryHistory'
   },
   {
     title: 'Average Price By Supplier',
     permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    key: 'standardReport',
     type: 'averagePriceBySupplier'
   },
   {
     title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    key: 'standardReport',
     type: 'numberOfAssetsByStatus'
   },
   {
     title: 'Asset Utilization',
     permission: 'serializedAsset',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    key: 'standardReport',
     type: 'assetUtilization'
+  },
+  {
+    title: 'Asset Stat',
+    permission: 'serializedAsset',
+    key: 'standardReport',
+    type: 'serializedAssetStat'
   },
   {
     title: 'User Session',
     permission: 'user',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    key: 'standardReport',
     type: 'userSession'
   },
   {
     title: 'In Used Serialized Asset',
     permission: 'serializedAsset',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
-    type: 'inUseSerializedAsset'
+    key: 'standardReport',
+    type: 'inUsedSerializedAsset'
   }
 ];
 
@@ -2444,7 +2441,7 @@ export const COLOUR_MASTER = {
     borderColor: '#f5c431'
   },
   lostAssets: {
-    background: '#ff9980',
+    background: 'var(--error-bg)',
     borderColor: '#db765c'
   },
   scrapAssets: {
@@ -2837,7 +2834,12 @@ export const fieldLabelToFieldName = (fieldLabel) => {
 };
 
 export const ATTACHMENT_TYPE = {
-  diagram: 'Diagram',
+  drawing: 'Drawing',
   certificate: 'Certificate',
   mtr: 'MTR'
 };
+
+export const FILE_PROCESS_STATUS = {
+  processing: 'Processing',
+  completed: 'Completed'
+} as const;

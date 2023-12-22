@@ -1,84 +1,80 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import DateFnsUtils from '@date-io/date-fns';
 import {
-  Grid,
   Box,
   Button,
-  Typography,
+  Dialog,
   FormControl,
-  FormGroup,
   FormControlLabel,
-  Switch,
+  FormGroup,
+  Grid,
   IconButton,
-  Paper,
-  Tooltip,
-  Tabs,
+  InputLabel,
+  MenuItem,
+  Select,
+  Switch,
   Tab,
-  TableRow,
-  TableContainer,
-  TableHead,
   Table,
   TableBody,
   TableCell,
-  makeStyles,
-  Dialog,
-  InputLabel,
-  Select,
-  MenuItem,
-  useMediaQuery
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Tooltip,
+  Typography,
+  makeStyles
 } from '@material-ui/core';
-import DeleteButton from '../../components/Helpers/DeleteButton';
 import { ControlPoint, Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory, useLocation, Link } from 'react-router-dom';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { startCase } from 'lodash';
+import moment from 'moment';
+import { useContext, useEffect, useState } from 'react';
+import { Line } from 'react-chartjs-2';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiReset, RiSettingsFill } from 'react-icons/all';
+import { FcFlowChart } from 'react-icons/fc';
+import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import AssignRolesDialog from '../../components/AssignRolesDialog/AssignRolesDialog';
+import BoxWithBorder from '../../components/BoxWithBorder';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPageHeader from '../../components/DetailsPageHeader';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import BoxWithBorder from '../../components/BoxWithBorder';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import AssignRolesDialog from '../../components/AssignRolesDialog/AssignRolesDialog';
-import {
-  displayDate,
-  userType,
-  defaultActivityShow,
-  dateFormatForInputControl,
-  opportunity,
-  lead,
-  customerAccount,
-  supplierAccount,
-  customerContact,
-  supplierContact,
-  quoteBuilder,
-  ACTIVITY_RESOURCE
-} from '../../constants/helpers';
-import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
-import LeadAccordionInUserDetailPage from './LeadAccordionInUserDetailPage';
-import AccountAccordionDetail from './AccountAccordionInDetail';
-import ContactAccordionInDetailPage from './ContactAccordionInDetailPage';
-import ManageUserDialog from './ManageUserDialog';
-import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
+import routes from '../../components/Helpers/Routes';
+import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';
 import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
-import { FcFlowChart } from 'react-icons/fc';
-import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
-import AssignedEntities from './AssignedEntities';
-import { isMobile, isTablet } from 'react-device-detect';
-import UserSetupDialog from './UserSetupDialog';
-import moment from 'moment';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateFnsUtils from '@date-io/date-fns';
-import { Line } from 'react-chartjs-2';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
-import { BiReset, RiSettingsFill } from 'react-icons/all';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import {
+  ACTIVITY_RESOURCE,
+  customerAccount,
+  customerContact,
+  dateFormatForInputControl,
+  displayDate,
+  lead,
+  opportunity,
+  quoteBuilder,
+  supplierAccount,
+  supplierContact,
+  userType
+} from '../../constants/helpers';
+import AccountAccordionDetail from './AccountAccordionInDetail';
+import AssignedEntities from './AssignedEntities';
+import ContactAccordionInDetailPage from './ContactAccordionInDetailPage';
+import LeadAccordionInUserDetailPage from './LeadAccordionInUserDetailPage';
+import ManageUserDialog from './ManageUserDialog';
+import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
+import UserSetupDialog from './UserSetupDialog';
 
-import { MdDelete } from 'react-icons/md';
-import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -710,11 +706,9 @@ const UserDetailsPage = () => {
                   </Tabs>
                   <Box hidden={currentTabIndex !== 0}>
                     <DetailsPageHeader
-                      heading={headingLbl}
                       logo={userData?.avatar ? userData.avatar : undefined}
                       mainPoints={mainPoints}
-                      showHeading={true}
-                    ></DetailsPageHeader>
+                    />
                     <DetailsPage data={userData} fields={userFields} />
                   </Box>
                   <Box hidden={currentTabIndex !== 1}>

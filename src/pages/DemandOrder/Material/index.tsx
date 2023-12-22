@@ -12,26 +12,23 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
-import { isMobile } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MaterialDialog from './MaterialDialog';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
 
   const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns()
 
   const [isUpdating, setUpdating] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -56,7 +53,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, demandOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, demandOrderData?.currency || 'USD', renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, demandOrderData?.currency || 'USD');
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -65,8 +62,9 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       {
         accessor: 'index',
         Header: 'Index',
+        primaryField: true,
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -75,7 +73,6 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{`${startCase(row.original?.type)} `}</p>
@@ -87,8 +84,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         Header: 'Detail',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
             {allowedToEdit ? (
               <p
@@ -97,7 +93,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -163,31 +159,30 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) =>
-        !row.original.hideSelection && (
-          <Grid container spacing={1}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              disabled={allowedToEdit ? false : true}
-              onClick={() => {
-                onMaterialEdit(row, rows);
-              }}
-            >
-              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-            </IconButton>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                setDeleteData(obj);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </Grid>
-        )
+      Cell: ({ row, table }) =>
+        <Grid container spacing={1}>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            disabled={allowedToEdit ? false : true}
+            onClick={() => {
+              onMaterialEdit(row, table.getRowModel().rows);
+            }}
+          >
+            <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+          </IconButton>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            onClick={() => {
+              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+              setDeleteData(obj);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </Grid>
+
     });
     setColumns(coloum);
     fetchData();
@@ -230,14 +225,14 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.serviceDetail?.serviceName;
+            ? _subRow.packageDetail?.packageName
+            : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -318,7 +313,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -386,7 +381,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
                   setAddDialog({ open: true, type: 'product', parentId: null });
                 }}
               >
-                Add Products
+                Add Existing Products
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -394,7 +389,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
                   setAddDialog({ open: true, type: 'package', parentId: null });
                 }}
               >
-                Add Packages
+                Add Existing Packages
               </MenuItem>
             </Menu>
           </Box>
@@ -465,9 +460,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
             <CustomReactTable
               height={'calc(100vh - 345px)'}
               columns={columns}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               onSelect={setSelectedRecords}
-              childrenProperty="subRows"
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               onSaveEdit={onSaveInlineEdit}
@@ -476,7 +469,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
               expander={true}
               state={state}
               dispatch={dispatch}
-              allowPagination={false}
+              refreshGrid={fetchData}
             />
           </Box>
         </>

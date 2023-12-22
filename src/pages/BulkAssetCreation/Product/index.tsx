@@ -1,20 +1,5 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import {
-  Grid,
-  Box,
-  Button,
-  Paper,
-  Typography,
-  IconButton,
-  Tab,
-  Tabs,
-  ButtonGroup,
-  Container,
-  InputAdornment,
-  TextField,
-  MenuItem,
-  Menu
-} from '@material-ui/core';
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { Box, Button, IconButton, MenuItem, Menu } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -22,51 +7,42 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { bulkAssetCreation, CHILD_RESOURCE } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-
-import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
-import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { prepareDataForGrid } from 'src/constants/helpers';
-import { generateColoum } from 'src/constants/columns';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
-import styles from '../../Leads/Header.module.scss';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import { deleteDisable } from 'src/constants/messageHelpers';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProduct, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
+
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
+
   const [anchorEl, setAnchorEl] = useState(null);
-
-  const [columns, setColumns] = useState([]);
-
+  const [columns, setColumns] = useState(null);
   const [addProductDialog, setAddProductDialog] = useState(false);
   const [isAddingProducts, setAddingProducts] = useState(false);
-
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [selectedProductData, setSelectedProductData] = useState(null);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
-
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [loadingButton, setLoadingButton] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [showCreateConfirmBox, setShowCreateConfirmBox] = useState(false);
+
   const [deleteBulkAssetCreationProduct, setDeleteBulkAssetCreationProduct] = useState([]);
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -86,35 +62,62 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
       ]
     });
     var productField = productFieldResponce?.data?.data?.find((e) => e.resource === 'Product')?.fieldNames || [];
-    const coloum = [];
+    let coloum = [];
     productField?.forEach((ele) => {
       if (ele?.fieldName === 'productName') {
-        coloum.push({ field: 'productName', headerName: ele?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' });
+        coloum.push({
+          accessor: 'productName',
+          Header: ele?.fieldLabel,
+          disabled: true,
+          Cell: ({ row }) => (
+            <div className="d-flex gap-2 align-items-center">
+              {(row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) && allowedToEdit ? (
+                <h5
+                  className="link text-truncate"
+                  onClick={() => {
+                    setShowProductDialog(true);
+                    setSelectedProductData(row?.original);
+                  }}
+                >
+                  {row?.original?.productName}
+                </h5>
+              ) : (
+                <h5 className="text-truncate">{row?.original?.productName}</h5>
+              )}
+              {row?.original?.productId && allowedToEdit && (
+                <HtmlTooltip title="Details">
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+            </div>
+          )
+        });
       } else {
-        coloum.push({ field: ele?.fieldName, headerName: ele?.fieldLabel, show: true, cellRenderer: 'commonRenderer' });
+        coloum.push({
+          accessor: ele?.fieldName,
+          Header: ele?.fieldLabel,
+          Cell: ({ row }) => (row?.original[ele?.fieldName] ? <h5 className="text-truncate">{row?.original[ele?.fieldName]}</h5> : <NoDataCell />)
+        });
       }
     });
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.bulkAssetCreationProduct}`);
     var fields = response?.data?.data;
     fields = CURReplaceByCurrencySingle(fields, bulkAssetCreationData?.currency ? bulkAssetCreationData?.currency : 'USD');
-    let rendererNames = [];
-    generateColoum(fields, coloum, rendererNames, false, renderedFrom, getColumnData);
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      nameRenderer: NameRenderer,
-      commonRenderer: CommonRenderer,
-      actionsRenderer: ActionsRenderer,
-      ...tempFrameworkComponent
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    setColumns([...coloum]);
+    const newColumns = generateColumns(renderedFrom, fields, routes.bulkAssetCreationDetail.path);
+    setColumns([...coloum, ...newColumns, ActionsRenderer]);
   };
 
   const fetchBulkAssetCreationProduct = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
     axiosInstance()
       .get(`${bulkAssetCreation.api}/product/${bulkAssetCreationData._id}`)
@@ -154,78 +157,74 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
       });
   };
 
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={(row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) && allowedToEdit ? 'Edit' : ''}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={!((row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) && allowedToEdit)}
+              onClick={() => {
+                setShowProductDialog(true);
+                setSelectedProductData(row?.original);
+              }}
+            >
+              <EditIcon
+                fontSize="small"
+                color={(row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) && allowedToEdit ? 'primary' : 'disabled'}
+              />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
 
-  const NameRenderer = (params) => (
-    <span className="d-flex gap-2 align-items-center">
-      {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && allowedToEdit ? (
-        <span
-          className="link"
-          onClick={() => {
-            setShowProductDialog(true);
-            setSelectedProductData(params.data);
-          }}
+        <HtmlTooltip
+          title={
+            (row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) && allowedToEdit
+              ? permissions?.bulkAssetCreation?.isUpdate
+                ? 'Delete'
+                : deleteDisable
+              : ''
+          }
         >
-          <CustomRenderCell value={params.value} />
-        </span>
-      ) : (
-        <CustomRenderCell value={params.value} />
-      )}
-      {params.data.productId && allowedToEdit && (
-        <HtmlTooltip title="Details">
-          <IconButton
-            size="small"
-            aria-label="Details"
-            onClick={() => {
-              window.open(`${routes.productDetail.path}/${params.data.productId}`);
-            }}
-          >
-            <OpenInNewIcon fontSize="small" color="primary" />
-          </IconButton>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={
+                !(
+                  (row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) &&
+                  allowedToEdit &&
+                  permissions?.bulkAssetCreation?.isUpdate
+                )
+              }
+              onClick={() => {
+                setShowDeleteConfirmBox(true);
+                setDeleteBulkAssetCreationProduct([row?.original?._id]);
+              }}
+            >
+              <DeleteIcon
+                fontSize="small"
+                color={
+                  (row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) &&
+                    allowedToEdit &&
+                    permissions?.bulkAssetCreation?.isUpdate
+                    ? 'error'
+                    : 'disabled'
+                }
+              />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      )}
-    </span>
-  );
-
-  const ActionsRenderer = (params) => (
-    <>
-      {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && allowedToEdit && (
-        <HtmlTooltip title="Edit">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowProductDialog(true);
-              setSelectedProductData(params.data);
-            }}
-          >
-            <EditIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {(params.data?.actualReceived === undefined || params.data?.actualReceived === 0) && allowedToEdit && (
-        <GridDeleteIcon
-          hasDeletePermission={permissions?.bulkAssetCreation?.isUpdate}
-          ownerId={user?.user?._id}
-          userId={user?.user?._id}
-          onDelete={() => {
-            setShowDeleteConfirmBox(true);
-            setDeleteBulkAssetCreationProduct([params.data._id]);
-          }}
-          entity="rentalManagement"
-        />
-      )}
-    </>
-  );
+      </>
+    )
+  };
 
   const handleAddProduct = (rows) => {
     setAddingProducts(true);
@@ -285,14 +284,16 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     let tempProducts = selectedRecords.map((d) => {
       return {
         bulkAssetCreationId: bulkAssetCreationData?._id,
-        productMaster: d?.productId,
+        productId: d?.productId,
+        _id: d?._id,
         qty: d?.qty,
-        wareHouse: bulkAssetCreationData?.warehouse?.optionValue
+        warehouse: bulkAssetCreationData?.warehouse?.optionValue
       };
     });
     axiosInstance()
       .post(`${bulkAssetCreation.api}/create-assets`, { bulkAssetCreation: tempProducts })
       .then(({ data }) => {
+        setShowCreateConfirmBox(false)
         fetchBulkAssetCreationProduct();
         fetchData();
         setLoadingButton(false);
@@ -303,6 +304,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
         });
       })
       .catch((error) => {
+        setLoadingButton(true);
         toastConfig.setToastConfig(error);
       });
   };
@@ -318,7 +320,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
   return (
     <Fragment>
       {allowedToEdit && permissions?.bulkAssetCreation?.isUpdate && (
-        <Box className="flex flex-wrap gap-2 justify-between">
+        <Box m={1} className="flex flex-wrap gap-2 justify-between">
           <Box>
             <Button
               variant={'contained'}
@@ -335,6 +337,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
             <Button
               variant={'outlined'}
               color="default"
+              disabled={selectedRecords?.length ? false : true}
               size="small"
               onClick={openActions}
               className={`new-dropdown-v1`}
@@ -381,7 +384,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 color="primary"
                 disabled={selectedRecords.length === 0 || loadingButton}
                 onClick={() => {
-                  createAsset();
+                  setShowCreateConfirmBox(true)
                   closeActions();
                 }}
               >
@@ -391,81 +394,18 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
           </Box>
         </Box>
       )}
-      {columns && frameWorkComponent ? (
-        isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={allowedToEdit}
-            allowSwipe={true}
-            permissions={permissions}
-            primaryField={columns?.find((d) => d.field === 'productName')}
-            onClick={(data) => {
-              if ((data?.actualReceived === undefined || data?.actualReceived === 0) && allowedToEdit) {
-                setShowProductDialog(true);
-                setSelectedProductData(data);
-              }
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(data) => {
-              if ((data?.actualReceived === undefined || data?.actualReceived === 0) && allowedToEdit) {
-                setShowProductDialog(true);
-                setSelectedProductData(data);
-              }
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => {
-              if (allowedToEdit) {
-                setShowDeleteConfirmBox(true);
-                setDeleteBulkAssetCreationProduct([data._id]);
-              }
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            chips={[
-              {
-                label: `Quantity: `,
-                field: 'qty',
-                forceShow: true
-              }
-            ]}
-            onCreate={null}
-            showClone={false}
-            fullHeight={true}
-            renderedFrom={renderedFrom}
-            onClone={() => { }}
-          />
-        ) : (
-          <CustomAgGridEditable
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={allowedToEdit}
-            actionWidth={150}
-            allowSelection={allowedToEdit}
-            isClientSideGrid={true}
-            loading={loading}
-            onCellValueChanged={(row) => {
-              //handleUpdateOrderProduct(row.data)
-            }}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchBulkAssetCreationProduct}
-            currency={bulkAssetCreationData?.currency?.toLowerCase()}
-            fromPurchaseOrderGrid={true}
-            rowClassRules={{
-              'red-data-row': function (params) {
-                return !params?.data?.isValid;
-              }
-            }}
-          />
-        )
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 393px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchBulkAssetCreationProduct}
+          hideAction={!allowedToEdit}
+          hideSelection={!allowedToEdit}
+          isClientSideGrid={true}
+        />
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -498,9 +438,18 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete  ? `}
+          message={`Are you sure you want to delete?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
+        />
+      )}
+      {showCreateConfirmBox && (
+        <ConfirmationDialog
+          open={showCreateConfirmBox}
+          message={`Are you sure you want to create assets?`}
+          onClose={() => setShowCreateConfirmBox(false)}
+          okBtnLoading={loadingButton}
+          onOk={createAsset}
         />
       )}
     </Fragment>

@@ -292,7 +292,6 @@ const SalesOrderDetails = () => {
               <Material
                 salesOrderData={salesOrderData}
                 setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
                 fetchSalesOrderData={fetchSalesOrderData}
                 updateJobStatus={updateJobStatus}
@@ -302,7 +301,7 @@ const SalesOrderDetails = () => {
               <AdditionalCost
                 salesOrderData={salesOrderData}
                 setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-2`}
+                stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
               />
             )}
@@ -317,7 +316,6 @@ const SalesOrderDetails = () => {
                 salesOrderData={salesOrderData}
                 setNextStep={setNextStep}
                 updateJobStatus={updateJobStatus}
-                renderedFrom={`${renderedFrom}_grid-5`}
                 stepFullScreen={stepFullScreen}
               />
             )}

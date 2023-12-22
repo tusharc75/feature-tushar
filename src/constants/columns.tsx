@@ -6,7 +6,7 @@ import { flatMapDeep } from 'lodash';
 import moment from 'moment';
 import { Box, IconButton } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import SignatureCell from 'src/components/Helpers/SignatureCell';
+import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
 
 export const headerName = {
   firstName: 'Name'
@@ -126,7 +126,8 @@ export const getCustomColumnData = (title, field) => {
       accessor: field?.fieldName,
       Header: fieldHeaderName,
       show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
-      disabled: (gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0) || field?.stopHideColumn ? true : false,
+      disabled:
+        (gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0) || field?.stopHideColumn ? true : false,
       editable: field?.isColumnEditable ?? false,
       isHideColumnSum: field?.isHideColumnSum ?? false,
       decimalPlaces: field?.decimalPlaces,
@@ -136,163 +137,11 @@ export const getCustomColumnData = (title, field) => {
   }
 };
 
-export const generateCustomTableColumns = (fields: any[], currency: string, renderedFrom = null) => {
-  let column = [];
-  let _fields = fields;
-  _fields.forEach((ele) => {
-    if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
-      const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
-
-      if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-        ele.displayUnits.forEach((_unit) => {
-          let fieldName = ele.fieldName + '_' + _unit.toLowerCase();
-          let fieldLabel = ele.fieldLabel + ' ' + _unit;
-          column.push({
-            accessor: fieldName,
-            Header: fieldLabel,
-            Cell: ({ row }) => {
-              return row?.original[fieldName] ? <p>{row?.original[fieldName]}</p> : <NoDataCell />;
-            },
-            editable: Boolean(ele?.isColumnEditable),
-            decimalPlaces: ele?.decimalPlaces,
-            primaryField: ele?.primaryField ?? false
-          });
-        });
-      } else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-        ele.displayUnits.forEach((_unit) => {
-          ele.displayCurrency.forEach((_currency) => {
-            let fieldName = ele.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-            let fieldLabel = ele.fieldLabel + ' ' + _unit + '/' + _currency;
-            column.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              editable: Boolean(ele?.isColumnEditable),
-              decimalPlaces: ele?.decimalPlaces,
-              primaryField: ele?.primaryField ?? false,
-              Cell: ({ row }) => {
-                return row?.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                );
-              }
-            });
-          });
-        });
-      } else if (ele.type === 'currencyAmount') {
-        ele.displayCurrency.forEach((_currency) => {
-          let fieldName = ele.fieldName + '_' + _currency.toLowerCase();
-          let fieldLabel = ele.fieldLabel + ' ' + _currency;
-          column.push({
-            accessor: fieldName,
-            Header: fieldLabel,
-            editable: Boolean(ele?.isColumnEditable),
-            decimalPlaces: ele?.decimalPlaces,
-            primaryField: ele?.primaryField ?? false,
-            Cell: ({ row }) => {
-              return row?.original[fieldName] ? (
-                <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
-              ) : (
-                <NoDataCell />
-              );
-            },
-            Footer: (info) => {
-              const total = info?.rows
-                ?.filter((f) => !f.original.parentId && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                .reduce((sum, row) => row.values[fieldName] + sum, 0);
-              return (
-                <>
-                  {ele?.isHideColumnSum ? '' : `${currencySymbol} ${formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}`}
-                </>
-              );
-            }
-          });
-        });
-      }
-    } else {
-      if (column.filter((_c) => _c.accessor === ele.fieldName && _c.Header === ele.fieldLabel).length === 0) {
-        let currentColumn: any = getCustomColumnData(renderedFrom, ele);
-        if (ele.type === 'date') {
-          column.push({
-            ...currentColumn,
-            disableFilters: true,
-            width: 200,
-            Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{moment(row.original[ele.fieldName])?.format(dateFormat) || ''}</p> : <NoDataCell />)
-          });
-        } else if (ele.type === 'dateTime') {
-          column.push({
-            ...currentColumn,
-            disableFilters: true,
-            width: 200,
-            Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{moment(row.original[ele.fieldName]).format(dateTimeFormat)}</p> : <NoDataCell />)
-          });
-        } else if (ele.type === 'dropDown') {
-          column.push({
-            ...currentColumn,
-            width: 200,
-            Cell: ({ row }) =>
-              row.original[ele.fieldName] ? ele.lookup ? columnData(ele, row) : <p>{row.original[ele.fieldName]}</p> : <NoDataCell />
-          });
-        } else if (ele.type === 'decimal') {
-          column.push({
-            ...currentColumn,
-            width: 200,
-            Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />),
-            Footer: (info) => {
-              const qtyTotal = info.rows
-                .filter((f) => !f.original.parentId && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName]))
-                .reduce((sum, row) => row.original[currentColumn.accessor] + sum, 0);
-              return <>{ele?.isHideColumnSum ? '' : qtyTotal}</>;
-            }
-          });
-        } else if (ele.type === 'checkBox') {
-          column.push({
-            ...currentColumn,
-            width: 200,
-            Cell: ({ row }) => (<p>{Boolean(row.original[ele.fieldName]) ? 'Yes' : 'No'}</p>)
-          });
-        } else if (ele.type === 'multiSelect') {
-          column.push({
-            ...currentColumn,
-            width: 200,
-            Cell: ({ row }) =>
-              row.original[ele.fieldName] ? ele.lookup ? columnData(ele, row) : <p>{row.original[ele.fieldName]?.join()}</p> : <NoDataCell />
-          });
-        } else if (ele.type === 'multiFileUpload') {
-
-        } else if (ele.type === 'signature') {
-          column.push({
-            ...currentColumn,
-            width: 200,
-            Cell: ({ row }) => row.original[ele.fieldName] ? <SignatureCell base64={row?.original[ele.fieldName]} /> : <NoDataCell />
-          });
-        } else {
-          column.push({
-            ...currentColumn,
-            width: 200,
-            Cell: ({ row }) =>
-              row.original[ele.fieldName] ? (
-                ele.lookup ? (
-                  columnData(ele, row)
-                ) : (
-                  <p className="text-truncate">{row.original[ele.fieldName]}</p>
-                )
-              ) : (
-                <NoDataCell />
-              )
-          });
-        }
-      }
-    }
-  });
-
-  return column;
-};
-
 const columnData = (ele, row) => {
-  // make lookup resource string first letter capital and remove every space using lodash
-  const lookupResource = camelCase(ele.lookupResource).replace(/\s/g, '');
-  const path = routes[`${lookupResource}Detail`].path;
+  const path = routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
+    ? routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
+    : `/${camelCase(ele?.lookupResource)}/detail`;
+
   if (ele.type === 'multiSelect' && ele.lookup) {
     return (
       <p>
@@ -301,7 +150,7 @@ const columnData = (ele, row) => {
             {row.original[ele.fieldName]
               ?.map((d) => {
                 return (
-                  <a className={`text-truncate ${path ? 'link' : ''}`} target='_blank' href={`${path}/${d.optionValue}`}>
+                  <a className={`text-truncate ${path ? 'link' : ''}`} target="_blank" href={`${path}/${d.optionValue}`}>
                     {d.optionLabel}
                   </a>
                 );
@@ -318,10 +167,10 @@ const columnData = (ele, row) => {
       <>
         {row.original[ele.fieldName]?.optionLabel ? (
           <div className="d-flex gap-2 align-items-center">
-            <p className='text-truncate' title={row.original[ele.fieldName]?.optionLabel}>
+            <p className="text-truncate" title={row.original[ele.fieldName]?.optionLabel}>
               {row.original[ele.fieldName]?.optionLabel}
             </p>
-            {path &&
+            {path && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -330,12 +179,12 @@ const columnData = (ele, row) => {
               >
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
-            }
+            )}
           </div>
         ) : (
           <NoDataCell />
         )}
-      </ >
+      </>
     );
   } else {
     return row.original[ele.fieldName]?.optionLabel ? (

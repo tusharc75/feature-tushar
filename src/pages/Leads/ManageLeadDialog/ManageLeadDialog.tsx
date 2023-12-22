@@ -69,9 +69,12 @@ export default function ManageLeadDialog({
         axiosInstance()
           .get(`${routes.lead.path}/${leadId}?entity=${selectedEntity}`)
           .then(({ data: { data } }) => {
-            const { _id, firstName, lastName, middleName, ...rest } = data;
+            const { _id, firstName, lastName, middleName, process, ...rest } = data;
             setCloneHeading(`${firstName || ''} ${middleName || ''} ${lastName || ''}`);
             let tempData = { ...rest };
+            if (fieldsDataForCreate?.find((e) => e?.fieldName === 'process')) {
+              tempData.process = fieldsDataForCreate?.find((e) => e?.fieldName === 'process')?.defaultValue
+            }
             setInitialData({
               fields: fieldsDataForCreate,
               values: getObjKeysWithValues(tempData, fieldsDataForCreate)

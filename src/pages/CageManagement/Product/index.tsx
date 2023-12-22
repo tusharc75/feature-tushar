@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, IconButton, Tooltip, Chip } from '@material-ui/core';
+import React, { useState, useEffect, useContext, Fragment} from 'react';
+import { Box, IconButton } from '@material-ui/core';
+import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { cageManagement, gridLoadingTimeout, isObjectEmpty } from 'src/constants/helpers';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, ImageRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from '../../../constants/helpers';
 import AddToPhotosOutlinedIcon from '@material-ui/icons/AddToPhotosOutlined';
@@ -17,46 +17,76 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
   const {
     state: { user, permissions }
   }: any = useData();
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const [columns, setColumns] = useState(null);
+  const { state, dispatch } = useTableReducer();
+  const { page, limit,search, filters, sorting, selectedRecords } = state;
 
-  const columns = [
-    { field: 'productName', headerName: 'Product Name', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'productImage', headerName: 'Product Image', show: false, cellRenderer: 'imageRenderer' },
-    { field: 'availableInventory', headerName: 'Inventory', filter: false, show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'productCategory', headerName: 'Product Category', show: false, cellRenderer: 'commonRenderer' }
-  ];
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
 
-  const ActionsRenderer = (params) => (
-    <HtmlTooltip title={params?.data?.inventory ? 'Pickup' : 'No inventory'}>
-      <span>
+  const fetchGridColumns = () => {
+    let columns = [
+      {
+        accessor: 'productName',
+        Header: 'Product Name',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <p
+            className="text-truncate"
+          >
+            {row.original.productName}
+          </p>
+        )
+      },
+      {
+        accessor: 'availableInventory',
+        Header: 'Inventory',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.availableInventory}</p>
+      },
+      ActionsRenderer
+    ];
+    setColumns(columns);
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 60,
+    width: 60,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+   <HtmlTooltip title={row?.original?.inventory ? 'Pickup' : 'No inventory'}>
+     <span>
         <IconButton
           size="small"
-          disabled={!params.data?.inventory || params.data?.inventory === 0}
+          disabled={!row?.original?.inventory || row?.original?.inventory === 0}
           aria-label="Pickup"
           onClick={() => {
-            setAssignHistoryProductQty(params.data);
+            setAssignHistoryProductQty(row?.original);
           }}
-          color={params?.data?.inventory ? 'primary' : 'inherit'}
+          color={row?.original?.inventory ? 'primary' : 'inherit'}
         >
           <AddToPhotosOutlinedIcon fontSize="small" color={'primary'} />
         </IconButton>
       </span>
     </HtmlTooltip>
-  );
-
-  const frameWorkComponent = {
-    commonRenderer: CommonRenderer,
-    imageRenderer: ImageRenderer,
-    actionsRenderer: ActionsRenderer
+       </>
+    )
   };
 
   useEffect(() => {
     if (plantId) {
       fetchProducts();
     }
-  }, [page, limit, filters, sorting, search, plantId, productCategory, refreshData]);
+  }, [page, limit, filters, sorting, plantId, productCategory, search, refreshData]);
 
   useEffect(() => {
     dispatch({ type: 'search', search: searchVal });
@@ -85,17 +115,13 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
       deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return deepFilter;
   };
-
   const fetchProducts = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     let api = `${cageManagement.api}?wareHouse=${plantId}${queryString}`;
     axiosInstance()
       .get(api)
@@ -118,41 +144,24 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
       });
   };
 
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-
   return (
     <Fragment>
-      {columns && frameWorkComponent ? (
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={100}
-          loading={loading}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchProducts}
-          allowSelection={false}
-        />
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+       {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchProducts}
+            showOnlyShowFilteredRecordSwitch={false}
+            showFilters={false}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
     </Fragment>
   );
 };

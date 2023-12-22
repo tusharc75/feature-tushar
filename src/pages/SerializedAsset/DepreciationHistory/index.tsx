@@ -4,19 +4,18 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { prepareDataForGrid, serializedAsset } from '../../../constants/helpers';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, DateRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { dateFormat, prepareDataForGrid, serializedAsset } from '../../../constants/helpers';
 import { camelCase } from 'lodash';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import moment from 'moment';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 
 const DepreciationHistory = ({ id }) => {
+
     const toastConfig = useContext(CustomToastContext);
     const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_depreciationHistory`;
-    const [gridApi, setGridApi] = useState(null);
-    const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
-    const [columns, setColumns] = useState([]);
-    const [frameWorkComponent, setFrameWorkComponent] = useState({});
+    const { state, dispatch } = useTableReducer();
+    const [columns, setColumns] = useState(null);
 
     useEffect(() => {
         fetchGridColumns();
@@ -30,9 +29,6 @@ const DepreciationHistory = ({ id }) => {
 
     const fetchData = () => {
         dispatch({ type: 'loading', loading: true });
-        if (gridApi) {
-            gridApi.setRowData([]);
-        }
         var api = `${serializedAsset.api}/${id}/depreciation-history`;
         axiosInstance()
             .get(api)
@@ -54,38 +50,65 @@ const DepreciationHistory = ({ id }) => {
 
     const fetchGridColumns = () => {
         const column = [
-            { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateRenderer' },
-            { field: 'amount', headerName: 'Depreciation Amount', show: true, cellRenderer: 'commonRenderer' },
-            { field: 'netBookValue', headerName: 'Net Book Value', show: true, cellRenderer: 'commonRenderer' }
+            {
+                accessor: 'date',
+                Header: 'Date',
+                disableFilters: true,
+                disableSortBy: false,
+                Cell: ({ row }) => (
+                    row.original?.date ? (
+                        <div>
+                            {moment(row.original?.date)?.format(dateFormat)}
+                        </div>
+                    ) : (
+                        <NoDataCell />
+                    )
+                )
+            },
+            {
+                accessor: 'amount',
+                Header: 'Depreciation Amount',
+                Cell: ({ row }) => (
+                    row.original?.amount ? (
+                        <div>
+                            {row.original?.amount}
+                        </div>
+                    ) : (
+                        <NoDataCell />
+                    )
+                )
+            },
+            {
+                accessor: 'netBookValue',
+                Header: 'Net Book Value',
+                Cell: ({ row }) => (
+                    row.original?.netBookValue ? (
+                        <div>
+                            {row.original?.netBookValue}
+                        </div>
+                    ) : (
+                        <NoDataCell />
+                    )
+                )
+            }
         ]
-        const frameworkComponents = {
-            commonRenderer: CommonRenderer,
-            dateRenderer: DateRenderer
-        };
-        setFrameWorkComponent({ ...frameworkComponents });
         setColumns([...column]);
     };
 
     return (
         <>
             <Box>
-                {Object.keys(frameWorkComponent).length > 0 ? (
-                    <CustomAgGrid
+                {columns ? (
+                    <CustomReactTable
+                        height={'calc(100vh - 250px)'}
                         columns={columns}
-                        dataRows={dataRows}
-                        frameworkComponents={frameWorkComponent}
-                        setGridApi={setGridApi}
+                        state={state}
                         dispatch={dispatch}
-                        rowCount={rowCount}
-                        limit={limit}
-                        pageSizes={pageSizes}
-                        page={page}
-                        allowAction={false}
-                        allowSelection={false}
-                        isClientSideGrid={true}
-                        loading={loading}
                         renderedFrom={renderedFrom}
+                        isClientSideGrid={true}
                         refreshGrid={fetchData}
+                        showFilters={false}
+                        hideSelection={true}
                     />
                 ) : (
                     <Box p={2} height={500}>

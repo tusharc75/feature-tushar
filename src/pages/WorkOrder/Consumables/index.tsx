@@ -11,7 +11,7 @@ import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import ConsumablesQtyDialog from './ConsumablesQtyDialog';
 import QtyRequestLog from './QtyRequestLog';
@@ -23,9 +23,10 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { BiChevronDown } from 'react-icons/bi';
 import UpdateProductDialog from './UpdateProductDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import EditIcon from '@material-ui/icons/Edit';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import { camelCase } from 'lodash';
 
 const Consumables = ({
   isCreate,
@@ -37,33 +38,32 @@ const Consumables = ({
   materialSubType = MATERIAL_SUB_TYPE.consumable,
   workOrderData
 }) => {
+  let renderedFrom = `${camelCase(routes?.workOrder.title)}_consumable`;
 
   const workOrderId = workOrderData?._id;
   const warehouse = workOrderData?.warehouse;
   const toastConfig = useContext(CustomToastContext);
-  const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [consumeRequest, setConsumeRequest] = useState(false);
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
   const [isUpdating, setUpdating] = useState(false);
-
   const [repairOrderData, setRepairOrderData] = useState(null);
-
   const [reviseQuotation, setReviseQuotation] = useState(false);
-
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const {
     state: { user, permissions }
   }: any = useData();
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     var allowRequest = false;
@@ -88,14 +88,13 @@ const Consumables = ({
     try {
       const data: any = row;
       delete data.workOrder;
-      await axiosInstance().put(`${workOrder.api}/${workOrderId}/material`, { material: [data] });
-    } catch (error) {
-      setUpdating(false);
-      toastConfig.setToastConfig(error);
-    } finally {
+      await axiosInstance().put(`${workOrder.api}/${workOrderId}/material/product`, { material: [data] });
       setUpdating(false);
       fetchData();
       setUpdateDialog({ open: false, data: null });
+    } catch (error) {
+      setUpdating(false);
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -103,7 +102,7 @@ const Consumables = ({
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
     let childFields = response?.data?.data || [];
     childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
-    const newColumns = generateCustomTableColumns(childFields, workOrderData?.currency || 'USD');
+    const newColumns = generateColumns(renderedFrom, childFields, null, false, workOrderData?.currency || 'USD');
 
     const hasChildFields = Array.isArray(childFields) && childFields?.length > 0 ? true : false;
 
@@ -129,19 +128,21 @@ const Consumables = ({
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <div className="d-flex gap-2 align-items-center">
-                {hasChildFields && allowedToEdit ?
-                  <p className={'link text-truncate'} onClick={() => {
-                    setUpdateDialog({
-                      open: true,
-                      data: row.original
-                    });
-                  }} >
-                    {row.original[e?.fieldName]}
-                  </p> :
-                  <p className={'text-truncate'}>
+                {hasChildFields && allowedToEdit ? (
+                  <p
+                    className={'link text-truncate'}
+                    onClick={() => {
+                      setUpdateDialog({
+                        open: true,
+                        data: row.original
+                      });
+                    }}
+                  >
                     {row.original[e?.fieldName]}
                   </p>
-                }
+                ) : (
+                  <p className={'text-truncate'}>{row.original[e?.fieldName]}</p>
+                )}
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -213,14 +214,17 @@ const Consumables = ({
           }
         ]
         : []),
-      ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide ?
-        [{
-          accessor: 'consumedQty',
-          Header: 'Consumed Qty',
-          primaryField: true,
-          width: 150,
-          Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-        }] : [])
+      ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide
+        ? [
+          {
+            accessor: 'consumedQty',
+            Header: 'Consumed Qty',
+            primaryField: true,
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+          }
+        ]
+        : [])
     ];
     extracolumns.push({
       accessor: 'action',
@@ -246,7 +250,7 @@ const Consumables = ({
               </IconButton>
             </HtmlTooltip>
           )}
-          {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide &&
+          {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && (
             <HtmlTooltip title="History">
               <IconButton
                 size="small"
@@ -263,8 +267,8 @@ const Consumables = ({
                 <HistoryIcon fontSize="small" color={'primary'} />
               </IconButton>
             </HtmlTooltip>
-          }
-          {(allowedToEdit && hasChildFields) && (
+          )}
+          {allowedToEdit && hasChildFields && (
             <HtmlTooltip title="Edit">
               <IconButton
                 size="small"
@@ -296,24 +300,27 @@ const Consumables = ({
           )}
         </div>
       )
-    })
+    });
     setColumns([...column, ...newColumns, ...extracolumns]);
   };
 
   const fetchRepairOrderData = async () => {
     axiosInstance()
-      .get(`${workOrder.api}/${workOrderId}/consumable/repair-order/quotation`).then(({ data }) => {
-        if(data?.data){
+      .get(`${workOrder.api}/${workOrderId}/consumable/repair-order/quotation`)
+      .then(({ data }) => {
+        if (data?.data) {
           setRepairOrderData(data?.data);
         }
-      }).catch((error) => {
+      })
+      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-
-  }
+  };
 
   const fetchData = async () => {
-    setDataRows(null);
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     var query = ``;
     if (service && uniqueId) {
       query = query + `?service=${service}&uniqueId=${uniqueId}`;
@@ -341,7 +348,8 @@ const Consumables = ({
           // }
           return res;
         });
-        setDataRows(rows);
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -359,8 +367,12 @@ const Consumables = ({
     await axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
-        if (repairOrderData && repairOrderData?.addConsumablesQuotation && repairOrderData?.addQuotationStep &&
-          repairOrderData?.quotation?.status === QUOTATION_STATUS.acceptByCustomer) {
+        if (
+          repairOrderData &&
+          repairOrderData?.addConsumablesQuotation &&
+          repairOrderData?.addQuotationStep &&
+          repairOrderData?.quotation?.status === QUOTATION_STATUS.acceptByCustomer
+        ) {
           setReviseQuotation(true);
         }
         fetchData();
@@ -381,12 +393,11 @@ const Consumables = ({
   const createNewVersionQuote = async (quoteId, quoteVersionId) => {
     axiosInstance()
       .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
-      .then(() => {
-      })
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const handleDelete = async (rows) => {
     const ids = rows.map((e) => e._id);
@@ -460,17 +471,25 @@ const Consumables = ({
       {allowedToEdit && (
         <Box className="flex flex-wrap mb-3 justify-between gap-2">
           {isCreate && permissions?.product?.isRead && (
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              onClick={() => setConsumablesDialog(true)}>
+            <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
               {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
             </Button>
           )}
           <Box display="flex" ml={'auto'}>
             <Box ml={1}></Box>
-            {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide &&
+            <ImportExportMenu
+              permissions={permissions?.workOrder}
+              module="consumables"
+              api={`${workOrder.api}/${workOrderId}/consumable`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              ids={[]}
+              additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}`}
+            />
+            <Box ml={1}></Box>
+            {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && (
               <Button
                 disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
                 onClick={() => setOpenConsumablesQtyDialog(true)}
@@ -483,14 +502,14 @@ const Consumables = ({
                   ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')'
                   : ''}
               </Button>
-            }
+            )}
             <Box ml={1}></Box>
             <Button
               variant={'outlined'}
               color="primary"
               size="small"
               onClick={handleClickAction}
-              disabled={selectedRecords.length ? false : true}
+              disabled={selectedRecords?.length ? false : true}
               endIcon={<BiChevronDown />}
               className="new-dropdown-v1"
             >
@@ -521,19 +540,16 @@ const Consumables = ({
       )}
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
-          {columns && dataRows ? (
+          {columns ? (
             <CustomReactTable
               height={isCreate ? 'calc(100vh - 140px)' : 'calc(100vh - 345px)'}
               columns={columns}
-              data={dataRows}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              state={state}
+              dispatch={dispatch}
+              refreshGrid={fetchData}
               onSaveEdit={onSaveInlineEdit}
-              renderedFrom={'workOrder_consumables'}
+              renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideExpander={true}
               hideSelection={allowedToEdit ? false : true}
             />
           ) : (
@@ -615,12 +631,12 @@ const Consumables = ({
               setReviseQuotation(false);
               fetchData();
             }}
-            onOk={()=>{
+            onOk={() => {
               createNewVersionQuote(repairOrderData?.quotation?.quotation, repairOrderData?.quotation?._id);
               setReviseQuotation(false);
             }}
           />
-      )}
+        )}
       </Grid>
     </>
   );

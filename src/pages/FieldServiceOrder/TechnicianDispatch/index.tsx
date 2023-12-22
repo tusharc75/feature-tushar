@@ -7,7 +7,7 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { dateTimeFormat, fieldServiceOrder } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -24,11 +24,11 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
     state: { user, permissions }
   }: any = useData();
 
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [showDispatchMaterial, setShowDispatchMaterial] = useState({ open: false, data: [] });
-
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
+
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
 
   useEffect(() => {
     fetchFields();
@@ -45,7 +45,8 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
         Header: ' Service',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {row.original?.service?.serviceName}
@@ -66,7 +67,8 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
         Header: 'Technician',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {`${row.original?.technician?.firstName} ${row.original?.technician?.lastName} - (${row.original?.technician?.employeeNumber})`}
@@ -110,8 +112,8 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -166,6 +168,8 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
 
     var data: any = [];
@@ -200,8 +204,9 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
     } else {
       setNextStep(true);
     }
-    setRowsData(rows);
-    setSelectedRecords([]);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const handleDispatch = (rows) => {
@@ -313,20 +318,18 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
           </Grid>
         )}
         <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+          {columns ? (
+            <Box zIndex={5} >
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
-                data={rowsData}
-                onSelect={setSelectedRecords}
-                childrenProperty="subRows"
-                uniqueKey="_id"
+                state={state}
+                dispatch={dispatch}
+                refreshGrid={fetchData}
                 hideSelection={!allowedToEdit}
                 hideAction={!allowedToEdit}
-                renderedFrom={`${renderedFrom}_technician`}
+                renderedFrom={renderedFrom}
                 isClientSideGrid={true}
-                hideExpander={true}
               />
             </Box>
           ) : (

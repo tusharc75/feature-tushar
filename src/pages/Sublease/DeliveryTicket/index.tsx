@@ -1,9 +1,6 @@
 import Box from '@material-ui/core/Box/Box';
 import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { Link } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
@@ -16,28 +13,25 @@ import {
     DELIVERY_TICKET_TYPE,
     DELIVERY_TICKET_REFERENCE_TYPE,
     DELIVERY_FROM_TO_TYPE,
-    ASSET_STATUS,
     sublease
 } from '../../../constants/helpers';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map, startCase } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { subleaseActions, subleaseMessage } from 'src/constants/messageHelpers';
 import CustomMessageDialog from 'src/components/MessageDialog';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 
 const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNextStepToolTip, stepFullScreen, renderedFrom, allowedToEdit }) => {
-
+    const { state, dispatch } = useTableReducer();
+    const { selectedRecords } = state;
     const toastConfig = useContext(CustomToastContext);
     const [columns, setColumns] = useState(null);
     const [anchorActionEl, setAnchorActionEl] = useState(null);
     const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
-    const [rowsData, setRowsData] = useState(null);
-    const [selectedRecords, setSelectedRecords] = useState([]);
     const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
 
     useEffect(() => {
@@ -50,14 +44,14 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
                 accessor: 'index',
                 Header: 'Index',
                 width: 70,
-                sticky: isMobile ? 'none' : 'left',
+                sticky: 'left',
                 Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
             },
             {
                 accessor: 'type',
                 Header: 'Type',
                 disableFilters: true,
-                sticky: isMobile ? 'none' : 'left',
+                sticky: isMobile || isTablet ? 'none' : 'left',
                 width: 100,
                 Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
             },
@@ -67,7 +61,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
                 minWidth: 200,
                 width: 200,
                 sticky: isMobile ? 'none' : 'left',
-                Cell: ({ row, rows }) => (
+                Cell: ({ row }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <p className="text-truncate">{row.original?.detail}</p>
                         <Box ml={1}>
@@ -175,6 +169,8 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
     };
 
     const fetchRecords = async () => {
+        dispatch({ type: 'loading', loading: true });
+        dispatch({ type: 'selection', selectedRecords: [] });
         setNextStep(false);
         setNextStepToolTip(null);
         try {
@@ -222,7 +218,8 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
                     }
                 });
             }
-            setRowsData(rows);
+            dispatch({ type: 'initialize', data: rows, count: rows?.length });
+            dispatch({ type: 'loading', loading: false });
             if (rows?.every((e) => e[`${ticketType}TicketStatus`] === DELIVERY_TICKET_STATUS.delivered)) {
                 setNextStep(true);
                 setNextStepToolTip(null);
@@ -313,7 +310,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             }
             else if (action === subleaseActions.createReceivingTicket) {
                 if (e.hasOwnProperty('ReceivingTicketId')) {
-                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
+                    errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyCreated });
                 }
             }
             else if (action === subleaseActions.deliveredToWarehouse) {
@@ -408,25 +405,20 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
                 </Box>
             </Box>
             <Grid item xs={12} md={12} sm={12} className="mt-3">
-                {columns && rowsData ? (
-                    <>
-                        <Box zIndex={5} width={'100%'}>
-                            <CustomReactTable
-                                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-                                columns={columns}
-                                data={rowsData}
-                                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-                                onSelect={setSelectedRecords}
-                                childrenProperty="subRows"
-                                uniqueKey="_id"
-                                renderedFrom={renderedFrom}
-                                isClientSideGrid={true}
-                                hideExpander={true}
-                                hideSelection={!allowedToEdit}
-                                hideAction={true}
-                            />
-                        </Box>
-                    </>
+                {columns ? (
+                    <Box zIndex={5}>
+                        <CustomReactTable
+                            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+                            columns={columns}
+                            state={state}
+                            dispatch={dispatch}
+                            refreshGrid={fetchRecords}
+                            renderedFrom={renderedFrom}
+                            isClientSideGrid={true}
+                            hideSelection={!allowedToEdit}
+                            hideAction={true}
+                        />
+                    </Box>
                 ) : (
                     <Box p={2} height={500}>
                         <CommonSkeleton lenArray={[...Array(10).keys()]} />

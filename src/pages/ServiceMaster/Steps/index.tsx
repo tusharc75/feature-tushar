@@ -1,20 +1,18 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import { Box, Grid, IconButton, Menu, MenuItem, Paper, Typography, Button, Tooltip } from '@material-ui/core';
+import { useState, useEffect, useContext} from 'react';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import { Box, Grid, IconButton, Menu, MenuItem, Button } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import StepDialog from './StepDialog';
-import { getLocalStorageArrayData, serviceMaster } from 'src/constants/helpers';
+import {  serviceMaster } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from '../../../StateProvider/Provider';
 import { gridLoadingTimeout } from 'src/constants/helpers';
-import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import FieldDialog from './FieldDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -25,31 +23,183 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const Steps = ({ serviceId }) => {
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const toastConfig = useContext(CustomToastContext);
+
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, dataRows, page, limit, selectedRecords } = state;
+  const {
+    state: { permissions, user, selectedEntity }
+  }: any = useData();
 
   const [stepDialog, setStepDialog] = useState({ open: false, stepId: '' });
   const [stepFieldsDialog, setStepFieldsDialog] = useState({ open: false, stepIds: [] });
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
-
-  const {
-    state: { permissions, user, selectedEntity }
-  }: any = useData();
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
-  const toastConfig = useContext(CustomToastContext);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
-  const [columns, setColumns] = useState([
-    { field: 'stepName', headerName: 'Step Name', show: true, disabled: true, cellRenderer: 'stepNameRenderer' },
-    { field: 'order', headerName: 'Sequence', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'leadDay', headerName: 'Lead Time', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'costPrice', headerName: 'Cost Price', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'listPrice', headerName: 'List Price', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'fieldCount', headerName: 'Fields', show: true, cellRenderer: 'commonRenderer' }
-  ]);
+  const columns = [
+    {
+      accessor: 'stepName',
+      Header: 'Step Name',
+      minWidth: 150,
+      width: 150,
+      primaryField: true,
+      disabled: true,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.stepName ? (
+            <h5
+              title={row?.original?.stepName}
+              onClick={() => {
+                setStepDialog({ open: true, stepId: row?.original?._id });
+              }}
+              className="link text-truncate"
+            >
+              {row?.original?.stepName}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'order',
+      Header: 'Sequence',
+      minWidth: 150,
+      width: 150,
+      disabled: true,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.order ? (
+            <h5 className="text-truncate" title={row?.original?.order}>
+              {row?.original?.order}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'leadDay',
+      Header: 'Lead Time',
+      minWidth: 150,
+      width: 150,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.leadDay ? (
+            <h5 className="text-truncate" title={row?.original?.leadDay}>
+              {row?.original?.leadDay}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'costPrice',
+      Header: 'Cost Price',
+      minWidth: 150,
+      width: 150,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.costPrice ? (
+            <h5 className="text-truncate" title={row?.original?.costPrice}>
+              {row?.original?.costPrice}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'listPrice',
+      Header: 'List Price',
+      minWidth: 150,
+      width: 150,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.listPrice ? (
+            <h5 className="text-truncate" title={row?.original?.listPrice}>
+              {row?.original?.listPrice}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'fieldCount',
+      Header: 'Fields',
+      minWidth: 150,
+      width: 150,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.fieldCount ? (
+            <h5 className="text-truncate" title={row?.original?.fieldCount}>
+              {row?.original?.fieldCount}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 110,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          <HtmlTooltip title={'Edit'}>
+            <IconButton
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                setStepDialog({ open: true, stepId: row.original?._id });
+              }}
+            >
+              <EditIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
+
+          <HtmlTooltip title="Add Fields">
+            <IconButton
+              aria-label="setting"
+              onClick={(e) => {
+                setStepFieldsDialog({ open: true, stepIds: [row?.original?._id] });
+              }}
+              size="small"
+            >
+              <Build color="primary" fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+
+          <HtmlTooltip title={'Delete'}>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setShowConfirmBox({ open: true, ids: [row.original?._id] });
+              }}
+            >
+              <DeleteIcon fontSize="small" color={'error'} />
+            </IconButton>
+          </HtmlTooltip>
+        </>
+      )
+    }
+  ];
 
   useEffect(() => {
     fetchStepsData();
@@ -57,6 +207,7 @@ const Steps = ({ serviceId }) => {
 
   const fetchStepsData = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     axiosInstance()
       .get(`${serviceMaster.api}/steps/${serviceId}`)
       .then(({ data: { data } }) => {
@@ -116,65 +267,6 @@ const Steps = ({ serviceId }) => {
         setIsAssigning(false);
         toastConfig.setToastConfig(err);
       });
-  };
-
-  const ActionsRenderer = (params) =>
-    permissions?.serviceMaster?.isUpdate && (
-      <>
-        <HtmlTooltip title="Edit">
-          <IconButton
-            aria-label="setting"
-            onClick={(e) => {
-              setStepDialog({ open: true, stepId: params?.data?._id });
-            }}
-            size="small"
-          >
-            <EditIcon color="primary" fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-        <HtmlTooltip title="Add Fields">
-          <IconButton
-            aria-label="setting"
-            onClick={(e) => {
-              setStepFieldsDialog({ open: true, stepIds: [params?.data?._id] });
-            }}
-            size="small"
-          >
-            <Build color="primary" fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-        <HtmlTooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowConfirmBox({ open: true, ids: [params?.data?._id] });
-            }}
-          >
-            <DeleteIcon color="error" fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-      </>
-    );
-
-  const StepNameRenderer = (params) =>
-    params?.value ? (
-      <p
-        onClick={() => {
-          setStepDialog({ open: true, stepId: params?.data?._id });
-        }}
-        className="link text-truncate"
-      >
-        {params.value}
-      </p>
-    ) : (
-      <NoDataCell />
-    );
-
-  const frameworkComponents = {
-    stepNameRenderer: StepNameRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer
   };
 
   const openActions = (event) => {
@@ -269,49 +361,22 @@ const Steps = ({ serviceId }) => {
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
                   recordsToExport={selectedRecords.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
+                  ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
                   additionalParams={`serviceId=${serviceId}`}
                 />
-                {/* <ImportExportMenu
-                  permissions={permissions?.serviceMaster}
-                  module="Service Master Steps"
-                  api={`${serviceMaster.api}/steps/${serviceId}`}
-                  afterImportCompleted={() => {
-                    fetchStepsData();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  ids={[]}
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchStepsData();
-                  }}
-                /> */}
               </Box>
             </Grid>
           </Grid>
         </Box>
       )}
-      {columns && frameworkComponents ? (
-        <CustomAgGrid
-          allowSelection={permissions?.serviceMaster?.isUpdate}
-          allowAction={permissions?.serviceMaster?.isUpdate}
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
           columns={columns}
-          dataRows={dataRows}
-          isClientSideGrid={true}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
+          state={state}
           dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={loading}
           renderedFrom={renderedFrom}
+          isClientSideGrid={true}
           refreshGrid={fetchStepsData}
         />
       ) : (
