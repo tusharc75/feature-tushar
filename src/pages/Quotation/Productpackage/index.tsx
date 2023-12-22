@@ -367,16 +367,14 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       if (addDialog.type !== 'serializedAsset') {
         element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
         element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-        if (quotationData?.estimateStartDate) {
+        if (quotationData?.estimateStartDate && quotationData?.estimateEndDate) {
           element.estimateStartDate = quotationData?.estimateStartDate;
-        }
-        if (quotationData?.estimateEndDate) {
           element.estimateEndDate = quotationData?.estimateEndDate;
-        }
-        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-        element.estimateJobDuration = 1;
-        if (calValues && calValues['estimateJobDuration']) {
-          element.estimateJobDuration = calValues['estimateJobDuration'];
+          const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+          element.estimateJobDuration = 1;
+          if (calValues && calValues['estimateJobDuration']) {
+            element.estimateJobDuration = calValues['estimateJobDuration'];
+          }
         }
       }
       element.qty = d.qty ? parseFloat(d.qty) : 1;

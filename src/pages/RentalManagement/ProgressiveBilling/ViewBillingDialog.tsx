@@ -22,8 +22,10 @@ import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess }) => {
+
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_view_invoice`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -37,6 +39,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [allFields, setAllFields] = useState([]);
 
 
   useEffect(() => {
@@ -55,6 +58,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
+      setAllFields(JSON.parse(JSON.stringify(data)));
       const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
       let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
@@ -102,7 +106,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           accessor: 'detail',
           Header: 'Details',
           minWidth: 300,
-          disabled : true,
+          disabled: true,
           width: 300,
           sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) => (
@@ -281,12 +285,12 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   const handleSaveData = async (rows: any) => {
     const data = {
       invoiceId: invoiceData?._id,
-      materialId: rows[0]?.materialId,
-      qty: rows[0]?.qty
+      _id: rows[0]?._id,
     };
+    const calValues = autoCalculateSpecificFields({ qty: rows[0]?.qty }, isProductEdit.rowData, allFields);
+    Object.assign(data, calValues);
     setIsLoadingUpdate(true);
-    axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/update-qty`, data)
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/update-qty`, data)
       .then((res) => {
         setIsLoadingUpdate(false);
         setIsProductEdit({ open: false, rowData: null });
