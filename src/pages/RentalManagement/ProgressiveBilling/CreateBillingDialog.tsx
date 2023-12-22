@@ -58,7 +58,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [proRata, setProRata] = useState(true);
 
   const { state, dispatch } = useTableReducer();
-  const { selectedRecords } = state;
+  const { selectedRecords, dataRows } = state;
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -98,7 +98,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         sticky: isMobile || isTablet ? 'none' : 'left',
         disabled: true,
         width: 200,
-        disableFilters : true,
+        disableFilters: true,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -122,7 +122,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       {
         accessor: 'detail',
         Header: 'Details',
-        disabled : true,
+        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         minWidth: 300,
         width: 300,
@@ -260,10 +260,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     let newMaterial: any = [];
     data?.material?.forEach((d) => {
-      if (d?.type === 'service' && d?.parentId === null && !d?.actualStartDate) {
-        d['actualStartDate'] = d?.estimateStartDate;
+      if (d?.type === MATERIAL_TYPE.service && d?.parentId === null && !d?.actualStartDate) {
+        d['actualStartDate'] = new Date(d?.estimateStartDate).toISOString();
       }
-      if (d?.type === 'package' && d?.packageDetail?.packageType === 'Service' && d?.parentId === null && !d?.actualStartDate) {
+      else if (d?.type === MATERIAL_TYPE.package && d?.packageDetail?.packageType === 'Service' && d?.parentId === null && !d?.actualStartDate) {
         d['actualStartDate'] = d?.estimateStartDate;
       }
       if (returnTicketProducts[d?.materialId] > 0) {
@@ -274,57 +274,52 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       }
     });
 
-    data?.material
-      ?.filter((d) => d?.actualStartDate && d?.parentId === null && d?.type === 'product' && d?.productDetail?.serializedProduct)
+    data?.material?.filter((d) => d?.actualStartDate && d?.parentId === null && d?.type === MATERIAL_TYPE.product && d?.productDetail?.serializedProduct)
       ?.forEach((element) => {
-        data?.inventory
-          ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
-          ?.forEach((ele: any) => {
-            ele.type = 'serializedAsset';
-            ele.qty = 1;
-            ele._id = ele?.inventoryDetail?._id;
-            ele.materialId = ele?.inventoryDetail?._id;
-            ele.description = `${element?.productDetail?.productName}-${element?.productDetail?.productDescription || ''}`;
-            let values = { qty: 1 };
-            values['actualStartDate'] = ele?.manualStartDate;
-            values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
-            values['manualEndDate'] = ele?.manualEndDate;
-            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-            const { materialId, qty, type, _id, ...rest } = element;
-            newMaterial.push({ ...rest, ...ele, ...calValues });
-          });
-      });
-
-    data?.material
-      ?.filter((d) => d.actualStartDate)
-      ?.forEach((element) => {
-        if (element?.parentId === null && element?.type === 'product' && element?.productDetail?.serializedProduct) {
-        } else {
-          let values: any = {};
-          values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
-          values['manualEndDate'] = element?.actualEndDate;
+        data?.inventory?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)?.forEach((ele: any) => {
+          ele.type = 'serializedAsset';
+          ele.qty = 1;
+          ele._id = ele?.inventoryDetail?._id;
+          ele.materialId = ele?.inventoryDetail?._id;
+          ele.description = `${element?.productDetail?.productName}-${element?.productDetail?.productDescription || ''}`;
+          let values = { qty: 1 };
+          values['actualStartDate'] = ele?.manualStartDate;
+          values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
+          values['manualEndDate'] = ele?.manualEndDate;
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-          newMaterial.push({ ...element, ...calValues });
-
-          if (element?.type === 'product' && element?.productDetail?.serializedProduct) {
-            data?.inventory
-              ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
-              ?.forEach((ele: any) => {
-                ele.parentId = element?._id;
-                ele.type = 'serializedAsset';
-                ele.qty = 1;
-                ele._id = ele?.inventoryDetail?._id;
-                ele.materialId = ele?.inventoryDetail?._id;
-                let values = { qty: 1 };
-                values['actualStartDate'] = ele?.manualStartDate;
-                values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
-                const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-                const { materialId, qty, type, _id, ...rest } = element;
-                newMaterial.push({ ...rest, ...ele, ...calValues });
-              });
-          }
-        }
+          const { materialId, qty, type, _id, ...rest } = element;
+          newMaterial.push({ ...rest, ...ele, ...calValues });
+        });
       });
+
+    data?.material?.filter((d) => d.actualStartDate)?.forEach((element) => {
+      if (element?.parentId === null && element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
+      } else {
+        let values: any = {};
+        values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
+        values['manualEndDate'] = element?.actualEndDate;
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        newMaterial.push({ ...element, ...calValues });
+
+        if (element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
+          data?.inventory
+            ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
+            ?.forEach((ele: any) => {
+              ele.parentId = element?._id;
+              ele.type = 'serializedAsset';
+              ele.qty = 1;
+              ele._id = ele?.inventoryDetail?._id;
+              ele.materialId = ele?.inventoryDetail?._id;
+              let values = { qty: 1 };
+              values['actualStartDate'] = ele?.manualStartDate;
+              values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
+              const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+              const { materialId, qty, type, _id, ...rest } = element;
+              newMaterial.push({ ...rest, ...ele, ...calValues });
+            });
+        }
+      }
+    });
 
     if (additionalCostData.length > 0) {
       additionalCostData.forEach((element) => {
@@ -337,7 +332,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     data.material = newMaterial;
 
-    if (invoiceData) {
+    if (invoiceData?.length) {
       data.material = data?.material
         ?.map((e) => {
           let materialData: any = { ...e };
@@ -356,7 +351,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
             let values = { qty: materialData.qty - tempTotalPrevQty };
             const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
-
             materialData = { ...materialData, ...calValues };
           }
 
@@ -367,6 +361,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           } else {
             materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
           }
+          materialData.actualStartDate = new Date(materialData.actualStartDate)?.toISOString()
+
           const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
           if (row) {
             const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
@@ -376,7 +372,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         })
         .filter((d) => d.qty > 0);
     }
-
     setMaterial(data?.material);
     setOrginalMaterial(data?.material);
     initializeTable(data?.material);
@@ -463,7 +458,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const handleApplyDate = async () => {
     let tempValues: any = { actualEndDate: endDate };
-
     var inUseStandByDays = [];
     if (user?.user?.brandPolicy?.assetDeliveredStatus) {
       const assetList: any = [];
@@ -587,9 +581,15 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const handleSaveData = async (rows: any) => {
     rows[0].isAppliedBill = true;
-    let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
-    setMaterial(tempRows);
-    initializeTable(tempRows);
+    const tempMaterial = [...material];
+    tempMaterial?.forEach((e) => {
+      const row = rows?.find((ele) => ele._id === e._id);
+      if (row) {
+        Object.assign(e, row);
+      }
+    })
+    setMaterial(tempMaterial);
+    initializeTable(tempMaterial);
     setRowsApplied((prevState) => {
       let prevRowsApplied = prevState.filter((obj) => !rows.map((d) => d._id).includes(obj._id));
       return [...prevRowsApplied, ...rows];
@@ -630,6 +630,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         toastConfig.setToastConfig(error);
       });
   };
+
 
   return (
     <Fragment>

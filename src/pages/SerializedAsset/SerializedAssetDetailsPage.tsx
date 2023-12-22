@@ -86,12 +86,10 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { ids: [id] });
       if (data.totalUtilization) {
-        data[`totalUtilizationDays`] = round(moment.duration(data.totalUtilization).asDays());
         data[`totalUtilizationHours`] = `${round(moment.duration(data?.totalUtilization).asHours())}:${Math.floor(moment.duration(data?.totalUtilization).asMinutes() % 60)}`;
         delete data?.totalUtilization
       }
       if (data.totalInUseTimeAfterLastRepair) {
-        data[`totalInUseTimeAfterLastRepairDays`] = round(moment.duration(data.totalInUseTimeAfterLastRepair).asDays());
         data[`totalInUseTimeAfterLastRepairHours`] = `${round(moment.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(moment.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}`;
         delete data?.totalInUseTimeAfterLastRepair
       }
