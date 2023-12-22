@@ -739,7 +739,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
             state={state}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}

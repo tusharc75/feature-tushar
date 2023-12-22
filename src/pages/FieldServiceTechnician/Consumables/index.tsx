@@ -101,18 +101,6 @@ const Consumables = ({ selectedFieldService, recall }) => {
                 height={'calc(100vh - 290px)'}
                 showSelectAll={true}
               />
-              {/* <CustomReactTable
-                height={'calc(100vh - 345px)'}
-                columns={columns}
-                data={dataRows}
-                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-                onSelect={setSelectedRecords}
-                childrenProperty="subRows"
-                uniqueKey="_id"
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-                hideExpander={true}
-              /> */}
             </Box>
           ) : (
             <Box p={2} height={500}>

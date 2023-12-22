@@ -345,7 +345,6 @@ function Product({ id }) {
           columns={columns}
           state={state}
           dispatch={dispatch}
-          setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           refreshGrid={fetchData}

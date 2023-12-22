@@ -662,10 +662,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 fetchData();
               }}
               isExportAllOrSomeFeature={true}
-              ids={[]}
               title={'Consumables'}
-              additionalParams={`workOrderIds=${JSON.stringify(selectedRecords?.length ? selectedRecords?.map((e) => e?.workOrder?._id)
-                : dataRows?.map((e) => e?.workOrder?._id))}`}
+              recordsToExport={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).length}
+              ids={[]}
+              additionalParams={`workOrderIds=${JSON.stringify(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length ?
+                selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.map((e) => e?.workOrder?._id)
+                : dataRows?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).map((e) => e?.workOrder?._id))}`}
             />
             <Box ml={1}></Box>
             <Button

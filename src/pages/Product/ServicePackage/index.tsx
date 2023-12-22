@@ -95,7 +95,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
-      <>
+      <div>
         {permissions?.product?.isUpdate && (
           <HtmlTooltip title={row?.original?.default ? 'Remove Default' : 'Set Default'}>
             <span>
@@ -109,12 +109,11 @@ const ServicePackage = ({ renderedFrom, productId }) => {
                   });
                 }}
               >
-                {row?.original?.default ? <FcApproval /> : <HiBadgeCheck />}
+                {row?.original?.default ? <FcApproval fontSize={'23px'} /> : <HiBadgeCheck fontSize={'23px'} />}
               </IconButton>
             </span>
           </HtmlTooltip>
         )}
-
         <HtmlTooltip title={permissions?.product?.isUpdate ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
@@ -130,7 +129,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
             </IconButton>
           </span>
         </HtmlTooltip>
-      </>
+      </div>
     )
   };
 

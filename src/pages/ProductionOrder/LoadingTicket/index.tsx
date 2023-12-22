@@ -330,7 +330,6 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               state={state}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               dispatch={dispatch}
               renderedFrom={renderedFrom}
               refreshGrid={fetchRecords}

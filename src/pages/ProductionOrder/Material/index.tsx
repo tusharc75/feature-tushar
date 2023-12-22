@@ -234,13 +234,13 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       parent.detail = parent?.detail
         ? parent?.detail
         : parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.packageDetail?.packageName;
+          ? parent.productDetail?.productName
+          : parent.packageDetail?.packageName;
       parent.description = parent?.description
         ? parent?.description
         : parent.type === MATERIAL_TYPE.product
-        ? parent?.productDetail?.productDescription
-        : parent?.packageDetail?.packageDescription;
+          ? parent?.productDetail?.productDescription
+          : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.canDelete = parent?.workOrder ? false : true;
@@ -279,13 +279,13 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       _subRow.detail = _subRow?.detail
         ? _subRow?.detail
         : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.packageDetail?.packageName;
+          ? _subRow.productDetail?.productName
+          : _subRow.packageDetail?.packageName;
       _subRow.description = _subRow?.description
         ? _subRow?.description
         : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productDescription
-        : _subRow?.packageDetail?.packageDescription;
+          ? _subRow?.productDetail?.productDescription
+          : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
@@ -469,7 +469,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 fetchData();
               }}
               isExportAllOrSomeFeature={true}
-              // ids={[]}
               recordsToExport={selectedRecords.length}
               ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
             />
@@ -535,7 +534,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               state={state}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               dispatch={dispatch}
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}

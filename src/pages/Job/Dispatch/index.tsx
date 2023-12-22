@@ -40,7 +40,7 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
-        disabled : true,
+        disabled: true,
         width: 300,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
@@ -222,19 +222,18 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
         </>
       </Box>
       <Box mt={1}>
-        {columns? (
+        {columns ? (
           <Box zIndex={5}>
             <CustomReactTable
               height={'calc(100vh - 395px)'}
               columns={columns}
-              state = {state}
-              dispatch = {dispatch}
-              refreshGrid = {fetchJobData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+              state={state}
+              dispatch={dispatch}
+              refreshGrid={fetchJobData}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               hideSelection={true}
-              expander = {true}
+              expander={true}
               hideAction={true}
             />
           </Box>

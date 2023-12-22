@@ -258,7 +258,6 @@ const AddCost = ({ fieldTicketData, setNextStep, allowedToEdit }) => {
             columns={columns}
             state={state}
             dispatch={dispatch}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
             onSaveEdit={onSaveInlineEdit}
             renderedFrom={renderedFrom}
             hideAction={!allowedToEdit}
