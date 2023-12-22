@@ -7,7 +7,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import AssignRolesDialog from '../../components/AssignRolesDialog/AssignRolesDialog';
 import CustomContainer from '../../components/CustomContainer';
@@ -37,7 +37,7 @@ const User: FC = () => {
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions }
@@ -134,15 +134,8 @@ const User: FC = () => {
     axiosInstance()
       .get(`/field?resource=User&view=true`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.userDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...extraColumns, ...getStaticFields(), ActionsRenderer];
-        setColumns(columns);
+        const newColumns = generateColumns(renderedFrom, data, routes.userDetail.path, true);
+        setColumns([...newColumns, ...extraColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

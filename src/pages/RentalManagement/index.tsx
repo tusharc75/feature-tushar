@@ -5,13 +5,7 @@ import { useHistory, Link } from 'react-router-dom';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, {
-  checkStaticField,
-  getStaticFields,
-  gridFilterParser,
-  useColumns,
-  useTableReducer
-} from 'src/components/CustomReactTableNew';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -57,7 +51,7 @@ const RentalManagement = () => {
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -108,7 +102,7 @@ const RentalManagement = () => {
       width: 100,
       disableFilters: true,
       disableSortBy: true,
-      Cell: ({ row }) => (row?.original?.['subleaseAssets'] ? 'Yes' : 'No')
+      Cell: ({ row }) => <div>{row?.original?.subleaseAssets ? 'Yes' : 'No'}</div>
     }
   ];
 
@@ -146,43 +140,34 @@ const RentalManagement = () => {
       }
     }
 
-    let columns = [];
-    data.forEach((o) => {
-      if (o?.fieldData?.fieldName === 'rentalJobName') {
-        columns = [
-          ...columns,
-          {
-            accessor: o?.fieldData?.fieldName,
-            Header: o?.fieldData?.fieldLabel,
-            minWidth: 180,
-            width: 180,
-            Cell: ({ row }) => (
-              <>
-                <Link className="link text-truncate" title={row?.original[o?.fieldData?.fieldName]} to={`${routes.rentalManagement.path}/detail/${row?.original?._id}`}>
-                  {row?.original[o?.fieldData?.fieldName]}
-                </Link>
-                {row?.original?.assetsNotReceivedInPo && (
-                  <Box ml={1}>
-                    <HtmlTooltip title={`Assets on PO not received`}>
-                      <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
-                    </HtmlTooltip>
-                  </Box>
-                )}
-              </>
-            )
-          }
-        ];
+    let newColumns = generateColumns(renderedFrom, data, routes.rentalManagementDetail.path, true);
+
+    newColumns?.forEach((o) => {
+      if (o.accessor === 'rentalJobName') {
+        o.cell = ({ row }) => (
+          <div>
+            <Link
+              className="link text-truncate"
+              title={row?.original?.rentalJobName}
+              to={`${routes.rentalManagement.path}/detail/${row?.original?._id}`}
+            >
+              {row?.original?.rentalJobName}
+            </Link>
+            {row?.original?.assetsNotReceivedInPo && (
+              <Box ml={1}>
+                <HtmlTooltip title={`Assets on PO not received`}>
+                  <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                </HtmlTooltip>
+              </Box>
+            )}
+          </div>
+        );
       } else {
-        let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.rentalManagementDetail.path, true);
-        if (currentColumn !== null) {
-          if (isOffline) {
-            currentColumn.columnData['filter'] = false;
-            currentColumn.columnData['sortable'] = false;
-          }
-          columns = [...columns, currentColumn?.columnData]
+        if (isOffline) {
+          o['disableFilters'] = true;
+          o['disableSortBy'] = true;
         }
       }
-      return o?.fieldData;
     });
 
     let staticFields: any = getStaticFields();
@@ -190,9 +175,9 @@ const RentalManagement = () => {
       staticFields = [...extraColumns, ...staticFields];
     }
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(renderedFrom, field));
+      newColumns.push(checkStaticField(renderedFrom, field));
     });
-    setColumns([...columns, ActionsRenderer]);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -305,9 +290,10 @@ const RentalManagement = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
+      return () => clearTimeout(timeout);
     }
   };
 

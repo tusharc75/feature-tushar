@@ -7,18 +7,20 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import Analysis from './Analysis';
 import axiosInstance from 'src/axios/axiosInstance';
-import { serializedAsset } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, serializedAsset } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import Current from './Current';
 import DataSimulationDialog from './DataSimulation';
 import Status from './Status';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import Alarms from './Alarms';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const IotChartDetail = () => {
   const toastConfig = useContext(CustomToastContext);
   const { assetId } = useParams();
-  const [customizedRoutes, setCustomizedRoutes] = useState([]);
+  const [assetData, setAssetData] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [dataPoints, setDataPoints] = useState([]);
   const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
@@ -31,9 +33,9 @@ const IotChartDetail = () => {
   useEffect(() => {
     if (deviceTemplate) {
       const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
-      const deepFilter = [{ field: 'active', term: 'yes' }];
+      const deepFilter = [{ field: 'active', term: 'yes' }, { field: 'alarm', term: 'no' }];
       axiosInstance()
-        .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&deepFilter=${JSON.stringify(deepFilter)}&filterType=and`)
+        .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&deepFilter=${JSON.stringify(deepFilter)}&sortBy=order&orderBy=asc&filterType=and`)
         .then(({ data: { data } }) => {
           setDataPoints(data?.data);
         });
@@ -45,7 +47,7 @@ const IotChartDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/iot-chart${serializedAsset.api}/${assetId}`);
-      setCustomizedRoutes([routes.iotChart, { title: `${data?.assetNumber ?? ''}` }]);
+      setAssetData(data);
       setDeviceTemplate(data?.deviceTemplates?._id);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -67,18 +69,27 @@ const IotChartDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1 flex flex-row justify-between">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[routes.iotChart, { title: `${assetData?.assetNumber ?? ''}` }]} />
         </Box>
-        <Button
-          onClick={() => {
-            setOpenDataSimulationDialog(!openDataSimulationDialog);
-          }}
-          variant="contained"
-          color="primary"
-          size="small"
-        >
-          Data Simulation
-        </Button>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            <Button
+              onClick={() => {
+                setOpenDataSimulationDialog(!openDataSimulationDialog);
+              }}
+              variant="outlined"
+              color="primary"
+              size="small"
+            >
+              Data Simulation
+            </Button>
+            <ActivityButton
+              referenceId={assetData?._id}
+              resource={ACTIVITY_RESOURCE.serializedAsset}
+              resourceLabel={assetData?.assetNumber}
+            />
+          </Box>
+        </Box>
       </Box>
       {deviceTemplate ? (
         <Box className={`detail-container-v1`}>
@@ -98,19 +109,21 @@ const IotChartDetail = () => {
             }}
           >
             <Tab className={'tabLayout'} value={0} label={<div className="d-flex align-items-center tab-font">Current</div>} {...a11yProps(0)} />
-            <Tab className={'tabLayout'} value={1} label={<div className="d-flex align-items-center tab-font">Analysis</div>} {...a11yProps(1)} />
+            {/* <Tab className={'tabLayout'} value={1} label={<div className="d-flex align-items-center tab-font">Analysis</div>} {...a11yProps(1)} /> */}
             <Tab
               className={'tabLayout'}
               value={2}
               label={<div className="d-flex align-items-center tab-font">Performance Analysis</div>}
               {...a11yProps(2)}
             />
-            <Tab className={'tabLayout'} value={3} label={<div className="d-flex align-items-center tab-font">Status</div>} {...a11yProps(3)} />
+            <Tab className={'tabLayout'} value={3} label={<div className="d-flex align-items-center tab-font">Alarms</div>} {...a11yProps(3)} />
+            <Tab className={'tabLayout'} value={4} label={<div className="d-flex align-items-center tab-font">Status</div>} {...a11yProps(4)} />
           </Tabs>
-          {tabValue === 0 && <Current assetId={assetId} />}
-          {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />}
-          {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} />}
-          {tabValue === 3 && <Status assetId={assetId} dataPoints={dataPoints} />}
+          {tabValue === 0 && <Current deviceTemplate={deviceTemplate} assetId={assetId} />}
+          {/* {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />} */}
+          {tabValue === 2 && <PerformanceAnalysis deviceTemplate={deviceTemplate} assetId={assetId} dataPoints={dataPoints} />}
+          {tabValue === 3 && <Alarms deviceTemplate={deviceTemplate} assetId={assetId} />}
+          {tabValue === 4 && <Status assetId={assetId} dataPoints={dataPoints} />}
         </Box>
       ) : (
         <Box p={2} height={500}>

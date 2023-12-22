@@ -1,6 +1,5 @@
-import { useState, useReducer, Fragment, useContext, useEffect, FC } from 'react';
+import { useState, Fragment, useContext, useEffect, FC } from 'react';
 import { Button, Box, MenuItem, Menu, IconButton } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -13,7 +12,9 @@ import {
   DELIVERY_FROM_TO_TYPE,
   serializedAsset,
   prepareDataForGrid,
-  ASSET_STATUS
+  ASSET_STATUS,
+  TRANSFER_ASSET_STATUS,
+  COLOUR_MASTER
 } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -25,19 +26,16 @@ import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSe
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import PreviewDownload from 'src/components/PreviewDownload';
-import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import { Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 interface LoadingGridProps {
   permissions: any;
   transferAssetData?: any;
   transferAssetId: string | any;
   setNextStep: any;
-  setPrevStep: any;
   currentStep: number;
   setTickets?: any;
   setExistingAssets?: any;
@@ -67,24 +65,19 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     stepFullScreen
   } = props;
   const toastConfig = useContext(CustomToastContext);
-
+  const { generateColumns } = useColumns();
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
-
-  const history = useHistory();
-
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
-  const [dataRows, setDataRows] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
-
-  const { getColumnData } = useColumns();
 
   useEffect(() => {
     if (transferAssetId) {
@@ -98,17 +91,15 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
     if (dataRows?.length) {
-      const inventoryDelivered = dataRows?.filter((asset: any) => asset['loadingTicketStatus'] === 'Delivered');
-      const inventoryLost = dataRows?.filter((asset: any) => asset?.status === 'Lost');
-      if (inventoryDelivered.length > 0) {
+      if (dataRows?.filter((asset: any) => asset['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered).length > 0) {
         setNextStep(true);
       } else {
         setNextStep(false);
       }
       if (transferAssetData?.transferType === 'Internal') {
-        if (inventoryDelivered.length === dataRows?.filter((d) => d.status !== 'Lost').length || inventoryLost.length === dataRows?.length) {
+        if (dataRows?.every((e) => e['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered)) {
           setTransferIsEnded(true);
-          updateTransferStatus('Completed');
+          updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
         } else {
           setTransferIsEnded(false);
         }
@@ -121,87 +112,67 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data
-          ?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))
-          ?.forEach((o) => {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-            if (currentColumn !== null) {
-              if (o?.fieldData?.fieldName === 'assetNumber') {
-                const assetNumberColumn = {
-                  accessor: o?.fieldData?.fieldName,
-                  Header: o?.fieldData?.fieldLabel,
-                  width: 300,
-                  sticky: isMobile ? 'none' : 'left',
-                  primaryField: true,
-                  Cell: ({ row }) =>
-                    row?.original?.assetNumber ? (
-                      <div className="d-flex gap-2 align-items-center">
-                        <p> {row.original[o?.fieldData?.fieldName]}</p>
-                        <Box ml={1}>
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
-                            }}
-                          >
-                            <OpenInNewIcon fontSize="small" color="primary" />
-                          </IconButton>
-                        </Box>
-                        {row?.original?.isReplaced && (
-                          <Box>
-                            <HtmlTooltip
-                              enterTouchDelay={0}
-                              title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}
-                            >
-                              <InfoIcon fontSize="small" color={'primary'} />
-                            </HtmlTooltip>
-                          </Box>
-                        )}
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    ),
-                  setCellClassNames: (row) => {
-                    if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.status)) {
-                      return 'error';
-                    }
-                    if (row?.isReplaced) {
-                      return 'isPurchaseOrder';
-                    }
-                  }
-                };
-                columns = [...columns, assetNumberColumn];
-              } else if (o?.fieldData?.fieldName === 'product') {
-                const productTypeColumn = {
-                  accessor: o?.fieldData?.fieldName,
-                  Header: o?.fieldData?.fieldLabel,
-                  width: 300,
-                  Cell: ({ row }) =>
-                    row?.original[o?.fieldData?.fieldName] ? (
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <p> {row.original[o?.fieldData?.fieldName]}</p>
-                        <Box ml={1}>
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              window.open(`${routes.productDetail.path}/${row.original?.productId}`);
-                            }}
-                          >
-                            <OpenInNewIcon fontSize="small" color="primary" />
-                          </IconButton>
-                        </Box>
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    )
-                };
-                columns = [...columns, productTypeColumn];
-              } else {
-                columns = [...columns, currentColumn?.columnData];
-              }
-            }
-          });
+        const newColumns = generateColumns(
+          renderedFrom,
+          data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
+          false
+        );
+        newColumns?.forEach((o) => {
+          if (o?.accessor === 'assetNumber') {
+            o.cell = ({ row }) =>
+              row?.original?.assetNumber ? (
+                <div className="d-flex gap-2 align-items-center" style={{
+                  backgroundColor:
+                    row?.original?.isReplaced
+                      ? COLOUR_MASTER.replaceAssetColor.background
+                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status) ? COLOUR_MASTER.lostAssets.background
+                        : '',
+                }}>
+                  <p> {row.original?.assetNumber}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                  {row?.original?.isReplaced && (
+                    <Box>
+                      <HtmlTooltip enterTouchDelay={0} title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
+                        <InfoIcon fontSize="small" color={'primary'} />
+                      </HtmlTooltip>
+                    </Box>
+                  )}
+                </div>
+              ) : (
+                <NoDataCell />
+              );
+          }
+          else if (o?.accessor === 'product') {
+            o.cell = ({ row }) =>
+              row?.original?.product ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p> {row.original?.product}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
+          }
+        });
+
         const column = [
           {
             accessor: 'index',
@@ -210,7 +181,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             sticky: isMobile ? 'none' : 'left',
             Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
           },
-          ...columns,
+          ...newColumns,
           {
             accessor: 'loadingTicket',
             Header: 'Loading Ticket',
@@ -247,6 +218,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   };
 
   const fetchAssetsData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     await fetchFields();
     try {
       const result = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`);
@@ -284,8 +257,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         };
       });
       setExistingAssets(assetData);
-      setDataRows(assetData);
-      setSelectedRecords(assetData?.filter((f) => f.isChecked === true));
+      dispatch({ type: 'initialize', data: assetData, count: assetData?.length });
+      dispatch({ type: 'loading', loading: false });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -491,7 +464,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                       !canReceive ||
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       setShowConfirmBoxReceive(true);
@@ -505,7 +478,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     disabled={
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       const products = [];
@@ -530,9 +503,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   </MenuItem>
 
                   {permissions?.transferAsset?.isUpdate &&
-                  selectedRecords.length &&
-                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                    ?.length === selectedRecords?.length ? (
+                    selectedRecords.length &&
+                    selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                      ?.length === selectedRecords?.length ? (
                     <MenuItem
                       onClick={() => {
                         setShowConfirmBox(true);
@@ -549,20 +522,18 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         )}
       </Box>
       <Box mt={1}>
-        {columns && dataRows ? (
+        {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={dataRows}
-              onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              state={state}
+              dispatch={dispatch}
               hideSelection={!allowedToEdit}
               hideAction={true}
+              refreshGrid={fetchAssetsData}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideExpander={true}
             />
           </Box>
         ) : (
@@ -636,3 +607,4 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 };
 
 export default LoadingTicketGrid;
+

@@ -17,7 +17,7 @@ import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicD
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -51,7 +51,7 @@ const SerializedAsset = () => {
   const history = useHistory();
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { permissions, selectedEntity }
@@ -159,54 +159,41 @@ const SerializedAsset = () => {
             return true;
           }
         });
-        let columns = [];
-        data.forEach((o) => {
-          if (o?.fieldData?.fieldName === 'assetNumber') {
-            columns = [
-              ...columns,
-              {
-                accessor: o?.fieldData?.fieldName,
-                Header: o?.fieldData?.fieldLabel,
-                minWidth: 180,
-                width: 180,
-                Cell: ({ row }) => (
-                  <div
-                    style={{
-                      backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                        row?.original?.status
-                      )
-                        ? COLOUR_MASTER.lostAssets.background
-                        : ''
-                    }}
-                  >
-                    <Link
-                      className="link text-truncate"
-                      title={row?.original[o?.fieldData?.fieldName]}
-                      to={`${routes.serializedAssetDetail.path}/${row?.original?._id}`}
-                    >
-                      {row?.original[o?.fieldData?.fieldName]}
-                    </Link>
-                    {(row?.original?.recertDate && new Date(row?.original?.recertDate)?.getTime() <= new Date()?.getTime()) ||
-                      (row?.original?.certificateExpiryDate && new Date(row?.original?.certificateExpiryDate)?.getTime() <= new Date()?.getTime() && (
-                        <Box ml={1}>
-                          <HtmlTooltip title="Asset needs to be recert">
-                            <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
-                          </HtmlTooltip>
-                        </Box>
-                      ))}
-                  </div>
-                )
-              }
-            ];
-          } else {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path, true);
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-            }
+        let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
+
+        newColumns?.forEach((o) => {
+          if (o?.accessor === 'assetNumber') {
+            o.cell = ({ row }) => (
+              <div
+                style={{
+                  backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
+                    row?.original?.status
+                  )
+                    ? COLOUR_MASTER.lostAssets.background
+                    : ''
+                }}
+              >
+                <Link
+                  className="link text-truncate"
+                  title={row?.original?.assetNumber}
+                  to={`${routes.serializedAssetDetail.path}/${row?.original?._id}`}
+                >
+                  {row?.original?.assetNumber}
+                </Link>
+                {(row?.original?.recertDate && new Date(row?.original?.recertDate)?.getTime() <= new Date()?.getTime()) ||
+                  (row?.original?.certificateExpiryDate && new Date(row?.original?.certificateExpiryDate)?.getTime() <= new Date()?.getTime() && (
+                    <Box ml={1}>
+                      <HtmlTooltip title="Asset needs to be recert">
+                        <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                      </HtmlTooltip>
+                    </Box>
+                  ))}
+              </div>
+            );
           }
         });
 
-        columns.push({
+        newColumns.push({
           accessor: 'ownerType',
           Header: 'Actual Owner Type',
           minWidth: 150,
@@ -224,7 +211,7 @@ const SerializedAsset = () => {
           )
         });
 
-        columns.push({
+        newColumns.push({
           accessor: 'owner',
           Header: 'Actual Owner',
           minWidth: 150,
@@ -242,8 +229,7 @@ const SerializedAsset = () => {
           )
         });
 
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns(columns);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

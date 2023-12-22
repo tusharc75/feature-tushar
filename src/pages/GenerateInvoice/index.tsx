@@ -4,7 +4,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { camelCase, map, uniq } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, INVOICE_STATUS, FIELD_TICKET_STATUS } from 'src/constants/helpers';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
@@ -78,7 +78,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
 
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
   const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null });
@@ -121,15 +121,8 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     setColumns(null);
     const response = await axiosInstance().get(`/field?resource=${selectedResource.resource}`);
     let data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, selectedResource?.path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, selectedResource?.path);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = async () => {

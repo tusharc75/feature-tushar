@@ -5,7 +5,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, CircularProgress } from '@material-ui/core';
 import SearchBox from '../../../components/Helpers/SearchBox';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, CustomDialogTransition, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Dialog from '@material-ui/core/Dialog/Dialog';
@@ -24,7 +24,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
   }: any = useData();
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
@@ -103,16 +103,8 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.warehouse}`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.warehouseDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields()];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true)
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
   const handleSearch = (e) => {

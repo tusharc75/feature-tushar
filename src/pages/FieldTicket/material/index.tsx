@@ -3,10 +3,10 @@ import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -17,20 +17,22 @@ import MaterialQtyDialog from './MaterialQtyDialog';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
 import Consumables from './Consumables';
 import { FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import { useData } from 'src/StateProvider/Provider';
+import { camelCase, isEmpty } from 'lodash';
 
-const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, handleChangeStatus }) => {
+const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeStatus }) => {
+
+  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
+
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState([]);
-  const [selectedServices, setSelectedServices] = useState([]);
   const [serviceDialog, setServiceDialog] = useState({ open: false, type: '' });
   const [allFields, setAllFields] = useState([]);
   const [isServiceEdit, setIsServiceEdit] = useState({ open: false, data: null, showSaveAndNext: false });
@@ -39,14 +41,15 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
-
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   const {
     state: { permissions }
   }: any = useData();
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   const fetchFields = async () => {
     setColumns(null);
@@ -57,7 +60,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
       });
     }
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, fieldTicketData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, fieldTicketData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -67,7 +70,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -78,15 +81,16 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
         Header: 'Details',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {!allowedToEdit ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
                 onClick={() => {
-                  openMaterial(row, rows);
+                  openMaterial(row, table.getRowModel().rows);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -134,13 +138,13 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) => {
+      Cell: ({ row, table }) => {
         return (
           <>
             <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
@@ -149,7 +153,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
                 aria-label="Delete"
                 disabled={!allowedToEdit}
                 onClick={() => {
-                  openMaterial(row, rows);
+                  openMaterial(row, table.getRowModel().rows);
                 }}
               >
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
@@ -177,6 +181,9 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
   };
 
   const fetchMaterial = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=service`);
     const data = response?.data?.data?.material;
 
@@ -196,8 +203,9 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
         setNextStep(true);
       }
     }
-    setRowsData(data);
-    setSelectedServices([]);
+
+    dispatch({ type: 'initialize', data: data, count: data?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const openMaterial = (data, rows) => {
@@ -231,7 +239,16 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
   };
 
   const handleAdd = async (rows) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
+    var taxCodeData: any = null;
+    if (fieldTicketData?.taxCode) {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.service}`);
+      if (data?.length) {
+        taxCodeData = data[0];
+      }
+    }
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -247,10 +264,21 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
       }
+      if (taxCodeData) {
+        element.taxCode = taxCodeData?.optionValue;
+        element.taxPercentage = taxCodeData?.taxRate || 0;
+      }
       material.push(element);
     });
-    //const priceData: any = await calculatePrice(fieldTicketData, material);
-    AddMaterial(material, null);
+    if (fieldTicketData?.pricingCondition?.optionValue) {
+      const priceData: any = await calculatePrice(fieldTicketData, material);
+      AddMaterial(
+        material,
+        priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue)
+      );
+    } else {
+      AddMaterial(material, null);
+    }
   };
 
   const AddMaterial = async (material, priceData) => {
@@ -284,11 +312,11 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
         }
         fetchMaterial();
         setServiceDialog({ open: false, type: '' });
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       });
   };
 
@@ -315,8 +343,8 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
       .then(() => {
         fetchMaterial();
         if (saveAndNext) {
-          const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
-          setIsServiceEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
+          setIsServiceEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
         } else {
           setIsServiceEdit({ open: false, data: null, showSaveAndNext: false });
         }
@@ -330,7 +358,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       if (parseInt(inputField?.qtyDisplay) === 0) {
         toastConfig.setToastConfig({
@@ -343,7 +371,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -403,7 +431,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
               size="small"
               id="demo-positioned-button"
               onClick={handleClick}
-              disabled={!Boolean(selectedServices?.length)}
+              disabled={!Boolean(selectedRecords?.length)}
               endIcon={<BiChevronDown />}
               className="new-dropdown-v1"
             >
@@ -424,7 +452,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
                 horizontal: 'right'
               }}
             >
-              <HtmlTooltip title={Boolean(selectedServices.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+              <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                 <MenuItem
                   onClick={() => {
                     setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
@@ -435,12 +463,12 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
                   Bulk Edit
                 </MenuItem>
               </HtmlTooltip>
-              <HtmlTooltip title={Boolean(selectedServices.length) ? 'Delete selected records' : 'Select records to delete'}>
+              <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
                 <MenuItem
                   disabled={isDeleting}
                   onClick={() => {
                     setDeleteData(
-                      selectedServices?.map((d) => {
+                      selectedRecords?.map((d) => {
                         return {
                           id: d?._id,
                           service: d?.materialId
@@ -457,22 +485,20 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
           </Box>
         </Box>
       )}
-      {columns && rowsData ? (
+      {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={'300px'}
             columns={columns}
-            data={rowsData}
+            state={state}
+            dispatch={dispatch}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={setSelectedServices}
-            childrenProperty="subRows"
-            uniqueKey="_id"
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
             onSaveEdit={onSaveInlineEdit}
-            renderedFrom="field_ticket_add_service"
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            hideExpander={true}
+            refreshGrid={fetchMaterial}
           />
         </Box>
       ) : (
@@ -481,7 +507,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
         </Box>
       )}
       <Box mt={3}>
-        <Consumables allowedToEdit={allowedToEdit} services={rowsData} fieldTicketData={fieldTicketData} renderedFrom={`${renderedFrom}_1`} />
+        <Consumables allowedToEdit={allowedToEdit} services={dataRows} fieldTicketData={fieldTicketData} />
       </Box>
       {serviceDialog?.open && serviceDialog?.type === 'service' && (
         <AssignServiceDialog
@@ -489,7 +515,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
           handleClose={() => {
             setServiceDialog({ open: false, type: '' });
           }}
-          ids={rowsData?.map((row) => row?.materialId)}
+          ids={dataRows?.map((row) => row?.materialId)}
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
           isSubmitting={isSubmitting}
         />
@@ -520,9 +546,9 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           fieldTicketData={fieldTicketData}
-          rowData={!isBulkEdit ? isServiceEdit.data : selectedServices}
-          material={rowsData}
-          selectedServices={selectedServices}
+          rowData={!isBulkEdit ? isServiceEdit.data : selectedRecords}
+          material={dataRows}
+          selectedServices={selectedRecords}
           loading={isUpdating}
           showSaveAndNext={isServiceEdit.showSaveAndNext}
         />

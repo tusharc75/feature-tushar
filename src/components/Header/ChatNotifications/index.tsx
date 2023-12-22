@@ -1,0 +1,250 @@
+import { Badge, Box, IconButton, MenuItem, Popover, useMediaQuery } from '@material-ui/core';
+import { ArrowBack, ChatBubbleOutlineOutlined } from '@material-ui/icons';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { CustomChatNotificationCountContext } from '../../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../../StateProvider/actionTypes';
+import axiosInstance from '../../../axios/axiosInstance';
+
+import { GlobalChatContext } from 'src/StateProvider/GlobalChatContext';
+import HtmlTooltip from '../../CustomTooltipTitle';
+import NewChat from './NewChat';
+import NotificationContent from './NotificationContent';
+
+// Rename Tabs here
+export const tabOptions: ['all', 'unread', 'chats'] = ['all', 'unread', 'chats'];
+export type TabOptions = (typeof tabOptions)[number];
+
+const ChatNotification = () => {
+  const toastConfig = useContext(CustomToastContext);
+  const notification = useContext(CustomChatNotificationCountContext);
+  const history = useHistory();
+  const isMobile = useMediaQuery('(max-width:960px)');
+  const { setOpen: setChatOpen, setSelectedChat, chatList } = useContext(GlobalChatContext);
+
+  const {
+    state: { user, selectedEntity },
+    dispatch
+  }: any = useData();
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const isNotificationOpen = Boolean(anchorEl);
+  const [notificationList, setNotificationList] = useState([]);
+  const [notificationData, setNotificationData] = useState({
+    [tabOptions[0]]: [],
+    [tabOptions[1]]: [],
+    [tabOptions[2]]: []
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [newChat, setNewChat] = useState(false);
+
+  const handleNotificationClose = () => {
+    setAnchorEl(null);
+    setNewChat(false);
+  };
+  const notificationId = isNotificationOpen ? 'chat-notification' : undefined;
+
+  const handleEntityChange = async (id) => {
+    if (!Array.isArray(id)) {
+      dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+    }
+  };
+
+  const hasAccessToEntity = async (id) => {
+    const entityList = user.entity?.map((entity) => entity._id);
+    return entityList.includes(id);
+  };
+
+  const handleRedirect = (id, resourceId, resourcePath) =>
+    id === selectedEntity
+      ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+      : hasAccessToEntity(id)
+        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+        : '';
+
+  const getAllNotifications = async (event) => {
+    setAnchorEl(event.currentTarget);
+    setIsLoading(true);
+
+    await axiosInstance()
+      .get('/user/user-notification')
+      .then(({ data: { data } }) => {
+        setNotificationList(data);
+
+        const nData = { [tabOptions[0]]: data as any[], [tabOptions[1]]: data.filter((d) => !d.read) as any[], [tabOptions[2]]: chatList as any[] };
+        setNotificationData(nData);
+        notification.setCount(0);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => setIsLoading(false));
+  };
+
+  const handleMarkAllRead = () => {
+    axiosInstance()
+      .put('/user/user-notification/all-read', { toggle: true })
+      .then(({ data }) => {
+        let updatedNotificationList = [];
+        notificationList.forEach((notification) => {
+          notification.read = true;
+          updatedNotificationList.push(notification);
+        });
+        setNotificationList(updatedNotificationList);
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          type: 'success'
+        });
+        setAnchorEl(null);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleClearAll = () => {
+    axiosInstance()
+      .put('/user/user-notification/clear-all', { toggle: true })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          type: 'success'
+        });
+        setAnchorEl(null);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleReadSingle = (d) => {
+    if (d.read === false) {
+      axiosInstance()
+        .put('/user/user-notification/read', {
+          toggle: true,
+          _id: d._id
+        })
+        .then(() => { })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+
+    setChatOpen(true);
+    setAnchorEl(null);
+    if (d?.entity) {
+      handleRedirect(d?.entity, d?.resourceId, d?.resourcePath);
+    } else {
+      history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath);
+    }
+  };
+
+  const handleClickHistory = (chat) => {
+    setSelectedChat(chat);
+    closeAndOpenChat();
+    if (chat.unseen > 0) {
+      axiosInstance().put(`chatter/mark-read/${chat.id}`);
+    }
+  };
+
+  const closeAndOpenChat = useCallback(() => {
+    setAnchorEl(null);
+    setChatOpen(true);
+    setNewChat(false);
+  }, []);
+
+  return (
+    <>
+      {isMobile ? (
+        <>
+          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => { }}>
+            <Badge
+              variant="dot"
+              overlap="circular"
+              badgeContent={notification ? notification.count : 0}
+              color="secondary"
+              aria-describedby={notificationId}
+            >
+              <ChatBubbleOutlineOutlined className="[font-size:22px_!important]" />
+            </Badge>
+            <Box component="span" mx={1} />
+            <p>Chat Notifications</p>
+          </MenuItem>
+        </>
+      ) : (
+        <IconButton
+          id="notificationButton"
+          aria-describedby={notificationId}
+          aria-label="settings"
+          color="inherit"
+          title="Notifications"
+          onClick={getAllNotifications}
+          className={`[padding:5px_!important] [margin-inline:8px_!important]`}
+        >
+          <Badge variant="dot" overlap="circular" badgeContent={notification ? notification.count : 0} color="secondary">
+            <ChatBubbleOutlineOutlined />
+          </Badge>
+        </IconButton>
+      )}
+      <Popover
+        PaperProps={{
+          className: 'w-[min(400px,100%)_!important]',
+          style: {
+            borderRadius: 0,
+            boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)'
+          }
+        }}
+        id={notificationId}
+        open={isNotificationOpen}
+        anchorEl={anchorEl}
+        onClose={handleNotificationClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center'
+        }}
+      >
+        {newChat ? (
+          <>
+            <div className="[border-bottom:1px_solid_var(--common-border-color)] flex justify-between items-center px-[20px] py-[10px]">
+              <h6 className="text-[16px] font-semibold ">Start New Chat</h6>
+              <HtmlTooltip title={'back'} enterTouchDelay={0} placement="top" arrow>
+                <span>
+                  <IconButton
+                    onClick={() => {
+                      setNewChat(false);
+                    }}
+                    size={'small'}
+                  >
+                    <ArrowBack />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            </div>
+            <NewChat closeAndOpenChat={closeAndOpenChat} userId={user.user._id} setNewChat={setNewChat} setSelectedChat={setSelectedChat} />
+          </>
+        ) : (
+          <NotificationContent
+            isLoading={isLoading}
+            handleMarkAllRead={handleMarkAllRead}
+            handleClearAll={handleClearAll}
+            handleReadSingle={handleReadSingle}
+            data={notificationData}
+            setNewChat={setNewChat}
+            handleClickHistory={handleClickHistory}
+          />
+        )}
+      </Popover>
+    </>
+  );
+};
+
+export default ChatNotification;

@@ -7,7 +7,7 @@ import { FaUser } from 'react-icons/all';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import CustomContainer from '../../components/CustomContainer';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
@@ -31,7 +31,7 @@ const Entity: FC = () => {
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions }
@@ -108,16 +108,8 @@ const Entity: FC = () => {
     axiosInstance()
       .get('/field?resource=Entity')
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.entityDetail.path, true);
-
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns(columns);
+        const newColumns = generateColumns(renderedFrom, data, routes.entityDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

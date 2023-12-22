@@ -31,7 +31,7 @@ import PreviewIcon from '@material-ui/icons/Visibility';
 import _ from 'lodash';
 import mime from 'mime';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -162,7 +162,7 @@ export default function Attachment() {
         ) : (
           <NoDataCell />
         );
-      }      
+      }
     },
     {
       id: 'createdBy',
@@ -809,7 +809,6 @@ export default function Attachment() {
               dispatch={dispatch}
               state={state}
               expander={true}
-              setWholeRowsCellColor={() => { }}
               renderedFrom={'attachment_render'}
               fetchChildAttachment={fetchChildAttachment}
               refreshGrid={fetchAttachments}

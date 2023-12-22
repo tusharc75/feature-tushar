@@ -23,7 +23,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { bulkAssetCreation, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 const BulkAssetCreation = () => {
@@ -55,7 +55,7 @@ const BulkAssetCreation = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -69,16 +69,8 @@ const BulkAssetCreation = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.bulkAssetCreation}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.bulkAssetCreationDetail.path, true);
-
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns, ActionsRenderer]);
+        const newColumns = generateColumns(renderedFrom, data, routes.bulkAssetCreationDetail.path, true)
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

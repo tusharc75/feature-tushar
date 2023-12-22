@@ -19,7 +19,7 @@ import {
   supplierAccount
 } from '../../constants/helpers';
 import queryString from 'query-string';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
@@ -53,7 +53,7 @@ const SalesOrder = () => {
   let { type }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -87,19 +87,12 @@ const SalesOrder = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Sales Order`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.salesOrderDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
+    let newColumns = generateColumns(renderedFrom, data, routes.salesOrderDetail.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(routes.projectSales.title, field));
     });
-    setColumns([...columns, ActionsRenderer]);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   const ActionsRenderer = {

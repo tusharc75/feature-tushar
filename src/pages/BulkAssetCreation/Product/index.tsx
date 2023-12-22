@@ -8,7 +8,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { bulkAssetCreation, CHILD_RESOURCE } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { ExpandMore } from '@material-ui/icons';
@@ -38,9 +38,11 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [loadingButton, setLoadingButton] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [showCreateConfirmBox, setShowCreateConfirmBox] = useState(false);
+
   const [deleteBulkAssetCreationProduct, setDeleteBulkAssetCreationProduct] = useState([]);
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -109,14 +111,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.bulkAssetCreationProduct}`);
     var fields = response?.data?.data;
     fields = CURReplaceByCurrencySingle(fields, bulkAssetCreationData?.currency ? bulkAssetCreationData?.currency : 'USD');
-    fields?.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o, routes.bulkAssetCreationDetail.path);
-
-      if (currentColumn !== null) {
-        coloum = [...coloum, currentColumn?.columnData];
-      }
-    });
-    setColumns([...coloum, ActionsRenderer]);
+    const newColumns = generateColumns(renderedFrom, fields, routes.bulkAssetCreationDetail.path);
+    setColumns([...coloum, ...newColumns, ActionsRenderer]);
   };
 
   const fetchBulkAssetCreationProduct = () => {
@@ -217,8 +213,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 fontSize="small"
                 color={
                   (row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) &&
-                  allowedToEdit &&
-                  permissions?.bulkAssetCreation?.isUpdate
+                    allowedToEdit &&
+                    permissions?.bulkAssetCreation?.isUpdate
                     ? 'error'
                     : 'disabled'
                 }
@@ -288,14 +284,16 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     let tempProducts = selectedRecords.map((d) => {
       return {
         bulkAssetCreationId: bulkAssetCreationData?._id,
-        productMaster: d?.productId,
+        productId: d?.productId,
+        _id: d?._id,
         qty: d?.qty,
-        wareHouse: bulkAssetCreationData?.warehouse?.optionValue
+        warehouse: bulkAssetCreationData?.warehouse?.optionValue
       };
     });
     axiosInstance()
       .post(`${bulkAssetCreation.api}/create-assets`, { bulkAssetCreation: tempProducts })
       .then(({ data }) => {
+        setShowCreateConfirmBox(false)
         fetchBulkAssetCreationProduct();
         fetchData();
         setLoadingButton(false);
@@ -306,6 +304,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
         });
       })
       .catch((error) => {
+        setLoadingButton(true);
         toastConfig.setToastConfig(error);
       });
   };
@@ -385,7 +384,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 color="primary"
                 disabled={selectedRecords.length === 0 || loadingButton}
                 onClick={() => {
-                  createAsset();
+                  setShowCreateConfirmBox(true)
                   closeActions();
                 }}
               >
@@ -397,7 +396,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
       )}
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 400px)'}
+          height={'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -405,6 +404,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
           refreshGrid={fetchBulkAssetCreationProduct}
           hideAction={!allowedToEdit}
           hideSelection={!allowedToEdit}
+          isClientSideGrid={true}
         />
       ) : (
         <Box p={2} height={500}>
@@ -438,9 +438,18 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete  ? `}
+          message={`Are you sure you want to delete?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
+        />
+      )}
+      {showCreateConfirmBox && (
+        <ConfirmationDialog
+          open={showCreateConfirmBox}
+          message={`Are you sure you want to create assets?`}
+          onClose={() => setShowCreateConfirmBox(false)}
+          okBtnLoading={loadingButton}
+          onOk={createAsset}
         />
       )}
     </Fragment>

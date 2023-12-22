@@ -19,7 +19,7 @@ import {
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageIotDataPoints from './ManageIotDataPoints';
 import MessageDialog from '../../components/Helpers/MessageDialog';
@@ -42,21 +42,14 @@ const IotDataPoints = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.iotDataPoints}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.iotDataPointsDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.iotDataPointsDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 
@@ -165,7 +158,7 @@ const IotDataPoints = () => {
                 setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color={permissions?.quotation?.isCreate ? 'primary' : 'disabled'} />
+              <FileCopyIcon fontSize="small" color={permissions?.iotDataPoints?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>

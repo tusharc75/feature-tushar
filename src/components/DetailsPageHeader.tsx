@@ -65,60 +65,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const DetailsPageHeader = (props) => {
-  const { mainPoints, heading, children, showHeading, loading, isApproved, leadStatus } = props;
+  const { mainPoints, children, loading } = props;
 
   const classes = useStyles();
   return (
     <>
       <div className={'mainHeader'}>
-        {/* <Grid container justifyContent="space-between" className="detailHeader detail-header-purchase-order">
-          <Grid item className="d-flex align-items-center">
-            {loading ? (
-              <Skeleton width={100} />
-            ) : showHeading ? (
-              <div className={'mobileHeading'}>
-                <Typography
-                  className="text-capitalize"
-                  style={{ display: 'inline-block' }}
-                  variant="h6"
-                  component="h2"
-                  color="primary"
-                  id="detailHeaderPageTitle"
-                >
-                  <span className="d-flex align-items-center">
-                    <span className="listingHeader"> {heading}</span>
-                    {isApproved && (
-                      <Tooltip title="Approved">
-                        <FcApproval title="Approved" size={20} />
-                      </Tooltip>
-                    )}
-                    {leadStatus ? (
-                      <>
-                        {leadStatus === 'Qualified' ? (
-                          <FiCheckCircle title={leadStatus} className={classes.qualified} color="green" />
-                        ) : leadStatus === 'Unqualified' ? (
-                          <AiOutlineCloseCircle title={leadStatus} className={classes.unQulified} />
-                        ) : (
-                          ''
-                        )}
-                      </>
-                    ) : null}
-                  </span>
-                </Typography>
-              </div>
-            ) : null}
-          </Grid>
-          <Grid
-            id="detailHeaderPageActions"
-            item
-            className={
-              isMobile && !isTablet ? 'd-flex align-items-center justify-flex-end gap-1' : 'd-flex align-items-center gap-2 justify-flex-end'
-            }
-          >
-            {children}
-          </Grid>
-        </Grid> */}
-
         <Box className={`gap-2 ${mainPoints && 'detailHeaderDashboard'}`}>
           {loading ? (
             <Box display="flex" flexWrap="nowrap">
@@ -179,6 +131,9 @@ const DetailsPageHeader = (props) => {
             })
           ) : null}
         </Box>
+        <div id="detailHeaderPageActions" className={'flex items-center justify-flex-end gap-2'}>
+          {children}
+        </div>
       </div>
     </>
   );
@@ -188,14 +143,10 @@ DetailsPageHeader.propTypes = {
   total: PropTypes.any,
   active: PropTypes.any,
   inactive: PropTypes.any,
-  heading: PropTypes.any,
-  children: PropTypes.node,
+  children: PropTypes.any,
   loading: PropTypes.any,
   logo: PropTypes.any,
   mainPoints: PropTypes.any,
-  showHeading: PropTypes.any,
-  isApproved: PropTypes.any,
-  leadStatus: PropTypes.string
 };
 
 export default DetailsPageHeader;

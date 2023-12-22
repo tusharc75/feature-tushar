@@ -15,7 +15,7 @@ import AttachFileIcon from '@material-ui/icons/AttachFile';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetDetails = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,7 +26,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { permissions }
@@ -71,17 +71,8 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
     axiosInstance()
       .get(`/field/child?resource=${CHILD_RESOURCE.serializedAssetsCertification}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data?.forEach((o) => {
-          if (o.fieldName === 'attachments') {
-            return;
-          }
-          let currentColumn = getColumnData(renderedFrom, o, routes.serializedAssetDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns.push({
+        let newColumns = generateColumns(renderedFrom, data?.filter(o => o.fieldName !== 'attachments'), routes.serializedAssetDetail.path, true);
+        newColumns.push({
           accessor: 'supplierAccount',
           Header: 'Certification Supplier',
           Cell: ({ row }) => (
@@ -97,7 +88,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
             </div>
           )
         });
-        columns.push({
+        newColumns.push({
           accessor: 'createdBy',
           Header: 'Created By',
           disableFilters: true,
@@ -113,12 +104,12 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
             )
           )
         });
-        columns?.forEach((e) => {
+        newColumns?.forEach((e) => {
           if (["issueDate", "expiryDate"].includes(e.accessor)) {
             e.disabled = true;
           }
         })
-        setColumns([...columns, ActionsRenderer]);
+        setColumns([...newColumns, ActionsRenderer]);
       });
   };
 

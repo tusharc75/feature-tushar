@@ -4,7 +4,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
 import { dateTimeFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
@@ -15,7 +15,6 @@ const History = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
   const columns = [
     {
@@ -97,7 +96,7 @@ const History = ({ id }) => {
       Header: 'Start Date',
       minWidth: 150,
       width: 150,
-      canFilter: false,
+      disableFilters: true,
       disabled: true,
       Cell: ({ row }) => (
         <>
@@ -116,7 +115,7 @@ const History = ({ id }) => {
       Header: 'End Date',
       minWidth: 150,
       width: 150,
-      canFilter: false,
+      disableFilters: true,
       disabled: true,
       Cell: ({ row }) => (
         <>

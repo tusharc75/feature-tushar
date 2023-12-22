@@ -9,7 +9,7 @@ import { gridLoadingTimeout, isObjectEmpty, product, prepareDataForGrid, sidebar
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 
@@ -26,13 +26,12 @@ const AssignProductDialog = ({
   isSubmitting = false,
   hideQty = false
 }) => {
-
   const renderedFrom = `${camelCase(routes.product?.title)}_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, selectedEntity }
@@ -79,13 +78,8 @@ const AssignProductDialog = ({
           setIsProductType(false);
         }
         let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
+        let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
+        columns = [...newColumns, ...getStaticFields()];
         if (hideQty) {
           setColumns([...columns]);
         } else {
@@ -202,7 +196,7 @@ const AssignProductDialog = ({
     const rows = [...dataRows];
     rows?.forEach((d) => {
       if (row?._id === d._id) {
-        d.qty = parseInt(data.qty);
+        d.qty = data.qty;
         d.isChecked = true;
       }
     });
@@ -211,6 +205,14 @@ const AssignProductDialog = ({
       if (editRow) {
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
+    } else {
+      const updatedSelectedRecords = selectedRecords?.map((e) => {
+        if (e?._id === row?._id) {
+          return { ...e, qty: parseInt(data?.qty), isChecked: true };
+        }
+        return e;
+      });
+      dispatch({ type: 'selection', selectedRecords: updatedSelectedRecords });
     }
     dispatch({ type: 'update', data: rows });
   };

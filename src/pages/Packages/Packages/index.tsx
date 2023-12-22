@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { prepareDataForGrid, packages } from 'src/constants/helpers';
@@ -22,12 +22,12 @@ const PackagesTable = ({ packageId, packageData }) => {
     state: { permissions, user }
   }: any = useData();
 
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
   const [showServiceAssignDialog, setShowServiceAssignDialog] = useState(false);
   const [isRemovingProducts, setRemovingProducts] = useState(false);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const { dataRows, selectedRecords } = state;
@@ -72,16 +72,8 @@ const PackagesTable = ({ packageId, packageData }) => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Packages`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ActionsRenderer];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path, true);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   const handleUpdateQuantity = (data, row) => {
@@ -125,7 +117,6 @@ const PackagesTable = ({ packageId, packageData }) => {
     sticky: 'right',
     editable: permissions?.packages?.isUpdate,
     cellEditor: 'numericCellEditor',
-    canFilter: false,
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,

@@ -6,13 +6,13 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
@@ -21,7 +21,7 @@ import Add from '@material-ui/icons/Add';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CreateProduct from 'src/components/Product/CreateProduct';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -46,6 +46,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const [allFields, setAllFields] = useState([]);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [isSubmitting, setSubmitting] = useState(false);
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -56,7 +57,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    let newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
+    let newColumns = generateColumns(renderedFrom, data, null, false, productionOrderData?.currency || 'USD');
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -66,7 +67,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <h5 className="text-truncate">{row.original.index}</h5>,
         Footer: () => {
           return <>Total</>;
@@ -75,17 +76,19 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       {
         accessor: 'type',
         Header: 'Type',
-        canFilter: false,
-        sticky: isMobile ? 'none' : 'left',
+        width: 100,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },
       {
         accessor: 'detail',
-        Header: ' Details',
-        minWidth: 300,
-        width: 300,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
+        Header: 'Details',
+        disabled: true,
+        minWidth: 200,
+        width: 200,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {allowedToEdit ? (
               <h5
@@ -94,7 +97,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext:
+                      row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -144,6 +148,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       {
         accessor: 'description',
         Header: 'Description',
+        width: 200,
         Cell: ({ row }) => {
           return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
         }
@@ -153,10 +158,10 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 70,
-      width: 70,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
-      Cell: ({ row, rows }) => (
+      Cell: ({ row, table }) => (
         <>
           <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
             <IconButton
@@ -164,13 +169,12 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               aria-label="Details"
               disabled={allowedToEdit ? false : true}
               onClick={() => {
-                onMaterialEdit(row, rows);
+                onMaterialEdit(row, table.getRowModel().rows);
               }}
             >
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
-
           <HtmlTooltip title={allowedToDelete && row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
             <IconButton
               size="small"
@@ -224,8 +228,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       data: { data, count }
     } = await axiosInstance().get(`${productionOrder.api}/material/${productionOrderData._id}${queryString}`);
     let rows = data?.material?.filter((e) => e.parentId === null);
+    const totalPrev = page * limit;
     rows.forEach((parent, i) => {
-      parent.index = i + 1;
+      parent.index = i + 1 + totalPrev;
       parent.detail = parent?.detail
         ? parent?.detail
         : parent.type === MATERIAL_TYPE.product
@@ -435,22 +440,24 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               >
                 Add Existing Products
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'newProduct', parentId: null });
-                }}
-              >
-                Add New Product
-              </MenuItem>
-              <MenuItem
+              {permissions?.product?.isCreate && (
+                <MenuItem
+                  onClick={() => {
+                    closeAddActions();
+                    setAddDialog({ open: true, type: 'newProduct', parentId: null });
+                  }}
+                >
+                  Add New Product
+                </MenuItem>
+              )}
+              {/* <MenuItem
                 onClick={() => {
                   closeAddActions();
                   setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
                 }}
               >
                 Add Existing Packages
-              </MenuItem>
+              </MenuItem> */}
             </Menu>
           </Box>
           <Box display="flex">
@@ -462,7 +469,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 fetchData();
               }}
               isExportAllOrSomeFeature={true}
-              ids={[]}
+              recordsToExport={selectedRecords.length}
+              ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
             />
             <Box ml={1} />
             <Button
@@ -526,13 +534,12 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               state={state}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               dispatch={dispatch}
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               onSaveEdit={onSaveInlineEdit}
               hideSelection={!allowedToEdit}
-              expander={true}
+              hideAction={!allowedToEdit}
             />
           </Box>
         </>
@@ -584,7 +591,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             handleAdd(rows);
           }}
           isSubmitting={isSubmitting}
-          packageType={"product"}
+          packageType={'product'}
         />
       )}
       {materialEdit.open && (

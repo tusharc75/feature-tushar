@@ -1,10 +1,10 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Box, Grid, Button, Menu, MenuItem, Link } from '@material-ui/core';
-import { getLocalStorageArrayData, serviceMaster } from '../../../constants/helpers';
+import { useState, useEffect, useContext } from 'react';
+import { Box, Grid, Button, Menu, MenuItem } from '@material-ui/core';
+import { serviceMaster } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { ExpandMore } from '@material-ui/icons';
-import { IconButton, Tooltip } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import AssignProductDialog from '../../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
@@ -13,17 +13,18 @@ import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 function Product({ id }) {
   const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_product`;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
 
   const {
-    state: { permissions, user, selectedEntity }
+    state: { permissions }
   }: any = useData();
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -35,8 +36,6 @@ function Product({ id }) {
 
   const [columns, setColumns] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
-  const [dataRows, setDataRows] = useState([]);
 
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -59,13 +58,23 @@ function Product({ id }) {
   }, []);
 
   const fetchData = () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     axiosInstance()
       .get(`${serviceMaster.api}/product/${id}`)
       .then(({ data: { data } }) => {
-        setDataRows(data?.map((e) => ({ ...e, ...(e?.productDetail || {}) })));
+        const rows = data?.map((e) => ({ ...e, ...(e?.productDetail || {}) }));
         setParts([...data]);
+        dispatch({
+          type: 'initialize',
+          data: rows,
+          count: rows?.length
+        });
+        dispatch({ type: 'loading', loading: false });
       })
-      .catch((err) => { });
+      .catch((err) => {
+        dispatch({ type: 'loading', loading: false });
+      });
   };
 
   const fetchGridColumns = async () => {
@@ -146,7 +155,7 @@ function Product({ id }) {
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      width: 50,
+      width: 70,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -217,7 +226,12 @@ function Product({ id }) {
     };
     axiosInstance()
       .put(`${serviceMaster.api}/product/${id}/qty`, dToUpdate)
-      .then((e) => {
+      .then(({data}) => {
+        setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
         fetchData();
       })
       .catch((err) => {
@@ -226,7 +240,7 @@ function Product({ id }) {
   };
 
   const handleAdd = async (rows) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const productObj = rows
       .filter((d) => d.qty > 0)
       .map((d) => {
@@ -246,10 +260,10 @@ function Product({ id }) {
           severity: 'success'
         });
         setOpenAssignProductDialog(false);
-        setSubmitting(false)
+        setSubmitting(false);
       })
       .catch((error) => {
-        setSubmitting(false)
+        setSubmitting(false);
         setToastConfig(error);
       });
   };
@@ -317,11 +331,7 @@ function Product({ id }) {
                   isExportAllOrSomeFeature={true}
                   total={selectedRecords.length}
                   recordsToExport={selectedRecords.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
+                  ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
                   additionalParams={`serviceId=${id}`}
                 />
               </Box>
@@ -329,19 +339,16 @@ function Product({ id }) {
           </Grid>
         </Box>
       )}
-      {columns && dataRows ? (
+      {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 345px)'}
+          height={'calc(100vh - 200px)'}
           columns={columns}
-          data={dataRows}
-          setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-          onSelect={setSelectedRecords}
-          childrenProperty="subRows"
-          uniqueKey="_id"
-          onSaveEdit={onSaveInlineEdit}
+          state={state}
+          dispatch={dispatch}
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
-          hideExpander={true}
+          refreshGrid={fetchData}
+          onSaveEdit={onSaveInlineEdit}
         />
       ) : (
         <Box p={2} height={500}>

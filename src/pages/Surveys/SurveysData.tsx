@@ -2,7 +2,7 @@ import { Box, IconButton } from '@material-ui/core';
 import { camelCase } from 'lodash';
 import React, { useContext, useState, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
@@ -16,12 +16,12 @@ const SurveysData = ({ surveyId }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   React.useEffect(() => {
     fetchGridColumns();
@@ -35,17 +35,8 @@ const SurveysData = ({ surveyId }) => {
     let data;
     const response = await axiosInstance().get(`surveys/fields/${surveyId}`);
     data = response?.data?.data;
-    
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o, routes.surveysDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.surveysDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = () => {
@@ -91,7 +82,7 @@ const SurveysData = ({ surveyId }) => {
     )
   };
 
-  const handleDelete = () => {};
+  const handleDelete = () => { };
 
   return (
     <div>

@@ -5,7 +5,6 @@ import { useHistory, useParams } from 'react-router-dom';
 import { Skeleton } from '@material-ui/lab';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import axiosInstance from './../../axios/axiosInstance';
 import { leadPage } from '../../routes/Lead';
@@ -370,7 +369,7 @@ const LeadDetailsPage = () => {
                 {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
-            {leadsPermissions.isDelete && allowedToDelete && (
+            {leadsPermissions.isDelete && allowedToDelete && !leadData?.staticData?.convertedToOpportunity && (
               <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
             <ActivityButton

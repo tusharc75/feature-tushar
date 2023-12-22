@@ -20,7 +20,7 @@ import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEnt
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -49,7 +49,7 @@ const Leads = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [okButtonLoading, setOkButtonLoading] = useState(false);
@@ -81,15 +81,9 @@ const Leads = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.lead}&view=true`);
     data = response?.data?.data;
-    let columns = [];
-    data?.forEach((o) => {
-      let currentColumn = getColumnData(lead.leadResource, o?.fieldData, routes.leadDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-    });
-    columns = [
-      ...columns,
+    let newColumns = generateColumns(lead.leadResource, data, routes.leadDetail.path, true);
+    newColumns = [
+      ...newColumns,
       {
         accessor: 'relatedOpportunity', Header: 'Related Opportunity', show: true,
         Cell: ({ row }) => (
@@ -105,7 +99,7 @@ const Leads = () => {
       },
       ...getStaticFields()
     ];
-    setColumns([...columns, ActionsRenderer]);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -133,23 +127,21 @@ const Leads = () => {
           </span>
         </HtmlTooltip>
         {hasPermissionToConvertInOpportunity && generateLeadToOpportunityButton(row?.original)}
-        <Box ml={1}>
-          <HtmlTooltip title={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? "Delete" : deleteDisable}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Delete"
-                disabled={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? false : true}
-                onClick={() => {
-                  setDeleteRecord(row?.original);
-                  setIsConformDialogVisible(true);
-                }}
-              >
-                <DeleteIcon fontSize="small" color={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? 'error' : 'disabled'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        </Box>
+        <HtmlTooltip title={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? "Delete" : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? false : true}
+              onClick={() => {
+                setDeleteRecord(row?.original);
+                setIsConformDialogVisible(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
       </>
     )
   }
@@ -206,7 +198,7 @@ const Leads = () => {
         count = response?.data?.count;
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = u.ownerId === user?.user._id && permissions?.lead?.isDelete;
+          finalObject['canDelete'] = u.owner?.optionValue === user?.user._id && permissions?.lead?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           let res = {
             ...finalObject,

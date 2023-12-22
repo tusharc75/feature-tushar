@@ -1,23 +1,24 @@
 import { Box, Dialog, IconButton } from '@material-ui/core';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
 import { fetch_field_ticket_submit_fields } from '../helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
 
 function ViewLogs({ fieldTicketData, handleClose }) {
+  const renderedFrom = `${routes.fieldTicket.title}_logs`;
+
   const {
     state: { permissions }
   }: any = useData();
@@ -25,10 +26,10 @@ function ViewLogs({ fieldTicketData, handleClose }) {
   const [fullScreen, setFullScreen] = useState(true);
   const [fullScreenAttachemnt, setFullScreenAttachemnt] = useState(false);
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
 
-  const renderedFrom = `${routes.fieldTicket.title}_logs`
+  const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchColumn();
@@ -89,12 +90,12 @@ function ViewLogs({ fieldTicketData, handleClose }) {
       }
     ];
     const fields = await fetch_field_ticket_submit_fields();
-    const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     const actionColumn = {
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -113,11 +114,13 @@ function ViewLogs({ fieldTicketData, handleClose }) {
             </IconButton>
           </HtmlTooltip>
         ) : null
-    }
+    };
     setColumns([...column, ...newColumns, actionColumn]);
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    
     const { data } = await axiosInstance().get(`${fieldTicket.api}/view-logs/${fieldTicketData?._id}`);
     data?.data.forEach((d) => {
       const invoice = d?.invoice;
@@ -127,7 +130,9 @@ function ViewLogs({ fieldTicketData, handleClose }) {
       d.user = user?.optionLabel;
       d.userId = user?.optionValue;
     });
-    setRowsData(data?.data);
+
+    dispatch({ type: 'initialize', data: data?.data, count: data?.data?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   return (
@@ -154,18 +159,16 @@ function ViewLogs({ fieldTicketData, handleClose }) {
           showManimizeMaximize={true}
         />
         <CustomDialogContent>
-          {rowsData && columns ? (
+          {columns ? (
             <Box p={2}>
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   columns={columns}
-                  data={rowsData}
-                  onSelect={() => { }}
-                  childrenProperty="subRows"
-                  uniqueKey="_id"
+                  state={state}
+                  dispatch={dispatch}
+                  refreshGrid={fetchData}
                   hideSelection={true}
-                  hideExpander={true}
                   renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                 />
@@ -216,6 +219,3 @@ function ViewLogs({ fieldTicketData, handleClose }) {
 }
 
 export default ViewLogs;
-
-
-

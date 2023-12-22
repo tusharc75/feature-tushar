@@ -9,7 +9,7 @@ import CustomContainer from 'src/components/CustomContainer';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, sublease } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import SearchBox from 'src/components/Helpers/SearchBox';
@@ -45,7 +45,7 @@ const Sublease = () => {
   let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -83,16 +83,8 @@ const Sublease = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Sublease`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.subleaseDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    let newColumns = generateColumns(renderedFrom, data, routes.subleaseDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

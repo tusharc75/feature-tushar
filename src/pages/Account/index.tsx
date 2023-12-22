@@ -21,7 +21,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomContainer from '../../components/CustomContainer';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import EntitySelectionsDialog from '../../components/EntitySelections';
@@ -42,12 +42,9 @@ import accountClass from './account.module.scss';
 import { cloneDisable } from 'src/constants/messageHelpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-
-
 const options = ['All', 'Approved', 'Disapproved'];
 
 export default function Account(props) {
-
   const types = [
     {
       key: 'My Accounts',
@@ -60,7 +57,7 @@ export default function Account(props) {
   ];
 
   const toastConfig = useContext(CustomToastContext);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const {
     account: { accountApi, accountResource, accountRoute }
   } = props;
@@ -123,40 +120,26 @@ export default function Account(props) {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`);
     data = response?.data?.data;
-    let columns = [];
+    let newColumns = generateColumns(accountResource, data, `/${accountRoute}/detail`, true);
 
-    data.forEach((o) => {
-      if (['accountName'].indexOf(o?.fieldData?.fieldName) === 0) {
-        columns = [
-          ...columns,
-          {
-            accessor: 'accountName',
-            Header: 'Account Name',
-            minWidth: 150,
-            width: 150,
-            Cell: ({ row }) => {
-              return (
-                <span className="d-flex gap-2 align-items-center">
-                  <Link className="link" to={`/${accountRoute}/detail/${row?.original?._id}`}>
-                    {row?.original?.accountName}
-                  </Link>
-                  {row?.original?.approved && <FcApproval title="Approved" size={20} />}
-                </span>
-              );
-            }
-          }
-        ];
-      } else {
-        let currentColumn = getColumnData(accountResource, o?.fieldData, `/${accountRoute}/detail`, true);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-        }
+    newColumns?.forEach((o) => {
+      if (o?.accessor === 'accountName') {
+        o.cell = ({ row }) => {
+          return (
+            <span className="d-flex gap-2 align-items-center">
+              <Link className="link" to={`/${accountRoute}/detail/${row?.original?._id}`}>
+                {row?.original?.accountName}
+              </Link>
+              {row?.original?.approved && <FcApproval title="Approved" size={20} />}
+            </span>
+          );
+        };
       }
-      return o?.fieldData;
     });
+   
     if (accountResource.includes('customer')) {
-      columns = [
-        ...columns,
+      newColumns = [
+        ...newColumns,
         {
           accessor: 'relatedLead',
           Header: 'Related Lead',
@@ -190,8 +173,7 @@ export default function Account(props) {
         }
       ];
     }
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   useEffect(() => {
@@ -290,7 +272,9 @@ export default function Account(props) {
           }}
           entity="account"
         />
-        <HtmlTooltip title={accountPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'Entity' : 'You do not have permission to update entity'}  >
+        <HtmlTooltip
+          title={accountPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'Entity' : 'You do not have permission to update entity'}
+        >
           <span>
             <IconButton
               size="small"
@@ -593,23 +577,24 @@ export default function Account(props) {
           extraImportExportLinks={[
             ...(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification
               ? [
-                {
-                  title: 'Supplier View Template',
-                  api: `${accountApi}/items/unknown/template`,
-                  type: 'download'
-                },
-                {
-                  title: 'Supplier View Export',
-                  api: `${accountApi}/items/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                  {
+                    title: 'Supplier View Template',
+                    api: `${accountApi}/items/unknown/template`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Supplier View Export',
+                    api: `${accountApi}/items/unknown/template?export=true${
+                      selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                  type: 'export'
-                },
-                {
-                  title: 'Supplier View Import',
-                  api: `${accountApi}/items/unknown/import`,
-                  type: 'import'
-                }
-              ]
+                    type: 'export'
+                  },
+                  {
+                    title: 'Supplier View Import',
+                    api: `${accountApi}/items/unknown/import`,
+                    type: 'import'
+                  }
+                ]
               : [])
           ]}
         />
@@ -825,9 +810,11 @@ export default function Account(props) {
             showFilters={true}
             resource={sidebarResource[accountResource]}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
 
         {showDeleteWarningConfirmBox?.show ? (
           <MessageDialog
@@ -868,8 +855,9 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
-              } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
+              singleApproveDisapproveAccount.accountName
+            } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -884,8 +872,9 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
-              } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
+              multipleApproveDisapproveAccount.selectedRecords
+            } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,

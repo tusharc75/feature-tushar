@@ -7,7 +7,7 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { MATERIAL_TYPE, REPAIR_ORDER_TYPE, repairOrder } from '../../../constants/helpers';
@@ -25,41 +25,42 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { flattenArray } from 'src/constants/columns';
 
-const Productpackage = ({
-  fetchRepairOrderData,
-  repairOrderData,
-  setNextStep,
-  renderedFrom,
-  stepFullScreen,
-  allowedToEdit,
-  setHasAssetsAdded
-}) => {
+const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setHasAssetsAdded }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
-
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
-
   const [recordToUpdate, setRecordToUpdate] = useState(null);
-
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-
   const [material, setMaterial] = useState([]);
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null });
-  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null, productId: null, productCategory: null });
-
+  const [addExistingProductDialog, setAddExistingProductDialog] = useState({
+    open: false,
+    type: '',
+    parentId: null,
+    existing: false,
+    productId: null,
+    productCategory: null
+  });
+  const [addchildDialog, setAddchildDialog] = useState({
+    open: false,
+    parentId: null,
+    top: null,
+    bottom: null,
+    productId: null,
+    productCategory: null
+  });
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
-
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [products, setProducts] = useState([]);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
 
   useEffect(() => {
     fetchFields();
@@ -76,7 +77,7 @@ const Productpackage = ({
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -85,15 +86,16 @@ const Productpackage = ({
       {
         accessor: 'type',
         Header: 'Type',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
       },
       {
         accessor: 'detail',
         Header: 'Details',
         width: 250,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {!(allowedToEdit && (row.original.type === 'product' || row.original.type === 'package')) ? (
@@ -102,7 +104,7 @@ const Productpackage = ({
               <p
                 onClick={() => {
                   setIsProductEdit({ open: true, isBulkedit: false });
-                  setRecordToUpdate(row.original)
+                  setRecordToUpdate(row.original);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -134,20 +136,44 @@ const Productpackage = ({
               </span>
               {allowedToEdit && row.original.type !== 'serializedAsset' && (
                 <Box ml={1}>
-                  <HtmlTooltip title={row.original.type === 'package' ? `Add Existing Product` : row.subRows?.length !== row.original.qty ? `Add` : `Can't add more asset!`}>
+                  <HtmlTooltip
+                    title={
+                      row.original.type === 'package'
+                        ? `Add Existing Product`
+                        : row.subRows?.length !== row.original.qty
+                          ? `Add`
+                          : `Can't add more asset!`
+                    }
+                  >
                     <IconButton
                       onClick={(event) => {
                         if (row.original.qty !== row.subRows?.length && row.original.type === 'product') {
-                          setProducts([{
-                            parentId: row.original._id,
-                            product: row.original.materialId,
-                            qty: row.original.qty - (row.subRows?.length || 0),
-                            productName: row.original?.detail,
-                          }])
-                          setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX, productId: row?.original?.productDetail._id, productCategory: row?.original?.productDetail?.productCategory })
+                          setProducts([
+                            {
+                              parentId: row.original._id,
+                              product: row.original.materialId,
+                              qty: row.original.qty - (row.subRows?.length || 0),
+                              productName: row.original?.detail
+                            }
+                          ]);
+                          setAddchildDialog({
+                            open: true,
+                            parentId: row.original?._id,
+                            top: event.clientY,
+                            bottom: event.clientX,
+                            productId: row?.original?.productDetail._id,
+                            productCategory: row?.original?.productDetail?.productCategory
+                          });
                         }
                         if (row.original.type !== 'product') {
-                          setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id, existing: false, productId: null, productCategory: null });
+                          setAddExistingProductDialog({
+                            open: true,
+                            type: 'product',
+                            parentId: row.original?._id,
+                            existing: false,
+                            productId: null,
+                            productCategory: null
+                          });
                         }
                       }}
                       size="small"
@@ -197,7 +223,7 @@ const Productpackage = ({
         width: 200,
         Cell: ({ row }) => {
           return row.original['qtyDisplay'] ? <p className="text-truncate">{row.original.qtyDisplay}</p> : <NoDataCell />;
-        }
+        },
       },
       {
         accessor: 'description',
@@ -217,8 +243,8 @@ const Productpackage = ({
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 70,
-      width: 70,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -247,9 +273,9 @@ const Productpackage = ({
     coloum.forEach((element) => {
       if (element.accessor === 'qty') {
         element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+          let rows = info.table.getExpandedRowModel().rows;
+          const qtyTotal = rows?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(element.accessor) && !isNaN(f.original[element.accessor]))
+            .reduce((sum, row) => row.original[element.accessor] + sum, 0);
           return <>{qtyTotal}</>;
         };
       }
@@ -258,6 +284,8 @@ const Productpackage = ({
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
 
     var data: any = [];
@@ -297,8 +325,10 @@ const Productpackage = ({
 
     if (rows.length !== 0) {
       setHasAssetsAdded(true);
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0 ||
-        !data.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length) {
+      if (
+        rows.filter((_rows) => _rows.isValid === false).length > 0 ||
+        !data.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
+      ) {
         setNextStep(false);
       } else {
         setNextStep(true);
@@ -307,7 +337,9 @@ const Productpackage = ({
       setHasAssetsAdded(false);
       setNextStep(false);
     }
-    setRowsData(rows);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -333,9 +365,8 @@ const Productpackage = ({
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = _subRow.type === MATERIAL_TYPE.serializedAsset ? 1 : `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
-      _subRow.status = _subRow?.serializedAssetDetail?.status || null
-      _subRow.canDelete = _subRow.type === MATERIAL_TYPE.serializedAsset ?
-        _subRow.workOrder ? false : true : canDelete;
+      _subRow.status = _subRow?.serializedAssetDetail?.status || null;
+      _subRow.canDelete = _subRow.type === MATERIAL_TYPE.serializedAsset ? (_subRow.workOrder ? false : true) : canDelete;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
@@ -365,7 +396,7 @@ const Productpackage = ({
         setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null });
         fetchData();
         fetchRepairOrderData();
-        setProducts([])
+        setProducts([]);
         setAddingProducts(false);
       })
       .catch((error) => {
@@ -375,10 +406,10 @@ const Productpackage = ({
   };
 
   const handleSaveData = async (rows: any) => {
-    const data = []
+    const data = [];
     rows?.forEach((element) => {
-      data.push({ _id: element._id, qty: element.qty })
-    })
+      data.push({ _id: element._id, qty: element.qty });
+    });
     setUpdating(true);
     axiosInstance()
       .put(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material: data })
@@ -449,10 +480,10 @@ const Productpackage = ({
         parentId: m._id,
         product: m.materialId,
         productName: m?.detail,
-        qty: m.qty - (alreadyAssets?.length || 0),
+        qty: m.qty - (alreadyAssets?.length || 0)
       };
     });
-    setProducts([...products?.filter((e) => e.qty > 0)])
+    setProducts([...products?.filter((e) => e.qty > 0)]);
   }, [selectedRecords]);
 
   return (
@@ -479,47 +510,77 @@ const Productpackage = ({
                   onClose={closeAddActions}
                 >
                   <MenuItem
-                    disabled={rowsData ? false : true}
                     onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: true, productId: null, productCategory: null });
+                      setAddExistingProductDialog({
+                        open: true,
+                        type: 'serializedAsset',
+                        parentId: null,
+                        existing: true,
+                        productId: null,
+                        productCategory: null
+                      });
                       closeAddActions();
                     }}
                   >
-                    {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Existing Customer Assets` : `Add Existing ${routes.serializedAsset.title}`}
+                    {repairOrderData?.type === REPAIR_ORDER_TYPE.external
+                      ? `Add Existing Customer Assets`
+                      : `Add Existing ${routes.serializedAsset.title}`}
                   </MenuItem>
                   {permissions?.serializedAsset?.isCreate && (
                     <MenuItem
                       onClick={() => {
-                        setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: false, productId: null, productCategory: null });
+                        setAddExistingProductDialog({
+                          open: true,
+                          type: 'serializedAsset',
+                          parentId: null,
+                          existing: false,
+                          productId: null,
+                          productCategory: null
+                        });
                         closeAddActions();
                       }}
                     >
                       {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add New Customer Assets` : `Add New ${routes.serializedAsset.title}`}
                     </MenuItem>
                   )}
-
-                  {user?.user?.brandPolicy?.repairOrderAddProductPackage &&
+                  {user?.user?.brandPolicy?.repairOrderAddProductPackage && (
                     <>
-                      {permissions?.product?.isCreate &&
+                      {permissions?.product?.isCreate && (
                         <MenuItem
                           onClick={() => {
                             closeAddActions();
-                            setAddExistingProductDialog({ open: true, type: 'product', parentId: null, existing: false, productId: null, productCategory: null });
+                            setAddExistingProductDialog({
+                              open: true,
+                              type: 'product',
+                              parentId: null,
+                              existing: false,
+                              productId: null,
+                              productCategory: null
+                            });
                           }}
                         >
                           Add New Products
-                        </MenuItem>}
-                      {permissions?.packages?.isCreate &&
+                        </MenuItem>
+                      )}
+                      {permissions?.packages?.isCreate && (
                         <MenuItem
                           onClick={() => {
                             closeAddActions();
-                            setAddExistingProductDialog({ open: true, type: 'package', parentId: null, existing: false, productId: null, productCategory: null });
+                            setAddExistingProductDialog({
+                              open: true,
+                              type: 'package',
+                              parentId: null,
+                              existing: false,
+                              productId: null,
+                              productCategory: null
+                            });
                           }}
                         >
                           Add New Packages
-                        </MenuItem>}
+                        </MenuItem>
+                      )}
                     </>
-                  }
+                  )}
                 </Menu>
               </Fragment>
             )}
@@ -553,7 +614,14 @@ const Productpackage = ({
                 disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product)?.length <= 0}
                 onClick={() => {
                   closeActions();
-                  setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: true, productId: null, productCategory: null });
+                  setAddExistingProductDialog({
+                    open: true,
+                    type: 'serializedAsset',
+                    parentId: null,
+                    existing: true,
+                    productId: null,
+                    productCategory: null
+                  });
                 }}
               >
                 Assign Assets
@@ -571,21 +639,20 @@ const Productpackage = ({
           </Box>
         </Box>
       )}
-      {columns && rowsData ? (
+      {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
-            data={rowsData}
+            state={state}
+            dispatch={dispatch}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={setSelectedRecords}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            refreshGrid={fetchData}
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            hideExpander={false}
+            expander={user?.user?.brandPolicy?.repairOrderAddProductPackage ? true : false}
           />
         </Box>
       ) : (
@@ -619,7 +686,9 @@ const Productpackage = ({
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
         <AssignProductDialog
           serialized={true}
-          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })}
+          handleCloseDialog={() =>
+            setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })
+          }
           onSuccess={(d) => {
             handleAdd(d);
           }}
@@ -628,7 +697,9 @@ const Productpackage = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
-          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })}
+          handleClose={() =>
+            setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })
+          }
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
@@ -639,7 +710,9 @@ const Productpackage = ({
         <ManageSerializedAsset
           productId={addExistingProductDialog.productId}
           productCategory={addExistingProductDialog.productCategory}
-          onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })}
+          onClose={() =>
+            setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })
+          }
           referenceType={'repairOrder'}
           referenceData={{
             customerAccount: repairOrderData?.type === REPAIR_ORDER_TYPE.external ? repairOrderData?.customerAccount?.optionValue : null,
@@ -654,22 +727,23 @@ const Productpackage = ({
       {addExistingProductDialog.open && addExistingProductDialog.existing && addExistingProductDialog.type === 'serializedAsset' && (
         <AssignSerializedAssetDialog
           reference="repairOrder"
-          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })}
-          ids={[...rowsData?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e: any) => e?.serializedAssetDetail?._id)]}
+          handleClose={() =>
+            setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })
+          }
+          ids={[...dataRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e: any) => e?.serializedAssetDetail?._id)]}
           referenceData={{
             customerAccount: repairOrderData?.type === REPAIR_ORDER_TYPE.external ? repairOrderData?.customerAccount?.optionValue : null,
-            warehouse: repairOrderData?.warehouse?.optionValue,
+            warehouse: repairOrderData?.warehouse?.optionValue
           }}
           isAssigning={isAddingProducts}
           handleSucess={(rows) => {
             if (products?.length) {
-              const dataToAddFormat = rows?.map(d => {
-                return { ...d, _id: d?.asset }
-              })
-              handleAdd([...dataToAddFormat])
-            }
-            else {
-              handleAdd(rows)
+              const dataToAddFormat = rows?.map((d) => {
+                return { ...d, _id: d?.asset };
+              });
+              handleAdd([...dataToAddFormat]);
+            } else {
+              handleAdd(rows);
             }
           }}
           selectedProducts={products}
@@ -694,9 +768,16 @@ const Productpackage = ({
         >
           <MenuList>
             <MenuItem
-              disabled={rowsData ? false : true}
+              disabled={dataRows?.length ? false : true}
               onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId, existing: true, productId: addchildDialog.productId, productCategory: addchildDialog.productCategory });
+                setAddExistingProductDialog({
+                  open: true,
+                  type: 'serializedAsset',
+                  parentId: addchildDialog.parentId,
+                  existing: true,
+                  productId: addchildDialog.productId,
+                  productCategory: addchildDialog.productCategory
+                });
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, productId: null, productCategory: null });
               }}
             >
@@ -705,7 +786,14 @@ const Productpackage = ({
             {permissions?.serializedAsset?.isCreate && (
               <MenuItem
                 onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId, existing: false, productId: addchildDialog.productId, productCategory: addchildDialog.productCategory });
+                  setAddExistingProductDialog({
+                    open: true,
+                    type: 'serializedAsset',
+                    parentId: addchildDialog.parentId,
+                    existing: false,
+                    productId: addchildDialog.productId,
+                    productCategory: addchildDialog.productCategory
+                  });
                   setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, productId: null, productCategory: null });
                 }}
               >

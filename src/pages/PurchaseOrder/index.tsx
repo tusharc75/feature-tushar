@@ -23,11 +23,10 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 const PurchaseOrder = () => {
-
   const PurchaseOrderType = [
     {
       key: `My ${routes.purchaseOrder.title}`,
@@ -58,7 +57,7 @@ const PurchaseOrder = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -84,16 +83,8 @@ const PurchaseOrder = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.purchaseOrder}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.purchaseOrderDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-          return o?.fieldData;
-        });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns(columns);
+        let newColumns = generateColumns(renderedFrom, data, routes.purchaseOrderDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 
@@ -108,7 +99,7 @@ const PurchaseOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.purchaseOrder?.isCreate ? "Clone" : cloneDisable}  >
+        <HtmlTooltip title={permissions?.purchaseOrder?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -122,7 +113,7 @@ const PurchaseOrder = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
@@ -137,7 +128,8 @@ const PurchaseOrder = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-      </>)
+      </>
+    )
   };
 
   const fetchPurchaseOrder = () => {
@@ -156,11 +148,12 @@ const PurchaseOrder = () => {
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-      }).finally(() => {
+      })
+      .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-      });;
+      });
   };
 
   const getQueryString = (isExport = false) => {
@@ -295,13 +288,7 @@ const PurchaseOrder = () => {
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <div className={`flex flex-wrap items-center gap-2 `}>
                 {PurchaseOrderType && (
-                  <ToggleButtonGroup
-                    size="small"
-                    className="ml-2"
-                    value={PurchaseOrderType[selectedType - 1].key}
-                    exclusive
-                    onChange={handleFilter}
-                  >
+                  <ToggleButtonGroup size="small" className="ml-2" value={PurchaseOrderType[selectedType - 1].key} exclusive onChange={handleFilter}>
                     {PurchaseOrderType.map((k, index) => {
                       return (
                         <ToggleButton value={k.key} key={index}>
@@ -418,6 +405,7 @@ const PurchaseOrder = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.purchaseOrder}
+            setWholeRowsCellColor={(rowData) => (rowData.deleted ? 'error' : '')}
           />
         ) : (
           <Box p={2} height={500}>

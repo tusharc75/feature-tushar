@@ -8,11 +8,26 @@ import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 import FilterAlertModel from './FilterAlertModel';
 import { useAppTheme } from 'src/constants/AppConfig';
+import moment from 'moment';
+import { dateTimeFormat24Hours } from 'src/constants/helpers';
+import routes from 'src/components/Helpers/Routes';
 
-const Chart = ({ dateFilters, assetId, dataPoints }) => {
+const downloadIconHTML = `<div>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico-download">
+<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+<polyline points="7 10 12 15 17 10"></polyline>
+<line x1="12" y1="15" x2="12" y2="3"></line>
+</svg>
+<div/>
+`;
+
+const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
   const toastConfig = useContext(CustomToastContext);
   const [chartData, setChartData] = useState(null);
   const [alert, setAlert] = useState(null);
+  const [alertOptions, setAlertOptions] = useState([]);
+  const [alarm, setalarm] = useState(null);
+  const [alarmOptions, setAlarmOptions] = useState([]);
   const [showHighLow, setShowHighLow] = useState(false);
   const [highLowData, setHighLowData] = useState([]);
   const [currentChartTheme, setCurrentChartTheme] = useState('light');
@@ -36,7 +51,10 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
         autoScaleYaxis: true
       },
       toolbar: {
-        autoSelected: 'zoom'
+        autoSelected: 'zoom',
+        tools: {
+          download: downloadIconHTML
+        }
       }
     },
     dataLabels: {
@@ -53,13 +71,22 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       size: 0
     },
     xaxis: {
-      type: 'datetime'
+      type: 'datetime',
+      labels: {
+        datetimeUTC: false
+      }
     },
     // yaxis: {
     //     min: 0
     // },
     tooltip: {
       shared: true,
+      x: {
+        formatter: function (value) {
+          const formattedDateTime = moment(value).format(dateTimeFormat24Hours);
+          return formattedDateTime;
+        }
+      },
       y: {
         formatter: function (val, { seriesIndex, w }) {
           const dataPoint = dataPoints?.find((d) => d?.fieldLabel === w?.globals?.seriesNames[seriesIndex]);
@@ -166,14 +193,50 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       });
   };
 
+  useEffect(() => {
+    if (deviceTemplate && chartData) {
+      const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
+      const deepFilter = [
+        { field: 'active', term: 'yes' },
+        { field: 'alarm', term: 'yes' }
+      ];
+      axiosInstance()
+        .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&deepFilter=${JSON.stringify(deepFilter)}&filterType=and`)
+        .then(({ data: { data } }) => {
+          setAlarmOptions(
+            data?.data?.map((d) => ({
+              optionValue: d?._id,
+              optionLabel: d?.fieldLabel
+            })) || []
+          );
+        });
+
+      axiosInstance()
+        .get(`${routes?.deviceTemplateAlert?.path}?filterById=${JSON.stringify(query)}&filterType=and`)
+        .then(({ data: { data } }) => {
+          setAlertOptions(data?.map((d) => d?.alertNumber));
+        });
+    }
+  }, [assetId, deviceTemplate, chartData]);
+
   const fetchAlert = () => {
-    if (alert) {
-      let api = `/report/iot/asset-error-message?asset=${assetId}&from_date=${new Date(dateFilters.from).toISOString()}&to_date=${new Date(
+    if (alarm) {
+      let api = `/report/iot/alerts?asset=${assetId}&from_date=${new Date(dateFilters.from).toISOString()}&to_date=${new Date(
         dateFilters.to
       ).toISOString()}`;
-      if (alert?.optionValue !== 'All') {
-        api = `${api}&deviceTemplateAlert=${alert?.optionValue}`;
+
+      if (alarm) {
+        let dataPoints = alarm?.optionValue;
+        if (alarm?.optionValue === 'All') {
+          dataPoints = alarmOptions?.map((alarm) => alarm?.optionValue)?.toString();
+        }
+        api = api + `&dataPoints=${dataPoints}`;
       }
+
+      if (alert) {
+        api = api + `&fieldValue=${alert}`;
+      }
+
       axiosInstance()
         .get(api)
         .then(({ data: { data } }) => {
@@ -241,7 +304,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
 
   useEffect(() => {
     fetchAlert();
-  }, [alert, assetId, dateFilters]);
+  }, [alert, alarm, assetId, dateFilters]);
 
   return (
     <>
@@ -249,9 +312,12 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       {chartData ? (
         <>
           <FilterAlertModel
-            assetId={assetId}
+            alertOptions={alertOptions}
             selectedAlert={alert}
             setSelectedAlert={setAlert}
+            alarmOptions={alarmOptions}
+            selectedAlarm={alarm}
+            setSelectedAlarm={setalarm}
             showHighLow={showHighLow}
             setShowHighLow={setShowHighLow}
           />

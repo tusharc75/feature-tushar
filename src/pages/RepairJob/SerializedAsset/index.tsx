@@ -34,18 +34,16 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { generateCustomTableColumns } from 'src/constants/columns';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { useData } from 'src/StateProvider/Provider';
 import HelpIcon from '@material-ui/icons/Help';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+
 
 const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus, stepFullScreen }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
-  const [selectedRecords, setSelectedRecords] = useState([]);
-  const [rowsData, setRowsData] = useState(null);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -54,6 +52,10 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   const [repairAssetDialog, setRepairAssetDialog] = useState({ open: false, assetId: null, assetName: null, assetIds: [] });
 
   const [repairProcessDialog, setRepairProcessDialog] = useState({ open: false, assetId: null, assetNumber: null, repaired: false });
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions }
@@ -103,13 +105,13 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     const assetField = data?.find((e) => e.resource === 'Serialized Asset')?.fieldNames || [];
     const productField = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
 
-    const newColumns = generateCustomTableColumns(fields, repairJobData?.currency || 'USD', renderedFrom);
+    const newColumns = generateColumns(renderedFrom, fields, null, false, repairJobData?.currency || 'USD' );
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        width: 100,
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -252,6 +254,10 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   };
 
   const fetchRecords = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     var data: any = [];
     let assetSendedToSupplier = []
 
@@ -281,8 +287,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       parent.hideSelection = parent.status === ASSET_STATUS.lost;
       parent.canRepair = user.user?.brandPolicy?.repairJobSendSupplierRequired ? assetSendedToSupplier?.includes(parent.inventory) && !parent?.repaired : true;
     });
-    setRowsData(data);
-    setSelectedRecords([]);
+
+    dispatch({ type: 'initialize', data: data, count: data?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const handleTicketDialog = (ticketType, pickupFromType, deliveryToType) => {
@@ -506,20 +513,18 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
           }
         </Box>
       </Box>
-      {columns && rowsData ? (<Box zIndex={5} width={'100%'}>
+      {columns ? (<Box zIndex={5} width={'100%'}>
         <CustomReactTable
           height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
           columns={columns}
-          data={rowsData}
+          state = {state}
+          dispatch = {dispatch}
           setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-          onSelect={setSelectedRecords}
-          childrenProperty="subRows"
-          uniqueKey="_id"
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           hideSelection={!allowedToEdit}
           hideAction={!allowedToEdit}
-          hideExpander={true}
+          refreshGrid = {fetchRecords}
         />
       </Box>
       ) : (

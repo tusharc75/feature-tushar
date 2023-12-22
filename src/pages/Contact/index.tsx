@@ -19,7 +19,7 @@ import CustomReactTable, {
   gridFilterParser,
   useColumns,
   useTableReducer
-} from 'src/components/CustomReactTableNew';
+} from 'src/components/CustomReactTable';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import CustomContainer from '../../components/CustomContainer';
@@ -88,7 +88,7 @@ export default function Contact(props) {
   const [isAddingWarehouse, setAddingWarehouse] = useState(false);
   const [entities, setEntities] = useState([]);
   const [columns, setColumns] = useState(null);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -106,21 +106,12 @@ export default function Contact(props) {
 
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource[contactResource]}`);
-
     let data = response?.data?.data;
 
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        return o?.fieldData;
-      }
-      return o?.fieldData;
-    });
+    let newColumns = generateColumns(contactResource, data, `/${contactRoute}/detail`, true);
     if (contactResource.includes('customer')) {
-      columns = [
-        ...columns,
+      newColumns = [
+        ...newColumns,
         {
           accessor: 'relatedLead',
           Header: 'Related Lead',
@@ -156,9 +147,9 @@ export default function Contact(props) {
     }
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(routes.projectSales.title, field));
     });
-    setColumns([...columns, ActionsRenderer]);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   useEffect(() => {

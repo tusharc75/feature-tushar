@@ -1,11 +1,9 @@
-import { ReactComponent } from 'ag-grid-react/lib/reactComponent';
 import { useAppTheme } from 'src/constants/AppConfig';
 import React, { FC, ReactElement, useState } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import { Dialog, Box, Typography, IconButton, DialogContent } from '@material-ui/core';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import { Link } from 'react-router-dom';
 import styles from './dashboardModal.module.scss';
 import CloseIcon from '@material-ui/icons/Close';
 import type { DialogProps } from '@material-ui/core/Dialog';

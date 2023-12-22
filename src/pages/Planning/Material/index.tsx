@@ -2,17 +2,16 @@ import { Box, Button, IconButton, Grid, Menu, MenuItem } from '@material-ui/core
 import { Add, ExpandMore } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import routes from 'src/components/Helpers/Routes';
-import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -26,6 +25,7 @@ import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   const {
@@ -35,11 +35,10 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   const toastConfig = useContext(CustomToastContext);
   const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
 
-  const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
 
   const [allFields, setAllFields] = useState([]);
-  const [selectedRecords, setSelectedRecords] = useState([]);
+
 
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
 
@@ -51,6 +50,10 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
 
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
+
   useEffect(() => {
     fetchFields();
   }, []);
@@ -60,7 +63,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, planningData?.currency);
     setAllFields(data);
-    const newColumns = generateCustomTableColumns(data, planningData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, planningData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -69,8 +72,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        width: 80,
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -79,7 +82,10 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        disableFilters: true,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        width: 200,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{`${row.original?.type === 'serializedAsset' ? `Asset` : startCase(row.original?.type)}`}</p>
@@ -89,12 +95,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail?.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail?.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </Box>
           </div>
         )
@@ -104,8 +110,9 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         Header: 'Detail',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {allowedToEdit && row.original.type !== 'serializedAsset' ? (
               <p
@@ -114,7 +121,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -185,32 +192,29 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) => (
+      Cell: ({ row, table }) => (
         <>
           <IconButton
             size="small"
             aria-label="Details"
-            disabled={allowedToEdit ? false : true}
+            disabled={!allowedToEdit}
             onClick={() => {
-              onMaterialEdit(row, rows);
+              onMaterialEdit(row, table.getRowModel().rows);
             }}
           >
             <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
           </IconButton>
-          {allowedToEdit && (
-            <Grid container spacing={1}>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            </Grid>
-          )}
+          <IconButton
+            size="small"
+            aria-label="Details"
+            disabled={!allowedToEdit}
+            onClick={() => {
+              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+              setDeleteData(obj);
+            }}
+          >
+            <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+          </IconButton>
         </>
       )
     });
@@ -224,6 +228,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
     const response = await axiosInstance().get(`${routes.planning.path}/material/${planningData._id}`);
     data = response?.data?.data;
@@ -234,22 +240,23 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'package'
-          ? parent.packageDetail?.packageName
-          : parent.serviceDetail?.serviceName;
+            ? parent.packageDetail?.packageName
+            : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === 'serializedAsset')?.length;
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    setRowsData(rows);
-    setSelectedRecords([]);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const onMaterialEdit = (row, rows) => {
@@ -269,18 +276,18 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.assetDetail.assetNumber
-          : _subRow.serviceDetail?.serviceName;
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow.assetDetail.assetNumber
+              : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow.type === 'serializedAsset'
-          ? parent.description
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow.type === 'serializedAsset'
+              ? parent.description
+              : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
@@ -339,12 +346,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
           setMaterialEdit({
             open: true,
-            data: rowsData[rowIndex + 1],
+            data: dataRows[rowIndex + 1],
             bulkedit: false,
-            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
           });
         } else {
           setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -394,12 +401,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -536,21 +543,20 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           )}
         </Box>
       </Box>
-      {columns && rowsData ? (
-        <Box p="6px" zIndex={5} width={'100%'}>
+      {columns && dataRows ? (
+        <Box zIndex={5} width={'100%'}>
           <CustomReactTable
-            height={'calc(100vh - 345px)'}
+            height={'calc(100vh - 300px)'}
             columns={columns}
-            data={rowsData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-            onSelect={setSelectedRecords}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchData}
+            hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
-            hideSelection={!allowedToEdit}
-            hideAction={!allowedToEdit}
+            expander={true}
           />
         </Box>
       ) : (
@@ -618,7 +624,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
             setAddDialog({ open: false, type: '', parentId: null });
             setAssetAssignedProduct([]);
           }}
-          ids={flattenArray(rowsData)
+          ids={flattenArray(dataRows)
             ?.filter((e) => e.type === 'serializedAsset')
             ?.map((e) => e.materialId)}
           handleSucess={(rows) => {

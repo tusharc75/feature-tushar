@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
+import { Grid, useTheme, Button, Box } from '@material-ui/core';
 import { camelCase } from 'lodash';
 import axios from 'axios';
 import { MdDescription, MdFilterList } from 'react-icons/md';
@@ -9,26 +9,19 @@ import routes from '../../../components/Helpers/Routes';
 import axiosInstance from '../../../axios/axiosInstance';
 import CustomContainer from '../../../components/CustomContainer';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { getFrameworkComponents } from '../../../constants/useColumns';
-import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, sidebarResource, dateTimeFormat } from '../../../constants/helpers';
+import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, dateFormat } from '../../../constants/helpers';
 import Loader from '../../../components/Loader';
 import { IOT_REPORT_LIST } from '../../../constants/helpers';
 import CustomFilter from './CustomFilter';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
-
 
 let cancelTokenSource = null;
 
 const IotReport = () => {
-  const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, pageSizes } = state;
-  const { getColumnData } = useColumns();
-
   const theme = useTheme();
   const toastConfig = React.useContext(CustomToastContext);
   const {
@@ -39,20 +32,14 @@ const IotReport = () => {
   const renderedFrom = `${resource}_report`;
 
   const [showGrid, setShowGrid] = React.useState(false);
-
   const [loadingData, setLoadingData] = React.useState(false);
   const [isExporting, setExporting] = React.useState(false);
   const [selectedReportView, setSelectedReportView] = React.useState(null);
-
   const [filterQuery, setFilterQuery] = useState({});
-
-  const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
   const [columns, setColumns] = React.useState(null);
   const [gridApi, setGridApi] = React.useState(null);
-  const prevQuery = useRef(null);
-  const memoData = useRef(null);
-  // const [state, dispatch] = React.useReducer(reducer, intialState);
-  // const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
+  const [state, dispatch] = React.useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
   const fetchReportObj = () => {
     for (const key in routes) {
@@ -98,60 +85,39 @@ const IotReport = () => {
 
   const handleColumns = (cols) => {
     let columns = [];
-    let data = localStorage.getItem('gridMetaData');
-    let gridMetaData = data === 'undefined' ? {} : JSON.parse(data);
-
-    const commonFieldData = (field) => ({
-      accessor: field?.fieldName,
-      Header: field?.fieldLabel,
-      show: gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
-      disabled: gridMetaData[renderedFrom]?.disabled && gridMetaData[renderedFrom]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false
-    });
-
-    const textRenderer = (field) => {
-      return {
-        Cell: ({ row }) => (
-          <div>
-            {row?.original?.[field?.fieldName] ? (
-              <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
-                {row?.original?.[field?.fieldName]}
-              </h5>
-            ) : (
-              <NoDataCell />
-            )}
-          </div>
-        )
-      };
-    };
-
-    const timeRenderer = (field) => {
-      return {
-        Cell: ({ row }) => (
-          <>
-            {row?.original?.[field?.fieldName] ? (
-              <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateTimeFormat)}`}>
-                {moment(row?.original?.[field?.fieldName])?.format(dateTimeFormat)}
-              </h5>
-            ) : (
-              <NoDataCell />
-            )}
-          </>
-        )
-      };
-    };
-
-    cols?.forEach((o) => {
+    cols?.forEach((e) => {
       columns.push({
-        ...commonFieldData(o),
-        disableFilters: false,
+        accessor: e.fieldName,
+        Header: e.fieldLabel,
+        show: true,
         disableSortBy: true,
-        ...(o?.fieldName === 'time' ? timeRenderer(o) : textRenderer(o))
+        Cell: ({ row }) =>
+          e.fieldName === 'time' ? (
+            row?.original[e.fieldName] ? (
+              <div>
+                {row?.original[e.fieldName] ? (
+                  <h5 className="createBy" title={`${moment(row?.original[e.fieldName]).format(dateFormat)}`}>
+                    {moment(row?.original[e.fieldName])?.format(dateFormat)}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+          ) : row?.original[e.fieldName] ? (
+            <div>
+              <h5 className="text-truncate" title={row?.original[e.fieldName]}>
+                {row?.original[e.fieldName]}
+              </h5>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       });
     });
-
-    console.log(columns);
-
-    setColumns(columns);
+    setColumns([...columns]);
   };
 
   React.useEffect(() => {
@@ -160,98 +126,9 @@ const IotReport = () => {
     }
   }, [filterQuery]);
 
-  // const fetchResourceData = () => {
-  //   setLoadingData(true);
-  //   setColumns(null);
-  //   let filterQuery = getFilter();
-  //   if (cancelTokenSource) {
-  //     cancelTokenSource.cancel();
-  //   }
-  //   cancelTokenSource = axios.CancelToken.source();
-  //   dispatch({ type: 'loading', loading: true });
-  //   if (gridApi) {
-  //     gridApi.setRowData([]);
-  //   }
-  //   let api = seletedReport?.api + filterQuery;
-  //   axiosInstance()
-  //     .get(api, {
-  //       cancelToken: cancelTokenSource.token
-  //     })
-  //     .then(({ data: responseData }) => {
-  //       const { data, count, columns } = responseData?.data;
-  //       handleColumns(columns);
-  //       const processedData = data.map((item, index) => {
-  //         const finalObject: any = prepareDataForGrid(item);
-  //         if (!finalObject?._id) {
-  //           finalObject._id = index?.toString();
-  //         }
-  //         return finalObject;
-  //       });
-  //       dispatch({ type: 'initialize', data: processedData, count: count });
-  //       setLoadingData(false);
-  //       setShowGrid(true);
-  //       setTimeout(() => {
-  //         dispatch({ type: 'loading', loading: false });
-  //       }, gridLoadingTimeout);
-  //     })
-  //     .catch((err) => {
-  //       if (!axios.isCancel(err)) {
-  //         setTimeout(() => {
-  //           dispatch({ type: 'loading', loading: false });
-  //         }, gridLoadingTimeout);
-  //         toastConfig.setToastConfig(err);
-  //       }
-  //     });
-  // };
-  const getFilter = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&column=true`;
-    if (isExport) {
-      deepFilter = `?`;
-    }
-    const { filterByIds, deepFilters } = gridFilterParser(filters);
-
-    if (filterByIds?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-    }
-
-    if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-    }
-
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    }
-    if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
-    }
-
-    if (Object.keys(filterQuery)?.length > 0) {
-      Object.keys(filterQuery).forEach((_k) => {
-        deepFilter = `${deepFilter}&${_k}=${filterQuery[_k]}`;
-      });
-    }
-
-    deepFilter = `${deepFilter}&timezone=${Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone}`;
-
-    return `${deepFilter}`;
-  };
-
-  const frontendPagination = (data: any[]) => {
-    const newData = [];
-    for (let i = page * limit; i < limit * (page + 1); i++) {
-      if (!data[i]) return newData;
-      const item = data[i];
-      const finalObject: any = prepareDataForGrid(item);
-      if (!finalObject?._id) {
-        finalObject._id = i?.toString();
-      }
-      newData.push(finalObject);
-    }
-    return newData;
-  };
-
   const fetchResourceData = () => {
     setLoadingData(true);
+    setColumns(null);
     let filterQuery = getFilter();
 
     const query = getFilter(true);
@@ -274,9 +151,7 @@ const IotReport = () => {
     }
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+
     let api = seletedReport?.api + filterQuery;
     axiosInstance()
       .get(api, {
@@ -285,8 +160,13 @@ const IotReport = () => {
       .then(({ data: responseData }) => {
         const { data, count, columns } = responseData?.data;
         handleColumns(columns);
-        memoData.current = { data, count, columns };
-        const processedData = frontendPagination(data);
+        const processedData = data.map((item, index) => {
+          const finalObject: any = prepareDataForGrid(item);
+          if (!finalObject?._id) {
+            finalObject._id = index?.toString();
+          }
+          return finalObject;
+        });
         dispatch({ type: 'initialize', data: processedData, count: count });
         setShowGrid(true);
       })
@@ -301,6 +181,29 @@ const IotReport = () => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       });
+  };
+
+  const getFilter = (isExport = false) => {
+    let returnQuery = `?page=${page}&limit=${limit}&column=true`;
+    if (isExport) {
+      returnQuery = `?column=true`;
+    }
+    if (sorting.length > 0) {
+      returnQuery = `${returnQuery}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      returnQuery = `${returnQuery}&search=${encodeURIComponent(search)}`;
+    }
+
+    if (Object.keys(filterQuery)?.length > 0) {
+      Object.keys(filterQuery).forEach((_k) => {
+        returnQuery = `${returnQuery}&${_k}=${filterQuery[_k]}`;
+      });
+    }
+
+    returnQuery = `${returnQuery}&timezone=${Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone}`;
+
+    return `${returnQuery}`;
   };
 
   const exportData = () => {
@@ -382,7 +285,7 @@ const IotReport = () => {
                       disableElevation
                       onClick={() => {
                         setShowGrid(false);
-                        // dispatch({ type: 'onlyFilter', filters: {} });
+                        dispatch({ type: 'onlyFilter', filters: {} });
                       }}
                       startIcon={<MdFilterList />}
                     >
@@ -404,42 +307,21 @@ const IotReport = () => {
           setShowGrid={setShowGrid}
         />
         <div>
-          {showGrid && columns ? (
-            <>
-              {/* <CustomAgGrid
+          {columns ? (
+            <CustomReactTable
+              height={'calc(100vh - 300px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchResourceData}
+              hideSelection={true}
+              hideAction={true}
               setSelectedReportView={setSelectedReportView}
               selectedReportView={selectedReportView}
               reportSave={true}
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              allowSelection={false}
-              allowAction={false}
-              refreshGrid={fetchResourceData}
-              showOnlyShowFilteredRecordSwitch={false}
-            /> */}
-              <CustomReactTable
-                height={'calc(100vh - 200px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchResourceData}
-                showOnlyShowFilteredRecordSwitch={false}
-                showFilters={false}
-                hideSelection={true}
-                // resource={sidebarResource.iotRe}
-              />
-            </>
+              virtualization={true}
+            />
           ) : (
             showGrid && <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
           )}

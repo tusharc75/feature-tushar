@@ -5,8 +5,7 @@ import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, ASSET_STATUS, serializedAsset, sidebarResource } from '../../../constants/helpers';
-import { useHistory } from 'react-router-dom';
+import { ASSET_STATUS, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import {
   prepareDataForGrid,
   DELIVERY_TICKET_REFERENCE_TYPE,
@@ -26,15 +25,24 @@ import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { subleaseMessage } from 'src/constants/messageHelpers';
 import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer, } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
-const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepToolTip, currentStep, renderedFrom, allowedToEdit, isProcessor, stepFullScreen }) => {
+const SerializedAsset = ({
+  subleaseData,
+  fetchData,
+  setNextStep,
+  setNextStepToolTip,
+  currentStep,
+  renderedFrom,
+  allowedToEdit,
+  isProcessor,
+  stepFullScreen
+}) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, rowCount, selectedRecords } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const {
     state: { user, permissions }
@@ -53,52 +61,49 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
   const [pdfColumns, setPdfColumns] = useState([]);
 
   useEffect(() => {
-    fetchFields()
+    fetchFields();
   }, []);
 
   const fetchFields = async () => {
     var data = await fetch_sublease_product_fields(subleaseData?.currency);
-    const newColumns = generateCustomTableColumns(data, subleaseData?.currency);
+    const newColumns = generateColumns(null, data, null, false, subleaseData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
-        Header: 'Index',
+        Header: 'Index'
       },
       {
         accessor: 'type',
-        Header: 'Type',
+        Header: 'Type'
       },
       {
         accessor: 'detail',
-        Header: 'Details',
+        Header: 'Details'
       },
       {
         accessor: 'description',
-        Header: 'Description',
+        Header: 'Description'
       }
     ];
-    setPdfColumns([...coloum, ...newColumns])
-  }
+    setPdfColumns([...coloum, ...newColumns]);
+  };
 
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            if (o.fieldData.type === 'singleLine' && o.fieldData.fieldName !== 'assetNumber') {
-              currentColumn.columnData.editable = true;
-            }
-            columns = [...columns, currentColumn?.columnData];
+        const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
+        newColumns?.forEach((o) => {
+          if (data?.find((d) => d?.fieldData?.fieldName === o?.accessor)?.type === 'singleLine' && o?.accessor !== 'assetNumber') {
+            o.editable = true;
           }
         });
-
         const extraColoums = [
           {
-            accessor: 'rentalJob', Header: 'Rental Job', show: true,
-            Cell: ({ row }) => (
+            accessor: 'rentalJob',
+            Header: 'Rental Job',
+            show: true,
+            Cell: ({ row }) =>
               row.original?.rentalJob ? (
                 <Link
                   className="link text-truncate"
@@ -111,31 +116,40 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
               ) : (
                 <NoDataCell />
               )
-            )
           },
           {
-            accessor: 'wellName', Header: 'Well Name', show: true,
-            Cell: ({ row }) => (
+            accessor: 'wellName',
+            Header: 'Well Name',
+            show: true,
+            Cell: ({ row }) =>
               row.original?.wellName ? (
-                <Link className="link text-truncate" target="_blank" title={row.original?.wellName} to={`${routes.wellMasterDetail.path}/${row.original?.wellNameId}`}>
+                <Link
+                  className="link text-truncate"
+                  target="_blank"
+                  title={row.original?.wellName}
+                  to={`${routes.wellMasterDetail.path}/${row.original?.wellNameId}`}
+                >
                   {row.original?.wellName}
                 </Link>
               ) : (
                 <NoDataCell />
               )
-            )
           },
-          { accessor: 'remainingJobDays', Header: 'Remaining Job Days', show: true, Cell: ({ row }) => (row.original?.remainingJobDays ? row.original?.wellName : <NoDataCell />) }
+          {
+            accessor: 'remainingJobDays',
+            Header: 'Remaining Job Days',
+            show: true,
+            Cell: ({ row }) => <div>{(row.original?.remainingJobDays ? row.original?.wellName : <NoDataCell />)}</div>
+          }
         ];
-
-        columns = [...columns.slice(0, 1), ...extraColoums, ...columns.slice(1), ...getStaticFields()];
-        setColumns([...columns]);
+        setColumns([...newColumns.slice(0, 1), ...extraColoums, ...newColumns.slice(1), ...getStaticFields()]);
         fetchRecords();
       });
   };
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     const response = await axiosInstance().get(`${sublease.api}/${subleaseData._id}/serialized-asset`);
     var isComplate = true;
     let rows = response?.data?.data.map((u) => {
@@ -154,15 +168,13 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
     setIsCompleteEnable(isComplate);
     if (isComplate) {
       setNextStep(true);
-      setNextStepToolTip(null)
+      setNextStepToolTip(null);
     } else {
       setNextStep(false);
-      setNextStepToolTip(subleaseMessage.subleaseProcessStep)
+      setNextStepToolTip(subleaseMessage.subleaseProcessStep);
     }
     dispatch({ type: 'initialize', data: rows, count: rows.length });
-    setTimeout(() => {
-      dispatch({ type: 'loading', loading: false });
-    }, gridLoadingTimeout);
+    dispatch({ type: 'loading', loading: false });
   };
 
   const completeSublease = () => {
@@ -171,7 +183,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
       .put(`${sublease.api}/${subleaseData._id}/complete-sublease`)
       .then(() => {
         setIsCompleteing(false);
-        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         fetchRecords();
       })
@@ -232,21 +243,15 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
             />
           </Box>
         )}
-        {columns && pdfColumns &&
+        {columns && pdfColumns && (
           <PreviewDownload
             fileName={`${routes.sublease.title}-${subleaseData?.subleaseName}`}
             resource={sidebarResource.sublease}
             referenceId={subleaseData?._id}
             columns={[...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))]}
-            defaultColumns={[
-              'index',
-              'type',
-              'detail',
-              'description',
-              'qty',
-            ]}
+            defaultColumns={['index', 'type', 'detail', 'description', 'qty']}
           />
-        }
+        )}
         {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
           <Fragment>
             {/* {currentStep === 1 && (
@@ -355,7 +360,9 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
+            refreshGrid={fetchRecords}
+            expander={true}
+            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={500}>
@@ -372,7 +379,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
-            dispatch({ type: 'selection', selectedRecords: [] });
             fetchRecords();
           }}
         />

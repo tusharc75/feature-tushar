@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -38,7 +38,7 @@ const InventoryProduct = () => {
   const history = useHistory();
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -78,41 +78,18 @@ const InventoryProduct = () => {
     getPlants();
   }, [selectedEntity]);
 
-  // useEffect(() => {
-  //   let millisec = Object.keys(search).length > 0 ? 600 : 5;
-  //   if (searchTimeout) {
-  //     clearTimeout(searchTimeout);
-  //   }
-  //   searchTimeout = setTimeout(() => {
-  //     fetchProductInventory();
-  //   }, millisec);
-  // }, [
-  //   plantId,
-  //   storageLocationId,
-  //   page,
-  //   limit,
-  //   filters,
-  //   sorting,
-  //   search,
-  //   selectedEntity,
-  //   showFilteredRecordsOnly,
-  //   fromProductMaster,
-  //   expenseItemValue,
-  //   showExpenseItem
-  // ]);
-
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (searchTimeout) {
       clearTimeout(searchTimeout);
     }
     searchTimeout = setTimeout(() => {
-      fetchProductInventory();
+      fetchData();
     }, millisec);
   }, [search]);
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchData();
   }, [
     plantId,
     storageLocationId,
@@ -150,82 +127,76 @@ const InventoryProduct = () => {
       if (o.fieldData.fieldName === 'expenseItem') {
         setShowExpenseItem(true);
       }
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
     });
 
+    let newColumns = generateColumns(renderedFrom, productFields?.data?.data, routes.productDetail.path);
+    columns = [...columns, ...newColumns];
     columns?.forEach((e) => {
       if (!['productName', 'serializedProduct'].includes(e?.accessor)) {
         e.show = false;
       }
     });
-
     if (!user?.user?.brandPolicy?.hideInventoryCount) {
-      productInventoryFields?.data?.data?.forEach((o) => {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
-        if (currentColumn !== null) {
-          if (!['plant', 'product'].includes(currentColumn?.columnData?.accessor)) {
-            if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
-              columns.push({
-                ...currentColumn?.columnData,
-                canFilter: false,
-                editable: plantId === 'All' ? false : permissions?.productInventory?.isUpdate,
-                Cell: ({ row }) => <h5 className="text-truncate">{row?.original[o.fieldData.fieldName] || 0}</h5>
-              });
-            } else if (['inventory'].includes(currentColumn?.columnData?.accessor)) {
-              columns.push({
-                ...currentColumn?.columnData,
-                canFilter: false,
-                Cell: ({ row }) => <h5 className="text-truncate">{row?.original[o.fieldData.fieldName] || 0}</h5>
-              });
-            } else {
-              columns.push(currentColumn?.columnData);
-            }
+      let newColumns = generateColumns(renderedFrom, productInventoryFields?.data?.data, routes.productInventory.path);
+      newColumns?.forEach(o => {
+        if (!['plant', 'product'].includes(o?.accessor)) {
+          if (['minInventory', 'maxInventory'].includes(o.accessor) && productInventoryFields?.data?.data?.find(d => d?.fieldData?.fieldName === o?.accessor)?.type === 'number') {
+            columns.push({
+              ...o,
+              disableFilters: true,
+              editable: plantId === 'All' ? false : permissions?.productInventory?.isUpdate,
+              cell: ({ row }) => <h5 className="text-truncate">{row?.original[o.accessor] || 0}</h5>
+            });
+          } else if (['inventory'].includes(o?.accessor)) {
+            columns.push({
+              ...o,
+              disableFilters: true,
+              cell: ({ row }) => <h5 className="text-truncate">{row?.original[o.accessor] || 0}</h5>
+            });
+          } else {
+            columns.push(o);
           }
         }
       });
     }
-
     const defaultColumns = [
       ...(!user?.user?.brandPolicy?.hideInventoryCount
         ? [
-            {
-              accessor: 'availableInventory',
-              Header: 'Available Inventory',
-              canFilter: false,
-              disableSortBy: true,
-              show: true,
-              Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
-            },
-            {
-              accessor: 'softHold',
-              Header: 'Soft Hold',
-              canFilter: false,
-              disableSortBy: true,
-              show: true,
-              Cell: ({ row }) =>
-                row?.original?.softHold ? (
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <h5 className="text-truncate">{row?.original?.softHold}</h5>
-                    <HtmlTooltip title={`Soft Hold History`}>
-                      <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(row?.original)} />
-                    </HtmlTooltip>
-                  </div>
-                ) : (
-                  <h5 className="text-truncate">0</h5>
-                )
-            },
-            {
-              accessor: 'purchaseOrderQty',
-              Header: 'On PO',
-              canFilter: false,
-              disableSortBy: true,
-              show: true,
-              Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>
-            }
-          ]
+          {
+            accessor: 'availableInventory',
+            Header: 'Available Inventory',
+            disableFilters: true,
+            disableSortBy: true,
+            show: true,
+            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
+          },
+          {
+            accessor: 'softHold',
+            Header: 'Soft Hold',
+            disableFilters: true,
+            disableSortBy: true,
+            show: true,
+            Cell: ({ row }) =>
+              row?.original?.softHold ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <h5 className="text-truncate">{row?.original?.softHold}</h5>
+                  <HtmlTooltip title={`Soft Hold History`}>
+                    <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(row?.original)} />
+                  </HtmlTooltip>
+                </div>
+              ) : (
+                <h5 className="text-truncate">0</h5>
+              )
+          },
+          {
+            accessor: 'purchaseOrderQty',
+            Header: 'On PO',
+            disableFilters: true,
+            disableSortBy: true,
+            show: true,
+            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>
+          }
+        ]
         : [])
     ];
     setColumns([...columns, ...defaultColumns, ActionsRenderer]);
@@ -265,12 +236,12 @@ const InventoryProduct = () => {
               !permissions?.productInventory?.isUpdate
                 ? TOOLTIP_MESSAGE.remove
                 : row?.original?.plantId === 'All'
-                ? 'Select Plant'
-                : user?.user?.brandPolicy?.allowNegativeInventory
-                ? 'Remove'
-                : !row?.original?.availableInventory
-                ? 'Inventory not available'
-                : 'Remove'
+                  ? 'Select Plant'
+                  : user?.user?.brandPolicy?.allowNegativeInventory
+                    ? 'Remove'
+                    : !row?.original?.availableInventory
+                      ? 'Inventory not available'
+                      : 'Remove'
             }
           >
             <span>
@@ -282,8 +253,8 @@ const InventoryProduct = () => {
                     ? user?.user?.brandPolicy?.allowNegativeInventory
                       ? false
                       : row?.original?.availableInventory
-                      ? false
-                      : true
+                        ? false
+                        : true
                     : true
                 }
                 onClick={() => {
@@ -297,8 +268,8 @@ const InventoryProduct = () => {
                       ? user?.user?.brandPolicy?.allowNegativeInventory
                         ? 'error'
                         : row?.original?.availableInventory
-                        ? 'error'
-                        : 'disabled'
+                          ? 'error'
+                          : 'disabled'
                       : 'disabled'
                   }
                 />
@@ -338,9 +309,8 @@ const InventoryProduct = () => {
     )
   };
 
-  const fetchProductInventory = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-
     if (plantId) {
       const queryString = getQueryString();
       axiosInstance()
@@ -376,9 +346,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-            .filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+          .filter((d) => d.optionValue !== 'All')
+          .map((d) => d.optionValue)
+          .toString()
         : plantId;
 
     let deepFilter = '';
@@ -455,7 +425,7 @@ const InventoryProduct = () => {
     }
     axiosInstance()
       .get(api)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -472,7 +442,7 @@ const InventoryProduct = () => {
             type: 'success',
             message: data.message
           });
-          fetchProductInventory();
+          fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -491,7 +461,7 @@ const InventoryProduct = () => {
             type: 'success',
             message: data.message
           });
-          fetchProductInventory();
+          fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -509,7 +479,7 @@ const InventoryProduct = () => {
           module="product inventory"
           api={productInventory.api}
           afterImportCompleted={() => {
-            fetchProductInventory();
+            fetchData();
           }}
           isDownloadExcel={true}
           isExportAllOrSomeFeature={true}
@@ -517,14 +487,14 @@ const InventoryProduct = () => {
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            fetchProductInventory();
+            fetchData();
           }}
         />
       </div>
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
+            <div className={'flex  align-items-center gap-2 w-full'}>
               <Autocomplete
                 style={{ minWidth: '200px', flexGrow: 1 }}
                 className="md:max-w-[250px]"
@@ -698,7 +668,7 @@ const InventoryProduct = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchProductInventory}
+            refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             onSaveEdit={onSaveEdit}
@@ -717,9 +687,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                .filter((d) => d.optionValue !== 'All')
+                .map((d) => d.optionValue)
+                .toString()
               : plantId
           }
         />
@@ -729,15 +699,15 @@ const InventoryProduct = () => {
         <HistoryDialog
           close={() => {
             setShowHistory({ open: false, product: '', productName: '' });
-            fetchProductInventory();
+            fetchData();
           }}
           product={showHistory.product}
           warehouse={
             plantId === 'All'
               ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                .filter((d) => d.optionValue !== 'All')
+                .map((d) => d.optionValue)
+                .toString()
               : plantId
           }
           storageLocation={storageLocationId}
@@ -753,9 +723,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                .filter((d) => d.optionValue !== 'All')
+                .map((d) => d.optionValue)
+                .toString()
               : plantId
           }
         />
@@ -766,7 +736,7 @@ const InventoryProduct = () => {
           handleClose={() => setInventory({ open: false, product: [], type: '' })}
           handleSuccess={() => {
             dispatch({ type: 'selection', selectedRecords: [] });
-            fetchProductInventory();
+            fetchData();
             setInventory({ open: false, product: [], type: '' });
           }}
           product={inventory.product}

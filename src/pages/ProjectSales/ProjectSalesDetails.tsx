@@ -11,7 +11,6 @@ import routes from '../../components/Helpers/Routes';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import DeleteButton from '../../components/Helpers/DeleteButton';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';

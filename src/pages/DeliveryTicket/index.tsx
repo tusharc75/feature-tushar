@@ -30,7 +30,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
 import { deleteDisable } from 'src/constants/messageHelpers';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
@@ -54,7 +54,7 @@ const DeliveryTicket = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -70,7 +70,7 @@ const DeliveryTicket = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -91,18 +91,13 @@ const DeliveryTicket = () => {
     }
     data = data.filter((e) => !['productInventory', 'pickupFromType', 'deliveryToType'].includes(e?.fieldData?.fieldName));
     let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes.deliveryTicket.path}/detail`, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    const newColumns = generateColumns(renderedFrom, data, `${routes.deliveryTicket.path}/detail`, true);
+
+    columns = [...newColumns, ...getStaticFields(), ActionsRenderer];
     columns = columns.filter((e) => !['warehouse', 'customerAccount', 'supplierAccount'].includes(e.field));
     columns.forEach((column) => {
       if (column.accessor === 'pickupFrom') {
-        column.Cell = ({ row }) => (
+        column.cell = ({ row }) => (
           <>
             <Link
               className="link text-truncate"
@@ -121,7 +116,7 @@ const DeliveryTicket = () => {
         );
       }
       if (column.accessor === 'deliveryTo') {
-        column.Cell = ({ row }) => (
+        column.cell = ({ row }) => (
           <>
             <Link
               className="link text-truncate"

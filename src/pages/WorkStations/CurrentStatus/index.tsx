@@ -5,7 +5,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';

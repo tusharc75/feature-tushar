@@ -8,7 +8,7 @@ import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
@@ -31,7 +31,7 @@ const DriverMaster = () => {
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const [driverMasterId, setDriverMasterId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
@@ -44,16 +44,8 @@ const DriverMaster = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.driverMaster}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.driverMasterDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.driverMasterDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

@@ -186,7 +186,6 @@ const ManageSublease = ({
               element.estimateEndDate = referenceData?.estimateEndDate;
               element.actualStartDate = '';
               element.actualEndDate = '';
-              element.assetQty = 0;
               material.push(element);
             });
             axiosInstance()

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { prepareDataForGrid, packages } from 'src/constants/helpers';
@@ -23,11 +23,11 @@ const ServiceTable = ({ packageId, packageData }) => {
     state: { permissions, user }
   }: any = useData();
 
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [showServiceConfirmBox, setShowServiceConfirmBox] = useState(false);
   const [showServiceAssignDialog, setShowServiceAssignDialog] = useState(false);
   const [isRemovingServices, setRemovingServices] = useState(false);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
@@ -47,7 +47,7 @@ const ServiceTable = ({ packageId, packageData }) => {
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res = {
-            ...prepareDataForGrid(u,user),
+            ...prepareDataForGrid(u, user),
             inventoryCount: u?.qty,
             warehouses: u.warehouse?.map((w) => w.warehouseName).join(', '),
             productCategoryChipColor: u.productCategory?.chipColour
@@ -81,16 +81,8 @@ const ServiceTable = ({ packageId, packageData }) => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Service Master`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serviceMaster.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...defaultColumns, ...columns, ActionsRenderer];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.serviceMaster.path, true);
+    setColumns([...defaultColumns, ...newColumns, ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -101,14 +93,13 @@ const ServiceTable = ({ packageId, packageData }) => {
     sticky: 'right',
     editable: permissions?.packages?.isUpdate,
     cellEditor: 'numericCellEditor',
-    canFilter: false,
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
   };
 
-  const handleUpdateQuantity = (data,row) => {
+  const handleUpdateQuantity = (data, row) => {
     axiosInstance()
       .put(`${packages.api}/${packageId}/services`, {
         ids: [row?._id],
@@ -265,19 +256,19 @@ const ServiceTable = ({ packageId, packageData }) => {
         </Box>
       </Box>
       {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 393px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            isClientSideGrid={true}
-            refreshGrid={fetchData}
-            onSaveEdit={handleUpdateQuantity}
-          />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        <CustomReactTable
+          height={'calc(100vh - 393px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          isClientSideGrid={true}
+          refreshGrid={fetchData}
+          onSaveEdit={handleUpdateQuantity}
+        />
+      ) : <Box p={2} height={500}>
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>}
       {showServiceAssignDialog && (
         <AssignServiceDialog
           handleClose={() => setShowServiceAssignDialog(false)}

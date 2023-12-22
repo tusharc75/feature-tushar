@@ -17,17 +17,18 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MaterialDialog from './MaterialDialog';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns()
 
   const [isUpdating, setUpdating] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -52,7 +53,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, demandOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, demandOrderData?.currency || 'USD', renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, demandOrderData?.currency || 'USD');
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -83,7 +84,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         Header: 'Detail',
         minWidth: 300,
         width: 300,
-        Cell: ({ row, rows }) => (
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
             {allowedToEdit ? (
               <p
@@ -92,7 +93,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -158,14 +159,14 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) =>
+      Cell: ({ row, table }) =>
         <Grid container spacing={1}>
           <IconButton
             size="small"
             aria-label="Details"
             disabled={allowedToEdit ? false : true}
             onClick={() => {
-              onMaterialEdit(row, rows);
+              onMaterialEdit(row, table.getRowModel().rows);
             }}
           >
             <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
@@ -459,7 +460,6 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
             <CustomReactTable
               height={'calc(100vh - 345px)'}
               columns={columns}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               onSelect={setSelectedRecords}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}

@@ -31,7 +31,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../../Leads/Header.module.scss';

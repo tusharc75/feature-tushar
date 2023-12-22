@@ -25,7 +25,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ManageJobDialog from './ManageJobDialog';
 import CardView from './CardView';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
@@ -78,7 +78,7 @@ const Job = () => {
   const [renderCount, setRenderCount] = useState(0);
   const [viewType, setViewType] = useState(1);
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -88,16 +88,8 @@ const Job = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Job`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.jobDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns([...columns]);
+    const newColumns = generateColumns(renderedFrom, data, routes.jobDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   useEffect(() => {

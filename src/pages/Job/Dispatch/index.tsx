@@ -3,7 +3,6 @@ import { Box, Button, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import { dateTimeFormat } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -12,13 +11,17 @@ import moment from 'moment';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(null);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -29,16 +32,17 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        width: 100,
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
+        disabled: true,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original?.detail}</p>
@@ -105,6 +109,10 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
   };
 
   const fetchJobData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${routes.job.path}/material/${jobData._id}`);
@@ -123,7 +131,9 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
     } else {
       setNextStep(false);
     }
-    setRowsData(rows);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -212,19 +222,18 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
         </>
       </Box>
       <Box mt={1}>
-        {columns && rowsData ? (
+        {columns ? (
           <Box zIndex={5}>
             <CustomReactTable
               height={'calc(100vh - 395px)'}
               columns={columns}
-              data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={() => {}}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              state={state}
+              dispatch={dispatch}
+              refreshGrid={fetchJobData}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               hideSelection={true}
+              expander={true}
               hideAction={true}
             />
           </Box>

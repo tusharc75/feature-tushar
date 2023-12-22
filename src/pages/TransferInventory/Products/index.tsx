@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button, Box, IconButton } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -24,7 +23,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ProductQtyDialog from './ProductQtyDialog';
 import { deleteDisable } from 'src/constants/messageHelpers';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem } from '@material-ui/core';
 
@@ -33,6 +32,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
 
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
   const {
     state: {
       user: { user },
@@ -43,7 +43,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [removeData, setRemoveData] = useState([]);
   const [openAddNewInventory, setAddInventoryDialog] = useState(false);
-  const { dataRows, selectedRecords } = state;
+
   const [isAdding, setIsAdding] = useState(false);
   const [columns, setColumns] = useState(null);
   const [viewProductEditDialog, setProductEditDialog] = useState({ open: false, productData: null });

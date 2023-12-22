@@ -11,7 +11,6 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import CustomContainer from '../../components/CustomContainer';
-import CustomDialogComponent from '../../components/CustomDialog/CustomDialogComponent';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
@@ -31,16 +30,22 @@ import {
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageQuoteDialog from './ManageQuote/ManageQuoteDialog';
-import VersionStatus from './VersionStatus';
 import './style.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, {
+  checkStaticField,
+  getStaticFields,
+  gridFilterParser,
+  useColumns,
+  useTableReducer
+} from 'src/components/CustomReactTable';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
+import AllVersionStatus from './AllVersionStatus';
 
 const types = [
   {
@@ -64,7 +69,7 @@ const QuoteBuilders = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [selectedType, setSelectedType] = useState(1);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -88,7 +93,7 @@ const QuoteBuilders = () => {
     opportunityId: history.location?.state?.opportunityId,
     opportunityName: history.location?.state?.opportunityName
   });
-  const [showVersionsDialog, setShowVersionsDialog] = useState(false);
+  const [showVersionsDialog, setShowVersionsDialog] = useState({ open: false, id: null, quoteData: null });
   const [columns, setColumns] = useState(null);
   const [clonedData, setClonedData] = useState([]);
   const [clonedId, setClonedId] = useState(null);
@@ -97,8 +102,7 @@ const QuoteBuilders = () => {
   const [cloneQuoteWithVersionNumber, setCloneQuoteWithVersionNumber] = useState(0);
 
   const { qbApi } = quoteBuilder;
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
-    state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
@@ -111,45 +115,31 @@ const QuoteBuilders = () => {
     let data = response?.data?.data;
 
     let columns = [];
-    data.forEach((o) => {
-      if (['quoteName'].find((d) => d === o?.fieldData?.fieldName)) {
-        columns = [
-          ...columns,
-          {
-            disabled: true,
-            accessor: 'quoteName',
-            Header: 'Quote Number',
-            pivotIndex: 0,
-            show: true,
-            Cell: ({ row }) => (
-              <>
-                <Link className="text-truncate link" title={row.original.quoteName} to={`${routes.quoteBuilder.path}/detail/${row.original._id}`}>
-                  {row.original.quoteName}
-                </Link>
-                <HtmlTooltip title="Versions">
-                  <span
-                    className="cursor-pointer link ml-1"
-                    onClick={() => {
-                      setShowVersionsDialog(true);
-                      getVersionStatus(row.original._id, row.original.currency);
-                    }}
-                  >
-                    ({row.original.versionCount})
-                  </span>
-                </HtmlTooltip></>
-            ),
-            primaryField: true
-          }
-        ];
-      } else {
-        let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-        }
+    let newColumns = generateColumns(routes.quoteBuilder.title, data, `${routes.quoteBuilder.path}/detail`);
+    newColumns?.forEach((o) => {
+      if (o.accessor === 'quoteName') {
+        o.cell = ({ row }) => (
+          <div>
+            <Link className="text-truncate link" title={row.original.quoteName} to={`${routes.quoteBuilder.path}/detail/${row.original._id}`}>
+              {row.original.quoteName}
+            </Link>
+            <HtmlTooltip title="Versions">
+              <span
+                className="cursor-pointer link ml-1"
+                onClick={() => {
+                  setShowVersionsDialog({ open: true, id: row.original._id, quoteData: row.original });
+                  // getVersionStatus(row.original._id, row.original.currency);
+                }}
+              >
+                ({row.original.versionCount})
+              </span>
+            </HtmlTooltip>
+          </div>
+        );
       }
     });
     columns = [
-      ...columns,
+      ...newColumns,
       {
         accessor: 'relatedOpportunity',
         Header: 'Related Opportunity',
@@ -157,12 +147,17 @@ const QuoteBuilders = () => {
         Cell: ({ row }) => (
           <>
             {row.original?.relatedOpportunity ? (
-              <Link className="link" to={`${routes.opportunityDetail.path}/${row.original.relatedOpportunityId}`} title={row.original?.relatedOpportunity}>
+              <Link
+                className="link"
+                to={`${routes.opportunityDetail.path}/${row.original.relatedOpportunityId}`}
+                title={row.original?.relatedOpportunity}
+              >
                 {row.original?.relatedOpportunity}
               </Link>
             ) : (
               <NoDataCell />
-            )}</>
+            )}
+          </>
         )
       }
     ];
@@ -195,11 +190,11 @@ const QuoteBuilders = () => {
                 setClonedId(row?.original?._id);
               }}
             >
-              <FileCopyIcon fontSize="small" color={permissions?.quoteBuilder?.isCreate ? "primary" : "disabled"} />
+              <FileCopyIcon fontSize="small" color={permissions?.quoteBuilder?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={permissions?.quoteBuilder.isDelete && row?.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={permissions?.quoteBuilder.isDelete && row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
@@ -208,8 +203,7 @@ const QuoteBuilders = () => {
               onClick={() => {
                 setDeleteRecord(row?.original);
                 setIsConformDialogVisible(true);
-              }
-              }
+              }}
             >
               <DeleteIcon fontSize="small" color={permissions?.quoteBuilder.isDelete && row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
@@ -221,7 +215,19 @@ const QuoteBuilders = () => {
 
   useEffect(() => {
     fetchData();
-  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, accountDetails, contactDetails, opportunityDetails, showFilteredRecordsOnly]);
+  }, [
+    search,
+    page,
+    limit,
+    selectedType,
+    filters,
+    sorting,
+    selectedEntity,
+    accountDetails,
+    contactDetails,
+    opportunityDetails,
+    showFilteredRecordsOnly
+  ]);
 
   const getVersionStatus = (id, currency) => {
     axiosInstance()
@@ -441,7 +447,7 @@ const QuoteBuilders = () => {
     setshowCreateQuoteDialog(true);
     setIsClone(true);
     setClonedId(quoteId);
-    setShowVersionsDialog(false);
+    setShowVersionsDialog({ open: false, id: null, quoteData: null });
   };
 
   const handleFilter = (event, newFilter) => {
@@ -485,13 +491,7 @@ const QuoteBuilders = () => {
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <div className={`flex flex-wrap items-center gap-2 `}>
                 {types && (
-                  <ToggleButtonGroup
-                    size="small"
-                    className="ml-2"
-                    value={types[selectedType - 1].key}
-                    exclusive
-                    onChange={handleFilter}
-                  >
+                  <ToggleButtonGroup size="small" className="ml-2" value={types[selectedType - 1].key} exclusive onChange={handleFilter}>
                     {types.map((k, index) => {
                       return (
                         <ToggleButton value={k.key} key={index}>
@@ -569,7 +569,7 @@ const QuoteBuilders = () => {
                     Add
                   </Button>
                 )}
-                <HtmlTooltip title={!selectedRecords.length ? "Please select some quotes" : ""}>
+                <HtmlTooltip title={!selectedRecords.length ? 'Please select some quotes' : ''}>
                   <span>
                     <Button
                       variant={'outlined'}
@@ -708,24 +708,24 @@ const QuoteBuilders = () => {
         />
       )}
 
-      {showVersionsDialog && (
-        <CustomDialogComponent
-          title="All Version Status"
-          open={showVersionsDialog}
-          onClose={() => {
-            setShowVersionsDialog(false);
-            setVersionStatusData([]);
+      {showVersionsDialog.open && (
+        <AllVersionStatus
+          open={showVersionsDialog.open}
+          onClose={() => setShowVersionsDialog({ open: false, id: null, quoteData: null })}
+          quoteId={showVersionsDialog.id}
+          quoteData={showVersionsDialog.quoteData}
+          quotePermissions={permissions?.quoteBuilder}
+          fetchQuoteData={() => { }}
+          handleChangeVersionFromAllVersion={(versionNumber) => {
+            history.push(`quotes/detail/${showVersionsDialog.id}`, {
+              versionNumber: `${versionNumber}`,
+              tabValue: 1
+            });
           }}
-        >
-          {versionStatusData.length === 0 ? (
-            <CommonSkeleton lenArray={arr} />
-          ) : (
-            <VersionStatus
-              handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
-              versionStatusData={versionStatusData}
-            />
-          )}
-        </CustomDialogComponent>
+          handleCloneQuoteWithVersionFromAllVersion={(versionNumber) => {
+            handleCloneQuoteWithVersionFromAllVersion(showVersionsDialog.id, versionNumber);
+          }}
+        />
       )}
       {showTransferEntityDialog && (
         <TransferEntityDialog

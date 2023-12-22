@@ -16,7 +16,7 @@ import { Button, Chip, IconButton, Menu, MenuItem, Box } from '@material-ui/core
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import styles from '../Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -46,7 +46,7 @@ const RepairOrder = () => {
   let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -112,16 +112,8 @@ const RepairOrder = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Repair Order`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.repairOrderDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    let newColumns = generateColumns(renderedFrom, data, routes.repairOrderDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -388,7 +380,7 @@ const RepairOrder = () => {
             <div className="flex flex-wrap gap-[8px] justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.sublease?.isCreate && (
+                {permissions?.repairOrder?.isCreate && (
                   <Button
                     onClick={() => {
                       setShowManageRepairOrderDialog({ open: true, isClone: false, idToClone: null });

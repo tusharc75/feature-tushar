@@ -1,9 +1,7 @@
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { Link } from 'react-router-dom';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
@@ -21,31 +19,23 @@ import {
   ASSET_STATUS,
   WORK_ORDER_STATUS
 } from '../../../constants/helpers';
-import { useHistory } from 'react-router-dom';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { useAppTheme } from 'src/constants/AppConfig';
 import { useData } from 'src/StateProvider/Provider';
-
 
 const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [theme] = useAppTheme();
-  const history = useHistory();
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
 
-  const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
 
   const {
-    state: { user, permissions }
+    state: { user }
   }: any = useData();
 
   useEffect(() => {
@@ -73,16 +63,14 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
         toastConfig.setToastConfig(error);
       });
     fetchRecords();
-  }
+  };
 
   const fetchRecords = async () => {
     setNextStep(false);
     try {
-      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
       var material: any = [];
+
+      dispatch({ type: 'selection', selectedRecords: [] });
       dispatch({ type: 'loading', loading: true });
       const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/product-package`);
 
@@ -155,100 +143,100 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
     const productFields = data?.find((d) => d.resource === 'Product');
     const column: any = [];
     [...assetFields?.fieldNames, ...productFields?.fieldNames]?.forEach((d: any) => {
-      var cellRenderer = 'commonRenderer';
+      var cell = ({ row }) => (row?.original[d.fieldName] ? <h5 className="text-truncate">{row?.original[d.fieldName]}</h5> : <NoDataCell />);
       if (d.fieldName === 'assetNumber') {
-        cellRenderer = 'inventoryRenderer';
+        cell = ({ row }) =>
+          row?.original?.assetNumber ? (
+            <div className="d-flex gap-2 align-items-center">
+              <h5 className="text-truncate">{row?.original?.assetNumber}</h5>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serializedAssetDetail.path}/${row?.original?._id}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
       }
       if (d.fieldName === 'productName') {
-        cellRenderer = 'productNameRenderer';
+        cell = ({ row }) =>
+          row?.original?.productName ? (
+            <div className="d-flex gap-2 align-items-center">
+              <h5 className="text-truncate">{row?.original?.productName}</h5>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
       }
       column.push({
-        field: d.fieldName,
-        headerName: d.fieldLabel,
-        show: true,
-        cellRenderer: cellRenderer
+        accessor: d.fieldName,
+        Header: d.fieldLabel,
+        Cell: cell
       });
     });
-    column.push({ field: 'workOrder', headerName: 'Work Order', show: true, cellRenderer: 'workOrderRenderer', width: 200 });
-    column.push({ field: 'workOrderStatus', headerName: 'Work Order Status', show: true, cellRenderer: 'commonRenderer' });
     column.push({
-      field: 'status',
-      headerName: 'Status',
-      show: true,
-      cellRenderer: 'commonRenderer'
+      accessor: 'workOrder',
+      Header: 'Work Order',
+      Cell: ({ row }) =>
+        row?.original?.workOrder ? (
+          <div className="d-flex gap-2 align-items-center">
+            <h5 className="text-truncate">{row?.original?.workOrder}</h5>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color="primary" />
+            </IconButton>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
     });
-    column.push({ field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer', width: 250 });
+    column.push({
+      accessor: 'workOrderStatus',
+      Header: 'Work Order Status',
+      Cell: ({ row }) => (row?.original?.workOrderStatus ? <h5 className="text-truncate">{row?.original?.workOrderStatus}</h5> : <NoDataCell />)
+    });
+    column.push({
+      accessor: 'status',
+      Header: 'Status',
+      Cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
+    });
+    column.push({
+      accessor: 'loadingTicket',
+      Header: 'Loading Ticket',
+      Cell: ({ row }) =>
+        row?.original?.loadingTicket ? (
+          <div className="d-flex gap-2 align-items-center">
+            <h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color="primary" />
+            </IconButton>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+    });
     setColumns(column);
-  };
-
-  const TicketRenderer = (params) =>
-    params?.value ? (
-      <div className="d-flex gap-2 align-items-center">
-        <p className="text-truncate">{params?.value}</p>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`);
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-      </div>
-    ) : (
-      <NoDataCell />
-    );
-
-  const WorkOrderRenderer = (params) =>
-    params?.value ? (
-      <div className="d-flex gap-2 align-items-center">
-        <p className="text-truncate">{params?.value}</p>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(`${routes.workOrderDetail.path}/${params.data?.workOrderId}`);
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-      </div>
-    ) : (
-      <NoDataCell />
-    );
-
-  const InventoryRenderer = (params) => (
-    <div className="d-flex gap-2 align-items-center">
-      <p className="text-truncate">{params?.value}</p>
-      <IconButton
-        size="small"
-        onClick={() => {
-          window.open(`${routes.serializedAssetDetail.path}/${params.data?._id}`);
-        }}
-      >
-        <OpenInNewIcon fontSize="small" color="primary" />
-      </IconButton>
-    </div>
-  );
-
-  const ProductNameRenderer = (params) => (
-    <div className="d-flex gap-2 align-items-center">
-      <p className="text-truncate">{params?.value}</p>
-      <IconButton
-        size="small"
-        onClick={() => {
-          window.open(`${routes.productDetail.path}/${params.data?.productId}`);
-        }}
-      >
-        <OpenInNewIcon fontSize="small" color="primary" />
-      </IconButton>
-    </div>
-  );
-
-  const frameworkComponents = {
-    ticketRenderer: TicketRenderer,
-    productNameRenderer: ProductNameRenderer,
-    inventoryRenderer: InventoryRenderer,
-    workOrderRenderer: WorkOrderRenderer,
-    commonRenderer: CommonRenderer
   };
 
   const openActions = (event) => {
@@ -304,15 +292,6 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
           toastConfig.setToastConfig(error);
         });
     }
-  };
-
-  const getRowStyle = (params) => {
-    if (params?.data?.status === ASSET_STATUS.scrap) {
-      return {
-        'background-color': 'var(--dark-gray, #d3d3d3)'
-      };
-    }
-    return null;
   };
 
   return (
@@ -374,62 +353,18 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
       </Box>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={allowedToEdit}
-              allowSwipe={true}
-              permissions={true}
-              primaryField={columns?.find((d) => d.field)}
-              onClick={(data) => {
-                history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={false}
-              extraParamsToCheckDelete={true}
-              onDelete={false}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              chips={[
-                {
-                  label: 'Status : ',
-                  field: 'status'
-                },
-                {
-                  label: 'Loading Ticket : ',
-                  field: 'loadingTicket',
-                  onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
-                }
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={false}
-              onClone={() => { }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={false}
-              loading={loading}
-              isClientSideGrid={true}
-              allowSelection={allowedToEdit}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchRecords}
-              customGridOptions={{ getRowStyle: getRowStyle }}
-            />
-          )
+          <CustomReactTable
+            height={'calc(100vh - 393px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchRecords}
+            isClientSideGrid={true}
+            hideSelection={!allowedToEdit}
+            hideAction={true}
+            setWholeRowsCellColor={(rowData) => (rowData?.status === ASSET_STATUS.scrap ? 'dark-gray-1' : '')}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

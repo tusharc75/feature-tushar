@@ -104,7 +104,6 @@ import InventoryProduct from './pages/ProductInventory';
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import Report from './pages/Report';
-import PurchaseOrderReport from './pages/Report/PurchaseOrder';
 import ReportMaster from './pages/ReportMaster';
 import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import EcommercePolicy from './pages/EcommercePolicy';
@@ -243,7 +242,9 @@ import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
 import CreditMemo from './pages/CreditMemo';
 import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
 import GenerateInvoice from './pages/GenerateInvoice';
-import StandardReportView from './pages/Report/StandardReport'
+import StandardReportView from './pages/Report/StandardReport';
+import UserDownloadRequest from './pages/UserDownloadRequest';
+import SendOutboundMessage from './pages/SendOutboundMessage';
 
 var notificationInterval: any = null;
 
@@ -298,7 +299,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -717,9 +718,6 @@ function App() {
             <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}/purchase-order-type/:type`}>
-              <PurchaseOrderReport />
-            </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}/standard-report/:type`}>
               <StandardReportView />
             </PrivateRoute>
@@ -1032,6 +1030,9 @@ function App() {
             <PrivateRoute exact path={`${routes.iotReport.path}/:resource`}>
               <IotReport />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.sendOutboundMessage.path}`}>
+              <SendOutboundMessage />
+            </PrivateRoute>
             <PrivateRoute exact path={`${routes.deviceTemplates.path}`}>
               <DeviceTemplates />
             </PrivateRoute>
@@ -1073,6 +1074,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.subleaseInvoice.path}>
               <GenerateInvoice resourceRendered="sublease" />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.userDownloadRequest.path}>
+              <UserDownloadRequest />
             </PrivateRoute>
             <PrivateRoute exact path={routes.repairOrderInvoice.path}>
               <GenerateInvoice resourceRendered="repairOrder" />

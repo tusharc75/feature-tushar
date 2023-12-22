@@ -1,25 +1,24 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
+import { Grid, useTheme, Button, Box } from '@material-ui/core';
 import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
-import moment from 'moment';
-import { MdDescription, MdChevronLeft } from 'react-icons/md';
+import { MdChevronLeft } from 'react-icons/md';
 import styles from '../Leads/Header.module.scss';
 import routes from './../../components/Helpers/Routes';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
-import Loader from '../../components/Loader';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from '../Report/ReportFilters';
 import { useHistory } from 'react-router-dom';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let cancelTokenSource = null;
 
@@ -47,13 +46,10 @@ const CustomReport = () => {
   const [reportList, setReportList] = React.useState([]);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
   const [customReportData, setCustomReportData] = React.useState(null);
-
-  const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
-  const [gridApi, setGridApi] = React.useState(null);
-  const [state, dispatch] = React.useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, loading } = state;
 
   const renderedFrom = `custom-report_${id}`;
 
@@ -78,36 +74,23 @@ const CustomReport = () => {
     setResourceColumns(data);
     setLoadingColumns(false);
     let columns = [];
-    let rendererNames = [];
+
     data.forEach((o) => {
       if (o?.fieldData?.fieldName === primaryFields[camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)]) {
         o.fieldData.primaryField = true;
       }
-      let currentColumn = getColumnData(
-        renderedFrom,
-        o?.fieldData,
-        routes[`${camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)}Detail`].path
-      );
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
-      }
     });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    columns = [...columns, ...getStaticFields()];
+    let newColumns = generateColumns(renderedFrom, data, routes[`${camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)}Detail`].path, true);
+    columns = [...newColumns, ...getStaticFields()];
+
     if (startCase(res) === 'Purchase Order') {
       columns.splice(1, 0, {
-        field: 'poAmount',
-        headerName: 'Purchase Order Amount',
-        show: true,
-        disabled: false,
-        cellRenderer: 'commonRenderer'
+        accessor: 'poAmount',
+        Header: 'Purchase Order Amount',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.poAmount ? <p className="text-truncate">{row.original.poAmount}</p> : <NoDataCell />;
+        }
       });
     }
     setColumns([...columns]);
@@ -140,12 +123,12 @@ const CustomReport = () => {
 
   React.useEffect(() => {
     if (showGrid && resource) {
-      if (gridApi && dataRows?.length == 0) {
-        setTimeout(() => { gridApi.sizeColumnsToFit(); }, 300);
-      }
+      // if (gridApi && dataRows?.length == 0) {
+      //   setTimeout(() => { gridApi.sizeColumnsToFit(); }, 300);
+      // }
       fetchResourceData();
     }
-  }, [resource, page, sorting, search, limit, filters, pageSizes, selectedEntity, customReportData, gridApi]);
+  }, [resource, page, sorting, search, limit, filters, selectedEntity, customReportData]);
 
   React.useEffect(() => {
     if (!selectedData) return;
@@ -171,9 +154,6 @@ const CustomReport = () => {
     }
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`${camelCase(resource) !== 'quotes' ? routes[camelCase(resource)].path : 'quote-builder'}/report${filterQuery}`, {
         cancelToken: cancelTokenSource.token
@@ -236,17 +216,17 @@ const CustomReport = () => {
       message: 'Please wait exporting data',
       type: 'info'
     });
-    let columns = [];
-    if (gridApi) {
-      columns = gridApi.columnController.displayedColumns;
-      columns = columns.map((col) => col.colId);
-    }
+    let exportColumns = [];
+    exportColumns =
+      customReportData?.column && customReportData?.column.length > 0
+        ? columns.filter((col) => customReportData?.column.includes(col.accessor)).map((col) => col.accessor)
+        : columns.map((col) => col.accessor);
     setExporting(true);
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
         `${camelCase(resource) !== 'quotes' ? routes[camelCase(resource)].path : 'quote-builder'}/report/export?exportColumn=${JSON.stringify(
-          columns
+          exportColumns
         )}&export=1&${filterQuery}`,
         {
           responseType: 'arraybuffer'
@@ -267,17 +247,6 @@ const CustomReport = () => {
         toastConfig.setToastConfig(err);
       });
   };
-
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns?.forEach((item) => {
-      columnState?.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -368,31 +337,25 @@ const CustomReport = () => {
             />
           ) : (
             <div>
-              {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                <CustomAgGrid
+              {columns ? (
+                <CustomReactTable
+                  height={'calc(100vh - 200px)'}
                   columns={
                     customReportData?.column && customReportData?.column.length > 0
-                      ? columns.filter((col) => customReportData?.column.includes(col.field))
+                      ? columns.filter((col) => customReportData?.column.includes(col.accessor))
                       : columns
                   }
-                  dataRows={dataRows}
-                  frameworkComponents={frameWorkComponent}
-                  setGridApi={setGridApi}
+                  state={state}
                   dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  actionWidth={100}
-                  loading={loading}
                   renderedFrom={renderedFrom}
-                  allowSelection={false}
-                  allowAction={false}
                   refreshGrid={fetchResourceData}
-                  showOnlyShowFilteredRecordSwitch={false}
+                  hideAction={true}
+                  hideSelection={true}
                 />
               ) : (
-                <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
+                <Box p={2} height={500}>
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
               )}
             </div>
           )}

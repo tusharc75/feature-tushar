@@ -7,7 +7,7 @@ import { Box, TextField } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { isObjectEmpty, gridLoadingTimeout, convertInventory, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
@@ -31,14 +31,14 @@ const ConvertInventory = () => {
   const [storageLocationId, setStorageLocationId] = useState(null);
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [inventory, setInventory] = useState({ open: false, product: [] });
 
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
@@ -96,19 +96,14 @@ const ConvertInventory = () => {
     const response = await axiosInstance().get(`/field?resource=Product&view=true`);
     data = response?.data?.data;
     let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-
+    let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true);
+    columns = [...columns, ...newColumns];
     columns?.forEach((e) => {
       if (!['productName', 'serializedProduct'].includes(e.accessor)) {
         e.show = false;
       }
     });
+
     columns.push({
       accessor: 'availableInventory',
       Header: 'Available Inventory',

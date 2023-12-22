@@ -1,13 +1,9 @@
 import { Box, Toolbar, useMediaQuery, withWidth } from '@material-ui/core';
 import { motion } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
-import { useLocation } from 'react-router-dom';
-import { useData } from '../StateProvider/Provider';
-import { SET_START_TOUR } from '../StateProvider/actionTypes';
 import GlobalUserChat from './GlobalUserChat';
 import Sidebar from './Sidebar/Sidebar';
-// import { AccountDetailsSteps, AccountSteps, DashboardSteps, UserSteps, ContactsSteps, ContactDetailsSteps } from '../constants/tourSteps';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
 
@@ -55,9 +51,8 @@ const Layout = ({ children, width }) => {
             onClick={handleSidebarClose}
           >
             <div
-              className={`flex-grow w-[calc(100%-6%)] mx-auto h-full z-[1]  max-[900px]:px-[13px] max-[900px]:w-full [transition:padding_195ms_cubic-bezier(0.4,_0,_0.6,_1)_0ms] ${
-                isSidebarOpen && sidebarOpenedByButton ? 'min-[960px]:pl-[222px]' : ''
-              }`}
+              className={`flex-grow w-[calc(100%-6%)] mx-auto h-full z-[1]  max-[900px]:px-[13px] max-[900px]:w-full [transition:padding_195ms_cubic-bezier(0.4,_0,_0.6,_1)_0ms] ${isSidebarOpen && sidebarOpenedByButton ? 'min-[960px]:pl-[222px]' : ''
+                }`}
               ref={bodyRef}
               onScroll={onScroll}
             >

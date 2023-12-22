@@ -6,7 +6,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { Grid } from '@material-ui/core';
 
@@ -20,7 +20,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, filters, sorting, selectedRecords } = state;
   const [columns, setColumns] = useState(null);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchColumns();
@@ -34,24 +34,20 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            if (o.fieldData.type === 'singleLine' && o.fieldData.fieldName !== 'assetNumber') {
-              currentColumn.columnData.editable = true;
-            }
-            columns = [...columns, currentColumn?.columnData];
+        const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
+        newColumns?.forEach((o) => {
+          if (data?.find((d) => d?.fieldData.fieldName === o.accessor)?.fieldData?.type === 'singleLine' && o.accessor !== 'assetNumber') {
+            o.editable = true;
           }
         });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-        fetchData();
+        setColumns([...newColumns, ...getStaticFields()]);
       });
   };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     const queryString = getQueryString();
     axiosInstance()
       .get(`${serializedAsset.api}${queryString}`)
@@ -128,7 +124,6 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
             module="packages-products"
             api={`${serializedAsset.api}/custom-template`}
             afterImportCompleted={() => {
-              dispatch({ type: 'selection', selectedRecords: [] });
               fetchData();
             }}
             isExportAllOrSomeFeature={true}
@@ -136,7 +131,6 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
             recordsToExport={selectedRecords?.length}
             ids={selectedRecords?.map((obj) => obj._id)}
             onExportToExcelSuccess={() => {
-              dispatch({ type: 'selection', selectedRecords: [] });
               fetchData();
             }}
             isDownloadExcel={false}

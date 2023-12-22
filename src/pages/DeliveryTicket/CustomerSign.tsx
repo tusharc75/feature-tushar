@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext, Fragment } from "react";
 import { Grid, Box, Button, Typography, Paper, makeStyles } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
-import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";

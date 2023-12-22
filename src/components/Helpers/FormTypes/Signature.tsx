@@ -90,7 +90,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
       <CustomDialogHeader title="Signature Pad" onClose={close} />
       <CustomDialogContent>
         {usePad ? (
-          <div className="bg-[white]">
+          <div className="dark:[filter:invert(1)]">
             <SignaturePad ref={signCanvas} canvasProps={{ minWidth: 500, width: 500, height: 400 }} />
           </div>
         ) : (

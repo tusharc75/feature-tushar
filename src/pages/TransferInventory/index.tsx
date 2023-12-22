@@ -21,7 +21,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferInventory } from 'src/constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import ManageTransferInventory from './ManageTransferInventory';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
@@ -53,7 +53,7 @@ const TransferInventory = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -67,15 +67,8 @@ const TransferInventory = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.transferInventory}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.transferInventoryDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.transferInventoryDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

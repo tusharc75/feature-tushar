@@ -654,7 +654,14 @@ function Dropdown({
                             order: option.length
                           };
                           setOptionsList([tempNewOption, ...option]);
-                          handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          if (type === 'multiSelect') {
+                            handleChange(
+                              name,
+                              tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                            );
+                          } else {
+                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          }
                         }
                       }}
                     />
@@ -820,7 +827,14 @@ function Dropdown({
                             shippingAddress: data?.shippingAddress || []
                           };
                           setOptionsList([tempNewOption, ...option]);
-                          handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          if (type === 'multiSelect') {
+                            handleChange(
+                              name,
+                              tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                            );
+                          } else {
+                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          }
                         }
                       }}
                     />
@@ -861,7 +875,14 @@ function Dropdown({
                           shippingAddress: data?.shippingAddress || []
                         };
                         setOptionsList([tempNewOption, ...option]);
-                        handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                        if (type === 'multiSelect') {
+                          handleChange(
+                            name,
+                            tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                          );
+                        } else {
+                          handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                        }
                       }
                     }}
                   />
@@ -954,7 +975,14 @@ function Dropdown({
                             [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
                           };
                           setOptionsList([tempNewOption, ...option]);
-                          handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          if (type === 'multiSelect') {
+                            handleChange(
+                              name,
+                              tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                            );
+                          } else {
+                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          }
                         }
                       }}
                     />
@@ -1039,7 +1067,14 @@ function Dropdown({
                             })
                           };
                           setOptionsList([tempNewOption, ...option]);
-                          handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          if (type === 'multiSelect') {
+                            handleChange(
+                              name,
+                              tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                            );
+                          } else {
+                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          }
                         }
                       }}
                     />
@@ -1081,7 +1116,14 @@ function Dropdown({
                             })
                           };
                           setOptionsList([tempNewOption, ...option]);
-                          handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          if (type === 'multiSelect') {
+                            handleChange(
+                              name,
+                              tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                            );
+                          } else {
+                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          }
                         }
                       }}
                     />

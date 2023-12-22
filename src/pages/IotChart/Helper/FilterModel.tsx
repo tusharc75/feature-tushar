@@ -2,9 +2,57 @@ import DateFnsUtils from '@date-io/date-fns';
 import { Box, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { INTERVALS } from '../../../constants/helpers';
+import { INTERVALS, dateFormatForInputControl } from '../../../constants/helpers';
+import { useEffect, useState } from 'react';
+import { isValid } from 'date-fns';
 
 export default function FilterModel({ dateFilters, setDateFilters }) {
+  const [intervals, setIntervals] = useState(INTERVALS);
+  const [dateFilter, setDateFilter] = useState({
+    from: dateFilters?.from,
+    to: dateFilters?.to
+  });
+  const [inputFormKeyBoard, setInputFromKeyBoard] = useState(false);
+
+  useEffect(() => {
+    const difference = (dateFilters?.to?.getTime() - dateFilters?.from?.getTime()) / (1000 * 60 * 60);
+    const interval = intervals?.map((d) => {
+      let disabled = true;
+      if (difference <= 2 && ['1second'].includes(d?.optionValue)) {
+        disabled = false;
+      } else if (difference <= 4 && ['5seconds'].includes(d?.optionValue)) {
+        disabled = false;
+      } else if (difference <= 6 && ['10seconds'].includes(d?.optionValue)) {
+        disabled = false;
+      } else if (difference <= 18 && ['30seconds'].includes(d?.optionValue)) {
+        disabled = false;
+      } else if (difference <= 36 && ['1minute'].includes(d?.optionValue)) {
+        disabled = false;
+      } else if (difference <= 240 && ['5minutes'].includes(d?.optionValue)) {
+        disabled = false;
+      } else if (difference <= 720 && ['15minutes'].includes(d?.optionValue)) {
+        disabled = false;
+      } else if (difference <= 1440 && ['1hour'].includes(d?.optionValue)) {
+        disabled = false;
+      } else if (difference <= 2880 && ['6hours'].includes(d?.optionValue)) {
+        disabled = false;
+      } else if (difference <= 8760 && ['1day'].includes(d?.optionValue)) {
+        disabled = false;
+      }
+      return {
+        ...d,
+        disabled
+      };
+    });
+    setIntervals(interval);
+  }, [dateFilters.from, dateFilters.to]);
+
+  useEffect(() => {
+    if (inputFormKeyBoard && isValid(dateFilter.from) && isValid(dateFilter.to)) {
+      setDateFilters({ ...dateFilters, from: dateFilter?.from, to: dateFilter.to });
+    }
+  }, [dateFilter, inputFormKeyBoard]);
+
   return (
     <Box display="flex" justifyContent="end">
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -16,13 +64,22 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
             size="small"
             margin="none"
             autoOk
-            maxDate={dateFilters.to}
-            format="dd/MM/yyyy HH:mm"
+            maxDate={dateFilter.to}
+            format={dateFormatForInputControl + ' HH:mm'}
             label="From"
             views={['year', 'month', 'date', 'hours', 'minutes']}
-            value={dateFilters.from}
+            value={dateFilter.from}
             onChange={(date) => {
-              setDateFilters({ ...dateFilters, from: date });
+              setInputFromKeyBoard(false);
+              setDateFilter({ ...dateFilter, from: date });
+            }}
+            onClose={() => {
+              setDateFilters({ ...dateFilters, from: dateFilter?.from });
+            }}
+            onInput={() => {
+              setTimeout(() => {
+                setInputFromKeyBoard(true);
+              }, 1000);
             }}
           />
           <KeyboardDateTimePicker
@@ -32,21 +89,31 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
             size="small"
             margin="none"
             autoOk
-            minDate={dateFilters.from}
-            format="dd/MM/yyyy HH:mm"
+            minDate={dateFilter.from}
+            format={dateFormatForInputControl + ' HH:mm'}
             label="To"
             views={['year', 'month', 'date', 'hours', 'minutes']}
-            value={dateFilters.to}
+            value={dateFilter.to}
             onChange={(date) => {
-              setDateFilters({ ...dateFilters, to: date });
+              setInputFromKeyBoard(false);
+              setDateFilter({ ...dateFilter, to: date });
+            }}
+            onClose={() => {
+              setDateFilters({ ...dateFilters, to: dateFilter?.to });
+            }}
+            onInput={() => {
+              setTimeout(() => {
+                setInputFromKeyBoard(true);
+              }, 1000);
             }}
           />
           <Autocomplete
             id={`interval`}
             style={{ minWidth: '260px' }}
-            options={INTERVALS}
+            options={intervals}
             autoHighlight
             getOptionLabel={(option: any) => option?.optionLabel}
+            getOptionDisabled={(option) => option?.disabled || false}
             renderOption={(option) => option?.optionLabel}
             onChange={(event, value) => {
               setDateFilters({
@@ -54,7 +121,7 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
                 intervals: value?.optionValue || null
               });
             }}
-            value={INTERVALS.find((v) => v.optionValue === dateFilters.intervals) || {}}
+            value={intervals.find((v) => v.optionValue === dateFilters.intervals) || {}}
             renderInput={(params) => <TextField {...params} name={`interval`} label="Interval" size="small" margin="none" variant="outlined" />}
           />
         </div>

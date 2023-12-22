@@ -6,7 +6,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { Box, CircularProgress } from '@material-ui/core';
 import SearchBox from '../../../components/Helpers/SearchBox';
 import routes from '../../../components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import {
   serializedAsset,
   isObjectEmpty,
@@ -61,7 +61,7 @@ const AddSerializedAsset = ({
 
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { permissions, user }
@@ -107,13 +107,7 @@ const AddSerializedAsset = ({
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
+        let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         const inUseColoumns: any = [
           {
             accessor: 'rentalJob',
@@ -132,8 +126,7 @@ const AddSerializedAsset = ({
           }
         ];
 
-        columns = [...inUseColoumns, ...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        setColumns([...inUseColoumns, ...newColumns, ...getStaticFields()]);
       });
   };
 
@@ -471,6 +464,7 @@ const AddSerializedAsset = ({
         open={true}
       >
         <CustomDialogHeader
+          showRequiredLabel={false}
           title={`${referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'} ${routes.serializedAsset.title}`}
           onClose={handleSerializedAssetClose}
         ></CustomDialogHeader>
@@ -657,20 +651,18 @@ const AddSerializedAsset = ({
               </Grid>
             </Grid>
             {['Rental Job'].includes(referenceType) && (
-              <Grid container spacing={2}>
-                <Grid item>
-                  <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                    <CustomTab value={0} index={0} label={'Assets'} {...a11yProps(0)} />
-                    {permissions?.sublease && <CustomTab className={'tabLayout'} value={1} index={1} label={'Sublease Assets'} {...a11yProps(1)} />}
-                    <CustomTab className={'tabLayout'} value={2} index={2} label={'In Use Assets'} {...a11yProps(2)} />
-                  </CustomTabs>
-                </Grid>
-              </Grid>
+              <Box pt={1}>
+                <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+                  <CustomTab value={0} index={0} label={'Assets'} {...a11yProps(0)} />
+                  {permissions?.sublease && <CustomTab className={'tabLayout'} value={1} index={1} label={'Sublease Assets'} {...a11yProps(1)} />}
+                  <CustomTab className={'tabLayout'} value={2} index={2} label={'In Use Assets'} {...a11yProps(2)} />
+                </CustomTabs>
+              </Box>
             )}
             <Box>
               {columns ? (
                 <CustomReactTable
-                  height={'calc(100vh - 350px)'}
+                  height={referenceType === 'Rental Job' ? 'calc(100vh - 350px)' : 'calc(100vh - 250px)'}
                   columns={Number(tabValue) === 2 ? columns : columns?.filter((e: any) => e.accessor !== 'rentalJob')}
                   state={state}
                   setWholeRowsCellColor={getRowStyleScheduled}

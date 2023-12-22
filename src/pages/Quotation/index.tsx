@@ -29,7 +29,7 @@ import {
   sidebarResource,
   supplierAccount
 } from '../../constants/helpers';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
@@ -67,7 +67,7 @@ const Quotation = () => {
   });
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -80,18 +80,12 @@ const Quotation = () => {
     const response = await axiosInstance().get(`/field?resource=Quotation`);
     data = response?.data?.data;
     let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.quotationDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    let newColumns = generateColumns(renderedFrom, data, routes.quotationDetail.path, true);
+    columns = [...newColumns, ...getStaticFields(), ActionsRenderer];
     columns?.forEach((column) => {
       if (column?.primaryField) {
-        column.Cell = ({ row }) => (
-          <>
+        column.cell = ({ row }) => (
+          <div style={{display:'flex', alignItems:'center'}}>
             <Link className="link text-truncate" title={row.original[column.accessor]} to={`${routes.quotation.path}/detail/${row.original._id}`}>
               {row.original[column.accessor]}
             </Link>
@@ -115,7 +109,7 @@ const Quotation = () => {
                 )}
               </>
             )}
-          </>
+          </div>
         );
       }
     });

@@ -4,14 +4,7 @@ import { Chip, IconButton, Tooltip, Button, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import queryString from 'query-string';
 import ManageRepairJob from './ManageRepairJob';
-import {
-  customerAccount,
-  supplierAccount,
-  gridLoadingTimeout,
-  repairJob,
-  prepareDataForGrid,
-  sidebarResource
-} from '../../constants/helpers';
+import { customerAccount, supplierAccount, gridLoadingTimeout, repairJob, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -24,7 +17,13 @@ import axiosInstance from '../../axios/axiosInstance';
 import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import { camelCase } from 'lodash';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, {
+  checkStaticField,
+  getStaticFields,
+  gridFilterParser,
+  useColumns,
+  useTableReducer
+} from 'src/components/CustomReactTable';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { AddOutlined } from '@material-ui/icons';
 import SearchBox from 'src/components/Helpers/SearchBox';
@@ -34,7 +33,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 let repairJobTimeout;
 
 const RepairJob = () => {
-
   const types = [
     {
       key: `My ${routes?.repairJob.title}`,
@@ -77,8 +75,7 @@ const RepairJob = () => {
   const [columns, setColumns] = useState(null);
   const pageTitle = camelCase(`${routes.repairJob.title}`);
 
-
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -97,23 +94,18 @@ const RepairJob = () => {
         console.error(`Repair Job: Error while storing data for Offline context. Error: ${ex.message}`);
       }
     }
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.repairJobDetail.path, true);
-      if (currentColumn !== null) {
-        if (isOffline) {
-          currentColumn.columnData['filter'] = false;
-          currentColumn.columnData['sortable'] = false;
-        }
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
+    let newColumns = generateColumns(pageTitle, data, routes.repairJobDetail.path, true);
+    if (isOffline) {
+      newColumns?.forEach((o) => {
+        o['filter'] = false;
+        o['sortable'] = false;
+      });
+    }
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(pageTitle, field));
+      newColumns.push(checkStaticField(pageTitle, field));
     });
-    setColumns([...columns, ActionsRenderer]);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   //  Grid Variables - End
@@ -208,8 +200,7 @@ const RepairJob = () => {
         )}
       </>
     )
-
-  }
+  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -404,11 +395,7 @@ const RepairJob = () => {
               {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                className={styles.search_box_input}
-                value={search}
-                size="small" />
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.repairJob?.isCreate && (
                   <Button
@@ -417,10 +404,10 @@ const RepairJob = () => {
                     size="small"
                     onClick={() => {
                       setShowManageRepairJobDialog({ open: true, isClone: false, idToClone: null });
-                    }
-                    }
+                    }}
                     className={`no-shadow`}
-                    startIcon={<AddOutlined />}>
+                    startIcon={<AddOutlined />}
+                  >
                     Add
                   </Button>
                 )}
@@ -455,8 +442,9 @@ const RepairJob = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${deleteRecord.repairJobName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${
+              deleteRecord.repairJobName || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

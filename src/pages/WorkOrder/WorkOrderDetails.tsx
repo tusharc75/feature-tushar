@@ -38,6 +38,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import { RiFileShredFill } from 'react-icons/ri';
 import Diagram from './Diagram';
 import { ExpandMore } from '@material-ui/icons';
+import { VscVersions } from 'react-icons/vsc';
+import Versions from './Versions';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -62,13 +64,17 @@ const WorkOrderDetails = () => {
   const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
-
   const [showConfirmVersion, setShowConfirmVersion] = useState({ open: false, withData: 0 });
+  const [versionDialog, setVersionDialog] = useState(false);
 
   const columns = [
+    { accessor: 'index', Header: 'Index' },
     { accessor: 'serviceName', Header: 'Service' },
     { accessor: 'serviceType', Header: 'Service Type' },
     { accessor: 'assignedTechnician', Header: 'Assigned Technician' },
+    { accessor: 'assignedWorkStation', Header: 'Assigned WorkStation' },
+    { accessor: 'startDate', Header: 'Start Date' },
+    { accessor: 'endDate', Header: 'End Date' },
     { accessor: 'status', Header: 'Status' },
     { accessor: 'serviceStatus', Header: 'Result' }
   ];
@@ -204,14 +210,16 @@ const WorkOrderDetails = () => {
   };
 
   const createVersion = (withData) => {
-    axiosInstance().put(`${workOrder.api}/create-version/${id}`, { withData }).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-      fetchWorkOrderData();
-    })
+    axiosInstance()
+      .put(`${workOrder.api}/${id}/version`, { withData })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchWorkOrderData();
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -261,16 +269,25 @@ const WorkOrderDetails = () => {
                       </HtmlTooltip>
                     </div>
                   )}
-                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
-                  <Button
-                    variant={'contained'}
-                    size="small"
-                    className={'btn-outline-v1'}
-                    onClick={openAddActions}
-                    aria-controls="add-menu"
-                  >
+                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.deleted && (
+                  <Button variant={'contained'} size="small" className={'btn-outline-v1'} onClick={openAddActions} aria-controls="add-menu">
                     {'Create Version'}
                     <ExpandMore fontSize="small" />
+                  </Button>
+                )}
+                {workOrderData?.versions?.length && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="primary"
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={() => {
+                      setVersionDialog(true);
+                    }}
+                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                  >
+                    {isMobile && !isTablet ? <VscVersions size={20} /> : `Versions : ${workOrderData?.versions?.length + 1}`}
                   </Button>
                 )}
                 <Menu
@@ -358,7 +375,7 @@ const WorkOrderDetails = () => {
           )}
           {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
             <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Diagram
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawing
             </CustomTab>
           )}
           {!(isMobile && !isTablet) && (
@@ -420,7 +437,7 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} />}
+          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} currentVersion={(workOrderData?.versions?.length + 1) || 1} />}
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>
@@ -461,7 +478,7 @@ const WorkOrderDetails = () => {
             setShowConfirmVersion({ open: false, withData: 0 });
           }}
           onOk={() => {
-            createVersion(showConfirmVersion.withData)
+            createVersion(showConfirmVersion.withData);
             setShowConfirmVersion({ open: false, withData: 0 });
           }}
         />
@@ -476,6 +493,15 @@ const WorkOrderDetails = () => {
           onSuccess={() => {
             fetchWorkOrderData();
             setOpenUpdateDialog(false);
+          }}
+        />
+      )}
+      {versionDialog && (
+        <Versions
+          workOrderId={id}
+          workOrderData={workOrderData}
+          handleClose={() => {
+            setVersionDialog(false);
           }}
         />
       )}

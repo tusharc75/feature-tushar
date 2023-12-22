@@ -10,7 +10,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DurationFilter from 'src/components/DurationFilter';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { dateTimeFormat, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -139,7 +139,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'date',
       Header: 'Date',
-      canFilter: false,
+      disableFilters: true,
       disabled: true,
       disableSortBy: true,
       Cell: ({ row }) => (
@@ -173,7 +173,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'reference',
       Header: 'Reference',
-      canFilter: false,
+      disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) =>
         row?.original?.reference ? (
@@ -286,7 +286,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'qty',
       Header: 'Credit/Debit',
-      canFilter: false,
+      disableFilters: true,
       disableSortBy: true,
       disabled: true,
       Cell: ({ row }) => (
@@ -319,7 +319,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           {
             accessor: 'finalInventory',
             Header: 'Final Quantity',
-            canFilter: false,
+            disableFilters: true,
             disableSortBy: true,
             Cell: ({ row }) => (
               <>
@@ -338,7 +338,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'price',
       Header: `Cost ${curr}`,
-      canFilter: false,
+      disableFilters: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.price ? (
@@ -354,7 +354,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'totalPrice',
       Header: `Amount ${curr}`,
-      canFilter: false,
+      disableFilters: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.totalPrice ? (
@@ -372,7 +372,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           {
             accessor: 'finalAvgPrice',
             Header: `Final Average Cost ${curr}`,
-            canFilter: false,
+            disableFilters: true,
             disableSortBy: true,
             Cell: ({ row }) => (
               <>
@@ -391,7 +391,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'warehouse',
       Header: routes.warehouse.title,
-      canFilter: false,
+      disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) => (
         <>
@@ -415,7 +415,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           {
             accessor: 'storageLocation',
             Header: 'Storage Location',
-            canFilter: false,
+            disableFilters: true,
             disableSortBy: true,
             Cell: ({ row }) => (
               <>
@@ -471,7 +471,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'serialNumber',
       Header: 'Serial Number',
-      canFilter: false,
+      disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) => (
         <>
@@ -504,7 +504,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'transactionDate',
       Header: 'Actual Transaction Date',
-      canFilter: false,
+      disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) => (
         <>

@@ -14,7 +14,7 @@ import CustomReactTable, {
   gridFilterParser,
   useColumns,
   useTableReducer
-} from 'src/components/CustomReactTableNew';
+} from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import { camelCase } from 'lodash';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
@@ -34,7 +34,7 @@ export default function DeviceTemplates() {
   const {
     state: { permissions, user, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -54,15 +54,8 @@ export default function DeviceTemplates() {
     axiosInstance()
       .get('/field?resource=Device Templates')
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.deviceTemplatesDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns(columns);
+        const newColumns = generateColumns(renderedFrom, data, routes.deviceTemplatesDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

@@ -4,21 +4,18 @@ import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Dialog, IconButton } from '@material-ui/core';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import {
   CHILD_RESOURCE,
   CustomDialogTransition,
   MATERIAL_TYPE,
   dateFormat,
-  quotation,
-  repairOrder,
-  sidebarResource,
-  sublease
+  sidebarResource
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -29,7 +26,6 @@ import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { camelCase, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -39,20 +35,21 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
   const [isUpdating, setUpdating] = useState(false);
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [material, setMaterial] = useState([]);
 
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
 
   const [endDate, setEndDate] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
 
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions }
   }: any = useData();
 
   const renderedFrom = `${camelCase(routes?.generateInvoice.title)}_create`;
@@ -82,14 +79,15 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       e.isColumnEditable = false;
     });
 
-    var newColumns = generateCustomTableColumns(data, resourceData[0]?.currency ? resourceData[0]?.currency : 'USD', renderedFrom);
+    var newColumns = generateColumns(renderedFrom, data, null, false, resourceData[0]?.currency ? resourceData[0]?.currency : 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
     let column: any = [
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        width: 120,
+        sticky: 'left',
+        disableFilters : false,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -98,9 +96,10 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
-        disableFilters: true,
+        disabled : true,
+        disableFilters : true,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -146,6 +145,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         Header: 'Details',
         minWidth: 300,
         width: 300,
+        disabled: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original.detail}</p>
@@ -193,6 +193,10 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     const referenceIds = resourceData?.map((d) => d._id);
     const { data: { data: data } } = await axiosInstance().get(`${routes?.generateInvoice.path}/material?resource=${resource}&referenceIds=${JSON.stringify(referenceIds)}`);
 
@@ -274,8 +278,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(material, parent);
     });
-    setRowsData(rows);
-    setSelectedProducts([]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -313,7 +317,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
     let rows: any = [];
-    selectedProducts.forEach((element) => {
+    selectedRecords.forEach((element) => {
       element.invalidDate = false;
 
       const product = invoicedProducts?.material?.find((p) => p._id === element._id);
@@ -436,12 +440,12 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                           margin="dense"
                         />
                         <Box>
-                          <HtmlTooltip title={selectedProducts?.length ? '' : 'Please select items to apply'}>
+                          <HtmlTooltip title={selectedRecords?.length ? '' : 'Please select items to apply'}>
                             <span>
                               <Button
                                 variant="contained"
                                 color="primary"
-                                disabled={selectedProducts?.length && moment(endDate)?.isValid() ? false : true}
+                                disabled={selectedRecords?.length && moment(endDate)?.isValid() ? false : true}
                                 size="small"
                                 onClick={() => {
                                   handleApplyDate();
@@ -458,24 +462,24 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                 </Grid>
               </MuiPickersUtilsProvider>
             )}
-            {columns && rowsData ? (
+            {columns ? (
               <Box zIndex={5} width={'100%'} p={1}>
                 <CustomReactTable
                   height={progressiveBilling ? 'calc(100vh - 285px)' : 'calc(100vh - 180px)'}
+                  state={state}
                   columns={columns}
-                  data={rowsData}
                   setWholeRowsCellColor={(rowData) => {
                     if (rowData?.invalidDate) return 'error';
                     if (rowData?.isAppliedBill) return 'isAppliedBill';
                     return '';
                   }}
-                  onSelect={setSelectedProducts}
-                  childrenProperty="subRows"
-                  uniqueKey="_id"
                   renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                   hideSelection={!progressiveBilling}
-                  hideExpander={resource === sidebarResource.fieldTicket ? true : false}
+                  expander={resource === sidebarResource.fieldTicket ? false : true}
+                  refreshGrid = {fetchData}
+                  dispatch = {dispatch}
+                  hideAction = {true}
                 />
               </Box>
             ) : (

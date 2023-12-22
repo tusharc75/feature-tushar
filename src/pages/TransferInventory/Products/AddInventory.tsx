@@ -11,14 +11,14 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer, } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer, } from 'src/components/CustomReactTable';
 
 const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, renderedFrom, ignoreIds }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { page, dataRows, limit, selectedRecords, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user }
@@ -35,34 +35,30 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   const fetchFields = async () => {
     const productResult = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
     const data = productResult?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-    });
-    columns.unshift(
+    const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true);
+    newColumns.unshift(
       {
         accessor: 'qty',
         Header: 'Quantity',
         show: true,
-        disabled: false,
         Cell: ({ row }) => <div>{row.original.qty}</div>,
         editable: true,
-        filter: false
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
       },
       {
         accessor: 'inventory',
         Header: 'Inventory',
         show: true,
-        disabled: false,
         Cell: ({ row }) => <div>{row.original.inventory}</div>,
         editable: false,
-        filter: false
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
       }
     );
-    setColumns([...columns, ...getStaticFields()]);
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
   const fetchData = () => {
@@ -127,7 +123,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     }
 
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${selectedRecords?.filter((e) => !e?.hideSelection)?.map((m) => m._id)}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords?.filter((e) => !e?.hideSelection)?.map((m) => m._id))}`;
     }
 
     if (sorting.length > 0) {
@@ -171,6 +167,14 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
       if (editRow) {
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
+    } else {
+      const updatedSelectedRecords = selectedRecords?.map((e) => {
+        if (e?._id === row?._id) {
+          return { ...e, qty: parseInt(data?.qty), isChecked: true };
+        }
+        return e;
+      });
+      dispatch({ type: 'selection', selectedRecords: updatedSelectedRecords });
     }
     dispatch({ type: 'update', data: rows });
   };

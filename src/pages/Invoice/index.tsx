@@ -14,7 +14,7 @@ import styles from '../Leads/Header.module.scss';
 import { customerAccount, gridLoadingTimeout, invoice, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
@@ -57,7 +57,7 @@ const Invoice = () => {
   });
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -69,16 +69,8 @@ const Invoice = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Invoice`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.invoiceDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns([...columns]);
+    const newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   useEffect(() => {
@@ -371,6 +363,7 @@ const Invoice = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
+                        disabled={!selectedRecords?.every((d) => d?.canDelete)}
                         onClick={() => {
                           closeActions();
                           showConfirmBox();

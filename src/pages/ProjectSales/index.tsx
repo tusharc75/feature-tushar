@@ -18,7 +18,7 @@ import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDisable, deleteDisable, entityDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -51,7 +51,7 @@ const ProjectSales: FC = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedType, setselectedType] = useState(1);
@@ -81,14 +81,8 @@ const ProjectSales: FC = () => {
       .get(`/field?resource=${sidebarResource.projectSales}`)
       .then(({ data: { data } }) => {
         let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.projectSalesDetail.path, true);
-
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
+        let newColumns = generateColumns(renderedFrom, data, routes.projectSalesDetail.path, true);
+        columns = [...newColumns, ...getStaticFields()];
         setColumns([...columns, ActionsRenderer]);
       });
   };

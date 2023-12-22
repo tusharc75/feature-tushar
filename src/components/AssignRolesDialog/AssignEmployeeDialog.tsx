@@ -18,7 +18,7 @@ import {
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import { Autocomplete } from '@material-ui/lab';
 
@@ -30,7 +30,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { permissions, selectedEntity }
@@ -76,16 +76,8 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.employeeMaster}&view=true`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.employeeMasterDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
-        setColumns(columns);
+        let newColumns = generateColumns(renderedFrom, data, routes.employeeMasterDetail.path);
+        setColumns([...newColumns, ...getStaticFields()]);
       });
   };
 

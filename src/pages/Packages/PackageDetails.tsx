@@ -10,7 +10,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

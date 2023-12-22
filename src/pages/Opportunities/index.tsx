@@ -19,7 +19,13 @@ import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
 import './style.scss';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, {
+  checkStaticField,
+  getStaticFields,
+  gridFilterParser,
+  useColumns,
+  useTableReducer
+} from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -46,7 +52,7 @@ const Opportunities = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(1);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -64,8 +70,6 @@ const Opportunities = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [anchorEl, setAnchorEl] = useState(null);
 
-
-
   //  Grid Variables - End
   useEffect(() => {
     fetchGridColumns();
@@ -74,33 +78,22 @@ const Opportunities = () => {
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=Opportunity&entity=${selectedEntity}&view=true`);
     let data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      if (['firstName'].find((d) => d === o?.fieldData?.fieldName)) {
-        columns = [
-          ...columns,
-          {
-            disabled: true,
-            accessor: 'opportunityName',
-            header: 'Opportunity Name',
-            pivotIndex: 0,
-            show: true,
-            primaryField: true
-          }
-        ];
-      } else {
-        let currentColumn = getColumnData(routes.opportunity.title, o?.fieldData, routes.opportunityDetail.path, true);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-        }
+    const newColumns = generateColumns(routes.opportunity.title, data, routes.opportunityDetail.path, true);
+    newColumns?.forEach((o) => {
+      if (o.accessor === 'firstName') {
+        (o.disabled = true),
+          (o.accessor = 'opportunityName'),
+          (o.header = 'Opportunity Name'),
+          (o.pivotIndex = 0),
+          (o.show = true),
+          (o.primaryField = true);
       }
-      return o?.fieldData;
     });
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.opportunity.title, field));
+      newColumns.push(checkStaticField(routes.opportunity.title, field));
     });
-    setColumns([...columns, ActionsRenderer]);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -114,7 +107,7 @@ const Opportunities = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.opportunity?.isCreate ? 'Clone' : cloneDisable}  >
+        <HtmlTooltip title={permissions?.opportunity?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               disabled={permissions?.opportunity?.isCreate ? false : true}
@@ -128,7 +121,7 @@ const Opportunities = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
@@ -137,8 +130,7 @@ const Opportunities = () => {
               onClick={() => {
                 setDeleteRecord(row?.original);
                 setIsConformDialogVisible(true);
-              }
-              }
+              }}
             >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
@@ -148,11 +140,9 @@ const Opportunities = () => {
     )
   };
 
-
   useEffect(() => {
-    fetchData()
+    fetchData();
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, accountDetails, showFilteredRecordsOnly]);
-
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -294,7 +284,6 @@ const Opportunities = () => {
     setAnchorEl(null);
   };
 
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -322,13 +311,7 @@ const Opportunities = () => {
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <div className={`flex flex-wrap items-center gap-2 `}>
                 {types && (
-                  <ToggleButtonGroup
-                    size="small"
-                    className="ml-2"
-                    value={types[selectedType - 1].key}
-                    exclusive
-                    onChange={handleFilter}
-                  >
+                  <ToggleButtonGroup size="small" className="ml-2" value={types[selectedType - 1].key} exclusive onChange={handleFilter}>
                     {types.map((k, index) => {
                       return (
                         <ToggleButton value={k.key} key={index}>
@@ -364,7 +347,7 @@ const Opportunities = () => {
                     Add
                   </Button>
                 )}
-                <HtmlTooltip title={!selectedRecords.length ? "Please select some opportunities" : ""}>
+                <HtmlTooltip title={!selectedRecords.length ? 'Please select some opportunities' : ''}>
                   <span>
                     <Button
                       variant={'outlined'}
@@ -443,8 +426,9 @@ const Opportunities = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${routes.opportunity.title}${selectedRecords.length ? "s" : ""}   ${deleteRecord.opportunityName || ''
-              }?`}
+            message={`Are you sure you want to delete ${routes.opportunity.title}${selectedRecords.length ? 's' : ''}   ${
+              deleteRecord.opportunityName || ''
+            }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

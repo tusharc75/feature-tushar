@@ -1,11 +1,11 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, Button, capitalize, Chip, Divider, Grid, makeStyles, Tooltip, Typography } from '@material-ui/core';
-import { dateFormat, downloadExcel, formatAmountWithCurrency, getUniqueCurrencies, prepareDataForGrid, quotation } from '../../../constants/helpers';
+import { Box, Grid, Tooltip, Typography } from '@material-ui/core';
+import { dateFormat, formatAmountWithCurrency, getUniqueCurrencies, quotation } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
@@ -17,13 +17,14 @@ import { orderBy, startCase } from 'lodash';
 
 const QuotationCustomerAccept = ({ openAuthId }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [loading, setLoading] = useState(false);
   const [columns, setColumns] = useState(null);
   const [isSubmited, setIsSubmited] = useState(false);
   const [quotationName, setQuotationName] = useState('');
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState({ accept: false, reject: false });
-  const [rowsData, setRowsData] = useState(null);
+
+  const { state, dispatch } = useTableReducer();
+  const { loading } = state;
 
   useEffect(() => {
     fetchProductInventory();
@@ -36,7 +37,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -45,7 +46,8 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        disabled: true,
         disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
@@ -73,6 +75,8 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         Header: 'Detail',
         minWidth: 300,
         width: 300,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        disabled: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {
@@ -179,7 +183,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
-            .filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
+            ?.filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
             .reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
           return <>{qtyTotal}</>;
         };
@@ -199,11 +203,11 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     });
     const columnToShow = coloum?.filter((i) => i.accessor !== 'pricingCondition');
     setColumns(columnToShow);
-    setLoading(false);
+    dispatch({ type: 'loading', loading: false });
   };
 
   const fetchProductInventory = async () => {
-    setLoading(true);
+    dispatch({ type: 'loading', loading: true });
     var data: any = [];
     var inventory: any = [];
     const response = await axiosInstance().get(`${quotation.api}/customer/${openAuthId}`);
@@ -239,7 +243,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
       parent.subRows = generateNestedData(data.material, inventory, parent, response?.data?.data?.quoteData?.currency);
     });
-    setRowsData([...rows]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     fetchFields(response?.data?.data?.quoteData);
   };
 
@@ -393,25 +397,18 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
               </div>
               <Box my={2} />
               {columns ? (
-                !loading ? (
-                  <CustomReactTable
-                    height={'calc(100vh - 218px)'}
-                    columns={columns}
-                    data={rowsData}
-                    setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                    onSelect={() => { }}
-                    hideSelection={true}
-                    hideAction={true}
-                    childrenProperty="subRows"
-                    uniqueKey="_id"
-                    renderedFrom="quotation_product_package"
-                    isClientSideGrid={true}
-                  />
-                ) : (
-                  <Box p={2}>
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                  </Box>
-                )
+                <CustomReactTable
+                  height={'calc(100vh - 218px)'}
+                  columns={columns}
+                  state={state}
+                  dispatch={dispatch}
+                  setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+                  refreshGrid={fetchProductInventory}
+                  hideSelection={true}
+                  hideAction={true}
+                  renderedFrom="quotation_product_package"
+                  isClientSideGrid={true}
+                />
               ) : (
                 <Box p={2}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />

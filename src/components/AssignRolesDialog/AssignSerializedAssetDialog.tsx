@@ -9,7 +9,7 @@ import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset,
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let searchTimeout;
@@ -29,7 +29,7 @@ const AssignSerializedAssetDialog = ({
 
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { permissions, selectedEntity }
@@ -58,15 +58,8 @@ const AssignSerializedAssetDialog = ({
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
+        setColumns([...newColumns, ...getStaticFields()]);
       });
   };
 
@@ -90,7 +83,6 @@ const AssignSerializedAssetDialog = ({
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = false;
-          finalObject['id'] = u._id;
           return {
             ...finalObject
           };
@@ -141,6 +133,12 @@ const AssignSerializedAssetDialog = ({
     }
     if (reference === 'sublease') {
       deepFilter = `${deepFilter}&masterSubleaseAsset=true&subleaseAsset=0`;
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
+    }
+    if (reference === 'rentalJob') {
+      deepFilter = `${deepFilter}&rental=true&subleaseAsset=0`;
       if (referenceData?.warehouse) {
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
       }
@@ -209,32 +207,31 @@ const AssignSerializedAssetDialog = ({
               <Box style={{ display: 'inline' }}>
                 {products.length > 0
                   ? products?.map((d) => (
-                      <Box
-                        m={0.5}
-                        p={1}
-                        border={1}
-                        className={`cursor-pointer rounded-sm ${
-                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                    <Box
+                      m={0.5}
+                      p={1}
+                      border={1}
+                      className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                         }`}
-                        borderColor="var(--common-border-color)"
-                        onClick={() => {
-                          if (selectedProduct === d.id) {
-                            setSelectedProduct(null);
-                          } else {
-                            setSelectedProduct(d.id);
-                          }
-                        }}
-                        style={{ display: 'inline-block' }}
-                      >
-                        {d?.qty < 0 ? (
-                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                        ) : d?.qty === 0 ? (
-                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                        ) : (
-                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                        )}
-                      </Box>
-                    ))
+                      borderColor="var(--common-border-color)"
+                      onClick={() => {
+                        if (selectedProduct === d.id) {
+                          setSelectedProduct(null);
+                        } else {
+                          setSelectedProduct(d.id);
+                        }
+                      }}
+                      style={{ display: 'inline-block' }}
+                    >
+                      {d?.qty < 0 ? (
+                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                      ) : d?.qty === 0 ? (
+                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                      ) : (
+                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                      )}
+                    </Box>
+                  ))
                   : null}
               </Box>
             </Grid>

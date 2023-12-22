@@ -21,17 +21,12 @@ import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
 import CreateProduct from '../../components/Product/CreateProduct';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  product,
-  sidebarResource
-} from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
 import styles from '../Leads/Header.module.scss';
-import AddRepairType from './RepairType/AddRepairTypes';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { childDisable, cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -50,8 +45,7 @@ const Product = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [columns, setColumns] = useState(null);
 
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
-    state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productTemplateList, setProductTemplateList] = useState([]);
@@ -66,7 +60,7 @@ const Product = () => {
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   useEffect(() => {
     if (permissions?.productCategory?.isRead) {
       axiosInstance()
@@ -93,9 +87,8 @@ const Product = () => {
     }
   }, [productCategory]);
 
-
   useEffect(() => {
-    fetchGridColumns()
+    fetchGridColumns();
   }, []);
 
   useEffect(() => {
@@ -122,19 +115,10 @@ const Product = () => {
         } else {
           setIsProductType(false);
         }
-        let columns = [];
-        data.forEach((o) => {
-          if (!ignoreField.includes(o?.fieldData.fieldName)) {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path, true);
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-            }
-          }
-        });
-        columns = [...columns];
-        setProductColumns(columns);
+        const newColumns = generateColumns(renderedFrom, data?.filter(d => !ignoreField.includes(d?.fieldData.fieldName)), routes.productDetail.path, true);
+        setProductColumns([...newColumns]);
       });
-  }
+  };
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -147,7 +131,7 @@ const Product = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.product?.isCreate ? "Clone" : cloneDisable}>
+        <HtmlTooltip title={permissions?.product?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               disabled={permissions?.product.isCreate ? false : true}
@@ -159,12 +143,12 @@ const Product = () => {
                 setIsClone(true);
               }}
             >
-              <FileCopyIcon fontSize="small" color={permissions?.product?.isCreate ? "primary" : "disabled"} />
+              <FileCopyIcon fontSize="small" color={permissions?.product?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
 
-        <HtmlTooltip title={permissions?.product?.isDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={permissions?.product?.isDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               disabled={permissions?.product.isDelete ? false : true}
@@ -175,12 +159,12 @@ const Product = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color={permissions?.product.isDelete ? "error" : "disabled"} />
+              <DeleteIcon color={permissions?.product.isDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        {(permissions?.serializedAsset?.isRead || permissions?.productionOrder?.isRead) &&
-          <HtmlTooltip title={permissions?.product?.isUpdate ? "Child Product" : childDisable}>
+        {(permissions?.serializedAsset?.isRead || permissions?.productionOrder?.isRead) && (
+          <HtmlTooltip title={permissions?.product?.isUpdate ? 'Child Product' : childDisable}>
             <span>
               <IconButton
                 disabled={permissions?.product?.isUpdate ? false : true}
@@ -190,14 +174,14 @@ const Product = () => {
                   history.push(`${routes.productDetail.path}/${row?.original._id}/bom`, { productName: row?.original.productName });
                 }}
               >
-                <RiBillLine color={permissions?.product?.isUpdate ? "primary" : "disabled"} />
+                <RiBillLine fontSize={'20px'} color={permissions?.product?.isUpdate ? 'primary' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
-        }
+        )}
       </>
     )
-  }
+  };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -212,12 +196,10 @@ const Product = () => {
         });
         let columns = [...productColumns];
         data.productTemplate?.forEach((ele) => {
-          GenrateColoum(ele.fields, columns);
+          const newColumns = generateColumns(renderedFrom, ele.fields);
+          columns = [...columns, ...newColumns];
         });
-        // make columns unique
-        columns = columns.filter(
-          (item, index, self) => index === self.findIndex((t) => t.accessor === item.accessor)
-        );
+        columns = columns.filter((item, index, self) => index === self.findIndex((t) => t.accessor === item.accessor));
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns, ActionsRenderer]);
         dispatch({ type: 'initialize', data: rows, count: data?.count });
@@ -231,72 +213,6 @@ const Product = () => {
       });
   };
 
-  const GenrateColoum = (fields, column) => {
-    fields.forEach((ele) => {
-      if (ignoreField.includes(ele.fieldName)) {
-      } else if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
-        if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-          ele.displayUnits.forEach((_unit) => {
-            let fieldName = ele.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = ele.fieldLabel + ' ' + _unit;
-            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-              let col: any = {};
-              col.accessor = fieldName;
-              col.Header = fieldLabel;
-              col.width = 180;
-              col.show = true;
-              col.filter = false;
-              col.sortable = false;
-              col.editable = false;
-              col.leval = 'product-template';
-              column.push(col);
-            }
-          });
-        } else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-          ele.displayUnits.forEach((_unit) => {
-            ele.displayCurrency.forEach((_currency) => {
-              let fieldName = ele.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = ele.fieldLabel + ' ' + _unit + '/' + _currency;
-              if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                let col: any = {};
-                col.accessor = fieldName;
-                col.Header = fieldLabel;
-                col.width = 180;
-                col.show = true;
-                col.filter = false;
-                col.sortable = false;
-                col.editable = false;
-                col.leval = 'product-template';
-                column.push(col);
-              }
-            });
-          });
-        } else if (ele.type === 'currencyAmount') {
-          ele.displayCurrency.forEach((_currency) => {
-            let fieldName = ele.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = ele.fieldLabel + ' ' + _currency;
-            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-              let col: any = {};
-              col.accessor = fieldName;
-              col.Header = fieldLabel;
-              col.width = 180;
-              col.editable = false;
-              col.show = true;
-              col.filter = false;
-              col.sortable = false;
-              col.leval = 'product-template';
-              column.push(col);
-            }
-          });
-        }
-      } else {
-        if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-          let currentColumn: any = getColumnData(renderedFrom, ele, routes.productDetail.path);
-          column.push({ ...currentColumn.columnData, leval: 'product-template', filter: false, sortable: false });
-        }
-      }
-    });
-  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
@@ -398,7 +314,6 @@ const Product = () => {
       });
   };
 
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -429,10 +344,7 @@ const Product = () => {
             },
             {
               title: 'Child Product Export',
-              api: `${product.api}/unknown/bom/template?export=true${selectedRecords.length
-                ? `&ids=${selectedRecords.map((obj) => obj._id)}`
-                : ''
-                }`,
+              api: `${product.api}/unknown/bom/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''}`,
               type: 'export'
             },
             {
@@ -447,9 +359,7 @@ const Product = () => {
             },
             {
               title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length
-                ? `&ids=${selectedRecords.map((obj) => obj._id)}`
-                : ''
+              api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
                 }`,
               type: 'export'
             },
@@ -465,9 +375,7 @@ const Product = () => {
             },
             {
               title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${selectedRecords.length
-                ? `&ids=${selectedRecords.map((obj) => obj._id)}`
-                : ''
+              api: `${product.api}/unknown/package/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
                 }`,
               type: 'export'
             },
@@ -657,15 +565,21 @@ const Product = () => {
             setOpen(false);
             fetchData();
           }}
-          isRedirectToDetailPage={true} openFrom="productMaster" />
+          isRedirectToDetailPage={true}
+          openFrom="productMaster"
+        />
       )}
       {openAddDialog && (
-        <AddRepairType
-          handleSubmit={handleSubmit}
+        <AssignDynamicDialog
+          resource={sidebarResource?.repairType}
+          onSuccess={(data) => {
+            handleSubmit(data?.map((d) => d?._id));
+          }}
+          handleClose={() => {
+            setOpenAddDialog(false);
+          }}
+          ids={[]}
           isSubmitting={isSubmitting}
-          renderedFrom={`${renderedFrom}_repair-type_grid-1`}
-          close={() => setOpenAddDialog(false)}
-          exisitingIds={[]}
         />
       )}
       {showDeleteConfirmBox && (

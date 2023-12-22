@@ -8,8 +8,6 @@ import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
-import MobileSortDialog from '../../components/MobileSortDialog';
 import styles from '../Leads/Header.module.scss';
 
 function QuoteHeader({
@@ -89,63 +87,15 @@ function QuoteHeader({
         <div className="d-flex align-items-center">
           {icon} <span className="listingHeader">{heading}</span>
         </div>
-        {isMobile && !isTablet ? (
-          <div className="d-flex flex-wrap items-center justify-between w-full">
-            <div>{toggleInner}</div>
-            <div className="flex flex-wrap items-center gap-1">
-              <IconButton
-                onClick={handleClickOpen}
-                id="demo-customized-button"
-                aria-controls="demo-customized-menu"
-                aria-haspopup="true"
-                size="small"
-                className={'mobileIconButton secondary'}
-              >
-                <TbArrowsSort className="rotate-90" size={16} />
-              </IconButton>
-              <MobileSortDialog
-                isOpen={open}
-                handleClose={handleClickClose}
-                contentPart={toggleInner}
-                secHeading={['Sort Quotes']}
-                columns={columns}
-                dispatch={dispatch}
-              />
-              <IconButton
-                id="demo-customized-button"
-                aria-controls="demo-customized-menu"
-                aria-haspopup="true"
-                size="small"
-                className={'mobileIconButton secondary'}
-                onClick={handleOpen}
-              >
-                <MdOutlineFilterAlt size={16} />
-              </IconButton>
-              <MobileFilterDialog
-                isOpen={isOpenDialog}
-                handleClose={handleClose}
-                contentPart={null}
-                columns={columns}
-                dispatch={dispatch}
-                title={routes?.quoteBuilder?.title}
-                filters={filters}
-                resource={resource}
-              />
-            </div>
-          </div>
-        ) : (
-          options && (
-            <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
-              {options.map((k, index) => {
-                return (
-                  <ToggleButton value={k.key} key={index}>
-                    {k.key}
-                  </ToggleButton>
-                );
-              })}
-            </ToggleButtonGroup>
-          )
-        )}
+        <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
+          {options.map((k, index) => {
+            return (
+              <ToggleButton value={k.key} key={index}>
+                {k.key}
+              </ToggleButton>
+            );
+          })}
+        </ToggleButtonGroup>
         {children}
       </div>
       <div className="flex flex-wrap gap-[8px]  justify-end">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext} from 'react';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { Box, Grid, IconButton, Menu, MenuItem, Button } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import StepDialog from './StepDialog';
@@ -207,6 +207,7 @@ const Steps = ({ serviceId }) => {
 
   const fetchStepsData = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     axiosInstance()
       .get(`${serviceMaster.api}/steps/${serviceId}`)
       .then(({ data: { data } }) => {
@@ -238,7 +239,6 @@ const Steps = ({ serviceId }) => {
           severity: 'success'
         });
         fetchStepsData();
-        dispatch({ type: 'selection', selectedRecords: [] });
         setShowConfirmBox({ open: false, ids: null });
       })
       .catch((err) => {

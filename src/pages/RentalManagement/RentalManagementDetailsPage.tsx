@@ -6,7 +6,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -754,7 +753,7 @@ const RentalManagementDetailsPage = () => {
             open={showCancelConfirmBox.open}
             message={
               showCancelConfirmBox.isQuote
-                ? 'Do you want to create a new version of the quote?'
+                ? `Do you want to create a new version of the ${routes?.quotation?.title?.toLowerCase()}?`
                 : `Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`
             }
             onClose={() => {

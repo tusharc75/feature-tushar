@@ -1,7 +1,5 @@
 import React, { useState, Fragment, useContext, useEffect, FC } from 'react';
 import { Button, Box } from '@material-ui/core';
-import { Link, useHistory } from 'react-router-dom';
-
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -21,16 +19,14 @@ import { groupBy } from 'lodash';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import PreviewDownload from 'src/components/PreviewDownload';
-import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 interface ReceivingGridProps {
   fetchAssets: any;
   permissions: any;
   transferAssetData: any;
   transferAssetId: string | any;
   setNextStep: any;
-  setPrevStep: any;
   setTransferIsEnded?: any;
   currentStep: number;
   setTickets: any;
@@ -46,7 +42,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     permissions,
     fetchAssets,
     transferAssetId,
-    setPrevStep,
     transferAssetData,
     setTickets,
     setNextStep,
@@ -58,7 +53,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     stepFullScreen
   } = props;
   const toastConfig = useContext(CustomToastContext);
-
+  const { generateColumns } = useColumns();
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [loadingTicketsNotDelivered, setLoadingTicketsNotDelivered] = useState([]);
 
@@ -66,48 +63,42 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [dataRows, setDataRows] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [columns, setColumns] = useState(null);
 
-  const { getColumnData } = useColumns();
-
-  const history = useHistory();
 
   const fetchFields = () => {
     setColumns(null);
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data?.filter(d => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))?.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
+        const newColumns = generateColumns(
+          renderedFrom,
+          data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
+        );
 
         const column = [
           {
             accessor: 'index',
             Header: 'Index',
             width: 70,
-            sticky: isMobile ? 'none' : 'left',
+            sticky: 'left',
             Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
             Footer: () => {
               return <>Total</>;
             }
           },
-          ...columns,
+          ...newColumns,
           {
             accessor: 'loadingTicket',
             Header: 'Loading Ticket',
             width: 300,
             Cell: ({ row }) =>
               row?.original?.loadingTicket ? (
-                <p title={row?.original?.loadingTicket}
+                <p
+                  title={row?.original?.loadingTicket}
                   className="link cursor-pointer"
-                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`)}>
+                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`)}
+                >
                   {row?.original?.loadingTicket}
                 </p>
               ) : (
@@ -128,9 +119,11 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             width: 300,
             Cell: ({ row }) =>
               row?.original?.receivingTicket ? (
-                <p title={row?.original?.receivingTicket}
+                <p
+                  title={row?.original?.receivingTicket}
                   className="link cursor-pointer"
-                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`)}>
+                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`)}
+                >
                   {row?.original?.receivingTicket}
                 </p>
               ) : (
@@ -142,8 +135,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             Header: 'Receiving Ticket Status',
             width: 200,
             Cell: ({ row }) => <p className="text-truncate">{row?.original?.receivingTicketStatus || <NoDataCell />}</p>
-          },
-        ]
+          }
+        ];
         setColumns(column);
       });
   };
@@ -155,6 +148,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   }, [transferAssetId]);
 
   const fetchAssetsData = async (forceRefresh) => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     await fetchFields();
 
     try {
@@ -190,7 +185,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           ...finalObject
         };
       });
-      setDataRows(assetData)
+      dispatch({ type: 'initialize', data: assetData, count: assetData?.length });
+      dispatch({ type: 'loading', loading: false });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -318,8 +314,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
                     if (transferAssetData?.wellNumber) {
                       if (transferAssetData?.wellNumber?.optionValue) {
                         data['wellNumber'] = transferAssetData?.wellNumber?.optionValue;
-                      }
-                      else {
+                      } else {
                         data['wellNumber'] = transferAssetData?.wellNumber?.map((e) => e?.optionValue);
                       }
                     }
@@ -350,28 +345,25 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         </Box>
       )}
       <Box mt={1}>
-        {columns && dataRows ? (
+        {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={dataRows}
-              onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              state={state}
+              dispatch={dispatch}
               hideSelection={!allowedToEdit}
               hideAction={true}
+              refreshGrid={fetchAssetsData}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideExpander={true}
             />
           </Box>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        )
-        }
+        )}
       </Box>
       {showTicketDialog.open && (
         <ManageDeliveryTicket

@@ -56,7 +56,6 @@ const InvoiceDetails = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [versionDialog, setVersionDialog] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -123,7 +122,7 @@ const InvoiceDetails = () => {
       let data;
       const response: any = await axiosInstance().get(`${invoice.api}/${id}`);
       data = response?.data?.data;
-      if ([INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(data?.status)) {
+      if ([INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(data?.status)) {
         setCurrentStep(invoiceProcessSteps?.length - 1);
       }
       else {
@@ -252,9 +251,9 @@ const InvoiceDetails = () => {
                       {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   )}
-                {permissions?.invoice?.isDelete && ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                )}
+                {permissions?.invoice?.isDelete &&
+                  ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) &&
+                  invoiceData?.canDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 {permissions?.invoice?.isUpdate && [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
                   <ButtonWithPulse
                     variant={'outlined'}
@@ -350,7 +349,6 @@ const InvoiceDetails = () => {
               <Material
                 invoiceData={invoiceData}
                 setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}
               />
@@ -359,7 +357,7 @@ const InvoiceDetails = () => {
               <AdditionalCost
                 invoiceData={invoiceData}
                 setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-2`}
+                stepFullScreen={stepFullScreen}
               />
             )}
             {currentStep === 2 && invoiceData && (
@@ -369,7 +367,6 @@ const InvoiceDetails = () => {
                 handleChangeStatus={handleChangeStatus}
                 stepFullScreen={stepFullScreen}
                 statusOptions={statusOptions}
-                renderedFrom={`${renderedFrom}_grid-5`}
               />
             )}
           </ContentFullScreen>
