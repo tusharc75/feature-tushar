@@ -147,12 +147,6 @@ const AssetStats = () => {
                     Total Utilization
                   </Typography>
                   <Box display="flex" alignItems="flex-end">
-                    <Typography variant="h5" component="h2">
-                      {assetStats?.totalUtilization ? round(moment.duration(assetStats?.totalUtilization).asDays()) : 0}
-                    </Typography>
-                    <Box ml={1}>
-                      <Typography variant="body1">Days</Typography>
-                    </Box >
                     <Box ml={1}>
                       <Typography variant="h5" component="h2">
                         {assetStats?.totalUtilization ? `${round(moment.duration(assetStats?.totalUtilization).asHours())}:${Math.floor(moment.duration(assetStats?.totalUtilization).asMinutes() % 60)}` : 0}
@@ -200,12 +194,6 @@ const AssetStats = () => {
                     Total In-Use Time After Last Repair
                   </Typography>
                   <Box display="flex" alignItems="flex-end">
-                    <Typography variant="h5" component="h2">
-                      {assetStats?.totalInUseTimeAfterLastRepair ? round(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asDays()) : 0}
-                    </Typography>
-                    <Box ml={1}>
-                      <Typography variant="body1">Days</Typography>
-                    </Box >
                     <Box ml={1}>
                       <Typography variant="h5" component="h2">
                         {assetStats?.totalInUseTimeAfterLastRepair ? `${round(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(moment.duration(assetStats?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}` : 0}

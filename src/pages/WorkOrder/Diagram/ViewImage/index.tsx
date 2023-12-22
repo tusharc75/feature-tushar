@@ -61,8 +61,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
             fabricCanvas.setDimensions({ width: img.width, height: img.height });
             fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
             if (canvasRef.current) {
-              canvasRef.current.style.border = '2px solid #2a2a2a';
-              canvasRef.current.style.boxShadow = '10px 10px 20px rgba(0, 0, 0, 0.25)';
+              canvasRef.current.style.border = '1px solid #2a2a2a';
             }
             setLoading(false);
           });
