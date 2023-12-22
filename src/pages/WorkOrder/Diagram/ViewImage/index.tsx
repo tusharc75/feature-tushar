@@ -17,9 +17,10 @@ fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
 })(fabric.IText.prototype.initHiddenTextarea);
 
 const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
+  const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
   const toastConfig = useContext(CustomToastContext);
   const [canvas, setCanvas] = useState(null);
-  const canvasRef = useRef(null);
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedObject, setSelectedObject] = useState(null);
@@ -42,6 +43,9 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   }, [data]);
 
   const loadImage = (fabricCanvas) => {
+    if (canvasRef.current) {
+      canvasRef.current.style.border = 'none';
+    }
     setLoading(true);
     axiosInstance()
       .get('/user/download?fileName=' + data?.url, {
@@ -56,6 +60,10 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           fabric.Image.fromURL(reader.result, (img) => {
             fabricCanvas.setDimensions({ width: img.width, height: img.height });
             fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
+            if (canvasRef.current) {
+              canvasRef.current.style.border = '2px solid #2a2a2a';
+              canvasRef.current.style.boxShadow = '10px 10px 20px rgba(0, 0, 0, 0.25)';
+            }
             setLoading(false);
           });
         };
@@ -218,6 +226,41 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     }
   };
 
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (f) {
+      const data = f.target.result;
+      fabric.Image.fromURL(data, (img) => {
+        const canvasWidth = canvas.getWidth();
+        const canvasHeight = canvas.getHeight();
+
+        let scalingFactor = Math.min(
+          canvasWidth / img.width,
+          canvasHeight / img.height
+        );
+
+        const scaleRelativeToCanvas = 0.9;
+        scalingFactor *= scaleRelativeToCanvas;
+
+        // Scale the image
+        img.scale(scalingFactor);
+
+        // Set image position to center of the canvas
+        img.set({
+          left: (canvasWidth - (img.width * img.scaleX)) / 2,
+          top: (canvasHeight - (img.height * img.scaleY)) / 2,
+        });
+
+        // Add the image to the canvas
+        canvas.add(img).renderAll();
+        canvas.setActiveObject(img);
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <Box>
       <div className="flex flex-wrap items-center justify-between gap-2 min-h-[40px] my-2">
@@ -242,6 +285,24 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
             onClick={toggleDrawingMode}
           >
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            accept="image/*"
+            onChange={handleImageUpload}
+          />
+          <Button
+            disabled={loading || isDrawingMode}
+            variant="outlined"
+            color="primary"
+            size="small"
+            onClick={() => {
+              fileInputRef.current.click();
+            }}
+          >
+            Upload Watermark
           </Button>
         </div>
         {selectedObject && (
@@ -274,6 +335,9 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
             Download
           </Button>
         </div>
+      </div>
+      <div>
+        {loading ? "Loading editor ..." : null}
       </div>
       <canvas ref={canvasRef} />
     </Box>
