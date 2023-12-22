@@ -29,7 +29,6 @@ export default function AccountHierarchy({
   useEffect(() => {
     fetchGridColumns();
   }, [])
-  
 
   useEffect(() => {
     if (data) {
@@ -52,160 +51,159 @@ export default function AccountHierarchy({
     });
     return subRows;
   };
-const fetchGridColumns = ()=>{
-  let customColumns = [
-    {
-      accessor: 'accountName',
-      Header: 'Account Name',
-      width: 300,
-      Cell: ({ row }) => {
-        return row.original['accountName'] ? (
-          <div className="text-truncate" style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original._id === currentAccountId ? (
-              <span>{row.original.accountName}</span>
-            ) : (
-              <Link className="link" to={`/${accountRoute}/detail/${row.original._id}`}>
-                {row.original.accountName}
-              </Link>
-            )}
-            {row.original._id === currentAccountId ? (
-              <Chip
-                style={{ color: 'white', backgroundColor: '#298B88', padding: 4, fontWeight: 600 }}
-                label="Current"
-                size="small"
-                className="ml-2"
-              />
-            ) : (
-              ''
-            )}
-            {
-              <span style={{ display: 'flex', marginLeft: '4px' }}>
-                <Tooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
-                  <IconButton
-                    size="small"
-                    aria-label="Edit"
-                    disabled={!canUpdate || !row.original?.canEdit}
-                    onClick={() => handleUpdate(row.original)}
-                  >
-                    <EditOutlined fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'} />
-                  </IconButton>
-                </Tooltip>
-                <Box mt={1} ml="2" />
-                <Tooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
-                  <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => onCreateNewAccount(row.original._id)}>
-                    <AddOutlined fontSize="small" color={canCreate ? 'primary' : 'disabled'} />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title={canDelete ? 'Delete' : "You don't have permission to delete"}>
-                  <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => handleDelete(row.original)}>
-                    <DeleteIcon fontSize="small" color={canCreate ? 'error' : 'disabled'} />
-                  </IconButton>
-                </Tooltip>
-              </span>
-            }
-          </div>
-        ) : (
-          <NoDataCell />
-        );
+
+  const fetchGridColumns = () => {
+    let customColumns = [
+      {
+        accessor: 'accountName',
+        Header: 'Account Name',
+        width: 300,
+        Cell: ({ row }) => {
+          return row.original['accountName'] ? (
+            <div className="text-truncate" style={{ display: 'flex', alignItems: 'center' }}>
+              {row.original._id === currentAccountId ? (
+                <span>{row.original.accountName}</span>
+              ) : (
+                <Link className="link" to={`/${accountRoute}/detail/${row.original._id}`}>
+                  {row.original.accountName}
+                </Link>
+              )}
+              {row.original._id === currentAccountId ? (
+                <Chip
+                  style={{ color: 'white', backgroundColor: '#298B88', padding: 4, fontWeight: 600 }}
+                  label="Current"
+                  size="small"
+                  className="ml-2"
+                />
+              ) : (
+                ''
+              )}
+              {
+                <span style={{ display: 'flex', marginLeft: '4px' }}>
+                  <Tooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
+                    <IconButton
+                      size="small"
+                      aria-label="Edit"
+                      disabled={!canUpdate || !row.original?.canEdit}
+                      onClick={() => handleUpdate(row.original)}
+                    >
+                      <EditOutlined fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'} />
+                    </IconButton>
+                  </Tooltip>
+                  <Box mt={1} ml="2" />
+                  <Tooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
+                    <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => onCreateNewAccount(row.original._id)}>
+                      <AddOutlined fontSize="small" color={canCreate ? 'primary' : 'disabled'} />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title={canDelete ? 'Delete' : "You don't have permission to delete"}>
+                    <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => handleDelete(row.original)}>
+                      <DeleteIcon fontSize="small" color={canCreate ? 'error' : 'disabled'} />
+                    </IconButton>
+                  </Tooltip>
+                </span>
+              }
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'typeOfAccount',
+        Header: 'Type',
+        width: commonFieldWidth,
+        Cell: ({ row }) => {
+          return row.original['accountName'] ? (
+            <div>
+              <CustomRenderCell value={row.original.typeOfAccount} />
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'industry',
+        Header: 'Industry',
+        width: commonFieldWidth,
+        Cell: ({ row }) => {
+          return row.original['accountName'] ? (
+            <div>
+              <CustomRenderCell value={row.original.industry} />
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'typeOfBusiness',
+        Header: 'Type Of Business',
+        width: commonFieldWidth,
+        Cell: ({ row }) => {
+          return row.original['accountName'] ? (
+            <div>
+              <CustomRenderCell value={row.original.typeOfBusiness} />
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'parentAccountText',
+        Header: 'Parent Account',
+        width: commonFieldWidth,
+        Cell: ({ row }) => {
+          return row.original['accountName'] ? (
+            <div style={{ width: 'auto' }}>
+              {row.original.parentId === currentAccountId ? (
+                <span className="text-truncate ">{row.original.parentAccountText}</span>
+              ) : (
+                <Link className="link text-truncate" to={`/${accountRoute}/detail/${row.original.parentId}`}>
+                  <CustomRenderCell value={row.original.parentAccountText} />
+                </Link>
+              )}
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'phone',
+        Header: 'Phone',
+        width: commonFieldWidth,
+        Cell: ({ row }) => {
+          return row.original['accountName'] ? (
+            <div>
+              <CustomRenderCell value={row.original.phone} isCopyToClipboard={true} />
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
       }
-    },
-    {
-      accessor: 'typeOfAccount',
-      Header: 'Type',
-      width: commonFieldWidth,
-      Cell: ({ row }) => {
-        return row.original['accountName'] ? (
-          <div>
-            <CustomRenderCell value={row.original.typeOfAccount} />
-          </div>
-        ) : (
-          <NoDataCell />
-        );
-      }
-    },
-    {
-      accessor: 'industry',
-      Header: 'Industry',
-      width: commonFieldWidth,
-      Cell: ({ row }) => {
-        return row.original['accountName'] ? (
-          <div>
-            <CustomRenderCell value={row.original.industry} />
-          </div>
-        ) : (
-          <NoDataCell />
-        );
-      }
-    },
-    {
-      accessor: 'typeOfBusiness',
-      Header: 'Type Of Business',
-      width: commonFieldWidth,
-      Cell: ({ row }) => {
-        return row.original['accountName'] ? (
-          <div>
-            <CustomRenderCell value={row.original.typeOfBusiness} />
-          </div>
-        ) : (
-          <NoDataCell />
-        );
-      }
-    },
-    {
-      accessor: 'parentAccountText',
-      Header: 'Parent Account',
-      width: commonFieldWidth,
-      Cell: ({ row }) => {
-        return row.original['accountName'] ? (
-          <div style={{ width: 'auto' }}>
-            {row.original.parentId === currentAccountId ? (
-              <span className="text-truncate ">{row.original.parentAccountText}</span>
-            ) : (
-              <Link className="link text-truncate" to={`/${accountRoute}/detail/${row.original.parentId}`}>
-                <CustomRenderCell value={row.original.parentAccountText} />
-              </Link>
-            )}
-          </div>
-        ) : (
-          <NoDataCell />
-        );
-      }
-    },
-    {
-      accessor: 'phone',
-      Header: 'Phone',
-      width: commonFieldWidth,
-      Cell: ({ row }) => {
-        return row.original['accountName'] ? (
-          <div>
-            <CustomRenderCell value={row.original.phone} isCopyToClipboard={true} />
-          </div>
-        ) : (
-          <NoDataCell />
-        );
-      }
-    }
-  ];
-  setColumns(customColumns);
-}
-  
+    ];
+    setColumns(customColumns);
+  }
+
   return (
     <Box style={{ display: 'flex' }}>
       {columns && (
-        <Box p="6px" zIndex={5} width={'100%'}>
- <CustomReactTable
-         height="max(calc(100vh - 350px), 500px)"
-         columns={columns}
-         state={state}
-         dispatch={dispatch}
-         refreshGrid={()=>{}}
-         setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-         renderedFrom={'customer-account'}
-         isClientSideGrid={true}
-         expander={true}
-         hideAction={true}
-         hideSelection={true}
-       />
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height="max(calc(100vh - 350px), 500px)"
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={'customer-account-hierarchy'}
+            isClientSideGrid={true}
+            expander={true}
+            hideAction={true}
+            hideSelection={true}
+          />
         </Box>
       )}
     </Box>

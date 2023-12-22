@@ -6,7 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { product, gridPageSizes, serviceMaster } from 'src/constants/helpers';
+import { product, serviceMaster } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -24,7 +24,7 @@ import { flattenArray } from 'src/constants/columns';
 import AssignStepDialog from './AssignStepDialog/Index';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 
 interface Props {
   renderedFrom: string;
@@ -35,7 +35,6 @@ const ServiceMaster = (props: Props) => {
   const { renderedFrom, id } = props;
 
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const [columns, setColumns] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -81,14 +80,14 @@ const ServiceMaster = (props: Props) => {
       {
         accessor: 'order',
         Header: 'Sequence',
-        width: 70,
+        width: 100,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.order || <NoDataCell />}</p>
       },
       {
         accessor: 'type',
         Header: 'Type',
-        width: 80,
+        width: 100,
         disableFilters: true,
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
@@ -547,31 +546,17 @@ const ServiceMaster = (props: Props) => {
         </Box>
       )}
       {columns ? (
-         <CustomReactTable
-         height={'calc(100vh - 345px)'}
-         columns={columns}
-         state={state}
-         dispatch={dispatch}
-         refreshGrid={fetchData}
-         setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-         onSaveEdit={onSaveInlineEdit}
-         expander = {true}
-         renderedFrom={renderedFrom}
-         isClientSideGrid={true}
-       />
-
-        // <CustomReactTable
-        //   height={'calc(100vh - 345px)'}
-        //   columns={columns}
-        //   data={dataRows}
-        //   setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-        //   onSelect={setSelectedRecords}
-        //   childrenProperty="subRows"
-        //   uniqueKey="_id"
-        //   onSaveEdit={onSaveInlineEdit}
-        //   renderedFrom={renderedFrom}
-        //   isClientSideGrid={true}
-        // />
+        <CustomReactTable
+          height={'calc(100vh - 345px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          refreshGrid={fetchData}
+          onSaveEdit={onSaveInlineEdit}
+          expander={true}
+          renderedFrom={renderedFrom}
+          isClientSideGrid={true}
+        />
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

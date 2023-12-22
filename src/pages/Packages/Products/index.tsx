@@ -430,7 +430,6 @@ const Products = ({ packageId, packageData }) => {
           state={state}
           dispatch={dispatch}
           refreshGrid={fetchData}
-          setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           onSaveEdit={onSaveInlineEdit}

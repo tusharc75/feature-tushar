@@ -987,8 +987,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 dispatch={dispatch}
                 setWholeRowsCellColor={(rowData) => {
                   if (!rowData.isValid) return 'error';
-                  //if (rowData.isPurchaseOrder) return "isPurchaseOrder";
-                  //if (rowData.isBulkAssetCreation) return "isPurchaseOrder";
+                
                   return '';
                 }}
                 refreshGrid={fetchData}

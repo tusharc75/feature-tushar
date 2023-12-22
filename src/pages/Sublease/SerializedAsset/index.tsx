@@ -450,10 +450,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                                 state={state}
                                 dispatch={dispatch}
                                 refreshGrid={fetchRowData}
-                                setWholeRowsCellColor={(rowData) => {
-                                    if (!rowData.isValid) return 'error';
-                                    return '';
-                                }}
+                                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
                                 hideSelection={!allowedToEdit}
                                 hideAction={!allowedToEdit}
                                 renderedFrom={renderedFrom}
