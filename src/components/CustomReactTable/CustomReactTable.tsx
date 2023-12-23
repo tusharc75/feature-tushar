@@ -141,16 +141,21 @@ const CustomReactTable = ({
           hColumns.push(col.id);
         }
       }
-
       if (reportSave) {
         if (selectedReportView) {
           let colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : [])];
+          selectedReportView?.columnState?.forEach(element => {
+            if (!element?.isVisible) {
+              hColumns.push(element.accessor);
+            }
+          });
           setHiddenColumns(hColumns);
           setColumnOrder(colOrder);
           dispatch({ type: 'updateColumnState', colState: selectedReportView?.columnState });
         } else {
           setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
           setHiddenColumns(newColumns?.filter((e) => e?.show === false).map((m) => m?.id ?? m?.accessor));
+          dispatch({ type: 'updateColumnState', colState: newColumns.map((m) => { return { accessor: m?.id ?? m?.accessor, isVisible: m?.show === false ? false : true } }) });
         }
       } else {
         let gridMetaData = getDataFromLocalStorage();
