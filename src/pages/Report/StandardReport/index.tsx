@@ -536,9 +536,8 @@ const Report = () => {
             type: 'info'
         });
         let newColumns = columns.map((col) => col.accessor);
-
         if (colState.length) {
-            newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor)
+            newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor)
         }
         setExporting(true);
         let filterQuery = getFilter(true);
