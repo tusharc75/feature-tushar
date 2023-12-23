@@ -55,7 +55,7 @@ interface ArrangeColumnsProps {
   setColumnOrder?: any;
   selectedReportView: object | any;
   setSelectedReportView: any;
-  dispatch : any;
+  dispatch: any;
 }
 
 const ItemTypes = {
@@ -90,23 +90,21 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
 
   React.useEffect(() => {
     try {
-      if(!selectedReportView){
-        
+      if (!selectedReportView) {
         var updatedCols = columns.map((col) => ({
           ...col,
-          isVisible: true
+          isVisible: col?.show === false ? false : true
         }));
-        
         setSortedColumns(updatedCols);
       }
-      else{
+      else {
         let savedColumns = selectedReportView.columnState
         var updatedCols = columns.map((col) => ({
           ...col,
-          isVisible: (savedColumns?.find((column)=>column.accessor === col.accessor))?.isVisible
+          isVisible: (savedColumns?.find((column) => column.accessor === col.accessor))?.isVisible
         }));
-        if(savedColumns){
-          const colOrder = savedColumns.map((m)=>m.accessor)
+        if (savedColumns) {
+          const colOrder = savedColumns.map((m) => m.accessor)
           const actionCol = updatedCols.find((d) => d.accessor === 'action');
           const expanderCol = updatedCols.find((d) => d.accessor === 'expander');
           const selectionCol = updatedCols.find((d) => d.accessor === 'selection');
@@ -148,9 +146,9 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
   };
 
   const handleSaveChange = () => {
-    if(!reportName){
+    if (!reportName) {
       setError('Report name is required')!;
-      return ;
+      return;
     }
     let dataToStore = [];
     sortedColumns.forEach((f) => {
@@ -162,22 +160,16 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
       });
       dataToStore.push(object);
     });
-    // if (renderedFrom && renderedFrom !== '') {
-    //   const hidedColumns = dataToStore?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.accessor)).map((o) => o?.accessor);
-    //   const columnOrder = dataToStore?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.accessor))?.map((o) => o?.accessor);
-    //   updateGridHiddenColumns(hidedColumns, columnOrder);
-    // }
     setColumnOrder([...sortedColumns.map((m) => m.accessor)]);
     setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.accessor));
-    const newColState = sortedColumns?.map(({accessor,isVisible})=>({accessor,isVisible}))
-    dispatch({type : 'updateColumnState', colState : newColState})
+    const newColState = sortedColumns?.map(({ accessor, isVisible }) => ({ accessor, isVisible }))
+    dispatch({ type: 'updateColumnState', colState: newColState })
     saveColumnSettings(sortedColumns)
-    // onClose();
   };
 
   const saveColumnSettings = (columnState: any) => {
-    
-    const newColState = columnState?.map(({accessor,isVisible})=>({accessor,isVisible}))
+
+    const newColState = columnState?.map(({ accessor, isVisible }) => ({ accessor, isVisible }))
     if (selectedReportView) {
       setSubmitting(true);
       axiosInstance()
@@ -263,7 +255,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
         onMinimizeMaximize={() => setMinimized((prevState) => !prevState)}
       />
       <CustomDialogContent>
-      <TextField
+        <TextField
           required
           variant="outlined"
           type="text"
