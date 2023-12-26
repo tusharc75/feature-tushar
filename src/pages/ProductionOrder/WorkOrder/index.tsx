@@ -645,6 +645,16 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     }
   };
 
+  const checkUniqCompetencies = () => {
+    if (selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length === 0) {
+      return true;
+    } else if (uniq((map(selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service), 'serviceDetail.competencies'))?.map((e) => e?.toString())).length === 1) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
   return (
     <Fragment>
       {isAutoCreating &&
@@ -711,7 +721,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 Add New Service
               </MenuItem>
               <MenuItem
-                disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
+                disabled={checkUniqCompetencies()}
                 onClick={() => {
                   closeActions();
                   const services = selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service);
@@ -848,6 +858,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
               expander={true}
             />
           </Box>
