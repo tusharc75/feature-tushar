@@ -58,7 +58,7 @@ const RenderColumns: React.FC<colDataInterface> = ({
 
     if (!isItemLoaded(index)) {
       content = (
-        <div className="loader-skeleton overflow-hidden rounded-md pr-1">
+        <div className="loader-skeleton overflow-hidden rounded-[8px] pr-1 shadow-[0px_4px_40px_rgba(0,0,0,0.08)] [border:1px_solid_var(--common-border-color)] p-2">
           <CommonSkeleton lenArray={Array.from(Array(2).keys())} lg={12} sm={12} xs={12} md={12} />
         </div>
       );
