@@ -1,0 +1,114 @@
+import { useReducer } from 'react';
+import { datarowInterface } from '../';
+
+const setInitialState = (columns) => {
+  const loading = {};
+  const page = {};
+  for (const column of columns) {
+    loading[column] = true;
+    page[column] = 0;
+  }
+  return { loading, page };
+};
+
+function reducer(state: TInitialState, action: TActios) {
+  switch (action.type) {
+    case 'loading':
+      return {
+        ...state,
+        loading: action.loading(state.loading)
+      };
+    case 'initialize':
+      const { loading, page } = setInitialState(action.columnOrder);
+      return {
+        ...state,
+        columnOrder: action.columnOrder,
+        visibleColumns: action.visibleColumns,
+        rowDef: action.rowDef,
+        limit: action.limit ?? 25,
+        loading: loading,
+        page: page
+      };
+    case 'page':
+      return {
+        ...state,
+        page: action.setPage(state.page)
+      };
+    case 'columnOrder':
+      return {
+        ...state,
+        columnOrder: action.columnOrder
+      };
+    case 'setFilterQuery':
+      return {
+        ...state,
+        loading: action.loading ?? true,
+        filterQuery: action.filterQuery,
+        page: 0
+      };
+    case 'setData':
+      return {
+        ...state,
+        data: action.setData(state.data),
+        count: action.setCount(state.count)
+      };
+    case 'visibleColumns':
+      return {
+        ...state,
+        visibleColumns: action.visibleColumns
+      };
+    case 'limit':
+      return {
+        ...state,
+        limit: action.limit
+      };
+    default:
+      break;
+  }
+
+  return state;
+}
+
+const intialState = {
+  data: {},
+  count: {},
+  loading: {},
+  page: {},
+  columnOrder: [],
+  visibleColumns: [],
+  filterQuery: '',
+  rowDef: [],
+  limit: 25
+};
+
+export type TInitialState = {
+  data: { [key: string]: any[] };
+  count: { [key: string]: number };
+  loading: { [key: string]: boolean };
+  columnOrder: string[];
+  page: { [key: string]: number };
+  visibleColumns: string[];
+  filterQuery: string;
+  rowDef: datarowInterface[];
+  limit: number;
+};
+
+export type TActios =
+  | { type: 'initialize'; columnOrder: string[]; visibleColumns: string[]; rowDef: datarowInterface[]; limit?: number }
+  | { type: 'loading'; loading: (prev: { [key: string]: boolean }) => { [key: string]: boolean } }
+  | { type: 'page'; setPage: (data: { [key: string]: number }) => { [key: string]: number } }
+  | { type: 'columnOrder'; columnOrder: string[] }
+  | { type: 'setFilterQuery'; filterQuery: string; loading?: boolean }
+  | {
+      type: 'setData';
+      setData: (data: { [key: string]: any[] }) => { [key: string]: any[] };
+      setCount: (data: { [key: string]: number }) => { [key: string]: number };
+    }
+  | { type: 'visibleColumns'; visibleColumns: string[] }
+  | { type: 'limit'; limit: number };
+
+export const useCardReducer = () => {
+  const [state, dispatch] = useReducer(reducer, intialState);
+
+  return { state, dispatch };
+};
