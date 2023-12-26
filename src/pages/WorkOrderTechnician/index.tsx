@@ -3,7 +3,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline1';
@@ -35,11 +35,10 @@ const RESOURCE = [
 
 const WorkOrderTechnician = () => {
   const { state, dispatch } = useCardReducer();
-  const { filterQuery, limit, count: stateCount } = state;
+  const { limit, loading: stateLoading } = state;
 
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
-  const [serviceData, setServiceData] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [workOrderOptions, setWorkOrderOptions] = useState([]);
@@ -193,6 +192,10 @@ const WorkOrderTechnician = () => {
     }
   }, [selectedResource, selectedResourceFilter, dispatch]);
 
+  const isAnyColumnLoading = useMemo(() => {
+    return Object.values(state.loading).some((item) => item);
+  }, [stateLoading]);
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -206,7 +209,7 @@ const WorkOrderTechnician = () => {
             <Autocomplete
               options={resourceFilter}
               fullWidth
-              disabled={loading}
+              disabled={loading || isAnyColumnLoading}
               getOptionLabel={(option: any) => option.title}
               getOptionSelected={(option: any, value: any) => option.resource === value.resource}
               value={selectedResource}
@@ -228,7 +231,7 @@ const WorkOrderTechnician = () => {
                     ? repairOrderOptions
                     : productionOrderOptions
                 }
-                disabled={loading}
+                disabled={loading || isAnyColumnLoading}
                 fullWidth
                 getOptionLabel={(option: any) => option.optionLabel}
                 getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}

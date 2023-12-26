@@ -42,8 +42,6 @@ const RenderColumns: React.FC<colDataInterface> = ({
   const isItemLoaded = (index) => !hasNextPage || index < data[column].length;
   const itemCount = hasNextPage ? data[column]?.length + 1 || 0 : data[column]?.length || 0;
 
-  console.log(refreshDataCount);
-
   const Row = ({ index, style }) => {
     const colData = data[column][index];
 
@@ -59,7 +57,11 @@ const RenderColumns: React.FC<colDataInterface> = ({
     );
 
     if (!isItemLoaded(index)) {
-      content = <div className="p-5">Loading...</div>;
+      content = (
+        <div className="loader-skeleton overflow-hidden rounded-md pr-1">
+          <CommonSkeleton lenArray={Array.from(Array(2).keys())} lg={12} sm={12} xs={12} md={12} />
+        </div>
+      );
     }
 
     return <div style={style}>{content}</div>;

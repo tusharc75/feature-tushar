@@ -5,7 +5,7 @@ const setInitialState = (columns) => {
   const loading = {};
   const page = {};
   for (const column of columns) {
-    loading[column] = true;
+    loading[column] = false;
     page[column] = 0;
   }
   return { loading, page };
@@ -65,7 +65,7 @@ function reducer(state: TInitialState, action: TActios) {
     case 'refreshData':
       return {
         ...state,
-        refreshDataCount: state.refreshDataCount < 10 ? +1 : 0
+        refreshDataCount: state.refreshDataCount < 10 ? state.refreshDataCount + 1 : 0
       };
     default:
       break;
