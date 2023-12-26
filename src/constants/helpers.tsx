@@ -1011,11 +1011,17 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
     } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
     } else if (key.type === 'dateTime') {
-      if (dataObj[key.fieldName] && !isClone) {
+      if (isClone) {
+        obj[key.fieldName] = new Date();
+      }
+      else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       }
     } else if (key.type === 'date') {
-      if (dataObj[key.fieldName] && !isClone) {
+      if (isClone) {
+        obj[key.fieldName] = new Date();
+      }
+      else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       }
     } else if (key.type === 'lookUpDisplay') {
