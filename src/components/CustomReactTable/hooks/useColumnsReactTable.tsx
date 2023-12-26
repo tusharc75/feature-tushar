@@ -224,29 +224,14 @@ export default function useColumns() {
             });
           });
         }
-      } else if (field?.fieldName === 'firstName' && field?.primaryField === false) {
-        let combinedTitle = camelCase(updatedTitle);
-        let pathName = detailPagePath[combinedTitle] ? detailPagePath[combinedTitle] : routes.userDetail.path ? routes.userDetail.path : '';
+      } else if (field?.fieldName === 'firstName' && !field?.primaryField) {
         column.push({
           ...commonFieldData,
           id: 'concatedName',
           accessor: 'concatedName',
+          accessorKey: 'concatedName',
           cell: ({ row }) => (
-            <span>
-              {row?.original?.concatedName ? (
-                <Link
-                  className="link text-truncate"
-                  title={row?.original?.detail}
-                  to={`${pathName}/${row?.original?._id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {row?.original?.concatedName}
-                </Link>
-              ) : (
-                <NoDataCell />
-              )}
-            </span>
+            <p className="text-truncate">{row?.original?.concatedName ? <p>{row?.original?.concatedName}</p> : <NoDataCell />}</p>
           )
         });
       } else if (field?.primaryField === true && detailScreenRoute) {

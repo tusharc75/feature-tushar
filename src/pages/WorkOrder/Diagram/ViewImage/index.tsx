@@ -335,10 +335,14 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           </Button>
         </div>
       </div>
+
       <div>
-        {loading ? "Loading editor ..." : null}
+        {loading ? 'Loading editor ...' : null}
       </div>
-      <canvas ref={canvasRef} />
+
+      <div style={{ overflow: 'auto' }}>
+        <canvas ref={canvasRef} />
+      </div>
     </Box>
   );
 };
