@@ -62,6 +62,11 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         limit: action.limit
       };
+    case 'refreshData':
+      return {
+        ...state,
+        refreshDataCount: state.refreshDataCount < 10 ? +1 : 0
+      };
     default:
       break;
   }
@@ -78,7 +83,8 @@ const intialState = {
   visibleColumns: [],
   filterQuery: '',
   rowDef: [],
-  limit: 25
+  limit: 25,
+  refreshDataCount: 0
 };
 
 export type TInitialState = {
@@ -91,6 +97,7 @@ export type TInitialState = {
   filterQuery: string;
   rowDef: datarowInterface[];
   limit: number;
+  refreshDataCount: number;
 };
 
 export type TActios =
@@ -105,7 +112,8 @@ export type TActios =
       setCount: (data: { [key: string]: number }) => { [key: string]: number };
     }
   | { type: 'visibleColumns'; visibleColumns: string[] }
-  | { type: 'limit'; limit: number };
+  | { type: 'limit'; limit: number }
+  | { type: 'refreshData' };
 
 export const useCardReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);

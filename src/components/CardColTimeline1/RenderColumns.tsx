@@ -36,11 +36,13 @@ const RenderColumns: React.FC<colDataInterface> = ({
   fetchSingleColumn,
   column
 }) => {
-  const { data, count, loading, page, columnOrder, visibleColumns, filterQuery, rowDef, limit } = state;
+  const { data, count, loading, page, columnOrder, visibleColumns, filterQuery, rowDef, limit, refreshDataCount } = state;
 
   const hasNextPage = !data[column]?.length || !count[column] ? false : data[column]?.length || 0 < count[column] || 0;
   const isItemLoaded = (index) => !hasNextPage || index < data[column].length;
   const itemCount = hasNextPage ? data[column]?.length + 1 || 0 : data[column]?.length || 0;
+
+  console.log(refreshDataCount);
 
   const Row = ({ index, style }) => {
     const colData = data[column][index];
@@ -66,7 +68,7 @@ const RenderColumns: React.FC<colDataInterface> = ({
   useEffect(() => {
     dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: 0 }) });
     fetchSingleColumn(column, 0, false, filterQuery);
-  }, [filterQuery, column]);
+  }, [filterQuery, column, refreshDataCount, dispatch]);
 
   const loadMoreItems = () => {
     fetchSingleColumn(column, page[column] + 1, true, filterQuery);
@@ -74,7 +76,7 @@ const RenderColumns: React.FC<colDataInterface> = ({
 
   return (
     <>
-      <div className="col group">
+      <div className="col group" key={refreshDataCount}>
         <InfiniteLoader isItemLoaded={isItemLoaded} itemCount={itemCount} loadMoreItems={() => loadMoreItems()}>
           {({ onItemsRendered, ref }) => (
             <List

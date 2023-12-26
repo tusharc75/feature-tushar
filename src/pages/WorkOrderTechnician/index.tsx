@@ -1,17 +1,16 @@
-import { Box, Button, Checkbox, Chip, Grid, IconButton, TextField } from '@material-ui/core';
-import { useCallback, useEffect, useState } from 'react';
+import { Box, Checkbox, Chip, IconButton, TextField } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import { Autocomplete } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline1';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
-import axiosInstance from 'src/axios/axiosInstance';
-import { Autocomplete } from '@material-ui/lab';
-import RefreshIcon from '@material-ui/icons/Refresh';
-import React from 'react';
-import { useData } from 'src/StateProvider/Provider';
-import CloseIcon from '@material-ui/icons/Close';
-import { sidebarResource, WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource } from 'src/constants/helpers';
 import TechnicianDialog from './TechnicianDialog';
-import { camelCase } from 'lodash';
-import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline1';
 
 const API = `/work-order-technician`;
 const LIMIT = 25;
@@ -280,7 +279,9 @@ const WorkOrderTechnician = () => {
           <IconButton
             className={`${selectedResource ? 'sm:col-span-[unset]' : 'sm:col-span-2'} md:col-span-[unset]`}
             size="small"
-            onClick={() => fetchData()}
+            onClick={() => {
+              dispatch({ type: 'refreshData' });
+            }}
             style={{ display: 'flex', marginTop: '4px', marginLeft: 'auto' }}
           >
             <RefreshIcon />
