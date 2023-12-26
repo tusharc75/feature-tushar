@@ -366,8 +366,8 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       element.type = addDialog.type;
       if (addDialog.type !== 'serializedAsset') {
         element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
-        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
         if (quotationData?.estimateStartDate && quotationData?.estimateEndDate) {
+          element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
           element.estimateStartDate = quotationData?.estimateStartDate;
           element.estimateEndDate = quotationData?.estimateEndDate;
           const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
