@@ -38,7 +38,7 @@ const RenderColumns: React.FC<colDataInterface> = ({
 }) => {
   const { data, count, loading, page, columnOrder, visibleColumns, filterQuery, rowDef, limit, refreshDataCount } = state;
 
-  const hasNextPage = !data[column]?.length || !count[column] ? false : data[column]?.length || 0 < count[column] || 0;
+  const hasNextPage = !data[column]?.length || !count[column] ? false : data[column]?.length < count[column];
   const isItemLoaded = (index) => !hasNextPage || index < data[column].length;
   const itemCount = hasNextPage ? data[column]?.length + 1 || 0 : data[column]?.length || 0;
 
@@ -85,7 +85,7 @@ const RenderColumns: React.FC<colDataInterface> = ({
               onItemsRendered={onItemsRendered}
               style={{ overflowX: 'hidden' }}
               height={containerHeight || 600}
-              itemCount={data[column]?.length || 0}
+              itemCount={itemCount}
               itemSize={cardHeight}
               width={'100%'}
               ref={ref}
