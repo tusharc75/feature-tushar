@@ -11,6 +11,8 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource } from 'src/constants/helpers';
 import TechnicianDialog from './TechnicianDialog';
+import queryString from 'query-string';
+import { useHistory } from 'react-router-dom';
 
 const API = `/work-order-technician`;
 const LIMIT = 25;
@@ -34,6 +36,11 @@ const RESOURCE = [
 ];
 
 const WorkOrderTechnician = () => {
+
+  const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { workOrder, uniqueId } = parsed;
+
   const { state, dispatch } = useCardReducer();
   const { limit } = state;
 
@@ -50,11 +57,17 @@ const WorkOrderTechnician = () => {
     WORKORDER_SERVICE_STATUS.completed
   ]);
 
-  const [cardData, setCardData] = useState(null);
-
   const [resourceFilter, setResourceFilter] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null);
   const [selectedResourceFilter, setSelectedResourceFilter] = useState(null);
+
+
+  useEffect(() => {
+    if (workOrder && uniqueId) {
+      setSelectedService({ workOrderId: workOrder, uniqueId: uniqueId })
+      setServiceOpen(true);
+    }
+  }, [workOrder, uniqueId]);
 
   const {
     state: { permissions, user }
@@ -138,7 +151,7 @@ const WorkOrderTechnician = () => {
         dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
         dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => {
         dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
       });
@@ -188,8 +201,8 @@ const WorkOrderTechnician = () => {
                   selectedResource.resource === sidebarResource.workOrder
                     ? workOrderOptions
                     : selectedResource.resource === sidebarResource.repairOrder
-                    ? repairOrderOptions
-                    : productionOrderOptions
+                      ? repairOrderOptions
+                      : productionOrderOptions
                 }
                 fullWidth
                 getOptionLabel={(option: any) => option.optionLabel}
@@ -237,7 +250,6 @@ const WorkOrderTechnician = () => {
               }}
             />
           </Box>
-
           <IconButton
             className={`${selectedResource ? 'sm:col-span-[unset]' : 'sm:col-span-2'} md:col-span-[unset]`}
             size="small"
@@ -250,7 +262,6 @@ const WorkOrderTechnician = () => {
           </IconButton>
           <Box></Box>
         </Box>
-        {/* {cardData && ( */}
         <CardColTimeline
           fetchSingleColumn={fetchSingleColumn}
           state={state}
@@ -258,27 +269,23 @@ const WorkOrderTechnician = () => {
           passFailStatus={true}
           passFailAccessor="serviceStatus"
           cardOnClick={(e, data) => {
-            let tempServiceData = data?.service;
+            let tempServiceData = {};
             tempServiceData['uniqueId'] = data?._id;
-            tempServiceData['status'] = data?.status;
-            tempServiceData['assetNumber'] = data?.workOrderDetail?.serializedAsset?.optionLabel;
-            tempServiceData['assetId'] = data?.workOrderDetail?.serializedAsset?.optionValue;
             tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
-            tempServiceData['workOrderNumber'] = data?.workOrderDetail?.workOrderNumber;
             setSelectedService(tempServiceData);
             setServiceOpen(true);
           }}
         />
-        {/* )} */}
       </Box>
       {serviceOpen && (
         <TechnicianDialog
           handleClose={() => {
             setServiceOpen(false);
             setSelectedService(null);
-            // fetchData();
+            dispatch({ type: 'refreshData' });
           }}
-          selectedService={selectedService}
+          workOrderId={selectedService?.workOrderId}
+          uniqueId={selectedService?.uniqueId}
         />
       )}
     </Box>
