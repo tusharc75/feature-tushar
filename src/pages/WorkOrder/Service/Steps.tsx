@@ -1682,7 +1682,10 @@ const Steps = ({
             title={`Drawing`}
           ></CustomDialogHeader>
           <CustomDialogContent>
-            <Diagram resource={'workOrder'} referenceId={workOrderData?._id} />
+            <Diagram
+              resource={'workOrder'}
+              referenceId={workOrderData?._id}
+              currentVersion={(workOrderData?.versions?.length + 1) || 1} />
           </CustomDialogContent>
         </Dialog>
       }
