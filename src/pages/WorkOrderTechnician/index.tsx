@@ -35,11 +35,10 @@ const RESOURCE = [
 
 const WorkOrderTechnician = () => {
   const { state, dispatch } = useCardReducer();
-  const { limit, loading: stateLoading } = state;
+  const { limit } = state;
 
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   const [workOrderOptions, setWorkOrderOptions] = useState([]);
   const [repairOrderOptions, setRepairOrderOptions] = useState([]);
@@ -71,53 +70,15 @@ const WorkOrderTechnician = () => {
     setResourceFilter(options);
   }, []);
 
-  const fetchAutoCompleteData = useCallback(() => {
-    setLoading(true);
+  useEffect(()=>{
     axiosInstance()
-      .get(API)
-      .then(({ data: { data } }) => {
-        if (!selectedResourceFilter) {
-          const workOrderOption = [];
-          const repairOrderOption = [];
-          const productionOrderOption = [];
-          for (const item of data) {
-            if (item?.workOrderDetail && !workOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?._id)) {
-              workOrderOption.push({ optionValue: item?.workOrderDetail?._id, optionLabel: item?.workOrderDetail?.workOrderNumber });
-            }
-            if (
-              item?.workOrderDetail?.repairOrder &&
-              !repairOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?.repairOrder?.optionValue)
-            ) {
-              repairOrderOption.push({
-                optionValue: item?.workOrderDetail?.repairOrder?.optionValue,
-                optionLabel: item?.workOrderDetail?.repairOrder?.optionLabel
-              });
-            }
-            if (
-              item?.workOrderDetail?.productionOrder &&
-              !productionOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?.productionOrder?.optionValue)
-            ) {
-              productionOrderOption.push({
-                optionValue: item?.workOrderDetail?.productionOrder?.optionValue,
-                optionLabel: item?.workOrderDetail?.productionOrder?.optionLabel
-              });
-            }
-          }
-
-          setWorkOrderOptions(workOrderOption);
-          setRepairOrderOptions(repairOrderOption);
-          setProductionOrderOptions(productionOrderOption);
-        }
-        setLoading(false);
-      })
-      ?.catch((err) => {
-        setLoading(false);
-      });
-  }, []);
-
-  useEffect(() => {
-    fetchAutoCompleteData();
-  }, [fetchAutoCompleteData]);
+    .get(`/sa-formbuilder/lookup?lookupResource=Work Order,Repair Order,Production Order`)
+    .then(({ data: { data } }) => {
+      setWorkOrderOptions(data['Work Order']);
+      setRepairOrderOptions(data['Repair Order']);
+      setProductionOrderOptions(data['Production Order']);
+    });
+  },[])
 
   const cardDataRows: any[] = [
     { accessor: 'serviceName', type: 'title' },
@@ -192,9 +153,9 @@ const WorkOrderTechnician = () => {
     }
   }, [selectedResource, selectedResourceFilter, dispatch]);
 
-  const isAnyColumnLoading = useMemo(() => {
-    return Object.values(state.loading).some((item) => item);
-  }, [stateLoading]);
+  // const isAnyColumnLoading = useMemo(() => {
+  //   return Object.values(state.loading).some((item) => item);
+  // }, [stateLoading]);
 
   return (
     <Box className="main-container-v1">
@@ -209,7 +170,6 @@ const WorkOrderTechnician = () => {
             <Autocomplete
               options={resourceFilter}
               fullWidth
-              disabled={loading || isAnyColumnLoading}
               getOptionLabel={(option: any) => option.title}
               getOptionSelected={(option: any, value: any) => option.resource === value.resource}
               value={selectedResource}
@@ -231,7 +191,6 @@ const WorkOrderTechnician = () => {
                     ? repairOrderOptions
                     : productionOrderOptions
                 }
-                disabled={loading || isAnyColumnLoading}
                 fullWidth
                 getOptionLabel={(option: any) => option.optionLabel}
                 getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
@@ -317,7 +276,7 @@ const WorkOrderTechnician = () => {
           handleClose={() => {
             setServiceOpen(false);
             setSelectedService(null);
-            fetchData();
+            // fetchData();
           }}
           selectedService={selectedService}
         />
