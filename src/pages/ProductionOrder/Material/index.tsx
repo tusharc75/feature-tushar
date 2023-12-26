@@ -175,7 +175,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
-          <HtmlTooltip title={allowedToDelete && row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
+          <HtmlTooltip title={row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
             <IconButton
               size="small"
               aria-label="Details"
@@ -183,9 +183,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
                 setDeleteData(obj);
               }}
-              disabled={!(allowedToDelete && row.original?.canDelete)}
+              disabled={row.original?.canDelete ? false : true}
             >
-              <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.canDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
         </>
@@ -245,7 +245,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       parent.qtyDisplay = parent.qty;
       parent.canDelete = parent?.workOrder ? false : true;
       if (parent?.workOrder) {
-        parent.workOrderNumber = parent?.workOrder?.optionLabel;
+        parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       }
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -290,7 +290,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
       if (_subRow?.workOrder) {
-        _subRow.workOrderNumber = _subRow?.workOrder?.optionLabel;
+        _subRow.workOrderNumber = _subRow?.workOrder?.workOrderNumber;
       }
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -315,6 +315,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     axiosInstance()
       .post(`${productionOrder.api}/material/${productionOrderData._id}`, { material })
       .then(({ data }) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
         setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig({
           open: true,
@@ -370,6 +371,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     axiosInstance()
       .put(`${productionOrder.api}/material/${productionOrderData._id}`, { material: rows })
       .then(({ data }) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
         setUpdating(false);
         fetchData();
         toastConfig.setToastConfig({
@@ -506,10 +508,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 Bulk Edit
               </MenuItem>
               <MenuItem
-                disabled={allowedToDelete ? (selectedRecords?.filter((e) => e.canDelete)?.length > 0 ? false : true) : true}
+                disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
                 onClick={() => {
-                  const dataToDelete = selectedRecords
-                    ?.filter((e) => !e.hideSelection && e.canDelete)
+                  const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection && e.canDelete)
                     .map((rec: any) => {
                       const obj: any = {};
                       obj.id = rec._id;
