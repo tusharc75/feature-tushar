@@ -18,6 +18,7 @@ type IColCard = {
 };
 
 const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus, passFailAccessor }) => {
+  const tooltip = rowDef.find((item) => item.type === 'tooltip');
   return (
     <Box
       className={styles.singleCard}
@@ -29,6 +30,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
       }}
     >
       {rowDef.map((item, index) => {
+        if (item.type === 'tooltip') return null;
         if (item.type === 'title') {
           if (item.renderer)
             return (
@@ -104,12 +106,13 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
               </Typography>
             );
         }
+        return null;
       })}
-      {passFailStatus ? (
-        <Box className={styles.passFail}>
-          <RenderStatusIcon stepStatus={data[passFailAccessor]} />
-        </Box>
-      ) : null}
+
+      <Box className={`${styles.passFail} flex gap-2`}>
+        {tooltip ? tooltip.renderer(data) : null}
+        {passFailStatus ? <RenderStatusIcon stepStatus={data[passFailAccessor]} /> : null}
+      </Box>
     </Box>
   );
 };
