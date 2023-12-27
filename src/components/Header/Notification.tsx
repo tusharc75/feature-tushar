@@ -56,8 +56,8 @@ const Notification = () => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-        : '';
+      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+      : '';
 
   const getAllNotifications = (event) => {
     setAnchorEl(event.currentTarget);
@@ -65,7 +65,7 @@ const Notification = () => {
 
     axiosInstance()
       .get('/notification/all')
-      .then(({ data: { data } }) => {
+      .then(({ data: { data, count } }) => {
         setNotificationList(data);
         const nData = { all: data, unread: data.filter((d) => !d.read) };
         setNotificationData(nData);
@@ -126,7 +126,7 @@ const Notification = () => {
           toggle: true,
           _id: d._id
         })
-        .then(() => { })
+        .then(() => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -154,7 +154,7 @@ const Notification = () => {
     <>
       {isMobile ? (
         <>
-          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => { }}>
+          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => {}}>
             <Badge
               variant="dot"
               overlap="circular"
@@ -264,10 +264,13 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
   };
 
   const boldMatchPattern = (title: string) => {
-    const regex = new RegExp(`([A-Z]+_[0-9]+)|([0-9]+)|(fail)(ed|s)?|(pass)(ed)?|(complete)(d|s)?|(start)(ed|s)?|(assign)(ed)?|(reject)(ed|s)?|(accept)(ed|s)?|(create)(d|s)?|(change)(s|d)?`, 'gi');
+    const regex = new RegExp(
+      `([A-Z]+_[0-9]+)|([0-9]+)|(fail)(ed|s)?|(pass)(ed)?|(complete)(d|s)?|(start)(ed|s)?|(assign)(ed)?|(reject)(ed|s)?|(accept)(ed|s)?|(create)(d|s)?|(change)(s|d)?`,
+      'gi'
+    );
     const data = title.replace(regex, '<strong>$&</strong>');
     return data;
-  }
+  };
 
   return (
     <>
@@ -299,8 +302,9 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
               <div className={`${tab === 'all' ? 'bg-[var(--primary)]' : 'bg-[transparent]'} ${otherClasses}`} />
               All{' '}
               <span
-                className={`text-[#D3E0FF] px-2 py-[1px] block rounded-[5px] ml-2 bg-[#2A3042] text-[12px] font-semibold ${isLoading || tab === 'all' ? 'grayscale dark:opacity-50 opacity-70' : ''
-                  }`}
+                className={`text-[#D3E0FF] px-2 py-[1px] block rounded-[5px] ml-2 bg-[#2A3042] text-[12px] font-semibold ${
+                  isLoading || tab === 'all' ? 'grayscale dark:opacity-50 opacity-70' : ''
+                }`}
               >
                 {data.all.length || 0}
               </span>
@@ -309,8 +313,9 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
               <div className={`${tab === 'unread' ? 'bg-[var(--primary)]' : 'bg-[transparent]'} ${otherClasses}`} />
               Unread{' '}
               <span
-                className={`text-[#2A3042] px-2 py-[1px] block rounded-[5px] ml-2 bg-[#D3E0FF] text-[12px] font-semibold ${isLoading || tab === 'unread' ? 'grayscale dark:opacity-50 opacity-70' : ''
-                  }`}
+                className={`text-[#2A3042] px-2 py-[1px] block rounded-[5px] ml-2 bg-[#D3E0FF] text-[12px] font-semibold ${
+                  isLoading || tab === 'unread' ? 'grayscale dark:opacity-50 opacity-70' : ''
+                }`}
               >
                 {data.unread.length || 0}
               </span>
@@ -346,7 +351,10 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
                         </div>
                       </div>
                       <div className="flex-grow">
-                        <h4 className="text-[12px] font-medium mb-[8px] [&>strong]:font-semibold dark:[&>strong]:font-bold leading-[22px] text-[#6B6F77] dark:text-gray-300 [&>strong]:text-[var(--primary-text)]" dangerouslySetInnerHTML={{ __html: boldMatchPattern(d.title) }}></h4>
+                        <h4
+                          className="text-[12px] font-medium mb-[8px] [&>strong]:font-semibold dark:[&>strong]:font-bold leading-[22px] text-[#6B6F77] dark:text-gray-300 [&>strong]:text-[var(--primary-text)]"
+                          dangerouslySetInnerHTML={{ __html: boldMatchPattern(d.title) }}
+                        ></h4>
                         <h5 className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal mb-[2px]">{d.description}</h5>
                         <p className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal">{displayCardDate(d?.date)}</p>
                       </div>

@@ -31,13 +31,12 @@ const DashbaordNew = () => {
   const [selectedChart, setSelectedChart] = React.useState(null);
   const [globalFilters, setGlobalFilters] = React.useState(() => {
     const selectedDashboard = localStorage.getItem('selectedDashboard') ? localStorage.getItem('selectedDashboard') : '';
-
     return {
       dashboardType: selectedDashboard,
       currency: user?.user?.currency,
       between: {
-        from: new Date(moment().subtract(1, 'year').calendar()),
-        to: new Date()
+        from: new Date(moment().startOf('year').calendar()),
+        to: new Date(moment().endOf('year').calendar())
       }
     };
   });

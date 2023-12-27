@@ -3,7 +3,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline1';
@@ -11,8 +11,9 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource } from 'src/constants/helpers';
 import TechnicianDialog from './TechnicianDialog';
+import queryString from 'query-string';
+import { useHistory } from 'react-router-dom';
 
-const API = `/work-order-technician`;
 const LIMIT = 25;
 
 const RESOURCE = [
@@ -34,12 +35,16 @@ const RESOURCE = [
 ];
 
 const WorkOrderTechnician = () => {
+
+  const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { workOrder, uniqueId } = parsed;
+
   const { state, dispatch } = useCardReducer();
-  const { limit, loading: stateLoading } = state;
+  const { limit } = state;
 
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   const [workOrderOptions, setWorkOrderOptions] = useState([]);
   const [repairOrderOptions, setRepairOrderOptions] = useState([]);
@@ -51,11 +56,17 @@ const WorkOrderTechnician = () => {
     WORKORDER_SERVICE_STATUS.completed
   ]);
 
-  const [cardData, setCardData] = useState(null);
-
   const [resourceFilter, setResourceFilter] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null);
   const [selectedResourceFilter, setSelectedResourceFilter] = useState(null);
+
+
+  useEffect(() => {
+    if (workOrder && uniqueId) {
+      setSelectedService({ workOrderId: workOrder, uniqueId: uniqueId, canPerform: true })
+      setServiceOpen(true);
+    }
+  }, [workOrder, uniqueId]);
 
   const {
     state: { permissions, user }
@@ -71,53 +82,15 @@ const WorkOrderTechnician = () => {
     setResourceFilter(options);
   }, []);
 
-  const fetchAutoCompleteData = useCallback(() => {
-    setLoading(true);
-    axiosInstance()
-      .get(API)
-      .then(({ data: { data } }) => {
-        if (!selectedResourceFilter) {
-          const workOrderOption = [];
-          const repairOrderOption = [];
-          const productionOrderOption = [];
-          for (const item of data) {
-            if (item?.workOrderDetail && !workOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?._id)) {
-              workOrderOption.push({ optionValue: item?.workOrderDetail?._id, optionLabel: item?.workOrderDetail?.workOrderNumber });
-            }
-            if (
-              item?.workOrderDetail?.repairOrder &&
-              !repairOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?.repairOrder?.optionValue)
-            ) {
-              repairOrderOption.push({
-                optionValue: item?.workOrderDetail?.repairOrder?.optionValue,
-                optionLabel: item?.workOrderDetail?.repairOrder?.optionLabel
-              });
-            }
-            if (
-              item?.workOrderDetail?.productionOrder &&
-              !productionOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?.productionOrder?.optionValue)
-            ) {
-              productionOrderOption.push({
-                optionValue: item?.workOrderDetail?.productionOrder?.optionValue,
-                optionLabel: item?.workOrderDetail?.productionOrder?.optionLabel
-              });
-            }
-          }
-
-          setWorkOrderOptions(workOrderOption);
-          setRepairOrderOptions(repairOrderOption);
-          setProductionOrderOptions(productionOrderOption);
-        }
-        setLoading(false);
-      })
-      ?.catch((err) => {
-        setLoading(false);
-      });
-  }, []);
-
   useEffect(() => {
-    fetchAutoCompleteData();
-  }, [fetchAutoCompleteData]);
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=Work Order,Repair Order,Production Order`)
+      .then(({ data: { data } }) => {
+        setWorkOrderOptions(data['Work Order']);
+        setRepairOrderOptions(data['Repair Order']);
+        setProductionOrderOptions(data['Production Order']);
+      });
+  }, [])
 
   const cardDataRows: any[] = [
     { accessor: 'serviceName', type: 'title' },
@@ -142,42 +115,37 @@ const WorkOrderTechnician = () => {
   }, [selectedServiceStatus]);
 
   const fetchSingleColumn = useCallback((column: string, page = 0, appendData = true, filterQuery) => {
-    let api = `${API}?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+    let api = `/work-order-technician?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
     dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: true }) });
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
         const setData = (prev: { [key: string]: any[] }, appendData: boolean) => {
-          const updatedData = data
-            .filter((item) => selectedServiceStatus.includes(item.status))
-            .map((item) => {
-              const newObj = { ...item };
-              newObj['serviceName'] = item.service?.serviceName;
-              newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
-              newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
-              newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
-              newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e.optionLabel)?.toString();
-              return newObj;
-            });
-
+          const rows = data.map((item) => {
+            const newObj = { ...item };
+            newObj['serviceName'] = item.service?.serviceName;
+            newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
+            newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
+            newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
+            return newObj;
+          });
           const newData = prev;
-
           if (!appendData) {
-            newData[column] = updatedData;
-            return newData;
+            newData[column] = rows;
           }
-          if (prev[column] && prev[column].length > 0) {
-            newData[column] = [...prev[column], ...updatedData];
-          } else {
-            newData[column] = updatedData;
+          else {
+            if (prev[column] && prev[column]?.length) {
+              newData[column] = [...prev[column], ...rows];
+            } else {
+              newData[column] = rows;
+            }
           }
           return newData;
         };
-
         dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
         dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => {
         dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
       });
@@ -192,9 +160,6 @@ const WorkOrderTechnician = () => {
     }
   }, [selectedResource, selectedResourceFilter, dispatch]);
 
-  const isAnyColumnLoading = useMemo(() => {
-    return Object.values(state.loading).some((item) => item);
-  }, [stateLoading]);
 
   return (
     <Box className="main-container-v1">
@@ -209,7 +174,6 @@ const WorkOrderTechnician = () => {
             <Autocomplete
               options={resourceFilter}
               fullWidth
-              disabled={loading || isAnyColumnLoading}
               getOptionLabel={(option: any) => option.title}
               getOptionSelected={(option: any, value: any) => option.resource === value.resource}
               value={selectedResource}
@@ -228,10 +192,9 @@ const WorkOrderTechnician = () => {
                   selectedResource.resource === sidebarResource.workOrder
                     ? workOrderOptions
                     : selectedResource.resource === sidebarResource.repairOrder
-                    ? repairOrderOptions
-                    : productionOrderOptions
+                      ? repairOrderOptions
+                      : productionOrderOptions
                 }
-                disabled={loading || isAnyColumnLoading}
                 fullWidth
                 getOptionLabel={(option: any) => option.optionLabel}
                 getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
@@ -278,7 +241,6 @@ const WorkOrderTechnician = () => {
               }}
             />
           </Box>
-
           <IconButton
             className={`${selectedResource ? 'sm:col-span-[unset]' : 'sm:col-span-2'} md:col-span-[unset]`}
             size="small"
@@ -291,7 +253,6 @@ const WorkOrderTechnician = () => {
           </IconButton>
           <Box></Box>
         </Box>
-        {/* {cardData && ( */}
         <CardColTimeline
           fetchSingleColumn={fetchSingleColumn}
           state={state}
@@ -299,27 +260,25 @@ const WorkOrderTechnician = () => {
           passFailStatus={true}
           passFailAccessor="serviceStatus"
           cardOnClick={(e, data) => {
-            let tempServiceData = data?.service;
+            let tempServiceData = {};
             tempServiceData['uniqueId'] = data?._id;
-            tempServiceData['status'] = data?.status;
-            tempServiceData['assetNumber'] = data?.workOrderDetail?.serializedAsset?.optionLabel;
-            tempServiceData['assetId'] = data?.workOrderDetail?.serializedAsset?.optionValue;
             tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
-            tempServiceData['workOrderNumber'] = data?.workOrderDetail?.workOrderNumber;
+            tempServiceData['canPerform'] = data?.canPerform;
             setSelectedService(tempServiceData);
             setServiceOpen(true);
           }}
         />
-        {/* )} */}
       </Box>
       {serviceOpen && (
         <TechnicianDialog
           handleClose={() => {
             setServiceOpen(false);
             setSelectedService(null);
-            fetchData();
+            dispatch({ type: 'refreshData' });
           }}
-          selectedService={selectedService}
+          workOrderId={selectedService?.workOrderId}
+          uniqueId={selectedService?.uniqueId}
+          canPerform={selectedService?.canPerform}
         />
       )}
     </Box>

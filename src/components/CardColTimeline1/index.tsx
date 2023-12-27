@@ -1,10 +1,8 @@
+import { BoxProps, Typography } from '@material-ui/core';
 import React, { useMemo } from 'react';
-import CommonSkeleton from '../Helpers/CommonSkeleton';
-import styles from './index.module.scss';
-import { Box, Typography, Grid } from '@material-ui/core';
 import RenderColumns from './RenderColumns';
-import { BoxProps } from '@material-ui/core';
-import { TInitialState, TActios } from './hooks/useCardReducer';
+import { TActios, TInitialState } from './hooks/useCardReducer';
+import styles from './index.module.scss';
 
 export * from './hooks/useCardReducer';
 
@@ -115,9 +113,8 @@ const CardColTimeline: React.FC<CardColInterface> = ({
               <div className="bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px] rounded-[8px] min-h-full">
                 <Typography className={styles.colTitle}>
                   <span></span>
-                  {col} ({count[col] ? count[col] || 0 : '--'})
+                  {col} ({count[col] || 0})
                 </Typography>
-
                 <RenderColumns
                   column={col}
                   cardOnClick={cardOnClick}

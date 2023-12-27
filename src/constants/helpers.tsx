@@ -170,7 +170,8 @@ export const serviceOrderSteps: stepInterface[] = [
   { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
 ];
 
-export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
+//export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
+export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -2365,10 +2366,10 @@ export const REPORT_LIST = [
     type: 'assetUtilization'
   },
   {
-    title: 'Asset Stat',
+    title: 'Asset Statistics',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'serializedAssetStat'
+    type: 'serializedAssetStatistics'
   },
   {
     title: 'User Session',

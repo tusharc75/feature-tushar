@@ -10,7 +10,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 
-const TechnicianDialog = ({ handleClose, selectedService }) => {
+const TechnicianDialog = ({ handleClose, workOrderId, uniqueId, canPerform }) => {
 
     const {
         state: { permissions, user }
@@ -23,18 +23,15 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
 
     useEffect(() => {
         fetchWorkOrderData();
-    }, [selectedService]);
+    }, [workOrderId]);
 
     const fetchWorkOrderData = () => {
-        axiosInstance()
-            .get(`${routes.workOrder.path}/${selectedService?.workOrderId}`)
-            .then(({ data: { data } }) => {
-                setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
-                setWorkOrderData({ ...data });
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-            });
+        axiosInstance().get(`${routes.workOrder.path}/${workOrderId}`).then(({ data: { data } }) => {
+            setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
+            setWorkOrderData({ ...data });
+        }).catch((err) => {
+            toastConfig.setToastConfig(err);
+        });
     };
 
     return (<Dialog
@@ -42,48 +39,56 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}>
-        <CustomDialogHeader
-            showRequiredLabel={false}
-            title={`${selectedService?.workOrderNumber}`}
-            onClose={handleClose}
-            additionalTitle={
-                selectedService?.assetNumber &&
-                <Box ml={2} title={selectedService?.assetNumber} >
-                    <Typography variant="h6" className={`title-layout text-truncate`}>
-                        {`Asset : `}
-                        {permissions?.serializedAsset?.isRead ? (
-                            <a
-                                rel="noreferrer"
-                                target="_blank"
-                                style={{ textDecoration: 'underline', textUnderlineOffset: '5px' }}
-                                href={`${routes.serializedAssetDetail.path}/${selectedService?.assetId}`}
-                            >
-                                {selectedService?.assetNumber}
-                            </a>
-                        ) : (
-                            selectedService?.assetNumber
-                        )}
-                    </Typography>
+        {workOrderData ?
+            <>
+                <CustomDialogHeader
+                    showRequiredLabel={false}
+                    title={`${workOrderData?.workOrderNumber}`}
+                    onClose={handleClose}
+                    additionalTitle={
+                        workOrderData?.serializedAsset?.optionLabel &&
+                        <Box ml={2} title={workOrderData?.serializedAsset?.optionLabel} >
+                            <Typography variant="h6" className={`title-layout text-truncate`}>
+                                {`Asset : `}
+                                {permissions?.serializedAsset?.isRead ? (
+                                    <a
+                                        rel="noreferrer"
+                                        target="_blank"
+                                        style={{ textDecoration: 'underline', textUnderlineOffset: '5px' }}
+                                        href={`${routes.serializedAssetDetail.path}/${workOrderData?.serializedAsset?.optionValue}`}
+                                    >
+                                        {workOrderData?.serializedAsset?.optionLabel}
+                                    </a>
+                                ) : (
+                                    workOrderData?.serializedAsset?.optionLabel
+                                )}
+                            </Typography>
+                        </Box>
+                    }
+                ></CustomDialogHeader>
+                <Box p={2}>
+                    {workOrderData ?
+                        <Service
+                            workOrderData={workOrderData}
+                            workOrderId={workOrderId}
+                            allowedToEdit={canPerform}
+                            completed={completed}
+                            fetchWorkOrderData={fetchWorkOrderData}
+                            resource={sidebarResource.workOrderTechnician}
+                            technicianSelectedService={uniqueId}
+                            minHeightClass={'md:h-[calc(100vh-150px)]'}
+                        /> :
+                        <Grid container spacing={2} >
+                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                        </Grid>
+                    }
                 </Box>
-            }
-        ></CustomDialogHeader>
-        <Box p={2}>
-            {workOrderData ?
-                <Service
-                    workOrderData={workOrderData}
-                    workOrderId={selectedService?.workOrderId}
-                    allowedToEdit={[WORKORDER_SERVICE_STATUS.backlog, WORKORDER_SERVICE_STATUS.inProgressByOther]?.includes(selectedService?.status) ? false : true}
-                    completed={completed}
-                    fetchWorkOrderData={fetchWorkOrderData}
-                    resource={sidebarResource.workOrderTechnician}
-                    technicianSelectedService={selectedService.uniqueId}
-                    minHeightClass={'md:h-[calc(100vh-150px)]'}
-                /> :
-                <Grid container spacing={2} >
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Grid>
-            }
-        </Box>
+            </>
+            :
+            <Grid container spacing={2} >
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Grid>
+        }
     </Dialog>
     );
 };

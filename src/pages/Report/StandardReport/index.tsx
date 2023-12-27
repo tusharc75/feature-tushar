@@ -82,7 +82,7 @@ const Report = () => {
             let columns = [];
             let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${type}/column`);
             const customRendererTypes = ['reference', 'creditDebit', 'date', 'creditDebitType'];
-            let newColumns = generateColumns(type, columnFields, '');
+            let newColumns = generateColumns(type, columnFields);
             newColumns?.forEach(o => {
                 const fieldType = columnFields?.find(c => c?.fieldData?.fieldName === o?.accessor)?.type;
                 if (customRendererTypes?.includes(fieldType)) {
@@ -110,6 +110,7 @@ const Report = () => {
                 if (type === "number-of-assets-by-status" && o?.accessor === "product") {
                     o.cell = ({ row }) => ProductRenderer(row)
                 }
+                o.editable = false
             });
             if (type === 'inventory-evaluation') {
                 newColumns?.forEach((e) => {
