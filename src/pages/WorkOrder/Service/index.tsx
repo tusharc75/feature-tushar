@@ -492,9 +492,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       });
   };
 
-  const isAllowedToServiceEdit =
+  const isAllowedToServiceEdit = resource === sidebarResource.workOrder ?
     !completed &&
-    (allowedToEdit || (selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate));
+    (allowedToEdit || (selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate))
+    : !completed && allowedToEdit && permissions?.workOrder?.isUpdate;
 
   const openAddServiceActions = (event) => {
     setAddServiceAnchorEl(event.currentTarget);
