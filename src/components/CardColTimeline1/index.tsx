@@ -1,5 +1,5 @@
 import { BoxProps, Typography } from '@material-ui/core';
-import React, { useMemo } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import RenderColumns from './RenderColumns';
 import { TActios, TInitialState } from './hooks/useCardReducer';
 import styles from './index.module.scss';
@@ -19,7 +19,7 @@ interface CardColInterface extends BoxProps {
   fetchSingleColumn: (column: string, page: number, appendData?: boolean, filterQuery?: string) => void;
 }
 
-export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTitle | TLinkTitle;
+export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTitle | TLinkTitle | TTooltip;
 
 type TCommon = {
   accessor: string;
@@ -50,6 +50,10 @@ type TTitle = TCommon & {
 type TLinkTitle = TCommon & {
   type: 'linkTitle';
   link: (data: any) => string;
+};
+type TTooltip = {
+  type: 'tooltip';
+  renderer: (data: any) => ReactNode;
 };
 
 const HEADER_HEIGHT = 90;
