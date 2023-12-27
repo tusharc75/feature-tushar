@@ -30,6 +30,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
       preserveObjectStacking: true,
       selection: false,
+      controlsAboveOverlay: true,
+      centeredScaling: true,
       allowTouchScrolling: true
     });
     fabric.Object.prototype.transparentCorners = false;
@@ -342,8 +344,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         {loading ? 'Loading editor ...' : null}
       </div>
 
-      <div className='custom-canvas'>
-        <canvas style={{display: 'block'}} ref={canvasRef} />
+      <div style={{overflow:'auto'}}>
+        <canvas ref={canvasRef} />
       </div>
     </Box>
   );
