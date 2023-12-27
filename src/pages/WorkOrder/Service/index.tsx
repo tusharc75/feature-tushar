@@ -1292,7 +1292,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
           isSubmitting={isSubmitting}
           extraStaticFilter={serviceDialog.preWork === null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}
-          hideQty={true}
         />
       )}
       {serviceDialog.open && serviceDialog.type === 'newService' && (
