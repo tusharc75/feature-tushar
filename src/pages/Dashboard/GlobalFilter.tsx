@@ -2,7 +2,6 @@ import React from 'react';
 import { Grid, FormControl, InputLabel, Select, MenuItem, AppBar, Box, makeStyles } from '@material-ui/core';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
-
 import FormTypes from '../../components/Helpers/FormTypes';
 import { dateFormatForInputControl } from '../../constants/helpers';
 
@@ -177,6 +176,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                   fullWidth
                   size="small"
                   openTo="year"
+                  autoOk
                   format={dateFormatForInputControl}
                   maxDate={globalFilters.between.to}
                   label="From"
@@ -196,6 +196,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                   size="small"
                   minDate={globalFilters.between.from}
                   openTo="year"
+                  autoOk
                   format={dateFormatForInputControl}
                   label="To"
                   views={['year', 'month', 'date']}
