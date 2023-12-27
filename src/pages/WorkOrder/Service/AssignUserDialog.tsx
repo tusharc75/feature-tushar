@@ -12,7 +12,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isArray } from 'lodash';
 
-const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, competencies, handleClose, handleSucess }) => {
+const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, competencies, handleClose, handleSucess, warehouse }) => {
   const toastConfig = useContext(CustomToastContext);
   const [userList, setUserList] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState(assignedUsers);
@@ -22,9 +22,9 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
   }, []);
 
   const fetchUserList = () => {
-    var api = `${workOrder.api}/technician-users`
+    var api = `${workOrder.api}/technician-users?warehouse=${warehouse}`
     if (competencies && isArray(competencies) && competencies?.length) {
-      api = api + `?competencies=${JSON.stringify(competencies)}`
+      api = api + `&competencies=${JSON.stringify(competencies)}`
     }
     axiosInstance()
       .get(api)

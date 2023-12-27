@@ -342,8 +342,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         {loading ? 'Loading editor ...' : null}
       </div>
 
-      <div style={{ width: '100%', overflow: 'auto' }}>
-        <canvas ref={canvasRef} />
+      <div className='custom-canvas'>
+        <canvas style={{display: 'block'}} ref={canvasRef} />
       </div>
     </Box>
   );

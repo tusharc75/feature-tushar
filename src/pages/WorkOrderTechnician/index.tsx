@@ -1,18 +1,20 @@
 import { Box, Checkbox, Chip, IconButton, TextField } from '@material-ui/core';
+import { Info } from '@material-ui/icons';
 import CloseIcon from '@material-ui/icons/Close';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
+import queryString from 'query-string';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline1';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import routes from 'src/components/Helpers/Routes';
 import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource } from 'src/constants/helpers';
 import TechnicianDialog from './TechnicianDialog';
-import queryString from 'query-string';
-import { useHistory } from 'react-router-dom';
 
 const LIMIT = 25;
 
@@ -35,7 +37,6 @@ const RESOURCE = [
 ];
 
 const WorkOrderTechnician = () => {
-
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { workOrder, uniqueId } = parsed;
@@ -60,10 +61,9 @@ const WorkOrderTechnician = () => {
   const [selectedResource, setSelectedResource] = useState(null);
   const [selectedResourceFilter, setSelectedResourceFilter] = useState(null);
 
-
   useEffect(() => {
     if (workOrder && uniqueId) {
-      setSelectedService({ workOrderId: workOrder, uniqueId: uniqueId, canPerform: true })
+      setSelectedService({ workOrderId: workOrder, uniqueId: uniqueId, canPerform: true });
       setServiceOpen(true);
     }
   }, [workOrder, uniqueId]);
@@ -90,13 +90,22 @@ const WorkOrderTechnician = () => {
         setRepairOrderOptions(data['Repair Order']);
         setProductionOrderOptions(data['Production Order']);
       });
-  }, [])
+  }, []);
 
   const cardDataRows: any[] = [
     { accessor: 'serviceName', type: 'title' },
     { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
     { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
     { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
+    {
+      type: 'tooltip',
+      renderer: (data) =>
+        data?.canPerformInfo ? (
+          <HtmlTooltip title={data.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+            <Info className="[font-size:20px_!important] text-red-500" />
+          </HtmlTooltip>
+        ) : null
+    },
     ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : [])
   ];
 
@@ -132,8 +141,7 @@ const WorkOrderTechnician = () => {
           const newData = prev;
           if (!appendData) {
             newData[column] = rows;
-          }
-          else {
+          } else {
             if (prev[column] && prev[column]?.length) {
               newData[column] = [...prev[column], ...rows];
             } else {
@@ -159,7 +167,6 @@ const WorkOrderTechnician = () => {
       dispatch({ type: 'setFilterQuery', filterQuery: '' });
     }
   }, [selectedResource, selectedResourceFilter, dispatch]);
-
 
   return (
     <Box className="main-container-v1">
