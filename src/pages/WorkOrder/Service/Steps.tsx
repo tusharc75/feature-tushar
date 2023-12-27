@@ -750,6 +750,7 @@ const Steps = ({
           message: data.message
         });
         setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
+        fetchService();
         fetchServiceData();
       })
       .catch((error) => {
