@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 import React, { useEffect } from 'react';
-=======
->>>>>>> 819b2b625409637d658ad4f767eddb0746d55aa0
 import { Box, Typography } from '@material-ui/core';
 import styles from './index.module.scss';
 import { WORKORDER_SERVICE_STEP_STATUS, dateTimeFormat, dateFormat } from 'src/constants/helpers';
@@ -12,7 +9,6 @@ import TimerComponent, { getFieldsWithOtherDetails } from './TimerComponent';
 import { Link } from 'react-router-dom';
 import { datarowInterface } from '.';
 
-<<<<<<< HEAD
 type IColCard = {
   data: any[];
   cardOnClick?: (e: React.MouseEvent, data: any) => void | null;
@@ -22,9 +18,6 @@ type IColCard = {
 };
 
 const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus, passFailAccessor }) => {
-=======
-const ColCard: any = ({ data, cardOnClick, rowDef, passFailStatus, passFailAccessor }) => {
->>>>>>> 819b2b625409637d658ad4f767eddb0746d55aa0
   return (
     <Box
       className={styles.singleCard}
