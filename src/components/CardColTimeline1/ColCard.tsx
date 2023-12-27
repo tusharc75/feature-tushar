@@ -19,6 +19,10 @@ type IColCard = {
 
 const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus, passFailAccessor }) => {
   const tooltip = rowDef.find((item) => item.type === 'tooltip');
+  let paddingRight = 0;
+  if (passFailStatus) paddingRight += 29;
+  if (Boolean(tooltip)) paddingRight += 29;
+
   return (
     <Box
       className={styles.singleCard}
@@ -39,9 +43,11 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
               </div>
             );
           return (
-            <Typography key={index} component={'h5'} className={styles.cardTitle} title={data[item.accessor] || '--'}>
-              {data[item.accessor] || '--'}
-            </Typography>
+            <div className={`${styles.cardTitle}`}>
+              <h5 key={index} className={` line-clamp-1  `} style={{ paddingRight }} title={data[item.accessor] || '--'}>
+                {data[item.accessor] || '--'}
+              </h5>
+            </div>
           );
         }
         if (item.renderer) {
@@ -123,14 +129,14 @@ const RenderStatusIcon = ({ stepStatus }: { stepStatus: string }) => {
   return (
     <>
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.passed && (
-        <HtmlTooltip title={stepStatus}>
+        <HtmlTooltip title={stepStatus} placement="top" arrow enterDelay={0}>
           <Box style={{ color: '#4BAE4F', fontSize: '25px', width: 25 }}>
             <AiFillCheckCircle style={{ display: 'block' }} />
           </Box>
         </HtmlTooltip>
       )}
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.failed && (
-        <HtmlTooltip title={stepStatus}>
+        <HtmlTooltip title={stepStatus} placement="top" arrow enterDelay={0}>
           <Box style={{ color: '#F25F54', fontSize: '25px', width: 25 }}>
             <AiFillExclamationCircle style={{ display: 'block' }} />
           </Box>
