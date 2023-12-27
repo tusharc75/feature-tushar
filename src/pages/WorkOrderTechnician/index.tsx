@@ -101,7 +101,7 @@ const WorkOrderTechnician = () => {
       type: 'tooltip',
       renderer: (data) =>
         !data.canPerform ? (
-          <HtmlTooltip title="You can perform this after completeing pending services" arrow placement="top" enterTouchDelay={0}>
+          <HtmlTooltip title="You can perform this, after completeing pending services" arrow placement="top" enterTouchDelay={0}>
             <Info className="[font-size:25px_!important] text-red-500" />
           </HtmlTooltip>
         ) : null
