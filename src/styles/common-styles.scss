@@ -405,3 +405,15 @@ $sizes: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10;
     width: calc(100% - 5%);
   }
 }
+
+.custom-canvas {
+  width: 100%;
+  overflow: auto;
+}
+
+ @media screen and (max-width: 500px) {
+    .custom-canvas {
+      width: 300px;
+      overflow: auto;
+    }
+  }

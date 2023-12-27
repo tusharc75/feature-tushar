@@ -750,6 +750,7 @@ const Steps = ({
           message: data.message
         });
         setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
+        fetchService();
         fetchServiceData();
       })
       .catch((error) => {
@@ -1533,6 +1534,7 @@ const Steps = ({
             )}
             {userAssignDialog && (
               <AssignUserDialog
+                warehouse={workOrderData?.warehouse?.optionValue}
                 workOrderData={{
                   workOrderId: workOrderId
                 }}
@@ -1682,7 +1684,10 @@ const Steps = ({
             title={`Drawing`}
           ></CustomDialogHeader>
           <CustomDialogContent>
-            <Diagram resource={'workOrder'} referenceId={workOrderData?._id} />
+            <Diagram
+              resource={'workOrder'}
+              referenceId={workOrderData?._id}
+              currentVersion={(workOrderData?.versions?.length + 1) || 1} />
           </CustomDialogContent>
         </Dialog>
       }

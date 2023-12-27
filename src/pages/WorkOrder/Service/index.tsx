@@ -5,8 +5,6 @@ import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import {
   convertMsToTime,
   QUOTATION_STATUS,
-  repairOrder,
-  REPAIR_ORDER_TYPE,
   workOrder,
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS,
@@ -14,13 +12,11 @@ import {
   getChipColor,
   sidebarResource
 } from 'src/constants/helpers';
-import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, Tooltip, useMediaQuery } from '@material-ui/core';
+import { Box, Chip, Grid, IconButton, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import Steps from './Steps';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import Quotation from '../Quotation';
 import AssignUserDialog from './AssignUserDialog';
@@ -353,6 +349,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         if (id === selectedService?.uniqueId) {
           setSelectedService(null);
         }
+        fetchWorkOrderData()
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -1245,6 +1242,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       )}
       {userAssignDialog && (
         <AssignUserDialog
+          warehouse={workOrderData?.warehouse?.optionValue}
           workOrderData={[
             {
               uniqueId: selectedService?.uniqueId,
@@ -1295,7 +1293,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
           isSubmitting={isSubmitting}
           extraStaticFilter={serviceDialog.preWork === null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}
-          hideQty={true}
         />
       )}
       {serviceDialog.open && serviceDialog.type === 'newService' && (

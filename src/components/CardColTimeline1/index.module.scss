@@ -1,0 +1,109 @@
+.singleCard {
+  --card-padding: 15px;
+  padding: var(--card-padding, 8px);
+  margin-bottom: 15px;
+  position: relative;
+  border-radius: 8px;
+  box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--dark-mode-border-color, var(--border, red));
+  background-color: var(--dark-primary, white);
+  transition: transform 0.2s, background 0.3s;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+
+  .passFail {
+    position: absolute;
+    top: var(--card-padding, 8px);
+    right: var(--card-padding, 8px);
+    cursor: pointer;
+  }
+  .cardTitle {
+    h5 {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.57;
+    }
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--common-border-color);
+  }
+  .cardDetails {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.57;
+    display: grid;
+    grid-template-columns: 13ch 1fr;
+    gap: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    span {
+      font-weight: 600;
+    }
+  }
+  .chip {
+    max-width: max-content;
+    background-color: var(--border);
+    color: var(--color);
+  }
+}
+.singleCol {
+  position: relative;
+}
+.colTitle {
+  position: sticky;
+  top: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background-color: var(--section-bg);
+  padding: 14px 13px;
+  z-index: 5;
+  margin-left: -6px !important;
+  margin-right: -6px !important;
+  border-radius: 8px 8px 0 0;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+
+  // span {
+  //   width: 20px;
+  //   height: 20px;
+  //   display: block;
+  //   border-radius: 100vmax;
+  //   background-color: var(--bg, red);
+  // }
+}
+
+.container {
+  --section-bg: var(--dark-secondary, #f1f5ff);
+  padding: 0 0px;
+  height: max(74vh, 600px);
+  overflow: hidden;
+  max-width: 100%;
+}
+.timer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 10px;
+  color: rgb(139, 139, 139);
+  svg {
+    font-size: 13px;
+    display: block;
+    margin-right: 3px;
+  }
+}
+.cardDetailsLink {
+  color: var(--link);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  &:hover {
+    text-decoration: underline;
+  }
+}

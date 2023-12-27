@@ -28,7 +28,9 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
 
   useEffect(() => {
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
-      preserveObjectStacking: true
+      preserveObjectStacking: true,
+      selection: false,
+      allowTouchScrolling: true
     });
     fabric.Object.prototype.transparentCorners = false;
     fabric.Object.prototype.cornerStyle = 'circle';
@@ -335,10 +337,14 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           </Button>
         </div>
       </div>
+
       <div>
-        {loading ? "Loading editor ..." : null}
+        {loading ? 'Loading editor ...' : null}
       </div>
-      <canvas ref={canvasRef} />
+
+      <div className='custom-canvas'>
+        <canvas style={{display: 'block'}} ref={canvasRef} />
+      </div>
     </Box>
   );
 };
