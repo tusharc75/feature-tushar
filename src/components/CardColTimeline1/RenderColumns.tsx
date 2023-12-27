@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
-import ColCard from './ColCard';
-import { TActios, TInitialState } from './index';
-import { FixedSizeList as List } from 'react-window';
 import { Button } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import CommonSkeleton from '../Helpers/CommonSkeleton';
+import React, { useEffect } from 'react';
+import { FixedSizeList as List } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
+import CommonSkeleton from '../Helpers/CommonSkeleton';
+import ColCard from './ColCard';
+import { TActios, TInitialState } from './index';
 
 export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   cardOnClick?: (e: React.MouseEvent, data: any) => void | null;
