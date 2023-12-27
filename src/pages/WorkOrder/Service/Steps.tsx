@@ -1534,6 +1534,7 @@ const Steps = ({
             )}
             {userAssignDialog && (
               <AssignUserDialog
+                warehouse={workOrderData?.warehouse?.optionValue}
                 workOrderData={{
                   workOrderId: workOrderId
                 }}
