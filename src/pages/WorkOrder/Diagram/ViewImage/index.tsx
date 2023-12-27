@@ -28,7 +28,9 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
 
   useEffect(() => {
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
-      preserveObjectStacking: true
+      preserveObjectStacking: true,
+      selection: false,
+      allowTouchScrolling: true
     });
     fabric.Object.prototype.transparentCorners = false;
     fabric.Object.prototype.cornerStyle = 'circle';
