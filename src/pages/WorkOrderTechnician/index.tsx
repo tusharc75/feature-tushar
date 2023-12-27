@@ -100,9 +100,9 @@ const WorkOrderTechnician = () => {
     {
       type: 'tooltip',
       renderer: (data) =>
-        !data.canPerform ? (
-          <HtmlTooltip title="You can perform this, after completeing pending services" arrow placement="top" enterTouchDelay={0}>
-            <Info className="[font-size:25px_!important] text-red-500" />
+        data?.canPerformInfo ? (
+          <HtmlTooltip title={data.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+            <Info className="[font-size:20px_!important] text-red-500" />
           </HtmlTooltip>
         ) : null
     },
@@ -153,7 +153,7 @@ const WorkOrderTechnician = () => {
         dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
         dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => {
         dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
       });
@@ -199,8 +199,8 @@ const WorkOrderTechnician = () => {
                   selectedResource.resource === sidebarResource.workOrder
                     ? workOrderOptions
                     : selectedResource.resource === sidebarResource.repairOrder
-                    ? repairOrderOptions
-                    : productionOrderOptions
+                      ? repairOrderOptions
+                      : productionOrderOptions
                 }
                 fullWidth
                 getOptionLabel={(option: any) => option.optionLabel}
