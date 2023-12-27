@@ -2365,10 +2365,10 @@ export const REPORT_LIST = [
     type: 'assetUtilization'
   },
   {
-    title: 'Asset Stat',
+    title: 'Asset Statistics',
     permission: 'serializedAsset',
     key: 'standardReport',
-    type: 'serializedAssetStat'
+    type: 'serializedAssetStatistics'
   },
   {
     title: 'User Session',

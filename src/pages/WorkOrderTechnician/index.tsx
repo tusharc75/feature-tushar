@@ -3,7 +3,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline1';
@@ -14,7 +14,6 @@ import TechnicianDialog from './TechnicianDialog';
 import queryString from 'query-string';
 import { useHistory } from 'react-router-dom';
 
-const API = `/work-order-technician`;
 const LIMIT = 25;
 
 const RESOURCE = [
@@ -64,7 +63,7 @@ const WorkOrderTechnician = () => {
 
   useEffect(() => {
     if (workOrder && uniqueId) {
-      setSelectedService({ workOrderId: workOrder, uniqueId: uniqueId })
+      setSelectedService({ workOrderId: workOrder, uniqueId: uniqueId, canPerform: true })
       setServiceOpen(true);
     }
   }, [workOrder, uniqueId]);
@@ -83,15 +82,15 @@ const WorkOrderTechnician = () => {
     setResourceFilter(options);
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     axiosInstance()
-    .get(`/sa-formbuilder/lookup?lookupResource=Work Order,Repair Order,Production Order`)
-    .then(({ data: { data } }) => {
-      setWorkOrderOptions(data['Work Order']);
-      setRepairOrderOptions(data['Repair Order']);
-      setProductionOrderOptions(data['Production Order']);
-    });
-  },[])
+      .get(`/sa-formbuilder/lookup?lookupResource=Work Order,Repair Order,Production Order`)
+      .then(({ data: { data } }) => {
+        setWorkOrderOptions(data['Work Order']);
+        setRepairOrderOptions(data['Repair Order']);
+        setProductionOrderOptions(data['Production Order']);
+      });
+  }, [])
 
   const cardDataRows: any[] = [
     { accessor: 'serviceName', type: 'title' },
@@ -116,38 +115,33 @@ const WorkOrderTechnician = () => {
   }, [selectedServiceStatus]);
 
   const fetchSingleColumn = useCallback((column: string, page = 0, appendData = true, filterQuery) => {
-    let api = `${API}?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+    let api = `/work-order-technician?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
     dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: true }) });
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
         const setData = (prev: { [key: string]: any[] }, appendData: boolean) => {
-          const updatedData = data
-            .filter((item) => selectedServiceStatus.includes(item.status))
-            .map((item) => {
-              const newObj = { ...item };
-              newObj['serviceName'] = item.service?.serviceName;
-              newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
-              newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
-              newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
-              newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e.optionLabel)?.toString();
-              return newObj;
-            });
-
+          const rows = data.map((item) => {
+            const newObj = { ...item };
+            newObj['serviceName'] = item.service?.serviceName;
+            newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
+            newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
+            newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
+            return newObj;
+          });
           const newData = prev;
-
           if (!appendData) {
-            newData[column] = updatedData;
-            return newData;
+            newData[column] = rows;
           }
-          if (prev[column] && prev[column].length > 0) {
-            newData[column] = [...prev[column], ...updatedData];
-          } else {
-            newData[column] = updatedData;
+          else {
+            if (prev[column] && prev[column]?.length) {
+              newData[column] = [...prev[column], ...rows];
+            } else {
+              newData[column] = rows;
+            }
           }
           return newData;
         };
-
         dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
         dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
       })
@@ -166,9 +160,6 @@ const WorkOrderTechnician = () => {
     }
   }, [selectedResource, selectedResourceFilter, dispatch]);
 
-  // const isAnyColumnLoading = useMemo(() => {
-  //   return Object.values(state.loading).some((item) => item);
-  // }, [stateLoading]);
 
   return (
     <Box className="main-container-v1">
@@ -272,6 +263,7 @@ const WorkOrderTechnician = () => {
             let tempServiceData = {};
             tempServiceData['uniqueId'] = data?._id;
             tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
+            tempServiceData['canPerform'] = data?.canPerform;
             setSelectedService(tempServiceData);
             setServiceOpen(true);
           }}
@@ -286,6 +278,7 @@ const WorkOrderTechnician = () => {
           }}
           workOrderId={selectedService?.workOrderId}
           uniqueId={selectedService?.uniqueId}
+          canPerform={selectedService?.canPerform}
         />
       )}
     </Box>

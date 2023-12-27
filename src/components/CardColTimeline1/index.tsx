@@ -115,9 +115,8 @@ const CardColTimeline: React.FC<CardColInterface> = ({
               <div className="bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px] rounded-[8px] min-h-full">
                 <Typography className={styles.colTitle}>
                   <span></span>
-                  {col} ({count[col] ? count[col] || 0 : '--'})
+                  {col} ({count[col] || 0})
                 </Typography>
-
                 <RenderColumns
                   column={col}
                   cardOnClick={cardOnClick}

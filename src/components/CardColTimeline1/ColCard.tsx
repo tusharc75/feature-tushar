@@ -1,5 +1,3 @@
-import React, { useEffect } from 'react';
-import { colDataInterface } from './RenderColumns';
 import { Box, Typography } from '@material-ui/core';
 import styles from './index.module.scss';
 import { WORKORDER_SERVICE_STEP_STATUS, dateTimeFormat, dateFormat } from 'src/constants/helpers';
@@ -9,7 +7,7 @@ import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import TimerComponent, { getFieldsWithOtherDetails } from './TimerComponent';
 import { Link } from 'react-router-dom';
 
-const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, rowDef, passFailStatus, passFailAccessor }) => {
+const ColCard: any = ({ data, cardOnClick, rowDef, passFailStatus, passFailAccessor }) => {
   return (
     <Box
       className={styles.singleCard}
