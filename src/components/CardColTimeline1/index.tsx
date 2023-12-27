@@ -1,10 +1,8 @@
+import { BoxProps, Typography } from '@material-ui/core';
 import React, { useMemo } from 'react';
-import CommonSkeleton from '../Helpers/CommonSkeleton';
-import styles from './index.module.scss';
-import { Box, Typography, Grid } from '@material-ui/core';
 import RenderColumns from './RenderColumns';
-import { BoxProps } from '@material-ui/core';
-import { TInitialState, TActios } from './hooks/useCardReducer';
+import { TActios, TInitialState } from './hooks/useCardReducer';
+import styles from './index.module.scss';
 
 export * from './hooks/useCardReducer';
 
