@@ -543,37 +543,35 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.service
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent?.serializedAssetDetail?.assetNumber
-          : parent?.packageDetail?.packageName
-      }`;
+            ? parent?.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent?.serializedAssetDetail?.assetNumber
+              : parent?.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === MATERIAL_TYPE.serializedAsset
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${
-        parent.type === MATERIAL_TYPE.service
+      parent.status = `${parent.type === MATERIAL_TYPE.service
           ? parent.serviceDetail?.status
           : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.status
-          : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.productDetail?.status
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail.status
+              : parent.packageDetail?.status
+        }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
       parent.hideSelection = false;
@@ -626,18 +624,18 @@ const WorkOrder = ({
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow?.serializedAsset?.assetNumber
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow?.serializedAsset?.assetNumber
+              : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -908,7 +906,7 @@ const WorkOrder = ({
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                    checkUniqWorkOrder()
+                      checkUniqWorkOrder()
                       ? false
                       : true
                   }
@@ -949,7 +947,7 @@ const WorkOrder = ({
                 }}
                 disabled={
                   selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
+                    selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
                     selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
                     ? false
                     : true
@@ -1019,7 +1017,6 @@ const WorkOrder = ({
               }}
               extraStaticFilter={!isPostWorkService ? [] : [{ field: 'preWork', term: false }]}
               isSubmitting={isSubmitting}
-              hideQty={true}
             />
           )}
           {addServicesDialog.open && addServicesDialog.new && (
