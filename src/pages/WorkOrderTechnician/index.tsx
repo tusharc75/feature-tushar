@@ -286,6 +286,9 @@ const WorkOrderTechnician = () => {
             setServiceOpen(false);
             setSelectedService(null);
             dispatch({ type: 'refreshData' });
+            if (workOrder) {
+              history.push(`${routes.workOrderTechnician.path}`);
+            }
           }}
           workOrderId={selectedService?.workOrderId}
           uniqueId={selectedService?.uniqueId}
