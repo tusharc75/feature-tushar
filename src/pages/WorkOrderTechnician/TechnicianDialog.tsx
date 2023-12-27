@@ -10,7 +10,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 
-const TechnicianDialog = ({ handleClose, workOrderId, uniqueId }) => {
+const TechnicianDialog = ({ handleClose, workOrderId, uniqueId, canPerform }) => {
 
     const {
         state: { permissions, user }
@@ -71,7 +71,7 @@ const TechnicianDialog = ({ handleClose, workOrderId, uniqueId }) => {
                         <Service
                             workOrderData={workOrderData}
                             workOrderId={workOrderId}
-                            allowedToEdit={[WORKORDER_SERVICE_STATUS.backlog, WORKORDER_SERVICE_STATUS.inProgressByOther]?.includes(workOrderData?.status) ? false : true}
+                            allowedToEdit={canPerform}
                             completed={completed}
                             fetchWorkOrderData={fetchWorkOrderData}
                             resource={sidebarResource.workOrderTechnician}

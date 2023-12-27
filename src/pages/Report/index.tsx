@@ -146,6 +146,9 @@ const Report = () => {
         )
       });
     }
+    columns?.forEach((e) => {
+      e.editable = false
+    })
     setColumns([...columns]);
     setLoadingColumns(false);
   };

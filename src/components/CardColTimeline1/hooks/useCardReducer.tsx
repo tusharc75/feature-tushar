@@ -107,10 +107,10 @@ export type TActios =
   | { type: 'columnOrder'; columnOrder: string[] }
   | { type: 'setFilterQuery'; filterQuery: string; loading?: boolean }
   | {
-      type: 'setData';
-      setData: (data: { [key: string]: any[] }) => { [key: string]: any[] };
-      setCount: (data: { [key: string]: number }) => { [key: string]: number };
-    }
+    type: 'setData';
+    setData: (data: { [key: string]: any[] }) => { [key: string]: any[] };
+    setCount: (data: { [key: string]: number }) => { [key: string]: number };
+  }
   | { type: 'visibleColumns'; visibleColumns: string[] }
   | { type: 'limit'; limit: number }
   | { type: 'refreshData' };
