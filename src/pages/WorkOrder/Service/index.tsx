@@ -1242,6 +1242,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       )}
       {userAssignDialog && (
         <AssignUserDialog
+          warehouse={workOrderData?.warehouse?.optionValue}
           workOrderData={[
             {
               uniqueId: selectedService?.uniqueId,
