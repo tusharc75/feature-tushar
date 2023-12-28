@@ -83,14 +83,17 @@ const WorkOrderTechnician = () => {
   }, []);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Work Order,Repair Order,Production Order`)
-      .then(({ data: { data } }) => {
-        setWorkOrderOptions(data['Work Order']);
-        setRepairOrderOptions(data['Repair Order']);
-        setProductionOrderOptions(data['Production Order']);
-      });
+    fetchData()
   }, []);
+
+  const fetchData = () => {
+    axiosInstance().get(`/work-order-technician/filter-option`)
+      .then(({ data: { data } }) => {
+        setWorkOrderOptions(data?.workOrder || []);
+        setRepairOrderOptions(data?.repairOrder || []);
+        setProductionOrderOptions(data?.productionOrder || []);
+      });
+  }
 
   const cardDataRows: any[] = [
     { accessor: 'serviceName', type: 'title' },
@@ -253,6 +256,7 @@ const WorkOrderTechnician = () => {
             size="small"
             onClick={() => {
               dispatch({ type: 'refreshData' });
+              fetchData()
             }}
             style={{ display: 'flex', marginTop: '4px', marginLeft: 'auto' }}
           >
@@ -282,6 +286,9 @@ const WorkOrderTechnician = () => {
             setServiceOpen(false);
             setSelectedService(null);
             dispatch({ type: 'refreshData' });
+            if (workOrder) {
+              history.push(`${routes.workOrderTechnician.path}`);
+            }
           }}
           workOrderId={selectedService?.workOrderId}
           uniqueId={selectedService?.uniqueId}
