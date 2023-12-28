@@ -22,6 +22,7 @@ import { entity } from '../../constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { Logo, LoginImage } from 'src/assets/authenticationAssets';
 import AuthSlider from './AuthSlider';
+import FacialLogin from 'src/components/FacialLogin';
 
 import styles from './index.module.scss';
 
@@ -185,6 +186,7 @@ const Login = () => {
                     <UnauthenticatedTemplate>
                       <AzureLogin />
                     </UnauthenticatedTemplate>
+                    <FacialLogin />
                     <Box className={styles.or}>
                       <Typography>or sign in with</Typography>
                     </Box>
