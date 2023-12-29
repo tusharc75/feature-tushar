@@ -168,7 +168,7 @@ const WebcamDialog = ({ open, onClose }) => {
             ))}
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button type="button" color="primary" size="small" onClick={onClose}>
+          <Button type="button" disabled={isScanning} color="primary" size="small" onClick={onClose}>
             Cancel
           </Button>
           <CustomButton
@@ -179,7 +179,7 @@ const WebcamDialog = ({ open, onClose }) => {
             disabled={isScanning}
             startIcon={isScanning && <CircularProgress size={15} />}
           >
-            {isScanning ? 'Scanning...' : 'Capture'}
+            {isScanning ? 'Authenticating...' : 'Authenticate'}
           </CustomButton>
         </CustomDialogFooter>
       </Dialog>
