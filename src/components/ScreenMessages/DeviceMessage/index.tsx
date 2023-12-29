@@ -1,8 +1,8 @@
 import { Button } from '@material-ui/core';
+import { ArrowBack } from '@material-ui/icons';
 import { FC, useEffect, useState } from 'react';
 import { isDesktop, isMobile, isTablet } from 'react-device-detect';
-import { useHistory, useLocation } from 'react-router-dom';
-import { ArrowBack } from '@material-ui/icons';
+import { useHistory } from 'react-router-dom';
 
 interface DeviceMessageProps {
   devices?: TDevices[];
