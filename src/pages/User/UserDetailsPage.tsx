@@ -1,4 +1,3 @@
-import DateFnsUtils from '@date-io/date-fns';
 import {
   Box,
   Button,
@@ -8,29 +7,22 @@ import {
   FormGroup,
   Grid,
   IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
   Switch,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
   Tooltip,
   Typography,
   makeStyles
 } from '@material-ui/core';
 import { ControlPoint, Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import queryString from 'query-string';
 import { startCase } from 'lodash';
-import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
-import { Line } from 'react-chartjs-2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiReset, RiSettingsFill } from 'react-icons/all';
 import { FcFlowChart } from 'react-icons/fc';
@@ -56,7 +48,6 @@ import {
   ACTIVITY_RESOURCE,
   customerAccount,
   customerContact,
-  dateFormatForInputControl,
   displayDate,
   lead,
   opportunity,
@@ -72,9 +63,10 @@ import LeadAccordionInUserDetailPage from './LeadAccordionInUserDetailPage';
 import ManageUserDialog from './ManageUserDialog';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import UserSetupDialog from './UserSetupDialog';
-
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import UserSession from './UserSession';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -95,6 +87,7 @@ const UserDetailsPage = () => {
   const history = useHistory();
   const queryParameter = useLocation().search;
   const userSetup = new URLSearchParams(queryParameter).get('userSetup');
+  const { tab }: any = queryString.parse(history.location.search);
   const {
     state: { user, permissions }
   }: any = useData();
@@ -127,34 +120,32 @@ const UserDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [userList, setUserList] = useState<any[]>([]);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [orgChartData, setOrgChartData] = useState([]);
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [entities, setEntities] = useState<any[]>([]);
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [showSetupUserDialog, setShowSetupUserDialog] = useState(false);
-  const [timeFrame, setTimeFrame] = useState<any>('1-year');
-  const [trackingTime, setTrackingTime] = useState({
-    between: {
-      from: new Date(moment().subtract(1, 'year').calendar()),
-      to: new Date()
-    }
-  });
-  const [userTrackingData, setUserTrackingData] = useState({
-    labels: [],
-    datasets: []
-  });
-  const [userTrackingDataLoading, setUserTrackingDataLoading] = useState(true);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allUsers, setAllUsers] = useState([]);
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+    history.push(`?tab=${newValue}`);
+  };
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
 
   useEffect(() => {
     if (id) {
       getUserFields();
       fetchUserData();
       getRoleUnion();
-      fetchUsers();
       fetchUserRelatedDetail();
-      setCurrentTabIndex(0);
     }
     // userSetup === 'true' && setShowSetupUserDialog(true);
     // eslint-disable-next-line
@@ -171,52 +162,6 @@ const UserDetailsPage = () => {
       setShowSetupUserDialog(true);
     }
   }, [id, roleAccessOfLoggedInUser]);
-
-  useEffect(() => {
-    switch (timeFrame) {
-      case '1-month':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('1', 'month').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-
-      case '3-months':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('3', 'months').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-
-      case '6-months':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('6', 'months').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-
-      case '1-year':
-        setTrackingTime({
-          between: {
-            from: new Date(moment().subtract('1', 'year').calendar()),
-            to: new Date()
-          }
-        });
-        break;
-      default:
-        break;
-    }
-  }, [timeFrame]);
-
-  useEffect(() => {
-    userTimeTracker();
-  }, [trackingTime]);
 
   const fetchLoggedInUserRole = async () => {
     let roleIds = [];
@@ -315,80 +260,6 @@ const UserDetailsPage = () => {
       });
   };
 
-  const convertDate = (str) => {
-    let date = new Date(str),
-      month = ('0' + (date.getMonth() + 1)).slice(-2),
-      day = ('0' + date.getDate()).slice(-2);
-    return [month, day, date.getFullYear()].join('-');
-  };
-
-  const userTimeTracker = async () => {
-    setUserTrackingDataLoading(true);
-    const parsedFromTime = convertDate(trackingTime.between.from);
-    const parsedToTime = convertDate(trackingTime.between.to);
-    const { from, to } = trackingTime.between;
-
-    const hour = 1000 * 60 * 60;
-    const day = 1000 * 60 * 60 * 24;
-    // const month = 1000 * 60 * 60 * 24 * 30
-    // const year = 1000 * 60 * 60 * 24 * 30 * 12
-    const dateDiff = moment(to).diff(from, 'days');
-    const time = dateDiff > 90 ? day : hour;
-    axiosInstance()
-      .get(`/user-activity/${id}/${parsedFromTime}/${parsedToTime}`)
-      .then(({ data: { data } }) => {
-        const labels = [];
-        const dataSets = [];
-
-        data = data.sort((a, b) => {
-          const aDate = new Date(a.date).getTime();
-          const bDate = new Date(b.date).getTime();
-
-          return aDate - bDate;
-        });
-
-        data.forEach((obj) => {
-          labels.push(moment(obj?.date).format('DD/MMM'));
-          dataSets.push(obj?.totalDuration / time);
-        });
-        setUserTrackingData({
-          labels: labels,
-          datasets: [
-            {
-              label: `Total Duration (${dateDiff > 90 ? 'In Days' : 'In Hours'})`,
-              data: dataSets,
-              borderColor: 'rgba(75,192,192,1)'
-            }
-          ]
-        });
-        setUserTrackingDataLoading(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const fetchUsers = () => {
-    axiosInstance()
-      .get('/user')
-      .then(({ data: { data, count } }) => {
-        getRows(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
-  const getRows = (data: []) => {
-    const rows = data.length
-      ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
-      : [];
-
-    setUserList(rows);
-  };
 
   const fetchUserRelatedDetail = () => {
     // setUserRelatedLoading(true);
@@ -441,7 +312,7 @@ const UserDetailsPage = () => {
           .put(`/user/remove`, { ids: [deleteUserRec] })
           .then(({ data }) => {
             setShowConfirmBox(false);
-            history.push(`${routes.user.path}`)
+            history.push(`${routes.user.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);
@@ -650,77 +521,36 @@ const UserDetailsPage = () => {
                 </Grid>
               ) : (
                 <>
-                  <Tabs
-                    className="new-tab-container-v1"
-                    value={currentTabIndex}
-                    onChange={(index, newValue) => {
-                      setCurrentTabIndex(newValue);
-                    }}
-                    indicatorColor="primary"
-                    TabIndicatorProps={{
-                      style: {
-                        display: 'none'
-                      }
-                    }}
-                    textColor="primary"
-                    aria-label="icon tabs example"
-                  >
-                    <Tab
-                      className={'tabLayout'}
-                      label={<div className="d-flex align-items-center tab-font">Details</div>}
-                      aria-controls="a11y-tabpanel-0"
-                      id="a11y-tab-0"
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      label={<div className="d-flex align-items-center tab-font">Org Chart</div>}
-                      aria-controls="a11y-tabpanel-1"
-                      id="a11y-tab-1"
-                    />
+                  <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+                    <CustomTab index={0} value={0} className={'tabLayout'} label={'Details'} {...a11yProps(0)} />
+                    <CustomTab index={1} value={1} className={'tabLayout'} label={'Org Chart'} {...a11yProps(1)} />
                     {userData?.proxyDOA?.optionValue && (
-                      <Tab
-                        className={'tabLayout'}
-                        label={<div className="d-flex align-items-center tab-font">DOA Proxy</div>}
-                        aria-controls="a11y-tabpanel-1"
-                        id="a11y-tab-1"
+                      <CustomTab index={2} value={2} className={'tabLayout'} label={'DOA Proxy'} {...a11yProps(2)} 
                       />
                     )}
-                    <Tab
-                      className={'tabLayout'}
-                      label={<div className="d-flex align-items-center tab-font">User Session</div>}
-                      aria-controls="a11y-tabpanel-2"
-                      id="a11y-tab-2"
+                    <CustomTab index={3} value={3} className={'tabLayout'} label={'User Session'} {...a11yProps(3)}
                     />
-                    <Tab
-                      className={'tabLayout'}
-                      label={<div className="d-flex align-items-center tab-font">Assigned Entity</div>}
-                      aria-controls="a11y-tabpanel-3"
-                      id="a11y-tab-3"
+                    <CustomTab index={4} value={4} className={'tabLayout'} label={'Assigned Entity'} {...a11yProps(4)}
                     />
-                    <Tab
-                      className={'tabLayout'}
-                      label={<div className="d-flex align-items-center tab-font">Approval Process</div>}
-                      aria-controls="a11y-tabpanel-4"
-                      id="a11y-tab-4"
+                    <CustomTab
+                      index={5} value={5} className={'tabLayout'} label={'Approval Process'} {...a11yProps(5)}
                     />
-                  </Tabs>
-                  <Box hidden={currentTabIndex !== 0}>
-                    <DetailsPageHeader
-                      logo={userData?.avatar ? userData.avatar : undefined}
-                      mainPoints={mainPoints}
-                    />
+                  </CustomTabs>
+
+                  <TabPanel value={tabValue} index={0}>
+                    <DetailsPageHeader logo={userData?.avatar ? userData.avatar : undefined} mainPoints={mainPoints} />
                     <DetailsPage data={userData} fields={userFields} />
-                  </Box>
-                  <Box hidden={currentTabIndex !== 1}>
+                  </TabPanel>
+                  <TabPanel value={tabValue} index={1}>
                     <OrgChartContainer
                       data={orgChartData}
                       onClick={(id) => {
                         history.push(`${routes.userDetail.path}/${id}`);
                       }}
                     />
-                  </Box>
+                  </TabPanel>
                   {userData?.proxyDOA && (
-                    <Box hidden={currentTabIndex !== 2}>
+                    <TabPanel value={tabValue} index={2}>
                       <TableContainer>
                         <Table aria-label="DOA Proxy Table" size="small">
                           <TableHead>
@@ -768,103 +598,12 @@ const UserDetailsPage = () => {
                       </TableContainer>
 
                       {/* </div> */}
-                    </Box>
+                    </TabPanel>
                   )}
-                  <Box hidden={userData?.proxyDOA ? currentTabIndex !== 3 : currentTabIndex !== 2}>
-                    <Box
-                      width="100%"
-                      padding={1}
-                      bgcolor="var(--dark-secondary, var(--accordion-expanded-summary-bg, #EFFBF9))"
-                      display="flex"
-                      justifyContent="space-between"
-                    >
-                      <Grid container>
-                        <Grid item xs={8}>
-                          <Box display="flex">
-                            <Box padding="5px">
-                              <Typography variant="subtitle2">User Time Track</Typography>
-                            </Box>
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                    <Box padding="10px">
-                      <Grid item xs={12} sm={12} md={12}>
-                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                          <Grid container spacing={2}>
-                            <Grid item xs={12} sm={4}>
-                              <FormControl fullWidth size="small" variant="outlined">
-                                <InputLabel id="duration">Select Duration</InputLabel>
-                                <Select
-                                  labelId="duration"
-                                  id="time-duration"
-                                  value={timeFrame}
-                                  onChange={(e) => setTimeFrame(e.target.value)}
-                                  label="Select Duration"
-                                >
-                                  <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                                  <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                                  <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                                  <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                                  <MenuItem value={'custom'}>Custom</MenuItem>
-                                </Select>
-                              </FormControl>
-                            </Grid>
-                            <Grid item xs={6} sm={4}>
-                              <KeyboardDatePicker
-                                disabled={timeFrame !== 'custom'}
-                                inputVariant="outlined"
-                                variant="inline"
-                                fullWidth
-                                autoOk
-                                size="small"
-                                openTo="year"
-                                format={dateFormatForInputControl}
-                                maxDate={trackingTime.between.to}
-                                label="From"
-                                views={['year', 'month', 'date']}
-                                value={trackingTime.between.from}
-                                onChange={(date) => {
-                                  setTrackingTime({ between: { from: date, to: trackingTime.between.to } });
-                                }}
-                              />
-                            </Grid>
-                            <Grid item xs={6} sm={4}>
-                              <KeyboardDatePicker
-                                disabled={timeFrame !== 'custom'}
-                                inputVariant="outlined"
-                                variant="inline"
-                                fullWidth
-                                autoOk
-                                size="small"
-                                minDate={trackingTime.between.from}
-                                openTo="year"
-                                format={dateFormatForInputControl}
-                                label="To"
-                                views={['year', 'month', 'date']}
-                                value={trackingTime.between.to}
-                                onChange={(date) => {
-                                  setTrackingTime({ between: { to: date, from: trackingTime.between.from } });
-                                }}
-                              />
-                            </Grid>
-                          </Grid>
-                        </MuiPickersUtilsProvider>
-                      </Grid>
-                    </Box>
-                    <Typography className="subtitle1 m-2">
-                      {userTrackingDataLoading ? (
-                        <Grid container spacing={2} style={{ padding: '8px' }}>
-                          <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                        </Grid>
-                      ) : userTrackingData.labels.length === 0 ? (
-                        <h3>No activity found in the selected date range</h3>
-                      ) : (
-                        <Line type="line" data={userTrackingData} />
-                      )}
-                    </Typography>
-                  </Box>
-                  <Box hidden={userData?.proxyDOA ? currentTabIndex !== 4 : currentTabIndex !== 3}>
+                  <TabPanel value={tabValue} index={3}>
+                    <UserSession id = {id} />
+                  </TabPanel>
+                  <TabPanel value={tabValue} index={4}>
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={12} md={12} lg={12}>
                         <Box
@@ -921,8 +660,8 @@ const UserDetailsPage = () => {
                         </Box>
                       </Grid>
                     </Grid>
-                  </Box>
-                  <Box hidden={userData?.proxyDOA ? currentTabIndex !== 5 : currentTabIndex !== 4}>
+                  </TabPanel>
+                  <TabPanel value={tabValue} index={5}>
                     <div style={{ display: 'block' }}>
                       <Box padding={2}>
                         <FormControl component="fieldset" fullWidth>
@@ -966,7 +705,7 @@ const UserDetailsPage = () => {
                       </Box>
                       <QuickLinks quickLinks={quickLinks} />
                     </div>
-                  </Box>
+                  </TabPanel>
                 </>
               )}
             </Box>
@@ -1177,7 +916,7 @@ const UserDetailsPage = () => {
             });
             fetchUserData();
           }}
-          fetchUsers={() => fetchUsers()}
+          fetchUsers={() => fetchAllUsers()}
           userList={userList}
           selectedRecords={[{ ...userData }]}
           isRoleSetUpPermission={permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate}

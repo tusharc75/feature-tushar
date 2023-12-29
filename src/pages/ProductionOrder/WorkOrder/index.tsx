@@ -834,7 +834,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  setDeleteData(selectedRecords);
+                  setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
                   setShowConfirmBox(true);
                   closeActions();
                 }}

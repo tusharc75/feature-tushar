@@ -9,7 +9,7 @@ import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serviceMaster, s
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 
@@ -113,7 +113,9 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    const updatedFilters = [];
+    
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    const updatedFilters = [...deepFilters];
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {
         if (e?.field === 'preWork') {
@@ -125,16 +127,11 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
         }
       });
     }
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
-    } else {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (updatedFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
