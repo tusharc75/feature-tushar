@@ -30,6 +30,7 @@ import CertificationHistory from './CertificationHistory';
 import DepreciationHistory from './DepreciationHistory';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
+import ManageSendOutboundMessage from '../SendOutboundMessage/manageSendOutboundMessage';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -58,6 +59,7 @@ const SerializedAssetDetailsPage = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [customField, setCustomField] = useState(null);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
+  const [manageSendOutBoundMessageDialog, setManageSendOutBoundMessageDialog] = useState(false);
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
@@ -286,6 +288,18 @@ const SerializedAssetDetailsPage = () => {
                     View Data
                   </Button>
                 )}
+                {permissions?.sendOutboundMessage?.isCreate && (
+                  <Button
+                    variant="outlined"
+                    className={'btn-outline-v1'}
+                    size="small"
+                    onClick={() => {
+                      setManageSendOutBoundMessageDialog(true)
+                    }}
+                  >
+                    Send Outbound Message
+                  </Button>
+                )}
                 {permissions?.serializedAsset?.isUpdate && assetDetails.active && (
                   <>
                     {permissions?.repairJob?.isCreate &&
@@ -484,6 +498,18 @@ const SerializedAssetDetailsPage = () => {
           onAddReason={(reason) => {
             handleStatusUpdate({ status: status, reason: reason });
             setShowReasonDialog(false);
+          }}
+        />
+      )}
+
+      {manageSendOutBoundMessageDialog && (
+        <ManageSendOutboundMessage
+          assetId={assetDetails?._id || null}
+          onSuccess={() => {
+            setManageSendOutBoundMessageDialog(false);
+          }}
+          onClose={() => {
+            setManageSendOutBoundMessageDialog(false);
           }}
         />
       )}
