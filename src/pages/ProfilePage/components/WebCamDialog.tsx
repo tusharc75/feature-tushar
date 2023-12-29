@@ -11,7 +11,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CircularProgress } from '@material-ui/core';
 
-const WebCamDialog = ({ open, onClose }) => {
+const WebCamDialog = ({ open, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const webcamRef = useRef(null);
   const [picture, setPicture] = useState('');
@@ -65,7 +65,7 @@ const WebCamDialog = ({ open, onClose }) => {
       })
       .then(({ data }) => {
         toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
-        onClose();
+        onSuccess();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -135,7 +135,7 @@ const WebCamDialog = ({ open, onClose }) => {
             ))}
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button type="button" color="primary" size="small" onClick={onClose}>
+          <Button type="button" disabled={isScanning} color="primary" size="small" onClick={onClose}>
             Cancel
           </Button>
           <CustomButton

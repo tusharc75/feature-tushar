@@ -85,6 +85,8 @@ export default function ManageProfile(props) {
   const [isEmailUpdate, setEmailUpdate] = useState(false);
   const [isPasswordUpdate, setPasswordUpdate] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [removeFaceConfirmBox, setRemoveFaceConfirmBox] = useState(false);
+  const [removingFace, setRemovingFace] = useState(false);
   const [showAddProxyDialog, setShowAddProxyDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -213,6 +215,26 @@ export default function ManageProfile(props) {
     return result;
   };
 
+  const handleRemoveFace = () => {
+    setRemovingFace(true);
+    axiosInstance()
+      .delete('/user/remove-face-data')
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setRemoveFaceConfirmBox(false);
+        setRemovingFace(false);
+        onFetchUserData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setRemovingFace(false);
+      });
+  };
+
   return (
     <>
       {openUpdateDialog && (
@@ -324,9 +346,15 @@ export default function ManageProfile(props) {
               Add DOA Proxy
             </Button>
             <Divider />
-            <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setWebCamDialog(true)}>
-              Add Face
-            </Button>
+            {userData?.faceData && userData?.faceId ? (
+              <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveFaceConfirmBox(true)}>
+                Remove Face
+              </Button>
+            ) : (
+              <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setWebCamDialog(true)}>
+                Add Face
+              </Button>
+            )}
           </div>
         ) : null}
         <div style={{ borderRadius: 8, minWidth: '300px' }}>
@@ -544,8 +572,21 @@ export default function ManageProfile(props) {
               onClose={() => {
                 setWebCamDialog(false);
               }}
+              onSuccess={() => {
+                onFetchUserData();
+                setWebCamDialog(false);
+              }}
             />
           )}
+          {removeFaceConfirmBox ? (
+            <ConfirmationDialog
+              open={removeFaceConfirmBox}
+              message={`Are you sure you want to remove Face ?`}
+              onClose={() => setRemoveFaceConfirmBox(false)}
+              onOk={handleRemoveFace}
+              okBtnLoading={removingFace}
+            />
+          ) : null}
         </div>
       </>
     </>
