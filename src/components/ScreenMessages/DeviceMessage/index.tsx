@@ -1,7 +1,7 @@
 import { Button } from '@material-ui/core';
 import { FC, useEffect, useState } from 'react';
 import { isDesktop, isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { ArrowBack } from '@material-ui/icons';
 
 interface DeviceMessageProps {
@@ -45,7 +45,9 @@ const DeviceMessage: FC<DeviceMessageProps> = ({
           <p className="text-[14px] mb-3">{description}</p>
           <Button
             startIcon={<ArrowBack className="mr-2" />}
-            onClick={() => history.goBack()}
+            onClick={() => {
+              history.push('/');
+            }}
             variant="contained"
             className="no-shadow"
             style={{ background: 'var(--primary)', color: 'white' }}
