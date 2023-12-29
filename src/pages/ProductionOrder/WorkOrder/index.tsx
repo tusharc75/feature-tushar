@@ -838,7 +838,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   setShowConfirmBox(true);
                   closeActions();
                 }}
-                disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
+                disabled={selectedRecords?.some((e) => !e?.canDelete) ? true : false}
               >
                 Delete
               </MenuItem>
