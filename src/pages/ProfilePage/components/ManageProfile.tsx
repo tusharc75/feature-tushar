@@ -38,6 +38,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { Image } from '@material-ui/icons';
+import WebcamDialog from './WebCamDialog';
 
 const useStyles = makeStyles((theme) => ({
   profileEdit: {
@@ -87,6 +88,7 @@ export default function ManageProfile(props) {
   const [showAddProxyDialog, setShowAddProxyDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
+  const [webCamDialog, setWebCamDialog] = useState(false);
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -322,6 +324,9 @@ export default function ManageProfile(props) {
               Add DOA Proxy
             </Button>
             <Divider />
+            <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setWebCamDialog(true)}>
+              Add Face
+            </Button>
           </div>
         ) : null}
         <div style={{ borderRadius: 8, minWidth: '300px' }}>
@@ -531,6 +536,14 @@ export default function ManageProfile(props) {
                   });
               }}
               userId={user?.user?._id}
+            />
+          )}
+          {webCamDialog && (
+            <WebcamDialog
+              open={webCamDialog}
+              onClose={() => {
+                setWebCamDialog(false);
+              }}
             />
           )}
         </div>
