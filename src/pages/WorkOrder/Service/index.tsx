@@ -10,7 +10,8 @@ import {
   WORKORDER_SERVICE_STEP_STATUS,
   WORK_ORDER_STATUS,
   getChipColor,
-  sidebarResource
+  sidebarResource,
+  MATERIAL_TYPE
 } from 'src/constants/helpers';
 import { Box, Chip, Grid, IconButton, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -39,7 +40,7 @@ import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { PreWorkIcon, PostWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
-import { isArray, reverse } from 'lodash';
+import { isArray, isEqual, reverse } from 'lodash';
 import AttachmentDialog from './AttachmentDialog';
 import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
 import { PassIcon, FailIcon } from 'src/assets/svg/svgIcons';
@@ -98,7 +99,8 @@ const RenderTotalTime = ({ stepTimes }: any) => {
   );
 };
 
-const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData, resource, technicianSelectedService, minHeightClass = null }) => {
+const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData, resource,
+  defaultSelectedService, setDefaultSelectedService, minHeightClass = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -191,13 +193,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         const order = services[pendingServiceIndex]?.order;
         services?.forEach((element, index) => {
           if (user?.brandPolicy?.workOrderServiceSequence) {
-            if (element?.type === 'service') {
+            if (element?.type === MATERIAL_TYPE.service) {
               if (element.order === order || index <= pendingServiceIndex) {
-                if (
-                  !completed &&
-                  (allowedToEdit || (element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate))
-                ) {
-                  element.clickable = true;
+                if (!completed) {
+                  if ((allowedToEdit || (element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id)
+                    || (!element?.assignedUsers?.length && isEqual(element?.competencies, user?.competencies))))) {
+                    element.clickable = true;
+                  }
+                  else {
+                    element.clickable = false;
+                  }
                 } else {
                   element.clickable = false;
                 }
@@ -221,27 +226,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }
         }
 
-        if (resource === sidebarResource.workOrderTechnician) {
-          services?.forEach((element) => {
-            if (element?.uniqueId === technicianSelectedService) {
-              element.clickable = true;
-            }
-            else {
-              element.clickable = false;
-            }
-          });
-        }
-
         if (selectedService) {
           setSelectedService(services?.find((e) => e?.uniqueId === selectedService?.uniqueId) || null);
         } else {
-          if (technicianSelectedService) {
-            setSelectedService(services?.find((e) => e?.uniqueId === technicianSelectedService) || null);
+          if (defaultSelectedService) {
+            setSelectedService(services?.find((e) => e?.uniqueId === defaultSelectedService) || null);
+            if (setDefaultSelectedService) {
+              setDefaultSelectedService(null)
+            }
           }
           else {
             setSelectedService(services[pendingServiceIndex]);
           }
         }
+
       }
       setServiceSteps(services);
       if (
@@ -492,10 +490,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       });
   };
 
-  const isAllowedToServiceEdit = resource === sidebarResource.workOrder ?
-    !completed &&
-    (allowedToEdit || (selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate))
-    : !completed && allowedToEdit && permissions?.workOrder?.isUpdate;
+  const isAllowedToServiceEdit = !completed &&
+    (allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id)
+      || (!selectedService?.assignedUsers?.length && isEqual(selectedService?.competencies, user?.competencies)))
 
   const openAddServiceActions = (event) => {
     setAddServiceAnchorEl(event.currentTarget);
