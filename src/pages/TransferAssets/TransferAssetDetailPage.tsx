@@ -34,12 +34,11 @@ const TransferAssetDetailPage = () => {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
-  const parsedTab = tab !== undefined ? parseInt(tab) : 1;
   const {
     state: { user, permissions }
   }: any = useData();
 
-  const [tabValue, setTabValue] = useState(parsedTab);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setDeleting] = useState(false);
   const [transferAssetData, setTransferAssetData] = useState(null);
@@ -346,7 +345,7 @@ const TransferAssetDetailPage = () => {
               updateStatus={updateProcessStatus}
             />
             <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-              {currentStep === 0 && (
+              {currentStep === 0 && transferAssetData && (
                 <AssetsGrid
                   permissions={permissions}
                   setNextStep={setNextStep}
@@ -357,7 +356,7 @@ const TransferAssetDetailPage = () => {
                   stepFullScreen={stepFullScreen}
                 />
               )}
-              {currentStep === 1 && (
+              {currentStep === 1 && transferAssetData && (
                 <LoadingTicketGrid
                   setTickets={setLoadingTickets}
                   currentStep={currentStep}
@@ -375,7 +374,7 @@ const TransferAssetDetailPage = () => {
                   stepFullScreen={stepFullScreen}
                 />
               )}
-              {currentStep === 2 && (
+              {currentStep === 2 && transferAssetData && (
                 <ReceivingTicketGrid
                   setTickets={setReceivingTickets}
                   currentStep={currentStep}
