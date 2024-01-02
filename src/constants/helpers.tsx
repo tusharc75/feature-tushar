@@ -2636,6 +2636,7 @@ export const WORK_ORDER_STATUS = {
   // quoteAccepted: 'Quote Accepted',
   // quoteRejected: 'Quote Rejected',
   postWork: 'Post-Work In-Progress',
+  inProgress: 'In-Progress',
   completed: 'Completed'
 };
 
