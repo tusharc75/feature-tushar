@@ -247,7 +247,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
         services.filter((e) => e.type === 'service')?.length &&
-        workOrderData?.status !== WORK_ORDER_STATUS.completed
+        (workOrderData?.status !== WORK_ORDER_STATUS.completed && workOrderData?.status !== WORK_ORDER_STATUS.inProgress) 
       ) {
         fetchWorkOrderData();
       }
