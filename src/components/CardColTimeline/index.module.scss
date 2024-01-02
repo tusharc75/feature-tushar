@@ -20,9 +20,11 @@
     cursor: pointer;
   }
   .cardTitle {
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.57;
+    h5 {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.57;
+    }
     margin-bottom: 12px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--common-border-color);
