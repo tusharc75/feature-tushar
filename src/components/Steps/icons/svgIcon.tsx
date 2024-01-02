@@ -24,12 +24,12 @@ export const Add: React.FC<svgInterface> = ({ colors, ...others }) => {
       />
       <defs>
         <linearGradient id={hash} x1="4.46745" y1="11.7236" x2="5.7438" y2="19.9674" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <linearGradient id={`${hash}1`} x1="12.2087" y1="0.713867" x2="21.6893" y2="2.73805" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
     </svg>
@@ -46,8 +46,8 @@ export const Assign: React.FC<svgInterface> = ({ colors, ...others }) => {
       />
       <defs>
         <linearGradient id={hash} x1="4.35384" y1="0.749023" x2="29.8827" y2="23.6169" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
     </svg>
@@ -66,8 +66,8 @@ export const Dispatch: React.FC<svgInterface> = ({ colors, ...others }) => {
       </g>
       <defs>
         <linearGradient id={hash} x1="5.20569" y1="5.30371" x2="24.0593" y2="35.7462" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <clipPath id="clip0_2614_28695">
           <rect width="33.5698" height="33.5698" fill="white" transform="translate(0.222656 0.726562)" />
@@ -87,8 +87,8 @@ export const Invoice: React.FC<svgInterface> = ({ colors, ...others }) => {
       />
       <defs>
         <linearGradient id={hash} x1="4.69081" y1="0.125" x2="30.8976" y2="30.8977" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
     </svg>
@@ -113,8 +113,8 @@ export const PostWork: React.FC<svgInterface> = ({ colors, ...others }) => {
       </g>
       <defs>
         <linearGradient id={hash} x1="93.915" y1="2" x2="-2.48685" y2="104.732" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <clipPath id="clip0_2799_31572">
           <rect width="115" height="115" fill="white" transform="matrix(-1 0 0 1 115 0)" />
@@ -134,8 +134,8 @@ export const Quote: React.FC<svgInterface> = ({ colors, ...others }) => {
       />
       <defs>
         <linearGradient id={hash} x1="6.90234" y1="0.669433" x2="27.9849" y2="36.2215" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
     </svg>
@@ -158,12 +158,12 @@ export const RepairOrder: React.FC<svgInterface> = ({ colors, ...others }) => {
       </g>
       <defs>
         <linearGradient id={hash} x1="9.07975" y1="-6.82592e-07" x2="61.0269" y2="60.9757" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <linearGradient id={`${hash}1`} x1="9.05632" y1="-6.82616e-07" x2="61.0019" y2="60.9982" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <clipPath id="clip0_2797_31500">
           <rect width="61" height="61" fill="white" />
@@ -204,12 +204,12 @@ export const WorkOrder: React.FC<svgInterface> = ({ colors, ...others }) => {
       />
       <defs>
         <linearGradient id={hash} x1="17.81" y1="9.28516" x2="61.828" y2="51.5776" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <linearGradient id={`${hash}1`} x1="27.6027" y1="4.64258" x2="34.4804" y2="16.7574" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
     </svg>
@@ -227,8 +227,8 @@ export const Ticket: React.FC<svgInterface> = ({ colors, ...others }) => {
       </g>
       <defs>
         <linearGradient id={hash} x1="5.20569" y1="5.30371" x2="24.0593" y2="35.7462" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <clipPath id="clip0_2614_28695">
           <rect width="33.5698" height="33.5698" fill="white" transform="translate(0.222656 0.726562)" />
@@ -262,8 +262,8 @@ export const Consumable: React.FC<svgInterface> = ({ colors, ...others }) => {
       />
       <defs>
         <linearGradient id={`${hash}`} x1="4.42329" y1="0.384765" x2="27.9837" y2="28.0522" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
     </svg>
@@ -280,8 +280,8 @@ export const DOA: React.FC<svgInterface> = ({ colors, ...others }) => {
       />
       <defs>
         <linearGradient id={hash} x1="4.47233" y1="0.268554" x2="28.4266" y2="28.1472" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
     </svg>
@@ -297,8 +297,8 @@ export const Approval: React.FC<svgInterface> = ({ colors, ...others }) => {
       />
       <defs>
         <linearGradient id={hash} x1="4.74772" y1="0.473633" x2="27.964" y2="29.0104" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
     </svg>
@@ -314,8 +314,8 @@ export const End: React.FC<svgInterface> = ({ colors, ...others }) => {
       />
       <defs>
         <linearGradient id={hash} x1="4.58603" y1="0.832031" x2="29.4017" y2="26.1117" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
     </svg>
@@ -339,16 +339,16 @@ export const StartSublease: React.FC<svgInterface> = ({ colors, ...others }) => 
       </g>
       <defs>
         <linearGradient id={`${hash}`} x1="17.5213" y1="0.513672" x2="22.7762" y2="6.6839" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[0] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[0] : 'currentcolor'} />
         </linearGradient>
         <linearGradient id={`${hash}1`} x1="3.49408" y1="0.0195309" x2="28.2784" y2="23.5095" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[0] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[0] : 'currentcolor'} />
         </linearGradient>
         <linearGradient id={`${hash}2`} x1="18.0063" y1="16.0937" x2="28.8216" y2="28.7943" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[0] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[0] : 'currentcolor'} />
         </linearGradient>
         <clipPath id="clip0_2860_31961">
           <rect width="28.7741" height="28.7741" fill="white" transform="translate(0.046875 0.0195312)" />
@@ -368,8 +368,8 @@ export const ReceivingTicket: React.FC<svgInterface> = ({ colors, ...others }) =
       />
       <defs>
         <linearGradient id={hash} x1="4.58603" y1="0.832031" x2="29.4017" y2="26.1117" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
     </svg>
@@ -394,16 +394,16 @@ export const ManualEntry: React.FC<svgInterface> = ({ colors, ...others }) => {
       />
       <defs>
         <linearGradient id={hash} x1="159.487" y1="423.373" x2="160.684" y2="449.243" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <linearGradient id={`${hash}2`} x1="130.887" y1="384" x2="163.853" y2="534.094" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <linearGradient id={`${hash}3`} x1="132.25" y1="36.8008" x2="435.149" y2="389.295" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
       </defs>
     </svg>
@@ -426,12 +426,12 @@ export const Process: React.FC<svgInterface> = ({ colors, ...others }) => {
       </g>
       <defs>
         <linearGradient id={hash} x1="161.078" y1="121" x2="391" y2="391" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <linearGradient id={`${hash}2`} x1="76" y1="-5.7295e-06" x2="512" y2="512" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
+          <stop stopColor={colors ? colors[0] : 'currentcolor'} />
+          <stop offset="1" stopColor={colors ? colors[1] : 'currentcolor'} />
         </linearGradient>
         <clipPath id="clip0_3021_33005">
           <rect width="512" height="512" fill="white" />

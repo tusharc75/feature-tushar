@@ -174,8 +174,8 @@ export const ReportIcon: React.FC<TIconWithColors> = ({ width = 43, height = 49,
           y2="42.4399"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color={colors[0]} />
-          <stop offset="1" stop-color={colors[1]} />
+          <stop stopColor={colors[0]} />
+          <stop offset="1" stopColor={colors[1]} />
         </linearGradient>
         <linearGradient
           id={`paint1_linear_1682_1335${colors[0]}${colors[1]}`}
@@ -185,8 +185,8 @@ export const ReportIcon: React.FC<TIconWithColors> = ({ width = 43, height = 49,
           y2="17.5009"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color={colors[0]} />
-          <stop offset="1" stop-color={colors[1]} />
+          <stop stopColor={colors[0]} />
+          <stop offset="1" stopColor={colors[1]} />
         </linearGradient>
       </defs>
     </svg>
@@ -236,8 +236,8 @@ export const AccountHierarchyIcon: React.FC<svgInterface> = ({ ...other }) => {
       </g>
       <defs>
         <linearGradient id="paint0_linear_3041_33026" x1="6.45447" y1="0.570312" x2="42.9323" y2="43.4067" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#577BFC" />
-          <stop offset="1" stop-color="#1608BD" />
+          <stop stopColor="#577BFC" />
+          <stop offset="1" stopColor="#1608BD" />
         </linearGradient>
         <clipPath id="clip0_3041_33026">
           <rect width="18.848" height="18.848" fill="white" transform="translate(12.0901 12.5645)" />
@@ -263,8 +263,8 @@ export const ProjectsIcon: React.FC<svgInterface> = ({ ...other }) => {
       </g>
       <defs>
         <linearGradient id="paint0_linear_3041_33027" x1="6.44886" y1="0.109375" x2="42.9267" y2="42.9457" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#FAC94B" />
-          <stop offset="1" stop-color="#FF9B04" />
+          <stop stopColor="#FAC94B" />
+          <stop offset="1" stopColor="#FF9B04" />
         </linearGradient>
         <clipPath id="clip0_3041_33027">
           <rect width="18.848" height="18.848" fill="white" transform="translate(12.0845 12.1035)" />
@@ -357,8 +357,8 @@ export const OpportunityIcon: React.FC<svgInterface> = ({ ...other }) => {
       </g>
       <defs>
         <linearGradient id="paint0_linear_3041_33035" x1="6.44324" y1="0.109375" x2="42.9211" y2="42.9457" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#FC5757" />
-          <stop offset="1" stop-color="#C60707" />
+          <stop stopColor="#FC5757" />
+          <stop offset="1" stopColor="#C60707" />
         </linearGradient>
         <clipPath id="clip0_3041_33035">
           <rect width="18.848" height="18.848" fill="white" transform="translate(12.0789 12.1035)" />
@@ -380,8 +380,8 @@ export const QuoteIcon: React.FC<svgInterface> = ({ ...other }) => {
       </g>
       <defs>
         <linearGradient id="paint0_linear_3041_33043" x1="6.4375" y1="0.109375" x2="42.9153" y2="42.9457" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#3BE961" />
-          <stop offset="1" stop-color="#058D12" />
+          <stop stopColor="#3BE961" />
+          <stop offset="1" stopColor="#058D12" />
         </linearGradient>
         <clipPath id="clip0_3041_33043">
           <rect width="18.848" height="18.848" fill="white" transform="translate(12.0731 12.1035)" />
@@ -415,8 +415,8 @@ export const AccountsTeamsIcon: React.FC<svgInterface> = ({ ...other }) => {
       </g>
       <defs>
         <linearGradient id="paint0_linear_3041_33051" x1="6.43189" y1="0.109375" x2="42.9097" y2="42.9457" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#FFA800" />
-          <stop offset="1" stop-color="#E35200" />
+          <stop stopColor="#FFA800" />
+          <stop offset="1" stopColor="#E35200" />
         </linearGradient>
         <clipPath id="clip0_3041_33051">
           <rect width="18.848" height="18.848" fill="white" transform="translate(12.0675 12.1035)" />
@@ -442,8 +442,8 @@ export const ContactsIcon: React.FC<svgInterface> = ({ ...other }) => {
       </g>
       <defs>
         <linearGradient id="paint0_linear_3041_33059" x1="6.42627" y1="0.109375" x2="42.9041" y2="42.9457" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#AD14F5" />
-          <stop offset="1" stop-color="#6203AC" />
+          <stop stopColor="#AD14F5" />
+          <stop offset="1" stopColor="#6203AC" />
         </linearGradient>
         <clipPath id="clip0_3041_33059">
           <rect width="18.848" height="18.848" fill="white" transform="translate(12.0619 12.1035)" />
@@ -482,7 +482,7 @@ export const DownloadIcon: React.FC<svgInterface> = ({ width = 18, height = 18, 
         d="M8.87741 6.07397C9.02893 6.07397 9.17425 6.13416 9.28139 6.2413C9.38853 6.34845 9.44873 6.49376 9.44873 6.64529V10.5988L10.7589 9.28858C10.8112 9.23245 10.8743 9.18742 10.9444 9.1562C11.0145 9.12497 11.0901 9.10818 11.1668 9.10683C11.2436 9.10548 11.3198 9.11959 11.3909 9.14832C11.462 9.17705 11.5267 9.21982 11.5809 9.27407C11.6352 9.32833 11.6779 9.39295 11.7067 9.46409C11.7354 9.53523 11.7495 9.61142 11.7482 9.68813C11.7468 9.76485 11.73 9.8405 11.6988 9.91058C11.6676 9.98066 11.6225 10.0437 11.5664 10.096L9.28114 12.3813C9.17402 12.4883 9.02881 12.5484 8.87741 12.5484C8.72601 12.5484 8.5808 12.4883 8.47368 12.3813L6.18841 10.096C6.13228 10.0437 6.08726 9.98066 6.05603 9.91058C6.02481 9.8405 6.00802 9.76485 6.00666 9.68813C6.00531 9.61142 6.01942 9.53523 6.04816 9.46409C6.07689 9.39295 6.11966 9.32833 6.17391 9.27407C6.22816 9.21982 6.29278 9.17705 6.36392 9.14832C6.43506 9.11959 6.51126 9.10548 6.58797 9.10683C6.66468 9.10818 6.74033 9.12497 6.81041 9.1562C6.8805 9.18742 6.94357 9.23245 6.99587 9.28858L8.30609 10.5988V6.64529C8.30609 6.49376 8.36628 6.34845 8.47343 6.2413C8.58057 6.13416 8.72588 6.07397 8.87741 6.07397Z"
         fill="currentcolor"
         stroke="currentcolor"
-        stroke-width="0.428571"
+        strokeWidth="0.428571"
       />
       <path
         fill-rule="evenodd"
@@ -490,7 +490,7 @@ export const DownloadIcon: React.FC<svgInterface> = ({ width = 18, height = 18, 
         d="M8.65229 0.935486C6.89339 0.935486 5.51538 0.935486 4.43978 1.08022C3.3398 1.228 2.4714 1.53727 1.78963 2.21828C1.10786 2.89929 0.79935 3.76845 0.65157 4.86919C0.506836 5.94403 0.506836 7.32204 0.506836 9.08094V9.16778C0.506836 10.9267 0.506836 12.3047 0.65157 13.3803C0.79935 14.4803 1.10862 15.3487 1.78963 16.0304C2.47064 16.7122 3.3398 17.0207 4.44054 17.1685C5.51538 17.3132 6.89339 17.3132 8.65229 17.3132H8.73913C10.498 17.3132 11.876 17.3132 12.9516 17.1685C14.0516 17.0207 14.92 16.7114 15.6018 16.0304C16.2836 15.3494 16.5921 14.4803 16.7398 13.3795C16.8846 12.3047 16.8846 10.9267 16.8846 9.16778V9.08094C16.8846 7.32204 16.8846 5.94403 16.7398 4.86843C16.5921 3.76845 16.2828 2.90005 15.6018 2.21828C14.9208 1.53651 14.0516 1.228 12.9509 1.08022C11.876 0.935486 10.498 0.935486 8.73913 0.935486H8.65229ZM2.59785 3.0265C3.03206 2.5923 3.61861 2.34321 4.59289 2.21219C5.58317 2.07964 6.88425 2.07812 8.69571 2.07812C10.5072 2.07812 11.8082 2.07964 12.7985 2.21219C13.7728 2.34321 14.3601 2.59307 14.7943 3.0265C15.2278 3.46071 15.4769 4.04726 15.6079 5.02154C15.7404 6.01182 15.7419 7.3129 15.7419 9.12436C15.7419 10.9358 15.7404 12.2369 15.6079 13.2272C15.4769 14.2015 15.227 14.7888 14.7936 15.223C14.3601 15.6572 13.7728 15.9055 12.7985 16.0365C11.8082 16.1691 10.5072 16.1706 8.69571 16.1706C6.88425 16.1706 5.58317 16.1691 4.59289 16.0365C3.61861 15.9055 3.03129 15.6556 2.59709 15.2222C2.16365 14.788 1.91456 14.2015 1.78354 13.2272C1.65099 12.2369 1.64947 10.9358 1.64947 9.12436C1.64947 7.3129 1.65099 6.01182 1.78354 5.02154C1.91456 4.04726 2.16442 3.46071 2.59785 3.0265Z"
         fill="currentcolor"
         stroke="currentcolor"
-        stroke-width="0.428571"
+        strokeWidth="0.428571"
       />
     </svg>
   );

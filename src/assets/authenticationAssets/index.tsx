@@ -379,7 +379,7 @@ export const ForgetPasswordImage: React.FC<svgInterface> = ({ ...others }) => {
         <path
           d="M96.5667 92.6265V82.7794C103.872 82.7794 109.794 76.9012 109.794 69.6498C109.794 62.3984 103.872 56.5203 96.5667 56.5203C89.2616 56.5203 83.3394 62.3984 83.3394 69.6498M96.5667 108.91C96.3889 108.91 96.2449 109.063 96.2449 109.25C96.2449 109.438 96.3889 109.589 96.5667 109.589C96.7444 109.589 96.8884 109.438 96.8884 109.25C96.8884 109.063 96.7444 108.91 96.5667 108.91Z"
           stroke="white"
-          stroke-width="8.7548"
+          strokeWidth="8.7548"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
@@ -410,28 +410,28 @@ export const ForgetPasswordImage: React.FC<svgInterface> = ({ ...others }) => {
       </g>
       <defs>
         <linearGradient id="paint0_linear_227_2" x1="114.069" y1="-19.0885" x2="115.993" y2="238.464" gradientUnits="userSpaceOnUse">
-          <stop stop-color="white" />
-          <stop offset="1" stop-color="#EEEEEE" />
+          <stop stopColor="white" />
+          <stop offset="1" stopColor="#EEEEEE" />
         </linearGradient>
         <linearGradient id="paint1_linear_227_2" x1="79.0644" y1="183.451" x2="77.1265" y2="-75.0487" gradientUnits="userSpaceOnUse">
-          <stop stop-color="white" />
-          <stop offset="1" stop-color="#EEEEEE" />
+          <stop stopColor="white" />
+          <stop offset="1" stopColor="#EEEEEE" />
         </linearGradient>
         <linearGradient id="paint2_linear_227_2" x1="38.8523" y1="147.125" x2="37.9286" y2="135.561" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#FAC94B" />
-          <stop offset="1" stop-color="#FF9B04" />
+          <stop stopColor="#FAC94B" />
+          <stop offset="1" stopColor="#FF9B04" />
         </linearGradient>
         <linearGradient id="paint3_linear_227_2" x1="180.562" y1="49.1932" x2="173.039" y2="58.0229" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#FAC94B" />
-          <stop offset="1" stop-color="#FF9B04" />
+          <stop stopColor="#FAC94B" />
+          <stop offset="1" stopColor="#FF9B04" />
         </linearGradient>
         <linearGradient id="paint4_linear_227_2" x1="13.6019" y1="72.7258" x2="17.4208" y2="54.0178" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#FAC94B" />
-          <stop offset="1" stop-color="#FF9B04" />
+          <stop stopColor="#FAC94B" />
+          <stop offset="1" stopColor="#FF9B04" />
         </linearGradient>
         <linearGradient id="paint5_linear_227_2" x1="153.25" y1="131.455" x2="137.321" y2="141.983" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#FAC94B" />
-          <stop offset="1" stop-color="#FF9B04" />
+          <stop stopColor="#FAC94B" />
+          <stop offset="1" stopColor="#FF9B04" />
         </linearGradient>
         <clipPath id="clip0_227_2">
           <rect width="193" height="146" fill="white" />
@@ -508,7 +508,7 @@ export const CreatePasswordImage: React.FC<svgInterface> = ({ ...others }) => {
         <path
           d="M75.2188 51.3455V36.2359C75.2188 25.1098 84.2393 16.0893 95.365 16.0893C106.491 16.0893 115.511 25.1098 115.511 36.2359V51.3455"
           stroke="#0F9FA9"
-          stroke-width="7.47759"
+          strokeWidth="7.47759"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
@@ -518,21 +518,21 @@ export const CreatePasswordImage: React.FC<svgInterface> = ({ ...others }) => {
           d="M125.171 112.969H65.5573C58.9701 112.969 53.6348 107.634 53.6348 101.046V59.3167C53.6348 52.729 58.9701 47.3937 65.5573 47.3937H125.171C131.759 47.3937 137.094 52.729 137.094 59.3167V101.046C137.094 107.634 131.759 112.969 125.171 112.969Z"
           fill="#0F9FA9"
           stroke="#0F9FA9"
-          stroke-width="5.56939"
+          strokeWidth="5.56939"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
         <path
           d="M94.9733 94.485V79.5331M94.9566 70.6266C92.529 70.6266 90.5587 72.597 90.5763 75.0246C90.5763 77.4522 92.5466 79.4221 94.9738 79.4221C97.4014 79.4221 99.3717 77.4522 99.3717 75.0246C99.3717 72.597 97.4014 70.6266 94.9566 70.6266Z"
           stroke="white"
-          stroke-width="11.6207"
+          strokeWidth="11.6207"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
         <path
           d="M132.657 78.2682L148.055 116.902M119.035 83.6964L132.657 78.2673M125.276 99.3535L138.897 93.9244M161.164 117.078C152.473 113.34 142.398 117.356 138.661 126.046C134.924 134.737 138.939 144.811 147.63 148.549C156.32 152.286 166.395 148.27 170.132 139.58C173.869 130.89 169.854 120.815 161.164 117.078Z"
           stroke="#31446C"
-          stroke-width="6.00324"
+          strokeWidth="6.00324"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
@@ -551,20 +551,20 @@ export const CreatePasswordImage: React.FC<svgInterface> = ({ ...others }) => {
       </g>
       <defs>
         <linearGradient id="paint0_linear_227_21" x1="60.785" y1="151.01" x2="-36.3026" y2="60.8027" gradientUnits="userSpaceOnUse">
-          <stop stop-color="white" />
-          <stop offset="1" stop-color="#EEEEEE" />
+          <stop stopColor="white" />
+          <stop offset="1" stopColor="#EEEEEE" />
         </linearGradient>
         <linearGradient id="paint1_linear_227_21" x1="277.293" y1="72.1743" x2="266.769" y2="59.8156" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#FAC94B" />
-          <stop offset="1" stop-color="#FF9B04" />
+          <stop stopColor="#FAC94B" />
+          <stop offset="1" stopColor="#FF9B04" />
         </linearGradient>
         <linearGradient id="paint2_linear_227_21" x1="85.159" y1="141.808" x2="75.292" y2="153.394" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#FAC94B" />
-          <stop offset="1" stop-color="#FF9B04" />
+          <stop stopColor="#FAC94B" />
+          <stop offset="1" stopColor="#FF9B04" />
         </linearGradient>
         <linearGradient id="paint3_linear_227_21" x1="203.325" y1="147.37" x2="244.907" y2="233.37" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#FAC94B" />
-          <stop offset="1" stop-color="#FF9B04" />
+          <stop stopColor="#FAC94B" />
+          <stop offset="1" stopColor="#FF9B04" />
         </linearGradient>
         <clipPath id="clip0_227_21">
           <rect width="296" height="209" fill="white" />
