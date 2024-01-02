@@ -63,7 +63,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
   let height = window.innerHeight / 2;
   const today = new Date();
   let startDate = moment('2021-01-01');
-  let endDate = moment('2023-12-31');
+  let endDate = moment('2024-12-31');
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
