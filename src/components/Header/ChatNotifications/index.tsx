@@ -45,25 +45,26 @@ const ChatNotification = () => {
     setAnchorEl(null);
     setNewChat(false);
   };
+
   const notificationId = isNotificationOpen ? 'chat-notification' : undefined;
 
-  const handleEntityChange = async (id) => {
-    if (!Array.isArray(id)) {
-      dispatch({ type: SET_SELECTED_ENTITY, payload: id });
-    }
-  };
+  // const handleEntityChange = async (id) => {
+  //   if (!Array.isArray(id)) {
+  //     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+  //   }
+  // };
 
-  const hasAccessToEntity = async (id) => {
-    const entityList = user.entity?.map((entity) => entity._id);
-    return entityList.includes(id);
-  };
+  // const hasAccessToEntity = async (id) => {
+  //   const entityList = user.entity?.map((entity) => entity._id);
+  //   return entityList.includes(id);
+  // };
 
-  const handleRedirect = (id, resourceId, resourcePath) =>
-    id === selectedEntity
-      ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-      : hasAccessToEntity(id)
-        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-        : '';
+  // const handleRedirect = (id, resourceId, resourcePath) =>
+  //   id === selectedEntity
+  //     ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+  //     : hasAccessToEntity(id)
+  //     ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+  //     : '';
 
   const getAllNotifications = async (event) => {
     setAnchorEl(event.currentTarget);
@@ -129,7 +130,7 @@ const ChatNotification = () => {
           toggle: true,
           _id: d._id
         })
-        .then(() => { })
+        .then(() => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -137,12 +138,26 @@ const ChatNotification = () => {
 
     setChatOpen(true);
     setAnchorEl(null);
-    if (d?.entity) {
-      handleRedirect(d?.entity, d?.resourceId, d?.resourcePath);
-    } else {
-      history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath);
+    if (d.chatterId) {
+      const selectedChat = chatList.find((c) => c.id === d.chatterId);
+      if (selectedChat) setSelectedChat(selectedChat);
     }
+    // const resourcePath = returnResourcePath(d?.resourceId, d?.resourcePath);
+    // if (d?.entity) {
+    //   handleRedirect(d?.entity, d?.resourceId, resourcePath);
+    // } else {
+    //   history.push(d?.resourceId ? `${resourcePath}/${d?.resourceId}` : resourcePath);
+    // }
   };
+
+  // const returnResourcePath = (resourceId, resourcePath) => {
+  //   const splittedPath = resourcePath.split('/');
+  //   if (splittedPath[splittedPath.length - 1] === resourceId) {
+  //     splittedPath.pop();
+  //     return splittedPath.join('/');
+  //   }
+  //   return resourcePath;
+  // };
 
   const handleClickHistory = (chat) => {
     setSelectedChat(chat);
@@ -162,7 +177,7 @@ const ChatNotification = () => {
     <>
       {isMobile ? (
         <>
-          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => { }}>
+          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => {}}>
             <Badge
               variant="dot"
               overlap="circular"
@@ -196,7 +211,8 @@ const ChatNotification = () => {
           className: 'w-[min(400px,100%)_!important]',
           style: {
             borderRadius: 0,
-            boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)'
+            boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)',
+            background: 'var(--dark-primary, #fefeff)'
           }
         }}
         id={notificationId}

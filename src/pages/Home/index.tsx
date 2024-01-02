@@ -50,7 +50,7 @@ function Dashboard() {
     if (entityData?.resource) {
       allData = entityData.resource;
     }
-    allData = allData?.filter((e) => isSectionVisible(e))
+    allData = allData?.filter((e) => isSectionVisible(e));
     allData?.forEach((u) => {
       u['resourceLabel'] = u?.homePageLabel || u?.resourceLabel || u?.name;
       u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
@@ -216,17 +216,6 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
           <Typography component={'p'}>{mode !== 'User Manual' ? description : userManual.description}</Typography>
           {mode === 'Setups & Administration' && (
             <>
-              {/* <ul className={styles.linkList}>
-                {colabData
-                  ?.filter((item) => !item?.isHidden && checkLinkAvailability.includes(item.resourceLabel || item.name))
-                  .map((item) => (
-                    <li key={item.name}>
-                      <Link to={handleRoutes(item)} className={styles.dialogLinks}>
-                        <Typography component="span">{item.resourceLabel || item.name}</Typography>
-                      </Link>
-                    </li>
-                  ))}
-              </ul> */}
               <Box
                 pb={1}
                 pt={5}
@@ -245,7 +234,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
           )}
           {mode === 'User Manual' && (
             <Box pb={1} pt={5}>
-              <a title="open equipt documentation" href={userManual.link} target="_blank" className={styles.viewAll}>
+              <a title="open equipt documentation" rel="noreferrer" href={userManual.link} target="_blank" className={styles.viewAll}>
                 <Typography component="span">Equipt - User Manual</Typography>
                 <FiExternalLink size={20} style={{ marginBottom: 4 }} />
               </a>

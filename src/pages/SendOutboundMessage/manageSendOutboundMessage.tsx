@@ -54,18 +54,18 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
   }, []);
 
   const handleSubmit = (values) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     axiosInstance()
       .post(`/iot-out-bound-message`, {
         asset: values['serializedAsset'],
         message: values['messageValue']
       })
       .then(() => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         onSuccess();
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -74,6 +74,9 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
     const error: any = {};
     if (!values['serializedAsset']) {
       error.serializedAsset = 'Serialized Asset is required';
+    }
+    if (!values['messageType']) {
+      error.messageType = 'Message Type is required';
     }
     if (!values['messageValue']) {
       error.messageValue = 'Message Value is required';
@@ -156,10 +159,20 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                         }
                         onChange={(e, val) => {
                           setFieldValue('messageType', val);
-                          setFieldValue('messageValue', null)
+                          setFieldValue('messageValue', null);
                         }}
                         renderInput={(params) => (
-                          <TextField {...params} margin="dense" name="messageType" label="Message Type" variant="outlined" fullWidth />
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            name="messageType"
+                            label="Message Type"
+                            required={true}
+                            error={Boolean(errors['messageType'])}
+                            helperText={errors && errors['messageType']}
+                            variant="outlined"
+                            fullWidth
+                          />
                         )}
                       />
                     </Grid>
