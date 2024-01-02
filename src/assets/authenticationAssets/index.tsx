@@ -331,7 +331,7 @@ export const Logo: React.FC<svgInterface> = ({ color = '#00a4a1', ...others }) =
 export const ForgetPasswordImage: React.FC<svgInterface> = ({ ...others }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" {...others} width="193" height="146" viewBox="0 0 193 146" fill="none">
-      <g clip-path="url(#clip0_227_2)">
+      <g clipPath="url(#clip0_227_2)">
         <path
           fill-rule="evenodd"
           clip-rule="evenodd"
@@ -444,7 +444,7 @@ export const ForgetPasswordImage: React.FC<svgInterface> = ({ ...others }) => {
 export const CreatePasswordImage: React.FC<svgInterface> = ({ ...others }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" {...others} width="296" height="209" viewBox="0 0 296 209" fill="none">
-      <g clip-path="url(#clip0_227_21)">
+      <g clipPath="url(#clip0_227_21)">
         <path
           d="M14.0926 127.732C26.1588 134.963 43.4699 128.278 43.4699 128.278C43.4699 128.278 41.2062 109.871 29.133 102.647C17.0669 95.4158 -0.236816 102.092 -0.236816 102.092C-0.236816 102.092 2.02646 120.5 14.0926 127.732Z"
           fill="url(#paint0_linear_227_21)"
