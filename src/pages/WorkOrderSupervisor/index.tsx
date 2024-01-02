@@ -341,14 +341,6 @@ const WorkOrderSupervisor = () => {
             dispatch={dispatch}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
-            cardOnClick={(e, data) => {
-              let tempServiceData = {};
-              tempServiceData['uniqueId'] = data?._id;
-              tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
-              tempServiceData['canPerform'] = data?.canPerform;
-              setSelectedService(tempServiceData);
-              setServiceOpen(true);
-            }}
           />
         </div>
       </Fragment>
