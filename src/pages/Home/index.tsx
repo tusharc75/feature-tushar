@@ -111,7 +111,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
             section.head === 'Collaboration Tools' ||
             section.head === 'Activities'
           ) {
-            return <></>;
+            return <Fragment key={section.head}></Fragment>;
           }
           return (
             <DashBoardCardShell
