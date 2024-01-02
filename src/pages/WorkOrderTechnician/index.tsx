@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline1';
+import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import routes from 'src/components/Helpers/Routes';
@@ -83,17 +83,18 @@ const WorkOrderTechnician = () => {
   }, []);
 
   useEffect(() => {
-    fetchData()
+    fetchData();
   }, []);
 
   const fetchData = () => {
-    axiosInstance().get(`/work-order-technician/filter-option`)
+    axiosInstance()
+      .get(`/work-order-technician/filter-option`)
       .then(({ data: { data } }) => {
         setWorkOrderOptions(data?.workOrder || []);
         setRepairOrderOptions(data?.repairOrder || []);
         setProductionOrderOptions(data?.productionOrder || []);
       });
-  }
+  };
 
   const cardDataRows: any[] = [
     { accessor: 'serviceName', type: 'title' },
@@ -156,7 +157,7 @@ const WorkOrderTechnician = () => {
         dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
         dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
       })
-      .catch((err) => { })
+      .catch((err) => {})
       .finally(() => {
         dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
       });
@@ -202,8 +203,8 @@ const WorkOrderTechnician = () => {
                   selectedResource.resource === sidebarResource.workOrder
                     ? workOrderOptions
                     : selectedResource.resource === sidebarResource.repairOrder
-                      ? repairOrderOptions
-                      : productionOrderOptions
+                    ? repairOrderOptions
+                    : productionOrderOptions
                 }
                 fullWidth
                 getOptionLabel={(option: any) => option.optionLabel}
@@ -256,7 +257,7 @@ const WorkOrderTechnician = () => {
             size="small"
             onClick={() => {
               dispatch({ type: 'refreshData' });
-              fetchData()
+              fetchData();
             }}
             style={{ display: 'flex', marginTop: '4px', marginLeft: 'auto' }}
           >
