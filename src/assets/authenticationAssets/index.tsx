@@ -331,7 +331,7 @@ export const Logo: React.FC<svgInterface> = ({ color = '#00a4a1', ...others }) =
 export const ForgetPasswordImage: React.FC<svgInterface> = ({ ...others }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" {...others} width="193" height="146" viewBox="0 0 193 146" fill="none">
-      <g clip-path="url(#clip0_227_2)">
+      <g clipPath="url(#clip0_227_2)">
         <path
           fill-rule="evenodd"
           clip-rule="evenodd"
@@ -380,8 +380,8 @@ export const ForgetPasswordImage: React.FC<svgInterface> = ({ ...others }) => {
           d="M96.5667 92.6265V82.7794C103.872 82.7794 109.794 76.9012 109.794 69.6498C109.794 62.3984 103.872 56.5203 96.5667 56.5203C89.2616 56.5203 83.3394 62.3984 83.3394 69.6498M96.5667 108.91C96.3889 108.91 96.2449 109.063 96.2449 109.25C96.2449 109.438 96.3889 109.589 96.5667 109.589C96.7444 109.589 96.8884 109.438 96.8884 109.25C96.8884 109.063 96.7444 108.91 96.5667 108.91Z"
           stroke="white"
           stroke-width="8.7548"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
           d="M35.1187 138.658C36.9177 136.928 39.7246 136.928 41.388 138.658C43.0515 140.387 42.9416 143.192 41.1426 144.922C39.3436 146.652 36.5368 146.652 34.8733 144.922C33.2099 143.192 33.3197 140.388 35.1187 138.658Z"
@@ -444,7 +444,7 @@ export const ForgetPasswordImage: React.FC<svgInterface> = ({ ...others }) => {
 export const CreatePasswordImage: React.FC<svgInterface> = ({ ...others }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" {...others} width="296" height="209" viewBox="0 0 296 209" fill="none">
-      <g clip-path="url(#clip0_227_21)">
+      <g clipPath="url(#clip0_227_21)">
         <path
           d="M14.0926 127.732C26.1588 134.963 43.4699 128.278 43.4699 128.278C43.4699 128.278 41.2062 109.871 29.133 102.647C17.0669 95.4158 -0.236816 102.092 -0.236816 102.092C-0.236816 102.092 2.02646 120.5 14.0926 127.732Z"
           fill="url(#paint0_linear_227_21)"
@@ -509,8 +509,8 @@ export const CreatePasswordImage: React.FC<svgInterface> = ({ ...others }) => {
           d="M75.2188 51.3455V36.2359C75.2188 25.1098 84.2393 16.0893 95.365 16.0893C106.491 16.0893 115.511 25.1098 115.511 36.2359V51.3455"
           stroke="#0F9FA9"
           stroke-width="7.47759"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
           fill-rule="evenodd"
@@ -519,22 +519,22 @@ export const CreatePasswordImage: React.FC<svgInterface> = ({ ...others }) => {
           fill="#0F9FA9"
           stroke="#0F9FA9"
           stroke-width="5.56939"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
           d="M94.9733 94.485V79.5331M94.9566 70.6266C92.529 70.6266 90.5587 72.597 90.5763 75.0246C90.5763 77.4522 92.5466 79.4221 94.9738 79.4221C97.4014 79.4221 99.3717 77.4522 99.3717 75.0246C99.3717 72.597 97.4014 70.6266 94.9566 70.6266Z"
           stroke="white"
           stroke-width="11.6207"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
           d="M132.657 78.2682L148.055 116.902M119.035 83.6964L132.657 78.2673M125.276 99.3535L138.897 93.9244M161.164 117.078C152.473 113.34 142.398 117.356 138.661 126.046C134.924 134.737 138.939 144.811 147.63 148.549C156.32 152.286 166.395 148.27 170.132 139.58C173.869 130.89 169.854 120.815 161.164 117.078Z"
           stroke="#31446C"
           stroke-width="6.00324"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
           fill-rule="evenodd"

@@ -1,7 +1,7 @@
 import { Avatar, Button, Chip, ListItem, Typography } from '@material-ui/core';
 import { AccountCircle, Check, Group } from '@material-ui/icons';
 import moment from 'moment';
-import { useMemo } from 'react';
+import { ForwardedRef, forwardRef, useMemo } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { displayCardDate } from 'src/constants/helpers';
 
@@ -72,12 +72,14 @@ export const HistoryItem = ({ data, userId, handleClick }) => {
   );
 };
 
-export const NotificationItem = ({ handleClick, data }) => {
+export const NotificationItem = forwardRef((props: { handleClick: any; data: any }, ref: ForwardedRef<any>) => {
+  const { handleClick, data } = props;
   return (
     <ListItem
       aria-label={data.title}
       className={`p-0 dark:[border-bottom:1px_solid_var(--common-border-color)_!important] [border-bottom:1px_solid_#F4F4F4_!important] `}
       key={data._id}
+      ref={ref}
     >
       <div className="flex items-center md:gap-[17px] gap-[15px] p-[20px] w-full">
         <div className=" basis-[38px]">
@@ -106,7 +108,7 @@ export const NotificationItem = ({ handleClick, data }) => {
       </div>
     </ListItem>
   );
-};
+});
 
 export const SingleUser = ({ handleClick, data, selected }) => {
   return (

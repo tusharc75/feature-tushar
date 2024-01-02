@@ -40,7 +40,7 @@ const NotificationContent = ({ handleMarkAllRead, handleClearAll, handleReadSing
     }
     if (tab !== tabOptions[tabOptions?.length - 1]) {
       return (
-        <List component="ul" aria-label="notifications">
+        <List component="ul" aria-label="notifications" className=" overflow-x-hidden">
           {notificationList.map((d) => {
             return <NotificationItem data={d} handleClick={handleReadSingle} key={d._id} />;
           })}
