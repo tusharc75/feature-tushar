@@ -350,8 +350,8 @@ const Header = () => {
       </MenuItem> */}
       {selectedEntity && (
         <MenuItem disabled={!selectedEntity} onClick={openEntitiesMenu} className="d-flex justify-content-space-between  ">
-          <div className='max-w-[180px] line-clamp-1'>
-          <p className={'text-ellipsis'}>{curEntity && curEntity.entityName}</p>
+          <div className="max-w-[180px] line-clamp-1">
+            <p className={'text-ellipsis'}>{curEntity && curEntity.entityName}</p>
           </div>
           <ExpandMore />
         </MenuItem>
@@ -489,18 +489,17 @@ const Header = () => {
             <Box className={`${styles.entity}`}>
               {selectedEntity && (
                 <ButtonBase id="entitySelect">
-                  <HtmlTooltip title={curEntity && curEntity.entityName} placement='top' enterDelay={0} arrow>
-                  <Box
-                    aria-controls={entitiesMenuId}
-                    color="inherit"
-                    onClick={openEntitiesMenu}
-                    title={curEntity && `Selected entity - ${curEntity.entityName}`}
-                    className={`${styles.flexAlignCenter} poppins max-w-[200px]`}
-                  >
-                    <span className={'poppins line-clamp-1'}>{curEntity && curEntity.entityName}</span>
-                    <Box component="span" mr={1} />
-                    <ExpandMore />
-                  </Box>
+                  <HtmlTooltip title={curEntity && `Selected entity - ${curEntity.entityName}`} placement="top" enterDelay={0} arrow>
+                    <Box
+                      aria-controls={entitiesMenuId}
+                      color="inherit"
+                      onClick={openEntitiesMenu}
+                      className={`${styles.flexAlignCenter} poppins max-w-[200px]`}
+                    >
+                      <span className={'poppins line-clamp-1'}>{curEntity && curEntity.entityName}</span>
+                      <Box component="span" mr={1} />
+                      <ExpandMore />
+                    </Box>
                   </HtmlTooltip>
                 </ButtonBase>
               )}
