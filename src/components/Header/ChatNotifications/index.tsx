@@ -211,7 +211,8 @@ const ChatNotification = () => {
           className: 'w-[min(400px,100%)_!important]',
           style: {
             borderRadius: 0,
-            boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)'
+            boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)',
+            background: 'var(--dark-primary, #fefeff)'
           }
         }}
         id={notificationId}
