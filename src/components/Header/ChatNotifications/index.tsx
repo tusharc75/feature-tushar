@@ -12,6 +12,7 @@ import { GlobalChatContext } from 'src/StateProvider/GlobalChatContext';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import NewChat from './NewChat';
 import NotificationContent from './NotificationContent';
+import { assignAvatar } from './utils';
 
 // Rename Tabs here
 export const tabOptions: ['all', 'unread', 'chats'] = ['all', 'unread', 'chats'];
@@ -74,8 +75,12 @@ const ChatNotification = () => {
       .get('/user/user-notification')
       .then(({ data: { data } }) => {
         setNotificationList(data);
-
-        const nData = { [tabOptions[0]]: data as any[], [tabOptions[1]]: data.filter((d) => !d.read) as any[], [tabOptions[2]]: chatList as any[] };
+        const dataWithAvatar = assignAvatar(data, chatList);
+        const nData = {
+          [tabOptions[0]]: dataWithAvatar as any[],
+          [tabOptions[1]]: data.filter((d) => !d.read) as any[],
+          [tabOptions[2]]: chatList as any[]
+        };
         setNotificationData(nData);
         notification.setCount(0);
       })

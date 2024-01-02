@@ -4,22 +4,14 @@ import moment from 'moment';
 import { ForwardedRef, forwardRef, useMemo } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { displayCardDate } from 'src/constants/helpers';
+import { getUserAvatar } from './utils';
 
 export const HistoryItem = ({ data, userId, handleClick }) => {
   const formatTime = (time: string) => moment(time).format('HH:MM');
 
   const isUnseen = useMemo(() => data?.unseen > 0, [data]);
 
-  const userAvatar = useMemo(() => {
-    let avatar = '';
-    for (const user of data.users) {
-      const userName = `${user.firstName} ${user.lastName}`;
-      if (userName === data.chatTitle) {
-        avatar = user.avatar || '';
-      }
-    }
-    return avatar;
-  }, [data]);
+  const userAvatar = getUserAvatar(data);
 
   return (
     <ListItem
@@ -84,7 +76,7 @@ export const NotificationItem = forwardRef((props: { handleClick: any; data: any
       <div className="flex items-center md:gap-[17px] gap-[15px] p-[20px] w-full">
         <div className=" basis-[38px]">
           <div className="rounded-full bg-[var(--dark-secondary,#F4F4F4)] w-[38px] h-[38px] relative">
-            <Avatar className="[width:38px_!important] [height:38px_!important]" />
+            <Avatar src={data.avatar} alt={data.chatterName || data.title || ''} className="[width:38px_!important] [height:38px_!important]" />
           </div>
         </div>
         <div className="flex-grow">
