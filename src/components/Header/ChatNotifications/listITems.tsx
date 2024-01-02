@@ -76,7 +76,7 @@ export const NotificationItem = forwardRef((props: { handleClick: any; data: any
       <div className="flex items-center md:gap-[17px] gap-[15px] p-[20px] w-full">
         <div className=" basis-[38px]">
           <div className="rounded-full bg-[var(--dark-secondary,#F4F4F4)] w-[38px] h-[38px] relative">
-            <Avatar src={data.avatar} alt={data.title} className="[width:38px_!important] [height:38px_!important]" />
+            <Avatar src={data.avatar} alt={data.chatterName || data.title || ''} className="[width:38px_!important] [height:38px_!important]" />
           </div>
         </div>
         <div className="flex-grow">
