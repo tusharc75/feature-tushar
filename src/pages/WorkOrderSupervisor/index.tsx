@@ -1,29 +1,30 @@
-import { Box, Grid, TextField } from '@material-ui/core';
-import React, { Fragment, useEffect, useState, useContext } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from '../../components/Helpers/Routes';
-import { Autocomplete } from '@material-ui/lab';
-import { FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
-import { WORKORDER_SERVICE_STATUS, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
 import DateFnsUtils from '@date-io/date-fns';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { FormControl, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import { dateFormatForInputControl } from '../../constants/helpers';
-import CardColTimeline, { datarowInterface } from 'src/components/CardColTimeline';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import React, { Fragment, useCallback, useContext, useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
-
+import axiosInstance from 'src/axios/axiosInstance';
+import { datarowInterface } from 'src/components/CardColTimeline';
+import CardColTimeline, { useCardReducer } from 'src/components/CardColTimeline1';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import routes from '../../components/Helpers/Routes';
+import { WORKORDER_SERVICE_STATUS, dateFormatForInputControl, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
 
 const RESOURCE = [
   { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
   { key: 'repairOrder', resource: sidebarResource.repairOrder, title: routes.repairOrder.title },
-  { key: 'productionOrder', resource: sidebarResource.productionOrder, title: routes.productionOrder.title },
+  { key: 'productionOrder', resource: sidebarResource.productionOrder, title: routes.productionOrder.title }
 ];
 
+const LIMIT = 25;
+
 const WorkOrderSupervisor = () => {
+  const { state, dispatch } = useCardReducer();
+  const { limit } = state;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions }
@@ -35,8 +36,6 @@ const WorkOrderSupervisor = () => {
   const [usersOption, setUsersOption] = useState([]);
   const [serviceMasterOption, setServiceMasterOption] = useState([]);
 
-  const [serviceData, setServiceData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [selectedResource, setSelectedResource] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
   const [selectedResourceOption, setSelectedResourceOption] = useState(null);
@@ -47,14 +46,9 @@ const WorkOrderSupervisor = () => {
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
 
-  const resourceFilter: any = RESOURCE.map((e) => { if (permissions[e.key]) return e; })
-
-  useEffect(() => {
-    let timeout = setTimeout(fetchData, 600);
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [selectedUser, selectedResourceOption, selectedService, timeFrame, globalFilters.from, globalFilters.to]);
+  const resourceFilter: any = RESOURCE.map((e) => {
+    if (permissions[e.key]) return e;
+  });
 
   React.useEffect(() => {
     switch (timeFrame) {
@@ -106,31 +100,54 @@ const WorkOrderSupervisor = () => {
     }
   }, [selectedResource]);
 
-  const fetchData = async () => {
-    setLoading(true);
-    const queryString = getQueryString();
-    try {
-      let data;
-      let response = await axiosInstance().get(`${workOrderSupervisor.api}${queryString}`);
-      data = response?.data?.data;
-      data?.forEach((ele) => {
-        ele['serviceName'] = ele?.service?.optionLabel;
-        ele['assignedUser'] = ele?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
-      });
-      setServiceData({
-        Pending: { data: data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.pending), color: '#F8A300' },
-        'In-Progress': { data: data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.inProgress), color: '#F16A9A' },
-        Completed: { data: data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.completed), color: '#31AC1D' }
-      });
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      toastConfig.setToastConfig(error);
-    }
-  };
+  useEffect(() => {
+    dispatch({
+      type: 'initialize',
+      columnOrder: Object.values(WORKORDER_SERVICE_STATUS),
+      rowDef: cardDataRows,
+      visibleColumns: [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.completed],
+      limit: LIMIT
+    });
+  }, []);
 
-  const getQueryString = () => {
-    let deepFilter = '?';
+  const fetchSingleColumn = useCallback((column: string, page = 0, appendData = true, filterQuery) => {
+    let api = `${workOrderSupervisor.api}?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+    dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: true }) });
+    axiosInstance()
+      .get(api)
+      .then(({ data: { data, count } }) => {
+        const setData = (prev: { [key: string]: any[] }, appendData: boolean) => {
+          const rows = data.map((item) => {
+            const newObj = { ...item };
+            newObj['serviceName'] = newObj?.service?.optionLabel;
+            newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
+            return newObj;
+          });
+          const newData = prev;
+          if (!appendData) {
+            newData[column] = rows;
+          } else {
+            if (prev[column] && prev[column]?.length) {
+              newData[column] = [...prev[column], ...rows];
+            } else {
+              newData[column] = rows;
+            }
+          }
+          return newData;
+        };
+        dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
+        dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      })
+      .finally(() => {
+        dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
+      });
+  }, []);
+
+  const getQueryString = useCallback(() => {
+    let deepFilter = '';
     if (selectedUser) {
       deepFilter = `${deepFilter}&user=${selectedUser}`;
     }
@@ -144,13 +161,32 @@ const WorkOrderSupervisor = () => {
       deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
-  };
+  }, [globalFilters, selectedResource, selectedResourceOption, selectedService, selectedUser]);
+
+  useEffect(() => {
+    if ((selectedUser && selectedResourceOption && selectedService && timeFrame) || globalFilters) {
+      const query = getQueryString();
+      dispatch({ type: 'setFilterQuery', filterQuery: query });
+    } else {
+      dispatch({ type: 'setFilterQuery', filterQuery: '' });
+    }
+  }, [
+    selectedUser,
+    selectedResourceOption,
+    selectedService,
+    timeFrame,
+    globalFilters.from,
+    globalFilters.to,
+    dispatch,
+    getQueryString,
+    globalFilters
+  ]);
 
   const cardDataRows: datarowInterface[] = [
     { accessor: 'workOrderNumber', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?._id}` },
     { accessor: 'serviceName', title: 'Service Name', type: 'text' },
     { accessor: 'assignedUser', title: 'Technician', type: 'text' },
-    { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
+    { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' }
   ];
 
   return (
@@ -220,16 +256,7 @@ const WorkOrderSupervisor = () => {
                   setSelectedResourceOption(null);
                   setSelectedResource(val);
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    margin="none"
-                    size="small"
-                    label="Select Resource"
-                    variant="outlined"
-                    fullWidth
-                  />
-                )}
+                renderInput={(params) => <TextField {...params} margin="none" size="small" label="Select Resource" variant="outlined" fullWidth />}
               />
               {selectedResource && (
                 <Autocomplete
@@ -248,14 +275,7 @@ const WorkOrderSupervisor = () => {
                     setSelectedResourceOption(val && val.optionValue ? val.optionValue : '');
                   }}
                   renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      margin="none"
-                      size="small"
-                      label={`Select ${selectedResource?.title}`}
-                      variant="outlined"
-                      fullWidth
-                    />
+                    <TextField {...params} margin="none" size="small" label={`Select ${selectedResource?.title}`} variant="outlined" fullWidth />
                   )}
                 />
               )}
@@ -315,20 +335,21 @@ const WorkOrderSupervisor = () => {
               />
             </div>
           </div>
-          {serviceData ? (
-            <CardColTimeline
-              cardHeight={150}
-              data={serviceData}
-              loading={loading}
-              cardDataRows={cardDataRows}
-              passFailStatus={true}
-              passFailAccessor="serviceStatus"
-            />
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
+          <CardColTimeline
+            fetchSingleColumn={fetchSingleColumn}
+            state={state}
+            dispatch={dispatch}
+            passFailStatus={true}
+            passFailAccessor="serviceStatus"
+            cardOnClick={(e, data) => {
+              let tempServiceData = {};
+              tempServiceData['uniqueId'] = data?._id;
+              tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
+              tempServiceData['canPerform'] = data?.canPerform;
+              setSelectedService(tempServiceData);
+              setServiceOpen(true);
+            }}
+          />
         </div>
       </Fragment>
     </MuiPickersUtilsProvider>
