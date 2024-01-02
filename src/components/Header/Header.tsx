@@ -463,8 +463,7 @@ const Header = () => {
             component="div"
             className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${
               styles.flexAlignCenter
-            }`}
-            flexGrow
+            } flex-grow`}
           >
             <div className={` ${styles.toggleButton}`}>
               <IconButton
