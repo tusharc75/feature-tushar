@@ -24,7 +24,6 @@ export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTit
 type TCommon = {
   accessor: string;
   title?: string;
-  // type: 'date' | 'dateTime' | 'text' | 'timer' | 'link' | 'title' | 'linkTitle';
   renderer?: (data: any) => string;
 };
 
@@ -61,8 +60,9 @@ const ROW_HEIGHT = 20;
 
 const calcCardHeight = (rowDef: datarowInterface[]) => {
   const head = rowDef?.find((c) => c.type === 'title' || c.type === 'linkTitle');
-  if (!head) return ROW_HEIGHT * rowDef.length;
-  return HEADER_HEIGHT + (rowDef.length - 1) * ROW_HEIGHT;
+  const rowsWithHeight = rowDef.filter((r) => !['title', 'linkTitle', 'tooltip'].includes(r.type));
+  if (!head) return ROW_HEIGHT * rowsWithHeight.length;
+  return HEADER_HEIGHT + rowsWithHeight.length * ROW_HEIGHT;
 };
 
 const CardColTimeline: React.FC<CardColInterface> = ({
@@ -82,7 +82,7 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = React.useState(600);
 
-  const { data, count, loading, page, columnOrder, visibleColumns, filterQuery, rowDef } = state;
+  const { count, columnOrder, visibleColumns, rowDef } = state;
 
   const cardCalculatedHeight = cardHeight ?? calcCardHeight(rowDef);
 

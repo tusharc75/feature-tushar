@@ -5,7 +5,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -96,22 +96,24 @@ const WorkOrderTechnician = () => {
       });
   };
 
-  const cardDataRows: any[] = [
-    { accessor: 'serviceName', type: 'title' },
-    { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
-    { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
-    { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
-    {
-      type: 'tooltip',
-      renderer: (data) =>
-        data?.canPerformInfo ? (
-          <HtmlTooltip title={data.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-            <Info className="[font-size:20px_!important] text-red-500" />
-          </HtmlTooltip>
-        ) : null
-    },
-    ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : [])
-  ];
+  const cardDataRows: any[] = useMemo(() => {
+    return [
+      { accessor: 'serviceName', type: 'title' },
+      { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
+      { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
+      { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
+      {
+        type: 'tooltip',
+        renderer: (data) =>
+          data?.canPerformInfo ? (
+            <HtmlTooltip title={data.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+              <Info className="[font-size:20px_!important] text-red-500" />
+            </HtmlTooltip>
+          ) : null
+      },
+      ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : [])
+    ];
+  }, [user?.user?.brandPolicy?.workOrderTimer]);
 
   useEffect(() => {
     dispatch({
@@ -121,7 +123,11 @@ const WorkOrderTechnician = () => {
       visibleColumns: selectedServiceStatus,
       limit: LIMIT
     });
-  }, []);
+    return () =>
+      dispatch({
+        type: 'reset'
+      });
+  }, [dispatch, cardDataRows]);
 
   useEffect(() => {
     dispatch({ type: 'visibleColumns', visibleColumns: selectedServiceStatus });

@@ -1,11 +1,12 @@
 import { Button } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import ColCard from './ColCard';
 import { TActios, TInitialState } from './index';
+import { Skeleton } from '@material-ui/lab';
 
 export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   cardOnClick?: (e: React.MouseEvent, data: any) => void | null;
@@ -38,6 +39,8 @@ const RenderColumns: React.FC<colDataInterface> = ({
 }) => {
   const { data, count, loading, page, columnOrder, visibleColumns, filterQuery, rowDef, limit, refreshDataCount } = state;
 
+  const isInitialLoading = loading[column] === undefined || data[column] === undefined;
+
   const hasNextPage = !data[column]?.length || !count[column] ? false : data[column]?.length < count[column];
   const isItemLoaded = (index) => !hasNextPage || index < data[column].length;
   const itemCount = hasNextPage ? data[column]?.length + 1 || 0 : data[column]?.length || 0;
@@ -58,7 +61,7 @@ const RenderColumns: React.FC<colDataInterface> = ({
 
     if (!isItemLoaded(index)) {
       content = (
-        <div className="loader-skeleton overflow-hidden rounded-[8px] pr-1 shadow-[0px_4px_40px_rgba(0,0,0,0.08)] [border:1px_solid_var(--common-border-color)] p-2">
+        <div className="loader-skeleton overflow-hidden rounded-[8px] shadow-[0px_4px_40px_rgba(0,0,0,0.08)] [border:1px_solid_var(--common-border-color)] ">
           <CommonSkeleton lenArray={Array.from(Array(2).keys())} lg={12} sm={12} xs={12} md={12} />
         </div>
       );
@@ -79,21 +82,40 @@ const RenderColumns: React.FC<colDataInterface> = ({
   return (
     <>
       <div className="col group" key={refreshDataCount}>
-        <InfiniteLoader isItemLoaded={isItemLoaded} itemCount={itemCount} loadMoreItems={() => loadMoreItems()}>
-          {({ onItemsRendered, ref }) => (
-            <List
-              onItemsRendered={onItemsRendered}
-              style={{ overflowX: 'hidden' }}
-              height={containerHeight || 600}
-              itemCount={itemCount}
-              itemSize={cardHeight}
-              width={'100%'}
-              ref={ref}
-            >
-              {Row}
-            </List>
-          )}
-        </InfiniteLoader>
+        {isInitialLoading ? (
+          <div className="grid gap-2 overflow-hidden" style={{ maxHeight: containerHeight || 600 }}>
+            {Array.from(Array(10).keys()).map((item) => (
+              <div
+                key={item}
+                style={{ maxHeight: cardHeight, height: cardHeight }}
+                className="loader-skeleton bg-[var(--dark-primary,_white)] overflow-hidden rounded-[8px] shadow-[0px_4px_40px_rgba(0,0,0,0.08)] [border:1px_solid_var(--common-border-color)]"
+              >
+                <div className="overflow-hidden p-2" style={{ maxHeight: cardHeight - 16, height: cardHeight - 16 }}>
+                  <Skeleton variant="text" width="100px" height="16px" />
+                  <Skeleton width="100%" height="50px" />
+                  <Skeleton variant="text" width="100px" height="16px" />
+                  <Skeleton width="100%" height="50px" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <InfiniteLoader isItemLoaded={isItemLoaded} itemCount={itemCount} loadMoreItems={() => loadMoreItems()}>
+            {({ onItemsRendered, ref }) => (
+              <List
+                onItemsRendered={onItemsRendered}
+                style={{ overflowX: 'hidden' }}
+                height={containerHeight || 600}
+                itemCount={itemCount}
+                itemSize={cardHeight}
+                width={'100%'}
+                ref={ref}
+              >
+                {Row}
+              </List>
+            )}
+          </InfiniteLoader>
+        )}
         {createNew && isCreateNew && (
           <Button
             onClick={createNew}

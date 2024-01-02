@@ -45,8 +45,9 @@ const WorkOrderSupervisor = () => {
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
 
-  const resourceFilter: any = RESOURCE.map((e) => {
-    if (permissions[e.key]) return e;
+  const resourceFilter: any = RESOURCE.filter((e) => {
+    if (permissions[e.key]) return true;
+    else return false;
   });
 
   React.useEffect(() => {
@@ -100,6 +101,13 @@ const WorkOrderSupervisor = () => {
   }, [selectedResource]);
 
   useEffect(() => {
+    const cardDataRows: datarowInterface[] = [
+      { accessor: 'workOrderNumber', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?._id}` },
+      { accessor: 'serviceName', title: 'Service Name', type: 'text' },
+      { accessor: 'assignedUser', title: 'Technician', type: 'text' },
+      { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' }
+    ];
+
     dispatch({
       type: 'initialize',
       columnOrder: Object.values(WORKORDER_SERVICE_STATUS),
@@ -107,43 +115,51 @@ const WorkOrderSupervisor = () => {
       visibleColumns: [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.completed],
       limit: LIMIT
     });
-  }, []);
 
-  const fetchSingleColumn = useCallback((column: string, page = 0, appendData = true, filterQuery) => {
-    let api = `${workOrderSupervisor.api}?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
-    dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: true }) });
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data, count } }) => {
-        const setData = (prev: { [key: string]: any[] }, appendData: boolean) => {
-          const rows = data.map((item) => {
-            const newObj = { ...item };
-            newObj['serviceName'] = newObj?.service?.optionLabel;
-            newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
-            return newObj;
-          });
-          const newData = prev;
-          if (!appendData) {
-            newData[column] = rows;
-          } else {
-            if (prev[column] && prev[column]?.length) {
-              newData[column] = [...prev[column], ...rows];
-            } else {
-              newData[column] = rows;
-            }
-          }
-          return newData;
-        };
-        dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
-        dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      })
-      .finally(() => {
-        dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
+    return () =>
+      dispatch({
+        type: 'reset'
       });
   }, []);
+
+  const fetchSingleColumn = useCallback(
+    (column: string, page = 0, appendData = true, filterQuery) => {
+      let api = `${workOrderSupervisor.api}?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+      dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: true }) });
+      axiosInstance()
+        .get(api)
+        .then(({ data: { data, count } }) => {
+          const setData = (prev: { [key: string]: any[] }, appendData: boolean) => {
+            const rows = data.map((item) => {
+              const newObj = { ...item };
+              newObj['serviceName'] = newObj?.service?.optionLabel;
+              newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
+              return newObj;
+            });
+            const newData = prev;
+            if (!appendData) {
+              newData[column] = rows;
+            } else {
+              if (prev[column] && prev[column]?.length) {
+                newData[column] = [...prev[column], ...rows];
+              } else {
+                newData[column] = rows;
+              }
+            }
+            return newData;
+          };
+          dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
+          dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        })
+        .finally(() => {
+          dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
+        });
+    },
+    [dispatch, limit, toastConfig]
+  );
 
   const getQueryString = useCallback(() => {
     let deepFilter = '';
@@ -163,7 +179,7 @@ const WorkOrderSupervisor = () => {
   }, [globalFilters, selectedResource, selectedResourceOption, selectedService, selectedUser]);
 
   useEffect(() => {
-    if ((selectedUser && selectedResourceOption && selectedService && timeFrame) || globalFilters) {
+    if (selectedUser || selectedService || selectedResourceOption || timeFrame || globalFilters) {
       const query = getQueryString();
       dispatch({ type: 'setFilterQuery', filterQuery: query });
     } else {
@@ -180,13 +196,6 @@ const WorkOrderSupervisor = () => {
     getQueryString,
     globalFilters
   ]);
-
-  const cardDataRows: datarowInterface[] = [
-    { accessor: 'workOrderNumber', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?._id}` },
-    { accessor: 'serviceName', title: 'Service Name', type: 'text' },
-    { accessor: 'assignedUser', title: 'Technician', type: 'text' },
-    { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' }
-  ];
 
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
