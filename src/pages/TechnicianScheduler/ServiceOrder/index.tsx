@@ -71,7 +71,8 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
         data?.forEach((ele, index) => {
           const obj: any = { ...ele };
           obj.index = index + 1;
-          obj._id = ele._id;
+          obj._id = ele?.service?.uniqueId,
+          obj.resourceId = ele._id;
           obj.fieldServiceOrder = ele?.fieldServiceOrder?.optionLabel;
           obj.fieldServiceOrderId = ele?.fieldServiceOrder?.optionValue;
           obj.serviceName = ele?.service?.serviceName;
@@ -136,7 +137,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
                       <IconButton
                         size="small"
                         onClick={() => {
-                          window.open(`${routes.fieldTicketDetail.path}/${row.original._id}`);
+                          window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
                         }}
                       >
                         <OpenInNewIcon fontSize="small" color="primary" />
@@ -162,7 +163,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
                       <IconButton
                         size="small"
                         onClick={() => {
-                          window.open(`${routes.rentalManagementDetail.path}/${row.original._id}`);
+                          window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
                         }}
                       >
                         <OpenInNewIcon fontSize="small" color="primary" />
