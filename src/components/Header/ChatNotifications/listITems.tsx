@@ -1,4 +1,4 @@
-import { Avatar, Chip, ListItem, Typography } from '@material-ui/core';
+import { Avatar, Button, Chip, ListItem, Typography } from '@material-ui/core';
 import { AccountCircle, Check, Group } from '@material-ui/icons';
 import moment from 'moment';
 import { useMemo } from 'react';
@@ -75,13 +75,9 @@ export const HistoryItem = ({ data, userId, handleClick }) => {
 export const NotificationItem = ({ handleClick, data }) => {
   return (
     <ListItem
-      button
       aria-label={data.title}
       className={`p-0 dark:[border-bottom:1px_solid_var(--common-border-color)_!important] [border-bottom:1px_solid_#F4F4F4_!important] `}
       key={data._id}
-      onClick={() => {
-        handleClick(data);
-      }}
     >
       <div className="flex items-center md:gap-[17px] gap-[15px] p-[20px] w-full">
         <div className=" basis-[38px]">
@@ -93,8 +89,19 @@ export const NotificationItem = ({ handleClick, data }) => {
           <h4 className="text-[12px] font-medium mb-[8px] [&>strong]:font-semibold dark:[&>strong]:font-bold leading-[22px] text-[#6B6F77] dark:text-gray-300 [&>strong]:text-[var(--primary-text)]">
             {data.title}
           </h4>
-          <h5 className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal mb-[2px]">{data.description}</h5>
-          <p className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal">{displayCardDate(data?.date)}</p>
+          <p className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal mb-[8px]">{displayCardDate(data?.date)}</p>
+          <h5 className="text-[var(--dark-secondary-text,_#6B6F77)] text-[12px] font-medium mb-[12px] p-[10px_12px] bg-[var(--dark-secondary,_white)] rounded-[8px] shadow-[0px_4px_40px_0px_rgba(0,_0,_0,_0.06)] max-w-fit">
+            {data.description || '--'}
+          </h5>
+          <button
+            onClick={() => {
+              handleClick(data);
+            }}
+            tabIndex={0}
+            className={`bg-[var(--primary)] hover:opacity-90 hover:scale-110 focus-within:[outline:2px_solid_var(--new-theme-color)] transition-all duration-300 dark:bg-[#163340] shadow-none border-0 outline-[transparent] text-white p-[4px_14px] rounded-[4px] text-[13px] font-semibold cursor-pointer poppins`}
+          >
+            Reply
+          </button>
         </div>
       </div>
     </ListItem>
