@@ -36,7 +36,6 @@ import { camelCase } from 'lodash';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../../Leads/Header.module.scss';
 
-
 const tabs = {
   Inbox: 1,
   Sent: 2
@@ -131,13 +130,7 @@ const Email = () => {
         show: true,
         disabled: true,
         Cell: ({ row }) => (
-          <span>
-            {typeof row.original?.to === 'string' ? (
-              <span> {row.original?.to}</span>
-            ) : (
-              <span>{getToEmailList(row.original?.to)}</span>
-            )}
-          </span>
+          <span>{typeof row.original?.to === 'string' ? <span> {row.original?.to}</span> : <span>{getToEmailList(row.original?.to)}</span>}</span>
         )
       },
       {
@@ -153,9 +146,7 @@ const Email = () => {
               row.original?.relatedTo.map((d) => {
                 return (
                   <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
-                    <p>
-                      {d?.name}
-                    </p>
+                    <p>{d?.name}</p>
                     <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                       <OpenInNewIcon fontSize="small" color="primary" />
                     </IconButton>
@@ -184,7 +175,7 @@ const Email = () => {
       }
     ];
     setColumns([...column, ActionsRenderer]);
-  }
+  };
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -196,12 +187,10 @@ const Email = () => {
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
-      <HtmlTooltip title={permissions.email.isDelete ? "Delete" : deleteDisable}>
+      <HtmlTooltip title={permissions.email.isDelete ? 'Delete' : deleteDisable}>
         <span>
-          <IconButton
-            disabled={!permissions.email.isDelete}
-            size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
-            <DeleteIcon fontSize="small" color={permissions.email.isDelete ? "error" : "disabled"} />
+          <IconButton disabled={!permissions.email.isDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
+            <DeleteIcon fontSize="small" color={permissions.email.isDelete ? 'error' : 'disabled'} />
           </IconButton>
         </span>
       </HtmlTooltip>
@@ -389,8 +378,8 @@ const Email = () => {
       <CustomContainer>
         {filter && (
           <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'flex justify-between align-items-center gap-1 w-full'}>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+              <div className={'flex max-[751px]:flex-wrap align-items-center gap-2 w-full'}>
                 <Autocomplete
                   fullWidth
                   options={resourceOptions}
@@ -451,7 +440,7 @@ const Email = () => {
                   />
                 )}
               </div>
-              <div className="flex flex-wrap gap-[8px] justify-end">
+              <div className="flex flex-wrap gap-[8px] justify-end items-center">
                 <SearchBox onChange={handleChangeFilter} className={styles.search_box_input} value={search} size="small" />
                 <div className="flex gap-[8px] flex-wrap items-center">
                   <Button
@@ -472,8 +461,8 @@ const Email = () => {
                         variant={'outlined'}
                         color="default"
                         size="small"
-                        onClick={openActions}
                         className={`new-dropdown-v1`}
+                        onClick={openActions}
                         aria-controls="action-menu"
                         endIcon={<ExpandMore />}
                         disabled={selectedRecords?.length ? false : true}
@@ -507,7 +496,6 @@ const Email = () => {
               </div>
             </div>
           </div>
-
         )}
         {columns ? (
           <CustomReactTable
@@ -520,9 +508,11 @@ const Email = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={false}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

@@ -197,7 +197,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               if (element.order === order || index <= pendingServiceIndex) {
                 if (!completed) {
                   if ((allowedToEdit || (element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id)
-                    || (!element?.assignedUsers?.length && isEqual(element?.competencies, user?.competencies))))) {
+                    || (!element?.assignedUsers?.length &&
+                      element?.competencies?.filter(e => user?.competencies.includes(e))?.length)))) {
                     element.clickable = true;
                   }
                   else {
@@ -245,7 +246,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
         services.filter((e) => e.type === 'service')?.length &&
-        (workOrderData?.status !== WORK_ORDER_STATUS.completed && workOrderData?.status !== WORK_ORDER_STATUS.inProgress) 
+        (workOrderData?.status !== WORK_ORDER_STATUS.completed && workOrderData?.status !== WORK_ORDER_STATUS.inProgress)
       ) {
         fetchWorkOrderData();
       }
@@ -492,7 +493,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 
   const isAllowedToServiceEdit = !completed &&
     (allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id)
-      || (!selectedService?.assignedUsers?.length && isEqual(selectedService?.competencies, user?.competencies)))
+      || (!selectedService?.assignedUsers?.length && selectedService?.competencies?.filter(e => user?.competencies.includes(e))?.length))
 
   const openAddServiceActions = (event) => {
     setAddServiceAnchorEl(event.currentTarget);

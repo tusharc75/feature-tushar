@@ -1,29 +1,29 @@
-import React from 'react';
-import CommonSkeleton from '../Helpers/CommonSkeleton';
-import styles from './index.module.scss';
-import { Box, Typography, Grid } from '@material-ui/core';
+import { BoxProps, Typography } from '@material-ui/core';
+import React, { ReactNode, useMemo } from 'react';
 import RenderColumns from './RenderColumns';
-import { GridSize, BoxProps } from '@material-ui/core';
+import { TActios, TInitialState } from './hooks/useCardReducer';
+import styles from './index.module.scss';
+
+export * from './hooks/useCardReducer';
 
 interface CardColInterface extends BoxProps {
-  data: any;
-  loading: boolean;
   cardOnClick?: (e: React.MouseEvent, data: any) => void;
-  cardDataRows: datarowInterface[];
   passFailStatus?: boolean;
   passFailAccessor?: string;
   cardHeight?: number;
   isCreateNew?: boolean;
   createNew?: () => void;
   createNewText?: string;
+  state: TInitialState;
+  dispatch: React.Dispatch<TActios>;
+  fetchSingleColumn: (column: string, page: number, appendData?: boolean, filterQuery?: string) => void;
 }
 
-export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTitle | TLinkTitle;
+export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTitle | TLinkTitle | TTooltip;
 
 type TCommon = {
   accessor: string;
   title?: string;
-  // type: 'date' | 'dateTime' | 'text' | 'timer' | 'link' | 'title' | 'linkTitle';
   renderer?: (data: any) => string;
 };
 
@@ -50,32 +50,49 @@ type TLinkTitle = TCommon & {
   type: 'linkTitle';
   link: (data: any) => string;
 };
+type TTooltip = {
+  type: 'tooltip';
+  renderer: (data: any) => ReactNode;
+};
 
 const HEADER_HEIGHT = 90;
 const ROW_HEIGHT = 20;
 
-const calcCardHeight = (cardDataRows: datarowInterface[]) => {
-  const head = cardDataRows?.find((c) => c.type === 'title' || c.type === 'linkTitle');
-  if (!head) return ROW_HEIGHT * cardDataRows.length;
-  return HEADER_HEIGHT + (cardDataRows.length - 1) * ROW_HEIGHT;
+const calcCardHeight = (rowDef: datarowInterface[]) => {
+  const head = rowDef?.find((c) => c.type === 'title' || c.type === 'linkTitle');
+  const rowsWithHeight = rowDef.filter((r) => !['title', 'linkTitle', 'tooltip'].includes(r.type));
+  if (!head) return ROW_HEIGHT * rowsWithHeight.length;
+  return HEADER_HEIGHT + rowsWithHeight.length * ROW_HEIGHT;
 };
 
 const CardColTimeline: React.FC<CardColInterface> = ({
-  data,
-  loading,
   cardOnClick = null,
-  cardDataRows,
   passFailStatus = true,
   passFailAccessor = 'passfail',
   className = '',
-  cardHeight = calcCardHeight(cardDataRows),
+  cardHeight,
   createNew,
   createNewText,
   isCreateNew,
+  state,
+  dispatch,
+  fetchSingleColumn,
   ...others
 }) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = React.useState(600);
+
+  const { count, columnOrder, visibleColumns, rowDef } = state;
+
+  const cardCalculatedHeight = cardHeight ?? calcCardHeight(rowDef);
+
+  // sort columns
+  const columns = useMemo(() => {
+    const sortedCols = [...visibleColumns].sort((a, b) => {
+      return columnOrder.indexOf(a) - columnOrder.indexOf(b);
+    });
+    return sortedCols;
+  }, [columnOrder, visibleColumns]);
 
   React.useLayoutEffect(() => {
     if (containerRef.current) setContainerHeight(containerRef.current.clientHeight - 125);
@@ -84,22 +101,14 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   return (
     <div className={`${styles.container} ${className}`} {...others} ref={containerRef}>
       <div className="py-4 flex  gap-[10px] md:scroll-px-[24px] overflow-auto snap-mandatory snap-x">
-        {Object.keys(data).map((col) => {
+        {columns.map((col) => {
           return (
             <div
               key={col}
               className={`${styles.singleCol} snap-start min-w-[min(100%,350px)] max-w-[350px]`}
               style={
                 {
-                  '--bg': Boolean(data[col].color)
-                    ? data[col].color
-                    : col === 'Pending'
-                    ? '#F8A300'
-                    : col === 'In-Progress'
-                    ? '#F16A9A'
-                    : col === 'Completed'
-                    ? '#31AC1D'
-                    : '#7F76EB',
+                  '--bg': col === 'Pending' ? '#F8A300' : col === 'In-Progress' ? '#F16A9A' : col === 'Completed' ? '#31AC1D' : '#7F76EB',
                   '--border': col === 'Completed' ? '#F1FEED' : col === 'In-Progress' ? '#FFF3FA' : '#FFFEEF',
                   '--color': col === 'Completed' ? '#31AC1D' : col === 'In-Progress' ? '#F16A9A' : '#F8A300'
                 } as React.CSSProperties
@@ -108,26 +117,22 @@ const CardColTimeline: React.FC<CardColInterface> = ({
               <div className="bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px] rounded-[8px] min-h-full">
                 <Typography className={styles.colTitle}>
                   <span></span>
-                  {col} ({loading ? '--' : data[col].data?.length || data[col].length || 0})
+                  {col} ({count[col] || 0})
                 </Typography>
-                {loading ? (
-                  <Box p={2} height={500}>
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                  </Box>
-                ) : (
-                  <RenderColumns
-                    data={data[col].data || data[col]}
-                    cardOnClick={cardOnClick}
-                    cardDataRows={cardDataRows}
-                    passFailStatus={passFailStatus}
-                    passFailAccessor={passFailAccessor}
-                    cardHeight={cardHeight}
-                    isCreateNew={isCreateNew}
-                    createNew={createNew}
-                    createNewText={createNewText}
-                    containerHeight={containerHeight}
-                  />
-                )}
+                <RenderColumns
+                  column={col}
+                  cardOnClick={cardOnClick}
+                  passFailStatus={passFailStatus}
+                  passFailAccessor={passFailAccessor}
+                  cardHeight={cardCalculatedHeight}
+                  isCreateNew={isCreateNew}
+                  createNew={createNew}
+                  createNewText={createNewText}
+                  containerHeight={containerHeight}
+                  state={state}
+                  dispatch={dispatch}
+                  fetchSingleColumn={fetchSingleColumn}
+                />
               </div>
             </div>
           );
