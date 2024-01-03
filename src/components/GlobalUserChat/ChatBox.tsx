@@ -159,7 +159,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
                     }}
                   >
                     {selectedChat && chatUsers?.length > 2 ? (
-                      <p className="username">
+                      <p className="font-semibold text-[13px] mb-[2px]">
                         {!userFromChat ? 'Equipt User' : userFromChat?._id !== currentUser && `${userFromChat?.firstName} ${userFromChat?.lastName}`}
                       </p>
                     ) : null}
