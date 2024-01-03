@@ -43,6 +43,7 @@ function reducer(state: TInitialState, action: TActios) {
       const { loading: resetedLoading } = getInitialState(state.columnOrder);
       return {
         ...state,
+        data: action.filterQuery !== state.filterQuery ? {} : state.data,
         filterQuery: action.filterQuery,
         loading: resetedLoading,
         page: 0
