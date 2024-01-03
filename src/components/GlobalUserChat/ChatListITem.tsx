@@ -23,7 +23,7 @@ const ChatList = (props) => {
     <Fragment>
       <ListItem button divider onClick={onChatClick} alignItems="flex-start">
         <ListItemAvatar>
-          <Avatar alt={chat?.chatTitle} />
+          <Avatar alt={chat?.chatTitle} src={chat.avatar} />
         </ListItemAvatar>
         <ListItemText
           primary={
