@@ -136,7 +136,7 @@ export default function Account(props) {
         };
       }
     });
-   
+
     if (accountResource.includes('customer')) {
       newColumns = [
         ...newColumns,
@@ -198,8 +198,8 @@ export default function Account(props) {
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
-    minWidth: 150,
-    width: 150,
+    minWidth: 120,
+    width: 120,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
@@ -235,7 +235,7 @@ export default function Account(props) {
                   });
                 }}
               >
-                <CancelIcon fontSize="small" color="error" />
+                <CancelIcon style={{ fontSize: '20px' }} color="error" />
               </IconButton>
             </span>
           </HtmlTooltip>
@@ -254,7 +254,7 @@ export default function Account(props) {
                   });
                 }}
               >
-                {row?.original?.approved ? <HiBadgeCheck /> : <FcApproval />}
+                {row?.original?.approved ? <HiBadgeCheck size={20} /> : <FcApproval size={20} />}
               </IconButton>
             </span>
           </HtmlTooltip>
@@ -297,7 +297,7 @@ export default function Account(props) {
               }}
             >
               <AiOutlineDeploymentUnit
-                fontSize="15"
+                fontSize="20"
                 color={accountPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'primary' : 'disabled'}
               />
             </IconButton>

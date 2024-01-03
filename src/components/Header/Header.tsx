@@ -488,7 +488,7 @@ const Header = () => {
             <Box className={`${styles.entity}`}>
               {selectedEntity && (
                 <ButtonBase id="entitySelect">
-                  <HtmlTooltip title={curEntity && `Selected entity - ${curEntity.entityName}`} placement="top" enterDelay={0} arrow>
+                  <HtmlTooltip title={curEntity && `Selected Entity - ${curEntity.entityName}`} placement="top" enterDelay={0} arrow>
                     <Box
                       aria-controls={entitiesMenuId}
                       color="inherit"

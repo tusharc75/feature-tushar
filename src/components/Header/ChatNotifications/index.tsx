@@ -1,13 +1,10 @@
 import { Badge, Box, IconButton, MenuItem, Popover, useMediaQuery } from '@material-ui/core';
 import { ArrowBack, ChatBubbleOutlineOutlined } from '@material-ui/icons';
-import { useCallback, useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useCallback, useContext, useState } from 'react';
 import { CustomChatNotificationCountContext } from '../../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
-import { SET_SELECTED_ENTITY } from '../../../StateProvider/actionTypes';
 import axiosInstance from '../../../axios/axiosInstance';
-
 import { GlobalChatContext } from 'src/StateProvider/GlobalChatContext';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import NewChat from './NewChat';
@@ -21,13 +18,11 @@ export type TabOptions = (typeof tabOptions)[number];
 const ChatNotification = () => {
   const toastConfig = useContext(CustomToastContext);
   const notification = useContext(CustomChatNotificationCountContext);
-  const history = useHistory();
   const isMobile = useMediaQuery('(max-width:960px)');
   const { setOpen: setChatOpen, setSelectedChat, chatList } = useContext(GlobalChatContext);
 
   const {
-    state: { user, selectedEntity },
-    dispatch
+    state: { user }
   }: any = useData();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -48,24 +43,6 @@ const ChatNotification = () => {
   };
 
   const notificationId = isNotificationOpen ? 'chat-notification' : undefined;
-
-  // const handleEntityChange = async (id) => {
-  //   if (!Array.isArray(id)) {
-  //     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
-  //   }
-  // };
-
-  // const hasAccessToEntity = async (id) => {
-  //   const entityList = user.entity?.map((entity) => entity._id);
-  //   return entityList.includes(id);
-  // };
-
-  // const handleRedirect = (id, resourceId, resourcePath) =>
-  //   id === selectedEntity
-  //     ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-  //     : hasAccessToEntity(id)
-  //     ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-  //     : '';
 
   const getAllNotifications = async (event) => {
     setAnchorEl(event.currentTarget);
@@ -90,9 +67,9 @@ const ChatNotification = () => {
       .finally(() => setIsLoading(false));
   };
 
-  const handleMarkAllRead = () => {
+  const handleMarkAllReadUnread = (toggle: boolean = true) => {
     axiosInstance()
-      .put('/user/user-notification/all-read', { toggle: true })
+      .put('/user/user-notification/all-read', { toggle })
       .then(({ data }) => {
         let updatedNotificationList = [];
         notificationList.forEach((notification) => {
@@ -147,22 +124,7 @@ const ChatNotification = () => {
       const selectedChat = chatList.find((c) => c.id === d.chatterId);
       if (selectedChat) setSelectedChat(selectedChat);
     }
-    // const resourcePath = returnResourcePath(d?.resourceId, d?.resourcePath);
-    // if (d?.entity) {
-    //   handleRedirect(d?.entity, d?.resourceId, resourcePath);
-    // } else {
-    //   history.push(d?.resourceId ? `${resourcePath}/${d?.resourceId}` : resourcePath);
-    // }
   };
-
-  // const returnResourcePath = (resourceId, resourcePath) => {
-  //   const splittedPath = resourcePath.split('/');
-  //   if (splittedPath[splittedPath.length - 1] === resourceId) {
-  //     splittedPath.pop();
-  //     return splittedPath.join('/');
-  //   }
-  //   return resourcePath;
-  // };
 
   const handleClickHistory = (chat) => {
     setSelectedChat(chat);
@@ -176,7 +138,7 @@ const ChatNotification = () => {
     setAnchorEl(null);
     setChatOpen(true);
     setNewChat(false);
-  }, []);
+  }, [setChatOpen]);
 
   return (
     <>
@@ -250,12 +212,12 @@ const ChatNotification = () => {
                 </span>
               </HtmlTooltip>
             </div>
-            <NewChat closeAndOpenChat={closeAndOpenChat} userId={user.user._id} setNewChat={setNewChat} setSelectedChat={setSelectedChat} />
+            <NewChat closeAndOpenChat={closeAndOpenChat} userId={user.user._id} setSelectedChat={setSelectedChat} />
           </>
         ) : (
           <NotificationContent
             isLoading={isLoading}
-            handleMarkAllRead={handleMarkAllRead}
+            handleMarkAllReadUnread={handleMarkAllReadUnread}
             handleClearAll={handleClearAll}
             handleReadSingle={handleReadSingle}
             data={notificationData}

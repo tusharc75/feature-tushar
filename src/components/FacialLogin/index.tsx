@@ -10,13 +10,13 @@ const LogIn = () => {
   const [camOpen, setCamOpen] = useState(false);
 
   return (
-    <>
+    <div style={{ display: 'none' }}>
       <Box mt={2} />
       <Button fullWidth variant="outlined" className="azure-login" onClick={handleFaceLogin}>
         Login using Face
       </Button>
       {camOpen && <WebcamDialog open={camOpen} onClose={() => setCamOpen(false)} />}
-    </>
+    </div>
   );
 };
 
