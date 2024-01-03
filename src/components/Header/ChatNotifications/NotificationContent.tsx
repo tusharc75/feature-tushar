@@ -1,12 +1,12 @@
 import { Button, IconButton, List, Menu, MenuItem, Typography } from '@material-ui/core';
-import { AddCircle, ClearAll, DoneAllOutlined, Settings } from '@material-ui/icons';
+import { AddCircle, ClearAll, DoneAllOutlined, Markunread, Settings } from '@material-ui/icons';
 import { useMemo, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
+import { TabOptions, tabOptions } from '.';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { HistoryItem, NotificationItem } from './listITems';
-import { tabOptions, TabOptions } from '.';
 
-const NotificationContent = ({ handleMarkAllRead, handleClearAll, handleReadSingle, data, isLoading, setNewChat, handleClickHistory }) => {
+const NotificationContent = ({ handleMarkAllReadUnread, handleClearAll, handleReadSingle, data, isLoading, setNewChat, handleClickHistory }) => {
   const {
     state: {
       user: { user }
@@ -75,7 +75,7 @@ const NotificationContent = ({ handleMarkAllRead, handleClearAll, handleReadSing
             <IconButton
               disabled={isLoading || data?.unread?.length === 0}
               onClick={() => {
-                handleMarkAllRead();
+                handleMarkAllReadUnread();
               }}
               size={'small'}
             >
@@ -123,8 +123,17 @@ const NotificationContent = ({ handleMarkAllRead, handleClearAll, handleReadSing
             setAnchorEl(null);
           }}
         >
-          <ClearAll className="mr-2" />
+          <ClearAll className="mr-2  opacity-60  dark:opacity-100" />
           Clear all
+        </MenuItem>
+        <MenuItem
+          onClick={(e) => {
+            handleMarkAllReadUnread(false);
+            setAnchorEl(null);
+          }}
+        >
+          <Markunread className="mr-2 opacity-60 dark:opacity-100" />
+          Mark all as unread
         </MenuItem>
       </Menu>
     </>
