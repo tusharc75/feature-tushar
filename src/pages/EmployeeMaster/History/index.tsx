@@ -208,6 +208,7 @@ const History = ({ id }) => {
           getOptionLabel={(option) => option?.title}
           onChange={(e, val) => {
             setSelectedResource(val);
+            dispatch({ type: 'pageChange', page: 0 });
           }}
           disableClearable={true}
           value={selectedResource}

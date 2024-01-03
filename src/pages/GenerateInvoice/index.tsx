@@ -314,6 +314,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                   getOptionLabel={(option) => option?.title}
                   onChange={(e, val) => {
                     dispatch({ type: 'selection', selectedRecords: [] });
+                    dispatch({ type: 'pageChange', page: 0 });
                     setSelectedResource(val);
                   }}
                   disableClearable={true}
