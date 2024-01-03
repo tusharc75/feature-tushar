@@ -7,7 +7,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
-import { dateFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
+import { dateFormat, dateTimeFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
@@ -25,13 +25,19 @@ const TECHNICIAN_RESOURCE = [
     resource: sidebarResource.workOrder,
     path: routes.workOrderDetail.path,
     title: routes.workOrder.title
+  },
+  {
+    key: 'rentalManagement',
+    resource: sidebarResource.rentalManagement,
+    path: routes.rentalManagementDetail.path,
+    title: routes.rentalManagement.title
   }
 ];
 
 const History = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
@@ -42,26 +48,25 @@ const History = ({ id }) => {
   const columns = [
     {
       accessor: 'reference',
-      Header: 'Reference',
+      Header: selectedResource?.title || 'Reference',
       minWidth: 150,
       width: 150,
       primaryField: true,
       Cell: ({ row }) => (
         <>
-          {row?.original?.referenceType && row?.original?.referenceId ? (
+          {row?.original?.reference?.optionValue ? (
             <div>
-              {/* <h5 className="text-truncate" title={row?.original?.reference}>
-                {row?.original?.reference}
-              </h5> */}
-              <div>{row?.original?.referenceId}</div>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${selectedResource.path}/${row?.original?.referenceId}`);
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
+              <div>{row?.original?.reference?.optionLabel}</div>
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${selectedResource.path}/${row?.original?.reference?.optionValue}`);
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
             </div>
           ) : (
             <NoDataCell />
@@ -97,8 +102,8 @@ const History = ({ id }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.startDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.startDate)?.format(dateFormat)}>
-              {moment(row?.original?.startDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={moment(row?.original?.startDate)?.format(dateTimeFormat)}>
+              {moment(row?.original?.startDate)?.format(dateTimeFormat)}
             </h5>
           ) : (
             <NoDataCell />
@@ -116,8 +121,8 @@ const History = ({ id }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.endDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.endDate)?.format(dateFormat)}>
-              {moment(row?.original?.endDate)?.format(dateFormat)}
+            <h5 className="text-truncate" title={moment(row?.original?.endDate)?.format(dateTimeFormat)}>
+              {moment(row?.original?.endDate)?.format(dateTimeFormat)}
             </h5>
           ) : (
             <NoDataCell />
