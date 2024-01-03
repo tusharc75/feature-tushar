@@ -1,6 +1,6 @@
 import { Button } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
@@ -26,21 +26,27 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
 const HEADER_HEIGHT = 90;
 const ROW_HEIGHT = 20;
 
-const calcCardHeight = (rowDef: datarowInterface[], data, loading: boolean = false) => {
+const calcCardHeight = (rowDef: datarowInterface[], data) => {
   const head = rowDef?.find((c) => c.type === 'title' || c.type === 'linkTitle');
-  let timeout;
-  clearTimeout(timeout);
-  if (loading || !data) {
-    timeout = setTimeout(() => {
-      calcCardHeight(rowDef, data, loading);
-    }, 1000);
+  const rowsWithHeight = [];
+  for (const row of rowDef) {
+    const ignoredRows = ['title', 'linkTitle', 'tooltip'];
+    switch (true) {
+      case ignoredRows.includes(row.type):
+        break;
+      case !Boolean(data):
+        rowsWithHeight.push(row);
+        break;
+      case Boolean(row.renderer):
+        rowsWithHeight.push(row);
+        break;
+      case Boolean(row.accessor ? (data[row.accessor] ? data[row.accessor] : false) : false):
+        rowsWithHeight.push(row);
+        break;
+      default:
+        break;
+    }
   }
-  const rowsWithHeight = rowDef.filter((r) => {
-    if (!data) return !['title', 'linkTitle', 'tooltip'].includes(r.type);
-    if (r.accessor)
-      return !['title', 'linkTitle', 'tooltip'].includes(r.type) && Boolean(r.accessor ? (data[r.accessor] ? data[r.accessor] : false) : false);
-    else return !['title', 'linkTitle', 'tooltip'].includes(r.type);
-  });
   if (!head) return ROW_HEIGHT * rowsWithHeight.length;
   return HEADER_HEIGHT + rowsWithHeight.length * ROW_HEIGHT;
 };
@@ -66,6 +72,8 @@ const RenderColumns: React.FC<colDataInterface> = ({
   const hasNextPage = !data[column]?.length || !count[column] ? false : data[column]?.length < count[column];
   const isItemLoaded = (index) => !hasNextPage || index < data[column].length;
   const itemCount = hasNextPage ? data[column]?.length + 1 || 0 : data[column]?.length || 0;
+  const resetIndex = useRef(0);
+  const listRef = useRef<any>(null);
 
   const Row = ({ index, style }) => {
     const colData = data[column][index];
@@ -101,6 +109,14 @@ const RenderColumns: React.FC<colDataInterface> = ({
     fetchSingleColumn(column, page[column] + 1, true, filterQuery);
   };
 
+  const isLoading = loading[column];
+
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current._listRef.resetAfterIndex(resetIndex.current);
+    }
+  }, [isLoading]);
+
   return (
     <>
       <div className="col group" key={refreshDataCount}>
@@ -122,18 +138,20 @@ const RenderColumns: React.FC<colDataInterface> = ({
             ))}
           </div>
         ) : (
-          <InfiniteLoader isItemLoaded={isItemLoaded} itemCount={itemCount} loadMoreItems={() => loadMoreItems()}>
+          <InfiniteLoader isItemLoaded={isItemLoaded} ref={listRef} itemCount={itemCount} loadMoreItems={() => loadMoreItems()}>
             {({ onItemsRendered, ref }) => (
               <List
                 onItemsRendered={onItemsRendered}
                 style={{ overflowX: 'hidden' }}
                 height={containerHeight || 600}
                 itemCount={itemCount}
+                ref={ref}
                 itemSize={(index) => {
-                  return calcCardHeight(rowDef, data[column][index], loading[column] || true);
+                  const cardData = data[column][index] || null;
+                  if (!cardData) resetIndex.current = index - 1;
+                  return calcCardHeight(rowDef, cardData);
                 }}
                 width={'100%'}
-                ref={ref}
               >
                 {Row}
               </List>
