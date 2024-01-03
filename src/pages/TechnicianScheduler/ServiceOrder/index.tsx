@@ -100,7 +100,8 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
       {
         accessor: 'index',
         Header: 'Index',
-        width: 50,
+        width: 70,
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       ...(selectedType === 'fieldTicket'
