@@ -48,6 +48,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
+import StepsInOtherServices from './StepsInOtherService';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -127,6 +128,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [comment, setComment] = useState('');
   const [bottomBarOpen, setBottomBarOpen] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
+  const [setpsInOtherServices, setSetpsInOtherServices] = useState(false);
   const [quotationData, setQuotationData] = useState(null);
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -1121,7 +1123,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   Assign Work Stations
                 </MenuItem>
               )}
-              {resource === sidebarResource.workOrder &&
+              {resource === sidebarResource.workOrder && (
                 <MenuItem
                   disabled={!allowedToEdit}
                   onClick={() => {
@@ -1131,8 +1133,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 >
                   Add Existing Services
                 </MenuItem>
-              }
-              {resource === sidebarResource.workOrder &&
+              )}
+              {resource === sidebarResource.workOrder && (
                 <MenuItem
                   disabled={
                     !allowedToEdit ||
@@ -1147,7 +1149,18 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 >
                   Add Steps
                 </MenuItem>
-              }
+              )}
+              {resource === sidebarResource.workOrder && (
+                <MenuItem
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setSetpsInOtherServices(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Add Steps in Other Services
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={() => {
                   setAttchmentsDialog({
@@ -1450,6 +1463,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         />
       )}
 
+      {setpsInOtherServices && (
+        <StepsInOtherServices
+          workOrderId={workOrderId}
+          service={selectedService}
+          allowedToEdit={allowedToEdit}
+          onClose={() => {
+            setSetpsInOtherServices(false);
+          }}
+        />
+      )}
     </Box>
   );
 };
