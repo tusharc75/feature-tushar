@@ -403,20 +403,7 @@ const Report = () => {
                     setLoadingColumns(false);
                 }
                 data = data.map((u: any) => {
-                    if (resourceCamelCase === 'purchaseOrderDetails') {
-                        if (u?.productLedger?.type === 'credit') {
-                            u.actualReceived = u?.productLedger?.qty;
-                            u.rejectQuantity = 0;
-                        } else {
-                            u.rejectQuantity = u?.productLedger?.qty;
-                            u.actualReceived = 0;
-                        }
-                        u.date = u?.productLedger?.date;
-                    }
                     let finalObject: any = prepareDataForGrid(u);
-                    if (finalObject?.listPrice) {
-                        finalObject.margin = ((finalObject?.listPrice + (finalObject?.averagePrice || 0)) / finalObject?.listPrice)?.toFixed(2);
-                    }
                     return finalObject;
                 });
                 dispatch({ type: 'initialize', data: data, count: count });
