@@ -345,16 +345,18 @@ export default function ManageProfile(props) {
             <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setShowAddProxyDialog(true)}>
               Add DOA Proxy
             </Button>
-            <Divider />
-            {userData?.faceData && userData?.faceId ? (
-              <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveFaceConfirmBox(true)}>
-                Remove Face
-              </Button>
-            ) : (
-              <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setWebCamDialog(true)}>
-                Add Face
-              </Button>
-            )}
+            <div style={{ display: 'none' }}>
+              <Divider />
+              {userData?.faceData && userData?.faceId ? (
+                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveFaceConfirmBox(true)}>
+                  Remove Face
+                </Button>
+              ) : (
+                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setWebCamDialog(true)}>
+                  Add Face
+                </Button>
+              )}
+            </div>
           </div>
         ) : null}
         <div style={{ borderRadius: 8, minWidth: '300px' }}>
