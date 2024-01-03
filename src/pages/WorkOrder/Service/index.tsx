@@ -1134,12 +1134,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               }
               {resource === sidebarResource.workOrder &&
                 <MenuItem
-                  disabled={
-                    !allowedToEdit ||
-                    [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                      selectedService?.status
-                    )
-                  }
+                  disabled={[WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status)
+                    && isAllowedToServiceEdit && selectedService?.clickable ? false : true}
                   onClick={() => {
                     setAssignSteps(true);
                     setAnchorEl(null);
