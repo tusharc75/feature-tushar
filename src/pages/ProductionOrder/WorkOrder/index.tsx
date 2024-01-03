@@ -724,10 +724,16 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 disabled={checkUniqCompetencies()}
                 onClick={() => {
                   closeActions();
-                  const services = selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service);
-                  const assignedUsers = services?.map((e) => e?.assignedUsers) || [];
-                  const uniqueAssignedUsers = [...new Set(assignedUsers.flat())];
-                  setUserAssignDialog({ open: true, assignedUsers: uniqueAssignedUsers });
+                  const uniqueAssignedUsers: any = flatMap(
+                    selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.assignedUsers || [])
+                  );
+                  const assignedUsers = [];
+                  uniqueAssignedUsers?.forEach((e: any) => {
+                    if (!assignedUsers?.find((ele) => ele.optionValue === e.optionValue)) {
+                      assignedUsers.push(e);
+                    }
+                  });
+                  setUserAssignDialog({ open: true, assignedUsers: assignedUsers });
                 }}
               >
                 Assign Technician
@@ -834,7 +840,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  setDeleteData(selectedRecords);
+                  setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
                   setShowConfirmBox(true);
                   closeActions();
                 }}

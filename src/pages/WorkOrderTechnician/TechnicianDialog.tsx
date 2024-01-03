@@ -20,6 +20,8 @@ const TechnicianDialog = ({ handleClose, workOrderId, uniqueId, canPerform }) =>
 
     const [completed, setCompleted] = useState(false);
     const [workOrderData, setWorkOrderData] = useState(null);
+    const [allowedToEdit, setAllowedToEdit] = useState(false);
+    const [defaultUniqueId, setDefaultUniqueId] = useState(uniqueId);
 
     useEffect(() => {
         fetchWorkOrderData();
@@ -27,6 +29,11 @@ const TechnicianDialog = ({ handleClose, workOrderId, uniqueId, canPerform }) =>
 
     const fetchWorkOrderData = () => {
         axiosInstance().get(`${routes.workOrder.path}/${workOrderId}`).then(({ data: { data } }) => {
+            var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+            if (user?.role?.selectedEntity?.superAdminAccess) {
+                isAllowedToEdit = true;
+            }
+            setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
             setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
             setWorkOrderData({ ...data });
         }).catch((err) => {
@@ -71,11 +78,12 @@ const TechnicianDialog = ({ handleClose, workOrderId, uniqueId, canPerform }) =>
                         <Service
                             workOrderData={workOrderData}
                             workOrderId={workOrderId}
-                            allowedToEdit={canPerform}
+                            allowedToEdit={allowedToEdit}
                             completed={completed}
                             fetchWorkOrderData={fetchWorkOrderData}
                             resource={sidebarResource.workOrderTechnician}
-                            technicianSelectedService={uniqueId}
+                            defaultSelectedService={defaultUniqueId}
+                            setDefaultSelectedService={setDefaultUniqueId}
                             minHeightClass={'md:h-[calc(100vh-150px)]'}
                         /> :
                         <Grid container spacing={2} >

@@ -2330,6 +2330,12 @@ export const REPORT_LIST = [
     type: 'dynamic'
   },
   {
+    title: sidebarResource.productionOrder,
+    permission: 'productionOrder',
+    key: 'productionOrder',
+    type: 'dynamic'
+  },
+  {
     title: 'Purchase Order Details',
     permission: 'purchaseOrder',
     key: 'standardReport',
@@ -2370,6 +2376,12 @@ export const REPORT_LIST = [
     permission: 'serializedAsset',
     key: 'standardReport',
     type: 'serializedAssetStatistics'
+  },
+  {
+    title: 'Work Order Service',
+    permission: 'workOrder',
+    key: 'standardReport',
+    type: 'workOrderService'
   },
   {
     title: 'User Session',
@@ -2636,6 +2648,7 @@ export const WORK_ORDER_STATUS = {
   // quoteAccepted: 'Quote Accepted',
   // quoteRejected: 'Quote Rejected',
   postWork: 'Post-Work In-Progress',
+  inProgress: 'In-Progress',
   completed: 'Completed'
 };
 

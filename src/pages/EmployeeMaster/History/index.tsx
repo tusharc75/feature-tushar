@@ -1,5 +1,5 @@
-import { useEffect, useContext } from 'react';
-import { Box, IconButton } from '@material-ui/core';
+import { useState, useEffect, useContext } from 'react';
+import { Box, IconButton, TextField } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -7,66 +7,67 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
-import { dateTimeFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
+import { dateFormat, dateTimeFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import moment from 'moment';
+import { useData } from 'src/StateProvider/Provider';
+import { Autocomplete } from '@material-ui/lab';
+
+const TECHNICIAN_RESOURCE = [
+  {
+    key: 'fieldTicket',
+    resource: sidebarResource.fieldTicket,
+    path: routes.fieldTicketDetail.path,
+    title: routes.fieldTicket.title
+  },
+  {
+    key: 'workOrder',
+    resource: sidebarResource.workOrder,
+    path: routes.workOrderDetail.path,
+    title: routes.workOrder.title
+  },
+  {
+    key: 'rentalManagement',
+    resource: sidebarResource.rentalManagement,
+    path: routes.rentalManagementDetail.path,
+    title: routes.rentalManagement.title
+  }
+];
 
 const History = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const { state, dispatch } = useTableReducer();
+  const { limit, page } = state;
+  const [selectedResource, setSelectedResource] = useState(null);
+  const [resourceList, setResourceList] = useState([]);
 
   const columns = [
     {
       accessor: 'reference',
-      Header: 'Reference',
+      Header: selectedResource?.title || 'Reference',
       minWidth: 150,
       width: 150,
       primaryField: true,
       Cell: ({ row }) => (
         <>
-          {row?.original?.referenceType && row?.original?.referenceId ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              {/* <h5 className="text-truncate" title={row?.original?.reference}>
-                {row?.original?.reference}
-              </h5> */}
-              {row?.original?.referenceId && (
-                <Box ml={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      const route =
-                        row?.original?.referenceType === sidebarResource.fieldTicket
-                          ? routes.fieldTicketDetail.path
-                          : row?.original?.referenceType === sidebarResource.rentalManagement
-                          ? routes.rentalManagementDetail.path
-                          : '';
-                      window.open(`${route}/${row?.original?.referenceId}`);
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </Box>
-              )}
+          {row?.original?.reference?.optionValue ? (
+            <div>
+              <div>{row?.original?.reference?.optionLabel}</div>
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${selectedResource.path}/${row?.original?.reference?.optionValue}`);
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
             </div>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    },
-    {
-      accessor: 'referenceType',
-      Header: 'Type',
-      minWidth: 150,
-      width: 150,
-      disabled: true,
-      Cell: ({ row }) => (
-        <>
-          {row?.original?.referenceType ? (
-            <h5 className="text-truncate" title={row?.original?.referenceType}>
-              {row?.original?.referenceType}
-            </h5>
           ) : (
             <NoDataCell />
           )}
@@ -149,16 +150,33 @@ const History = ({ id }) => {
   ];
 
   useEffect(() => {
-    if (id) {
+    const options: any = [];
+    TECHNICIAN_RESOURCE?.forEach((item) => {
+      if (permissions[item.key] && permissions[item.key]?.isRead === true) {
+        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title });
+      }
+    });
+    setResourceList(options);
+    if (options.length > 0) setSelectedResource(options[0]);
+  }, []);
+
+  useEffect(() => {
+    if (id || selectedResource) {
       fetchData();
     }
-  }, [id]);
+  }, [id, selectedResource, page, limit]);
+
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}&referenceType=${selectedResource?.resource}` : '?';
+    return deepFilter;
+  };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
     axiosInstance()
-      .get(`${employeeMaster.api}/history/${id}`)
-      .then(({ data: { data } }) => {
+      .get(`${employeeMaster.api}/history/${id}/${queryString}`)
+      .then(({ data: { data, count } }) => {
         // data = data?.map((u, index) => ({
         //   ...u,
         //   _id: index + 1,
@@ -170,7 +188,7 @@ const History = ({ id }) => {
         //   serviceId: u?.service?.optionValue,
         //   date: u?.startDate
         // }));
-        dispatch({ type: 'initialize', data: data, count: data.length });
+        dispatch({ type: 'initialize', data: data, count: count });
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
@@ -181,6 +199,21 @@ const History = ({ id }) => {
 
   return (
     <Box>
+      <div className={'flex justify-between align-items-center gap-1 w-full'}>
+        <Autocomplete
+          id="employeemaster-history"
+          style={{ width: '300px' }}
+          options={resourceList?.map((item) => item)}
+          renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+          getOptionLabel={(option) => option?.title}
+          onChange={(e, val) => {
+            setSelectedResource(val);
+            dispatch({ type: 'pageChange', page: 0 });
+          }}
+          disableClearable={true}
+          value={selectedResource}
+        />
+      </div>
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 200px)'}
@@ -188,7 +221,6 @@ const History = ({ id }) => {
           state={state}
           dispatch={dispatch}
           renderedFrom={`${camelCase(routes?.employeeMaster.title)}_History`}
-          isClientSideGrid={true}
           refreshGrid={fetchData}
           hideSelection={true}
         />

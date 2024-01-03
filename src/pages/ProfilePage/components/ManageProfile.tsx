@@ -38,6 +38,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { Image } from '@material-ui/icons';
+import WebcamDialog from './WebCamDialog';
 
 const useStyles = makeStyles((theme) => ({
   profileEdit: {
@@ -84,9 +85,12 @@ export default function ManageProfile(props) {
   const [isEmailUpdate, setEmailUpdate] = useState(false);
   const [isPasswordUpdate, setPasswordUpdate] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [removeFaceConfirmBox, setRemoveFaceConfirmBox] = useState(false);
+  const [removingFace, setRemovingFace] = useState(false);
   const [showAddProxyDialog, setShowAddProxyDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
+  const [webCamDialog, setWebCamDialog] = useState(false);
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -211,6 +215,26 @@ export default function ManageProfile(props) {
     return result;
   };
 
+  const handleRemoveFace = () => {
+    setRemovingFace(true);
+    axiosInstance()
+      .delete('/user/remove-face-data')
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setRemoveFaceConfirmBox(false);
+        setRemovingFace(false);
+        onFetchUserData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setRemovingFace(false);
+      });
+  };
+
   return (
     <>
       {openUpdateDialog && (
@@ -321,7 +345,18 @@ export default function ManageProfile(props) {
             <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setShowAddProxyDialog(true)}>
               Add DOA Proxy
             </Button>
-            <Divider />
+            <div style={{ display: 'none' }}>
+              <Divider />
+              {userData?.faceData && userData?.faceId ? (
+                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveFaceConfirmBox(true)}>
+                  Remove Face
+                </Button>
+              ) : (
+                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setWebCamDialog(true)}>
+                  Add Face
+                </Button>
+              )}
+            </div>
           </div>
         ) : null}
         <div style={{ borderRadius: 8, minWidth: '300px' }}>
@@ -533,6 +568,27 @@ export default function ManageProfile(props) {
               userId={user?.user?._id}
             />
           )}
+          {webCamDialog && (
+            <WebcamDialog
+              open={webCamDialog}
+              onClose={() => {
+                setWebCamDialog(false);
+              }}
+              onSuccess={() => {
+                onFetchUserData();
+                setWebCamDialog(false);
+              }}
+            />
+          )}
+          {removeFaceConfirmBox ? (
+            <ConfirmationDialog
+              open={removeFaceConfirmBox}
+              message={`Are you sure you want to remove Face ?`}
+              onClose={() => setRemoveFaceConfirmBox(false)}
+              onOk={handleRemoveFace}
+              okBtnLoading={removingFace}
+            />
+          ) : null}
         </div>
       </>
     </>

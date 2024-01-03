@@ -239,6 +239,7 @@ export default function useColumns() {
         column.push({
           lockPosition: true,
           ...commonFieldData,
+          accessor: fieldName,
           disabled: true,
           cell: ({ row }) =>
             permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? (

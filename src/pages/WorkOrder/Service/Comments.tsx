@@ -14,6 +14,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import EditIcon from '@material-ui/icons/Edit';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, userId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -142,15 +143,17 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
                       <>
                         <p className="basis-[calc(100%-100px)] font-[500] text-[16px]">{item.comment}</p>
                         {userId === item?.user?.optionValue ? (
-                          <IconButton
-                            aria-label="edit"
-                            onClick={(e) => {
-                              handleEdit(item);
-                            }}
-                            size="small"
-                          >
-                            <EditIcon color="primary" fontSize="small" />
-                          </IconButton>
+                          <HtmlTooltip title="Edit">
+                            <IconButton
+                              aria-label="edit"
+                              onClick={(e) => {
+                                handleEdit(item);
+                              }}
+                              size="small"
+                            >
+                              <EditIcon color="primary" fontSize="small" />
+                            </IconButton>
+                          </HtmlTooltip>
                         ) : null}
                       </>
                     )}
