@@ -149,7 +149,6 @@ function SideBar({ location }) {
               setIsSidebarOpen({ [SIDEBAR_OPEN]: false });
             }, 500);
         }}
-        keepMounted
       >
         <Toolbar />
         <div id="sidebarOrDrawer" style={{ borderTop: '1px solid #485B64' }}>

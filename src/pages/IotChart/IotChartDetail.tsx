@@ -16,15 +16,23 @@ import Status from './Status';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Alarms from './Alarms';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { useData } from 'src/StateProvider/Provider';
+import ManageSendOutboundMessage from '../SendOutboundMessage/manageSendOutboundMessage';
 
 const IotChartDetail = () => {
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { permissions }
+  }: any = useData();
+
   const { assetId } = useParams();
   const [assetData, setAssetData] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [dataPoints, setDataPoints] = useState([]);
   const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
   const [deviceTemplate, setDeviceTemplate] = useState(null);
+  const [manageSendOutBoundMessageDialog, setManageSendOutBoundMessageDialog] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -33,9 +41,16 @@ const IotChartDetail = () => {
   useEffect(() => {
     if (deviceTemplate) {
       const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
-      const deepFilter = [{ field: 'active', term: 'yes' }, { field: 'alarm', term: 'no' }];
+      const deepFilter = [
+        { field: 'active', term: 'yes' },
+        { field: 'alarm', term: 'no' }
+      ];
       axiosInstance()
-        .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&deepFilter=${JSON.stringify(deepFilter)}&sortBy=order&orderBy=asc&filterType=and`)
+        .get(
+          `${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&deepFilter=${JSON.stringify(
+            deepFilter
+          )}&sortBy=order&orderBy=asc&filterType=and`
+        )
         .then(({ data: { data } }) => {
           setDataPoints(data?.data);
         });
@@ -73,6 +88,19 @@ const IotChartDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {permissions?.sendOutboundMessage?.isCreate && (
+              <Button
+                onClick={() => {
+                  setManageSendOutBoundMessageDialog(true);
+                }}
+                variant="outlined"
+                color="primary"
+                size="small"
+                className={'btn-outline-v1'}
+              >
+                Send Outbound Message
+              </Button>
+            )}
             <Button
               onClick={() => {
                 setOpenDataSimulationDialog(!openDataSimulationDialog);
@@ -83,11 +111,7 @@ const IotChartDetail = () => {
             >
               Data Simulation
             </Button>
-            <ActivityButton
-              referenceId={assetData?._id}
-              resource={ACTIVITY_RESOURCE.serializedAsset}
-              resourceLabel={assetData?.assetNumber}
-            />
+            <ActivityButton referenceId={assetData?._id} resource={ACTIVITY_RESOURCE.serializedAsset} resourceLabel={assetData?.assetNumber} />
           </Box>
         </Box>
       </Box>
@@ -131,6 +155,18 @@ const IotChartDetail = () => {
         </Box>
       )}
       {openDataSimulationDialog && <DataSimulationDialog onClose={() => setOpenDataSimulationDialog(false)} />}
+
+      {manageSendOutBoundMessageDialog && (
+        <ManageSendOutboundMessage
+          assetId={assetId}
+          onSuccess={() => {
+            setManageSendOutBoundMessageDialog(false);
+          }}
+          onClose={() => {
+            setManageSendOutBoundMessageDialog(false);
+          }}
+        />
+      )}
     </Box>
   );
 };

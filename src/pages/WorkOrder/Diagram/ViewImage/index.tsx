@@ -3,9 +3,10 @@ import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
-import { Box, Button, FormControl } from '@material-ui/core';
+import { Box, Button, FormControl, Typography } from '@material-ui/core';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
   return function () {
@@ -22,7 +23,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const toastConfig = useContext(CustomToastContext);
   const [canvas, setCanvas] = useState(null);
   const [isSubmitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedObject, setSelectedObject] = useState(null);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
 
@@ -30,6 +31,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
       preserveObjectStacking: true,
       selection: false,
+      controlsAboveOverlay: true,
+      centeredScaling: true,
       allowTouchScrolling: true
     });
     fabric.Object.prototype.transparentCorners = false;
@@ -123,7 +126,6 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     canvas.add(newCircle);
   };
 
-
   const handleRemove = () => {
     const activeObject = canvas.getActiveObject();
     if (activeObject.type === 'activeSelection') {
@@ -206,7 +208,6 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     if (!activeObject) {
       return null;
     }
-
     if (activeObject.type === 'activeSelection') {
       const objects = activeObject.getObjects();
       if (objects.length === 0) return null;
@@ -337,14 +338,15 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           </Button>
         </div>
       </div>
-
-      <div>
-        {loading ? 'Loading editor ...' : null}
-      </div>
-
-      <div className='custom-canvas'>
-        <canvas style={{display: 'block'}} ref={canvasRef} />
-      </div>
+      <Box height={'calc(100vh - 140px)'} width={'calc(100vw - 20px)'} style={{ overflow: 'auto' }}>
+        {loading ?
+          <Box pt={2} >
+            <Typography>Image Loading...</Typography>
+          </Box>
+          : null
+        }
+        <canvas ref={canvasRef} />
+      </Box>
     </Box>
   );
 };

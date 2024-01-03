@@ -1,7 +1,7 @@
 import { useReducer } from 'react';
 import { datarowInterface } from '../';
 
-const setInitialState = (columns) => {
+const getInitialState = (columns) => {
   const loading = {};
   const page = {};
   for (const column of columns) {
@@ -19,7 +19,7 @@ function reducer(state: TInitialState, action: TActios) {
         loading: action.loading(state.loading)
       };
     case 'initialize':
-      const { loading, page } = setInitialState(action.columnOrder);
+      const { loading, page } = getInitialState(action.columnOrder);
       return {
         ...state,
         columnOrder: action.columnOrder,
@@ -40,10 +40,12 @@ function reducer(state: TInitialState, action: TActios) {
         columnOrder: action.columnOrder
       };
     case 'setFilterQuery':
+      const { loading: resetedLoading } = getInitialState(state.columnOrder);
       return {
         ...state,
-        loading: action.loading ?? true,
+        data: action.filterQuery !== state.filterQuery ? {} : state.data,
         filterQuery: action.filterQuery,
+        loading: resetedLoading,
         page: 0
       };
     case 'setData':
@@ -65,7 +67,22 @@ function reducer(state: TInitialState, action: TActios) {
     case 'refreshData':
       return {
         ...state,
-        refreshDataCount: state.refreshDataCount < 10 ? state.refreshDataCount + 1 : 0
+        refreshDataCount: state.refreshDataCount < 10 ? state.refreshDataCount + 1 : 0,
+        data: {},
+        loading: {}
+      };
+    case 'reset':
+      return {
+        data: {},
+        count: {},
+        loading: {},
+        page: {},
+        columnOrder: [],
+        visibleColumns: [],
+        filterQuery: '',
+        rowDef: [],
+        limit: 25,
+        refreshDataCount: 0
       };
     default:
       break;
@@ -113,7 +130,8 @@ export type TActios =
     }
   | { type: 'visibleColumns'; visibleColumns: string[] }
   | { type: 'limit'; limit: number }
-  | { type: 'refreshData' };
+  | { type: 'refreshData' }
+  | { type: 'reset' };
 
 export const useCardReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);

@@ -28,7 +28,7 @@ const DisplayChips = (props) => {
       for (let i = 0; i < keys.length; i++) {
         const element = filterModel[keys[i]];
         const currentColumn = columns.find((col) => col.accessor === keys[i]);
-        if (currentColumn.cellRenderer === 'dateRenderer') {
+        if (currentColumn?.cellRenderer === 'dateRenderer') {
           const dateValue =
             element.filter.from && element.filter.to
               ? `${element.filter.from ? element.filter.from : null} - ${element.filter.to ? element.filter.to : null}`

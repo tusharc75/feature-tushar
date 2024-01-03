@@ -919,10 +919,15 @@ const Steps = ({
                 if (resource === sidebarResource.workOrderTechnician && stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) {
                   return '';
                 }
-                let isAnyTechnician = selectedService?.assignedUsers?.length ? true : false;
-                let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
-                if (resource === sidebarResource.workOrderTechnician) {
-                  isMeTechnician = true;
+                let isStepsAllowToPerform = false;
+                if (selectedService?.assignedUsers?.length) {
+                  isStepsAllowToPerform = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) ? true : false
+                }
+                else if (selectedService?.competencies?.filter(e => user?.competencies.includes(e))?.length) {
+                  isStepsAllowToPerform = true;
+                }
+                else if (allowedToEdit) {
+                  isStepsAllowToPerform = true;
                 }
                 return (
                   <Box
@@ -1058,7 +1063,7 @@ const Steps = ({
                                 WORKORDER_SERVICE_STEP_STATUS.pause,
                                 WORKORDER_SERVICE_STEP_STATUS.needReperform
                               ].includes(stepData?.status) &&
-                                (isMeTechnician || !isAnyTechnician) &&
+                                isStepsAllowToPerform &&
                                 (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && !user?.brandPolicy?.workOrderTimer ? null : (
                                   <Button
                                     variant="outlined"
@@ -1084,7 +1089,7 @@ const Steps = ({
                                         : 'Restart'}
                                   </Button>
                                 ))}
-                              {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
+                              {!stepData?.startDate && isStepsAllowToPerform ? (
                                 <Button
                                   variant="outlined"
                                   color="secondary"
@@ -1103,7 +1108,7 @@ const Steps = ({
                                 </Button>
                               ) : stepData?.passFailStatus ? (
                                 <RenderPassFailChip status={stepData?.passFailStatus} className={classes.stepTags} />
-                              ) : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && isStepValid && (isMeTechnician || !isAnyTechnician) ? (
+                              ) : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && isStepValid && isStepsAllowToPerform ? (
                                 step?.isPassFail ? (
                                   <>
                                     <Button
@@ -1152,7 +1157,7 @@ const Steps = ({
                               {stepData?.status &&
                                 ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
                                 ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                                (isMeTechnician || !isAnyTechnician) ? (
+                                isStepsAllowToPerform ? (
                                 [
                                   WORKORDER_SERVICE_STEP_STATUS.passed,
                                   WORKORDER_SERVICE_STEP_STATUS.failed,

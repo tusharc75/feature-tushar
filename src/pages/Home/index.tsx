@@ -50,7 +50,7 @@ function Dashboard() {
     if (entityData?.resource) {
       allData = entityData.resource;
     }
-    allData = allData?.filter((e) => isSectionVisible(e))
+    allData = allData?.filter((e) => isSectionVisible(e));
     allData?.forEach((u) => {
       u['resourceLabel'] = u?.homePageLabel || u?.resourceLabel || u?.name;
       u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
@@ -84,9 +84,7 @@ function Dashboard() {
           <div className={styles.rightContainer}>
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
-            <a title="open equipt documentation" href={userManual.link} target="_blank">
-              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
-            </a>
+            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
           </div>
         </div>
       </div>
@@ -113,7 +111,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
             section.head === 'Collaboration Tools' ||
             section.head === 'Activities'
           ) {
-            return <></>;
+            return <Fragment key={section.head}></Fragment>;
           }
           return (
             <DashBoardCardShell
@@ -208,7 +206,13 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
           style={style}
           className={`${styles.rightInner} `}
           aria-label={`open ${mode}`}
-          onClick={() => setModalContent({ items: colabData, title: mode, icon: <img src={SVGImages(mode)} alt={`${mode} Logo`} /> })}
+          onClick={() => {
+            if (mode === 'User Manual') {
+              window.open(userManual.link);
+            } else {
+              setModalContent({ items: colabData, title: mode, icon: <img src={SVGImages(mode)} alt={`${mode} Logo`} /> });
+            }
+          }}
           {...others}
         >
           <img src={SVGImages(mode)} alt={`${mode} Logo`} className={styles.colabLogo} />
@@ -216,17 +220,6 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
           <Typography component={'p'}>{mode !== 'User Manual' ? description : userManual.description}</Typography>
           {mode === 'Setups & Administration' && (
             <>
-              {/* <ul className={styles.linkList}>
-                {colabData
-                  ?.filter((item) => !item?.isHidden && checkLinkAvailability.includes(item.resourceLabel || item.name))
-                  .map((item) => (
-                    <li key={item.name}>
-                      <Link to={handleRoutes(item)} className={styles.dialogLinks}>
-                        <Typography component="span">{item.resourceLabel || item.name}</Typography>
-                      </Link>
-                    </li>
-                  ))}
-              </ul> */}
               <Box
                 pb={1}
                 pt={5}
@@ -245,10 +238,10 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
           )}
           {mode === 'User Manual' && (
             <Box pb={1} pt={5}>
-              <a title="open equipt documentation" href={userManual.link} target="_blank" className={styles.viewAll}>
+              <span title="open equipt documentation" className={styles.viewAll}>
                 <Typography component="span">Equipt - User Manual</Typography>
                 <FiExternalLink size={20} style={{ marginBottom: 4 }} />
-              </a>
+              </span>
             </Box>
           )}
         </div>

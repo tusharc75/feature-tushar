@@ -19,13 +19,13 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         service: ele?.serviceId,
         technician: technicianData?._id,
         ...(type === 'fieldTicket' ? {
-          fieldTicket: ele?._id,
-          estimateStartDate: ele?.service?.estimateStartDate,
-          estimateEndDate: ele?.service?.estimateEndDate
+          fieldTicket: ele?.resourceId,
+          startDate: ele?.service?.estimateStartDate,
+          endDate: ele?.service?.estimateEndDate
         } : {
-          rentalJob: ele?._id,
-          estimateStartDate: ele?.estimateStartDate,
-          estimateEndDate: ele?.estimateEndDate
+          rentalJob: ele?.resourceId,
+          startDate: ele?.estimateStartDate,
+          endDate: ele?.estimateEndDate
         }),
         status: "Assigned",
       }

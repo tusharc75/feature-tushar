@@ -12,19 +12,25 @@ export default function GridDeleteIcon({ hasDeletePermission, ownerId, userId, o
                 hasDeletePermission ?
                     ownerId === userId ?
                         <HtmlTooltip title="Delete" >
-                            <IconButton size="small" aria-label="Delete" onClick={onDelete}>
-                                <DeleteIcon color="error" />
-                            </IconButton>
+                            <span>
+                                <IconButton size="small" aria-label="Delete" onClick={onDelete}>
+                                    <DeleteIcon color="error" />
+                                </IconButton>
+                            </span>
                         </HtmlTooltip> :
                         <HtmlTooltip className="cursor-stop" title={entity !== "Project" ? `You must be the owner of this ${entity} to get the delete functionality` : `You must be the manager of this ${entity} to get the delete functionality`}>
+                            <span>
+                                <IconButton size="small" aria-label="Delete">
+                                    <DeleteIcon />
+                                </IconButton>
+                            </span>
+                        </HtmlTooltip> :
+                    <HtmlTooltip className="cursor-stop" title={`You do not have permission to delete ${entity}`}>
+                        <span>
                             <IconButton size="small" aria-label="Delete">
                                 <DeleteIcon />
                             </IconButton>
-                        </HtmlTooltip> :
-                    <HtmlTooltip className="cursor-stop" title={`You do not have permission to delete ${entity}`}>
-                        <IconButton size="small" aria-label="Delete">
-                            <DeleteIcon />
-                        </IconButton>
+                        </span>
                     </HtmlTooltip>
             }
         </>

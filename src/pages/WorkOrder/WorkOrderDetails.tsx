@@ -404,7 +404,8 @@ const WorkOrderDetails = () => {
               completed={completed}
               fetchWorkOrderData={fetchWorkOrderData}
               resource={sidebarResource.workOrder}
-              technicianSelectedService={null}
+              defaultSelectedService={null}
+              setDefaultSelectedService={null}
             />
           )}
         </TabPanel>
