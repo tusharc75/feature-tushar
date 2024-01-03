@@ -1,11 +1,11 @@
 import { Button } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import React, { useEffect, useMemo } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import { VariableSizeList as List } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import ColCard from './ColCard';
-import { TActios, TInitialState } from './index';
+import { TActios, TInitialState, datarowInterface } from './index';
 import { Skeleton } from '@material-ui/lab';
 
 export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
@@ -22,6 +22,28 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   column: string;
   fetchSingleColumn: (column: string, page: number, appendData?: boolean, filterQuery?: string) => void;
 }
+
+const HEADER_HEIGHT = 90;
+const ROW_HEIGHT = 20;
+
+const calcCardHeight = (rowDef: datarowInterface[], data, loading: boolean = false) => {
+  const head = rowDef?.find((c) => c.type === 'title' || c.type === 'linkTitle');
+  let timeout;
+  clearTimeout(timeout);
+  if (loading || !data) {
+    timeout = setTimeout(() => {
+      calcCardHeight(rowDef, data, loading);
+    }, 1000);
+  }
+  const rowsWithHeight = rowDef.filter((r) => {
+    if (!data) return !['title', 'linkTitle', 'tooltip'].includes(r.type);
+    if (r.accessor)
+      return !['title', 'linkTitle', 'tooltip'].includes(r.type) && Boolean(r.accessor ? (data[r.accessor] ? data[r.accessor] : false) : false);
+    else return !['title', 'linkTitle', 'tooltip'].includes(r.type);
+  });
+  if (!head) return ROW_HEIGHT * rowsWithHeight.length;
+  return HEADER_HEIGHT + rowsWithHeight.length * ROW_HEIGHT;
+};
 
 const RenderColumns: React.FC<colDataInterface> = ({
   cardOnClick,
@@ -107,7 +129,9 @@ const RenderColumns: React.FC<colDataInterface> = ({
                 style={{ overflowX: 'hidden' }}
                 height={containerHeight || 600}
                 itemCount={itemCount}
-                itemSize={cardHeight}
+                itemSize={(index) => {
+                  return calcCardHeight(rowDef, data[column][index], loading[column] || true);
+                }}
                 width={'100%'}
                 ref={ref}
               >

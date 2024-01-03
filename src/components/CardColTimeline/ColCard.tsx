@@ -54,7 +54,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
           return item.renderer(data);
         }
         if (item.type === 'linkTitle') {
-          if (!data[item.accessor]) return <div className="min-h-[20px]" />;
+          if (!data[item.accessor]) return null;
           return (
             <Typography key={index} component={'h5'} className={styles.cardTitle} title={data[item.accessor] || '--'}>
               <Link target="_blank" className={styles.cardDetailsLink} to={() => item.link(data)}>
@@ -64,7 +64,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
           );
         }
         if (item.type === 'text') {
-          if (!data[item.accessor]) return <div className="min-h-[20px]" />;
+          if (!data[item.accessor]) return null;
           return (
             <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
               <span>{item.title}: </span>
@@ -73,7 +73,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
           );
         }
         if (item.type === 'link') {
-          if (!data[item.accessor]) return <div className="min-h-[20px]" />;
+          if (!data[item.accessor]) return null;
           return (
             <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
@@ -84,7 +84,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
           );
         }
         if (item.type === 'date') {
-          if (!data[item.accessor]) return <div className="min-h-[20px]" />;
+          if (!data[item.accessor]) return null;
           return (
             <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
@@ -93,7 +93,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
           );
         }
         if (item.type === 'dateTime') {
-          if (!data[item.accessor]) return <div className="min-h-[20px]" />;
+          if (!data[item.accessor]) return null;
           return (
             <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
@@ -103,7 +103,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
         }
         if (item.type === 'timer') {
           const stepTimes = getFieldsWithOtherDetails(data[item.accessor] || []);
-          if (!stepTimes.length) return <div className="min-h-[20px]" />;
+          if (!stepTimes.length) return null;
           if (stepTimes.length > 0)
             return (
               <Typography key={index} className={styles.cardDetails}>
