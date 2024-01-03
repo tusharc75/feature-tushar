@@ -13,7 +13,7 @@ export const assignAvatar = (notifications, chats) => {
   const newNotifications = [...notifications];
   for (const notification of newNotifications) {
     const chat = chats.find((c) => c.id === notification.chatterId);
-    if (chat) notification.avatar = getUserAvatar(chat);
+    if (chat) notification.avatar = chat.avatar;
     else notification.avatar = '';
     notification.chatterName = chat ? `${chat.chatTitle}` : '';
   }

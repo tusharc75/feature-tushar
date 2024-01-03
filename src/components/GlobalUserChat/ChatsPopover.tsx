@@ -1,15 +1,15 @@
-import { useState, useEffect, useContext } from 'react';
-import { createStyles, Theme, makeStyles, useTheme } from '@material-ui/core/styles';
-import { Popover, Box, Typography, Divider, IconButton, List, useMediaQuery } from '@material-ui/core';
-import { Create, Clear, ArrowBack, Group } from '@material-ui/icons';
+import { Avatar, Box, Divider, IconButton, List, TextField, Typography, useMediaQuery } from '@material-ui/core';
+import { Theme, createStyles, makeStyles, useTheme } from '@material-ui/core/styles';
+import { ArrowBack, Create, Group } from '@material-ui/icons';
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
 
-import ChatListITem from './ChatListITem';
-import ChatBox from './ChatBox';
-import NewChat from './NewChat';
-import axiosInstance from '../../axios/axiosInstance';
-import { useData } from '../../StateProvider/Provider';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
 import HtmlTooltip from '../CustomTooltipTitle';
+import ChatBox from './ChatBox';
+import ChatListITem from './ChatListITem';
+import NewChat from './NewChat';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -26,6 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
 const ChatsPopover = (props) => {
   const classes = useStyles();
   const { socket, chatList, selectedChat, setSelectedChat } = useContext(GlobalChatContext);
+
   const {
     state: {
       user: { user }
@@ -34,8 +35,21 @@ const ChatsPopover = (props) => {
   const { open, anchorEl, onClose, getChats } = props;
   const [newChat, setNewChat] = useState(false);
   const [users, setUsers] = useState([]);
+  const [filterValue, setFilterValue] = useState('');
+  const [filteredChatList, setFilteredChatList] = useState(chatList);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const setFilterChatList = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    const value = e.target.value;
+    setFilterValue(value);
+    if (value.trim() === '') {
+      setFilteredChatList(chatList);
+      return;
+    }
+    const filteredList = chatList.filter((d) => d.chatTitle.toLowerCase().includes(value.toLowerCase()));
+    setFilteredChatList(filteredList);
+  };
 
   useEffect(() => {
     fetchUsersList();
@@ -79,7 +93,9 @@ const ChatsPopover = (props) => {
                 </IconButton>
               </HtmlTooltip>
             ) : (
-              <HtmlTooltip title="New chat">
+              <>
+                <div className={`min-w-[24px]`} />
+                {/* <HtmlTooltip title="New chat">
                 <IconButton
                   onClick={() => {
                     if (selectedChat) setSelectedChat(null);
@@ -89,10 +105,14 @@ const ChatsPopover = (props) => {
                 >
                   <Create className="text-[white]" />
                 </IconButton>
-              </HtmlTooltip>
+              </HtmlTooltip> */}
+              </>
             )}
 
             <Box display="flex" alignItems="center">
+              {selectedChat ? (
+                <Avatar src={selectedChat.avatar} alt={selectedChat.chatTitle ? selectedChat.chatTitle : ''} className="mr-2 ml-[12px]" />
+              ) : null}
               <Typography variant="h6" className="text-truncate [font-size:16px_!important] font-bold">
                 {selectedChat ? selectedChat?.chatTitle : newChat ? 'New chat' : `Chats (${chatList?.length})`}
               </Typography>
@@ -115,22 +135,44 @@ const ChatsPopover = (props) => {
               )}
             </Box>
 
-            <div className="w-[24px]" />
+            <div className={`min-w-[24px] ${selectedChat ? 'flex-grow' : ''}`} />
           </Box>
 
           <Divider orientation="horizontal" />
 
-          <Box height={isSmallScreen ? '100%' : 509} style={{ overflowY: 'auto' }}>
+          <Box>
             {newChat ? (
               <NewChat userId={user._id} setNewChat={setNewChat} setSelectedChat={setSelectedChat} users={users} />
             ) : selectedChat ? (
               <ChatBox isSmallScreen={isSmallScreen} user={user} />
             ) : (
-              <List disablePadding dense className={classes.listRoot}>
-                {chatList.map((chat, i) => (
-                  <ChatListITem key={i} userId={user._id} socket={socket} chat={chat} setSelectedChat={setSelectedChat} getChats={getChats} />
-                ))}
-              </List>
+              <>
+                <div className="relative m-[21px_17px_23px]">
+                  <TextField
+                    value={filterValue}
+                    onChange={(e) => setFilterChatList(e)}
+                    className="w-full"
+                    id="filter-chat-list"
+                    name="outlined-basic"
+                    type="search"
+                    variant="outlined"
+                    fullWidth
+                    size="small"
+                    label={'Search name or number'}
+                  />
+                </div>
+                <h4 className="text-[var(--primary-text)] mb-3 font-semibold text-[14px] px-[17px]">Quick Contacts</h4>
+                <List
+                  disablePadding
+                  dense
+                  className={`${classes.listRoot} `}
+                  style={{ overflowY: 'auto', height: isSmallScreen ? 'calc(100vh - 225px)' : '394px' }}
+                >
+                  {filteredChatList.map((chat, i) => (
+                    <ChatListITem key={chat.id} userId={user._id} socket={socket} chat={chat} setSelectedChat={setSelectedChat} getChats={getChats} />
+                  ))}
+                </List>
+              </>
             )}
           </Box>
         </Box>
