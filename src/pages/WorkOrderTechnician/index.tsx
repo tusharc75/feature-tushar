@@ -113,7 +113,8 @@ const WorkOrderTechnician = () => {
             </HtmlTooltip>
           ) : null
       },
-      ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : [])
+      ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : []),
+      { accessor: 'estimateCompleteDate', title: 'Due Date', type: 'date' },
     ];
   }, [user?.user?.brandPolicy?.workOrderTimer]);
 
@@ -150,6 +151,9 @@ const WorkOrderTechnician = () => {
             newObj['productionOrderNumber'] = item.workOrderDetail?.productionOrder?.optionLabel;
             newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
             newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
+            if (column !== WORKORDER_SERVICE_STATUS.completed) {
+              newObj['estimateCompleteDate'] = item.workOrderDetail?.estimateCompleteDate;
+            }
             return newObj;
           });
           const newData = prev;
