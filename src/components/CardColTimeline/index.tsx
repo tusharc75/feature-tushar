@@ -50,19 +50,9 @@ type TLinkTitle = TCommon & {
   type: 'linkTitle';
   link: (data: any) => string;
 };
-type TTooltip = {
+type TTooltip = TCommon & {
   type: 'tooltip';
   renderer: (data: any) => ReactNode;
-};
-
-const HEADER_HEIGHT = 90;
-const ROW_HEIGHT = 20;
-
-const calcCardHeight = (rowDef: datarowInterface[]) => {
-  const head = rowDef?.find((c) => c.type === 'title' || c.type === 'linkTitle');
-  const rowsWithHeight = rowDef.filter((r) => !['title', 'linkTitle', 'tooltip'].includes(r.type));
-  if (!head) return ROW_HEIGHT * rowsWithHeight.length;
-  return HEADER_HEIGHT + rowsWithHeight.length * ROW_HEIGHT;
 };
 
 const CardColTimeline: React.FC<CardColInterface> = ({
@@ -83,8 +73,6 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   const [containerHeight, setContainerHeight] = React.useState(600);
 
   const { count, columnOrder, visibleColumns, rowDef } = state;
-
-  const cardCalculatedHeight = cardHeight ?? calcCardHeight(rowDef);
 
   // sort columns
   const columns = useMemo(() => {
@@ -124,7 +112,6 @@ const CardColTimeline: React.FC<CardColInterface> = ({
                   cardOnClick={cardOnClick}
                   passFailStatus={passFailStatus}
                   passFailAccessor={passFailAccessor}
-                  cardHeight={cardCalculatedHeight}
                   isCreateNew={isCreateNew}
                   createNew={createNew}
                   createNewText={createNewText}
