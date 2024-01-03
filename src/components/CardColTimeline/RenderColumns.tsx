@@ -113,7 +113,6 @@ const RenderColumns: React.FC<colDataInterface> = ({
 
   useEffect(() => {
     if (listRef.current) {
-      console.log(resetIndex.current);
       listRef.current._listRef.resetAfterIndex(resetIndex.current);
     }
   }, [isLoading]);
