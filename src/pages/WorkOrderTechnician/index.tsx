@@ -100,6 +100,8 @@ const WorkOrderTechnician = () => {
     return [
       { accessor: 'serviceName', type: 'title' },
       { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
+      { accessor: 'productionOrderNumber', title: routes.productionOrder.title, type: 'text' },
+      { accessor: 'repairOrderNumber', title: routes.repairOrder.title, type: 'text' },
       { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
       { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
       {
@@ -144,6 +146,8 @@ const WorkOrderTechnician = () => {
             const newObj = { ...item };
             newObj['serviceName'] = item.service?.serviceName;
             newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
+            newObj['repairOrderNumber'] = item.workOrderDetail?.repairOrder?.optionLabel;
+            newObj['productionOrderNumber'] = item.workOrderDetail?.productionOrder?.optionLabel;
             newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
             newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
             return newObj;
@@ -163,7 +167,7 @@ const WorkOrderTechnician = () => {
         dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
         dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => {
         dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
       });
@@ -209,8 +213,8 @@ const WorkOrderTechnician = () => {
                   selectedResource.resource === sidebarResource.workOrder
                     ? workOrderOptions
                     : selectedResource.resource === sidebarResource.repairOrder
-                    ? repairOrderOptions
-                    : productionOrderOptions
+                      ? repairOrderOptions
+                      : productionOrderOptions
                 }
                 fullWidth
                 getOptionLabel={(option: any) => option.optionLabel}

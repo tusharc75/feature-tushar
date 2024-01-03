@@ -1,11 +1,12 @@
-import { useEffect, useState, useContext } from 'react';
-import { Box, IconButton, Typography, CircularProgress, Divider } from '@material-ui/core';
-import { SendOutlined } from '@material-ui/icons';
+import { Box, CircularProgress, IconButton, Typography } from '@material-ui/core';
+import { Done, DoneAll } from '@material-ui/icons';
 import moment from 'moment';
+import { useContext, useEffect, useRef, useState } from 'react';
 
-import axiosInstance from '../../axios/axiosInstance';
-import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
+import { SendIcon } from 'src/assets/svg/svgIcons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
+import axiosInstance from '../../axios/axiosInstance';
 
 const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
   const { setToastConfig } = useContext(CustomToastContext);
@@ -16,6 +17,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
   const [isMsgSending, setIsMsgSending] = useState(false);
   const [chatUsers, setChatUsers] = useState([]);
   const [loadingChat, setLoadingChat] = useState(true);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!socket) return;
@@ -79,6 +81,38 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
 
   const user = (data: any) => chatUsers.find((_d) => _d?._id === data.userid);
 
+  useEffect(() => {
+    if (inputRef.current && !loadingChat) {
+      inputRef.current.focus();
+    }
+  }, [selectedChat.id, loadingChat]);
+
+  const RenderReadReceipt = ({ messageData }) => {
+    if (messageData.userid !== currentUser) return null;
+    if (messageData.seen.length === 1) {
+      return (
+        <span className="read-receipt received">
+          <Done className="[font-size:14px_!important] text-gray-500" />
+        </span>
+      );
+    }
+    if (messageData.seen.length === selectedChat.users.length) {
+      return (
+        <span className="read-receipt seen">
+          <DoneAll className="[font-size:14px_!important] text-[#49B11D]" />
+        </span>
+      );
+    }
+    if (messageData.seen.length < selectedChat.users.length) {
+      return (
+        <span className="read-receipt sent">
+          <DoneAll className="[font-size:14px_!important] text-gray-500" />
+        </span>
+      );
+    }
+    return null;
+  };
+
   return (
     <Box height={isSmallScreen ? '100%' : '509px'} className="global-chatbox">
       {selectedChat.chatTitle === 'Equipt User' && (
@@ -87,7 +121,13 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
         </div>
       )}
       {loadingChat ? (
-        <Box height={'100%'} display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
+        <Box
+          height={isSmallScreen ? 'calc(100vh - 171px)' : '449px'}
+          display={'flex'}
+          flexDirection={'column'}
+          justifyContent={'center'}
+          alignItems={'center'}
+        >
           <CircularProgress size={24} />
           <div>
             <Typography component={'p'} variant="body1">
@@ -96,38 +136,54 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
           </div>
         </Box>
       ) : (
-        <Box height={isSmallScreen ? 'calc(100% - 120px)' : '449px'} className="chatbox-container bg-[var(--dark-secondary,white)]">
+        <Box
+          height={isSmallScreen ? 'calc(100vh - 171px)' : '449px'}
+          className="chatbox-container bg-[var(--dark-secondary,white)] gap-y-[9px] py-[20px] px-[17px]"
+        >
           {messages &&
-            messages.map((data, i) => (
-              <div key={i} className={`message-container ${data.userid === currentUser ? 'my-message' : ''}`}>
-                <div
-                  title={moment(data.date).format('DD, MMM YYYY')}
-                  className={`message-outlet ${data.userid === currentUser ? 'my-color ml-4' : 'mr-4'}`}
-                  style={{
-                    borderBottomLeftRadius: data.userid === currentUser ? '14px' : 0,
-                    borderBottomRightRadius: data.userid === currentUser ? 0 : '14px'
-                  }}
-                >
-                  {selectedChat && chatUsers?.length > 2 ? (
-                    <p className="username">{!user(data) ? 'Equipt User' : user(data)?._id !== currentUser && user(data)?.firstName}</p>
-                  ) : null}
-                  <div className="msg-data">
-                    <div className="msg-info">
-                      <p className="name">{data.userid === currentUser ? 'You' : data.userName}</p>
-                      <p className="time">{formatTime(data.date)}</p>
+            messages.map((data, i) => {
+              const userFromChat = user(data);
+              const isMyMessage = data.userid === currentUser;
+              return (
+                <div key={i} className={`single-message max-w-[calc(100%-min(30%,30px))] group w-fit ${isMyMessage ? 'ml-auto' : 'mr-auto'}`}>
+                  <div
+                    title={moment(data.date).format('DD, MMM YYYY')}
+                    className={`message-outlet p-[10px] ${
+                      isMyMessage
+                        ? 'my-message rounded-[10.142px_10.142px_0px_10.142px] bg-[var(--dark-primary,#E8FCFB)] text-right'
+                        : 'rounded-[10.142px_10.142px_10.142px_0px] bg-[#F4F8F6] dark:bg-[rgba(14,14,35,0.5)]'
+                    }`}
+                    style={{
+                      borderBottomLeftRadius: isMyMessage ? '14px' : 0,
+                      borderBottomRightRadius: isMyMessage ? 0 : '14px'
+                    }}
+                  >
+                    {selectedChat && chatUsers?.length > 2 ? (
+                      <p className="font-semibold text-[13px] mb-[2px]">
+                        {!userFromChat ? 'Equipt User' : userFromChat?._id !== currentUser && `${userFromChat?.firstName} ${userFromChat?.lastName}`}
+                      </p>
+                    ) : null}
+                    <div className="msg-data">
+                      <div className="msg-info">{/* <p className="name">{isMyMessage ? 'You' : data.userName}</p> */}</div>
+                      <p className="msg-text">{data.message}</p>
                     </div>
-                    <p className="msg-text">{data.message}</p>
+                  </div>
+                  <div className={`flex items-center gap-1 ${isMyMessage ? 'text-right justify-end' : ''}`}>
+                    <RenderReadReceipt messageData={data} />
+                    <p className={`text-[12px] ${isMyMessage ? '' : 'opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
+                      {formatTime(data.date)}
+                    </p>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </Box>
       )}
 
       {!loadingChat && (
         <form
           onSubmit={sendMessage}
-          className={`h-[60px] grid grid-cols-[1fr_32px] gap-[10px] items-center px-[15px] py-[10px] shadow-[0px_-4px_40px_0px_rgba(0,_0,_0,_0.06)] dark:[border-top:1px_solid_var(--common-border-color)]`}
+          className={`h-[60px] grid grid-cols-[1fr_32px] gap-[10px] items-center px-[15px] py-[10px] shadow-[0px_-4px_40px_0px_rgba(0,_0,_0,_0.06)] dark:[border-top:1px_solid_var(--common-border-color)] dark:bg-[rgba(14,14,35,0.5)]`}
         >
           <input
             disabled={selectedChat.chatTitle === 'Equipt User'}
@@ -135,6 +191,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
             value={messageValue}
             className="p-[12px_22px] rounded-[26px] bg-[transparent] [border:1px_solid_var(--common-border-color)] text-[var(--primary-text)] text-[13px] [outline-color:transparent] focus-within:[outline:2px_solid_var(--common-border-color)]"
             onChange={(e) => setMessageValue(e.target.value)}
+            ref={inputRef}
           />
 
           <Box mr={1}>
@@ -144,7 +201,12 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
               type="submit"
               size="small"
             >
-              <SendOutlined />
+              <SendIcon
+                size={32}
+                className={`text-[var(--dark-primary-text,#2A3042)]  ${
+                  !messageValue || selectedChat.chatTitle === 'Equipt User' || isMsgSending ? ' opacity-70' : ''
+                }`}
+              />
             </IconButton>
           </Box>
         </form>

@@ -1,14 +1,14 @@
-import { useContext, useEffect, useState } from 'react';
 import { Box, IconButton, InputBase, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
+import { useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { SendIcon } from 'src/assets/svg/svgIcons';
 
+import moment from 'moment';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { backendApi } from 'src/config';
-import moment from 'moment';
 
 const Chatter = (props: any) => {
   const { relatedTo } = props;
