@@ -33,6 +33,25 @@ const GlobalUserChat = () => {
     buttonRef.current.click();
   }, [open]);
 
+  const getUserAvatar = (data) => {
+    let avatar = '';
+    for (const user of data.users) {
+      const userName = `${user.firstName} ${user.lastName}`;
+      if (userName === data.chatTitle) {
+        avatar = user.avatar || '';
+      }
+    }
+    return avatar;
+  };
+
+  const assignAvatar = (chats) => {
+    const newNotifications = [...chats];
+    for (const notification of newNotifications) {
+      notification.avatar = getUserAvatar(notification);
+    }
+    return newNotifications;
+  };
+
   const getChats = useCallback(() => {
     axiosInstance()
       .get('/chatter/user-to-user/my?orderBy=desc&sortBy=message.date&limit=100')
@@ -57,7 +76,7 @@ const GlobalUserChat = () => {
 
         const yetUnseen = data?.filter((d) => d.unseen > 0).length > 0 ? true : false;
         setUnseen(yetUnseen);
-
+        newData = assignAvatar(newData);
         setChatList(newData);
         setChatterIds(data.map((d) => d.id));
         if (chatter) {
