@@ -791,8 +791,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   closeActions();
                   setArrangeView(true);
                 }}
-                disabled={
-                  selectedRecords?.length && selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id) ? false : true
+                disabled={selectedRecords?.length &&
+                  selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+                  selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id) ? false : true
                 }
               >
                 Arrange Services
@@ -948,8 +949,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       {arrangeView && (
         <ArrangeView
           data={
-            selectedRecords
-              ?.filter((e) => e.type === MATERIAL_TYPE.service)
+            flattenArray(dataRows)?.filter((e) => e.type === MATERIAL_TYPE.service
+              && e?.workOrder?._id === selectedRecords[0]?.workOrder?._id)
               ?.map((d) => {
                 return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
               }) || []
