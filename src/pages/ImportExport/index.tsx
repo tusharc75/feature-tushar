@@ -368,6 +368,7 @@ const ImportExport = () => {
                 onClick={(e: any) => (e.target.value = null)}
                 type="file"
                 accept=".xlsx,.csv"
+                disabled={isImgUploading || !selectResource}
               />
               <label htmlFor={`file`}>
                 <Button size="small" variant="outlined" component="span" disabled={isImgUploading || !selectResource} startIcon={<AiOutlineImport />}>
