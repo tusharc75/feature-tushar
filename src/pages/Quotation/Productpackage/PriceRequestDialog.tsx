@@ -9,10 +9,8 @@ import MuiAccordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import { withStyles } from '@material-ui/core/styles';
-import { Box, Button, Grid, IconButton, TextField, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, useMediaQuery } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import moment from 'moment';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -69,7 +67,6 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
   const [comment, setComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { state, dispatch } = useTableReducer();
 
   const handleChange = (event) => {
     setComment(event.target.value.trimStart());
@@ -77,19 +74,6 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
   useEffect(() => {
     fetchProductGridData();
   }, []);
-
-  const columns: any = [
-    {
-      accessor: 'detail',
-      Header: 'Detail',
-      Cell: ({ row }) => <p>{row?.original?.detail}</p>
-    },
-    {
-      accessor: 'price',
-      Header: 'Price',
-      Cell: ({ row }) => <p className="text-truncate">{row?.original?.price ? <p>{row?.original?.price}</p> : <NoDataCell />}</p>
-    }
-  ];
 
   const fetchProductGridData = () => {
     setIsLoading(true);
@@ -184,7 +168,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
           const m = data?.material?.map((item: any) => {
             return {
               ...item,
-              price: item[`price_${quoteData?.currency?.toLowerCase()}`],
+              price: item[`supplierPrice_${quoteData?.currency?.toLowerCase()}`],
               detail: type === 'Customer' ? item.productDetail.productName : item.productName || item.serviceName
             };
           });
@@ -250,19 +234,25 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                           </Grid>
                         )}
                         <Box p="10px" width={'100%'}>
-                          {columns && data.material ? (
-                            <CustomReactTable
-                              columns={columns}
-                              state={{ ...state, dataRows: data.material }}
-                              dispatch={dispatch}
-                              renderedFrom="quotation_product_package"
-                              isClientSideGrid={true}
-                              hideSelection={true}
-                              hideAction={true}
-                              showArrangeView={false}
-                              // displayCustomReactTableHeaderOptions={false}
-                              // hideExpander={true}
-                            />
+                          {data.material ? (
+                            <TableContainer component={Paper}>
+                              <Table aria-label="simple table">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>Detail</TableCell>
+                                    <TableCell >Price</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {data?.material?.map((row) => (
+                                    <TableRow key={row._id}>
+                                      <TableCell >{row?.detail}</TableCell>
+                                      <TableCell>{row?.price}</TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
                           ) : (
                             <Box height={500}>
                               <CommonSkeleton lenArray={[...Array(10).keys()]} />
