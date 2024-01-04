@@ -118,12 +118,16 @@ const ProductionOrderDetails = () => {
       .get(`${routes.productionOrder.path}/${id}`)
       .then(({ data: { data } }) => {
         const tempStepList = productionOrderSteps.filter((o) => o.name !== 'Loading Ticket')
-        setCurrentStep(getIndex(data?.processStatus, tempStepList));
+        setProductionOrderProcessSteps(tempStepList);
+        if (data?.status === PRODUCTION_ORDER_STATUS.completed) {
+          setCurrentStep(tempStepList?.length - 1);
+        } else {
+          setCurrentStep(getIndex(data?.processStatus, tempStepList));
+        }
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         if (user?.role?.selectedEntity?.superAdminAccess) {
           isAllowedToEdit = true;
         }
-        setProductionOrderProcessSteps(tempStepList);
         // if (!data?.customerAccount) {
         //   setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
         // }
@@ -163,7 +167,7 @@ const ProductionOrderDetails = () => {
       .then(({ data }) => {
         fetchProductionOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const updateOrderStatus = (status) => {
@@ -288,20 +292,20 @@ const ProductionOrderDetails = () => {
             handleNext={
               productionOrderProcessStepsNames[currentStep] === 'Add'
                 ? () => {
-                    axiosInstance()
-                      .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
-                      .then(({ data: { data } }) => {
-                        if (data) {
-                          setCurrentStep((prevStep) => {
-                            const newStep = prevStep + 1;
-                            return newStep;
-                          });
-                        }
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                      });
-                  }
+                  axiosInstance()
+                    .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
+                    .then(({ data: { data } }) => {
+                      if (data) {
+                        setCurrentStep((prevStep) => {
+                          const newStep = prevStep + 1;
+                          return newStep;
+                        });
+                      }
+                    })
+                    .catch((err) => {
+                      toastConfig.setToastConfig(err);
+                    });
+                }
                 : null
             }
           />
