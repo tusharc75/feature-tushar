@@ -59,16 +59,20 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.info.dark
   }
 }));
+
 const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
+
   let renderedFrom = 'QuotationSupplierPrice';
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
+
+  const { dataRows } = state;
+
   const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
-  const [productData, setProductData] = useState([]);
-  const [productArray, setProductArray] = useState([]);
   const [requireFieldArray, setRequireFieldArray] = useState([]);
   const [quotationDetailsData, setQuotationDetailsData] = useState(null);
   const [isSubmited, setIsSubmited] = useState(false);
@@ -133,10 +137,10 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
   ];
 
   useEffect(() => {
-    fetchProduct();
+    fetchData();
   }, []);
 
-  const fetchProduct = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     axios
       .get(backendApi + `/quotation/supplier-price-request/supplier-price-response/${quotationData?.data?.requestId}`)
@@ -150,7 +154,6 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
           res.detail = item?.productName ?? item?.serviceName;
           return res;
         });
-        setProductArray(rows);
         let columns = [];
         columns = [
           {
@@ -173,9 +176,6 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             disabled: true,
             primaryField: true,
             Cell: ({ row }) => <p className="text-truncate">{row?.original?.detail}</p>,
-            Footer: () => {
-              return <>Total</>;
-            }
           }
         ];
 
@@ -187,9 +187,9 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             const currencyField: any =
               field?.type === 'currencyAmount'
                 ? {
-                    ...field,
-                    fieldName: field?.fieldName + '_' + quotationData?.currency?.toLowerCase()
-                  }
+                  ...field,
+                  fieldName: field?.fieldName + '_' + quotationData?.currency?.toLowerCase()
+                }
                 : {};
 
             rows.forEach((data) => {
@@ -208,13 +208,14 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                   tempProductData[productIndex][currencyField?.fieldName] = tempData[currencyField?.fieldName];
                   tempProductData[productIndex][`price_${quotationData?.currency.toLowerCase()}`] = tempData[currencyField?.fieldName];
                 }
-                setProductData(tempProductData);
               }
             });
           });
-
           const filteredFields = ele?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName));
           const newColumns = generateColumns(renderedFrom, filteredFields, null, false, quotationData.currency);
+          newColumns?.forEach((e) => {
+            e.editable = true;
+          })
           columns = [...columns, ...newColumns];
         });
         setRequireFieldArray(data?.requiredFields);
@@ -234,48 +235,42 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       });
   };
 
-  const onCellValueChanged = (data, row) => {
-    const col = Object.keys(data)[0];
-    const value = data[col];
-    let tempFieldsNumber = [];
-    let productIndex = productData.findIndex((d) => d._id === row?.uniqueId);
-    let tempData = {
-      _id: row?.uniqueId,
-      [col]: parseInt(row[col] === '' ? 0 : row[col]),
-      [`price_${quotationDetailsData?.currency.toLowerCase()}`]: parseInt(row[col] === '' ? 0 : row[col])
-    };
-    if (productIndex === -1) {
-      setProductData((prevState) => [...prevState, tempData]);
-    } else {
-      let tempProductData = productData;
-      tempProductData[productIndex][`price_${quotationDetailsData?.currency.toLowerCase()}`] =
-        tempData[`price_${quotationDetailsData?.currency.toLowerCase()}`];
-      tempProductData[productIndex][col] = tempData[col];
-      setProductData(tempProductData);
-    }
+  const onSaveEdit = (data, row) => {
+    if (!data) return;
+    const rows = [...dataRows];
+    rows?.forEach((d) => {
+      if (row?._id === d._id) {
+        Object.assign(d, data);
+      }
+    });
+    dispatch({ type: 'update', data: rows });
   };
 
   const handleSubmit = () => {
     let checkField: boolean;
     if (requireFieldArray.length === 1) {
-      checkField = !(productArray.length !== productData.length);
+      checkField = !(dataRows.length !== dataRows.length);
     } else {
-      checkField = !(
-        productArray.length !== productData.length ||
-        productData.length === 0 ||
-        !productData.every((data) => Object.keys(data).length === requireFieldArray.length + 1)
+      checkField = !(dataRows.length !== dataRows.length ||
+        dataRows.length === 0 ||
+        !dataRows.every((data) => Object.keys(data).length === requireFieldArray.length + 1)
       );
     }
 
+    const material = dataRows?.map((e) => {
+      return {
+        _id: e.uniqueId,
+        [`supplierPrice_${quotationData?.currency?.toLowerCase() || 'usd'}`]: e[`supplierPrice_${quotationData?.currency?.toLowerCase() || 'usd'}`]
+      }
+    })
+
     if (checkField) {
       let tempData = {
-        material: productData,
+        material: material,
         requestId: quotationData?.data?.requestId,
         openAuthId: openAuthId
       };
-
-      axios
-        .post(backendApi + `/quotation/supplier-price-request/supplier-price-response `, tempData)
+      axios.post(backendApi + `/quotation/supplier-price-request/supplier-price-response `, tempData)
         .then(({ data }) => {
           setIsSubmited(true);
         })
@@ -315,10 +310,10 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
               type: 'success',
               message: 'All Records Added Successfully'
             });
-            fetchProduct();
+            fetchData();
           } else {
             const fileName = response.headers['content-disposition'].split('filename=')[1];
-            fetchProduct();
+            fetchData();
           }
         })
         .catch((error) => {
@@ -327,9 +322,6 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
     }
   };
 
-  /**
-   * EXPORT TABLES INTO EXCEL
-   */
   const exportToExcel = () => {
     toastConfig.setToastConfig({
       hideDuration: null,
@@ -401,7 +393,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
               <div className={'detail-box-content'}>
                 <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                 <h3 className="form-label-style" title={' Product List'}>
-                  Product List
+                  Products
                 </h3>
               </div>
               <div id="importExportLinks" className={`${classes.root}`}>
@@ -422,16 +414,15 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   columns={columns}
-                  onSelect={() => {}}
                   state={state}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}
-                  refreshGrid={fetchProduct}
-                  onSaveEdit={onCellValueChanged}
+                  refreshGrid={fetchData}
+                  onSaveEdit={onSaveEdit}
                   showOnlyShowFilteredRecordSwitch={true}
-                  isClientSideGrid={false}
-                  hideAction={false}
-                  hideSelection={false}
+                  isClientSideGrid={true}
+                  hideAction={true}
+                  hideSelection={true}
                 />
               ) : (
                 <Box p={2} height={500}>
