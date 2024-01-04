@@ -122,7 +122,7 @@ const PublicRoutePage = () => {
   }, [resourceData?.referenceIdType]);
 
   return (
-    <div style={{ backgroundColor: 'white', position: 'relative', zIndex: 1 }}>
+    <div className="h-screen w-screen">
       <Grid container className={classes.header}>
         <Grid item container xs={6} md={6} sm={6} justify={'flex-start'}>
           <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
