@@ -923,7 +923,7 @@ const Steps = ({
                 if (selectedService?.assignedUsers?.length) {
                   isStepsAllowToPerform = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) ? true : false
                 }
-                else if (selectedService?.competencies?.filter(e => user?.competencies.includes(e))?.length) {
+                else if (selectedService?.competencies?.filter(e => user?.competencies?.includes(e))?.length) {
                   isStepsAllowToPerform = true;
                 }
                 else if (allowedToEdit) {
