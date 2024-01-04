@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useReducer } from 'react';
+import React, { useState, useRef, useEffect, useReducer, useCallback } from 'react';
 import { IconButton, ListItem, ListItemText, List, ListItemIcon } from '@material-ui/core';
 import { Clear as ClearIcon } from '@material-ui/icons';
 import { useData } from '../../StateProvider/Provider';
@@ -11,6 +11,7 @@ import { usePathname, useClickdOutside, useKeyPress } from 'src/hooks';
 import styles from './Header.module.scss';
 import CallMadeIcon from '@material-ui/icons/CallMade';
 import { useStore, SEARCH } from 'src/StateProvider/fastContext';
+import { useLocation } from 'react-router-dom';
 
 import { filterReducerInitialState, filterReducer } from './helper';
 
@@ -85,12 +86,17 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
     filterDispatch({ type: 'setFilteredData', payload: filteredItems });
   };
 
-  const clearSearch = () => {
-    // dispatch({ type: SET_SEARCH, payload: '' });
+  const clearSearch = useCallback(() => {
     setStore({ [SEARCH]: '' });
     setSearch('');
     setShowCloseButton(false);
-  };
+  }, [setStore]);
+
+  // reset search
+  const location = useLocation();
+  useEffect(() => {
+    clearSearch();
+  }, [location.pathname, clearSearch]);
 
   const handleRoutes = (item) => {
     switch (item.name) {
