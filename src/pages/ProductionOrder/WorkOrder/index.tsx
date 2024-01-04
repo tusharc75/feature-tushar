@@ -419,7 +419,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
-      if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed) {
+      if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed ||
+        _subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         _subRow.hideSelection = true;
       }
       _subRow.canDelete = false;
