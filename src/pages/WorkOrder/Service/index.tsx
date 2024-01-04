@@ -200,7 +200,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 if (!completed) {
                   if ((allowedToEdit || (element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id)
                     || (!element?.assignedUsers?.length &&
-                      element?.competencies?.filter(e => user?.competencies.includes(e))?.length)))) {
+                      element?.competencies?.filter(e => user?.competencies?.includes(e))?.length)))) {
                     element.clickable = true;
                   }
                   else {
@@ -495,7 +495,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 
   const isAllowedToServiceEdit = !completed &&
     (allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id)
-      || (!selectedService?.assignedUsers?.length && selectedService?.competencies?.filter(e => user?.competencies.includes(e))?.length))
+      || (!selectedService?.assignedUsers?.length && selectedService?.competencies?.filter(e => user?.competencies?.includes(e))?.length))
 
   const openAddServiceActions = (event) => {
     setAddServiceAnchorEl(event.currentTarget);
