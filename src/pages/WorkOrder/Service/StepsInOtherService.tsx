@@ -4,11 +4,13 @@ import { Autocomplete } from '@material-ui/lab';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS, workOrder } from 'src/constants/helpers';
-import { Add, DeleteOutline, FileCopyOutlined } from '@material-ui/icons';
+import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS, sidebarResource, workOrder } from 'src/constants/helpers';
+import { Add, DeleteOutline, FileCopyOutlined, EditOutlined, DragIndicator } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -44,14 +46,17 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const StepsInOtherServices = ({ workOrderId, service, allowedToEdit, onClose }) => {
+const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, onClose }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
   const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
+  const [stepData, setStepData] = useState([]);
   const [steps, setSteps] = useState([]);
-  const [addNewStep, setAddNewStep] = useState({ open: false, clone: false, cloneStepData: null });
+  const [manageStep, setManageStep] = useState({ open: false, clone: false, data: null });
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, loading: false, steps: [] });
+  const [arrangeView, setArrangeView] = useState(false);
 
   useEffect(() => {
     axiosInstance()
@@ -69,27 +74,38 @@ const StepsInOtherServices = ({ workOrderId, service, allowedToEdit, onClose }) 
           }
         });
         setServiceOptions(services);
+        setStepData(data?.stepData);
       });
   }, [workOrderId, service]);
 
   useEffect(() => {
     if (selectedService) {
-      axiosInstance()
-        .get(`${workOrder.api}/service/detail/${workOrderId}/${selectedService?.optionValue}/${selectedService?.uniqueId}`)
-        .then(({ data: { data } }) => {
-          setSteps(data?.steps?.sort((a, b) => a?.order - b?.order));
-        });
+      fetchSteps();
     }
   }, [selectedService]);
 
-  const handleAddStep = (values: any) => {
+  const fetchSteps = () => {
     axiosInstance()
-      .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
+      .get(`${workOrder.api}/service/detail/${workOrderId}/${selectedService?.optionValue}/${selectedService?.uniqueId}`)
+      .then(({ data: { data } }) => {
+        setSteps(data?.steps?.sort((a, b) => a?.order - b?.order));
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleStep = (values: any) => {
+    let api = `${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`;
+    if (!manageStep?.clone && manageStep?.data) {
+      api = `${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-step`;
+      values = { ...values, order: manageStep?.data?.order };
+    }
+    axiosInstance()
+      .put(api, values)
       .then(({ data }) => {
-        const temp = selectedService;
-        setSelectedService(null);
-        setSelectedService(temp);
-        setAddNewStep({ open: false, clone: false, cloneStepData: null });
+        fetchSteps();
+        setManageStep({ open: false, clone: false, data: null });
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
@@ -98,6 +114,45 @@ const StepsInOtherServices = ({ workOrderId, service, allowedToEdit, onClose }) 
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+      });
+  };
+
+  const deleteSteps = () => {
+    setShowDeleteConfirmBox((prev) => ({ ...prev, loading: true }));
+    const payload = {
+      serviceUniqueId: selectedService?.uniqueId,
+      steps: showDeleteConfirmBox.steps.map((item) => item._id)
+    };
+    axiosInstance()
+      .put(`${workOrder.api}/${workOrderId}/step/remove`, payload)
+      .then(({ data }) => {
+        fetchSteps();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleStepUpdate = (rows: any[]) => {
+    axiosInstance()
+      .put(`${workOrder.api}/steps-order/${workOrderId}/${selectedService?.optionValue}`, { data: rows || [] })
+      .then(({ data }) => {
+        fetchSteps();
+        setArrangeView(false);
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
       });
   };
 
@@ -132,7 +187,28 @@ const StepsInOtherServices = ({ workOrderId, service, allowedToEdit, onClose }) 
               <TextField {...params} margin="dense" variant="outlined" label="Select Service" placeholder="Select Service" name="service" />
             )}
           />
-          <Box mt={1}>
+          <Box mt={1} display="flex" alignItems="center">
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              disabled={
+                allowedToEdit &&
+                selectedService &&
+                steps?.length > 0 &&
+                resource === sidebarResource.workOrder &&
+                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                  selectedService?.status
+                )
+                  ? false
+                  : true
+              }
+              onClick={() => setArrangeView(true)}
+            >
+              <DragIndicator className="mr-1" fontSize="small" />
+              Arrange
+            </Button>
+            <Box ml={1}></Box>
             <Button
               variant={'outlined'}
               color="primary"
@@ -141,7 +217,7 @@ const StepsInOtherServices = ({ workOrderId, service, allowedToEdit, onClose }) 
               aria-controls="add-menu"
               disabled={!selectedService}
               onClick={() => {
-                setAddNewStep({ open: true, clone: false, cloneStepData: null });
+                setManageStep({ open: true, clone: false, data: null });
               }}
             >
               Add Steps
@@ -149,7 +225,7 @@ const StepsInOtherServices = ({ workOrderId, service, allowedToEdit, onClose }) 
           </Box>
         </Box>
         <Box mt={2}>
-          {steps?.length > 0 &&
+          {steps?.length > 0 ? (
             steps?.map((step) => {
               return (
                 <Box
@@ -174,44 +250,111 @@ const StepsInOtherServices = ({ workOrderId, service, allowedToEdit, onClose }) 
                         </div>
                       </Box>
                     </Box>
-                    <div className="flex  md:gap-1 items-center">
+                    <div className="flex md:gap-1 items-center">
+                      <HtmlTooltip enterTouchDelay={0} title="Edit" placement="top" arrow>
+                        <IconButton
+                          size="small"
+                          color="inherit"
+                          aria-label="Edit"
+                          onClick={(e) => {
+                            setManageStep({ open: true, clone: false, data: step });
+                          }}
+                        >
+                          <EditOutlined color="primary" style={{ fontSize: '18px' }} />
+                        </IconButton>
+                      </HtmlTooltip>
+
                       <HtmlTooltip enterTouchDelay={0} title="Clone" placement="top" arrow>
                         <IconButton
                           size="small"
                           color="inherit"
                           aria-label="Clone"
                           onClick={(e) => {
-                            setAddNewStep({ open: true, clone: true, cloneStepData: step });
+                            setManageStep({ open: true, clone: true, data: step });
                           }}
                         >
                           <FileCopyOutlined style={{ fontSize: '18px' }} />
+                        </IconButton>
+                      </HtmlTooltip>
+
+                      <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
+                        <IconButton
+                          size="small"
+                          color="inherit"
+                          style={{ color: 'red' }}
+                          aria-label="delete"
+                          disabled={
+                            !allowedToEdit ||
+                            [
+                              WORKORDER_SERVICE_STEP_STATUS.passed,
+                              WORKORDER_SERVICE_STEP_STATUS.failed,
+                              WORKORDER_SERVICE_STEP_STATUS.completed
+                            ].includes(stepData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id)?.passFailStatus)
+                          }
+                          onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
+                        >
+                          <DeleteOutline style={{ fontSize: '20px' }} />
                         </IconButton>
                       </HtmlTooltip>
                     </div>
                   </Box>
                 </Box>
               );
-            })}
+            })
+          ) : selectedService ? (
+            <Box>No Steps</Box>
+          ) : (
+            <Box>Please Select Service !!</Box>
+          )}
         </Box>
-        {addNewStep.open && (
+        {manageStep.open && (
           <StepDialog
             handleClose={() => {
-              setAddNewStep({ open: false, clone: false, cloneStepData: null });
+              setManageStep({ open: false, clone: false, data: null });
             }}
             handleSucess={(data) => {
-              if (addNewStep.clone) {
+              if (manageStep?.clone) {
                 delete data?.stepId;
               }
-              handleAddStep(data);
+              handleStep(data);
             }}
-            stepId={addNewStep.clone ? addNewStep.cloneStepData?._id : ''}
-            stepData={addNewStep.clone ? addNewStep.cloneStepData : null}
+            stepId={manageStep?.data?._id ?? ''}
+            stepData={manageStep?.data}
+            notEditable={!manageStep?.clone && manageStep?.data ? (manageStep?.data?.customStep === true ? false : true) : false}
             steps={steps}
             reference={'workOrder'}
             workOrderId={workOrderId}
             serviceId={selectedService?.optionValue}
             uniqueId={selectedService?.uniqueId}
-            isClone={addNewStep.clone}
+            isClone={manageStep?.clone}
+          />
+        )}
+
+        {showDeleteConfirmBox.open && (
+          <ConfirmationDialog
+            open={showDeleteConfirmBox.open}
+            message={`Are you sure you want to delete ${showDeleteConfirmBox.steps.map((item) => item.stepName).join(', ')}?`}
+            onClose={() => {
+              setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
+            }}
+            okBtnLoading={showDeleteConfirmBox.loading}
+            onOk={() => {
+              deleteSteps();
+            }}
+          />
+        )}
+
+        {arrangeView && (
+          <ArrangeView
+            data={
+              steps?.map((d) => {
+                return { _id: d?._id, name: d?.stepName, order: d?.order };
+              }) || []
+            }
+            title={'Arrange'}
+            handleClose={() => setArrangeView(false)}
+            handleSubmit={handleStepUpdate}
+            loading={false}
           />
         )}
       </CustomDialogContent>

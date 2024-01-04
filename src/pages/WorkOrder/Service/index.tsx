@@ -1462,6 +1462,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       {setpsInOtherServices && (
         <StepsInOtherServices
           workOrderId={workOrderId}
+          resource={resource}
           service={selectedService}
           allowedToEdit={allowedToEdit}
           onClose={() => {
