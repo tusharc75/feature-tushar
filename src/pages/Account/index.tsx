@@ -47,11 +47,11 @@ const options = ['All', 'Approved', 'Disapproved'];
 export default function Account(props) {
   const types = [
     {
-      key: 'My Accounts',
+      key: `My ${routes.customerAccount.title}`,
       value: 1
     },
     {
-      key: 'All Accounts',
+      key: `All ${routes.customerAccount.title}`,
       value: 2
     }
   ];
