@@ -24,8 +24,9 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem } from '@material-ui/core';
+import { map, uniq } from 'lodash';
 
-const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive, stepFullScreen }) => {
+const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, canLoad, canReceive, stepFullScreen }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
@@ -43,6 +44,10 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   const [showConfirmInterPlantTransfer, setShowConfirmInterPlantTransfer] = useState(false);
   const [loadingInterPlantTransfer, setLoadingInterPlantTransfer] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false);
+  const [okBtnLoading, setOkBtnLoading] = useState(false);
+
 
   useEffect(() => {
     fetchFields();
@@ -192,12 +197,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         });
       });
 
-      if (transferInventoryData.status !== TRANSFER_INVENTORY_STATUS.delivered) {
-        if (rows?.filter((d) => d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === rows?.length) {
-          updateStatus(TRANSFER_INVENTORY_STATUS.delivered);
-        }
-      }
-
       dispatch({ type: 'initialize', data: rows, count: rows.length });
       dispatch({ type: 'loading', loading: false });
     } catch (err) {
@@ -247,20 +246,18 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
 
   const handleInterPlantTransfer = () => {
     setLoadingInterPlantTransfer(true);
-    axiosInstance()
-      .put(
-        `${routes.transferInventory.path}/${transferInventoryData._id}/transfer-inter-plant`,
-        dataRows?.map((e) => {
-          return { product: e.productId, qty: e.qty };
-        })
-      )
+    axiosInstance().put(
+      `${routes.transferInventory.path}/${transferInventoryData._id}/transfer-inter-plant`,
+      dataRows?.map((e) => {
+        return { product: e.productId, qty: e.qty };
+      })
+    )
       .then(({ data: { data } }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: `Inventory Received Successfully`
         });
-        updateStatus(TRANSFER_INVENTORY_STATUS.delivered);
         setShowConfirmInterPlantTransfer(false);
         setLoadingInterPlantTransfer(false);
       })
@@ -278,6 +275,31 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     setAnchorEl(null);
   };
 
+  const handelCancelDeliveredTicket = () => {
+    setOkBtnLoading(true);
+    const loadingTicketId = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
+    if (loadingTicketId.length) {
+      let data = {};
+      data['_ids'] = loadingTicketId;
+      axiosInstance().post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
+        .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Cancelled Successfully`
+          });
+          fetchData();
+        })
+        .catch((error) => {
+          setOkBtnLoading(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
+
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
@@ -289,18 +311,20 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           columns={columns?.filter((e) => ['productName', 'productNumber', 'productDescription', 'productDescription', 'qty']?.includes(e.accessor))}
         />
         <Box display="flex">
-          <Button
-            variant={'outlined'}
-            color="default"
-            size="small"
-            onClick={openActions}
-            className={`new-dropdown-v1`}
-            aria-controls="action-menu"
-            endIcon={<ExpandMore />}
-            disabled={selectedRecords?.length ? false : true}
-          >
-            Actions
-          </Button>
+          {transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered &&
+            <Button
+              variant={'outlined'}
+              color="default"
+              size="small"
+              onClick={openActions}
+              className={`new-dropdown-v1`}
+              aria-controls="action-menu"
+              endIcon={<ExpandMore />}
+              disabled={selectedRecords?.length ? false : true}
+            >
+              Actions
+            </Button>
+          }
           <Menu
             anchorEl={anchorEl}
             keepMounted
@@ -314,7 +338,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
             onClose={closeActions}
           >
             {interPlantTransfer ? (
-              allowedToEdit && canReceive && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
+              allowedToEdit && canReceive && (
                 <MenuItem
                   onClick={() => {
                     closeActions()
@@ -338,18 +362,31 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
                   </MenuItem>
                 )}
                 {canReceive && (
-                  <MenuItem
-                    onClick={() => {
-                      closeActions()
-                      setShowConfirmBoxReceive(true);
-                    }}
-                    disabled={
-                      selectedRecords.length === 0 ||
-                      selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
-                    }
-                  >
-                    {`Receive`}
-                  </MenuItem>
+                  <>
+                    <MenuItem
+                      onClick={() => {
+                        closeActions()
+                        setShowConfirmBoxReceive(true);
+                      }}
+                      disabled={
+                        selectedRecords.length === 0 ||
+                        selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+                      }
+                    >
+                      {`Receive`}
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        closeActions()
+                        setShowConformationCancleTicket(true);
+                      }}
+                      disabled={selectedRecords.length &&
+                        selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length ? false : true
+                      }
+                    >
+                      Cancel Delivered Loading Ticket(s)
+                    </MenuItem>
+                  </>
                 )}
               </>
             )}
@@ -416,6 +453,18 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
             setShowConfirmInterPlantTransfer(false);
           }}
           onOk={handleInterPlantTransfer}
+        />
+      )}
+
+      {showConformationCancleTicket && (
+        <ConfirmationDialogRaw
+          okBtnLoading={okBtnLoading}
+          open={showConformationCancleTicket}
+          message={`This action will cancel the complete Loading Ticket(s). Are you sure?`}
+          onClose={() => {
+            setShowConformationCancleTicket(false);
+          }}
+          onOk={handelCancelDeliveredTicket}
         />
       )}
     </Fragment>
