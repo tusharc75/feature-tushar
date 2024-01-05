@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { pricingCondition, gridLoadingTimeout, PRICING_TYPE, sidebarResource, MATERIAL_TYPE } from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConditionDialog from './ConditionDialog';
 import { camelCase, startCase } from 'lodash';
@@ -31,7 +31,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, rowCount, page, limit, sorting, selectedRecords } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const [addMaterialDialog, setAddMaterialDialog] = useState({ open: false, materialType: '' });
   const [condition, setCondition] = useState(null);
   const [showDialog, setShowDialog] = useState({ open: false, isBulkedit: false });
@@ -44,7 +44,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
 
   useEffect(() => {
     fetchCondition();
-  }, [page, limit, sorting, pricingConditionId]);
+  }, [page, limit, sorting, pricingConditionId, filters, showFilteredRecordsOnly, search]);
 
   const fetchCondition = () => {
     dispatch({ type: 'loading', loading: true });
@@ -84,8 +84,27 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
+    if (showFilteredRecordsOnly) {
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
+    }
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return deepFilter;
   };
