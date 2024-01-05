@@ -1273,9 +1273,6 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
       const hasApproveAccountPermission = user.user.permissions.approveAccount;
       const accounts = [sidebarResource.customerAccount, sidebarResource.supplierAccount];
 
-      console.log("inside helpers");
-      console.log(data);
-
       data.forEach((d) => {
         const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
         if (indexOfPermission > -1) {
