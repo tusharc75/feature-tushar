@@ -61,7 +61,7 @@ const SupportTicketDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/support-ticket/${id}`);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id) && data?.status !== 'Completed';
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id && data?.status === 'Pending');
       setSupportTicketData(data);
@@ -140,7 +140,7 @@ const SupportTicketDetail = () => {
             <FaWpforms className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
           <CustomTab index={1} value={1} {...a11yProps(1)}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Comment
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Activity
           </CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
