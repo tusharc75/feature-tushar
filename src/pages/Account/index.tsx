@@ -52,11 +52,11 @@ export default function Account(props) {
   
   const types = [
     {
-      key: `My ${routes[accountResource].title}`,
+      key: `My ${routes[accountResource]?.title}`,
       value: 1
     },
     {
-      key: `All ${routes[accountResource].title}`,
+      key: `All ${routes[accountResource]?.title}`,
       value: 2
     }
   ];
