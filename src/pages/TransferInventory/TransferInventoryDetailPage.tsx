@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { ACTIVITY_RESOURCE, transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
-import Steps from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 import { transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import TabPanel from 'src/components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -24,6 +24,7 @@ import ContentFullScreen from '../../components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Edit } from '@material-ui/icons';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
@@ -37,7 +38,6 @@ const TransferInventoryDetailPage = () => {
   const {
     state: { permissions, user }
   }: any = useData();
-  const [headingLabel, setHeadingLabel] = useState('');
   const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setDeleting] = useState(false);
@@ -45,7 +45,6 @@ const TransferInventoryDetailPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [transferInventoryFields, setTransferInventoryFields] = useState([]);
-  const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [nextStep, setNextStep] = useState(false);
@@ -83,6 +82,10 @@ const TransferInventoryDetailPage = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    fetchFields()
+  }, []);
+
   const fetchFields = () => {
     axiosInstance()
       .get('/field?resource=Transfer Inventory')
@@ -97,11 +100,8 @@ const TransferInventoryDetailPage = () => {
   };
 
   const fetchTransferInventoryData = () => {
-    axiosInstance()
-      .get(`${routes.transferInventory.path}/${id}`)
+    axiosInstance().get(`${routes.transferInventory.path}/${id}`)
       .then(({ data: { data } }) => {
-        const transferData = data;
-
         const userEntity = user?.entity?.map((e) => e._id) ?? [];
         if (data?.transferFromPlant?.entity?.length) {
           setCanLoad(data?.transferFromPlant?.entity?.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0);
@@ -114,21 +114,17 @@ const TransferInventoryDetailPage = () => {
         } else {
           setCanReceive(true);
         }
-
-        axiosInstance()
-          .get(`${routes.transferInventory.path}/${id}/product`)
-          .then(({ data: { data } }) => {
-            fetchFields();
-            setHeadingLabel(transferData.transferNumber);
-            setCustomizedRoutes([routes.transferInventory, { title: transferData.transferNumber }]);
-            setCurrentStep(stepNames.indexOf(transferData?.processStatus) !== -1 ? stepNames.indexOf(transferData?.processStatus) : 0);
-            var isAllowedToEdit = [...(transferData.collaborator ?? []), transferData.owner].some((d) => d?.optionValue === user?.user?._id);
-            if (user?.role?.selectedEntity?.superAdminAccess) {
-              isAllowedToEdit = true;
-            }
-            setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
-            setTransferInventoryData(transferData);
-          });
+        if (data?.status === TRANSFER_INVENTORY_STATUS.delivered) {
+          setCurrentStep(transferInventorySteps?.length - 1);
+        } else {
+          setCurrentStep(getIndex(data?.processStatus, transferInventorySteps));
+        }
+        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        if (user?.role?.selectedEntity?.superAdminAccess) {
+          isAllowedToEdit = true;
+        }
+        setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
+        setTransferInventoryData(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -177,9 +173,6 @@ const TransferInventoryDetailPage = () => {
           type: 'success',
           message: `Status updated ${status} Successfully`
         });
-        if (status === TRANSFER_INVENTORY_STATUS.delivered) {
-          updateProcessStatus(1);
-        }
         fetchTransferInventoryData();
       })
       .catch((error) => {
@@ -202,10 +195,25 @@ const TransferInventoryDetailPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[routes.transferInventory, { title: transferInventoryData?.transferNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {allowedToEdit && ![TRANSFER_INVENTORY_STATUS.delivered].includes(transferInventoryData?.status) &&
+              transferInventoryData?.canComplete &&
+              (
+                <Fragment>
+                  <ButtonWithPulse
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={() => updateStatus(TRANSFER_INVENTORY_STATUS.delivered)}
+                    className={'btn-outline-v1'}
+                  >
+                    Complete
+                  </ButtonWithPulse>
+                </Fragment>
+              )}
             {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
               <Button
                 className={'btn-outline-v1'}
@@ -294,7 +302,6 @@ const TransferInventoryDetailPage = () => {
                 {stepNames[currentStep] === 'Loading Ticket' && (
                   <LoadingTicket
                     transferInventoryData={transferInventoryData}
-                    updateStatus={updateStatus}
                     renderedFrom={`${renderedFrom}_grid-3`}
                     allowedToEdit={allowedToEdit}
                     canLoad={canLoad}
@@ -311,7 +318,7 @@ const TransferInventoryDetailPage = () => {
         <ConfirmationDialog
           okBtnLoading={isDeleting}
           open={showConfirmBox}
-          message={`Are you sure you want to delete this transfer inventory: ${headingLabel} ?`}
+          message={`Are you sure you want to delete this transfer inventory: ${transferInventoryData?.transferNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
