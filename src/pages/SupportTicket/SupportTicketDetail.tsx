@@ -18,6 +18,7 @@ import ManageSupportTicket from './ManageSupportTicket';
 import Comments from './Comments';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { FaWpforms } from 'react-icons/fa';
+import { SUPPORT_TICKET_STATUS } from 'src/constants/helpers';
 const SupportTicketDetail = () => {
   const { id } = useParams();
   const history = useHistory();
@@ -61,7 +62,8 @@ const SupportTicketDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/support-ticket/${id}`);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id) && data?.status !== 'Completed';
+      const isAllowedToEdit =
+        [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id) && data?.status !== 'Completed';
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id && data?.status === 'Pending');
       setSupportTicketData(data);
@@ -102,6 +104,31 @@ const SupportTicketDetail = () => {
     }
   };
 
+  const handleReopenStatus = () => {
+    axiosInstance()
+      .put(`${routes.supportTicket.path}/update-status`, {
+        ticket: [
+          {
+            _id: supportTicketData._id,
+            currentStatus: supportTicketData?.status
+          }
+        ],
+        status: SUPPORT_TICKET_STATUS.inProgress,
+        resolution: ''
+      })
+      .then(({ data: { data } }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${SUPPORT_TICKET_STATUS.inProgress}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   function a11yProps(index: any) {
     return {
       id: `main-tab-${index}`,
@@ -125,6 +152,11 @@ const SupportTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {supportTicketData?.status === 'Completed' && (
+              <Button disabled={loading} variant={'outlined'} color="default" size="small" className="btn-outline-v1" onClick={handleReopenStatus}>
+                {'Re-Open'}
+              </Button>
+            )}
             {allowedToEdit && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
