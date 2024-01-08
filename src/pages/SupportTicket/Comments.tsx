@@ -62,36 +62,29 @@ const Comments = ({ uniqueId }) => {
           </IconButton>
         </HtmlTooltip>
       </div>
-
       <CustomDialogContent style={{ padding: '18px 24px 12px', marginTop: '3px' }}>
         {data ? (
           <div>
             {data.map((item: any) => (
-              <div key={item._id}>
-                <div key={item._id} className="mb-4 md:mb-[26px]">
-                  <div
-                    style={{ borderBottomStyle: 'solid' }}
-                    className="flex flex-wrap border-b border-[var(--common-border-color)] md:gap-[32px] gap-4 items-start justify-between"
-                  >
-                    <p className="basis-[calc(100%-100px)] font-[500] text-[16px]">{item?.comment?.replace(/<[^>]*>/g, '')}</p>
-                  </div>
-                  <div className="flex mt-[9px] gap-[10px] justify-between flex-wrap text-[13px] text-[var(--primary-text)]">
+              <div key={item._id} className='mb-4 border border-[var(--common-border-color)] p-2'>
+                <div key={item._id} className="md:mb-[26px]">
+                  <div className="flex mt-[9px] gap-[10px] justify-between flex-wrap text-[13px] text-[var(--primary-text)] mb-4 ">
                     <p>
-                      Created by : <span className="font-semibold">{item?.user?.optionLabel}</span>
+                      <span className="font-semibold">{item?.user?.optionLabel}</span>
                       <span className="text-[#969696] dark:text-gray-400 ml-2">{moment(item.date).format(dateTimeFormat)}</span>
                     </p>
-                    {item.updatedBy && item.updatedAt ? (
-                      <p>
-                        Edited by : <span className="font-semibold">{item?.user?.optionLabel}</span>
-                        <span className="text-[#969696] dark:text-gray-400 ml-2">{moment(item.updatedAt).format(dateTimeFormat)}</span>
-                      </p>
-                    ) : null}
-                    <div></div>
+                  </div>
+                  <div className="flex flex-wrap md:gap-[32px] gap-4 items-start justify-between"    >
+                    <div
+                      className="max-image"
+                      dangerouslySetInnerHTML={{
+                        __html: item?.comment
+                      }}
+                    />
                   </div>
                 </div>
               </div>
             ))}
-
             <Grid style={{ marginTop: data?.length > 0 ? '5px' : '0' }} container justifyContent="center" alignItems="center" spacing={2}>
               <Grid item xs={12}>
                 <TinyMce
