@@ -465,9 +465,7 @@ const WorkOrder = ({
           });
         }
       });
-
-      await axiosInstance().put(`${workOrder.api}/remove-work-orders-material`, records);
-
+      await axiosInstance().put(`${workOrder.api}/${repairOrderData?._id}/material/remove`, records);
       if (
         deleteData?.filter((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type))?.length &&
         isPostWorkService &&
@@ -656,6 +654,9 @@ const WorkOrder = ({
         }
         if (_subRow.type === MATERIAL_TYPE.package) {
           _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
+        }
+        if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
+          _subRow.canDelete = false;
         }
       }
 
