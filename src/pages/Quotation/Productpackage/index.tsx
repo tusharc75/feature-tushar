@@ -504,7 +504,9 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       material: selectedRecords?.map((d) => {
         return {
           _id: d?._id,
-          materialId: d?.materialId
+          materialId: d?.materialId,
+          type: d?.type,
+          parentId: d?.parentId
         };
       }),
       quotationId: quotationData?._id,

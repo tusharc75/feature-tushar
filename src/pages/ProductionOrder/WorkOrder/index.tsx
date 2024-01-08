@@ -434,6 +434,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         if (_subRow.type === MATERIAL_TYPE.package) {
           _subRow.canDelete = _subRow.subRows.length === 0 ? true : false;
         }
+        if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
+          _subRow.canDelete = false;
+        }
       }
     });
     return subRows;
@@ -467,13 +470,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const handleDelete = async () => {
-    if (
-      deleteData?.some((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type) || (MATERIAL_TYPE.product === e.type && e.parentId))
-    ) {
+    if (deleteData?.some((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type) || (MATERIAL_TYPE.product === e.type && e.parentId))) {
       setDeleting(true);
-
       const records: any = [];
-
       deleteData?.forEach((data) => {
         const index = records?.findIndex((d) => d?.workOrder === data?.workOrder?._id);
         if (index >= 0) {
@@ -485,8 +484,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           });
         }
       });
-
-      await axiosInstance().put(`${workOrder.api}/remove-work-orders-material`, records);
+      await axiosInstance().put(`${workOrder.api}/${productionOrderData?._id}/material/remove`, records);
       setDeleting(false);
       setShowConfirmBox(false);
       fetchData();
