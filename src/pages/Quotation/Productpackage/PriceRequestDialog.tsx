@@ -1,23 +1,23 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, dateFormat, dateTimeFormat } from '../../../constants/helpers';
+import { CustomDialogTransition, dateTimeFormat, prepareDataForGrid } from '../../../constants/helpers';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import { withStyles } from '@material-ui/core/styles';
-import { Box, Button, Grid, IconButton, TextField, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, TextField, Typography } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import moment from 'moment';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Accordion = withStyles({
   root: {
@@ -62,14 +62,19 @@ const AccordionDetails = withStyles((theme) => ({
 }))(MuiAccordionDetails);
 
 const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId }) => {
+  let renderedFrom = 'ViewQuotationSupplierPrice';
   const toastConfig = useContext(CustomToastContext);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows } = state;
+  const { generateColumns } = useColumns();
+
   const [productDataList, setproductDataList] = useState([]);
+  const [allFields, setAllFields] = useState([]);
   const [response, setResponse] = useState({ open: false, type: '', id: '' });
   const [expandSupplierGrid, setExpandSupplierGrid] = useState(0);
   const [comment, setComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const { state, dispatch } = useTableReducer();
 
   const handleChange = (event) => {
     setComment(event.target.value.trimStart());
@@ -77,19 +82,6 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
   useEffect(() => {
     fetchProductGridData();
   }, []);
-
-  const columns: any = [
-    {
-      accessor: 'detail',
-      Header: 'Detail',
-      Cell: ({ row }) => <p>{row?.original?.detail}</p>
-    },
-    {
-      accessor: 'price',
-      Header: 'Price',
-      Cell: ({ row }) => <p className="text-truncate">{row?.original?.price ? <p>{row?.original?.price}</p> : <NoDataCell />}</p>
-    }
-  ];
 
   const fetchProductGridData = () => {
     setIsLoading(true);
@@ -109,7 +101,41 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
       axiosInstance()
         .get(`/quotation/supplier-price-request/quotation-product-supplier-response/${quoteData?._id}/${versionId}`)
         .then(({ data: { data } }) => {
-          setproductDataList(data);
+          let rows = [];
+          data?.data.forEach((d) => {
+            const material = d?.material.filter((e) => !!!e?.parentId);
+            material.forEach((_material, index) => {
+              const res: any = {
+                ...prepareDataForGrid(_material)
+              };
+              res.index = index + 1;
+              res.detail =
+                _material?.type === 'product'
+                  ? _material?.productDetail?.productName
+                  : _material?.type === 'service'
+                  ? _material?.serviceDetail?.serviceName
+                  : _material?.type === 'package'
+                  ? _material?.packageDetail?.packageName
+                  : '';
+              res.description =
+                _material?.type === 'product'
+                  ? _material?.productDetail?.productDescription
+                  : _material?.type === 'service'
+                  ? _material?.serviceDetail?.serviceDescription
+                  : _material?.type === 'package'
+                  ? _material?.packageDetail?.packageDescription
+                  : '';
+              res.uniqueId = d?._id;
+              res.subRows = generateNestedData(d?.material, res);
+
+              rows = [...rows, res];
+            });
+          });
+
+          dispatch({ type: 'initialize', data: rows, count: rows.length });
+
+          setproductDataList(data?.data);
+          setAllFields(data?.fields);
           setIsLoading(false);
         })
         .catch((error) => {
@@ -117,6 +143,90 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
           toastConfig.setToastConfig(error);
         });
     }
+  };
+
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, index) => {
+      _subRow.index = parent.index + '.' + `${index + 1}`;
+      _subRow.detail =
+        _subRow?.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === 'service'
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageName
+          : '';
+      _subRow.description =
+        _subRow?.type === 'product'
+          ? _subRow?.productDetail?.productDescription
+          : _subRow?.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription
+          : '';
+
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+
+    return subRows;
+  };
+
+  const fetchColumns = (id = null) => {
+    let columns = [];
+    columns = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 150,
+        show: true,
+        disabled: true,
+        primaryField: true,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.index}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'detail',
+        Header: 'Detail',
+        width: 150,
+        show: true,
+        disabled: true,
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p className="text-truncate" title={row.original?.detail}>
+              {row.original?.detail}
+            </p>
+            {row.original?.subRows?.length ? (
+              <Box ml={1}>
+                <span>({row.original?.subRows?.length})</span>
+              </Box>
+            ) : null}
+          </div>
+        )
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 150,
+        show: true,
+        disabled: true,
+        Cell: ({ row }) => (row?.original?.description ? <p className="text-truncate">{row?.original?.description}</p> : <NoDataCell />)
+      }
+    ];
+
+    if (id) {
+      const filteredFields = allFields?.filter((e) => productDataList?.find((p) => p?._id === id)?.requiredFields.includes(e.fieldName));
+      const newColumns = generateColumns(renderedFrom, filteredFields, null, false, quoteData.currency);
+      newColumns?.forEach((e) => {
+        e.editable = false;
+      });
+
+      columns = [...columns, ...newColumns];
+    }
+
+    return columns;
   };
 
   const handleAccept = (responseId) => {
@@ -180,33 +290,25 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
     <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
       <CustomDialogHeader title={`View ${type} Quote`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
       {productDataList && productDataList.length !== 0 && !isLoading ? (
-        productDataList.map((data, index) => {
-          const m = data?.material?.map((item: any) => {
-            return {
-              ...item,
-              price: item[`price_${quoteData?.currency?.toLowerCase()}`],
-              detail: type === 'Customer' ? item.productDetail.productName : item.productName || item.serviceName
-            };
-          });
-          data.material = m;
+        productDataList.map((data) => {
           return (
             <Box ml={2} mr={2}>
               <div className="pt-1 modified_style_of_accordion_supplier_ask_price">
-                <Accordion expanded={Boolean(expandSupplierGrid === index)} className="omsAccordian accordSupplierAskPrice">
+                <Accordion expanded={Boolean(expandSupplierGrid === data?._id)} className="omsAccordian accordSupplierAskPrice">
                   <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
                     <Grid container className="pos_rel">
                       <div
                         className="clicker_div"
-                        onClick={() => (expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index))}
+                        onClick={() => (expandSupplierGrid === data?._id ? setExpandSupplierGrid(null) : setExpandSupplierGrid(data?._id))}
                       ></div>
                       <Grid item xs={12} sm={12} md={12}>
                         <Box display="flex">
                           <Box>
                             <IconButton
                               size="small"
-                              onClick={() => (expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index))}
+                              onClick={() => (expandSupplierGrid === data?._id ? setExpandSupplierGrid(null) : setExpandSupplierGrid(data?._id))}
                             >
-                              {expandSupplierGrid === index ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                              {expandSupplierGrid === data?._id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                             </IconButton>
                           </Box>
                           <Box padding="5px">
@@ -222,7 +324,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                     </Grid>
                   </AccordionSummary>
                   <AccordionDetails>
-                    {expandSupplierGrid === index && (
+                    {expandSupplierGrid === data?._id && (
                       <>
                         {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
                           <Grid item xs={12} sm={12} md={12} container justify="flex-end">
@@ -249,26 +351,18 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                             </Box>
                           </Grid>
                         )}
-                        <Box p="10px" width={'100%'}>
-                          {columns && data.material ? (
-                            <CustomReactTable
-                              columns={columns}
-                              state={{ ...state, dataRows: data.material }}
-                              dispatch={dispatch}
-                              renderedFrom="quotation_product_package"
-                              isClientSideGrid={true}
-                              hideSelection={true}
-                              hideAction={true}
-                              showArrangeView={false}
-                              // displayCustomReactTableHeaderOptions={false}
-                              // hideExpander={true}
-                            />
-                          ) : (
-                            <Box height={500}>
-                              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                            </Box>
-                          )}
-                        </Box>
+                        <CustomReactTable
+                          height={'calc(100vh - 393px)'}
+                          columns={fetchColumns(data?._id)}
+                          state={{ ...state, dataRows: dataRows?.filter((d) => d?.uniqueId === data?._id) }}
+                          dispatch={dispatch}
+                          renderedFrom={renderedFrom}
+                          refreshGrid={fetchProductGridData}
+                          isClientSideGrid={true}
+                          hideAction={true}
+                          hideSelection={true}
+                          expander={true}
+                        />
                       </>
                     )}
                   </AccordionDetails>

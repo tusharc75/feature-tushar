@@ -2074,6 +2074,13 @@ export const PLANNING_STATUS = {
   converted: 'Converted'
 } as const;
 
+export const SUPPORT_TICKET_STATUS = {
+  pending: 'Pending',
+  inProgress: 'In-Progress',
+  approvalPending: 'Approval Pending',
+  completed: 'Completed'
+} as const
+
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);

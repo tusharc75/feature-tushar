@@ -45,22 +45,24 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 const options = ['All', 'Approved', 'Disapproved'];
 
 export default function Account(props) {
+
+  const {
+    account: { accountApi, accountResource, accountRoute }
+  } = props;
+  
   const types = [
     {
-      key: 'My Accounts',
+      key: `My ${routes[accountResource]?.title}`,
       value: 1
     },
     {
-      key: 'All Accounts',
+      key: `All ${routes[accountResource]?.title}`,
       value: 2
     }
   ];
 
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
-  const {
-    account: { accountApi, accountResource, accountRoute }
-  } = props;
   const {
     state: { user, permissions, selectedEntity },
     dispatch: entityDispatch

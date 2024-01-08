@@ -126,7 +126,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
   };
 
   const onUploadFile = (file) => {
-    setOtherAttachments((prevState) => [{ name: file.split('_')[3] || file, url: file, date: new Date() }, ...prevState]);
+    setOtherAttachments((prevState) => [{ name: file.split('_OMS_TS_')?.pop() || file, url: file, date: new Date() }, ...prevState]);
   };
 
   const handleDeleteAttachment = (file) => {
