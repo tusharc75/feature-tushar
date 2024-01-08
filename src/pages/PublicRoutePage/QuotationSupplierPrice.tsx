@@ -10,6 +10,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -61,7 +62,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
-
   let renderedFrom = 'QuotationSupplierPrice';
 
   const classes = useStyles();
@@ -146,12 +146,29 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       .get(backendApi + `/quotation/supplier-price-request/supplier-price-response/${quotationData?.data?.requestId}`)
       .then(({ data: { data } }) => {
         setQuotationDetailsData(data?.quotation);
-        let rows = data.products.map((item, index) => {
+        const material = data?.materials.filter((e) => !!!e?.parentId);
+        let rows = material?.map((item, index) => {
           let res: any = {
             ...prepareDataForGrid(item)
           };
           res.index = index + 1;
-          res.detail = item?.productName ?? item?.serviceName;
+          res.detail =
+            item?.type === 'product'
+              ? item?.productDetail?.productName
+              : item?.type === 'service'
+              ? item?.serviceDetail?.serviceName
+              : item?.type === 'package'
+              ? item?.packageDetail?.packageName
+              : '';
+          res.description =
+            item?.type === 'product'
+              ? item?.productDetail?.productDescription
+              : item?.type === 'service'
+              ? item?.serviceDetail?.serviceDescription
+              : item?.type === 'package'
+              ? item?.packageDetail?.packageDescription
+              : '';
+          res.subRows = generateNestedData(data?.materials, res);
           return res;
         });
         let columns = [];
@@ -174,56 +191,27 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             width: 150,
             show: true,
             disabled: true,
-            primaryField: true,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.detail}</p>,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.detail}</p>
+          },
+          {
+            accessor: 'description',
+            Header: 'Description',
+            width: 150,
+            show: true,
+            disabled: true,
+            Cell: ({ row }) => (row?.original?.description ? <p className="text-truncate">{row?.original?.description}</p> : <NoDataCell />)
           }
         ];
 
-        let fields = [];
-        let tempProductData = [];
-        data.products?.forEach((ele) => {
-          fields = [...fields, ...ele.fields];
-          ele?.fields?.forEach((field) => {
-            const currencyField: any =
-              field?.type === 'currencyAmount'
-                ? {
-                  ...field,
-                  fieldName: field?.fieldName + '_' + quotationData?.currency?.toLowerCase()
-                }
-                : {};
-
-            rows.forEach((data) => {
-              if (data[currencyField?.fieldName]) {
-                let productIndex = tempProductData.findIndex((d) => d._id === data?.uniqueId);
-                let tempData = {
-                  _id: data?.uniqueId,
-                  [currencyField?.fieldName]: parseInt(data[currencyField?.fieldName] === '' ? 0 : data[currencyField?.fieldName]),
-                  [`price_${quotationData?.currency.toLowerCase()}`]: parseInt(
-                    data[currencyField?.fieldName] === '' ? 0 : data[currencyField?.fieldName]
-                  )
-                };
-                if (productIndex === -1) {
-                  tempProductData = [...tempProductData, tempData];
-                } else {
-                  tempProductData[productIndex][currencyField?.fieldName] = tempData[currencyField?.fieldName];
-                  tempProductData[productIndex][`price_${quotationData?.currency.toLowerCase()}`] = tempData[currencyField?.fieldName];
-                }
-              }
-            });
-          });
-          const filteredFields = ele?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName));
-          const newColumns = generateColumns(renderedFrom, filteredFields, null, false, quotationData.currency);
-          newColumns?.forEach((e) => {
-            e.editable = true;
-          })
-          columns = [...columns, ...newColumns];
+        const filteredFields = data?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName));
+        const newColumns = generateColumns(renderedFrom, filteredFields, null, false, quotationData.currency);
+        newColumns?.forEach((e) => {
+          e.editable = true;
         });
-        setRequireFieldArray(data?.requiredFields);
 
-        columns = sortBy(columns, function (item: any) {
-          return levalOrderBy.indexOf(item.leval);
-        });
-        setColumns([...columns]);
+        setRequireFieldArray(filteredFields);
+
+        setColumns([...columns, ...newColumns]);
 
         dispatch({ type: 'initialize', data: rows, count: rows.length });
         setTimeout(() => {
@@ -233,6 +221,33 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, index) => {
+      _subRow.index = parent.index + '.' + `${index + 1}`;
+      _subRow.detail =
+        _subRow?.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === 'service'
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageName
+          : '';
+      _subRow.description =
+        _subRow?.type === 'product'
+          ? _subRow?.productDetail?.productDescription
+          : _subRow?.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription
+          : '';
+
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+
+    return subRows;
   };
 
   const onSaveEdit = (data, row) => {
@@ -251,18 +266,25 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
     if (requireFieldArray.length === 1) {
       checkField = !(dataRows.length !== dataRows.length);
     } else {
-      checkField = !(dataRows.length !== dataRows.length ||
+      checkField = !(
+        dataRows.length !== dataRows.length ||
         dataRows.length === 0 ||
         !dataRows.every((data) => Object.keys(data).length === requireFieldArray.length + 1)
       );
     }
 
     const material = dataRows?.map((e) => {
+      const data: any = {};
+      requireFieldArray?.forEach((field) => {
+        data[`${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`] =
+          e[`${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`];
+      });
+
       return {
-        _id: e.uniqueId,
-        [`supplierPrice_${quotationData?.currency?.toLowerCase() || 'usd'}`]: e[`supplierPrice_${quotationData?.currency?.toLowerCase() || 'usd'}`]
-      }
-    })
+        _id: e._id,
+        ...data
+      };
+    });
 
     if (checkField) {
       let tempData = {
@@ -270,7 +292,8 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
         requestId: quotationData?.data?.requestId,
         openAuthId: openAuthId
       };
-      axios.post(backendApi + `/quotation/supplier-price-request/supplier-price-response `, tempData)
+      axios
+        .post(backendApi + `/quotation/supplier-price-request/supplier-price-response `, tempData)
         .then(({ data }) => {
           setIsSubmited(true);
         })
@@ -423,6 +446,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                   isClientSideGrid={true}
                   hideAction={true}
                   hideSelection={true}
+                  expander={true}
                 />
               ) : (
                 <Box p={2} height={500}>
