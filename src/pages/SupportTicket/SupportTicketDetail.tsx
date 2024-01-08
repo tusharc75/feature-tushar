@@ -63,9 +63,9 @@ const SupportTicketDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/support-ticket/${id}`);
       const isAllowedToEdit =
-        [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id) && data?.status !== 'Completed';
+        [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id) && data?.status !== SUPPORT_TICKET_STATUS.completed;
       setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id && data?.status === 'Pending');
+      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id && data?.status !== SUPPORT_TICKET_STATUS.completed);
       setSupportTicketData(data);
       setCustomizedRoutes([routes.supportTicket, { title: data?.supportTicketNumber }]);
       setLoading(false);
@@ -152,7 +152,7 @@ const SupportTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {supportTicketData?.status === 'Completed' && (
+            {supportTicketData?.status === SUPPORT_TICKET_STATUS.completed && (
               <Button disabled={loading} variant={'outlined'} color="default" size="small" className="btn-outline-v1" onClick={handleReopenStatus}>
                 {'Re-Open'}
               </Button>
