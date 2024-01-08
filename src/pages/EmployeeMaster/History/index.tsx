@@ -4,7 +4,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
 import { dateFormat, dateTimeFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
@@ -41,7 +41,7 @@ const History = ({ id }) => {
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
-  const { limit, page } = state;
+  const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
   const [selectedResource, setSelectedResource] = useState(null);
   const [resourceList, setResourceList] = useState([]);
 
@@ -52,6 +52,8 @@ const History = ({ id }) => {
       minWidth: 150,
       width: 150,
       primaryField: true,
+      disableFilters: true,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.reference?.optionValue ? (
@@ -80,6 +82,8 @@ const History = ({ id }) => {
       minWidth: 150,
       width: 150,
       disabled: true,
+      disableFilters: true,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.service ? (
@@ -98,6 +102,7 @@ const History = ({ id }) => {
       minWidth: 150,
       width: 150,
       disableFilters: true,
+      disableSortBy: true,
       disabled: true,
       Cell: ({ row }) => (
         <>
@@ -117,6 +122,7 @@ const History = ({ id }) => {
       minWidth: 150,
       width: 150,
       disableFilters: true,
+      disableSortBy: true,
       disabled: true,
       Cell: ({ row }) => (
         <>
@@ -135,6 +141,8 @@ const History = ({ id }) => {
       Header: 'Status',
       minWidth: 150,
       width: 150,
+      disableFilters: true,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.status ? (
@@ -164,10 +172,23 @@ const History = ({ id }) => {
     if (id || selectedResource) {
       fetchData();
     }
-  }, [id, selectedResource, page, limit]);
+  }, [id, selectedResource, page, limit, filters, sorting, showFilteredRecordsOnly]);
 
-  const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}&referenceType=${selectedResource?.resource}` : '?';
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}&referenceType=${selectedResource?.resource}`;
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
     return deepFilter;
   };
 
@@ -177,17 +198,6 @@ const History = ({ id }) => {
     axiosInstance()
       .get(`${employeeMaster.api}/history/${id}/${queryString}`)
       .then(({ data: { data, count } }) => {
-        // data = data?.map((u, index) => ({
-        //   ...u,
-        //   _id: index + 1,
-        //   id: index + 1,
-        //   type: u?.referenceType,
-        //   reference: u?.reference?.optionLabel,
-        //   referenceId: u?.reference?.optionValue,
-        //   service: u?.service?.optionLabel,
-        //   serviceId: u?.service?.optionValue,
-        //   date: u?.startDate
-        // }));
         dispatch({ type: 'initialize', data: data, count: count });
         dispatch({ type: 'loading', loading: false });
       })
