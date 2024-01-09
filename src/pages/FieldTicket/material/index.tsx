@@ -518,6 +518,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           ids={dataRows?.map((row) => row?.materialId)}
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
           isSubmitting={isSubmitting}
+          pricingCondition={fieldTicketData?.pricingCondition?.optionValue || null}
         />
       )}
       {serviceDialog.open && serviceDialog.type === 'newService' && (
