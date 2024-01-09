@@ -64,7 +64,7 @@ const AssignServiceDialog = ({
     searchTimeout = setTimeout(() => {
       fetchData();
     }, millisec);
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -115,6 +115,10 @@ const AssignServiceDialog = ({
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
+
+    if (pricingCondition && tabValue === 0) {
+      deepFilter = `${deepFilter}&pricingCondition=${pricingCondition}`;
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -189,6 +193,8 @@ const AssignServiceDialog = ({
 
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
+    dispatch({ type: 'selection', selectedRecords: [] });
+    dispatch({ type: 'pageChange', page: 0 });
   };
 
   return (
@@ -224,7 +230,7 @@ const AssignServiceDialog = ({
         {pricingCondition && (
           <Box>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab value={0} index={0} label={'Pricing Condition Services'} {...a11yProps(0)} />
+              <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Services`} {...a11yProps(0)} />
               <CustomTab className={'tabLayout'} value={1} index={1} label={'All Services'} {...a11yProps(1)} />
             </CustomTabs>
           </Box>
