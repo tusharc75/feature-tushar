@@ -144,7 +144,7 @@ const CustomReactTable = ({
       if (reportSave) {
         if (selectedReportView) {
           let colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : [])];
-          selectedReportView?.columnState?.forEach(element => {
+          selectedReportView?.columnState?.forEach((element) => {
             if (!element?.isVisible) {
               hColumns.push(element.accessor);
             }
@@ -155,7 +155,12 @@ const CustomReactTable = ({
         } else {
           setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
           setHiddenColumns(newColumns?.filter((e) => e?.show === false).map((m) => m?.id ?? m?.accessor));
-          dispatch({ type: 'updateColumnState', colState: newColumns.map((m) => { return { accessor: m?.id ?? m?.accessor, isVisible: m?.show === false ? false : true } }) });
+          dispatch({
+            type: 'updateColumnState',
+            colState: newColumns.map((m) => {
+              return { accessor: m?.id ?? m?.accessor, isVisible: m?.show === false ? false : true };
+            })
+          });
         }
       } else {
         let gridMetaData = getDataFromLocalStorage();
@@ -298,7 +303,7 @@ const CustomReactTable = ({
     const updatedData = flattenArray(data)?.find((row) => row?._id === currentEditingCellPosition.rowId);
     updatedData[currentEditingCellPosition.columnName] = cellValue;
     const inputField = { [`${currentEditingCellPosition.columnName}`]: cellValue };
-    
+
     if (onSaveEdit && ![undefined, null].includes(cellValue)) {
       onSaveEdit(inputField, updatedData);
     }
