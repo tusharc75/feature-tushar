@@ -11,10 +11,8 @@ import routes from 'src/components/Helpers/Routes';
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RejectProduct from './RejectProduct';
-import TransformIcon from '@material-ui/icons/Transform';
 import HistoryIcon from '@material-ui/icons/History';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import Receive from './Receive';
@@ -23,7 +21,6 @@ import Logs from './Logs';
 import History from 'src/pages/ProductInventory/LedgerHistory';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import PreviewDownload from 'src/components/PreviewDownload';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import AssetQtyDialog from './AssetQtyDialog';
 import { startCase } from 'lodash';
 import { Cancel } from '@material-ui/icons';
@@ -304,7 +301,14 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           let index = 1;
           subRows?.forEach((e: any) => {
             if (actualReceived && !e.isUsed) {
-              res.subRows.push({ index: `${res.index}.${index}`, detail: e.assetNumber, type: MATERIAL_TYPE.serializedAsset, assetId: e?._id, hideSelection: true });
+              res.subRows.push({
+                index: `${res.index}.${index}`,
+                _id: e?._id,
+                detail: e.assetNumber,
+                type: MATERIAL_TYPE.serializedAsset,
+                assetId: e?._id,
+                hideSelection: true
+              });
               actualReceived = actualReceived - 1;
               index = index + 1;
               e.isUsed = true;
@@ -318,6 +322,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           subRowsproductSerialNumber?.forEach((e: any) => {
             if (actualReceived && !e.isUsed) {
               res.subRows.push({
+                _id: e?._id,
                 index: `${res.index}.${index + 1}`,
                 detail: e.serialNumber,
                 type: 'Serial Number',

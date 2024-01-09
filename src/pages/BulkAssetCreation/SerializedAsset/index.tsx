@@ -105,11 +105,9 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
       }
     ];
     try {
-      await axiosInstance()
-        .post(`${routes.serializedAsset.path}/update-assets`, value)
-        .then(() => {
-          fetchColumns();
-        });
+      await axiosInstance().post(`${routes.serializedAsset.path}/update-assets`, value).then(() => {
+        fetchData();
+      });
     } catch (err) {
       toastConfig.setToastConfig(err);
     }
