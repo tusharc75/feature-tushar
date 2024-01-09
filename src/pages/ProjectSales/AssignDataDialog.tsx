@@ -25,7 +25,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import { useData } from '../../StateProvider/Provider';
 
 const AssignDataDialog = (props) => {
-  const { dialogOpen, onSuccess, handleCloseDialog, type, projectID, existingData, accountId = '', entityIds = [] } = props;
+  const { dialogOpen, onSuccess, handleCloseDialog, type, projectID, existingData, accountId = '', entityIds = [], users } = props;
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user }
@@ -42,7 +42,8 @@ const AssignDataDialog = (props) => {
 
     switch (type) {
       case 'customer-account':
-        url = `/${type}?filterById=[{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]`;
+        const userIdsString = users.map((u) => `"${u?._id?.toString()}"`).join(', ');
+        url = `/${type}?filterById=[{"field":"owner", "term": {"$in":[${userIdsString}]}} ]`;
         break;
 
       case 'customer-contact':

@@ -791,7 +791,7 @@ const Steps = ({
           <Box className={`max-[768px]:mb-[70px] relative overflow-hidden`}>
             <div className="flex justify-between items-center gap-[8px] p-[8px] flex-wrap">
               <div className="flex items-center gap-[15px] flex-wrap pl-2">
-                {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) && (
+                {(allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck)) ? (
                   <>
                     <label htmlFor="select-all" className={`cursor-pointer`}>
                       <Checkbox id="select-all" color="primary" checked={isAllChecked()} onChange={() => checkAll()} />
@@ -812,7 +812,7 @@ const Steps = ({
                       )}
                     </Button>
                   </>
-                )}
+                ) : null}
               </div>
               <div className={`d-flex flex-wrap align-center justify-end gap-[8px] ml-auto ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
                 {resource === sidebarResource.workOrderTechnician && workOrderData?.type === WORK_ORDER_TYPE.productionOrder &&
@@ -938,7 +938,7 @@ const Steps = ({
                       } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
                   >
                     <Box sx={{ display: 'flex' }} gridGap={'8px'}>
-                      {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) && (
+                      {(allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck)) ? (
                         <Checkbox
                           name={`checkbox_${step._id}`}
                           color={'primary'}
@@ -953,7 +953,7 @@ const Steps = ({
                             }
                           }}
                         />
-                      )}
+                      ) : null}
                       <span className="bg-[var(--primary)] dark:bg-[var(--dark-primary)] rounded-full text-white text-[13px] px-[12px] py-[1px]">
                         {resource === sidebarResource.workOrderTechnician ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
                       </span>
@@ -1226,7 +1226,6 @@ const Steps = ({
                               <Info fontSize="inherit" />
                             </IconButton>
                           )}
-
                           <IconButton
                             size="small"
                             color="primary"
@@ -1239,8 +1238,7 @@ const Steps = ({
                           >
                             <MoreHoriz />
                           </IconButton>
-
-                          {allowedToEdit && ![WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status) && (
+                          {(allowedToEdit && ![WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status)) ? (
                             <HtmlTooltip enterTouchDelay={0} title="Clone" placement="top" arrow>
                               <IconButton
                                 size="small"
@@ -1257,7 +1255,7 @@ const Steps = ({
                                 <FileCopyOutlined style={{ fontSize: '18px' }} />
                               </IconButton>
                             </HtmlTooltip>
-                          )}
+                          ) : null}
                           <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
                             <IconButton
                               size="small"

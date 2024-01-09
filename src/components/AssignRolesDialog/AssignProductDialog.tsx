@@ -12,6 +12,7 @@ import styles from 'src/pages/Leads/Header.module.scss';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
+import CustomTabs, { CustomTab } from '../CustomTabs';
 
 let searchTimeout;
 
@@ -24,7 +25,8 @@ const AssignProductDialog = ({
   extraDeepFilter = [],
   extraFilterById = [],
   isSubmitting = false,
-  hideQty = false
+  hideQty = false,
+  pricingCondition = null
 }) => {
   const renderedFrom = `${camelCase(routes.product?.title)}_Assign`;
   const toastConfig = useContext(CustomToastContext);
@@ -39,6 +41,7 @@ const AssignProductDialog = ({
 
   const [columns, setColumns] = useState(null);
   const [isProductType, setIsProductType] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
 
   const defaultColumns = [
     {
@@ -65,7 +68,7 @@ const AssignProductDialog = ({
     searchTimeout = setTimeout(() => {
       fetchProduct();
     }, millisec);
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -121,6 +124,10 @@ const AssignProductDialog = ({
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
+
+    if (pricingCondition && tabValue === 0) {
+      deepFilter = `${deepFilter}&pricingCondition=${pricingCondition}`;
+    }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -217,6 +224,19 @@ const AssignProductDialog = ({
     dispatch({ type: 'update', data: rows });
   };
 
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
+
+  const handleMainTabChange = (event: any, newValue: number) => {
+    setTabValue(newValue);
+    dispatch({ type: 'selection', selectedRecords: [] });
+    dispatch({ type: 'pageChange', page: 0 });
+  };
+
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title={`Add ${routes.product.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
@@ -243,9 +263,17 @@ const AssignProductDialog = ({
               </Grid>
             </Grid>
           </div>
+          {pricingCondition && (
+            <Box>
+              <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+                <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Products`}  {...a11yProps(0)} />
+                <CustomTab className={'tabLayout'} value={1} index={1} label={'All Products'} {...a11yProps(1)} />
+              </CustomTabs>
+            </Box>
+          )}
           {columns ? (
             <CustomReactTable
-              height={'calc(100vh - 250px)'}
+              height={pricingCondition ? 'calc(100vh - 310px)' : 'calc(100vh - 250px)'}
               columns={columns}
               state={state}
               dispatch={dispatch}

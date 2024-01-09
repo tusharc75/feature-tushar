@@ -31,7 +31,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
-const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
+const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -408,6 +408,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       .then(() => {
         setAddDialog({ open: false, type: '', parentId: null });
         fetchData();
+        fetchQuotationData()
         setSubmitting(false);
       })
       .catch((error) => {
@@ -453,6 +454,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       .then(() => {
         setDeleting(false);
         fetchData();
+        fetchQuotationData()
         setDeleteData(null);
       })
       .catch((error) => {
@@ -504,7 +506,9 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       material: selectedRecords?.map((d) => {
         return {
           _id: d?._id,
-          materialId: d?.materialId
+          materialId: d?.materialId,
+          type: d?.type,
+          parentId: d?.parentId
         };
       }),
       quotationId: quotationData?._id,
