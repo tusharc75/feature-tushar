@@ -68,7 +68,7 @@ const AssignProductDialog = ({
     searchTimeout = setTimeout(() => {
       fetchProduct();
     }, millisec);
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -124,6 +124,10 @@ const AssignProductDialog = ({
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
+
+    if (pricingCondition && tabValue === 0) {
+      deepFilter = `${deepFilter}&pricingCondition=${pricingCondition}`;
+    }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -229,6 +233,8 @@ const AssignProductDialog = ({
 
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
+    dispatch({ type: 'selection', selectedRecords: [] });
+    dispatch({ type: 'pageChange', page: 0 });
   };
 
   return (
@@ -260,7 +266,7 @@ const AssignProductDialog = ({
           {pricingCondition && (
             <Box>
               <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                <CustomTab value={0} index={0} label={'Pricing Condition Products'} {...a11yProps(0)} />
+                <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Products`}  {...a11yProps(0)} />
                 <CustomTab className={'tabLayout'} value={1} index={1} label={'All Products'} {...a11yProps(1)} />
               </CustomTabs>
             </Box>
