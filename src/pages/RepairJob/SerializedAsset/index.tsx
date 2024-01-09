@@ -105,7 +105,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     const assetField = data?.find((e) => e.resource === 'Serialized Asset')?.fieldNames || [];
     const productField = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
 
-    const newColumns = generateColumns(renderedFrom, fields, null, false, repairJobData?.currency || 'USD' );
+    const newColumns = generateColumns(renderedFrom, fields, null, false, repairJobData?.currency || 'USD');
     let coloum: any = [
       {
         accessor: 'index',
@@ -334,6 +334,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       }
     }
     data['afeNumber'] = repairJobData?.afeNumber;
+    if (repairJobData?.processor?.optionValue) {
+      data['processor'] = repairJobData?.processor?.optionValue;
+    }
 
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
     closeActions();
@@ -517,14 +520,14 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         <CustomReactTable
           height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
           columns={columns}
-          state = {state}
-          dispatch = {dispatch}
+          state={state}
+          dispatch={dispatch}
           setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           hideSelection={!allowedToEdit}
           hideAction={!allowedToEdit}
-          refreshGrid = {fetchRecords}
+          refreshGrid={fetchRecords}
         />
       </Box>
       ) : (
