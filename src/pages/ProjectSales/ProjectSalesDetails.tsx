@@ -537,6 +537,7 @@ const ProjectSalesDetails = () => {
           existingData={getExisitingData}
           accountId={currentAccountId}
           entityIds={projectSalesData?.entity?.map((m) => m.optionValue) || []}
+          users={teamUsers}
         />
       )}
     </Box>

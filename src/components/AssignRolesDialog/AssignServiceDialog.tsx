@@ -12,10 +12,19 @@ import styles from 'src/pages/Leads/Header.module.scss';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
+import CustomTabs, { CustomTab } from '../CustomTabs';
 
 let searchTimeout;
 
-const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilter = [], isSubmitting = false, hideQty = false }) => {
+const AssignServiceDialog = ({
+  onSuccess,
+  handleClose,
+  ids = [],
+  extraStaticFilter = [],
+  isSubmitting = false,
+  hideQty = false,
+  pricingCondition = null
+}) => {
   const renderedFrom = `${camelCase(routes.serviceMaster?.title)}_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -28,6 +37,7 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
 
   const defaultColumns = [
     {
@@ -46,7 +56,6 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
     fetchGridColumns();
   }, []);
 
-
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (searchTimeout) {
@@ -55,7 +64,7 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
     searchTimeout = setTimeout(() => {
       fetchData();
     }, millisec);
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -107,13 +116,17 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
 
+    if (pricingCondition && tabValue === 0) {
+      deepFilter = `${deepFilter}&pricingCondition=${pricingCondition}`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     const updatedFilters = [...deepFilters];
     if (extraStaticFilter?.length) {
@@ -160,8 +173,7 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
       if (editRow) {
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
-    }
-    else {
+    } else {
       const updatedSelectedRecords = selectedRecords?.map((e) => {
         if (e?._id === row?._id) {
           return { ...e, qty: parseInt(data?.qty), isChecked: true };
@@ -171,6 +183,19 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
       dispatch({ type: 'selection', selectedRecords: updatedSelectedRecords });
     }
     dispatch({ type: 'update', data: rows });
+  };
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
+
+  const handleMainTabChange = (event: any, newValue: number) => {
+    setTabValue(newValue);
+    dispatch({ type: 'selection', selectedRecords: [] });
+    dispatch({ type: 'pageChange', page: 0 });
   };
 
   return (
@@ -203,15 +228,22 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
             </Grid>
           </Grid>
         </div>
+        {pricingCondition && (
+          <Box>
+            <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+              <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Services`} {...a11yProps(0)} />
+              <CustomTab className={'tabLayout'} value={1} index={1} label={'All Services'} {...a11yProps(1)} />
+            </CustomTabs>
+          </Box>
+        )}
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 250px)'}
+            height={pricingCondition ? 'calc(100vh - 310px)' : 'calc(100vh - 250px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             onSaveEdit={onSaveEdit}
-
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
