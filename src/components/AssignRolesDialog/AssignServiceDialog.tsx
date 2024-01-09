@@ -119,6 +119,7 @@ const AssignServiceDialog = ({
     if (pricingCondition && tabValue === 0) {
       deepFilter = `${deepFilter}&pricingCondition=${pricingCondition}`;
     }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
