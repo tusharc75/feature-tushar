@@ -152,7 +152,7 @@ export const PreviewDialog = ({
           </Grid>
         </CustomDialogContent>
         <CustomDialogFooter>
-          {operation !== 'Send Email' &&
+          {type?.includes('Excel') && type?.includes('PDF') ? null :
             <CustomButton
               onClick={() => {
                 setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
@@ -162,8 +162,7 @@ export const PreviewDialog = ({
               className="yellow-button"
             >
               {type === 'Excel' ? selectedExcelView ? 'Update View' : 'Save View' : selectedPdfView ? 'Update View' : 'Save View'}
-            </CustomButton>
-          }
+            </CustomButton>}
           {operation === 'Send Email' ?
             <CustomButton
               variant="contained"
