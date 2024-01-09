@@ -311,7 +311,24 @@ const AssetHistory = ({ id }) => {
           <NoDataCell />
         )
       )
-    }
+    },
+    {
+      accessor: 'transactionDate',
+      Header: 'Actual Transaction Date',
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.transactionDate ? (
+            <h5 className="text-truncate" title={moment(row?.original?.transactionDate)?.format(dateTimeFormat)}>
+              {moment(row?.original?.transactionDate)?.format(dateTimeFormat)}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
   ];
 
   useEffect(() => {

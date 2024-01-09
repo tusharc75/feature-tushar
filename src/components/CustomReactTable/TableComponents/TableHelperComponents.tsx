@@ -451,7 +451,6 @@ export const CellRenderer = ({
     );
   };
 
-
   switch (true) {
     case cell?.column.id === 'expander' && loadingExpanderRowId === row.original._id:
       return (
@@ -491,7 +490,7 @@ export const CellRenderer = ({
           </div>
         </CellShell>
       );
-    case currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action':
+    case currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' && currentEditingCellPosition?.rowId !== undefined:
       return (
         <CellShell>
           <div className="action-cell">
