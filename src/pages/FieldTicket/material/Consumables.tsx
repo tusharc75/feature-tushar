@@ -37,7 +37,7 @@ import { camelCase, isEmpty } from 'lodash';
 const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
 
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Consumables`;
-
+  
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
@@ -651,6 +651,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
           }}
           serialized={false}
           isSubmitting={isSubmitting}
+          pricingCondition={fieldTicketData?.pricingCondition?.optionValue || null}
         />
       )}
 
