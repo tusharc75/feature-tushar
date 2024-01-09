@@ -6,10 +6,6 @@ import {
   Typography,
   Card,
   CardContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Tooltip,
   MenuItem,
   Menu,
@@ -17,19 +13,13 @@ import {
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
 import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
-import { withStyles } from '@material-ui/core/styles';
 import axiosInstance from '../../axios/axiosInstance';
-import { Link, useHistory } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { useData } from '../../StateProvider/Provider';
 import { displayDate } from '../../services/util';
-import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
 import { MoreVert } from '@material-ui/icons';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -41,34 +31,27 @@ import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import styles from './ProjectSales.module.scss';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import DisplayData from 'src/components/CardDisplayData';
+import ManageQuotationDialog from './ManageQuotationDialog';
 
-export default function QuotesAccordionInProjectSale({
+export default function QuotationAccordionInProjectSales({
   expanded = true,
   recordsPerLine = 2,
-  quotes,
+  quotations,
   permissions,
   accountId = null,
-  resource = null,
-  contactId = null,
-  opportunityId = null,
-  accountResource = null,
   projectId,
   addExisting,
   fetchProjectData,
   isTeamMember,
   isManager,
-  onNewQuoteAdd,
-  currency,
-  estimatedAmount,
-  marketSegmentId,
-  subMarketSegmentId,
-  isFromProjectSales = false,
-  projectSalesTeam = []
+  onNewQuotationAdd,
 }) {
+
   const {
     state: { selectedEntity, user },
     dispatch
   }: any = useData();
+
   let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
   switch (recordsPerLine) {
@@ -88,9 +71,10 @@ export default function QuotesAccordionInProjectSale({
       recordsPerLineInLargeScreen = 6;
       break;
   }
+
   const { setToastConfig } = useContext(CustomToastContext);
-  const history = useHistory();
-  const [expandQuote, setExpandQuote] = useState(expanded);
+
+  const [expandQuotation, setExpandQuotation] = useState(expanded);
   const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -102,27 +86,27 @@ export default function QuotesAccordionInProjectSale({
     setAnchorEl(event.currentTarget);
   };
   useEffect(() => {
-    let isExpanded = expandQuote;
-    if (quotes?.length === 0 && isExpanded) isExpanded = false;
-    else if (quotes?.length > 0 && !isExpanded) isExpanded = true;
+    let isExpanded = expandQuotation;
+    if (quotations?.length === 0 && isExpanded) isExpanded = false;
+    else if (quotations?.length > 0 && !isExpanded) isExpanded = true;
 
-    setExpandQuote(isExpanded);
-  }, [quotes]);
+    setExpandQuotation(isExpanded);
+  }, [quotations]);
   const handleRemove = (rec) => {
     setShowConfirmBox(true);
     setRemoveRec(rec);
   };
 
-  const removeQuote = () => {
+  const removeQuotation = () => {
     if (!removeRec) return;
 
     const dataObj = {
-      quoteBuilder: quotes.filter((o) => o._id !== removeRec._id).map((o) => o._id),
+      quotation: quotations?.filter((o) => o?._id !== removeRec?._id).map((o) => o?._id),
       _id: projectId
     };
 
     axiosInstance()
-      .put(`/project-sales/add-quote`, dataObj)
+      .put(`/project-sales/add-quotation`, dataObj)
       .then(() => {
         fetchProjectData();
         setShowConfirmBox(false);
@@ -144,30 +128,30 @@ export default function QuotesAccordionInProjectSale({
     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
   };
 
-  const isQuotePrivate = (obj) => {
+  const isQuotationPrivate = (obj) => {
     return 'privateAccess' in obj;
   };
-  const quoteNameWithRedirect = (obj) =>
+  const quotationNameWithRedirect = (obj) =>
     hasAccessToEntity(obj.entity) ? (
       obj.entity === selectedEntity ? (
-        <p className="link text-truncate" onClick={() => window.open(`${routes.quoteBuilder.path}/detail/${obj._id}`)}>
-          <Typography className="detailName">{obj.quoteName}</Typography>
+        <p className="link text-truncate" onClick={() => window.open(`${routes.quotationDetail.path}/${obj._id}`)}>
+          <Typography className="detailName">{obj.quotationNumber}</Typography>
         </p>
       ) : (
         <p
           className="link text-truncate"
           onClick={() => {
             handleEntityChange(obj.entity);
-            window.open(`${routes.quoteBuilder.path}/detail/${obj._id}`);
+            window.open(`${routes.quotationDetail.path}/${obj._id}`);
           }}
         >
-          <Typography className="detailName">{obj.quoteName}</Typography>
+          <Typography className="detailName">{obj.quotationNumber}</Typography>
         </p>
       )
     ) : (
       <span className="d-flex gap-2 align-items-center">
-        <Typography className="detailName">{obj.quoteName}</Typography>{' '}
-        <Tooltip title={`${obj.quoteName} belongs to different entity`}>
+        <Typography className="detailName">{obj.quotationNumber}</Typography>{' '}
+        <Tooltip title={`${obj.quotationNumber} belongs to different entity`}>
           <InfoOutlinedIcon fontSize="small" />
         </Tooltip>
       </span>
@@ -185,23 +169,23 @@ export default function QuotesAccordionInProjectSale({
         </MenuItem>
         <MenuItem
           onClick={() => {
-            addExisting('quote-builder', accountId);
+            addExisting('quotation', accountId);
             handleCloseMenu();
           }}
         >
           Add Exisiting
         </MenuItem>
       </Menu>
-      <Accordion expanded={expandQuote} onChange={() => setExpandQuote(!expandQuote)}>
+      <Accordion expanded={expandQuotation} onChange={() => setExpandQuotation(!expandQuotation)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header pos_rel">
           <Grid container>
             <Grid item xs={8} alignItems="center">
               <Box component="div" display="flex" alignItems="center" flexGrow={1}>
-                <IconButton size="small" onClick={() => setExpandQuote(!expandQuote)}>
-                  {expandQuote === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                <IconButton size="small" onClick={() => setExpandQuotation(!expandQuotation)}>
+                  {expandQuotation === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                 </IconButton>
                 <Box padding="5px">
-                  <Typography variant="subtitle2">Quotes ({quotes?.length || 0})</Typography>
+                  <Typography variant="subtitle2">Quotations ({quotations?.length || 0})</Typography>
                 </Box>
               </Box>
             </Grid>
@@ -216,16 +200,13 @@ export default function QuotesAccordionInProjectSale({
         </AccordionSummary>
         <AccordionDetails>
           <>
-            {expandQuote && (
+            {expandQuotation && (
               <>
-                {quotes && quotes?.length ? (
+                {quotations && quotations?.length ? (
                   <Grid container className={styles.opportunity_layout}>
-                    {quotes.slice(0, maxRecordsToShow).map((obj, i) => (
+                    {quotations.slice(0, maxRecordsToShow).map((obj, i) => (
                       <Grid
                         item
-                        // xs={12}
-                        // sm={12}
-                        // md={recordsPerLineInLargeScreen}
                         className={styles.opportunity_layout_container}
                       >
                         <Card className="detailCard  card-v1" variant="outlined">
@@ -233,21 +214,21 @@ export default function QuotesAccordionInProjectSale({
                             <Grid item xs={12}>
                               <Grid container className="detailCardHeader">
                                 <Grid item xs={6}>
-                                  {!isQuotePrivate(obj) ? (
-                                    quoteNameWithRedirect(obj)
+                                  {!isQuotationPrivate(obj) ? (
+                                    quotationNameWithRedirect(obj)
                                   ) : obj?.privateAccess === true ? (
                                     [...obj.collaborator, obj.owner].includes(user.user?._id) ? (
-                                      quoteNameWithRedirect(obj)
+                                      quotationNameWithRedirect(obj)
                                     ) : (
                                       <span className="d-flex gap-2 align-items-center">
-                                        <Typography className="detailName">{obj.quoteName}</Typography>{' '}
-                                        <Tooltip title={`${obj.quoteName} is a Private Quote`}>
+                                        <Typography className="detailName">{obj.quotationNumber}</Typography>{' '}
+                                        <Tooltip title={`${obj.quotationNumber} is a Private Quotation`}>
                                           <InfoOutlinedIcon fontSize="small" />
                                         </Tooltip>
                                       </span>
                                     )
                                   ) : (
-                                    quoteNameWithRedirect(obj)
+                                    quotationNameWithRedirect(obj)
                                   )}
                                 </Grid>
                                 <Grid item xs={6}>
@@ -265,7 +246,7 @@ export default function QuotesAccordionInProjectSale({
                                     {(permissions?.isUpdate && isTeamMember) || isManager ? (
                                       <>
                                         <Box ml={1} />
-                                        <IconButton title={`Remove quote ${obj.quoteName}`} size="small" onClick={() => handleRemove(obj)}>
+                                        <IconButton title={`Remove quotation ${obj.quotationNumber}`} size="small" onClick={() => handleRemove(obj)}>
                                           <DeleteOutlineIcon fontSize="small" color="error" />
                                         </IconButton>
                                       </>
@@ -309,11 +290,11 @@ export default function QuotesAccordionInProjectSale({
                     ))}
                   </Grid>
                 ) : (
-                  <Typography variant="subtitle1">No Quotes To Show</Typography>
+                  <Typography variant="subtitle1">No Quotations To Show</Typography>
                 )}
               </>
             )}
-            {quotes?.length > 0 && quotes.length > maxRecordsToShow && (
+            {quotations?.length > 0 && quotations.length > maxRecordsToShow && (
               <Button
                 onClick={() => {
                   setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
@@ -331,43 +312,24 @@ export default function QuotesAccordionInProjectSale({
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={removeRec ? `Are you sure you want to remove quote  ${removeRec.quoteName}` : ''}
+          message={removeRec ? `Are you sure you want to remove quotation  ${removeRec.quotationNumber}` : ''}
           onClose={() => {
             setShowConfirmBox(false);
             if (removeRec) setRemoveRec(null);
           }}
-          onOk={removeRec ? removeQuote : null}
+          onOk={removeRec ? removeQuotation : null}
         />
       ) : null}
 
       {showCreateDialog && (
-        <ManageQuoteDialog
+        <ManageQuotationDialog
           open={showCreateDialog}
-          onClose={() => {
-            setShowCreateDialog(false);
-          }}
-          isNew={true}
-          isRedirectTodetailPage={false}
-          dataToUpdate={null}
-          resource={null}
+          onClose={() => setShowCreateDialog(false)}
           onSuccess={(id) => {
             setShowCreateDialog(false);
-            onNewQuoteAdd(id);
+            onNewQuotationAdd(id);
           }}
           accountId={accountId}
-          contactId={contactId}
-          opportunityId={opportunityId}
-          accountResource={accountResource}
-          disableOwnerDropDown={true}
-          isRenderedFromCustomerAccount={true}
-          currency={currency}
-          estimatedAmount={estimatedAmount}
-          marketSegmentId={marketSegmentId}
-          subMarketSegmentId={subMarketSegmentId}
-          isRenderedFromProjectSales={true}
-          doaCollaboratorResources={user?.user?.doa?.map((obj) => obj.user)}
-          isFromProjectSales={isFromProjectSales}
-          projectSalesTeam={projectSalesTeam}
         />
       )}
     </>

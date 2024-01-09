@@ -55,6 +55,7 @@ const ProjectSalesDetails = () => {
   const [customerContacts, setCustomerContacts] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
   const [quotes, setQuotes] = useState([]);
+  const [quotations, setQuotations] = useState([]);
   const [currentAccountId, setCurrentAccountId] = useState('');
   const [headingLbl, setHeadingLbl] = useState('');
   const [mainPoints, setMainPoints] = useState(null);
@@ -144,6 +145,7 @@ const ProjectSalesDetails = () => {
       setCustomerAccounts(data.staticData?.customerAccount);
       setOpportunities(data.staticData?.opportunity);
       setQuotes(data.staticData?.quoteBuilder);
+      setQuotations(data.staticData?.quotation || []);
       setCustomerContacts(data.staticData?.customerContact);
       initializeGraphData();
       setLoading(false);
@@ -274,6 +276,8 @@ const ProjectSalesDetails = () => {
         return opportunities.length ? opportunities.map((t) => t._id) : [];
       case 'quote-builder':
         return quotes.length ? quotes.map((t) => t._id) : [];
+      case 'quotation':
+        return quotations.length ? quotations.map((t) => t._id) : [];
 
       default:
         return [];
@@ -428,11 +432,12 @@ const ProjectSalesDetails = () => {
                   customerContacts={customerContacts}
                   opportunities={opportunities}
                   quotes={quotes}
+                  quotations={quotations}
                   currency={projectSalesData?.currency}
                   estimatedAmount={projectSalesData?.amount}
                   marketSegmentId={projectSalesData?.marketSegment?.optionValue}
                   subMarketSegmentId={projectSalesData?.subMarketSegment?.optionValue}
-                  permissions={permissions?.projectSales}
+                  permissions={permissions}
                   fetchProjectData={getSalesData}
                   projectId={id}
                   users={teamUsers}
