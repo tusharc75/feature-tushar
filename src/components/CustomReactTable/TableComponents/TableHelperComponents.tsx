@@ -490,7 +490,7 @@ export const CellRenderer = ({
           </div>
         </CellShell>
       );
-    case currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' && currentEditingCellPosition?.rowId:
+    case currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' && currentEditingCellPosition?.rowId !== undefined:
       return (
         <CellShell>
           <div className="action-cell">
