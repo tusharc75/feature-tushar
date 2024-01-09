@@ -1103,7 +1103,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
               {allowedToEdit && resource === sidebarResource.workOrder && (
                 <MenuItem
-                  disabled={!allowedToEdit}
+                  disabled={allowedToEdit && selectedService?.status !== WORKORDER_SERVICE_STATUS.completed ? false : true}
                   onClick={() => {
                     setUserAssignDialog(true);
                     setAnchorEl(null);
@@ -1114,7 +1114,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               )}
               {allowedToEdit && resource === sidebarResource.workOrder && permissions?.workStations?.isRead && (
                 <MenuItem
-                  disabled={!allowedToEdit}
+                  disabled={allowedToEdit && selectedService?.status !== WORKORDER_SERVICE_STATUS.completed ? false : true}
                   onClick={() => {
                     setWorkStationAssignDialog(true);
                     setAnchorEl(null);
@@ -1148,7 +1148,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               )}
               {resource === sidebarResource.workOrder && (
                 <MenuItem
-                  disabled={!allowedToEdit}
+                  disabled={allowedToEdit && selectedService?.status !== WORKORDER_SERVICE_STATUS.completed ? false : true}
                   onClick={() => {
                     setSetpsInOtherServices(true);
                     setAnchorEl(null);
