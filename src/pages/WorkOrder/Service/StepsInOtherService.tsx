@@ -64,7 +64,7 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
       .then(({ data: { data } }) => {
         const services: any = [];
         data?.services?.forEach((s) => {
-          if (s?.order > service?.order) {
+          if (s?.order > service?.order && s?.status !== WORKORDER_SERVICE_STATUS.completed) {
             services.push({
               optionLabel: s?.serviceName,
               optionValue: s?._id,
@@ -194,12 +194,12 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
               size="small"
               disabled={
                 allowedToEdit &&
-                selectedService &&
-                steps?.length > 0 &&
-                resource === sidebarResource.workOrder &&
-                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                  selectedService?.status
-                )
+                  selectedService &&
+                  steps?.length > 0 &&
+                  resource === sidebarResource.workOrder &&
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                    selectedService?.status
+                  )
                   ? false
                   : true
               }
