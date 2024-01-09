@@ -651,6 +651,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
           }}
           serialized={false}
           isSubmitting={isSubmitting}
+          pricingCondition={fieldTicketData?.pricingCondition?.optionValue || null}
         />
       )}
 
