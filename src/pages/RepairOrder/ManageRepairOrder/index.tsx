@@ -111,6 +111,9 @@ const ManageRepairOrder = ({
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
         initialData['repairOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+          initialData['currency'] = user.user?.brandCurrency;
+        }
         if (referenceType === 'rentalJob') {
           initialData['rentalJob'] = referenceData?._id;
           if (fieldsDataForCreate?.some((e) => e?.fieldName === 'warehouse')) {
