@@ -361,7 +361,6 @@ const SerializedAsset = ({
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchRecords}
-            expander={true}
             isClientSideGrid={true}
           />
         ) : (

@@ -525,7 +525,7 @@ const QuotationDetails = () => {
                         Delete Version-{currentVersion}
                       </MenuItem>
                     )}
-                  {permissions?.quotation?.isDelete && (
+                  {permissions?.quotation?.isDelete && quotationData?.owner?.optionValue === user?.user?._id && quotationData?.canDelete && (
                     <MenuItem
                       onClick={() => {
                         setShowConfirmBox(true);
@@ -644,6 +644,7 @@ const QuotationDetails = () => {
               {stepNames[currentStep] === 'Add Products' && quotationData && (
                 <Productpackage
                   quotationData={quotationData}
+                  fetchQuotationData={fetchQuotationData}
                   setNextStep={setNextStep}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
