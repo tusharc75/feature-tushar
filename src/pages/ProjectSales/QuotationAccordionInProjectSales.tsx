@@ -1,16 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import {
-  Grid,
-  Box,
-  IconButton,
-  Typography,
-  Card,
-  CardContent,
-  Tooltip,
-  MenuItem,
-  Menu,
-  Button
-} from '@material-ui/core';
+import { Grid, Box, IconButton, Typography, Card, CardContent, Tooltip, MenuItem, Menu, Button } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
@@ -25,13 +14,13 @@ import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { formatAmountWithCurrency } from '../../constants/helpers';
+import { customerAccount, formatAmountWithCurrency } from '../../constants/helpers';
 import routes from '../../components/Helpers/Routes';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import styles from './ProjectSales.module.scss';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import DisplayData from 'src/components/CardDisplayData';
-import ManageQuotationDialog from './ManageQuotationDialog';
+import ManageQuotationDialog from '../../pages/Quotation/ManageQuotationDialog';
 
 export default function QuotationAccordionInProjectSales({
   expanded = true,
@@ -44,9 +33,8 @@ export default function QuotationAccordionInProjectSales({
   fetchProjectData,
   isTeamMember,
   isManager,
-  onNewQuotationAdd,
+  onNewQuotationAdd
 }) {
-
   const {
     state: { selectedEntity, user },
     dispatch
@@ -205,10 +193,7 @@ export default function QuotationAccordionInProjectSales({
                 {quotations && quotations?.length ? (
                   <Grid container className={styles.opportunity_layout}>
                     {quotations.slice(0, maxRecordsToShow).map((obj, i) => (
-                      <Grid
-                        item
-                        className={styles.opportunity_layout_container}
-                      >
+                      <Grid item className={styles.opportunity_layout_container}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
                             <Grid item xs={12}>
@@ -323,13 +308,16 @@ export default function QuotationAccordionInProjectSales({
 
       {showCreateDialog && (
         <ManageQuotationDialog
+          isClone={false}
+          quotationId={null}
           open={showCreateDialog}
           onClose={() => setShowCreateDialog(false)}
-          onSuccess={(id) => {
+          onSuccess={(data) => {
             setShowCreateDialog(false);
-            onNewQuotationAdd(id);
+            onNewQuotationAdd(data?._id);
           }}
-          accountId={accountId}
+          referenceData={{ customerAccount: accountId }}
+          renderedFrom={routes.projectSales.title}
         />
       )}
     </>
