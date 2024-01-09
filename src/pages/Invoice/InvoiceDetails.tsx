@@ -411,7 +411,7 @@ const InvoiceDetails = () => {
           }}
           onSuccess={() => {
             setOpenUpdateDialog(false);
-            invoiceData();
+            fetchInvoiceData();
           }}
         />
       )}
