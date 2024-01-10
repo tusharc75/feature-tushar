@@ -15,9 +15,9 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
+import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 
 const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -33,16 +33,35 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
     fetchFields();
   }, []);
 
+  const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
+    const zipCode = billingAddress?.zipCode;
+    const state = billingAddress?.state;
+    try {
+      const response = await axiosInstance().get(
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=other${taxCode && `&taxCode=${taxCode}`}`
+      );
+      return response?.data?.data || [];
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    }
+  };
+
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`);
     var data = response?.data?.data;
-    data?.forEach((d) => {
-      if(d?.fieldName === 'taxCode') {
-        d.option = d?.option?.filter((o) => o?.optionValue === fieldTicketData?.taxCode?.optionValue)
-      }
-    })
     data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
+    if (
+      fieldTicketData?.taxCode ||
+      (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))
+    ) {
+      const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
+      data?.forEach((e: any) => {
+        if (e?.fieldName === 'taxCode') {
+          e.option = taxCodeOptions;
+        }
+      });
+    }
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (costData) {
       setInitialData({
@@ -90,7 +109,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
         });
     } else {
       axiosInstance()
-        .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [{ ...getObjKeysWithValues(values, allFields)}])
+        .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [{ ...getObjKeysWithValues(values, allFields) }])
         .then(({ data }) => {
           setLoading(false);
           onSuccess(data.data);
@@ -174,7 +193,46 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
                                     tooltipMessage={field.tooltipMessage}
                                     size="small"
                                   />
-                                ) :
+                                ) : ['taxCode'].includes(field.fieldName) ? (
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex">
+                                      <Box flexGrow={1}>
+                                        <FormTypes
+                                          {...field}
+                                          fields={initialData.fields}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                            const taxCode = field.option?.find((d) => d.optionValue === value);
+                                            setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                            const result = autoCalculateSpecificFields(
+                                              { ['taxPercentage']: taxCode?.taxRate || 0 },
+                                              values,
+                                              initialData.fields
+                                            );
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
+                                            }
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Grid>
+                                ) : (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
@@ -201,6 +259,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
                                       </Box>
                                     </Box>
                                   </Grid>
+                                )
                               )}
                           </Grid>
                         </Box>
