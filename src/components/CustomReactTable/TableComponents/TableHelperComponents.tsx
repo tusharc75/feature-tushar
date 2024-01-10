@@ -1,13 +1,12 @@
 import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell } from '@material-ui/core';
 import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
-import { debounce } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
 import HtmlTooltip from '../../CustomTooltipTitle';
-import { getCellValue, getStickyPosition, handleCellClick, handleKeyDown } from '../utils';
+import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
 
 export type TColType = {
   sticky: undefined | 'left' | 'right';
@@ -269,13 +268,9 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
         value: customFilters[key].filter
       }))
     );
+    return () => setFilters([]);
   }, [customFilters]); // Add customFilters as a dependency
-
-  const MINIMUM_SEARCH_DELAY = 600; // Adjust this delay as needed
-
-  const debouncedFilterDispatch = debounce((updatedCustomFilters) => {
-    dispatch({ type: 'filter', filters: updatedCustomFilters });
-  }, MINIMUM_SEARCH_DELAY);
+  const MINIMUM_SEARCH_DELAY = 1000; // Adjust this delay as needed
 
   const [, dropRef] = useDrop({
     accept: 'column',
@@ -296,31 +291,31 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   });
 
   useEffect(() => {
+    if (isClientSideGrid) return;
+
     // Add a timer to delay the dispatch
     const searchTimer = setTimeout(() => {
       let tempArray = Object.keys(customFilters).map((key, i) => {
         return { id: key, value: customFilters[key].filter };
       });
-
       if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
         var tempResult = {};
         filters?.forEach((v) => {
           if (v.value && v.value !== '') {
             tempResult[v.id] = { filter: v.value };
           } else {
-            //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
             if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
               tempResult[v.id] = customFilters[v.id];
             }
           }
         });
-        if (!isClientSideGrid) debouncedFilterDispatch(tempResult);
+        dispatch({ type: 'filter', filters: tempResult });
       }
     }, MINIMUM_SEARCH_DELAY);
 
     // Clear the timer when the component unmounts or when filters change
     return () => clearTimeout(searchTimer);
-  }, [filters]);
+  }, [filters, isClientSideGrid]);
 
   const colSize = header.getSize();
 
