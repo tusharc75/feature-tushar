@@ -354,7 +354,8 @@ export const sidebarResource = {
   flash: 'Flash',
   rentalManagementInvoice: 'Rental Management Invoice',
   creditMemo: 'Credit Memo',
-  outboundMessage: 'Outbound Message'
+  outboundMessage: 'Outbound Message',
+  payrollPolicy: 'Payroll Policy'
 };
 
 export const primaryFields = {
@@ -491,7 +492,8 @@ export const RESOURCE_LABEL = {
   accountsReceivable: 'Accounts Receivable',
   creditMemo: 'Credit Memo',
   generateInvoice: 'Generate Invoice',
-  repairOrderInvoice: 'Repair Order Invoice'
+  repairOrderInvoice: 'Repair Order Invoice',
+  payrollPolicy: 'Payroll Policy'
 };
 
 export const CHILD_RESOURCE = {
