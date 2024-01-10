@@ -143,7 +143,7 @@ export const CreateEmail = ({
         }
       }
     }
-  }, [qouteBuilderAttachments]);
+  }, [qouteBuilderAttachments?.length]);
 
   useEffect(() => {
     fetchEmailDetail();
