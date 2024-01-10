@@ -21,7 +21,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
@@ -38,7 +38,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   const [columns, setColumns] = useState(null);
 
   const [allFields, setAllFields] = useState([]);
-
 
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
 
@@ -88,19 +87,19 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         width: 200,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${row.original?.type === 'serializedAsset' ? `Asset` : startCase(row.original?.type)}`}</p>
+            <p>{`${row.original?.type === MATERIAL_TYPE.serializedAsset ? `Asset` : startCase(row.original?.type)}`}</p>
             <Box pl={1}>
-              {row.original['type'] === 'product'
+              {row.original['type'] === MATERIAL_TYPE.product
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
                   : '(Non-Serialized)'
-                : row.original?.type === 'package'
-                  ? row.original?.packageDetail?.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                : row.original?.type === MATERIAL_TYPE.package
+                ? row.original?.packageDetail?.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === MATERIAL_TYPE.service
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </Box>
           </div>
         )
@@ -114,14 +113,15 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {allowedToEdit && row.original.type !== 'serializedAsset' ? (
+            {allowedToEdit && row.original.type !== MATERIAL_TYPE.serializedAsset ? (
               <p
                 onClick={() => {
                   setMaterialEdit({
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext:
+                      row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -132,35 +132,34 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
             ) : (
               <p className="text-truncate">{row.original?.detail}</p>
             )}
-            {row?.original?.type !== 'service' ||
-              (row.original.type !== 'serializedAsset' && allowedToEdit && (
-                <>
-                  <Box ml={1}>
-                    <span>({row.original?.subRows?.length})</span>
-                  </Box>
-                  <Box ml={1}>
-                    <HtmlTooltip title="Add Product">
-                      <IconButton
-                        onClick={() => {
-                          setAddDialog({ open: true, type: 'product', parentId: row.original?._id });
-                        }}
-                        size="small"
-                      >
-                        <Add fontSize="small" color="primary" />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </Box>
-                </>
-              ))}
+            {row.original.type === MATERIAL_TYPE.package && allowedToEdit && (
+              <>
+                <Box ml={1}>
+                  <span>({row.original?.subRows?.length})</span>
+                </Box>
+                <Box ml={1}>
+                  <HtmlTooltip title="Add Product">
+                    <IconButton
+                      onClick={() => {
+                        setAddDialog({ open: true, type: 'product', parentId: row.original?._id });
+                      }}
+                      size="small"
+                    >
+                      <Add fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
+              </>
+            )}
             <Box ml={1}>
               <IconButton
                 size="small"
                 onClick={() => {
-                  if (row.original.type === 'service') {
+                  if (row.original.type === MATERIAL_TYPE.service) {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'serializedAsset') {
+                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -237,20 +236,20 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =
-        parent.type === 'product'
+        parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
-          : parent.type === 'package'
-            ? parent.packageDetail?.packageName
-            : parent.serviceDetail?.serviceName;
+          : parent.type === MATERIAL_TYPE.package
+          ? parent.packageDetail?.packageName
+          : parent.serviceDetail?.serviceName;
       parent.description =
-        parent.type === 'product'
+        parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
-          : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription
-            : parent?.serviceDetail?.serviceDescription;
+          : parent.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
-      parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === 'serializedAsset')?.length;
+      parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === MATERIAL_TYPE.serializedAsset)?.length;
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -276,18 +275,18 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.assetDetail.assetNumber
-              : _subRow.serviceDetail?.serviceName;
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.assetDetail.assetNumber
+          : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow.type === 'serializedAsset'
-              ? parent.description
-              : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === 'serializedAsset'
+          ? parent.description
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
