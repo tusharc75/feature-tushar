@@ -37,6 +37,11 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
     setInitialData({ fields: [], values: {} });
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`);
     var data = response?.data?.data;
+    data?.forEach((d) => {
+      if(d?.fieldName === 'taxCode') {
+        d.option = d?.option?.filter((o) => o?.optionValue === fieldTicketData?.taxCode?.optionValue)
+      }
+    })
     data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (costData) {
