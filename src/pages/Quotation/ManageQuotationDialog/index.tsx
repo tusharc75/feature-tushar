@@ -29,7 +29,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 
-const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open, versionId = null }) => {
+const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open, versionId = null, referenceData = null, renderedFrom = '' }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -96,6 +96,19 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate), currency: user.user?.brandCurrency || '' };
         initialData['quotationNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (referenceData) {
+          fieldsDataForCreate?.forEach((field) => {
+            if(referenceData[field.fieldName]) {
+              field.isUneditable = true;
+            }
+          });
+          for (const key in referenceData) {
+            if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+              initialData[key] = referenceData[key];
+            }
+          }
+          
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
@@ -131,11 +144,12 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
         .post(`${quotation.api}`, values)
         .then(({ data: { data, message } }) => {
           if (versionId) {
-            axiosInstance().post(`${quotation.api}/clone-new-quotation-version`, {
-              oldQuotationId: quotationId,
-              newQuotationId: data._id,
-              versionId: versionId
-            })
+            axiosInstance()
+              .post(`${quotation.api}/clone-new-quotation-version`, {
+                oldQuotationId: quotationId,
+                newQuotationId: data._id,
+                versionId: versionId
+              })
               .then(() => {
                 history.push(`${routes.quotationDetail.path}/${data._id}`);
                 setLoading(false);
@@ -150,9 +164,8 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                 setLoading(false);
                 toastConfig.setToastConfig(error);
               });
-          }
-          else {
-            history.push(`${routes.quotationDetail.path}/${data._id}`);
+          } else {
+            if(renderedFrom !== routes.projectSales.title) history.push(`${routes.quotationDetail.path}/${data._id}`);   
             setLoading(false);
             onSuccess(data);
             toastConfig.setToastConfig({
@@ -190,8 +203,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
       );
     }
     if (type === QUOTATION_TYPE.salesOrder) {
-      setFormsData(
-        setFieldsInAscendingOrder(initialData.fields.filter((d) => !['estimateStartDate', 'estimateEndDate']?.includes(d.fieldName))))
+      setFormsData(setFieldsInAscendingOrder(initialData.fields.filter((d) => !['estimateStartDate', 'estimateEndDate']?.includes(d.fieldName))));
     }
   };
 
@@ -271,16 +283,17 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field) => (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    {(
+                                    {
                                       <FormTypes
                                         quotationId={quotationId}
                                         {...field}
                                         fieldData={field}
                                         fields={initialData.fields}
                                         disabled={
-                                          field.fieldName === 'currency' ? salesDetails && salesDetails?.material?.length
-                                            ? true
-                                            : false
+                                          field.fieldName === 'currency'
+                                            ? salesDetails && salesDetails?.material?.length
+                                              ? true
+                                              : false
                                             : quotationId && field.disableOnEdit && !isClone
                                         }
                                         values={values}
@@ -302,7 +315,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                       />
-                                    )}
+                                    }
                                   </Grid>
                                 ))}
                               </Grid>

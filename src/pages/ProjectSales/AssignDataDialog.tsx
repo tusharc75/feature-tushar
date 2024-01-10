@@ -23,6 +23,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { useData } from '../../StateProvider/Provider';
+import { quotation } from 'src/constants/helpers';
 
 const AssignDataDialog = (props) => {
   const { dialogOpen, onSuccess, handleCloseDialog, type, projectID, existingData, accountId = '', entityIds = [], users } = props;
@@ -56,6 +57,10 @@ const AssignDataDialog = (props) => {
 
       case 'quote-builder':
         url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`;
+        break;
+
+      case 'quotation':
+        url = `/${type}?filterById=[{"field":"customerAccount", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`;
         break;
 
       case 'user':
