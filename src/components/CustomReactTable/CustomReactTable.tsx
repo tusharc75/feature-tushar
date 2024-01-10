@@ -1,7 +1,8 @@
-import { Box, CircularProgress, useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from '@material-ui/core';
 import {
-  ColumnDef,
   ExpandedState,
+  Row,
+  SortingState,
   getCoreRowModel,
   getExpandedRowModel,
   getFacetedMinMaxValues,
@@ -10,29 +11,26 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  Row,
-  SortingState,
   useReactTable
 } from '@tanstack/react-table';
-import { debounce } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
+import { useData } from 'src/StateProvider/Provider';
+import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
 import { useDebounce } from 'src/hooks';
-import { SEARCH, useStore } from 'src/StateProvider/fastContext';
-import { useData } from 'src/StateProvider/Provider';
 import { gridPageSizes } from '../../constants/helpers';
 import GridHeader from './GridHeader';
-import Pagination from './TableComponents/Pagination';
 import { fuzzyFilter, serverFilter } from './ReactTableHelpers';
+import Pagination from './TableComponents/Pagination';
+import TableComponent from './TableComponents/Table';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
 import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
-import TableComponent from './TableComponents/Table';
 
 const CustomReactTable = ({
   columns,
@@ -101,17 +99,6 @@ const CustomReactTable = ({
     toggleExpandChange
   });
 
-  const columnFilters = React.useMemo(() => {
-    const filters = [];
-
-    for (const key of Object.keys(customFilters)) {
-      // in case of complex filters api should porovide filtered value
-      if (typeof customFilters[key].filter !== 'string') continue;
-      filters.push({ id: key, value: customFilters[key].filter });
-    }
-    return filters;
-  }, [customFilters]);
-
   const [searchQuery] = useStore((store) => store[SEARCH]);
   const [cellValue, setCellValue] = React.useState('');
   const [baseColumns, setBaseColumns] = React.useState(() => newColumns);
@@ -144,7 +131,7 @@ const CustomReactTable = ({
       if (reportSave) {
         if (selectedReportView) {
           let colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : [])];
-          selectedReportView?.columnState?.forEach(element => {
+          selectedReportView?.columnState?.forEach((element) => {
             if (!element?.isVisible) {
               hColumns.push(element.accessor);
             }
@@ -155,7 +142,12 @@ const CustomReactTable = ({
         } else {
           setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
           setHiddenColumns(newColumns?.filter((e) => e?.show === false).map((m) => m?.id ?? m?.accessor));
-          dispatch({ type: 'updateColumnState', colState: newColumns.map((m) => { return { accessor: m?.id ?? m?.accessor, isVisible: m?.show === false ? false : true } }) });
+          dispatch({
+            type: 'updateColumnState',
+            colState: newColumns.map((m) => {
+              return { accessor: m?.id ?? m?.accessor, isVisible: m?.show === false ? false : true };
+            })
+          });
         }
       } else {
         let gridMetaData = getDataFromLocalStorage();
@@ -224,44 +216,35 @@ const CustomReactTable = ({
     setSortedColumns(returnSortedColumns(newColumns, columnOrder));
   }, [columnOrder, returnSortedColumns, newColumns]);
 
-  const sortingRef = useRef(null);
+  const columnFilters = React.useMemo(() => {
+    const filters = [];
+    for (const key of Object.keys(customFilters)) {
+      if (typeof customFilters[key].filter !== 'string') continue;
+      filters.push({ id: key, value: customFilters[key].filter });
+    }
+    return filters;
+  }, [customFilters]);
 
   const setColumnFilters = (filtersfn) => {
-    const MINIMUM_SEARCH_DELAY = 600;
-
+    if (!isClientSideGrid) return;
     const filters = filtersfn();
-
-    const debouncedFilterDispatch = debounce((updatedCustomFilters) => {
-      dispatch({ type: 'filter', filters: updatedCustomFilters, loading: isClientSideGrid ? false : true });
-    }, MINIMUM_SEARCH_DELAY);
-    const instantFilterDispatch = (updatedCustomFilters) => {
-      dispatch({ type: 'filter', filters: updatedCustomFilters, loading: isClientSideGrid ? false : true });
-    };
-
-    setTimeout(() => {
-      let tempArray = Object.keys(customFilters).map((key, i) => {
-        return { id: key, value: customFilters[key].filter };
-      });
-
-      if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-        var tempResult = {};
-        filters?.forEach((v) => {
-          if (v.value && v.value !== '') {
-            tempResult[v.id] = { filter: v.value };
-          } else {
-            //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
-            if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
-              tempResult[v.id] = customFilters[v.id];
-            }
-          }
-        });
-        if (isClientSideGrid) {
-          instantFilterDispatch(tempResult);
+    let tempArray = Object.keys(customFilters).map((key, i) => {
+      return { id: key, value: customFilters[key].filter };
+    });
+    if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
+      var tempResult = {};
+      filters?.forEach((v) => {
+        if (v.value && v.value !== '') {
+          tempResult[v.id] = { filter: v.value };
         } else {
-          debouncedFilterDispatch(tempResult);
+          //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
+          if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
+            tempResult[v.id] = customFilters[v.id];
+          }
         }
-      }
-    }, MINIMUM_SEARCH_DELAY);
+      });
+      dispatch({ type: 'filter', filters: tempResult, loading: isClientSideGrid ? false : true });
+    }
   };
 
   const setGlobalFilter = useCallback(
@@ -298,7 +281,7 @@ const CustomReactTable = ({
     const updatedData = flattenArray(data)?.find((row) => row?._id === currentEditingCellPosition.rowId);
     updatedData[currentEditingCellPosition.columnName] = cellValue;
     const inputField = { [`${currentEditingCellPosition.columnName}`]: cellValue };
-    
+
     if (onSaveEdit && ![undefined, null].includes(cellValue)) {
       onSaveEdit(inputField, updatedData);
     }
