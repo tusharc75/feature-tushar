@@ -78,6 +78,7 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
       if (!tempObjKeysWithValues['expectedDelivery'] && purchaseOrderData['deliveryDate']) {
         tempObjKeysWithValues['expectedDelivery'] = purchaseOrderData['deliveryDate'];
       }
+      console.log(tempObjKeysWithValues)
       setInitialData({
         fields: poFields,
         values: tempObjKeysWithValues
