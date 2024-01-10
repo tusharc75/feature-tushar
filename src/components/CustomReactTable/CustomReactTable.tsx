@@ -347,6 +347,7 @@ const CustomReactTable = ({
     enablePinning: true,
     enableFilters: true,
     enableColumnResizing: true,
+    filterFromLeafRows: true,
     columnResizeMode: 'onChange',
 
     // custom functions

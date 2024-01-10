@@ -17,6 +17,7 @@ import { customerAccount, customerContact } from '../../constants/helpers';
 import ManageAccountDialog from '../Account/ManageAccount';
 import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
 import QuotesAccordionInProjectSale from './QuotesAccordionInProjectSale';
+import QuotationAccordionInProjectSales from './QuotationAccordionInProjectSales';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
@@ -128,6 +129,7 @@ const CustomerAccounts = (props) => {
     customerAccounts,
     opportunities,
     quotes,
+    quotations,
     permissions,
     fetchProjectData,
     customerContacts,
@@ -225,6 +227,29 @@ const CustomerAccounts = (props) => {
       .then(() => {
         setToastConfig({
           message: `Quote added successfully`,
+          type: 'success',
+          open: true
+        });
+        fetchProjectData();
+      })
+      .catch((error) => {
+        setToastConfig(error);
+      });
+  };
+
+  const saveQuotationToProject = (id) => {
+    const existingData = quotations.map((o) => o._id);
+
+    const dataObj = {
+      quotation: [id, ...existingData],
+      _id: projectId
+    };
+
+    axiosInstance()
+      .put(`/project-sales/add-quotation`, dataObj)
+      .then(() => {
+        setToastConfig({
+          message: `Quotation added successfully`,
           type: 'success',
           open: true
         });
@@ -456,7 +481,7 @@ const CustomerAccounts = (props) => {
             <Typography variant="subtitle1" className={classes.cusName}>
               Customer Accounts
             </Typography>
-            {(permissions?.isUpdate && isTeamMember) || isManager ? (
+            {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
               <>
                 {/* {customerAccounts.length > 0 &&
                 opportunities.filter(
@@ -609,7 +634,7 @@ const CustomerAccounts = (props) => {
                               </Grid>
                               <Grid item xs={4} container justify="flex-end" alignItems="center">
                                 <Typography variant="subtitle2">
-                                  {(permissions?.isUpdate && isTeamMember) || isManager ? (
+                                  {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
                                     <IconButton
                                       aria-haspopup="true"
                                       color="primary"
@@ -657,14 +682,14 @@ const CustomerAccounts = (props) => {
                       </Box>
 
                       {/*TODO: Heirarchy Table */}
-                      {permissions?.isRead && (
+                      {permissions?.projectSales?.isRead && (
                         <Box mb={2}>
                           <OpportunityAccordianProjectSales
                             opportunities={opportunities.filter((o) => o.customerAccount === c._id)}
                             onNewOpportunityAdd={(id) => {
                               saveOppToProject(id);
                             }}
-                            permissions={permissions}
+                            permissions={permissions?.projectSales}
                             accountId={c._id}
                             accountName={c.accountName}
                             resource={'customerAccount'}
@@ -683,15 +708,15 @@ const CustomerAccounts = (props) => {
                           />
                         </Box>
                       )}
-                      {permissions?.isRead && (
-                        <Box>
+                      {permissions?.quoteBuilder?.isRead && (
+                        <Box mb={2}>
                           <QuotesAccordionInProjectSale
                             expanded={false}
                             quotes={quotes.filter((q) => q.customerAccountName === c._id)}
                             recordsPerLine={3}
                             accountId={c._id}
                             accountResource={'customerAccount'}
-                            permissions={permissions}
+                            permissions={permissions?.quoteBuilder}
                             projectId={projectId}
                             addExisting={handleOpenDialog}
                             fetchProjectData={fetchProjectData}
@@ -706,6 +731,25 @@ const CustomerAccounts = (props) => {
                             subMarketSegmentId={subMarketSegmentId}
                             isFromProjectSales={true}
                             projectSalesTeam={collaborators}
+                          />
+                        </Box>
+                      )}
+                      {permissions?.quotation?.isRead && (
+                        <Box>
+                          <QuotationAccordionInProjectSales
+                            expanded={false}
+                            quotations={quotations?.filter((q) => q?.customerAccount === c?._id)}
+                            recordsPerLine={3}
+                            accountId={c._id}
+                            permissions={permissions?.quotation}
+                            projectId={projectId}
+                            addExisting={handleOpenDialog}
+                            fetchProjectData={fetchProjectData}
+                            isTeamMember={isTeamMember}
+                            isManager={isManager}
+                            onNewQuotationAdd={(id) => {
+                              saveQuotationToProject(id);
+                            }}
                           />
                         </Box>
                       )}
