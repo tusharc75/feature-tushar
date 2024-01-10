@@ -1,13 +1,12 @@
 import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell } from '@material-ui/core';
 import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
-import { debounce } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
 import HtmlTooltip from '../../CustomTooltipTitle';
-import { getCellValue, getStickyPosition, handleCellClick, handleKeyDown } from '../utils';
+import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
 
 export type TColType = {
   sticky: undefined | 'left' | 'right';

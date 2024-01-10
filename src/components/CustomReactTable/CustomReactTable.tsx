@@ -1,7 +1,8 @@
-import { Box, CircularProgress, useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from '@material-ui/core';
 import {
-  ColumnDef,
   ExpandedState,
+  Row,
+  SortingState,
   getCoreRowModel,
   getExpandedRowModel,
   getFacetedMinMaxValues,
@@ -10,30 +11,26 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  Row,
-  SortingState,
   useReactTable
 } from '@tanstack/react-table';
-import { debounce } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
+import { useData } from 'src/StateProvider/Provider';
+import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
 import { useDebounce } from 'src/hooks';
-import { useDebounce as useDebounceFunc } from 'src/hooks/useFulHooks';
-import { SEARCH, useStore } from 'src/StateProvider/fastContext';
-import { useData } from 'src/StateProvider/Provider';
 import { gridPageSizes } from '../../constants/helpers';
 import GridHeader from './GridHeader';
-import Pagination from './TableComponents/Pagination';
 import { fuzzyFilter, serverFilter } from './ReactTableHelpers';
+import Pagination from './TableComponents/Pagination';
+import TableComponent from './TableComponents/Table';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
 import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
-import TableComponent from './TableComponents/Table';
 
 const CustomReactTable = ({
   columns,
