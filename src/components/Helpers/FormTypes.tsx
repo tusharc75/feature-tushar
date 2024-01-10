@@ -2365,7 +2365,7 @@ const FormTypes = (props) => {
             required={required}
             variant="inline"
             inputVariant="outlined"
-            value={values[name]}
+            value={values[name] || null}
             name={name}
             label={getLabel(label)}
             onChange={onChange ? onChange : (date) => handleChange(name, date ? date : '')}
