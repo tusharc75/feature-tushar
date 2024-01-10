@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { isEqual, map, orderBy, uniq } from 'lodash';
@@ -38,7 +38,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
     const state = billingAddress?.state;
     try {
       const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=other${taxCode && `&taxCode=${taxCode}`}`
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${MATERIAL_TYPE.manualEntry}${taxCode && `&taxCode=${taxCode}`}`
       );
       return response?.data?.data || [];
     } catch (e) {
