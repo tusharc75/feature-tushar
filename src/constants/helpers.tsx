@@ -495,7 +495,8 @@ export const RESOURCE_LABEL = {
   generateInvoice: 'Generate Invoice',
   repairOrderInvoice: 'Repair Order Invoice',
   payrollPolicy: 'Payroll Policy',
-  triggerNotificationMaster: 'Trigger Notification Master'
+  triggerNotificationMaster: 'Trigger Notification Master',
+  triggerNotificationHistory : 'Trigger Notification History'
 };
 
 export const CHILD_RESOURCE = {
