@@ -1161,6 +1161,17 @@ const routes = {
         : RESOURCE_LABEL.payrollPolicy,
     path: '/payroll-policy/detail'
   },
+  triggerNotificationMaster: {
+    title: storedRoutes && storedRoutes.triggerNotificationMaster && storedRoutes.triggerNotificationMaster.title ? storedRoutes.triggerNotificationMaster?.title : RESOURCE_LABEL.triggerNotificationMaster,
+    path: '/trigger-notification-master'
+  },
+  triggerNotificationMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.triggerNotificationMaster && storedRoutes.triggerNotificationMaster.title
+        ? storedRoutes.triggerNotificationMaster?.title
+        : RESOURCE_LABEL.triggerNotificationMaster,
+    path: '/trigger-notification-master/detail'
+  },
   triggerNotificationHistory: {
     title: storedRoutes && storedRoutes.triggerNotificationHistory && storedRoutes.triggerNotificationHistory.title ? storedRoutes.triggerNotificationHistory?.title : RESOURCE_LABEL.triggerNotificationHistory,
     path: '/trigger-notification-history'

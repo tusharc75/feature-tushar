@@ -355,7 +355,8 @@ export const sidebarResource = {
   rentalManagementInvoice: 'Rental Management Invoice',
   creditMemo: 'Credit Memo',
   outboundMessage: 'Outbound Message',
-  payrollPolicy: 'Payroll Policy'
+  payrollPolicy: 'Payroll Policy',
+  triggerNotificationMaster: 'Trigger Notification Master'
 };
 
 export const primaryFields = {
@@ -494,6 +495,7 @@ export const RESOURCE_LABEL = {
   generateInvoice: 'Generate Invoice',
   repairOrderInvoice: 'Repair Order Invoice',
   payrollPolicy: 'Payroll Policy',
+  triggerNotificationMaster: 'Trigger Notification Master',
   triggerNotificationHistory : 'Trigger Notification History'
 };
 

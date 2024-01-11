@@ -1,15 +1,15 @@
-import { useState, useRef, useContext, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import { useState, useRef, useEffect } from 'react';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { FaceLivenessDetector} from '@aws-amplify/ui-react-liveness';
-import { Loader, ThemeProvider, Theme, useTheme } from '@aws-amplify/ui-react';
+import { FaceLivenessDetector } from '@aws-amplify/ui-react-liveness';
+import {
+  Loader, ThemeProvider, Theme, useTheme, View,
+} from '@aws-amplify/ui-react';
 import "@aws-amplify/ui-react/styles.css";
 import { Amplify } from 'aws-amplify';
 import awsexports from '../../amplifyconfiguration.json';
+import "./faceLiveness.scss"
 
 Amplify.configure(awsexports);
 
@@ -63,6 +63,9 @@ const FaceLiveNess = ({ open, onClose, onComplete }) => {
     name: 'Face Liveness Example Theme',
     tokens: {
       colors: {
+        overlay: {
+          value: tokens.colors.black['90'],
+        },
         background: {
           value: tokens.colors.transparent.value,
         },
@@ -75,10 +78,10 @@ const FaceLiveNess = ({ open, onClose, onComplete }) => {
           outline: {
             color: {
               value: tokens.colors.teal['100'],
-            
+
             }
           },
-          color:{ value: tokens.colors.teal['100']},
+          color: { value: tokens.colors.teal['100'] },
           primary: {
             '10': tokens.colors.teal['100'],
             '80': tokens.colors.teal['40'],
@@ -107,18 +110,20 @@ const FaceLiveNess = ({ open, onClose, onComplete }) => {
         aria-labelledby="customized-dialog-title"
         onClose={onClose}
         open={open}
-        
+
       >
-        <CustomDialogContent style={{
-          margin: 0,
-          padding:0
-        }}>
-          <ThemeProvider theme={theme}>
-            {loading || !sessionId ? (
-              <Loader />
-            ) : (
-                <FaceLivenessDetector
-                   
+        <ThemeProvider >
+          {loading || !sessionId ? (
+            <Loader />
+          ) : (
+            <View
+              as="div"
+              maxHeight="100%"
+              height="100%"
+              width="100%"
+              maxWidth="100%"
+            >
+              <FaceLivenessDetector
                 sessionId={sessionId}
                 region={"ap-south-1"}
                 onAnalysisComplete={() => onComplete(sessionId)}
@@ -126,11 +131,10 @@ const FaceLiveNess = ({ open, onClose, onComplete }) => {
                 onError={(error) => {
                   console.error('err', error);
                 }}
-                  
               />
-            )}
-          </ThemeProvider>
-        </CustomDialogContent>
+            </View>
+          )}
+        </ThemeProvider>
       </Dialog>
     </>
   );
