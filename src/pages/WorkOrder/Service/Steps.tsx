@@ -784,6 +784,17 @@ const Steps = ({
       });
   };
 
+  let isStepsAllowToPerform = false;
+  if (selectedService?.assignedUsers?.length) {
+    isStepsAllowToPerform = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) ? true : false
+  }
+  else if (selectedService?.competencies?.filter(e => user?.competencies?.includes(e))?.length) {
+    isStepsAllowToPerform = true;
+  }
+  else if (allowedToEdit) {
+    isStepsAllowToPerform = true;
+  }
+
   return (
     <>
       {serviceDetails ? (
@@ -797,20 +808,22 @@ const Steps = ({
                       <Checkbox id="select-all" color="primary" checked={isAllChecked()} onChange={() => checkAll()} />
                       <span className="font-medium select-none">Select All</span>
                     </label>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      disabled={selectedSteps.length ? false : true}
-                      onClick={completeAllSteps}
-                    >
-                      Complete
-                      {isCompleteAllLoading ? (
-                        <CircularProgress size={20} className="ml-[8px]" />
-                      ) : (
-                        `(${isAllChecked() ? 'All' : selectedSteps.length})`
-                      )}
-                    </Button>
+                    {isStepsAllowToPerform &&
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        disabled={selectedSteps.length ? false : true}
+                        onClick={completeAllSteps}
+                      >
+                        Complete
+                        {isCompleteAllLoading ? (
+                          <CircularProgress size={20} className="ml-[8px]" />
+                        ) : (
+                          `(${isAllChecked() ? 'All' : selectedSteps.length})`
+                        )}
+                      </Button>
+                    }
                   </>
                 ) : null}
               </div>
@@ -919,16 +932,7 @@ const Steps = ({
                 if (resource === sidebarResource.workOrderTechnician && stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) {
                   return '';
                 }
-                let isStepsAllowToPerform = false;
-                if (selectedService?.assignedUsers?.length) {
-                  isStepsAllowToPerform = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) ? true : false
-                }
-                else if (selectedService?.competencies?.filter(e => user?.competencies?.includes(e))?.length) {
-                  isStepsAllowToPerform = true;
-                }
-                else if (allowedToEdit) {
-                  isStepsAllowToPerform = true;
-                }
+
                 return (
                   <Box
                     key={`${step._id}_${selectedService?.uniqueId}}`}

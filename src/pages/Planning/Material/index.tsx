@@ -27,7 +27,7 @@ import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/Assign
 import PreviewDownload from 'src/components/PreviewDownload';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
-const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
+const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData }) => {
   const {
     state: { user, permissions }
   }: any = useData();
@@ -94,12 +94,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                ? row.original?.packageDetail?.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === MATERIAL_TYPE.service
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail?.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === MATERIAL_TYPE.service
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </Box>
           </div>
         )
@@ -239,14 +239,14 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.type === MATERIAL_TYPE.package
-          ? parent.packageDetail?.packageName
-          : parent.serviceDetail?.serviceName;
+            ? parent.packageDetail?.packageName
+            : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
           : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === MATERIAL_TYPE.serializedAsset)?.length;
@@ -275,18 +275,18 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.assetDetail.assetNumber
-          : _subRow.serviceDetail?.serviceName;
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow.assetDetail.assetNumber
+              : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow.type === 'serializedAsset'
-          ? parent.description
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow.type === 'serializedAsset'
+              ? parent.description
+              : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
@@ -324,6 +324,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           message: data.message
         });
         fetchData();
+        fetchPlanningData()
         setIsAdding(false);
       })
       .catch((error) => {
@@ -374,6 +375,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           message: data.message
         });
         fetchData();
+        fetchPlanningData()
         setDeleteData(null);
       })
       .catch((error) => {

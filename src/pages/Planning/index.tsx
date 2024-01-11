@@ -30,6 +30,7 @@ import AutorenewIcon from '@material-ui/icons/Autorenew';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import queryString from 'query-string';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { deleteDisable } from 'src/constants/messageHelpers';
 let searchTimeout;
 
 const Planning = () => {
@@ -151,35 +152,37 @@ const Planning = () => {
             </span>
           </HtmlTooltip>
         ) : (
-          <HtmlTooltip title={permissions?.planning?.isUpdate ? 'Convert' : 'You do not have permission to convert'}>
-            <span>
-              <IconButton
-                disabled={permissions?.planning?.isUpdate ? false : true}
-                aria-label="Convert"
-                size="small"
-                onClick={() => {
-                  setShowConverConfirmBox({ open: true, id: row?.original?._id, planningNumber: row?.original?.planningNumber });
-                }}
-              >
-                <AutorenewIcon fontSize="small" color={permissions?.planning?.isUpdate ? 'primary' : 'disabled'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
+          row?.original?.canConvert ?
+            <HtmlTooltip title={permissions?.planning?.isUpdate ? 'Convert' : 'You do not have permission to convert'}>
+              <span>
+                <IconButton
+                  disabled={permissions?.planning?.isUpdate ? false : true}
+                  aria-label="Convert"
+                  size="small"
+                  onClick={() => {
+                    setShowConverConfirmBox({ open: true, id: row?.original?._id, planningNumber: row?.original?.planningNumber });
+                  }}
+                >
+                  <AutorenewIcon fontSize="small" color={permissions?.planning?.isUpdate ? 'primary' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip> : null
         )}
-        {row?.original?.canDelete && (
-          <HtmlTooltip title="Delete">
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
             <IconButton
               size="small"
               aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        )}
+          </span>
+        </HtmlTooltip>
       </>
     )
   };
@@ -226,6 +229,7 @@ const Planning = () => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.planning?.isUpdate;
+          finalObject['canConvert'] = !u?.canDelete;
           finalObject['canDelete'] = permissions?.planning?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           return finalObject;
         });
