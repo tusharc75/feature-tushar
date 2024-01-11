@@ -1150,6 +1150,17 @@ const routes = {
     title: storedRoutes && storedRoutes.fieldTicketInvoice && storedRoutes.fieldTicketInvoice.title ? storedRoutes.fieldTicketInvoice?.title : RESOURCE_LABEL.fieldTicketInvoice,
     path: '/field-ticket-invoice'
   },
+  payrollPolicy: {
+    title: storedRoutes && storedRoutes.payrollPolicy && storedRoutes.payrollPolicy.title ? storedRoutes.payrollPolicy?.title : RESOURCE_LABEL.payrollPolicy,
+    path: '/payroll-policy'
+  },
+  payrollPolicyDetail: {
+    title:
+      storedRoutes && storedRoutes.payrollPolicy && storedRoutes.payrollPolicy.title
+        ? storedRoutes.payrollPolicy?.title
+        : RESOURCE_LABEL.payrollPolicy,
+    path: '/payroll-policy/detail'
+  },
 };
 
 export default routes;

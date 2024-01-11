@@ -64,9 +64,11 @@ const DashBoards = () => {
         width: 185,
         sticky: 'left',
         Cell: ({ row }) => (
-          <Link className="link" to={`dashboard-master/${row?.original?._id}`}>
-            {row.original.name}
-          </Link>
+          <div>
+            <Link className="link" to={`dashboard-master/${row?.original?._id}`}>
+              {row.original.name}
+            </Link>
+          </div>
         )
       },
       ...getStaticFields(),

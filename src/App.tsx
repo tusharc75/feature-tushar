@@ -245,6 +245,8 @@ import GenerateInvoice from './pages/GenerateInvoice';
 import StandardReportView from './pages/Report/StandardReport';
 import UserDownloadRequest from './pages/UserDownloadRequest';
 import SendOutboundMessage from './pages/SendOutboundMessage';
+import PayrollPolicy from './pages/PayrollPolicy';
+import PayrollPolicyDetail from './pages/PayrollPolicy/PayrollPolicyDetail';
 
 var notificationInterval: any = null;
 
@@ -1053,6 +1055,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.chartOfAccount.path}`}>
               <ChartOfAccount />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.payrollPolicy.path}`}>
+              <PayrollPolicy />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.payrollPolicyDetail.path}/:id`}>
+              <PayrollPolicyDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.chartOfAccountDetail.path}/:id`}>
               <ChartOfAccountDetail />

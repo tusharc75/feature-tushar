@@ -39,6 +39,7 @@ import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { Image } from '@material-ui/icons';
 import WebcamDialog from './WebCamDialog';
+import FaceLiveNess from 'src/components/FacialLogin/FaceLiveNess';
 
 const useStyles = makeStyles((theme) => ({
   profileEdit: {
@@ -88,6 +89,7 @@ export default function ManageProfile(props) {
   const [removeFaceConfirmBox, setRemoveFaceConfirmBox] = useState(false);
   const [removingFace, setRemovingFace] = useState(false);
   const [showAddProxyDialog, setShowAddProxyDialog] = useState(false);
+  const [addFaceDialog, setAddFaceDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const [webCamDialog, setWebCamDialog] = useState(false);
@@ -234,7 +236,20 @@ export default function ManageProfile(props) {
         setRemovingFace(false);
       });
   };
-
+  const handleCapture = async (sessionId: string) => {
+    await axiosInstance().post('/user/add-face-data', { sessionId }).then((res) => {
+      setAddFaceDialog(false);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: res.data.message
+      });
+      onFetchUserData();
+    }).catch((err) => {
+      setAddFaceDialog(false);
+      toastConfig.setToastConfig(err);
+    });
+  }
   return (
     <>
       {openUpdateDialog && (
@@ -345,6 +360,21 @@ export default function ManageProfile(props) {
             <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setShowAddProxyDialog(true)}>
               Add DOA Proxy
             </Button>
+            <Divider />
+            {
+              (userData?.faceId || userData?.faceData) ? (
+                <Button color="primary" fullWidth variant="outlined" size="small" onClick={handleRemoveFace}>
+                  Remove Face
+                </Button>
+              ) : (
+                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setAddFaceDialog(true)}>
+                  Add Face
+                </Button>
+              )
+            }
+            {/* <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setAddFaceDialog(true)}>
+              Add Face
+            </Button> */}
             <div style={{ display: 'none' }}>
               <Divider />
               {userData?.faceData && userData?.faceId ? (
@@ -546,6 +576,11 @@ export default function ManageProfile(props) {
               }}
             />
           ) : null}
+          {
+            addFaceDialog && (
+              <FaceLiveNess open={addFaceDialog} onClose={() => setAddFaceDialog(false)} onComplete={handleCapture} />
+            )
+          }
           {showAddProxyDialog && (
             <AddProxyDialog
               open={showAddProxyDialog}

@@ -245,10 +245,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 
       }
       setServiceSteps(services);
-      if (
-        services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
-        services.filter((e) => e.type === 'service')?.length &&
-        (workOrderData?.status !== WORK_ORDER_STATUS.completed && workOrderData?.status !== WORK_ORDER_STATUS.inProgress)
+      if ((workOrderData?.canComplete && !services.filter((e) => e.type === MATERIAL_TYPE.service)?.every((e) => e.status === WORKORDER_SERVICE_STATUS.completed))
+        || (!workOrderData?.canComplete && services.filter((e) => e.type === MATERIAL_TYPE.service)?.every((e) => e.status === WORKORDER_SERVICE_STATUS.completed))
       ) {
         fetchWorkOrderData();
       }

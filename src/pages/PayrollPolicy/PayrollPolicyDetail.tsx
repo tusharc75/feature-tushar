@@ -4,7 +4,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { BiEdit } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { useData } from 'src/StateProvider/Provider';
 import { useParams, useHistory } from 'react-router-dom';
@@ -13,27 +13,27 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import TabPanel from '../../components/TabPanel';
-import Material from './Material';
 import { camelCase } from 'lodash';
-import ManagePlanning from './ManagePlanning';
 import { FaWpforms } from 'react-icons/fa';
-import { ACTIVITY_RESOURCE, PLANNING_STATUS } from 'src/constants/helpers';
+import { sidebarResource } from 'src/constants/helpers';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import ManagePayrollPolicy from './ManagePayrollPolicy';
 
-const PlanningDetail = () => {
-  const renderedFrom = camelCase(routes?.planning.title);
+const PayrollPolicyDetail = () => {
+  const renderedFrom = camelCase(routes?.payrollPolicy.title);
 
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { state: { permissions, user } }: any = useData();
+  const {
+    state: { permissions, user }
+  }: any = useData();
 
-  const [planningData, setPlanningData] = useState(null);
+  const [payrollPolicyData, setPayrollPolicyData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [showConverConfirmBox, setShowConverConfirmBox] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -47,7 +47,7 @@ const PlanningDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get('/field?resource=Planning')
+      .get(`/field?resource=${sidebarResource?.payrollPolicy}`)
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -61,17 +61,16 @@ const PlanningDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`${routes.planning.path}/${id}`);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      } = await axiosInstance().get(`${routes.payrollPolicy.path}/${id}`);
+      //   var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      var isAllowedToEdit = true;
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
-      if (data?.status === PLANNING_STATUS.converted) {
-        isAllowedToEdit = false;
-      }
       setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
-      setPlanningData(data);
+      //   setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+      setAllowedToDelete(true);
+      setPayrollPolicyData(data);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -81,7 +80,7 @@ const PlanningDetail = () => {
   const handleDelete = () => {
     if (id) {
       axiosInstance()
-        .put(`${routes?.planning?.path}/remove`, { ids: [id] })
+        .put(`${routes?.payrollPolicy?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
           setShowConfirmBox(false);
 
@@ -90,7 +89,7 @@ const PlanningDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.planning.path}`)
+          history.push(`${routes.payrollPolicy.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -98,23 +97,6 @@ const PlanningDetail = () => {
     } else {
       setShowConfirmBox(false);
     }
-  };
-
-  const handleConvert = () => {
-    axiosInstance()
-      .post(`${routes?.planning?.path}/convert-planning`, { id: planningData?._id })
-      .then(({ data }) => {
-        setShowConverConfirmBox(false);
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
   };
 
   const handleOpenUpdateDialog = () => {
@@ -133,37 +115,22 @@ const PlanningDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.planning, { title: planningData?.planningNumber }]} />
+          <CustomBreadCrumbs routes={[routes.payrollPolicy, { title: payrollPolicyData?.payrollPolicyName }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.planning?.isUpdate && allowedToEdit && !planningData?.canDelete && planningData?.status != PLANNING_STATUS.converted && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={() => { setShowConverConfirmBox(true) }}
-                >
-                  {'Convert'}
-                </Button>
-              )}
-              {permissions?.planning?.isUpdate && allowedToEdit && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                >
+              {permissions?.payrollPolicy?.isUpdate && allowedToEdit && (
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.planning?.isDelete && allowedToDelete && planningData?.canDelete && (
-                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-              )}
-              <ActivityButton
+              {permissions?.payrollPolicy?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {/* <ActivityButton
                 referenceId={planningData?._id}
-                resource={ACTIVITY_RESOURCE.planning}
+                resource={ACTIVITY_RESOURCE.payrollPolicy}
                 resourceLabel={planningData?.planningNumber}
-              />
+              /> */}
             </>
           </Box>
         </Box>
@@ -191,17 +158,6 @@ const PlanningDetail = () => {
             aria-controls="a11y-tabpanel-0"
             id="a11y-tab-0"
           />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            value={1}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
-          />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -210,43 +166,26 @@ const PlanningDetail = () => {
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
             ) : (
-              <DetailsPage data={planningData} fields={fields} />
+              <DetailsPage data={payrollPolicyData} fields={fields} />
             )}
           </Box>
-        </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          {planningData && (
-            <Material
-              renderedFrom={`${renderedFrom}_grid-1`}
-              allowedToEdit={allowedToEdit && permissions?.planning?.isUpdate ? true : false}
-              planningData={planningData}
-              fetchPlanningData={fetchData}
-            />
-          )}
         </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.planning?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${routes?.payrollPolicy?.title?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
         />
       )}
-      {showConverConfirmBox && (
-        <ConfirmationDialog
-          open={true}
-          message={`Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
-          onClose={() => { setShowConverConfirmBox(false) }}
-          onOk={handleConvert}
-        />
-      )}
+
       {openUpdateDialog && (
-        <ManagePlanning
-          id={id}
+        <ManagePayrollPolicy
           isClone={false}
+          id={id}
           onClose={closeUpdateDialog}
           onSuccess={() => {
             closeUpdateDialog();
@@ -258,4 +197,4 @@ const PlanningDetail = () => {
   );
 };
 
-export default PlanningDetail;
+export default PayrollPolicyDetail;
