@@ -115,7 +115,19 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
           </>
         )
       });
-      setColumns([...columns]);
+      setColumns([
+        {
+          accessor: 'index',
+          Header: 'Index',
+          width: 70,
+          sticky: 'left',
+          Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+          Footer: () => {
+            return <>Total</>;
+          }
+        },
+        ...columns
+      ]);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
