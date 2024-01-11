@@ -493,7 +493,8 @@ export const RESOURCE_LABEL = {
   creditMemo: 'Credit Memo',
   generateInvoice: 'Generate Invoice',
   repairOrderInvoice: 'Repair Order Invoice',
-  payrollPolicy: 'Payroll Policy'
+  payrollPolicy: 'Payroll Policy',
+  triggerNotificationHistory : 'Trigger Notification History'
 };
 
 export const CHILD_RESOURCE = {
