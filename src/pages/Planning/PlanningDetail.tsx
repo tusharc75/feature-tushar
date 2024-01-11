@@ -138,7 +138,7 @@ const PlanningDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.planning?.isUpdate && allowedToEdit && planningData?.status != PLANNING_STATUS.converted && (
+              {permissions?.planning?.isUpdate && allowedToEdit && !planningData?.canDelete && planningData?.status != PLANNING_STATUS.converted && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   className="btn-outline-v1"
@@ -220,6 +220,7 @@ const PlanningDetail = () => {
               renderedFrom={`${renderedFrom}_grid-1`}
               allowedToEdit={allowedToEdit && permissions?.planning?.isUpdate ? true : false}
               planningData={planningData}
+              fetchPlanningData={fetchData}
             />
           )}
         </TabPanel>
