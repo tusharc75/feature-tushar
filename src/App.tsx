@@ -247,6 +247,9 @@ import UserDownloadRequest from './pages/UserDownloadRequest';
 import SendOutboundMessage from './pages/SendOutboundMessage';
 import PayrollPolicy from './pages/PayrollPolicy';
 import PayrollPolicyDetail from './pages/PayrollPolicy/PayrollPolicyDetail';
+import TriggerNotificationMaster from './pages/TriggerNotificationMaster';
+import TriggerNotificationMasterDetail from './pages/TriggerNotificationMaster/TriggerNotificationMasterDetail';
+import TriggerNotificationHistory from './pages/TriggerNotificationHistory';
 
 var notificationInterval: any = null;
 
@@ -1062,6 +1065,12 @@ function App() {
             <PrivateRoute exact path={`${routes.payrollPolicyDetail.path}/:id`}>
               <PayrollPolicyDetail />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.triggerNotificationMaster.path}`}>
+              <TriggerNotificationMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.triggerNotificationMasterDetail.path}/:id`}>
+              <TriggerNotificationMasterDetail />
+            </PrivateRoute>
             <PrivateRoute exact path={`${routes.chartOfAccountDetail.path}/:id`}>
               <ChartOfAccountDetail />
             </PrivateRoute>
@@ -1094,6 +1103,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.fieldTicketInvoice.path}>
               <GenerateInvoice resourceRendered="fieldTicket" />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.triggerNotificationHistory.path}`}>
+              <TriggerNotificationHistory />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
