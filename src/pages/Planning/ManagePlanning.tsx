@@ -49,6 +49,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
           .then(({ data: { data } }) => {
             let fields = fieldsDataForUpdate;
             let tempData = data;
+            if(!isClone) fields = fields?.filter((f) => f?.fieldName !== 'status');
             if (isClone) {
               fields = fieldsDataForCreate;
               const { planningNumber, ...rest } = data;
