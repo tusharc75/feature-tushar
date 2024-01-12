@@ -17,6 +17,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useHistory } from 'react-router-dom';
+import moment from 'moment';
 
 const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -129,6 +130,16 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
     fetchFields();
   }, []);
 
+  function validate(values) {
+    const errors = {};
+    const startDate = moment(values?.startDate);
+    const endDate = moment(values?.endDate);
+    if (endDate.diff(startDate, 'days') < 0) {
+      errors['endDate'] = 'End Date can not be less than the Start date';
+    }
+    return errors;
+  }
+
   return (
     <Dialog
       maxWidth="md"
@@ -144,7 +155,13 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
+        <Formik
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          validate={validate}
+          validateOnMount
+          onSubmit={handleSubmit}
+        >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
