@@ -26,14 +26,6 @@ const TriggerNotificationHistory = () => {
 
   let columns = [
     {
-      accessor: 'index',
-      Header: 'Index',
-      width: 80,
-      show: true,
-      disabled: false,
-      Cell: ({ row }) => <div>{row?.original?.index}</div>
-    },
-    {
       accessor: 'reference',
       Header: 'Reference',
       width: 180,
@@ -152,7 +144,6 @@ const TriggerNotificationHistory = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             hideSelection={true}
-            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={500}>
