@@ -1,6 +1,6 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
 import moment from 'moment';
-import React from 'react';
+import React, { useState } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import { WORKORDER_SERVICE_STEP_STATUS, dateFormat, dateTimeFormat } from 'src/constants/helpers';
@@ -8,16 +8,28 @@ import { datarowInterface } from '.';
 import HtmlTooltip from '../CustomTooltipTitle';
 import TimerComponent, { getFieldsWithOtherDetails } from './TimerComponent';
 import styles from './index.module.scss';
-
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 type IColCard = {
   data: any[];
   cardOnClick?: (e: React.MouseEvent, data: any) => void | null;
   passFailStatus?: boolean;
   passFailAccessor?: string;
+  assignOpen?: boolean;
+  assignOptions?: any;
+  OpenTechnicianHandler?: (e: React.MouseEvent, data: any) => void | null;
   rowDef: datarowInterface[];
 };
 
-const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus, passFailAccessor }) => {
+const ColCard: React.FC<IColCard> = ({
+  data,
+  cardOnClick,
+  rowDef,
+  passFailStatus,
+  passFailAccessor,
+  assignOpen = false,
+  assignOptions,
+  OpenTechnicianHandler
+}) => {
   const tooltip = rowDef.find((item) => item.type === 'tooltip');
   let paddingRight = 0;
   if (passFailStatus) paddingRight += 29;
@@ -118,6 +130,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
       <Box className={`${styles.passFail} flex gap-2`}>
         {tooltip ? tooltip.renderer(data) : null}
         {passFailStatus ? <RenderStatusIcon stepStatus={data[passFailAccessor]} /> : null}
+        {assignOpen ? <RenderAssignOptions openTechnicianHandler={OpenTechnicianHandler} assignOptions={assignOptions} data = {data} /> : null}
       </Box>
     </Box>
   );
@@ -141,6 +154,50 @@ const RenderStatusIcon = ({ stepStatus }: { stepStatus: string }) => {
             <AiFillExclamationCircle style={{ display: 'block' }} />
           </Box>
         </HtmlTooltip>
+      )}
+    </>
+  );
+};
+
+const RenderAssignOptions = ({ openTechnicianHandler, assignOptions, data }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  return (
+    <>
+      <div>
+        <IconButton
+          size="small"
+          color="primary"
+          aria-label="menu"
+          onClick={(event) => {
+            handleOpenMenu(event);
+          }}
+        >
+          <MoreHorizIcon />
+        </IconButton>
+      </div>
+      {anchorEl && (
+        <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+          {assignOptions.map((option) => {
+              return (
+                <MenuItem
+                  key={option}
+                  onClick={() => {
+                    openTechnicianHandler(option,data);
+                    setAnchorEl(null);
+                  }}
+                >
+                  {option}
+                </MenuItem>
+              );
+            })
+          }
+        </Menu>
       )}
     </>
   );

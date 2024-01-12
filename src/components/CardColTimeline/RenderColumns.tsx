@@ -21,6 +21,9 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   dispatch: React.Dispatch<TActios>;
   column: string;
   fetchSingleColumn: (column: string, page: number, appendData?: boolean, filterQuery?: string) => void;
+  assignOpen?: boolean;
+  assignOptions?: any;
+  OpenTechnicianHandler?: (e: React.MouseEvent, data: any) => void | null;
 }
 
 const HEADER_HEIGHT = 90;
@@ -63,10 +66,13 @@ const RenderColumns: React.FC<colDataInterface> = ({
   state,
   dispatch,
   fetchSingleColumn,
-  column
+  column,
+  assignOpen = false,
+  assignOptions,
+  OpenTechnicianHandler
 }) => {
   const { data, count, loading, page, columnOrder, visibleColumns, filterQuery, rowDef, limit, refreshDataCount } = state;
-
+ 
   const isInitialLoading = loading[column] === undefined || data[column] === undefined;
 
   const hasNextPage = !data[column]?.length || !count[column] ? false : data[column]?.length < count[column];
@@ -86,6 +92,9 @@ const RenderColumns: React.FC<colDataInterface> = ({
         rowDef={rowDef}
         passFailStatus={passFailStatus}
         passFailAccessor={passFailAccessor}
+        assignOpen = {assignOpen}
+        assignOptions = {assignOptions}
+        OpenTechnicianHandler = {OpenTechnicianHandler}
       />
     );
 
@@ -158,7 +167,7 @@ const RenderColumns: React.FC<colDataInterface> = ({
             )}
           </InfiniteLoader>
         )}
-        {createNew && isCreateNew && (
+        { (
           <Button
             onClick={createNew}
             style={{ marginTop: '10px' }}
