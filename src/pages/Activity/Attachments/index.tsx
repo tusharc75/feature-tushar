@@ -155,13 +155,7 @@ export default function Attachment() {
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) => {
-        return row.original?.attachmentType ? (
-          <p>
-            {row.original.attachmentType}
-          </p>
-        ) : (
-          <NoDataCell />
-        );
+        return row.original?.attachmentType ? <p>{row.original.attachmentType}</p> : <NoDataCell />;
       }
     },
     {
@@ -465,10 +459,10 @@ export default function Attachment() {
       });
     }
     const file = data?.file;
-    setIsDownloading(true);
-    if (file?.length === 1) {
+    file?.forEach((ele) => {
+      setIsDownloading(true);
       axiosInstance()
-        .get(`user/download?fileName=${file[0].url}`, {
+        .get(`user/download?fileName=${ele.url}`, {
           responseType: 'blob',
           onDownloadProgress: (progressEvent) => {
             let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
@@ -497,30 +491,7 @@ export default function Attachment() {
           toastConfig.setToastConfig(err);
           setIsDownloading(false);
         });
-    } else {
-      const fileUrl = file?.map((f) => f.url);
-      axiosInstance()
-        .put(
-          `user/download`,
-          {
-            files: fileUrl
-          },
-          {
-            responseType: 'blob'
-          }
-        )
-        .then(({ data }) => {
-          const file = new Blob([data], { type: 'application/pdf' });
-          const fileURL = URL.createObjectURL(file);
-          const pdfWindow = window.open();
-          pdfWindow.location.href = fileURL;
-          setTimeout(() => setIsDownloading(false), 2000);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-          setIsDownloading(false);
-        });
-    }
+    });
   };
 
   const getQueryString = (isExport = false) => {
@@ -670,7 +641,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module="Attachment"
           api={`/attachment`}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -893,8 +864,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                      ? selectedResourceData.optionValue
-                      : user?.user?._id,
+                    ? selectedResourceData.optionValue
+                    : user?.user?._id,
                   access: true
                 }
               ]}
