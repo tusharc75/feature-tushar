@@ -16,6 +16,7 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
+import moment from 'moment';
 
 const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -128,6 +129,16 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
     }
   };
 
+  function validate(values) {
+    const errors = {};
+    let estimateStartDate = moment(values?.estimateStartDate);
+    let estimateEndDate = moment(values?.estimateEndDate);
+    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+      errors['estimateEndDate'] = 'Please enter valid estimate end date';
+    }
+    return errors;
+  }
+
   return (
     <Dialog
       maxWidth="md"
@@ -143,7 +154,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount validate={validate} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
