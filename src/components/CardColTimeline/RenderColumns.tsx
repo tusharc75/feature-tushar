@@ -167,7 +167,7 @@ const RenderColumns: React.FC<colDataInterface> = ({
             )}
           </InfiniteLoader>
         )}
-        { (
+        {createNew && isCreateNew && (
           <Button
             onClick={createNew}
             style={{ marginTop: '10px' }}
