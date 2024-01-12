@@ -24,13 +24,18 @@ export const PreviewFields = ({
     fetchUserViews,
     allColumn,
     resource,
-    type
+    type,
+    defaultColumns = []
 }) => {
     const toastConfig = useContext(CustomToastContext);
 
     const [isViewDeleteConfirm, setIsViewDeleteConfirm] = useState({ open: false, id: null });
     const [showSaveViewDialog, setShowSaveViewDialog] = useState({ open: false, data: null });
 
+    const setDefaultColumns = () => {
+        const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName)) : allColumn;
+        setVisibleColumns([...temp]);
+      };
 
     const handleDeleteView = () => {
         axiosInstance()
@@ -41,6 +46,7 @@ export const PreviewFields = ({
                     type: 'success',
                     message: data.message
                 });
+                setDefaultColumns()
                 fetchUserViews();
                 setIsViewDeleteConfirm({ open: false, id: null });
                 setSelectedView(null);

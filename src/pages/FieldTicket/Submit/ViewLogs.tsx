@@ -44,6 +44,7 @@ function ViewLogs({ fieldTicketData, handleClose }) {
         Header: 'Date',
         disableFilters: true,
         width: 150,
+        disabled: true,
         Cell: ({ row }) => {
           return row?.original['date'] ? <p className="text-truncate">{moment(row?.original['date']).format(dateTimeFormat)}</p> : <NoDataCell />;
         }
@@ -52,6 +53,7 @@ function ViewLogs({ fieldTicketData, handleClose }) {
         accessor: 'type',
         Header: 'Action',
         width: 150,
+        disabled: true,
         Cell: ({ row }) => {
           return row?.original['type'] ? <p className="text-truncate">{row?.original['type']}</p> : <NoDataCell />;
         }
@@ -60,6 +62,7 @@ function ViewLogs({ fieldTicketData, handleClose }) {
         accessor: 'invoice',
         Header: 'Invoice',
         width: 200,
+        disabled: true,
         Cell: ({ row }) => {
           return row?.original['invoice'] ? (
             permissions?.invoice?.isRead ? (
@@ -78,6 +81,7 @@ function ViewLogs({ fieldTicketData, handleClose }) {
         accessor: 'user',
         Header: 'User',
         width: 200,
+        disabled: true,
         Cell: ({ row }) => {
           return row?.original['user'] ? (
             <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['userId']}`} rel="noreferrer" target="_blank">
