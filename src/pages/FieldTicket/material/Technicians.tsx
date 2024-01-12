@@ -98,12 +98,16 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
       {
         accessor: 'startDate',
         Header: 'Start Date',
+        disableFilters: true,
+        disableSortBy: true,
         width: 250,
         Cell: ({ row }) => (row.original?.startDate ? <p>{displayDate(row.original?.startDate)}</p> : <NoDataCell />)
       },
       {
         accessor: 'endDate',
         Header: 'End Date',
+        disableFilters: true,
+        disableSortBy: true,
         width: 250,
         Cell: ({ row }) => (row.original?.endDate ? <p>{displayDate(row.original?.endDate)}</p> : <NoDataCell />)
       },

@@ -125,7 +125,7 @@ const FaceLiveNess = ({ open, onClose, onComplete }) => {
             >
               <FaceLivenessDetector
                 sessionId={sessionId}
-                region={"ap-south-1"}
+                region={"us-east-1"}
                 onAnalysisComplete={() => onComplete(sessionId)}
                 onUserCancel={handleCancel}
                 onError={(error) => {
