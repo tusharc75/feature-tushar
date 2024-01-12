@@ -264,7 +264,6 @@ export default function useColumns() {
             )
         });
       } else if (field?.lookup) {
-        
         column.push({
           ...commonFieldData,
           accessorFn: (original) => {
