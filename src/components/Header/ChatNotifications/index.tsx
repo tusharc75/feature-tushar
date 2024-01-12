@@ -127,6 +127,9 @@ const ChatNotification = () => {
       }
     }
   };
+  const isDisable = (d)=>{
+    return !Boolean(chatList.find((c) => c.id === d.chatterId))
+  }
 
   const handleClickHistory = (chat) => {
     setSelectedChat(chat);
@@ -225,6 +228,7 @@ const ChatNotification = () => {
             data={notificationData}
             setNewChat={setNewChat}
             handleClickHistory={handleClickHistory}
+            isDisable={isDisable}
           />
         )}
       </Popover>

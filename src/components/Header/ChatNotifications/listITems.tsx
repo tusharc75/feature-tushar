@@ -64,8 +64,8 @@ export const HistoryItem = ({ data, userId, handleClick }) => {
   );
 };
 
-export const NotificationItem = forwardRef((props: { handleClick: any; data: any }, ref: ForwardedRef<any>) => {
-  const { handleClick, data } = props;
+export const NotificationItem = forwardRef((props: { handleClick: any; data: any, isDisable: (data:any)=> boolean }, ref: ForwardedRef<any>) => {
+  const { handleClick, data, isDisable } = props;
   const splittedTitle = data.title.split(' ') as string[];
   let notificationMessage = '';
   let userName = '';
@@ -107,8 +107,9 @@ export const NotificationItem = forwardRef((props: { handleClick: any; data: any
             onClick={() => {
               handleClick(data);
             }}
+            disabled={isDisable(data)}
             tabIndex={0}
-            className={`bg-[var(--primary)] hover:opacity-90 hover:scale-110 focus-within:[outline:2px_solid_var(--new-theme-color)] transition-all duration-300 dark:bg-[#163340] shadow-none border-0 outline-[transparent] text-white p-[4px_14px] rounded-[4px] text-[13px] font-semibold cursor-pointer poppins`}
+            className={`bg-[var(--primary)] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 hover:opacity-90 hover:scale-110 focus-within:[outline:2px_solid_var(--new-theme-color)] transition-all duration-300 dark:bg-[#163340] shadow-none border-0 outline-[transparent] text-white p-[4px_14px] rounded-[4px] text-[13px] font-semibold cursor-pointer poppins`}
           >
             Reply
           </button>
