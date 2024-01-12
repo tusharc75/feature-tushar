@@ -118,11 +118,13 @@ const ChatNotification = () => {
         });
     }
 
-    setChatOpen(true);
-    setAnchorEl(null);
     if (d.chatterId) {
       const selectedChat = chatList.find((c) => c.id === d.chatterId);
-      if (selectedChat) setSelectedChat(selectedChat);
+      if (selectedChat) {
+        setAnchorEl(null);
+        setChatOpen(true);
+        setSelectedChat(selectedChat);
+      }
     }
   };
 

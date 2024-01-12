@@ -11,6 +11,7 @@ import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import { isArray, isObject } from 'lodash';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -263,8 +264,12 @@ export default function useColumns() {
             )
         });
       } else if (field?.lookup) {
+        
         column.push({
           ...commonFieldData,
+          accessorFn: (original) => {
+            return isArray(original?.[field?.fieldName]) ? original?.[field?.fieldName][0]?.optionLabel :
+          isObject(original?.[field?.fieldName]) ? original?.[field?.fieldName]?.optionLabel : original?.[field?.fieldName]},
           cell: ({ row }) => <DropdownCell permissions={permissions} permissionForLinks={permissionForLinks} field={field} original={row?.original} />
         });
       } else if (['mobileNumber', 'phone', 'email']?.includes(field?.type)) {

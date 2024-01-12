@@ -122,6 +122,8 @@ function ViewLogs({ fieldTicketData, handleClose }) {
     setColumns([...column, ...newColumns, actionColumn]);
   };
 
+
+
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     
@@ -134,6 +136,7 @@ function ViewLogs({ fieldTicketData, handleClose }) {
       d.user = user?.optionLabel;
       d.userId = user?.optionValue;
     });
+
 
     dispatch({ type: 'initialize', data: data?.data, count: data?.data?.length });
     dispatch({ type: 'loading', loading: false });
