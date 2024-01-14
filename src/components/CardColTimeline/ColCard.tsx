@@ -14,22 +14,12 @@ type IColCard = {
   cardOnClick?: (e: React.MouseEvent, data: any) => void | null;
   passFailStatus?: boolean;
   passFailAccessor?: string;
-  assignOpen?: boolean;
   assignOptions?: any;
-  OpenTechnicianHandler?: (e: React.MouseEvent, data: any) => void | null;
+  openAssignHandler?: (option: any, data: any) => void | null;
   rowDef: datarowInterface[];
 };
 
-const ColCard: React.FC<IColCard> = ({
-  data,
-  cardOnClick,
-  rowDef,
-  passFailStatus,
-  passFailAccessor,
-  assignOpen = false,
-  assignOptions,
-  OpenTechnicianHandler
-}) => {
+const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus, passFailAccessor, assignOptions, openAssignHandler }) => {
   const tooltip = rowDef.find((item) => item.type === 'tooltip');
   let paddingRight = 0;
   if (passFailStatus) paddingRight += 29;
@@ -130,7 +120,7 @@ const ColCard: React.FC<IColCard> = ({
       <Box className={`${styles.passFail} flex gap-2`}>
         {tooltip ? tooltip.renderer(data) : null}
         {passFailStatus ? <RenderStatusIcon stepStatus={data[passFailAccessor]} /> : null}
-        {assignOpen ? <RenderAssignOptions openTechnicianHandler={OpenTechnicianHandler} assignOptions={assignOptions} data = {data} /> : null}
+        {assignOptions ? <RenderAssignOptions openAssignHandler={openAssignHandler} assignOptions={assignOptions} data={data} /> : null}
       </Box>
     </Box>
   );
@@ -159,7 +149,7 @@ const RenderStatusIcon = ({ stepStatus }: { stepStatus: string }) => {
   );
 };
 
-const RenderAssignOptions = ({ openTechnicianHandler, assignOptions, data }) => {
+const RenderAssignOptions = ({ openAssignHandler, assignOptions, data }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => {
     setAnchorEl(null);
@@ -184,19 +174,18 @@ const RenderAssignOptions = ({ openTechnicianHandler, assignOptions, data }) => 
       {anchorEl && (
         <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
           {assignOptions.map((option) => {
-              return (
-                <MenuItem
-                  key={option}
-                  onClick={() => {
-                    openTechnicianHandler(option,data);
-                    setAnchorEl(null);
-                  }}
-                >
-                  {option}
-                </MenuItem>
-              );
-            })
-          }
+            return (
+              <MenuItem
+                key={option}
+                onClick={() => {
+                  openAssignHandler(option, data);
+                  setAnchorEl(null);
+                }}
+              >
+                {option}
+              </MenuItem>
+            );
+          })}
         </Menu>
       )}
     </>

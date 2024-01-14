@@ -14,6 +14,7 @@ import routes from '../../components/Helpers/Routes';
 import { WORKORDER_SERVICE_STATUS, dateFormatForInputControl, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
 import AssignUserDialog from './AssignUserDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const RESOURCE = [
   { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
@@ -49,7 +50,7 @@ const WorkOrderSupervisor = () => {
     from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
-  
+
   const resourceFilter: any = RESOURCE.filter((e) => {
     if (permissions[e.key]) return true;
     else return false;
@@ -128,10 +129,9 @@ const WorkOrderSupervisor = () => {
       });
   }, []);
 
-  const OpenTechnicianHandler = (option: any, data: any) => {
+  const openAssignHandler = (option: any, data: any) => {
     setServiceData(data);
-    option === 'Assign Technician' ? setAssignTechnician(true) : null;
-    option === 'Assign Workstation' ? setAssignWorkStation(true) : null;
+    option === 'Assign Technician' ? setAssignTechnician(true) : setAssignWorkStation(true);
   };
 
   const fetchSingleColumn = useCallback(
@@ -354,16 +354,18 @@ const WorkOrderSupervisor = () => {
                   setGlobalFilters({ ...globalFilters, to: date });
                 }}
               />
-              <IconButton
-              className={`${selectedResource ? 'sm:col-span-[unset]' : 'sm:col-span-3'} lg:col-span-1 xl:col-span-1`}
-                size="small"
-                onClick={() => {
-                  dispatch({ type: 'refreshData' });
-                }}
-                style={{ display: 'flex', marginLeft: 'auto' }}
-              >
-                <RefreshIcon />
-              </IconButton>
+              <HtmlTooltip title={'Refresh'}>
+                <IconButton
+                  className={`${selectedResource ? 'sm:col-span-[unset]' : 'sm:col-span-3'} lg:col-span-4 xl:col-span-1`}
+                  size="small"
+                  onClick={() => {
+                    dispatch({ type: 'refreshData' });
+                  }}
+                  style={{ display: 'flex', marginLeft: 'auto' }}
+                >
+                  <RefreshIcon />
+                </IconButton>
+              </HtmlTooltip>
             </div>
           </div>
           <CardColTimeline
@@ -372,9 +374,8 @@ const WorkOrderSupervisor = () => {
             dispatch={dispatch}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
-            assignOpen={true}
             assignOptions={['Assign Technician', 'Assign Workstation']}
-            openTechnicianHandler={OpenTechnicianHandler}
+            openAssignHandler={openAssignHandler}
           />
         </div>
         {assignTechnician && (
