@@ -27,49 +27,6 @@ const LIMIT = 25;
 
 
 
-const RenderAssignOptions = ({ openAssignHandler, assignOptions, data }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-  const handleOpenMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  return (
-    <>
-      <div>
-        <IconButton
-          size="small"
-          color="primary"
-          aria-label="menu"
-          onClick={(event) => {
-            handleOpenMenu(event);
-          }}
-        >
-          <MoreHorizIcon />
-        </IconButton>
-      </div>
-      {anchorEl && (
-        <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-          {assignOptions.map((option) => {
-            return (
-              <MenuItem
-                key={option}
-                onClick={() => {
-                  openAssignHandler(option, data);
-                  setAnchorEl(null);
-                }}
-              >
-                {option}
-              </MenuItem>
-            );
-          })}
-        </Menu>
-      )}
-    </>
-  );
-};
-
 
 const WorkOrderSupervisor = () => {
   const { state, dispatch } = useCardReducer();
@@ -470,3 +427,49 @@ const WorkOrderSupervisor = () => {
 };
 
 export default WorkOrderSupervisor;
+
+
+
+const RenderAssignOptions = ({ openAssignHandler, assignOptions, data }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  return (
+    <>
+      <div>
+        <IconButton
+          size="small"
+          color="primary"
+          aria-label="menu"
+          onClick={(event) => {
+            handleOpenMenu(event);
+          }}
+        >
+          <MoreHorizIcon />
+        </IconButton>
+      </div>
+      {anchorEl && (
+        <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+          {assignOptions.map((option) => {
+            return (
+              <MenuItem
+                key={option}
+                disabled={data?.status===WORKORDER_SERVICE_STATUS.completed}
+                onClick={() => {
+                  openAssignHandler(option, data);
+                  setAnchorEl(null);
+                }}
+              >
+                {option}
+              </MenuItem>
+            );
+          })}
+        </Menu>
+      )}
+    </>
+  );
+};
