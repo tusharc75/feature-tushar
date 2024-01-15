@@ -79,7 +79,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
           if (!data[item.accessor]) return null;
           let linkText = data[item.accessor] || '--';
           if(item.target === '_blank'){
-            linkText = <>{data[item.accessor] || '--'} <FiExternalLink size={18}/></>
+            linkText = <>{data[item.accessor] || '--'} <FiExternalLink size={16}/></>
           }
           return (
             <Typography key={index} className={styles.cardDetails}>
