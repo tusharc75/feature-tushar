@@ -44,6 +44,7 @@ type TTimer = TCommon & {
 type TLink = TCommon & {
   type: 'link';
   link: (data: any) => string;
+  target?: '_blank' | '_self' | '_parent' | '_top';
 };
 type TTitle = TCommon & {
   type: 'title';

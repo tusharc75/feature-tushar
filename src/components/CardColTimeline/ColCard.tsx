@@ -8,6 +8,7 @@ import { datarowInterface } from '.';
 import HtmlTooltip from '../CustomTooltipTitle';
 import TimerComponent, { getFieldsWithOtherDetails } from './TimerComponent';
 import styles from './index.module.scss';
+import { FiExternalLink } from 'react-icons/fi';
 
 type IColCard = {
   data: any[];
@@ -51,7 +52,9 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
           );
         }
         if (item.renderer) {
-          return item.renderer(data);
+          return  <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
+            {item.renderer(data)}
+          </Typography>
         }
         if (item.type === 'linkTitle') {
           if (!data[item.accessor]) return null;
@@ -74,11 +77,15 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
         }
         if (item.type === 'link') {
           if (!data[item.accessor]) return null;
+          let linkText = data[item.accessor] || '--';
+          if(item.target === '_blank'){
+            linkText = <>{data[item.accessor] || '--'} <FiExternalLink size={18}/></>
+          }
           return (
             <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
-              <Link className={styles.cardDetailsLink} to={() => item.link(data)} title={data[item.accessor] || '--'}>
-                {data[item.accessor] || '--'}
+              <Link className={`${styles.cardDetailsLink} flex gap-2 text-ellipsis min-w-0 `} onClick={(e)=>e.stopPropagation()} target={item.target} to={() => item.link(data)} title={data[item.accessor] || '--'}>
+                {linkText}
               </Link>
             </Typography>
           );
@@ -115,7 +122,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
         return null;
       })}
 
-      <Box className={`${styles.passFail} flex gap-2`}>
+      <Box className={`${styles.passFail} flex gap-2 items-center`}>
         {tooltip ? tooltip.renderer(data) : null}
         {passFailStatus ? <RenderStatusIcon stepStatus={data[passFailAccessor]} /> : null}
       </Box>
