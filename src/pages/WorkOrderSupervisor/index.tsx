@@ -141,6 +141,7 @@ const WorkOrderSupervisor = () => {
           <RenderAssignOptions
             openAssignHandler={openAssignHandler}
             data={data}
+            permissions={permissions}
           />
         )
       }
@@ -464,7 +465,7 @@ const WorkOrderSupervisor = () => {
 
 export default WorkOrderSupervisor;
 
-const RenderAssignOptions = ({ openAssignHandler, data }) => {
+const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => {

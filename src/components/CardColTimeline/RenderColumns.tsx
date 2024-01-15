@@ -35,6 +35,7 @@ const calcCardHeight = (rowDef: datarowInterface[], data) => {
   const rowsWithExternalLInk = [];
   for (const row of rowDef) {
     const ignoredRows = ['title', 'linkTitle', 'tooltip'];
+    const isRowDataPresent = Boolean(row.accessor ? (data[row.accessor] ? data[row.accessor] : false) : false);
     switch (true) {
       case ignoredRows.includes(row.type):
         break;
@@ -44,10 +45,10 @@ const calcCardHeight = (rowDef: datarowInterface[], data) => {
       case Boolean(row.renderer):
         rowsWithHeight.push(row);
         break;
-      case row.type === 'link' && (Object.hasOwn(row, 'target') && row.target === '_blank') && Boolean(row.accessor ? (data[row.accessor] ? data[row.accessor] : false) : false):
+      case row.type === 'link' && (Object.hasOwn(row, 'target') && row.target === '_blank') && isRowDataPresent:
         rowsWithExternalLInk.push(row);
         break;
-      case Boolean(row.accessor ? (data[row.accessor] ? data[row.accessor] : false) : false):
+      case isRowDataPresent:
         rowsWithHeight.push(row);
         break;
      
