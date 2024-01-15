@@ -17,6 +17,8 @@ interface CardColInterface extends BoxProps {
   state: TInitialState;
   dispatch: React.Dispatch<TActios>;
   fetchSingleColumn: (column: string, page: number, appendData?: boolean, filterQuery?: string) => void;
+  assignOptions?: any;
+  openAssignHandler?: (option: any, data: any) => void;
 }
 
 export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTitle | TLinkTitle | TTooltip;
@@ -67,6 +69,8 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   state,
   dispatch,
   fetchSingleColumn,
+  assignOptions = null,
+  openAssignHandler,
   ...others
 }) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -119,6 +123,8 @@ const CardColTimeline: React.FC<CardColInterface> = ({
                   state={state}
                   dispatch={dispatch}
                   fetchSingleColumn={fetchSingleColumn}
+                  assignOptions={assignOptions}
+                  openAssignHandler={openAssignHandler}
                 />
               </div>
             </div>

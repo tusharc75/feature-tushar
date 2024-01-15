@@ -1,7 +1,8 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { FormControl, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
 import React, { Fragment, useCallback, useContext, useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
@@ -11,6 +12,9 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
 import { WORKORDER_SERVICE_STATUS, dateFormatForInputControl, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
+import AssignWorkStationDialog from './AssignWorkStationDialog';
+import AssignUserDialog from './AssignUserDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const RESOURCE = [
   { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
@@ -31,10 +35,12 @@ const WorkOrderSupervisor = () => {
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
+  const [assignWorkstation, setAssignWorkStation] = useState(false);
+  const [assignTechnician, setAssignTechnician] = useState(false);
 
   const [usersOption, setUsersOption] = useState([]);
   const [serviceMasterOption, setServiceMasterOption] = useState([]);
-
+  const [serviceData, setServiceData] = useState(null);
   const [selectedResource, setSelectedResource] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
   const [selectedResourceOption, setSelectedResourceOption] = useState(null);
@@ -105,7 +111,8 @@ const WorkOrderSupervisor = () => {
       { accessor: 'workOrderNumber', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?._id}` },
       { accessor: 'serviceName', title: 'Service Name', type: 'text' },
       { accessor: 'assignedUser', title: 'Technician', type: 'text' },
-      { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' }
+      { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
+      { accessor: 'workStation', title: 'Workstations', type: 'text' }
     ];
 
     dispatch({
@@ -122,6 +129,11 @@ const WorkOrderSupervisor = () => {
       });
   }, []);
 
+  const openAssignHandler = (option: any, data: any) => {
+    setServiceData(data);
+    option === 'Assign Technician' ? setAssignTechnician(true) : setAssignWorkStation(true);
+  };
+
   const fetchSingleColumn = useCallback(
     (column: string, page = 0, appendData = true, filterQuery) => {
       let api = `${workOrderSupervisor.api}?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
@@ -134,6 +146,7 @@ const WorkOrderSupervisor = () => {
               const newObj = { ...item };
               newObj['serviceName'] = newObj?.service?.optionLabel;
               newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
+              newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
               return newObj;
             });
             const newData = prev;
@@ -341,6 +354,18 @@ const WorkOrderSupervisor = () => {
                   setGlobalFilters({ ...globalFilters, to: date });
                 }}
               />
+              <HtmlTooltip title={'Refresh'}>
+                <IconButton
+                  className={`${selectedResource ? 'sm:col-span-[unset]' : 'sm:col-span-3'} lg:col-span-4 xl:col-span-1`}
+                  size="small"
+                  onClick={() => {
+                    dispatch({ type: 'refreshData' });
+                  }}
+                  style={{ display: 'flex', marginLeft: 'auto' }}
+                >
+                  <RefreshIcon />
+                </IconButton>
+              </HtmlTooltip>
             </div>
           </div>
           <CardColTimeline
@@ -349,8 +374,50 @@ const WorkOrderSupervisor = () => {
             dispatch={dispatch}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
+            assignOptions={['Assign Technician', 'Assign Workstation']}
+            openAssignHandler={openAssignHandler}
           />
         </div>
+        {assignTechnician && (
+          <AssignUserDialog
+            warehouse={serviceData?.warehouse}
+            workOrderData={[
+              {
+                uniqueId: serviceData?.uniqueId,
+                workOrderId: serviceData?._id
+              }
+            ]}
+            assignedUsers={serviceData?.assignedUsers}
+            reference={'service'}
+            handleClose={() => {
+              setAssignTechnician(false);
+            }}
+            handleSucess={() => {
+              setAssignTechnician(false);
+              dispatch({ type: 'refreshData' });
+            }}
+            competencies={serviceData?.competencies}
+          />
+        )}
+        {assignWorkstation && (
+          <AssignWorkStationDialog
+            warehouse={serviceData?.warehouse}
+            workOrderData={[
+              {
+                uniqueId: serviceData?.uniqueId,
+                workOrderId: serviceData?._id
+              }
+            ]}
+            workStations={serviceData?.assignedWorkStations}
+            handleClose={() => {
+              setAssignWorkStation(false);
+            }}
+            handleSucess={() => {
+              setAssignWorkStation(false);
+              dispatch({ type: 'refreshData' });
+            }}
+          />
+        )}
       </Fragment>
     </MuiPickersUtilsProvider>
   );

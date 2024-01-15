@@ -21,6 +21,8 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   dispatch: React.Dispatch<TActios>;
   column: string;
   fetchSingleColumn: (column: string, page: number, appendData?: boolean, filterQuery?: string) => void;
+  assignOptions?: any;
+  openAssignHandler?: (option: any, data: any) => void | null;
 }
 
 const HEADER_HEIGHT = 90;
@@ -63,7 +65,9 @@ const RenderColumns: React.FC<colDataInterface> = ({
   state,
   dispatch,
   fetchSingleColumn,
-  column
+  column,
+  assignOptions,
+  openAssignHandler
 }) => {
   const { data, count, loading, page, columnOrder, visibleColumns, filterQuery, rowDef, limit, refreshDataCount } = state;
 
@@ -86,6 +90,8 @@ const RenderColumns: React.FC<colDataInterface> = ({
         rowDef={rowDef}
         passFailStatus={passFailStatus}
         passFailAccessor={passFailAccessor}
+        assignOptions={assignOptions}
+        openAssignHandler={openAssignHandler}
       />
     );
 
