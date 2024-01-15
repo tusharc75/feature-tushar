@@ -55,6 +55,7 @@ type TLinkTitle = TCommon & {
 };
 type TTooltip = {
   type: 'tooltip';
+  accessor: string;
   renderer: (data: any) => ReactNode | Element;
 };
 

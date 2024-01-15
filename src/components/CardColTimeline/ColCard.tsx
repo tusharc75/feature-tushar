@@ -52,9 +52,11 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
           );
         }
         if (item.renderer) {
-          return  <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
-            {item.renderer(data)}
-          </Typography>
+          return (
+            <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
+              {item.renderer(data)}
+            </Typography>
+          );
         }
         if (item.type === 'linkTitle') {
           if (!data[item.accessor]) return null;
@@ -78,15 +80,26 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
         if (item.type === 'link') {
           if (!data[item.accessor]) return null;
           let linkText = data[item.accessor] || '--';
-          if(item.target === '_blank'){
-            linkText = <>{data[item.accessor] || '--'} <FiExternalLink size={16}/></>
+          let outsideText = null;
+          if (item.target === '_blank') {
+            linkText = <FiExternalLink size={16} />;
+            outsideText = data[item.accessor] || '--';
           }
           return (
             <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
-              <Link className={`${styles.cardDetailsLink} flex gap-1 text-ellipsis min-w-0 `} onClick={(e)=>e.stopPropagation()} target={item.target} to={() => item.link(data)} title={data[item.accessor] || '--'}>
-                {linkText}
-              </Link>
+              <span className="flex gap-1 text-ellipsis min-w-0 [font-weight:400_!important]">
+                {outsideText}
+                <Link
+                  className={`${styles.cardDetailsLink} min-w-0 `}
+                  onClick={(e) => e.stopPropagation()}
+                  target={item.target}
+                  to={() => item.link(data)}
+                  title={data[item.accessor] || '--'}
+                >
+                  {linkText}
+                </Link>
+              </span>
             </Typography>
           );
         }

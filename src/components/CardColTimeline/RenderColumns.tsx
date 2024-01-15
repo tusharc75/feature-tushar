@@ -27,10 +27,12 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
 
 const HEADER_HEIGHT = 90;
 const ROW_HEIGHT = 20;
+const ROW_EXTERNALliNK_HEIGHT = 22.406;
 
 const calcCardHeight = (rowDef: datarowInterface[], data) => {
   const head = rowDef?.find((c) => c.type === 'title' || c.type === 'linkTitle');
   const rowsWithHeight = [];
+  const rowsWithExternalLInk = [];
   for (const row of rowDef) {
     const ignoredRows = ['title', 'linkTitle', 'tooltip'];
     switch (true) {
@@ -42,15 +44,19 @@ const calcCardHeight = (rowDef: datarowInterface[], data) => {
       case Boolean(row.renderer):
         rowsWithHeight.push(row);
         break;
+      case row.type === 'link' && (Object.hasOwn(row, 'target') && row.target === '_blank') && Boolean(row.accessor ? (data[row.accessor] ? data[row.accessor] : false) : false):
+        rowsWithExternalLInk.push(row);
+        break;
       case Boolean(row.accessor ? (data[row.accessor] ? data[row.accessor] : false) : false):
         rowsWithHeight.push(row);
         break;
+     
       default:
         break;
     }
   }
   if (!head) return ROW_HEIGHT * rowsWithHeight.length;
-  return HEADER_HEIGHT + rowsWithHeight.length * ROW_HEIGHT;
+  return HEADER_HEIGHT + rowsWithHeight.length * ROW_HEIGHT + rowsWithExternalLInk.length * ROW_EXTERNALliNK_HEIGHT;
 };
 
 const RenderColumns: React.FC<colDataInterface> = ({
