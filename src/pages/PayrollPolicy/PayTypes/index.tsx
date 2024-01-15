@@ -37,7 +37,7 @@ const PayTypes = ({ payrollPolicyId }) => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.payTypes}`);
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.payrollPayTypes}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
