@@ -66,10 +66,8 @@ const RenderColumns: React.FC<colDataInterface> = ({
   dispatch,
   fetchSingleColumn,
   column,
-  assignOptions,
-  openAssignHandler
 }) => {
-  const { data, count, loading, page, columnOrder, visibleColumns, filterQuery, rowDef, limit, refreshDataCount } = state;
+  const { data, count, loading, page, filterQuery, rowDef, refreshDataCount } = state;
 
   const isInitialLoading = loading[column] === undefined || data[column] === undefined;
 
@@ -90,8 +88,6 @@ const RenderColumns: React.FC<colDataInterface> = ({
         rowDef={rowDef}
         passFailStatus={passFailStatus}
         passFailAccessor={passFailAccessor}
-        assignOptions={assignOptions}
-        openAssignHandler={openAssignHandler}
       />
     );
 
