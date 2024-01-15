@@ -1,5 +1,5 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Select, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
@@ -15,6 +15,7 @@ import { WORKORDER_SERVICE_STATUS, dateFormatForInputControl, sidebarResource, w
 import AssignWorkStationDialog from './AssignWorkStationDialog';
 import AssignUserDialog from './AssignUserDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 
 const RESOURCE = [
   { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
@@ -23,6 +24,9 @@ const RESOURCE = [
 ];
 
 const LIMIT = 25;
+
+
+
 
 const WorkOrderSupervisor = () => {
   const { state, dispatch } = useCardReducer();
@@ -112,7 +116,8 @@ const WorkOrderSupervisor = () => {
       { accessor: 'serviceName', title: 'Service Name', type: 'text' },
       { accessor: 'assignedUser', title: 'Technician', type: 'text' },
       { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
-      { accessor: 'workStation', title: 'Workstations', type: 'text' }
+      { accessor: 'workStation', title: 'Workstations', type: 'text' },
+      {type: 'tooltip', renderer: (data)=> <RenderAssignOptions openAssignHandler={openAssignHandler} assignOptions={['Assign Technician', 'Assign Workstation']} data={data} />}
     ];
 
     dispatch({
@@ -374,8 +379,6 @@ const WorkOrderSupervisor = () => {
             dispatch={dispatch}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
-            assignOptions={['Assign Technician', 'Assign Workstation']}
-            openAssignHandler={openAssignHandler}
           />
         </div>
         {assignTechnician && (
@@ -424,3 +427,49 @@ const WorkOrderSupervisor = () => {
 };
 
 export default WorkOrderSupervisor;
+
+
+
+const RenderAssignOptions = ({ openAssignHandler, assignOptions, data }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  return (
+    <>
+      <div>
+        <IconButton
+          size="small"
+          color="primary"
+          aria-label="menu"
+          onClick={(event) => {
+            handleOpenMenu(event);
+          }}
+        >
+          <MoreHorizIcon />
+        </IconButton>
+      </div>
+      {anchorEl && (
+        <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+          {assignOptions.map((option) => {
+            return (
+              <MenuItem
+                key={option}
+                disabled={data?.status===WORKORDER_SERVICE_STATUS.completed}
+                onClick={() => {
+                  openAssignHandler(option, data);
+                  setAnchorEl(null);
+                }}
+              >
+                {option}
+              </MenuItem>
+            );
+          })}
+        </Menu>
+      )}
+    </>
+  );
+};

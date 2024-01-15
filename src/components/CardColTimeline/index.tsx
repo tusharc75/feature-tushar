@@ -26,7 +26,7 @@ export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTit
 type TCommon = {
   accessor: string;
   title?: string;
-  renderer?: (data: any) => string;
+  renderer?: (data: any) => string | ReactNode | Element;
 };
 
 type TDate = TCommon & {
@@ -52,9 +52,9 @@ type TLinkTitle = TCommon & {
   type: 'linkTitle';
   link: (data: any) => string;
 };
-type TTooltip = TCommon & {
+type TTooltip = {
   type: 'tooltip';
-  renderer: (data: any) => ReactNode;
+  renderer: (data: any) => ReactNode | Element;
 };
 
 const CardColTimeline: React.FC<CardColInterface> = ({
@@ -69,8 +69,6 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   state,
   dispatch,
   fetchSingleColumn,
-  assignOptions = null,
-  openAssignHandler,
   ...others
 }) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -123,8 +121,6 @@ const CardColTimeline: React.FC<CardColInterface> = ({
                   state={state}
                   dispatch={dispatch}
                   fetchSingleColumn={fetchSingleColumn}
-                  assignOptions={assignOptions}
-                  openAssignHandler={openAssignHandler}
                 />
               </div>
             </div>
