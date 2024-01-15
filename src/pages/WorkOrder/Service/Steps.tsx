@@ -217,7 +217,6 @@ const Steps = ({
   minHeightClass = null
 }) => {
   const workOrderId = workOrderData?._id;
-  const warehouse = workOrderData?.warehouse;
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -1563,7 +1562,7 @@ const Steps = ({
             )}
             {workStationAssignDialog && (
               <AssignWorkStationDialog
-                warehouse={warehouse}
+                warehouse={workOrderData?.warehouse?.optionValue}
                 workOrderData={[
                   {
                     uniqueId: selectedService?.uniqueId,

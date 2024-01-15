@@ -926,7 +926,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       )}
       {workStationAssignDialog.open && (
         <AssignWorkStationDialog
-          warehouse={productionOrderData?.warehouse}
+          warehouse={productionOrderData?.warehouse?.optionValue}
           workOrderData={selectedRecords
             .filter((e) => e.type === MATERIAL_TYPE.service)
             .map((d) => {

@@ -1056,7 +1056,7 @@ const WorkOrder = ({
           )}
           {workStationAssignDialog && (
             <AssignWorkStationDialog
-              warehouse={repairOrderData?.warehouse}
+              warehouse={repairOrderData?.warehouse?.optionValue}
               workOrderData={selectedRecords
                 .filter((e) => e.type === 'service')
                 .map((d) => {

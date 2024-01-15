@@ -1,5 +1,5 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Select, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
@@ -12,9 +12,10 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
 import { WORKORDER_SERVICE_STATUS, dateFormatForInputControl, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
-import AssignWorkStationDialog from './AssignWorkStationDialog';
-import AssignUserDialog from './AssignUserDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
+import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
 
 const RESOURCE = [
   { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
@@ -35,12 +36,12 @@ const WorkOrderSupervisor = () => {
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
-  const [assignWorkstation, setAssignWorkStation] = useState(false);
-  const [assignTechnician, setAssignTechnician] = useState(false);
+  const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
+  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
 
   const [usersOption, setUsersOption] = useState([]);
   const [serviceMasterOption, setServiceMasterOption] = useState([]);
-  const [serviceData, setServiceData] = useState(null);
+  const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [selectedResource, setSelectedResource] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
   const [selectedResourceOption, setSelectedResourceOption] = useState(null);
@@ -108,11 +109,42 @@ const WorkOrderSupervisor = () => {
 
   useEffect(() => {
     const cardDataRows: datarowInterface[] = [
-      { accessor: 'workOrderNumber', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?._id}` },
-      { accessor: 'serviceName', title: 'Service Name', type: 'text' },
+      { accessor: 'serviceName', title: 'Service Name', type: 'title' },
+      {
+        accessor: 'productionOrderNumber',
+        type: 'link',
+        title: routes.productionOrder.title,
+        link: (data) => `${routes.productionOrderDetail.path}/${data?.productionOrder?.optionValue}`,
+        target: '_blank'
+      },
+      {
+        accessor: 'repairOrderNumber',
+        type: 'link',
+        title: routes.repairOrder.title,
+        link: (data) => `${routes.repairOrderDetail.path}/${data?.repairOrder?.optionValue}`,
+        target: '_blank'
+      },
+      {
+        accessor: 'workOrderNumber',
+        type: 'link',
+        title: 'Work Order',
+        link: (data) => `${routes.workOrderDetail.path}/${data?._id}`,
+        target: '_blank'
+      },
       { accessor: 'assignedUser', title: 'Technician', type: 'text' },
+      { accessor: 'workStation', title: routes.workStations.title, type: 'text' },
       { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
-      { accessor: 'workStation', title: 'Workstations', type: 'text' }
+      {
+        type: 'tooltip',
+        accessor: 'tooltip',
+        renderer: (data) => (
+          <RenderAssignOptions
+            openAssignHandler={openAssignHandler}
+            data={data}
+            permissions={permissions}
+          />
+        )
+      }
     ];
 
     dispatch({
@@ -129,9 +161,14 @@ const WorkOrderSupervisor = () => {
       });
   }, []);
 
-  const openAssignHandler = (option: any, data: any) => {
-    setServiceData(data);
-    option === 'Assign Technician' ? setAssignTechnician(true) : setAssignWorkStation(true);
+  const openAssignHandler = (value: any, data: any) => {
+    setSelectedServiceData(data);
+    if (value === 'assignTechnician') {
+      setAssignTechnicianDialog(true)
+    }
+    else {
+      setWorkStationAssignDialog(true);
+    }
   };
 
   const fetchSingleColumn = useCallback(
@@ -144,6 +181,8 @@ const WorkOrderSupervisor = () => {
           const setData = (prev: { [key: string]: any[] }, appendData: boolean) => {
             const rows = data.map((item) => {
               const newObj = { ...item };
+              newObj['productionOrderNumber'] = newObj?.productionOrder?.optionLabel;
+              newObj['repairOrderNumber'] = newObj?.repairOrder?.optionLabel;
               newObj['serviceName'] = newObj?.service?.optionLabel;
               newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
               newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
@@ -220,6 +259,7 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
+            <div className='grid grid-cols-[1fr_30px] gap-2 items-start'>
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3 align-items-center">
               <Autocomplete
                 fullWidth
@@ -354,9 +394,10 @@ const WorkOrderSupervisor = () => {
                   setGlobalFilters({ ...globalFilters, to: date });
                 }}
               />
+              </div>
+              <div className='pt-[4px]'>
               <HtmlTooltip title={'Refresh'}>
                 <IconButton
-                  className={`${selectedResource ? 'sm:col-span-[unset]' : 'sm:col-span-3'} lg:col-span-4 xl:col-span-1`}
                   size="small"
                   onClick={() => {
                     dispatch({ type: 'refreshData' });
@@ -366,6 +407,7 @@ const WorkOrderSupervisor = () => {
                   <RefreshIcon />
                 </IconButton>
               </HtmlTooltip>
+              </div>
             </div>
           </div>
           <CardColTimeline
@@ -374,46 +416,44 @@ const WorkOrderSupervisor = () => {
             dispatch={dispatch}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
-            assignOptions={['Assign Technician', 'Assign Workstation']}
-            openAssignHandler={openAssignHandler}
           />
         </div>
-        {assignTechnician && (
+        {assignTechnicianDialog && (
           <AssignUserDialog
-            warehouse={serviceData?.warehouse}
+            warehouse={selectedServiceData?.warehouse}
             workOrderData={[
               {
-                uniqueId: serviceData?.uniqueId,
-                workOrderId: serviceData?._id
+                uniqueId: selectedServiceData?.uniqueId,
+                workOrderId: selectedServiceData?._id
               }
             ]}
-            assignedUsers={serviceData?.assignedUsers}
+            assignedUsers={selectedServiceData?.assignedUsers}
             reference={'service'}
             handleClose={() => {
-              setAssignTechnician(false);
+              setAssignTechnicianDialog(false);
             }}
             handleSucess={() => {
-              setAssignTechnician(false);
+              setAssignTechnicianDialog(false);
               dispatch({ type: 'refreshData' });
             }}
-            competencies={serviceData?.competencies}
+            competencies={selectedService?.competencies}
           />
         )}
-        {assignWorkstation && (
+        {workStationAssignDialog && (
           <AssignWorkStationDialog
-            warehouse={serviceData?.warehouse}
+            warehouse={selectedServiceData?.warehouse}
             workOrderData={[
               {
-                uniqueId: serviceData?.uniqueId,
-                workOrderId: serviceData?._id
+                uniqueId: selectedServiceData?.uniqueId,
+                workOrderId: selectedServiceData?._id
               }
             ]}
-            workStations={serviceData?.assignedWorkStations}
+            workStations={selectedServiceData?.assignedWorkStations}
             handleClose={() => {
-              setAssignWorkStation(false);
+              setWorkStationAssignDialog(false);
             }}
             handleSucess={() => {
-              setAssignWorkStation(false);
+              setWorkStationAssignDialog(false);
               dispatch({ type: 'refreshData' });
             }}
           />
@@ -424,3 +464,52 @@ const WorkOrderSupervisor = () => {
 };
 
 export default WorkOrderSupervisor;
+
+const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  return (
+    <>
+      <IconButton
+        size="small"
+        color="primary"
+        aria-label="menu"
+        disabled={data?.status === WORKORDER_SERVICE_STATUS.completed}
+        onClick={(event) => {
+          handleOpenMenu(event);
+        }}
+      >
+        <MoreHorizIcon />
+      </IconButton>
+      {anchorEl && (
+        <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+          <MenuItem
+            onClick={() => {
+              openAssignHandler('assignTechnician', data);
+              setAnchorEl(null);
+            }}
+          >
+            {'Assign Technician'}
+          </MenuItem>
+          {permissions?.workStations?.isRead &&
+            <MenuItem
+              onClick={() => {
+                openAssignHandler('assignWorkStations', data);
+                setAnchorEl(null);
+              }}
+            >
+              {`Assign ${routes.workStations.title}`}
+            </MenuItem>
+          }
+        </Menu>
+      )}
+    </>
+  );
+};
