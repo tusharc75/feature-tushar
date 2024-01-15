@@ -61,8 +61,6 @@ const ManagePayType = ({ payTypeData, onClose, onSuccess, payrollPolicyId, isClo
     setFields(customData);
   };
 
-  console.log(initialData);
-
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (payTypeData && !isClone) {
