@@ -27,6 +27,7 @@ import { deleteDisable } from 'src/constants/messageHelpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
+import GenerateAutoPassword from './GenerateAutoPassword';
 
 let searchTimeout: ReturnType<typeof setTimeout>;
 
@@ -72,6 +73,7 @@ const User: FC = () => {
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [generateAutoPassword, setGenerateAutoPassword] = useState(false);
 
   const extraColumns = [
     {
@@ -731,6 +733,16 @@ const User: FC = () => {
                     >
                       User Setup
                     </MenuItem>
+                    {user?.user?.userType === userType.brandAdmin && (
+                      <MenuItem
+                        onClick={() => {
+                          setGenerateAutoPassword(true)
+                          closeActions();
+                        }}
+                      >
+                        Generate Password
+                      </MenuItem>
+                    )}
                     <MenuItem
                       disabled={!permissions?.user?.isUpdate}
                       onClick={() => {
@@ -853,6 +865,15 @@ const User: FC = () => {
             selectedRecords={selectedRecords}
           />
         ) : null}
+
+        {generateAutoPassword && (
+          <GenerateAutoPassword
+            onClose={() => {
+              setGenerateAutoPassword(false);
+            }}
+            ids={selectedRecords?.map(d => d?._id)}
+          />
+        )}
       </section>
     </>
   );
