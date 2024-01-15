@@ -16,6 +16,8 @@ import AssignWorkStationDialog from './AssignWorkStationDialog';
 import AssignUserDialog from './AssignUserDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import { FiExternalLink } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 
 const RESOURCE = [
   { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
@@ -24,9 +26,6 @@ const RESOURCE = [
 ];
 
 const LIMIT = 25;
-
-
-
 
 const WorkOrderSupervisor = () => {
   const { state, dispatch } = useCardReducer();
@@ -112,12 +111,23 @@ const WorkOrderSupervisor = () => {
 
   useEffect(() => {
     const cardDataRows: datarowInterface[] = [
-      { accessor: 'workOrderNumber', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?._id}` },
-      { accessor: 'serviceName', title: 'Service Name', type: 'text' },
+      { accessor: 'serviceName', title: 'Service Name', type: 'title' },
+      {
+        accessor: 'workOrderNumber',
+        type: 'link',
+        title: 'Work Order',
+        link:(data) => `${routes.workOrderDetail.path}/${data?._id}`,
+        target: '_blank'
+      },
       { accessor: 'assignedUser', title: 'Technician', type: 'text' },
       { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
-      { accessor: 'workStation', title: 'Workstations', type: 'text' },
-      {type: 'tooltip', renderer: (data)=> <RenderAssignOptions openAssignHandler={openAssignHandler} assignOptions={['Assign Technician', 'Assign Workstation']} data={data} />}
+      { accessor: 'workStation', title: routes.workStations.title, type: 'text' },
+      {
+        type: 'tooltip',
+        renderer: (data) => (
+          <RenderAssignOptions openAssignHandler={openAssignHandler} assignOptions={['Assign Technician', 'Assign Workstation']} data={data} />
+        )
+      }
     ];
 
     dispatch({
