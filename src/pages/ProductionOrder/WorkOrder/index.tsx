@@ -892,32 +892,26 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         />
       )}
       {userAssignDialog.open && (
-        intersection(...(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || [])))?.length === 0 ?
-          <MessageDialog
-            open={userAssignDialog?.open}
-            message={`Selected services have not any unique competencies`}
-            onClose={() => setUserAssignDialog({ open: false, assignedUsers: [] })}
-          /> :
-          <AssignUserDialog
-            warehouse={productionOrderData?.warehouse?.optionValue}
-            workOrderData={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
-              .map((d) => {
-                return {
-                  uniqueId: d?.uniqueId,
-                  workOrderId: d?.workOrder?._id
-                };
-              })}
-            reference="service"
-            assignedUsers={userAssignDialog.assignedUsers}
-            handleClose={() => {
-              setUserAssignDialog({ open: false, assignedUsers: [] });
-            }}
-            handleSucess={() => {
-              fetchData();
-              setUserAssignDialog({ open: false, assignedUsers: [] });
-            }}
-            competencies={intersection(...(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || [])))}
-          />
+        <AssignUserDialog
+          warehouse={productionOrderData?.warehouse?.optionValue}
+          workOrderData={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
+            .map((d) => {
+              return {
+                uniqueId: d?.uniqueId,
+                workOrderId: d?.workOrder?._id
+              };
+            })}
+          reference="service"
+          assignedUsers={userAssignDialog.assignedUsers}
+          handleClose={() => {
+            setUserAssignDialog({ open: false, assignedUsers: [] });
+          }}
+          handleSucess={() => {
+            fetchData();
+            setUserAssignDialog({ open: false, assignedUsers: [] });
+          }}
+          competencies={uniq(flatMap(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || [])))}
+        />
       )}
       {workStationAssignDialog.open && (
         <AssignWorkStationDialog
