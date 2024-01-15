@@ -1,14 +1,14 @@
-import { Box, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { Box, Typography } from '@material-ui/core';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
+import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { WORKORDER_SERVICE_STEP_STATUS, WORKORDER_SERVICE_STATUS, dateFormat, dateTimeFormat } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STEP_STATUS, dateFormat, dateTimeFormat } from 'src/constants/helpers';
 import { datarowInterface } from '.';
 import HtmlTooltip from '../CustomTooltipTitle';
 import TimerComponent, { getFieldsWithOtherDetails } from './TimerComponent';
 import styles from './index.module.scss';
-import { FiExternalLink } from 'react-icons/fi';
 
 type IColCard = {
   data: any[];

@@ -75,7 +75,7 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = React.useState(600);
 
-  const { count, columnOrder, visibleColumns, rowDef } = state;
+  const { count, columnOrder, visibleColumns } = state;
 
   // sort columns
   const columns = useMemo(() => {
