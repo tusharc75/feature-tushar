@@ -97,6 +97,11 @@ const FaceLiveNess = ({ open, onClose, onComplete }) => {
                 onError={(error) => {
                   console.error('err', error);
                 }}
+                components={{
+                  PhotosensitiveWarning: (): JSX.Element => {
+                    return null;
+                  }
+                }}
               />
             </View>
           )}

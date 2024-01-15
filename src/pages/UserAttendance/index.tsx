@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import axiosInstance from 'src/axios/axiosInstance';
 import { FaceLivenessDetector } from '@aws-amplify/ui-react-liveness';
 import {
@@ -7,7 +7,6 @@ import {
 import "@aws-amplify/ui-react/styles.css";
 import { Amplify } from 'aws-amplify';
 import awsexports from '../../amplifyconfiguration.json';
-import { Box, Dialog } from '@material-ui/core';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 Amplify.configure(awsexports);
@@ -58,7 +57,7 @@ function UserAttendance() {
     const onCompleteScan = async (sessionId) => {
         const complete = await axiosInstance().get(`/user-attendance/attend/${sessionId}`)
         const data = complete.data.data;
-        if (data && data.gettingOut) { 
+        if (data && data.gettingOut) {
             setGettingOutModal(true);
         } else {
             fetchCreateLiveness();
@@ -68,8 +67,8 @@ function UserAttendance() {
     const onError = (error) => {
         console.error('Error in liveness detection:', error);
         setTimeout(() => {
-            fetchCreateLiveness(); 
-        }, 5000); 
+            fetchCreateLiveness();
+        }, 5000);
     };
 
 
@@ -90,11 +89,16 @@ function UserAttendance() {
                         <FaceLivenessDetector
                             sessionId={sessionId}
                             region={"us-east-1"}
-                                onAnalysisComplete={() => onCompleteScan(sessionId)}
-                                onUserCancel={() => { 
-                                    fetchCreateLiveness();
-                                }}
-                                onError={onError}
+                            onAnalysisComplete={() => onCompleteScan(sessionId)}
+                            onUserCancel={() => {
+                                fetchCreateLiveness();
+                            }}
+                            onError={onError}
+                            components={{
+                                PhotosensitiveWarning: (): JSX.Element => {
+                                    return null;
+                                }
+                            }}
                         />
                     </View>
                 )}
@@ -106,7 +110,7 @@ function UserAttendance() {
                             setGettingOutModal(false);
                             fetchCreateLiveness();
                         }}
-                        onOk={() => { 
+                        onOk={() => {
                             setGettingOutModal(false);
                             fetchCreateLiveness();
                         }}
