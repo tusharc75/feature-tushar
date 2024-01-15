@@ -1269,7 +1269,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       )}
       {workStationAssignDialog && (
         <AssignWorkStationDialog
-          warehouse={workOrderData?.warehouse}
+          warehouse={workOrderData?.warehouse?.optionValue}
           workOrderData={[
             {
               uniqueId: selectedService?.uniqueId,

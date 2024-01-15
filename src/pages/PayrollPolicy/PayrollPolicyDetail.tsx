@@ -4,7 +4,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { useData } from 'src/StateProvider/Provider';
 import { useParams, useHistory } from 'react-router-dom';
@@ -18,6 +18,7 @@ import { FaWpforms } from 'react-icons/fa';
 import { sidebarResource } from 'src/constants/helpers';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ManagePayrollPolicy from './ManagePayrollPolicy';
+import Holidays from './Holidays';
 
 const PayrollPolicyDetail = () => {
   const renderedFrom = camelCase(routes?.payrollPolicy.title);
@@ -158,6 +159,17 @@ const PayrollPolicyDetail = () => {
             aria-controls="a11y-tabpanel-0"
             id="a11y-tab-0"
           />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Holidays
+              </div>
+            }
+            value={1}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
+          />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -169,6 +181,9 @@ const PayrollPolicyDetail = () => {
               <DetailsPage data={payrollPolicyData} fields={fields} />
             )}
           </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Holidays payrollPolicyData={payrollPolicyData} />
         </TabPanel>
       </Box>
       {showConfirmBox && (
