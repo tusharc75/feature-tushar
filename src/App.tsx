@@ -250,6 +250,7 @@ import PayrollPolicyDetail from './pages/PayrollPolicy/PayrollPolicyDetail';
 import TriggerNotificationMaster from './pages/TriggerNotificationMaster';
 import TriggerNotificationMasterDetail from './pages/TriggerNotificationMaster/TriggerNotificationMasterDetail';
 import TriggerNotificationHistory from './pages/TriggerNotificationHistory';
+import UserAttendance from './pages/UserAttendance';
 
 var notificationInterval: any = null;
 
@@ -1106,6 +1107,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.triggerNotificationHistory.path}`}>
               <TriggerNotificationHistory />
+            </PrivateRoute>
+            <PrivateRoute exact path={'/user-attendance'}>
+              <UserAttendance />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

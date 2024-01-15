@@ -3,22 +3,25 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import { FaceLivenessDetector } from '@aws-amplify/ui-react-liveness';
-import {
-  Loader, ThemeProvider, Theme, useTheme, View,
-} from '@aws-amplify/ui-react';
+import { Loader, ThemeProvider, View } from '@aws-amplify/ui-react';
 import "@aws-amplify/ui-react/styles.css";
 import { Amplify } from 'aws-amplify';
 import awsexports from '../../amplifyconfiguration.json';
 import "./faceLiveness.scss"
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../CustomDialog/CustomDialogContent';
+import CommonSkeleton from '../Helpers/CommonSkeleton';
+import { Box } from '@material-ui/core';
 
 Amplify.configure(awsexports);
 
-const FaceLiveNess = ({ open, onClose, onComplete }) => {
+const FaceLiveNess = ({ onClose, onComplete }) => {
   const [cameraPermission, setCameraPermission] = useState('prompt');
 
   const [loading, setLoading] = useState<boolean>(true);
   const [sessionId, setSessionId] = useState<any>(null);
   const videoStream = useRef(null);
+
   useEffect(() => {
     if (cameraPermission === 'granted' || cameraPermission === 'prompt') {
       navigator.mediaDevices
@@ -30,8 +33,8 @@ const FaceLiveNess = ({ open, onClose, onComplete }) => {
         })
         .then((stream) => {
           setCameraPermission('granted');
-          videoStream.current = stream; // Store the stream
-          stream.getTracks().forEach((track) => track.stop()); // Stop the stream initially
+          videoStream.current = stream;
+          stream.getTracks().forEach((track) => track.stop());
         })
         .catch((err) => {
           console.error('Camera access denied:', err);
@@ -58,43 +61,6 @@ const FaceLiveNess = ({ open, onClose, onComplete }) => {
     setLoading(false);
   };
 
-  const { tokens } = useTheme();
-  const theme: Theme = {
-    name: 'Face Liveness Example Theme',
-    tokens: {
-      colors: {
-        overlay: {
-          value: tokens.colors.black['90'],
-        },
-        background: {
-          value: tokens.colors.transparent.value,
-        },
-        font: {
-          primary: {
-            value: tokens.colors.white.value,
-          },
-        },
-        brand: {
-          outline: {
-            color: {
-              value: tokens.colors.teal['100'],
-
-            }
-          },
-          color: { value: tokens.colors.teal['100'] },
-          primary: {
-            '10': tokens.colors.teal['100'],
-            '80': tokens.colors.teal['40'],
-            '90': tokens.colors.teal['20'],
-            '100': tokens.colors.teal['10'],
-          },
-        },
-      },
-    },
-  };
-
-
-
   const handleCancel = () => {
     if (videoStream.current) {
       videoStream.current.getTracks().forEach((track) => track.stop());
@@ -102,41 +68,49 @@ const FaceLiveNess = ({ open, onClose, onComplete }) => {
     onClose();
   };
 
-  return (
-    <>
-      <Dialog
-        maxWidth="md"
-        TransitionComponent={CustomDialogTransition}
-        aria-labelledby="customized-dialog-title"
-        onClose={onClose}
-        open={open}
-
-      >
-        <ThemeProvider >
-          {loading || !sessionId ? (
-            <Loader />
-          ) : (
-            <View
-              as="div"
-              maxHeight="100%"
-              height="100%"
-              width="100%"
-              maxWidth="100%"
-            >
-              <FaceLivenessDetector
-                sessionId={sessionId}
-                region={"us-east-1"}
-                onAnalysisComplete={() => onComplete(sessionId)}
-                onUserCancel={handleCancel}
-                onError={(error) => {
-                  console.error('err', error);
-                }}
-              />
-            </View>
-          )}
+  return (<Dialog
+    maxWidth="md"
+    TransitionComponent={CustomDialogTransition}
+    aria-labelledby="customized-dialog-title"
+    onClose={onClose}
+    open={true}
+    fullScreen
+  >
+    <CustomDialogHeader
+      title={'Face'}
+      onClose={() => {
+        onClose();
+      }}
+      showRequiredLabel={false}
+    ></CustomDialogHeader>
+    <CustomDialogContent>
+      {loading || !sessionId ? (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      ) : (
+        <ThemeProvider>
+          <View as="div" width={'calc(100vh - 100px)'} margin={'auto'} >
+            <FaceLivenessDetector
+              sessionId={sessionId}
+              region={"us-east-1"}
+              onAnalysisComplete={() => onComplete(sessionId)}
+              onUserCancel={handleCancel}
+              onError={(error) => {
+                console.error('err', error);
+              }}
+              components={{
+                PhotosensitiveWarning: (): JSX.Element => {
+                  return null;
+                }
+              }}
+            />
+          </View>
         </ThemeProvider>
-      </Dialog>
-    </>
+      )}
+    </CustomDialogContent>
+  </Dialog>
+
   );
 };
 

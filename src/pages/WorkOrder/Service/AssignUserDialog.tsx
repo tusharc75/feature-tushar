@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import { CustomDialogTransition, workOrder } from 'src/constants/helpers';
-import { Box, Dialog, TextField } from '@material-ui/core';
+import { Box, Dialog, TextField, Typography } from '@material-ui/core';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -14,7 +14,7 @@ import { isArray } from 'lodash';
 
 const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, competencies, handleClose, handleSucess, warehouse }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [userList, setUserList] = useState([]);
+  const [userList, setUserList] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState(assignedUsers);
 
   useEffect(() => {
@@ -48,19 +48,16 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
       data.serviceUniqueId = referenceData?.serviceUniqueId;
     }
 
-    axiosInstance()
-      .put(api, data)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        handleSucess();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
+    axiosInstance().put(api, data).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
       });
+      handleSucess();
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
   };
 
   return (
@@ -80,18 +77,24 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
       <CustomDialogHeader onClose={handleClose} title={`Assign Technicians`} showRequiredLabel={false} showManimizeMaximize={false} />
       <CustomDialogContent>
         <Box m={1}>
-          <Autocomplete
-            size="small"
-            options={userList}
-            multiple
-            value={selectedUsers}
-            onChange={(_, val) => {
-              setSelectedUsers(val);
-            }}
-            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-            renderInput={(props) => <TextField {...props} placeholder={''} variant="outlined" name="userList" label={'Select Technicians'} />}
-          />
+          {userList ?
+            <>
+              {userList?.length === 0 && <Box mb={2}>
+                <Typography >None of the technicians have selected competencies.</Typography></Box>}
+              <Autocomplete
+                size="small"
+                options={userList}
+                multiple
+                value={selectedUsers}
+                onChange={(_, val) => {
+                  setSelectedUsers(val);
+                }}
+                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                renderInput={(props) => <TextField {...props} placeholder={''} variant="outlined" name="userList" label={'Select Technicians'} />}
+              />
+            </>
+            : null}
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
