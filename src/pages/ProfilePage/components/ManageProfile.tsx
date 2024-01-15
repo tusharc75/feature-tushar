@@ -360,9 +360,9 @@ export default function ManageProfile(props) {
             <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setShowAddProxyDialog(true)}>
               Add DOA Proxy
             </Button>
-            <Divider />
-            {
-              (userData?.faceId || userData?.faceData) ? (
+            <div>
+              <Divider />
+              {(userData?.faceId || userData?.faceData) ? (
                 <Button color="primary" fullWidth variant="outlined" size="small" onClick={handleRemoveFace}>
                   Remove Face
                 </Button>
@@ -370,11 +370,8 @@ export default function ManageProfile(props) {
                 <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setAddFaceDialog(true)}>
                   Add Face
                 </Button>
-              )
-            }
-            {/* <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setAddFaceDialog(true)}>
-              Add Face
-            </Button> */}
+              )}
+            </div>
             <div style={{ display: 'none' }}>
               <Divider />
               {userData?.faceData && userData?.faceId ? (

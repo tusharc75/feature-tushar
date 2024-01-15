@@ -16,9 +16,9 @@ import TabPanel from '../../components/TabPanel';
 import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
 import { sidebarResource } from 'src/constants/helpers';
-import ActivityButton from 'src/components/Activity/ActivityButton';
 import ManagePayrollPolicy from './ManagePayrollPolicy';
 import Holidays from './Holidays';
+import PayTypes from './PayTypes';
 
 const PayrollPolicyDetail = () => {
   const renderedFrom = camelCase(routes?.payrollPolicy.title);
@@ -163,10 +163,21 @@ const PayrollPolicyDetail = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Holidays
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Pay Types
               </div>
             }
             value={1}
+            aria-controls="a11y-tabpanel-2"
+            id="a11y-tab-2"
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Holidays
+              </div>
+            }
+            value={2}
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
           />
@@ -183,6 +194,9 @@ const PayrollPolicyDetail = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
+          <PayTypes payrollPolicyId={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
           <Holidays payrollPolicyData={payrollPolicyData} />
         </TabPanel>
       </Box>

@@ -58,40 +58,6 @@ const FaceLiveNess = ({ open, onClose, onComplete }) => {
     setLoading(false);
   };
 
-  const { tokens } = useTheme();
-  const theme: Theme = {
-    name: 'Face Liveness Example Theme',
-    tokens: {
-      colors: {
-        overlay: {
-          value: tokens.colors.black['90'],
-        },
-        background: {
-          value: tokens.colors.transparent.value,
-        },
-        font: {
-          primary: {
-            value: tokens.colors.white.value,
-          },
-        },
-        brand: {
-          outline: {
-            color: {
-              value: tokens.colors.teal['100'],
-
-            }
-          },
-          color: { value: tokens.colors.teal['100'] },
-          primary: {
-            '10': tokens.colors.teal['100'],
-            '80': tokens.colors.teal['40'],
-            '90': tokens.colors.teal['20'],
-            '100': tokens.colors.teal['10'],
-          },
-        },
-      },
-    },
-  };
 
 
 

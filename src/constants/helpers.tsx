@@ -532,6 +532,7 @@ export const CHILD_RESOURCE = {
   invoiceCreditMemo: 'Invoice Credit Memo',
   workOrderProduct: 'Work Order Product',
   payrollHoliday: 'Payroll Holiday',
+  payTypes: 'Pay Types',
 };
 
 export const sidebarResourceObjectFromValues = () => {
