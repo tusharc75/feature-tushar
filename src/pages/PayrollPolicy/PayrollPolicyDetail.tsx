@@ -17,6 +17,7 @@ import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
 import { sidebarResource } from 'src/constants/helpers';
 import ManagePayrollPolicy from './ManagePayrollPolicy';
+import Holidays from './Holidays';
 import PayTypes from './PayTypes';
 
 const PayrollPolicyDetail = () => {
@@ -162,6 +163,17 @@ const PayrollPolicyDetail = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Holidays
+              </div>
+            }
+            value={1}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Pay Types
               </div>
             }
@@ -183,6 +195,9 @@ const PayrollPolicyDetail = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <PayTypes payrollPolicyId={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Holidays payrollPolicyData={payrollPolicyData} />
         </TabPanel>
       </Box>
       {showConfirmBox && (

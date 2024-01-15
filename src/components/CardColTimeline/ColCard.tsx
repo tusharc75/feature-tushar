@@ -1,9 +1,10 @@
-import { Box, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { Box, Typography } from '@material-ui/core';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
+import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { WORKORDER_SERVICE_STEP_STATUS, WORKORDER_SERVICE_STATUS, dateFormat, dateTimeFormat } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STEP_STATUS, dateFormat, dateTimeFormat } from 'src/constants/helpers';
 import { datarowInterface } from '.';
 import HtmlTooltip from '../CustomTooltipTitle';
 import TimerComponent, { getFieldsWithOtherDetails } from './TimerComponent';
@@ -51,7 +52,11 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
           );
         }
         if (item.renderer) {
-          return item.renderer(data);
+          return (
+            <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
+              {item.renderer(data)}
+            </Typography>
+          );
         }
         if (item.type === 'linkTitle') {
           if (!data[item.accessor]) return null;
@@ -74,12 +79,27 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
         }
         if (item.type === 'link') {
           if (!data[item.accessor]) return null;
+          let linkText = data[item.accessor] || '--';
+          let outsideText = null;
+          if (item.target === '_blank') {
+            linkText = <FiExternalLink size={16} />;
+            outsideText = data[item.accessor] || '--';
+          }
           return (
             <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
-              <Link className={styles.cardDetailsLink} to={() => item.link(data)} title={data[item.accessor] || '--'}>
-                {data[item.accessor] || '--'}
-              </Link>
+              <span className="flex gap-1 text-ellipsis min-w-0 [font-weight:400_!important]">
+                {outsideText}
+                <Link
+                  className={`${styles.cardDetailsLink} min-w-0 `}
+                  onClick={(e) => e.stopPropagation()}
+                  target={item.target}
+                  to={() => item.link(data)}
+                  title={data[item.accessor] || '--'}
+                >
+                  {linkText}
+                </Link>
+              </span>
             </Typography>
           );
         }
@@ -115,7 +135,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
         return null;
       })}
 
-      <Box className={`${styles.passFail} flex gap-2`}>
+      <Box className={`${styles.passFail} flex gap-2 items-center`}>
         {tooltip ? tooltip.renderer(data) : null}
         {passFailStatus ? <RenderStatusIcon stepStatus={data[passFailAccessor]} /> : null}
       </Box>

@@ -251,9 +251,7 @@ const InvoiceDetails = () => {
                       {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   )}
-                {permissions?.invoice?.isDelete &&
-                  ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) &&
-                  invoiceData?.canDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {permissions?.invoice?.isDelete && invoiceData?.canDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 {permissions?.invoice?.isUpdate && [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
                   <ButtonWithPulse
                     variant={'outlined'}
@@ -348,6 +346,7 @@ const InvoiceDetails = () => {
             {currentStep === 0 && invoiceData && (
               <Material
                 invoiceData={invoiceData}
+                fetchInvoiceData={fetchInvoiceData}
                 setNextStep={setNextStep}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}

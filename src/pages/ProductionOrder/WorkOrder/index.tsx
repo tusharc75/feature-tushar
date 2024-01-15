@@ -13,9 +13,10 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORK_ORDER_STATUS,
   productionOrder,
+  sidebarResource,
   workOrder
 } from '../../../constants/helpers';
-import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
+import { flatMap, intersection, map, orderBy, startCase, uniq } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
@@ -34,6 +35,7 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import SyncIcon from '@material-ui/icons/Sync';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -644,16 +646,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     }
   };
 
-  const checkUniqCompetencies = () => {
-    if (selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length === 0) {
-      return true;
-    } else if (uniq((map(selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service), 'serviceDetail.competencies'))?.map((e) => e?.toString())).length === 1) {
-      return false;
-    } else {
-      return true;
-    }
-  };
-
   return (
     <Fragment>
       {isAutoCreating &&
@@ -720,7 +712,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 Add New Service
               </MenuItem>
               <MenuItem
-                disabled={checkUniqCompetencies()}
+                disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length ? false : true}
                 onClick={() => {
                   closeActions();
                   const uniqueAssignedUsers: any = flatMap(
@@ -900,33 +892,36 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         />
       )}
       {userAssignDialog.open && (
-        <AssignUserDialog
-          warehouse={productionOrderData?.warehouse?.optionValue}
-          workOrderData={selectedRecords
-            .filter((e) => e.type === MATERIAL_TYPE.service)
-            .map((d) => {
-              return {
-                uniqueId: d?.uniqueId,
-                workOrderId: d?.workOrder?._id
-              };
-            })}
-          reference="service"
-          assignedUsers={userAssignDialog.assignedUsers}
-          handleClose={() => {
-            setUserAssignDialog({ open: false, assignedUsers: [] });
-          }}
-          handleSucess={() => {
-            fetchData();
-            setUserAssignDialog({ open: false, assignedUsers: [] });
-          }}
-          competencies={uniq(
-            flatMap(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || []))
-          )}
-        />
+        intersection(...(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || [])))?.length === 0 ?
+          <MessageDialog
+            open={userAssignDialog?.open}
+            message={`Selected services have not any unique competencies`}
+            onClose={() => setUserAssignDialog({ open: false, assignedUsers: [] })}
+          /> :
+          <AssignUserDialog
+            warehouse={productionOrderData?.warehouse?.optionValue}
+            workOrderData={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
+              .map((d) => {
+                return {
+                  uniqueId: d?.uniqueId,
+                  workOrderId: d?.workOrder?._id
+                };
+              })}
+            reference="service"
+            assignedUsers={userAssignDialog.assignedUsers}
+            handleClose={() => {
+              setUserAssignDialog({ open: false, assignedUsers: [] });
+            }}
+            handleSucess={() => {
+              fetchData();
+              setUserAssignDialog({ open: false, assignedUsers: [] });
+            }}
+            competencies={intersection(...(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || [])))}
+          />
       )}
       {workStationAssignDialog.open && (
         <AssignWorkStationDialog
-          warehouse={productionOrderData?.warehouse}
+          warehouse={productionOrderData?.warehouse?.optionValue}
           workOrderData={selectedRecords
             .filter((e) => e.type === MATERIAL_TYPE.service)
             .map((d) => {

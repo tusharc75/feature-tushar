@@ -26,14 +26,11 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
     if (competencies && isArray(competencies) && competencies?.length) {
       api = api + `&competencies=${JSON.stringify(competencies)}`
     }
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data } }) => {
-        setUserList(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      setUserList(data);
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
   };
 
   const handleAssignUser = () => {

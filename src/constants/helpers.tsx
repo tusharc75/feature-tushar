@@ -531,6 +531,7 @@ export const CHILD_RESOURCE = {
   serializedAssetsCertification: 'Serialized Assets Certificate',
   invoiceCreditMemo: 'Invoice Credit Memo',
   workOrderProduct: 'Work Order Product',
+  payrollHoliday: 'Payroll Holiday',
   payTypes: 'Pay Types',
 };
 
@@ -2395,6 +2396,12 @@ export const REPORT_LIST = [
     permission: 'workOrder',
     key: 'standardReport',
     type: 'workOrderService'
+  },
+  {
+    title: 'Work Order Technician Work Hours',
+    permission: 'workOrder',
+    key: 'standardReport',
+    type: 'workOrderTechnicianWorkHours'
   },
   {
     title: 'User Session',
