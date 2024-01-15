@@ -34,7 +34,7 @@ const ManagePayType = ({ payTypeData, onClose, onSuccess, payrollPolicyId, isClo
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.payTypes}`);
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.payrollPayTypes}`);
     var data = response?.data?.data;
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (payTypeData) {
