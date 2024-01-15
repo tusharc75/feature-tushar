@@ -35,7 +35,7 @@ const calcCardHeight = (rowDef: datarowInterface[], data) => {
   const rowsWithExternalLInk = [];
   for (const row of rowDef) {
     const ignoredRows = ['title', 'linkTitle', 'tooltip'];
-    const isRowDataPresent = Boolean(row.accessor ? (data[row.accessor] ? data[row.accessor] : false) : false);
+    const isRowDataPresent = data ? Boolean(row.accessor ? (data[row.accessor] ? data[row.accessor] : false) : false) : false;
     switch (true) {
       case ignoredRows.includes(row.type):
         break;
