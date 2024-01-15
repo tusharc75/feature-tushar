@@ -163,23 +163,23 @@ const PayrollPolicyDetail = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Holidays
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Pay Types
               </div>
             }
             value={1}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
+            aria-controls="a11y-tabpanel-2"
+            id="a11y-tab-2"
           />
           <Tab
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Pay Types
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Holidays
               </div>
             }
-            value={1}
-            aria-controls="a11y-tabpanel-0"
-            id="a11y-tab-0"
+            value={2}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
           />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
@@ -196,7 +196,7 @@ const PayrollPolicyDetail = () => {
         <TabPanel value={tabValue} index={1}>
           <PayTypes payrollPolicyId={id} />
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
+        <TabPanel value={tabValue} index={2}>
           <Holidays payrollPolicyData={payrollPolicyData} />
         </TabPanel>
       </Box>
