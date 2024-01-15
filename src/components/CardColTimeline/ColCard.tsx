@@ -3,7 +3,7 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
-import { WORKORDER_SERVICE_STEP_STATUS, dateFormat, dateTimeFormat } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STEP_STATUS, WORKORDER_SERVICE_STATUS, dateFormat, dateTimeFormat } from 'src/constants/helpers';
 import { datarowInterface } from '.';
 import HtmlTooltip from '../CustomTooltipTitle';
 import TimerComponent, { getFieldsWithOtherDetails } from './TimerComponent';
@@ -177,6 +177,7 @@ const RenderAssignOptions = ({ openAssignHandler, assignOptions, data }) => {
             return (
               <MenuItem
                 key={option}
+                disabled={data?.status===WORKORDER_SERVICE_STATUS.completed}
                 onClick={() => {
                   openAssignHandler(option, data);
                   setAnchorEl(null);
