@@ -567,7 +567,6 @@ export default function ManageProfile(props) {
           ) : null}
           {addFaceDialog && (
             <FaceLiveNess
-              open={addFaceDialog}
               onClose={() => setAddFaceDialog(false)}
               onComplete={handleAddFace} />
           )}
