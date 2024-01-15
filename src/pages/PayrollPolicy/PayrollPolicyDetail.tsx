@@ -19,6 +19,7 @@ import { sidebarResource } from 'src/constants/helpers';
 import ManagePayrollPolicy from './ManagePayrollPolicy';
 import Holidays from './Holidays';
 import PayTypes from './PayTypes';
+import PaidTimeOff from './PaidTimeOff';
 
 const PayrollPolicyDetail = () => {
   const renderedFrom = camelCase(routes?.payrollPolicy.title);
@@ -167,8 +168,8 @@ const PayrollPolicyDetail = () => {
               </div>
             }
             value={1}
-            aria-controls="a11y-tabpanel-2"
-            id="a11y-tab-2"
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-1"
           />
           <Tab
             className={'tabLayout'}
@@ -178,8 +179,19 @@ const PayrollPolicyDetail = () => {
               </div>
             }
             value={2}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
+            aria-controls="a11y-tabpanel-2"
+            id="a11y-tab-2"
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Paid Time Off
+              </div>
+            }
+            value={3}
+            aria-controls="a11y-tabpanel-3"
+            id="a11y-tab-3"
           />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
@@ -198,6 +210,9 @@ const PayrollPolicyDetail = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <Holidays payrollPolicyData={payrollPolicyData} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <PaidTimeOff payrollPolicyData={payrollPolicyData} />
         </TabPanel>
       </Box>
       {showConfirmBox && (

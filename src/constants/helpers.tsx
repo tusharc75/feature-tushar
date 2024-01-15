@@ -496,7 +496,7 @@ export const RESOURCE_LABEL = {
   repairOrderInvoice: 'Repair Order Invoice',
   payrollPolicy: 'Payroll Policy',
   triggerNotificationMaster: 'Trigger Notification Master',
-  triggerNotificationHistory : 'Trigger Notification History'
+  triggerNotificationHistory: 'Trigger Notification History'
 };
 
 export const CHILD_RESOURCE = {
@@ -533,6 +533,7 @@ export const CHILD_RESOURCE = {
   workOrderProduct: 'Work Order Product',
   payrollHoliday: 'Payroll Holiday',
   payrollPayTypes: 'Payroll Pay Types',
+  payrollPaidTimeOff: 'Payroll Paid Time Off'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -1021,15 +1022,13 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
     } else if (key.type === 'dateTime') {
       if (isClone) {
         obj[key.fieldName] = new Date();
-      }
-      else if (dataObj[key.fieldName]) {
+      } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       }
     } else if (key.type === 'date') {
       if (isClone) {
         obj[key.fieldName] = new Date();
-      }
-      else if (dataObj[key.fieldName]) {
+      } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       }
     } else if (key.type === 'lookUpDisplay') {
@@ -1055,21 +1054,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1077,7 +1076,9 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'multiSelect') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
-      schema[input.fieldName] = input.required ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable() : number().nullable();
+      schema[input.fieldName] = input.required
+        ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
+        : number().nullable();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail
@@ -2086,7 +2087,7 @@ export const SUPPORT_TICKET_STATUS = {
   inProgress: 'In-Progress',
   approvalPending: 'Approval Pending',
   completed: 'Completed'
-} as const
+} as const;
 
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
@@ -2568,7 +2569,7 @@ export const WORKORDER_SERVICE_STATUS = {
   completed: 'Completed',
   failed: 'Failed',
   skipped: 'Skipped',
-  inProgressByOther: 'In-Progress By Other',
+  inProgressByOther: 'In-Progress By Other'
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
