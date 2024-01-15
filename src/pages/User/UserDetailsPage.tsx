@@ -67,6 +67,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import UserSession from './UserSession';
+import GenerateAutoPassword from './GenerateAutoPassword';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -127,6 +128,7 @@ const UserDetailsPage = () => {
   const [showSetupUserDialog, setShowSetupUserDialog] = useState(false);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allUsers, setAllUsers] = useState([]);
+  const [generateAutoPassword, setGenerateAutoPassword] = useState(false);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -469,6 +471,18 @@ const UserDetailsPage = () => {
               {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
                 <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={`btn-outline-v1`} onClick={entityDialogOpen}>
                   {isMobile && !isTablet ? <RiSettingsFill /> : 'Assign Entity/Role'}
+                </Button>
+              )}
+              {user?.user?.userType === userType.brandAdmin && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className={`btn-outline-v1`}
+                  onClick={() => {
+                    setGenerateAutoPassword(true);
+                  }}
+                  style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
+                >
+                  {isMobile && !isTablet ? <BiReset size={20} /> : 'Generate Password'}
                 </Button>
               )}
               {permissions?.user?.isUpdate && (
@@ -938,6 +952,14 @@ const UserDetailsPage = () => {
           }}
         />
       ) : null}
+      {generateAutoPassword && (
+        <GenerateAutoPassword
+          onClose={() => {
+            setGenerateAutoPassword(false);
+          }}
+          ids={[userData?._id]}
+        />
+      )}
     </>
   );
 };
