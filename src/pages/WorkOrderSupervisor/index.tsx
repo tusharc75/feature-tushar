@@ -136,10 +136,12 @@ const WorkOrderSupervisor = () => {
       { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
       {
         type: 'tooltip',
+        accessor: 'tooltip',
         renderer: (data) => (
           <RenderAssignOptions
             openAssignHandler={openAssignHandler}
             data={data}
+            permissions={permissions}
           />
         )
       }
@@ -257,6 +259,7 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
+            <div className='grid grid-cols-[1fr_30px] gap-2 items-start'>
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3 align-items-center">
               <Autocomplete
                 fullWidth
@@ -391,6 +394,8 @@ const WorkOrderSupervisor = () => {
                   setGlobalFilters({ ...globalFilters, to: date });
                 }}
               />
+              </div>
+              <div className='pt-[4px]'>
               <HtmlTooltip title={'Refresh'}>
                 <IconButton
                   size="small"
@@ -402,6 +407,7 @@ const WorkOrderSupervisor = () => {
                   <RefreshIcon />
                 </IconButton>
               </HtmlTooltip>
+              </div>
             </div>
           </div>
           <CardColTimeline
@@ -459,7 +465,7 @@ const WorkOrderSupervisor = () => {
 
 export default WorkOrderSupervisor;
 
-const RenderAssignOptions = ({ openAssignHandler, data }) => {
+const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => {

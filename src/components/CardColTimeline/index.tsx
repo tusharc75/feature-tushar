@@ -55,6 +55,7 @@ type TLinkTitle = TCommon & {
 };
 type TTooltip = {
   type: 'tooltip';
+  accessor: string;
   renderer: (data: any) => ReactNode | Element;
 };
 
@@ -75,7 +76,7 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = React.useState(600);
 
-  const { count, columnOrder, visibleColumns, rowDef } = state;
+  const { count, columnOrder, visibleColumns } = state;
 
   // sort columns
   const columns = useMemo(() => {

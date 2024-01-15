@@ -1,12 +1,12 @@
 import { Button } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import React, { useEffect, useMemo, useRef } from 'react';
+import { Skeleton } from '@material-ui/lab';
+import React, { useEffect, useRef } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import ColCard from './ColCard';
 import { TActios, TInitialState, datarowInterface } from './index';
-import { Skeleton } from '@material-ui/lab';
 
 export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   cardOnClick?: (e: React.MouseEvent, data: any) => void | null;
@@ -27,12 +27,15 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
 
 const HEADER_HEIGHT = 90;
 const ROW_HEIGHT = 20;
+const ROW_EXTERNALliNK_HEIGHT = 22.406;
 
 const calcCardHeight = (rowDef: datarowInterface[], data) => {
   const head = rowDef?.find((c) => c.type === 'title' || c.type === 'linkTitle');
   const rowsWithHeight = [];
+  const rowsWithExternalLInk = [];
   for (const row of rowDef) {
     const ignoredRows = ['title', 'linkTitle', 'tooltip'];
+    const isRowDataPresent = data ? Boolean(row.accessor ? (data[row.accessor] ? data[row.accessor] : false) : false) : false;
     switch (true) {
       case ignoredRows.includes(row.type):
         break;
@@ -42,15 +45,19 @@ const calcCardHeight = (rowDef: datarowInterface[], data) => {
       case Boolean(row.renderer):
         rowsWithHeight.push(row);
         break;
-      case Boolean(row.accessor ? (data[row.accessor] ? data[row.accessor] : false) : false):
+      case row.type === 'link' && (Object.hasOwn(row, 'target') && row.target === '_blank') && isRowDataPresent:
+        rowsWithExternalLInk.push(row);
+        break;
+      case isRowDataPresent:
         rowsWithHeight.push(row);
         break;
+     
       default:
         break;
     }
   }
   if (!head) return ROW_HEIGHT * rowsWithHeight.length;
-  return HEADER_HEIGHT + rowsWithHeight.length * ROW_HEIGHT;
+  return HEADER_HEIGHT + rowsWithHeight.length * ROW_HEIGHT + rowsWithExternalLInk.length * ROW_EXTERNALliNK_HEIGHT;
 };
 
 const RenderColumns: React.FC<colDataInterface> = ({
