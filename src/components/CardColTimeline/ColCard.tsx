@@ -84,7 +84,7 @@ const ColCard: React.FC<IColCard> = ({ data, cardOnClick, rowDef, passFailStatus
           return (
             <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
-              <Link className={`${styles.cardDetailsLink} flex gap-2 text-ellipsis min-w-0 `} onClick={(e)=>e.stopPropagation()} target={item.target} to={() => item.link(data)} title={data[item.accessor] || '--'}>
+              <Link className={`${styles.cardDetailsLink} flex gap-1 text-ellipsis min-w-0 `} onClick={(e)=>e.stopPropagation()} target={item.target} to={() => item.link(data)} title={data[item.accessor] || '--'}>
                 {linkText}
               </Link>
             </Typography>
