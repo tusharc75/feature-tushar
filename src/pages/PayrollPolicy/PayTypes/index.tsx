@@ -17,13 +17,14 @@ import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from '
 import ManagePayType from './ManagePayType';
 import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import FileCopyIcon from '@material-ui/icons/FileCopy'
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const PayTypes = ({ payrollPolicyId }) => {
   const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_payTypes`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { selectedRecords } = state;
+  const { rowCount, selectedRecords } = state;
   const {
     state: { permissions }
   }: any = useData();
@@ -208,6 +209,19 @@ const PayTypes = ({ payrollPolicyId }) => {
                   </MenuItem>
                 </Menu>
                 <Box ml={1} />
+                <ImportExportMenu
+                  permissions={permissions?.payrollPolicy}
+                  module="pay-types"
+                  api={`${routes.payrollPolicy.path}/pay-types`}
+                  afterImportCompleted={() => {
+                    fetchData();
+                  }}
+                  isExportAllOrSomeFeature={true}
+                  total={rowCount}
+                  recordsToExport={selectedRecords.length}
+                  ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
+                  additionalParams={`payrollPolicy=${payrollPolicyId}`}
+                />
               </Box>
             </Grid>
           </Grid>
