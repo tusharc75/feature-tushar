@@ -27,7 +27,7 @@ const AssignWorkStationDialog = ({ warehouse, workOrderData, workStations, handl
 
     filterByIds.push({
       field: 'warehouse',
-      term: { $in: [warehouse?.optionValue] }
+      term: { $in: [warehouse] }
     });
 
     return `?filterById=${JSON.stringify(filterByIds)}&filterType=and`;
