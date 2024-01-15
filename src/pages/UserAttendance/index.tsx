@@ -8,14 +8,18 @@ import "@aws-amplify/ui-react/styles.css";
 import { Amplify } from 'aws-amplify';
 import awsexports from '../../amplifyconfiguration.json';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { Box } from '@material-ui/core';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 Amplify.configure(awsexports);
+
 function UserAttendance() {
     const [cameraPermission, setCameraPermission] = useState('prompt');
     const [loading, setLoading] = useState<boolean>(true);
     const [sessionId, setSessionId] = useState<any>(null);
     const [gettingOutModal, setGettingOutModal] = useState(false);
     const videoStream = useRef(null);
+
     useEffect(() => {
         if (cameraPermission === 'granted' || cameraPermission === 'prompt') {
             navigator.mediaDevices
@@ -54,6 +58,7 @@ function UserAttendance() {
         setSessionId(data.SessionId);
         setLoading(false);
     };
+
     const onCompleteScan = async (sessionId) => {
         const complete = await axiosInstance().get(`/user-attendance/attend/${sessionId}`)
         const data = complete.data.data;
@@ -65,59 +70,52 @@ function UserAttendance() {
     };
 
     const onError = (error) => {
-        console.error('Error in liveness detection:', error);
         setTimeout(() => {
             fetchCreateLiveness();
         }, 5000);
     };
 
 
-    return (
-        <section className="main-container-v1" style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-        }}>
-            <ThemeProvider >
-                {loading || !sessionId ? (
-                    <Loader />
-                ) : (
-                    <View
-                        as="div"
-                        width={"640px"}
-                    >
-                        <FaceLivenessDetector
-                            sessionId={sessionId}
-                            region={"us-east-1"}
-                            onAnalysisComplete={() => onCompleteScan(sessionId)}
-                            onUserCancel={() => {
-                                fetchCreateLiveness();
-                            }}
-                            onError={onError}
-                            components={{
-                                PhotosensitiveWarning: (): JSX.Element => {
-                                    return null;
-                                }
-                            }}
-                        />
-                    </View>
-                )}
-                {gettingOutModal && (
-                    <ConfirmationDialog
-                        open={gettingOutModal}
-                        message={`You are getting out!`}
-                        onClose={() => {
-                            setGettingOutModal(false);
+    return (<section className="main-container-v1">
+        <ThemeProvider >
+            {loading || !sessionId ? (
+                <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+            ) : (
+                <View as="div" width={'calc(100vh - 50px)'}  margin={'auto'} >
+                    <FaceLivenessDetector
+                        sessionId={sessionId}
+                        region={"us-east-1"}
+                        onAnalysisComplete={() => onCompleteScan(sessionId)}
+                        onUserCancel={() => {
                             fetchCreateLiveness();
                         }}
-                        onOk={() => {
-                            setGettingOutModal(false);
-                            fetchCreateLiveness();
+                        onError={onError}
+                        components={{
+                            PhotosensitiveWarning: (): JSX.Element => {
+                                return null;
+                            }
                         }}
                     />
-                )}
-            </ThemeProvider>
-        </section>
+                </View>
+            )}
+            {gettingOutModal && (
+                <ConfirmationDialog
+                    open={gettingOutModal}
+                    message={`You are getting out!`}
+                    onClose={() => {
+                        setGettingOutModal(false);
+                        fetchCreateLiveness();
+                    }}
+                    onOk={() => {
+                        setGettingOutModal(false);
+                        fetchCreateLiveness();
+                    }}
+                />
+            )}
+        </ThemeProvider>
+    </section>
     )
 }
 
