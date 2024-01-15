@@ -2396,6 +2396,12 @@ export const REPORT_LIST = [
     type: 'workOrderService'
   },
   {
+    title: 'Work Order Technician Work Hours',
+    permission: 'workOrder',
+    key: 'standardReport',
+    type: 'workOrderTechnicianWorkHours'
+  },
+  {
     title: 'User Session',
     permission: 'user',
     key: 'standardReport',
