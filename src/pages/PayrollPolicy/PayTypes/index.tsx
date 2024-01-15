@@ -18,7 +18,7 @@ import ManagePayType from './ManagePayType';
 import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import FileCopyIcon from '@material-ui/icons/FileCopy'
 
-const Steps = ({ payrollPolicyId }) => {
+const PayTypes = ({ payrollPolicyId }) => {
   const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_payTypes`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -255,4 +255,4 @@ const Steps = ({ payrollPolicyId }) => {
   );
 };
 
-export default Steps;
+export default PayTypes;
