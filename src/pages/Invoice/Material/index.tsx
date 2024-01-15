@@ -22,12 +22,12 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
-const Material = ({ invoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
+const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
 
   const renderedFrom = `${camelCase(routes?.invoice.title)}_Material`;
 
@@ -214,19 +214,19 @@ const Material = ({ invoiceData, setNextStep, stepFullScreen, allowedToEdit }) =
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
-          {
-            allowedToEdit && (
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            )
+          {allowedToEdit && (
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                getNestedSubRows(obj, row.original);
+                setDeleteData(obj);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          )
           }
         </>
     });
@@ -364,6 +364,7 @@ const Material = ({ invoiceData, setNextStep, stepFullScreen, allowedToEdit }) =
           message: data.message
         });
         fetchData();
+        fetchInvoiceData();
         setIsAdding(false);
       })
       .catch((error) => {
@@ -410,6 +411,7 @@ const Material = ({ invoiceData, setNextStep, stepFullScreen, allowedToEdit }) =
       .then(() => {
         setDeleting(false);
         fetchData();
+        fetchInvoiceData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -556,21 +558,17 @@ const Material = ({ invoiceData, setNextStep, stepFullScreen, allowedToEdit }) =
             >
               Bulk Edit
             </MenuItem>
-
             <MenuItem
               onClick={() => {
-                const dataToDelete =
-                  selectedRecords &&
-                  selectedRecords
-                    .filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                setDeleteData(dataToDelete);
+                const obj: any = [];
+                const dataToDelete = selectedRecords.filter((e) => !e.hideSelection);
+                dataToDelete?.forEach((ele) => {
+                  obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
+                });
+                dataToDelete?.forEach((ele) => {
+                  getNestedSubRows(obj, ele);
+                });
+                setDeleteData(obj);
                 closeActions();
               }}
             >
