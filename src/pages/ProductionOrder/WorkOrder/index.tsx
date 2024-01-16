@@ -21,7 +21,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CheckCircle, Delete, ExpandMore } from '@material-ui/icons';
+import { Add, CheckCircle, Delete, ExpandMore, CloudUpload } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
@@ -36,6 +36,7 @@ import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import SyncIcon from '@material-ui/icons/Sync';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
+import ZipUploadDialog from './ZipUploadDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -66,6 +67,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [isSubmitting, setSubmitting] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
+  const [zipDialog, setZipDialog] = useState(false);
 
 
   const [isAutoCreating, setIsAutoCreating] = useState(true);
@@ -646,6 +648,27 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     }
   };
 
+  const handleUploadZip = (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return axiosInstance()
+      .put(`${productionOrder.api}/process-zip/${productionOrderData?._id}`, formData)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setZipDialog(false);
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setZipDialog(false);
+      });
+  };
+  
+
   return (
     <Fragment>
       {isAutoCreating &&
@@ -670,7 +693,20 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.map((e) => e?.workOrder?._id)
                 : dataRows?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).map((e) => e?.workOrder?._id))}`}
             />
-            <Box ml={1}></Box>
+            <Box ml={1}/>
+            <Button
+              variant={'outlined'}
+              color="primary"
+              size="small"
+              startIcon={<CloudUpload />}
+              onClick={() => {
+                setZipDialog(true);
+              }}
+              aria-controls="add-menu"
+            >
+              Upload Drawings
+            </Button>
+            <Box ml={1}/>
             <Button
               variant="outlined"
               color="default"
@@ -1008,6 +1044,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           }}
         />
       )}
+      {zipDialog && <ZipUploadDialog open={zipDialog} onClose={() => setZipDialog(false)} onSubmit={handleUploadZip} />}
     </Fragment>
   );
 };
