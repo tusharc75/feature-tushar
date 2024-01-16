@@ -337,6 +337,7 @@ export default function useColumns() {
       } else if (field?.type === 'checkBox') {
         column.push({
           ...commonFieldData,
+          accessorFn:(data)=> Boolean(data[field?.fieldName]) ? 'Yes' : 'No',
           cell: ({ row }) => (
             <div>
               <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
