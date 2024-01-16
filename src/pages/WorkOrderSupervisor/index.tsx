@@ -436,7 +436,7 @@ const WorkOrderSupervisor = () => {
               setAssignTechnicianDialog(false);
               dispatch({ type: 'refreshData' });
             }}
-            competencies={selectedService?.competencies}
+            competencies={selectedServiceData?.competencies}
           />
         )}
         {workStationAssignDialog && (
