@@ -158,6 +158,7 @@ const LoadingTicket = ({
           ?.filter((e) => e.replace != true)
           .map((d) => ({
             ...d.inventory,
+            uniqueId: d.inventory._id,
             isReplaced: d.isReplaced,
             replaceReason: d.replaceReason,
             replaceAsset: d?.replaceAsset
@@ -277,7 +278,7 @@ const LoadingTicket = ({
       deliveryTicketList.map((obj) => {
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
-            if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
+            if (obj?.assets?.some((p) => d?._id === p?.asset)) {
               productAssets[index]['loadingTicket'] = obj?.ticketName;
               productAssets[index]['loadingTicketId'] = obj?._id;
               productAssets[index]['loadingTicketStatus'] = obj?.status;
@@ -1301,7 +1302,7 @@ const LoadingTicket = ({
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
-          productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
+          assets={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={selectedRecords?.filter((e) => e.type === 'Product')}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });

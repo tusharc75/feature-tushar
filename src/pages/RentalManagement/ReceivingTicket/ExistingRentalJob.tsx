@@ -315,7 +315,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
           ticketType={showTicketDialog.ticketType}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           referenceData={showTicketDialog.data}
-          productInventory={productInventory?.filter((e) => e.type === 'Asset')}
+          assets={productInventory?.filter((e) => e.type === 'Asset')}
           products={productInventory?.filter((e) => e.type === 'Product')}
           onClose={() => setShowTicketDialog({ open: false, ticketType: '', data: {}, rentalJob: null })}
           onSuccess={(data) => {

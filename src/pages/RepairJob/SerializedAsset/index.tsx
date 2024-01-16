@@ -269,8 +269,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         && e.deliveryToType === DELIVERY_FROM_TO_TYPE.plant && e.pickupFromType === DELIVERY_FROM_TO_TYPE.supplier) || []
 
       assetSendedToSupplier = receivedTickets?.reduce((acc, t) => {
-        if (t?.productInventory && t?.productInventory?.length > 0) {
-          let ids = t?.productInventory.map(inventory => inventory?.optionValue);
+        if (t?.assets && t?.assets?.length > 0) {
+          let ids = t?.assets.map(inventory => inventory?.asset);
           return acc.concat(ids);
         }
       }, []);
@@ -585,7 +585,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
           ticketType={showTicketDialog.ticketType}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.repairJob}
           referenceData={showTicketDialog.data}
-          productInventory={selectedRecords}
+          assets={selectedRecords}
           onClose={() => setShowTicketDialog({ open: false, ticketType: '', data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, ticketType: '', data: {} });

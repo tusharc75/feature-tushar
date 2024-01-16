@@ -322,12 +322,7 @@ export default function DeliveryTicketDetail(props) {
         }
         setCanEdit([...(data?.collaborator ?? []), data?.owner ?? {}, data?.processor ?? {}].some((obj) => obj.optionValue === user.user._id));
         setSignatures(data?.signatures || []);
-        if (data?.productInventory && data?.productInventory.length) {
-          let ids = data?.productInventory.map((o) => o?.optionValue);
-          fetchProductInventory(ids);
-        } else {
-          dispatch({ type: 'initialize', data: [], count: 0 });
-        }
+        fetchProductInventory();
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -343,8 +338,8 @@ export default function DeliveryTicketDetail(props) {
     {
       accessor: 'qty',
       Header: 'Qty',
-      width:100,
-      minWidth:100,
+      width: 100,
+      minWidth: 100,
       order: 1,
       disabled: true,
       Cell: ({ row }) => (row?.original?.qty ? <div>{row?.original?.qty}</div> : <NoDataCell />)
@@ -372,10 +367,7 @@ export default function DeliveryTicketDetail(props) {
     }
   };
 
-  const fetchProductInventory = async (productInventories) => {
-    if (!productInventories) {
-      productInventories = deliveryTicketData?.productInventory?.map((o) => o?.optionValue);
-    }
+  const fetchProductInventory = async () => {
     try {
       dispatch({ type: 'loading', loading: true });
 
@@ -462,8 +454,8 @@ export default function DeliveryTicketDetail(props) {
       deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new
         ? 'Sign-off - Dispatch'
         : deliveryTicketData?.status === 'In-Transit'
-        ? 'Sign-off - Delivery'
-        : '';
+          ? 'Sign-off - Delivery'
+          : '';
 
     const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
@@ -649,15 +641,15 @@ export default function DeliveryTicketDetail(props) {
         <Box className={`detail-container-v1`}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             <CustomTab index={0} value={0} className={'tabLayout'} {...a11yProps(0)} >
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </CustomTab>
+              <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            </CustomTab>
             {permissions?.serializedAsset?.isRead && (
               <CustomTab index={1} value={1} className={'tabLayout'} {...a11yProps(1)} >
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
               </CustomTab >
             )}
             <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)} >
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
             </CustomTab>
             {deliveryTicketData?.additionalCost?.length > 0 && (
               <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)}>

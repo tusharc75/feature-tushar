@@ -172,7 +172,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
 
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < assets.length; j++) {
-          if (ticketData[i]?.productInventory.some((asset: any) => assets[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
+          if (ticketData[i]?.assets.some((e: any) => assets[j]._id === e.asset)) {
             assets[j].deliveryTicket = ticketData[i].ticketName;
             assets[j].deliveryTicketId = ticketData[i]._id;
             assets[j].deliveryTicketStatus = ticketData[i].status;
