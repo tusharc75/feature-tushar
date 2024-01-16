@@ -223,15 +223,13 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     await fetchFields();
     try {
       const result = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`);
-
       let assetData = result?.data?.data?.assets;
-
       let replaceAssetLog = result?.data?.data?.replaceAssetLog ? result?.data?.data?.replaceAssetLog : [];
       let ticketData: any = await fetchLoadingTickets();
       ticketData = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.loading);
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
-          if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
+          if (ticketData[i]?.assets.some((e: any) => assetData[j]._id === e.asset)) {
             assetData[j].loadingTicket = ticketData[i].ticketName;
             assetData[j].loadingTicketId = ticketData[i]._id;
             assetData[j].loadingTicketStatus = ticketData[i].status;
@@ -547,7 +545,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           ticketType={DELIVERY_TICKET_TYPE.loading}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}
           referenceData={showTicketDialog.data}
-          productInventory={assetWithNoTicket}
+          assets={assetWithNoTicket}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });

@@ -184,7 +184,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
 
       deliveryTicketList?.map((obj) => {
         rows.map((d, index) => {
-          if (obj?.productInventory?.some((p) => p?.optionValue === d?._id)) {
+          if (obj?.assets?.some((p) => p?.asset === d?._id)) {
             rows[index]['loadingTicket'] = obj?.ticketName;
             rows[index]['loadingTicketId'] = obj?._id;
             rows[index]['loadingTicketStatus'] = obj?.status;
@@ -419,7 +419,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.transferInventory}
           referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
-          productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
+          assets={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={selectedRecords?.filter((e) => e.type === 'Product')}
           serialNumber={selectedRecords
             ?.filter((e) => e.type === 'Product')

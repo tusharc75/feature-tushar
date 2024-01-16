@@ -10,18 +10,17 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import ManageHolidays from './ManageHolidays';
+import ManagePaidTimeOff from './ManagePaidTimeOff';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
-const Holidays = ({ payrollPolicyData }) => {
-  const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_holidays`;
+const PaidTimeOff = ({ payrollPolicyData }) => {
+  const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_paidTimeOff`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { rowCount, selectedRecords } = state;
+  const { selectedRecords } = state;
   const {
     state: { permissions, user }
   }: any = useData();
@@ -29,7 +28,7 @@ const Holidays = ({ payrollPolicyData }) => {
   const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
-  const [manageHolidays, setManageHolidays] = useState({ open: false, id: null });
+  const [managePaidTimeOff, setManagePaidTimeOff] = useState({ open: false, id: null });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -40,7 +39,7 @@ const Holidays = ({ payrollPolicyData }) => {
   }, []);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.payrollHoliday}`);
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.payrollPaidTimeOff}`);
     var data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data);
 
@@ -65,7 +64,7 @@ const Holidays = ({ payrollPolicyData }) => {
                 size="small"
                 aria-label="Edit"
                 onClick={() => {
-                  setManageHolidays({ open: true, id: row?.original?._id });
+                  setManagePaidTimeOff({ open: true, id: row?.original?._id });
                 }}
               >
                 <EditIcon fontSize="small" color={'primary'} />
@@ -95,7 +94,7 @@ const Holidays = ({ payrollPolicyData }) => {
     dispatch({ type: 'selection', selectedRecords: [] });
 
     axiosInstance()
-      .get(`${routes.payrollPolicy?.path}/holidays/${payrollPolicyData?._id}`)
+      .get(`${routes.payrollPolicy?.path}/paid-time-off/${payrollPolicyData?._id}`)
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
@@ -122,7 +121,7 @@ const Holidays = ({ payrollPolicyData }) => {
       ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
-      .put(`${routes?.payrollPolicy?.path}/holidays/${payrollPolicyData?._id}/remove`, { ids: ids })
+      .put(`${routes?.payrollPolicy?.path}/paid-time-off/${payrollPolicyData?._id}/remove`, { ids: ids })
       .then(() => {
         fetchData();
         setShowConfirmBox(false);
@@ -153,10 +152,10 @@ const Holidays = ({ payrollPolicyData }) => {
                 variant="contained"
                 color="primary"
                 onClick={() => {
-                  setManageHolidays({ open: true, id: null });
+                  setManagePaidTimeOff({ open: true, id: null });
                 }}
               >
-                Add Holiday
+                Add Paid Time Off
               </Button>
             </Grid>
             <Grid item xs={9} md={9} sm={9}>
@@ -196,19 +195,6 @@ const Holidays = ({ payrollPolicyData }) => {
                   </MenuItem>
                 </Menu>
                 <Box ml={1} />
-                <ImportExportMenu
-                  permissions={permissions?.payrollPolicy}
-                  module="packages-products"
-                  api={`${routes.payrollPolicy.path}/holidays/${payrollPolicyData?._id}`}
-                  afterImportCompleted={() => {
-                    fetchData();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={selectedRecords.length}
-                  ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
-                  additionalParams={`payrollPolicyId=${payrollPolicyData?._id}`}
-                />
               </Box>
             </Grid>
           </Grid>
@@ -230,16 +216,16 @@ const Holidays = ({ payrollPolicyData }) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {manageHolidays?.open && (
-        <ManageHolidays
+      {managePaidTimeOff?.open && (
+        <ManagePaidTimeOff
           payrollPolicyId={payrollPolicyData?._id}
-          id={manageHolidays?.id}
+          id={managePaidTimeOff?.id}
           onSuccess={() => {
             fetchData();
-            setManageHolidays({ open: false, id: null });
+            setManagePaidTimeOff({ open: false, id: null });
           }}
           onClose={() => {
-            setManageHolidays({ open: false, id: null });
+            setManagePaidTimeOff({ open: false, id: null });
           }}
         />
       )}
@@ -259,4 +245,4 @@ const Holidays = ({ payrollPolicyData }) => {
   );
 };
 
-export default Holidays;
+export default PaidTimeOff;

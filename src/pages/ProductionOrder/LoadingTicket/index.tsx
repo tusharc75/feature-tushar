@@ -349,7 +349,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.productionOrder}
           referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
-          productInventory={[]}
+          assets={[]}
           products={selectedRecords?.map((e) => ({ _id: e?.materialId, qty: e?.qty || 1, uniqueId: e._id }))}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });

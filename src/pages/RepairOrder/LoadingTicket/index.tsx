@@ -17,7 +17,8 @@ import {
   DELIVERY_FROM_TO_TYPE,
   repairOrder,
   ASSET_STATUS,
-  WORK_ORDER_STATUS
+  WORK_ORDER_STATUS,
+  MATERIAL_TYPE
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map } from 'lodash';
@@ -81,9 +82,10 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
       );
 
       response?.data?.data?.material?.forEach((e: any) => {
-        if (e?.type === 'serializedAsset') {
+        if (e?.type === MATERIAL_TYPE.serializedAsset) {
           const obj: any = {};
           obj._id = e?.serializedAssetDetail?._id;
+          obj.uniqueId = e?.serializedAssetDetail?._id;
           obj.assetNumber = e?.serializedAssetDetail?.assetNumber;
           obj.serialNumber = e?.serializedAssetDetail?.serialNumber;
           obj.status = e?.serializedAssetDetail?.status;
@@ -92,7 +94,6 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
           obj.workOrderStatus = e?.workOrder?.status;
           obj.workOrder = e?.workOrder?.optionLabel;
           obj.workOrderId = e?.workOrder?.optionValue;
-          obj.isChecked = false;
           obj.hideSelection = [WORK_ORDER_STATUS.completed].includes(obj.workOrderStatus) ? false : true;
           material.push(obj);
         }
@@ -101,7 +102,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
       deliveryTicketList?.map((obj) => {
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           material.map((d, index) => {
-            if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
+            if (obj?.assets?.some((p) => d?._id === p?.asset)) {
               material[index]['loadingTicket'] = obj?.ticketName;
               material[index]['loadingTicketId'] = obj?._id;
               material[index]['loadingTicketStatus'] = obj?.status;
@@ -377,7 +378,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.repairOrder}
           referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
-          productInventory={selectedRecords}
+          assets={selectedRecords}
           products={[]}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });

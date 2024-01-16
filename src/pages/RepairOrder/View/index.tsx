@@ -176,10 +176,10 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
           position: { x: xPosition, y: index * 100 },
           style: customNodeStyles.loadingTicket
         });
-        loadingTicket?.productInventory?.map((productInventory) => {
-          const workOrder = workOrders?.find((e) => e.serializedAsset === productInventory.optionValue);
+        loadingTicket?.assets?.map((ele) => {
+          const workOrder = workOrders?.find((e) => e.serializedAsset === ele.asset);
           flowEdge.push({
-            id: `asset-loading-${productInventory.optionValue}-${loadingTicket._id}`,
+            id: `asset-loading-${ele.asset}-${loadingTicket._id}`,
             source: workOrder?._id,
             target: loadingTicket._id,
             arrowHeadType: 'arrow'

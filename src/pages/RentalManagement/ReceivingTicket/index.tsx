@@ -213,6 +213,7 @@ const ReceivingTicket = ({
           .map((d) => {
             return {
               ...d.inventory,
+              uniqueId: d.inventory._id,
               rentalAssetStatus: d.status,
               startDate: d.actualStartDate || d.startDate,
               endDate: d.actualEndDate || d.endDate,
@@ -435,7 +436,7 @@ const ReceivingTicket = ({
 
       deliveryTicketList?.map((obj) => {
         productAssets?.map((d, index) => {
-          if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
+          if (obj?.assets?.some((p) => d?._id === p?.asset)) {
             if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
               productAssets[index]['loadingTicket'] = obj?.ticketName;
               productAssets[index]['loadingTicketId'] = obj?._id;
@@ -1816,7 +1817,7 @@ const ReceivingTicket = ({
           ticketType={showTicketDialog.ticketType}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           referenceData={showTicketDialog.data}
-          productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
+          assets={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={
             showQtyDialog?.data && showQtyDialog?.data?.length > 0
               ? showQtyDialog.data.map((d) => ({ ...d, _id: d?.productId, qty: d.returnQuantity }))

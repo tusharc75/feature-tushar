@@ -60,7 +60,6 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
     data = response?.data?.data;
     let rows = data.map((u) => {
       let finalObject = prepareDataForGrid(u, user);
-      finalObject['isChecked'] = false;
       return finalObject;
     });
     dispatch({ type: 'initialize', data: rows, count: rows.length });

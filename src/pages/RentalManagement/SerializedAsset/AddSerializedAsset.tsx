@@ -704,7 +704,7 @@ const AddSerializedAsset = ({
           ticketType={DELIVERY_TICKET_TYPE.receiving}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           referenceData={showTicketDialog.data}
-          productInventory={selectedRecords}
+          assets={selectedRecords}
           products={[]}
           onClose={() => setShowTicketDialog({ open: false, data: {}, assets: [] })}
           onSuccess={(data) => {

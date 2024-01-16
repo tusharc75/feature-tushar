@@ -10,6 +10,7 @@ import awsexports from '../../amplifyconfiguration.json';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Box } from '@material-ui/core';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import FaceLiveNess from 'src/components/FaceLiveness/AWS';
 
 Amplify.configure(awsexports);
 
@@ -77,44 +78,32 @@ function UserAttendance() {
 
 
     return (<section className="main-container-v1">
-        <ThemeProvider >
-            {loading || !sessionId ? (
-                <Box p={2} height={500}>
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-            ) : (
-                <View as="div" width={'calc(100vh - 50px)'}  margin={'auto'} >
-                    <FaceLivenessDetector
-                        sessionId={sessionId}
-                        region={"us-east-1"}
-                        onAnalysisComplete={() => onCompleteScan(sessionId)}
-                        onUserCancel={() => {
-                            fetchCreateLiveness();
-                        }}
-                        onError={onError}
-                        components={{
-                            PhotosensitiveWarning: (): JSX.Element => {
-                                return null;
-                            }
-                        }}
-                    />
-                </View>
-            )}
-            {gettingOutModal && (
-                <ConfirmationDialog
-                    open={gettingOutModal}
-                    message={`You are getting out!`}
-                    onClose={() => {
-                        setGettingOutModal(false);
-                        fetchCreateLiveness();
-                    }}
-                    onOk={() => {
-                        setGettingOutModal(false);
-                        fetchCreateLiveness();
-                    }}
-                />
-            )}
-        </ThemeProvider>
+        {loading ? (
+            <Box p={2} height={500}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+        ) : (
+            <FaceLiveNess
+                sessionId={sessionId}
+                onComplete={onCompleteScan}
+                onUserCancel={() => { }}
+                onError={onError}
+                autoStart={true} />
+        )}
+        {gettingOutModal && (
+            <ConfirmationDialog
+                open={gettingOutModal}
+                message={`You are getting out!`}
+                onClose={() => {
+                    setGettingOutModal(false);
+                    fetchCreateLiveness();
+                }}
+                onOk={() => {
+                    setGettingOutModal(false);
+                    fetchCreateLiveness();
+                }}
+            />
+        )}
     </section>
     )
 }

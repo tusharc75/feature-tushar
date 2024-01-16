@@ -154,10 +154,7 @@ const RentalManagementDetailsPage = () => {
 
   const checkProgressiveBilling = () => {
     if (user?.user?.brandPolicy?.rentalProgressiveBilling) {
-      axiosInstance()
-        .get(
-          `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
-        )
+      axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
         .then(({ data: { data } }) => {
           if (data.length > 0) {
             setDisplayProgressiveBillingTab(true);

@@ -176,7 +176,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             );
             var loadingTicketAssets = []
             loadingTicket?.forEach(element => {
-                loadingTicketAssets = [...loadingTicketAssets, ...element?.productInventory]
+                loadingTicketAssets = [...loadingTicketAssets, ...element?.assets?.map((e)=> e.asset)]
             });
             let rows = data.material.filter((e) => !e.parentId);
             rows.forEach((parent, i) => {
