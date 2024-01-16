@@ -89,7 +89,7 @@ const AddExistingProductInventory = ({
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);;
           finalObject['type'] = type;
-          finalObject['qty'] = 0;
+          finalObject['qty'] = 1;
           const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
           if (qtyAdded.length) {
             finalObject['qty'] = qtyAdded[0].qty;
@@ -152,7 +152,7 @@ const AddExistingProductInventory = ({
         let columns = [];
         let newColumns = generateColumns(renderedFrom, data, type === 'product' ? routes.productDetail.path : routes.packagesDetail.path);
         columns = [...newColumns, ...getStaticFields()];
-        setColumns([...columns, ...defaultColumns]);
+        setColumns([...defaultColumns, ...columns]);
       });
   };
 

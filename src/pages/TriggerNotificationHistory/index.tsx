@@ -4,43 +4,50 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
-import { useData } from 'src/StateProvider/Provider';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import { Box } from '@material-ui/core';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { dateTimeFormat, gridLoadingTimeout } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
+import moment from 'moment';
 
 const TriggerNotificationHistory = () => {
+
   const renderedFrom = camelCase(routes?.triggerNotificationHistory.title);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
   const { page, limit, filters, sorting } = state;
 
-  const {
-    state: { user }
-  }: any = useData();
 
   let columns = [
+    {
+      accessor: 'createdBy',
+      Header: 'Date',
+      width: 150,
+      disableFilters: true,
+      disableSortBy: true,
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.createdBy?.date ? <div>{moment(row?.original?.createdBy?.date).format(dateTimeFormat)}</div> : <NoDataCell />)
+    },
     {
       accessor: 'reference',
       Header: 'Reference',
       width: 180,
-      show: true,
-      disabled: false,
+      disabled: true,
       Cell: ({ row }) =>
         row?.original?.reference ? (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <Link
+              target='_blank'
               className="link text-truncate"
-              title={camelCase(row?.original?.referenceType)}
-              to={`${routes[camelCase(row?.original?.referenceType)].path}/detail/${row?.original?.referenceId}`}
+              title={row?.original?.reference?.optionLabel}
+              to={`${routes[camelCase(row?.original?.referenceType)].path}/detail/${row?.original?.reference?.optionValue}`}
             >
-              {row?.original?.reference}
-            </Link>{' '}
+              {row?.original?.reference?.optionLabel}
+            </Link>
           </div>
         ) : (
           <NoDataCell />
@@ -50,27 +57,42 @@ const TriggerNotificationHistory = () => {
       accessor: 'referenceType',
       Header: 'Reference Type',
       width: 180,
-      show: true,
-      disabled: false,
+      disabled: true,
       Cell: ({ row }) => (row?.original?.referenceType ? <div>{row?.original?.referenceType}</div> : <NoDataCell />)
-    },
-    {
-      accessor: 'notificationUsers',
-      Header: 'Notified Users',
-      width: 180,
-      show: true,
-      disabled: false,
-      Cell: ({ row }) => (row?.original?.notificationUsers ? <div>{row?.original?.notificationUsers}</div> : <NoDataCell />)
     },
     {
       accessor: 'message',
       Header: 'Message',
       width: 180,
-      show: true,
-      disabled: false,
+      disabled: true,
       Cell: ({ row }) => (row?.original?.message ? <div>{row?.original?.message}</div> : <NoDataCell />)
     },
-    ...getStaticFields()
+    {
+      accessor: 'notificationUsers',
+      Header: 'Notified Users',
+      width: 180,
+      disabled: true,
+      Cell: ({ row }) => (
+        <div>
+          {row?.original['notificationUsers'] && row?.original['notificationUsers']?.length ? (
+            row?.original['notificationUsers']?.map((e, i) => {
+              return i === row?.original['notificationUsers'].length - 1 ? (
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
+                  {e?.optionLabel}
+                </a>
+              ) : (
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
+                  {e?.optionLabel},{' '}
+                </a>
+              );
+            })
+          ) : (
+            <NoDataCell />
+          )}
+        </div>
+      )
+    },
+    
   ];
   const [renderCount, setRenderCount] = useState(0);
 
@@ -83,12 +105,8 @@ const TriggerNotificationHistory = () => {
   }, [page, limit, filters, sorting]);
 
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (isExport) {
-      deepFilter = `?`;
-    }
-
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -108,16 +126,10 @@ const TriggerNotificationHistory = () => {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     axiosInstance()
       .get(`${routes?.triggerNotificationHistory?.path}${queryString}`)
       .then(({ data: { data, count } }) => {
-        let rows = data?.map((u, index) => {
-          let finalObject: any = prepareDataForGrid(u, user);
-          finalObject.index = index + 1;
-          return finalObject;
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
+        dispatch({ type: 'initialize', data: data, count: count });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
