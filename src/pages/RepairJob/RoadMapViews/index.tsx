@@ -84,9 +84,7 @@ const RepairJobViews = (props) => {
       var flowEdge: any[] = [];
 
       const assets = await axiosInstance().get(`repair-job/${repairId}/assets`);
-      const tickets = await axiosInstance().get(
-        `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.repairJob}&referenceId=${repairId}`
-      );
+      const tickets = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.repairJob}&referenceId=${repairId}`);
 
       if (assets?.data?.data?.length) xPosition += 300;
       assets?.data?.data?.map((item, index) => {
@@ -124,7 +122,7 @@ const RepairJobViews = (props) => {
       const allTicketsAssets = assets?.data?.data?.map((asset) => {
         var assetsTicket = [];
         tickets?.data?.data?.map((t) => {
-          const ticketInventory = t?.productInventory?.map((i) => i.optionValue);
+          const ticketInventory = t?.assets?.map((i) => i.asset);
           if (ticketInventory.includes(asset.inventory)) {
             const ticketData = {
               ticketId: t._id,
