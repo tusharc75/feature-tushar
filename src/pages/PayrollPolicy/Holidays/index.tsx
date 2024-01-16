@@ -14,13 +14,14 @@ import ManageHolidays from './ManageHolidays';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const Holidays = ({ payrollPolicyData }) => {
   const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_holidays`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { selectedRecords } = state;
+  const { rowCount, selectedRecords } = state;
   const {
     state: { permissions, user }
   }: any = useData();
@@ -195,6 +196,19 @@ const Holidays = ({ payrollPolicyData }) => {
                   </MenuItem>
                 </Menu>
                 <Box ml={1} />
+                <ImportExportMenu
+                  permissions={permissions?.payrollPolicy}
+                  module="packages-products"
+                  api={`${routes.payrollPolicy.path}/holidays/${payrollPolicyData?._id}`}
+                  afterImportCompleted={() => {
+                    fetchData();
+                  }}
+                  isExportAllOrSomeFeature={true}
+                  total={rowCount}
+                  recordsToExport={selectedRecords.length}
+                  ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
+                  additionalParams={`payrollPolicyId=${payrollPolicyData?._id}`}
+                />
               </Box>
             </Grid>
           </Grid>
