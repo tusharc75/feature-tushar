@@ -85,7 +85,7 @@ const Quotation = () => {
     columns?.forEach((column) => {
       if (column?.primaryField) {
         column.cell = ({ row }) => (
-          <div style={{display:'flex', alignItems:'center'}}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <Link className="link text-truncate" title={row.original[column.accessor]} to={`${routes.quotation.path}/detail/${row.original._id}`}>
               {row.original[column.accessor]}
             </Link>
@@ -334,12 +334,16 @@ const Quotation = () => {
           permissions={permissions?.quotation}
           module="quotation"
           api={quotation.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {
+            fetchData()
+          }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={fetchData}
+          onExportToExcelSuccess={() => {
+            fetchData()
+          }}
           additionalParams={getQueryString(true)}
         />
       </div>
