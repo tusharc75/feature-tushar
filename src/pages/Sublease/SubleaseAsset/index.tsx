@@ -150,7 +150,7 @@ const SerializedAsset = ({
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-    const response = await axiosInstance().get(`${sublease.api}/${subleaseData._id}/serialized-asset`);
+    const response = await axiosInstance().get(`${sublease.api}/asset/${subleaseData._id}`);
     var isComplate = true;
     let rows = response?.data?.data.map((u) => {
       if (
@@ -374,7 +374,7 @@ const SerializedAsset = ({
           ticketType={DELIVERY_TICKET_TYPE.delivery}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.sublease}
           referenceData={showTicketDialog.data}
-          productInventory={selectedRecords}
+          assets={selectedRecords}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
