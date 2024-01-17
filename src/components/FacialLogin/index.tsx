@@ -17,7 +17,7 @@ const LogIn = ({ dispatch, notification, chatNotification }) => {
 
   const [camOpen, setCamOpen] = useState(false);
   const handleCapture = async (sessionId: string) => {
-    await axiosInstance().post('/user/login/face', { sessionId }).then(async ({ data: response }) => {
+    await axiosInstance().post('/user/face/login', { sessionId }).then(async ({ data: response }) => {
       setCamOpen(false);
       const { data } = response;
       localStorage.setItem('token', data.token);

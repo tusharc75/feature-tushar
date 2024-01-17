@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Box, Dialog } from '@material-ui/core';
@@ -6,8 +6,11 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FaceLiveNess from 'src/components/FaceLiveness/AWS';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 function FaceDialog({ onClose }) {
+
+    const toastConfig = useContext(CustomToastContext);
 
     const [loading, setLoading] = useState<boolean>(true);
     const [sessionId, setSessionId] = useState<any>(null);
@@ -16,12 +19,23 @@ function FaceDialog({ onClose }) {
         fetchCreateLiveness();
     }, []);
 
-    const fetchCreateLiveness: () => Promise<void> = async () => {
+    const fetchCreateLiveness = () => {
         setLoading(true);
-        const res = await axiosInstance().get('/user/liveness-session');
-        const data = res.data.data;
-        setSessionId(data.SessionId);
-        setLoading(false);
+        axiosInstance()
+          .get('/user/face/liveness-session')
+          .then(({ data: { data } }) => {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
+            setSessionId(data.SessionId);
+            setLoading(false);
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+            setLoading(false);
+          });
     };
 
     const onCompleteScan = async (sessionId) => {
