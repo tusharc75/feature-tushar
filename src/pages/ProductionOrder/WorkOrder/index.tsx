@@ -108,7 +108,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
+    var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     data?.forEach((e) => {
       e.isColumnEditable = false;
@@ -168,76 +168,87 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         Cell: ({ row }) => {
           return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
         }
-      },
-      {
-        accessor: 'workOrder',
-        Header: 'Work Order',
-        width: 200,
-        Cell: ({ row }) =>
-          row.original.workOrder ? (
-            <div className="d-flex gap-2 align-items-center">
-              <h5 className="text-truncate">{row.original.workOrderNumber}</h5>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.workOrderDetail.path}/${row.original?.workOrder?._id}`);
-                }}
+      }
+    ];
+    const workOrderCol = {
+      accessor: 'workOrder',
+      Header: 'Work Order',
+      width: 200,
+      Cell: ({ row }) =>
+        row.original.workOrder ? (
+          <div className="d-flex gap-2 align-items-center">
+            <h5 className="text-truncate">{row.original.workOrderNumber}</h5>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.workOrderDetail.path}/${row.original?.workOrder?._id}`);
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+    }
+    if (!newColumns?.find((e) => e.accessor === 'workOrderNumber')) {
+      coloum.push(workOrderCol);
+    }
+    newColumns?.forEach((e) => {
+      if (e.accessor === 'workOrderNumber') {
+        coloum.push(workOrderCol)
+      }
+      else {
+        coloum.push(e)
+      }
+    })
+    coloum.push({
+      accessor: 'status',
+      Header: 'Status',
+      width: 200,
+      Cell: ({ row }) => <div>{row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />}</div>
+    });
+    coloum.push({
+      accessor: 'serviceStatus',
+      Header: 'Result',
+      width: 200,
+      Cell: ({ row }) => <div>{row?.original['serviceStatus'] ? <h5> {row?.original?.serviceStatus}</h5> : <NoDataCell />}</div>
+    });
+    coloum.push({
+      accessor: 'assignedUsers',
+      Header: 'Assigned Technician',
+      width: 200,
+      Cell: ({ row }) =>
+        <div>{row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
+          row?.original['assignedUsers']?.map((e, i) => {
+            return i === row?.original['assignedUsers'].length - 1 ? (
+              <a
+                className="link text-truncate [flex-grow:0_!important]"
+                target="_blank"
+                href={`${routes.userDetail.path}/${e.optionValue}`}
+                rel="noreferrer"
               >
-                <OpenInNewIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      {
-        accessor: 'status',
-        Header: 'Status',
-        width: 200,
-        Cell: ({ row }) => <div>{row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />}</div>
-      },
-      {
-        accessor: 'serviceStatus',
-        Header: 'Result',
-        width: 200,
-        Cell: ({ row }) => <div>{row?.original['serviceStatus'] ? <h5> {row?.original?.serviceStatus}</h5> : <NoDataCell />}</div>
-      },
-      {
-        accessor: 'assignedUsers',
-        Header: 'Assigned Technician',
-        width: 200,
-        Cell: ({ row }) =>
-          <div>{row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
-            row?.original['assignedUsers']?.map((e, i) => {
-              return i === row?.original['assignedUsers'].length - 1 ? (
+                {e?.optionLabel}
+              </a>
+            ) : (
+              <>
                 <a
                   className="link text-truncate [flex-grow:0_!important]"
                   target="_blank"
                   href={`${routes.userDetail.path}/${e.optionValue}`}
                   rel="noreferrer"
                 >
-                  {e?.optionLabel}
+                  {e?.optionLabel},
                 </a>
-              ) : (
-                <>
-                  <a
-                    className="link text-truncate [flex-grow:0_!important]"
-                    target="_blank"
-                    href={`${routes.userDetail.path}/${e.optionValue}`}
-                    rel="noreferrer"
-                  >
-                    {e?.optionLabel},
-                  </a>
-                  &nbsp;
-                </>
-              );
-            })
-          ) : (
-            <NoDataCell />
-          )}</div>
-      }
-    ];
-    if (permissions?.workStations?.isRead) {
+                &nbsp;
+              </>
+            );
+          })
+        ) : (
+          <NoDataCell />
+        )}</div>
+    });
+    if (permissions?.workStations) {
       coloum.push({
         accessor: 'assignedWorkStations',
         Header: 'Assigned Work Station',
@@ -275,7 +286,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           </div>
       });
     }
-    coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
