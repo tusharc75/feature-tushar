@@ -1,5 +1,5 @@
 import { Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
-import React, { useState } from 'react'
+import { useContext, useState } from 'react'
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -8,53 +8,51 @@ import { object, string } from 'yup';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-function TOtpAttendanceDialog({ open, onClose }) {
+const schema = object().shape({
+    employeeNumber: string().required('Please enter employee number'),
+    otp: string().required('Please enter otp'),
+});
+
+function MfaAuthDialog({ onClose }) {
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [gettingOutModal, setGettingOutModal] = useState({ open: false, text: "" });
+    const toastConfig = useContext(CustomToastContext);
 
-    const TOtpSchema = object().shape({
-        employeeId: string().required('please enter Employee ID'),
-        totp: string().required('please enter totp'),
-    });
-
-    const handleSave = async (values) => {
-        try {
-            setIsSubmitting(true);
-            const complete = await axiosInstance().post('/user-attendance/totp-validate', values);
-            const data = complete.data.data;
+    const handleSave = (values) => {
+        setIsSubmitting(true);
+        axiosInstance().post('/user-attendance/mfa-attendance', values).then(({ data: { data } }) => {
             if (data && data.gettingOut) {
                 setGettingOutModal({ open: true, text: "You are getting out!" });
             } else {
                 setGettingOutModal({ open: true, text: "You are getting in!" });
             }
             setIsSubmitting(false);
-        } catch (err) {
+        }).catch((error) => {
             setIsSubmitting(false);
-            console.log(err)
-
-        }
+            toastConfig.setToastConfig(error);
+        });
     }
 
     return (
-        <Dialog
-            maxWidth="sm"
-            fullWidth
+        <Dialog maxWidth="sm" fullWidth
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
-            onClose={onClose}
-            open={open}
+            onClose={(e, reason) => {
+                if (reason !== 'backdropClick') {
+                    onClose();
+                }
+            }}
+            open={true}
         >
-            <CustomDialogHeader title="MFA/TOTP Verification" showRequiredLabel={false} onClose={onClose} />
-            
-                <Formik
-                    initialValues={{
-                        employeeId: "",
-                        totp: "",
-                    }}
-                    validationSchema={TOtpSchema}
-                    onSubmit={handleSave}
-                >
+            <CustomDialogHeader title="MFA Verification" onClose={onClose} />
+            <Formik
+                initialValues={{ employeeNumber: "", otp: "" }}
+                validationSchema={schema}
+                onSubmit={handleSave}
+            >
                 {({ submitForm, touched, errors, setFieldValue, values }) => (
                     <div>
 
@@ -63,32 +61,32 @@ function TOtpAttendanceDialog({ open, onClose }) {
                                 <Grid container spacing={2}>
                                     <Grid item xs={12}>
                                         <TextField
-                                            label="Employee ID"
-                                            name="employeeId"
+                                            label="Employee Number"
+                                            name="employeeNumber"
                                             variant="outlined"
                                             size='small'
                                             fullWidth
                                             required
-                                            onChange={(e) => { 
-                                                setFieldValue('employeeId', e.target.value)
+                                            onChange={(e) => {
+                                                setFieldValue('employeeNumber', e.target.value)
                                             }}
-                                            error={Boolean(touched.employeeId && errors.employeeId)}
-                                            helperText={touched.employeeId && errors.employeeId}
+                                            error={Boolean(touched.employeeNumber && errors.employeeNumber)}
+                                            helperText={touched.employeeNumber && errors.employeeNumber}
                                         />
                                     </Grid>
                                     <Grid item xs={12}>
                                         <TextField
-                                            label="TOTP"
-                                            name="totp"
+                                            label="OTP"
+                                            name="otp"
                                             variant="outlined"
                                             size='small'
                                             required
                                             fullWidth
-                                            onChange={(e) => { 
-                                                setFieldValue('totp', e.target.value)
+                                            onChange={(e) => {
+                                                setFieldValue('otp', e.target.value)
                                             }}
-                                            error={Boolean(touched.totp && errors.totp)}
-                                            helperText={touched.totp && errors.totp}
+                                            error={Boolean(touched.otp && errors.otp)}
+                                            helperText={touched.otp && errors.otp}
                                         />
                                     </Grid>
                                 </Grid>
@@ -98,7 +96,7 @@ function TOtpAttendanceDialog({ open, onClose }) {
                             <Button
                                 size="small"
                                 onClick={onClose}
-                                variant="contained"
+                                variant="outlined"
                             >
                                 Cancel
                             </Button>
@@ -110,30 +108,28 @@ function TOtpAttendanceDialog({ open, onClose }) {
                                 size="small"
                                 onClick={submitForm}
                             >
-                                {isSubmitting ? <CircularProgress size={22} /> : "Save"}
+                                {isSubmitting ? <CircularProgress size={22} /> : "Process"}
                             </Button>
                         </CustomDialogFooter>
 
                     </div>
-                    )}</Formik>
-            {
-                gettingOutModal.open && (
-                    <ConfirmationDialog
-                        open={gettingOutModal.open}
-                        message={gettingOutModal.text}
-                        onClose={() => {
-                            setGettingOutModal({ open: false, text: "" });
-                            onClose();
-                        }}
-                        onOk={() => {
-                            setGettingOutModal({ open: false, text: "" });
-                            onClose();
-                        }}
-                    />
-                )
-            }
+                )}</Formik>
+            {gettingOutModal.open && (
+                <ConfirmationDialog
+                    open={gettingOutModal.open}
+                    message={gettingOutModal.text}
+                    onClose={() => {
+                        setGettingOutModal({ open: false, text: "" });
+                        onClose();
+                    }}
+                    onOk={() => {
+                        setGettingOutModal({ open: false, text: "" });
+                        onClose();
+                    }}
+                />
+            )}
         </Dialog>
     )
 }
 
-export default TOtpAttendanceDialog
+export default MfaAuthDialog
