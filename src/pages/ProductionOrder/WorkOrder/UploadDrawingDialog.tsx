@@ -10,17 +10,19 @@ import { productionOrder } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 
 const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [isUploading, setIsUploading] = useState(false);
 
   const handleUpload = async (event) => {
-    const file = event.target.files[0];
-    if (file && (file.type === 'application/zip' || file.type === 'application/x-zip-compressed')) {
+    const files = event.target.files;
+    if (files?.length > 0) {
       setIsUploading(true);
       const formData = new FormData();
-      formData.append('file', file);
-      axiosInstance().put(`${productionOrder.api}/upload-drawing/${productionOrderData?._id}`, formData)
+      for (const file of files) {
+        formData.append('files', file);
+      }
+      axiosInstance()
+        .put(`${productionOrder.api}/upload-drawing/${productionOrderData?._id}`, formData)
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -46,7 +48,8 @@ const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
             id="zip-upload"
             name="zip-upload"
             type="file"
-            accept=".zip,application/zip,application/x-zip-compressed"
+            accept=".zip,application/zip,application/x-zip-compressed,application/pdf,.pdf"
+            multiple
             onChange={handleUpload}
             style={{ display: 'none' }}
           />
@@ -64,13 +67,7 @@ const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button
-          type="button"
-          variant="outlined"
-          color="primary"
-          size="small"
-          onClick={handleClose}
-        >
+        <Button type="button" variant="outlined" color="primary" size="small" onClick={handleClose}>
           Cancel
         </Button>
       </CustomDialogFooter>
