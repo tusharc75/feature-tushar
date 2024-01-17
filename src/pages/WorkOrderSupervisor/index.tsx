@@ -90,10 +90,11 @@ const WorkOrderSupervisor = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=User,Service Master`)
+      .get(`/sa-formbuilder/lookup?lookupResource=Service Master,Employee Master`)
       .then(({ data: { data } }) => {
-        setUsersOption(data['User']);
-        setServiceMasterOption(data['Service Master']);
+        setServiceMasterOption(data['Service Master'] || []);
+        setUsersOption(data['Employee Master'] || []);
+
       });
   }, []);
 
@@ -131,19 +132,14 @@ const WorkOrderSupervisor = () => {
         link: (data) => `${routes.workOrderDetail.path}/${data?._id}`,
         target: '_blank'
       },
+      { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
       { accessor: 'assignedUser', title: 'Technician', type: 'text' },
       { accessor: 'workStation', title: routes.workStations.title, type: 'text' },
       { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
       {
         type: 'tooltip',
         accessor: 'tooltip',
-        renderer: (data) => (
-          <RenderAssignOptions
-            openAssignHandler={openAssignHandler}
-            data={data}
-            permissions={permissions}
-          />
-        )
+        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} />
       }
     ];
 
@@ -164,9 +160,8 @@ const WorkOrderSupervisor = () => {
   const openAssignHandler = (value: any, data: any) => {
     setSelectedServiceData(data);
     if (value === 'assignTechnician') {
-      setAssignTechnicianDialog(true)
-    }
-    else {
+      setAssignTechnicianDialog(true);
+    } else {
       setWorkStationAssignDialog(true);
     }
   };
@@ -259,154 +254,163 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <div className='grid grid-cols-[1fr_30px] gap-2 items-start'>
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3 align-items-center">
-              <Autocomplete
-                fullWidth
-                options={usersOption}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => {
-                  return option.optionValue === val.optionValue;
-                }}
-                value={
-                  usersOption.filter((data) => data.optionValue === selectedUser).length
-                    ? usersOption.filter((data) => data.optionValue === selectedUser)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setSelectedUser(val && val.optionValue ? val.optionValue : '');
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    margin="none"
-                    size="small"
-                    name="user"
-                    placeholder="Technician"
-                    label="Technician"
-                    variant="outlined"
-                    fullWidth
-                  />
-                )}
-              />
-              <Autocomplete
-                fullWidth
-                options={serviceMasterOption}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => {
-                  return option.optionValue === val.optionValue;
-                }}
-                value={
-                  serviceMasterOption.filter((data) => data.optionValue === selectedService).length
-                    ? serviceMasterOption.filter((data) => data.optionValue === selectedService)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setSelectedService(val && val.optionValue ? val.optionValue : '');
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} margin="none" size="small" name="user" placeholder="Service" label="Service" variant="outlined" fullWidth />
-                )}
-              />
-              <Autocomplete
-                fullWidth
-                options={resourceFilter}
-                getOptionLabel={(option: any) => (option ? option?.title : '')}
-                value={selectedResource}
-                onChange={(e, val) => {
-                  setSelectedResourceOption(null);
-                  setSelectedResource(val);
-                }}
-                renderInput={(params) => <TextField {...params} margin="none" size="small" label="Select Resource" variant="outlined" fullWidth />}
-              />
-              {selectedResource && (
+            <div className="grid grid-cols-[1fr_30px] gap-2 items-start">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3 align-items-center">
                 <Autocomplete
                   fullWidth
-                  options={resourceOptions}
+                  options={usersOption}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => {
                     return option.optionValue === val.optionValue;
                   }}
                   value={
-                    resourceOptions.filter((data) => data.optionValue === selectedResourceOption).length
-                      ? resourceOptions.filter((data) => data.optionValue === selectedResourceOption)[0]
+                    usersOption.filter((data) => data.optionValue === selectedUser).length
+                      ? usersOption.filter((data) => data.optionValue === selectedUser)[0]
                       : ''
                   }
                   onChange={(e, val) => {
-                    setSelectedResourceOption(val && val.optionValue ? val.optionValue : '');
+                    setSelectedUser(val && val.optionValue ? val.optionValue : '');
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="none" size="small" label={`Select ${selectedResource?.title}`} variant="outlined" fullWidth />
+                    <TextField
+                      {...params}
+                      margin="none"
+                      size="small"
+                      name="user"
+                      placeholder="Technician"
+                      label="Technician"
+                      variant="outlined"
+                      fullWidth
+                    />
                   )}
                 />
-              )}
-              <FormControl fullWidth size="small" margin="none" variant="outlined">
-                <InputLabel id="duration">Select Duration</InputLabel>
-                <Select
-                  labelId="duration"
-                  id="time-duration"
-                  value={timeFrame}
-                  onChange={(e) => setTimeFrame(e.target.value)}
-                  label="Select Duration"
-                  SelectDisplayProps={{
-                    style: { minHeight: 22.5 }
-                  }}
+                <Autocomplete
                   fullWidth
-                >
-                  <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                  <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                  <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                  <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                  <MenuItem value={'custom'}>Custom</MenuItem>
-                </Select>
-              </FormControl>
-              <KeyboardDatePicker
-                disabled={timeFrame !== 'custom'}
-                inputVariant="outlined"
-                variant="inline"
-                size="small"
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-                autoOk
-                format={dateFormatForInputControl}
-                maxDate={globalFilters.to}
-                label="From"
-                value={globalFilters.from}
-                onChange={(date) => {
-                  setGlobalFilters({ ...globalFilters, from: date });
-                }}
-              />
-              <KeyboardDatePicker
-                disabled={timeFrame !== 'custom'}
-                inputVariant="outlined"
-                variant="inline"
-                autoOk
-                size="small"
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-                minDate={globalFilters.from}
-                format={dateFormatForInputControl}
-                label="To"
-                value={globalFilters.to}
-                onChange={(date) => {
-                  setGlobalFilters({ ...globalFilters, to: date });
-                }}
-              />
-              </div>
-              <div className='pt-[4px]'>
-              <HtmlTooltip title={'Refresh'}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    dispatch({ type: 'refreshData' });
+                  options={serviceMasterOption}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => {
+                    return option.optionValue === val.optionValue;
                   }}
-                  style={{ display: 'flex', marginLeft: 'auto' }}
-                >
-                  <RefreshIcon />
-                </IconButton>
-              </HtmlTooltip>
+                  value={
+                    serviceMasterOption.filter((data) => data.optionValue === selectedService).length
+                      ? serviceMasterOption.filter((data) => data.optionValue === selectedService)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setSelectedService(val && val.optionValue ? val.optionValue : '');
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      margin="none"
+                      size="small"
+                      name="user"
+                      placeholder="Service"
+                      label="Service"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+                <Autocomplete
+                  fullWidth
+                  options={resourceFilter}
+                  getOptionLabel={(option: any) => (option ? option?.title : '')}
+                  value={selectedResource}
+                  onChange={(e, val) => {
+                    setSelectedResourceOption(null);
+                    setSelectedResource(val);
+                  }}
+                  renderInput={(params) => <TextField {...params} margin="none" size="small" label="Select Resource" variant="outlined" fullWidth />}
+                />
+                {selectedResource && (
+                  <Autocomplete
+                    fullWidth
+                    options={resourceOptions}
+                    getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                    getOptionSelected={(option: any, val) => {
+                      return option.optionValue === val.optionValue;
+                    }}
+                    value={
+                      resourceOptions.filter((data) => data.optionValue === selectedResourceOption).length
+                        ? resourceOptions.filter((data) => data.optionValue === selectedResourceOption)[0]
+                        : ''
+                    }
+                    onChange={(e, val) => {
+                      setSelectedResourceOption(val && val.optionValue ? val.optionValue : '');
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} margin="none" size="small" label={`Select ${selectedResource?.title}`} variant="outlined" fullWidth />
+                    )}
+                  />
+                )}
+                <FormControl fullWidth size="small" margin="none" variant="outlined">
+                  <InputLabel id="duration">Select Duration</InputLabel>
+                  <Select
+                    labelId="duration"
+                    id="time-duration"
+                    value={timeFrame}
+                    onChange={(e) => setTimeFrame(e.target.value)}
+                    label="Select Duration"
+                    SelectDisplayProps={{
+                      style: { minHeight: 22.5 }
+                    }}
+                    fullWidth
+                  >
+                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                    <MenuItem value={'custom'}>Custom</MenuItem>
+                  </Select>
+                </FormControl>
+                <KeyboardDatePicker
+                  disabled={timeFrame !== 'custom'}
+                  inputVariant="outlined"
+                  variant="inline"
+                  size="small"
+                  InputProps={{
+                    style: { minHeight: '38px' }
+                  }}
+                  autoOk
+                  format={dateFormatForInputControl}
+                  maxDate={globalFilters.to}
+                  label="From"
+                  value={globalFilters.from}
+                  onChange={(date) => {
+                    setGlobalFilters({ ...globalFilters, from: date });
+                  }}
+                />
+                <KeyboardDatePicker
+                  disabled={timeFrame !== 'custom'}
+                  inputVariant="outlined"
+                  variant="inline"
+                  autoOk
+                  size="small"
+                  InputProps={{
+                    style: { minHeight: '38px' }
+                  }}
+                  minDate={globalFilters.from}
+                  format={dateFormatForInputControl}
+                  label="To"
+                  value={globalFilters.to}
+                  onChange={(date) => {
+                    setGlobalFilters({ ...globalFilters, to: date });
+                  }}
+                />
+              </div>
+              <div className="pt-[4px]">
+                <HtmlTooltip title={'Refresh'}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      dispatch({ type: 'refreshData' });
+                    }}
+                    style={{ display: 'flex', marginLeft: 'auto' }}
+                  >
+                    <RefreshIcon />
+                  </IconButton>
+                </HtmlTooltip>
               </div>
             </div>
           </div>
@@ -466,7 +470,6 @@ const WorkOrderSupervisor = () => {
 export default WorkOrderSupervisor;
 
 const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
-
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClose = () => {
     setAnchorEl(null);
@@ -498,7 +501,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
           >
             {'Assign Technician'}
           </MenuItem>
-          {permissions?.workStations?.isRead &&
+          {permissions?.workStations?.isRead && (
             <MenuItem
               onClick={() => {
                 openAssignHandler('assignWorkStations', data);
@@ -507,7 +510,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
             >
               {`Assign ${routes.workStations.title}`}
             </MenuItem>
-          }
+          )}
         </Menu>
       )}
     </>
