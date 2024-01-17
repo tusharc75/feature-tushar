@@ -7,10 +7,11 @@ import FaceLiveNess from 'src/components/FaceLiveness/AWS';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
-function FaceAttendance({ open, onClose }) {
+function FaceDialog({ onClose }) {
+
     const [loading, setLoading] = useState<boolean>(true);
     const [sessionId, setSessionId] = useState<any>(null);
-    const [gettingOutModal, setGettingOutModal] = useState({open: false, text:""});
+    const [gettingOutModal, setGettingOutModal] = useState({ open: false, text: "" });
     useEffect(() => {
         fetchCreateLiveness();
     }, []);
@@ -24,10 +25,10 @@ function FaceAttendance({ open, onClose }) {
     };
 
     const onCompleteScan = async (sessionId) => {
-        const complete = await axiosInstance().get(`/user-attendance/attend/${sessionId}`)
+        const complete = await axiosInstance().get(`/face-attendance/attend/${sessionId}`)
         const data = complete.data.data;
         if (data && data.gettingOut) {
-            setGettingOutModal({open:true, text: "You are getting out!"});
+            setGettingOutModal({ open: true, text: "You are getting out!" });
         } else {
             setGettingOutModal({ open: true, text: "You are getting in!" });
         }
@@ -46,7 +47,7 @@ function FaceAttendance({ open, onClose }) {
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
             onClose={onClose}
-            open={open}
+            open={true}
             fullScreen
         >
             <CustomDialogContent>
@@ -70,7 +71,7 @@ function FaceAttendance({ open, onClose }) {
                             open={gettingOutModal.open}
                             message={gettingOutModal.text}
                             onClose={() => {
-                                setGettingOutModal({open:false, text:""});
+                                setGettingOutModal({ open: false, text: "" });
                                 onClose();
                             }}
                             onOk={() => {
@@ -85,6 +86,4 @@ function FaceAttendance({ open, onClose }) {
     )
 }
 
-
-
-export default FaceAttendance;
+export default FaceDialog;

@@ -1176,6 +1176,10 @@ const routes = {
     title: storedRoutes && storedRoutes.triggerNotificationHistory && storedRoutes.triggerNotificationHistory.title ? storedRoutes.triggerNotificationHistory?.title : RESOURCE_LABEL.triggerNotificationHistory,
     path: '/trigger-notification-history'
   },
+  userAttendance: {
+    title: storedRoutes && storedRoutes.userAttendance && storedRoutes.userAttendance.title ? storedRoutes.userAttendance?.title : RESOURCE_LABEL.userAttendance,
+    path: '/user-attendance'
+  },
 };
 
 export default routes;

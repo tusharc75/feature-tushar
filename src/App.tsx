@@ -1108,7 +1108,7 @@ function App() {
             <PrivateRoute exact path={`${routes.triggerNotificationHistory.path}`}>
               <TriggerNotificationHistory />
             </PrivateRoute>
-            <PrivateRoute exact path={'/user-attendance'}>
+            <PrivateRoute exact  path={routes.userAttendance.path}>
               <UserAttendance />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
