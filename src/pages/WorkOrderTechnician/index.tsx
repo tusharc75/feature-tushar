@@ -101,6 +101,7 @@ const WorkOrderTechnician = () => {
       { accessor: 'serviceName', type: 'title' },
       { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
       { accessor: 'productionOrderNumber', title: routes.productionOrder.title, type: 'text' },
+      { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
       { accessor: 'repairOrderNumber', title: routes.repairOrder.title, type: 'text' },
       { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
       { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
@@ -149,6 +150,7 @@ const WorkOrderTechnician = () => {
             newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
             newObj['repairOrderNumber'] = item.workOrderDetail?.repairOrder?.optionLabel;
             newObj['productionOrderNumber'] = item.workOrderDetail?.productionOrder?.optionLabel;
+            newObj['spoolNumber'] = item.workOrderDetail?.spoolNumber;
             newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
             newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
             if (column !== WORKORDER_SERVICE_STATUS.completed) {

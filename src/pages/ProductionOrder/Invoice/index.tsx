@@ -88,6 +88,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         accessor: 'description',
         Header: 'Description',
         width: 200,
+        show: false,
         Cell: ({ row }) => {
           return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
         }

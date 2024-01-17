@@ -11,7 +11,7 @@ import CardColTimeline, { useCardReducer, datarowInterface } from 'src/component
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
-import { WORKORDER_SERVICE_STATUS, dateFormatForInputControl, employeeMaster, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
+import { WORKORDER_SERVICE_STATUS, dateFormatForInputControl, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
@@ -90,20 +90,11 @@ const WorkOrderSupervisor = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Service Master`)
+      .get(`/sa-formbuilder/lookup?lookupResource=Service Master,Employee Master`)
       .then(({ data: { data } }) => {
-        setServiceMasterOption(data['Service Master']);
-      });
-  }, []);
+        setServiceMasterOption(data['Service Master'] || []);
+        setUsersOption(data['Employee Master'] || []);
 
-  useEffect(() => {
-    axiosInstance()
-      .get(`${employeeMaster.api}`)
-      .then(({ data: { data } }) => {
-        setUsersOption(data?.data?.map((d) => ({ optionValue: d?._id, optionLabel: d?.concatedName })));
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
       });
   }, []);
 
@@ -141,6 +132,7 @@ const WorkOrderSupervisor = () => {
         link: (data) => `${routes.workOrderDetail.path}/${data?._id}`,
         target: '_blank'
       },
+      { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
       { accessor: 'assignedUser', title: 'Technician', type: 'text' },
       { accessor: 'workStation', title: routes.workStations.title, type: 'text' },
       { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },

@@ -164,6 +164,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         accessor: 'description',
         Header: 'Description',
         width: 200,
+        show: false,
         Cell: ({ row }) => {
           return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
         }
