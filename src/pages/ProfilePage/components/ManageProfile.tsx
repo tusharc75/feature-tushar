@@ -223,7 +223,7 @@ export default function ManageProfile(props) {
 
   const handleRemoveFace = () => {
     setRemovingFace(true);
-    axiosInstance().delete('/user/remove-face-data').then(({ data }) => {
+    axiosInstance().delete('/user/face/remove').then(({ data }) => {
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
@@ -240,12 +240,12 @@ export default function ManageProfile(props) {
   };
 
   const handleAddFace = async (sessionId: string) => {
-    await axiosInstance().post('/user/add-face-data', { sessionId }).then((res) => {
+    await axiosInstance().post('/user/face/add', { sessionId }).then(({data}) => {
       setAddFaceDialog(false);
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: res.data.message
+        message: data.message
       });
       onFetchUserData();
     }).catch((err) => {

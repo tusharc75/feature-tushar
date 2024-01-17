@@ -57,7 +57,7 @@ const WebCamDialog = ({ open, onClose, onSuccess }) => {
         const formData = new FormData();
         formData.append('file', file);
 
-        return axiosInstance().post('user/add-face-data', formData, {
+        return axiosInstance().post('user/face/add', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
