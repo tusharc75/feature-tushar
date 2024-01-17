@@ -158,7 +158,7 @@ const LoadingTicket = ({
           ?.filter((e) => e.replace != true)
           .map((d) => ({
             ...d.inventory,
-            uniqueId: d.inventory._id,
+            uniqueId: d._id,
             isReplaced: d.isReplaced,
             replaceReason: d.replaceReason,
             replaceAsset: d?.replaceAsset
@@ -278,7 +278,7 @@ const LoadingTicket = ({
       deliveryTicketList.map((obj) => {
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
-            if (obj?.assets?.some((p) => d?._id === p?.asset)) {
+            if (obj?.assets?.some((p) => p?.asset === d?._id && p?.uniqueId === d?.uniqueId)) {
               productAssets[index]['loadingTicket'] = obj?.ticketName;
               productAssets[index]['loadingTicketId'] = obj?._id;
               productAssets[index]['loadingTicketStatus'] = obj?.status;

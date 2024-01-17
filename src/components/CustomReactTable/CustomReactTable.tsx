@@ -345,7 +345,7 @@ const CustomReactTable = ({
     onGlobalFilterChange: setGlobalFilter,
 
     // accessors
-    getRowId: (row) => row._id,
+    getRowId: (row) => `${row._id}_${row?.index || 0}`,
     getSubRows: (row) => row[childrenProperty],
 
     // table models
@@ -399,7 +399,7 @@ const CustomReactTable = ({
     const testData = getUniqueDataByKey([...currentPageSelectedRows, ...selectedRecords]);
     const newData = [];
     for (const data of testData) {
-      if (selectedRowIds.includes(data._id)) newData.push(data);
+      if (selectedRowIds.includes(`${data._id}_${data?.index || 0}`)) newData.push(data);
     }
 
     if (onSelect) onSelect(newData);

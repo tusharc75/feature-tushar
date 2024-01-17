@@ -209,24 +209,23 @@ const ReceivingTicket = ({
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
-        productAssets = productAssets
-          .map((d) => {
-            return {
-              ...d.inventory,
-              uniqueId: d.inventory._id,
-              rentalAssetStatus: d.status,
-              startDate: d.actualStartDate || d.startDate,
-              endDate: d.actualEndDate || d.endDate,
-              manualStartDate: d.manualStartDate,
-              manualEndDate: d.manualEndDate,
-              isReplaced: d.isReplaced,
-              replaceReason: d.replaceReason,
-              replaceAsset: d?.replaceAsset
-                ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
-                : '',
-              description: d?.product?.productDescription
-            };
-          })
+        productAssets = productAssets.map((d) => {
+          return {
+            ...d.inventory,
+            uniqueId: d._id,
+            rentalAssetStatus: d.status,
+            startDate: d.actualStartDate || d.startDate,
+            endDate: d.actualEndDate || d.endDate,
+            manualStartDate: d.manualStartDate,
+            manualEndDate: d.manualEndDate,
+            isReplaced: d.isReplaced,
+            replaceReason: d.replaceReason,
+            replaceAsset: d?.replaceAsset
+              ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
+              : '',
+            description: d?.product?.productDescription
+          };
+        })
           .map((u) => ({
             ...u,
             type: 'Asset',
@@ -436,7 +435,7 @@ const ReceivingTicket = ({
 
       deliveryTicketList?.map((obj) => {
         productAssets?.map((d, index) => {
-          if (obj?.assets?.some((p) => d?._id === p?.asset)) {
+          if (obj?.assets?.some((p) => p?.asset === d?._id && p?.uniqueId === d?.uniqueId)) {
             if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
               productAssets[index]['loadingTicket'] = obj?.ticketName;
               productAssets[index]['loadingTicketId'] = obj?._id;
@@ -453,18 +452,6 @@ const ReceivingTicket = ({
               productAssets[index]['returnTicketStatus'] = obj?.status;
             }
           }
-          // if (obj?.products?.some((p) => d?._id?.split('_')[0] === p?.product)) {
-          //   if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving && productAssets[index]['loadingTicketId']) {
-          //     productAssets[index]['receivingTicket'] = obj?.ticketName;
-          //     productAssets[index]['receivingTicketId'] = obj?._id;
-          //     productAssets[index]['receivingTicketStatus'] = obj?.status;
-          //   }
-          //   if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['loadingTicketId']) {
-          //     productAssets[index]['returnTicket'] = obj?.ticketName;
-          //     productAssets[index]['returnTicketId'] = obj?._id;
-          //     productAssets[index]['returnTicketStatus'] = obj?.status;
-          //   }
-          // }
         });
       });
 
