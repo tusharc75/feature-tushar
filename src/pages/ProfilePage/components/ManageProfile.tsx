@@ -40,6 +40,7 @@ import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { Image } from '@material-ui/icons';
 import WebcamDialog from './WebCamDialog';
 import FaceLiveNess from 'src/components/FacialLogin/FaceLiveNess';
+import ViewTOTPDialog from './ViewTOTPDialog';
 
 const useStyles = makeStyles((theme) => ({
   profileEdit: {
@@ -92,7 +93,7 @@ export default function ManageProfile(props) {
 
 
   const [addFaceDialog, setAddFaceDialog] = useState(false);
-  const [webCamDialog, setWebCamDialog] = useState(false);
+  const [totpDialog, setTotpDialog] = useState(false);
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -373,7 +374,11 @@ export default function ManageProfile(props) {
                   <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setAddFaceDialog(true)}>
                     Add Face
                   </Button>
-                )}
+              )}
+              <Divider />
+              <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setTotpDialog(true)}>
+                View MFA/TOTP
+              </Button>
               </>
             }
           </div>
@@ -570,6 +575,15 @@ export default function ManageProfile(props) {
               onClose={() => setAddFaceDialog(false)}
               onComplete={handleAddFace} />
           )}
+          {
+            totpDialog && (
+              <ViewTOTPDialog
+                open={totpDialog}
+                onClose={() => {
+                  setTotpDialog(false);
+                }}/>
+            )
+          }
           {/* {webCamDialog && (
             <WebcamDialog
               open={webCamDialog}
