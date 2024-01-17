@@ -15,8 +15,8 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import axiosInstance from 'src/axios/axiosInstance';
 import ManagePayrollPolicy from './ManagePayrollPolicy';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { FileCopyIcon } from 'src/assets/svg/svgIcons';
 import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 
