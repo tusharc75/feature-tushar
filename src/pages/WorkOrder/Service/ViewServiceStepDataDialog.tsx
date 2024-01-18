@@ -7,8 +7,9 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 
-const ViewStepDataDialog = ({ servicesData, stepsData, handleClose }) => {
-  const renderedFrom = `${routes?.workOrder?.title}_stepLogs`;
+const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose }) => {
+
+  const renderedFrom = `${routes?.workOrder?.title}_Service_StepData`;
   const { generateColumns } = useColumns();
   const [serviceOptions, setServiceOptions] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
@@ -53,7 +54,6 @@ const ViewStepDataDialog = ({ servicesData, stepsData, handleClose }) => {
       }
     ];
     const stepColumns = [];
-
     const stepFields = steps?.map((e) => e?.fields);
     stepFields?.forEach((step) => {
       step?.forEach((field: any) => {
@@ -62,28 +62,25 @@ const ViewStepDataDialog = ({ servicesData, stepsData, handleClose }) => {
         }
       });
     });
-
     let newColumns = generateColumns(renderedFrom, stepColumns);
     setColumns([...initialColumns, ...newColumns]);
   };
 
   const fetchData = (id: any) => {
-    const rows = stepsData
-      ?.filter((e) => e.uniqueId === id)
-      .map((e, index) => {
-        const matchingStep = selectedService?.steps.find((item) => item?._id === e?.stepId);
-        return {
-          index: index + 1,
-          stepName: matchingStep?.stepName,
-          ...e
-        };
-      });
+    const rows = stepsData?.filter((e) => e.uniqueId === id).map((e, index) => {
+      const matchingStep = selectedService?.steps.find((item) => item?._id === e?.stepId);
+      return {
+        index: index + 1,
+        stepName: matchingStep?.stepName,
+        ...e
+      };
+    });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
   };
 
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="consume-dialog">
-      <CustomDialogHeader title={'View Step Data'} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
+      <CustomDialogHeader title={'View Service Steps Data'} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent>
         <Autocomplete
           id="service"
@@ -102,22 +99,23 @@ const ViewStepDataDialog = ({ servicesData, stepsData, handleClose }) => {
         />
         {selectedService ? (
           <Box mt={1}>
-              <CustomReactTable
-                height={'calc(100vh - 200px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                refreshGrid={() => fetchData(selectedService?.uniqueId)}
-                hideSelection={true}
-                hideAction={true}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-              />
-            </Box>
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              refreshGrid={() => fetchData(selectedService?.uniqueId)}
+              hideSelection={true}
+              hideAction={true}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              showArrangeView={false}
+            />
+          </Box>
         ) : null}
       </CustomDialogContent>
     </Dialog>
   );
 };
 
-export default ViewStepDataDialog;
+export default ViewServiceStepDataDialog;

@@ -10,6 +10,9 @@ import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS } from 's
 import axiosInstance from 'src/axios/axiosInstance';
 import { camelCase } from 'lodash';
 import TechnicianDialog from '../TechnicianDialog';
+import { IconButton } from '@material-ui/core';
+import DescriptionIcon from '@material-ui/icons/Description';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const LIMIT = 25;
 
@@ -28,6 +31,7 @@ const CardView = (props, ref) => {
 
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
   const childFunction = () => {
     dispatch({ type: 'refreshData' });
@@ -56,11 +60,26 @@ const CardView = (props, ref) => {
       {
         type: 'tooltip',
         renderer: (data) =>
-          data?.canPerformInfo ? (
-            <HtmlTooltip title={data.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-              <Info className="[font-size:20px_!important] text-red-500" />
-            </HtmlTooltip>
-          ) : null
+          <>
+            {data?.productionOrderNumber &&
+              <HtmlTooltip title="Drawings">
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDrawingDialog({ open: true, workOrder: data.workOrderDetail?._id })
+                  }}
+                >
+                  <DescriptionIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>}
+            {data?.canPerformInfo ? (
+              <HtmlTooltip title={data.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+                <Info className="[font-size:20px_!important] text-red-500" />
+              </HtmlTooltip>
+            ) : null}
+          </>
       },
       ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : []),
       { accessor: 'estimateCompleteDate', title: 'Due Date', type: 'date' }
@@ -121,7 +140,7 @@ const CardView = (props, ref) => {
         dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
         dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => {
         dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
       });
@@ -153,7 +172,6 @@ const CardView = (props, ref) => {
           setServiceOpen(true);
         }}
       />
-
       {serviceOpen && (
         <TechnicianDialog
           handleClose={() => {
@@ -169,6 +187,15 @@ const CardView = (props, ref) => {
           canPerform={selectedService?.canPerform}
         />
       )}
+      {showDrawingDialog.open &&
+        <DiagramDialog
+          referenceId={showDrawingDialog.workOrder}
+          currentVersion={null}
+          handleClose={() => {
+            setShowDrawingDialog({ open: false, workOrder: null })
+          }}
+        />
+      }
     </>
   );
 };
