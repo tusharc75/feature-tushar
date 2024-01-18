@@ -58,9 +58,7 @@ import AssignUserDialog from './AssignUserDialog';
 import { isDesktop, isMobile, isTablet } from 'react-device-detect';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
 import { WorkStations } from 'src/assets/svg/svgIcons';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import Diagram from '../Diagram';
+import DiagramDialog from '../Diagram/DiagramDialog';
 
 export interface StepDataInterface {
   _id: string;
@@ -836,7 +834,7 @@ const Steps = ({
                       setShowDrawing(true)
                     }}
                   >
-                    Drawing
+                    Drawings
                   </Button>
                 }
                 {resource === sidebarResource.workOrder && (
@@ -1671,31 +1669,13 @@ const Steps = ({
         />
       )}
       {showDrawing &&
-        <Dialog
-          open
-          aria-labelledby="customized-dialog-title"
-          maxWidth="md"
-          onClose={(e, reason) => {
+        <DiagramDialog
+          referenceId={workOrderData?._id}
+          currentVersion={(workOrderData?.versions?.length + 1) || 1}
+          handleClose={() => {
             setShowDrawing(false)
           }}
-          fullWidth
-          fullScreen
-          TransitionComponent={CustomDialogTransition}
-        >
-          <CustomDialogHeader
-            onClose={() => {
-              setShowDrawing(false)
-            }}
-            showRequiredLabel={false}
-            title={`Drawing`}
-          ></CustomDialogHeader>
-          <CustomDialogContent>
-            <Diagram
-              resource={'workOrder'}
-              referenceId={workOrderData?._id}
-              currentVersion={(workOrderData?.versions?.length + 1) || 1} />
-          </CustomDialogContent>
-        </Dialog>
+        />
       }
     </>
   );

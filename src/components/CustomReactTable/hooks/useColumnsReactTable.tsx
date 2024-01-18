@@ -141,7 +141,7 @@ export default function useColumns() {
 
     const _fields = fields?.map((e) => e?.fieldData || e);
     _fields.forEach((field) => {
-      let commonFieldData = {
+      let commonFieldData: any = {
         id: field?.fieldName,
         accessorKey: field?.fieldName,
         accessor: field?.fieldName,
@@ -152,6 +152,10 @@ export default function useColumns() {
         primaryField: field?.primaryField ?? false,
         decimalPlaces: field?.decimalPlaces || 0
       };
+
+      if (field?.stopHideColumn || field?.primaryField) {
+        commonFieldData['disabled'] = true
+      }
 
       if (hideColumns.indexOf(field?.fieldName) >= 0) {
       } else if (field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter === true) {
@@ -241,7 +245,6 @@ export default function useColumns() {
           lockPosition: true,
           ...commonFieldData,
           accessor: fieldName,
-          disabled: true,
           cell: ({ row }) =>
             permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? (
               <span>
@@ -268,7 +271,8 @@ export default function useColumns() {
           ...commonFieldData,
           accessorFn: (original) => {
             return isArray(original?.[field?.fieldName]) ? original?.[field?.fieldName][0]?.optionLabel :
-          isObject(original?.[field?.fieldName]) ? original?.[field?.fieldName]?.optionLabel : original?.[field?.fieldName]},
+              isObject(original?.[field?.fieldName]) ? original?.[field?.fieldName]?.optionLabel : original?.[field?.fieldName]
+          },
           cell: ({ row }) => <DropdownCell permissions={permissions} permissionForLinks={permissionForLinks} field={field} original={row?.original} />
         });
       } else if (['mobileNumber', 'phone', 'email']?.includes(field?.type)) {
@@ -337,7 +341,7 @@ export default function useColumns() {
       } else if (field?.type === 'checkBox') {
         column.push({
           ...commonFieldData,
-          accessorFn:(data)=> Boolean(data[field?.fieldName]) ? 'Yes' : 'No',
+          accessorFn: (data) => Boolean(data[field?.fieldName]) ? 'Yes' : 'No',
           cell: ({ row }) => (
             <div>
               <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
