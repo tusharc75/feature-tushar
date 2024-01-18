@@ -116,10 +116,10 @@ const WorkOrderTechnician = () => {
                       selectedResource.resource === sidebarResource.workOrder
                         ? workOrderOptions
                         : selectedResource.resource === sidebarResource.repairOrder
-                        ? repairOrderOptions
-                        : selectedResource.resource === sidebarResource.productionOrder
-                        ? productionOrderOptions
-                        : []
+                          ? repairOrderOptions
+                          : selectedResource.resource === sidebarResource.productionOrder
+                            ? productionOrderOptions
+                            : []
                     }
                     style={{ minWidth: '330px' }}
                     fullWidth
@@ -196,9 +196,18 @@ const WorkOrderTechnician = () => {
           </div>
         </div>
         {viewType === 1 && (
-          <CardView serviceStatus={selectedServiceStatus} resource={selectedResource} resourceData={selectedResourceFilter} ref={ref} />
+          <CardView
+            serviceStatus={selectedServiceStatus}
+            resource={selectedResource}
+            resourceData={selectedResourceFilter}
+            ref={ref}
+          />
         )}
-        {viewType === 2 && <GridView serviceStatus={selectedServiceStatus} resource={selectedResource} resourceData={selectedResourceFilter} />}
+        {viewType === 2 && <GridView
+          serviceStatus={selectedServiceStatus}
+          resource={selectedResource}
+          resourceData={selectedResourceFilter}
+        />}
       </CustomContainer>
     </section>
   );

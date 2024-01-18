@@ -49,7 +49,7 @@ import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
 import StepsInOtherServices from './StepsInOtherService';
-import ViewStepDataDialog from './ViewStepDataDialog';
+import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -121,7 +121,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
   const [logsDialog, setLogsDialog] = useState(false);
   const [commentsDialog, setCommentsDialog] = useState(false);
-  const [viewStepDataDialog,setViewStepDataDialog] = useState(false);
+  const [viewServiceStepDataDialog, setViewServiceStepDataDialog] = useState(false);
   const [showManagePurchaseOrder, setShowManagePurchaseOrder] = useState(false);
   const [isColapsed, setIsColapsed] = useState(resource === sidebarResource.workOrder ? false : true);
   const mobScreen = useMediaQuery('(max-width:768px)');
@@ -1159,11 +1159,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               )}
               <MenuItem
                 onClick={() => {
-                  setViewStepDataDialog(true);
+                  setViewServiceStepDataDialog(true);
                   setAnchorEl(null);
                 }}
               >
-                View Step Data
+                View Service Steps Data
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -1364,13 +1364,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
         />
       )}
-      {viewStepDataDialog && (
-        <ViewStepDataDialog 
-        servicesData={serviceSteps}
-        stepsData={stepSubmitedData}
-        handleClose={() => {
-          setViewStepDataDialog(false);
-        }}
+      {viewServiceStepDataDialog && (
+        <ViewServiceStepDataDialog
+          servicesData={serviceSteps}
+          stepsData={stepSubmitedData}
+          handleClose={() => {
+            setViewServiceStepDataDialog(false);
+          }}
         />
       )}
       {commentsDialog && (
