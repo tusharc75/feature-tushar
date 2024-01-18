@@ -1203,8 +1203,8 @@ const ReceivingTicket = ({
     if (!openDateDialog.data) return;
     setOpenDateDialog({ ...openDateDialog, loading: true });
     const data: any = {
-      material: openDateDialog?.data?.displayType !== 'Asset' ? openDateDialog?.data?.uniqueId : '',
-      inventory: openDateDialog?.data?.displayType === 'Asset' ? openDateDialog?.data?._id : ''
+      _id: openDateDialog?.data?.uniqueId,
+      asset: openDateDialog?.data?._id?.split('_')[0]
     };
     if (values.manualStartDate) {
       data.startDate = values.manualStartDate;
@@ -1297,7 +1297,7 @@ const ReceivingTicket = ({
         }
       } else if (action === rentalManagementActions.createSupplierDeliveryTicket) {
         if (!e?.subleaseAsset) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.notSubleaseAsset });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlySubleaseAsset });
         } else if (!e?.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
