@@ -139,7 +139,7 @@ const SerializedAsset = ({
             accessor: 'remainingJobDays',
             Header: 'Remaining Job Days',
             show: true,
-            Cell: ({ row }) => <div>{(row.original?.remainingJobDays ? row.original?.wellName : <NoDataCell />)}</div>
+            Cell: ({ row }) => <div>{(row.original?.remainingJobDays ? row.original?.remainingJobDays : <NoDataCell />)}</div>
           }
         ];
         setColumns([...newColumns.slice(0, 1), ...extraColoums, ...newColumns.slice(1), ...getStaticFields()]);

@@ -375,7 +375,7 @@ const WorkOrderDetails = () => {
           )}
           {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
             <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawing
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawings
             </CustomTab>
           )}
           {!(isMobile && !isTablet) && (
