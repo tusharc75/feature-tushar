@@ -84,7 +84,25 @@ const QuoteBuilder = ({
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
+        Cell: ({ row }) => 
+        row.original['type'] ? (
+          <p className="text-truncate">
+            {row.original.type === 'serializedAsset' ? 'Asset' : `${capitalize(row.original.type)} `}
+            {row.original['type'] === 'product'
+              ? row.original?.productDetail?.serializedProduct
+                ? '(Serialized)'
+                : '(Non-Serialized)'
+              : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                  : ''}
+          </p>
+        ) : (
+          <NoDataCell />
+        )
       },
       {
         accessor: 'detail',
