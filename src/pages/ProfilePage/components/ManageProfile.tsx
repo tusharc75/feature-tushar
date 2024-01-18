@@ -88,6 +88,7 @@ export default function ManageProfile(props) {
   const [isPasswordUpdate, setPasswordUpdate] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [removeFaceConfirmBox, setRemoveFaceConfirmBox] = useState(false);
+  const [removeMFAConfirmBox, setRemoveMFAConfirmBox] = useState(false);
   const [removingFace, setRemovingFace] = useState(false);
   const [showAddProxyDialog, setShowAddProxyDialog] = useState(false);
 
@@ -239,6 +240,23 @@ export default function ManageProfile(props) {
       });
   };
 
+  const handleRemoveMFA = () => {
+    setRemovingFace(true);
+    axiosInstance().delete('/user/mfa/remove').then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      setRemoveMFAConfirmBox(false);
+      onFetchUserData();
+    })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setRemovingFace(false);
+      });
+  };
+
   const handleAddFace = async (sessionId: string) => {
     await axiosInstance().post('/user/face/add', { sessionId }).then(({data}) => {
       setAddFaceDialog(false);
@@ -253,7 +271,6 @@ export default function ManageProfile(props) {
       toastConfig.setToastConfig(err);
     });
   }
-
   return (
     <>
       {openUpdateDialog && (
@@ -376,9 +393,13 @@ export default function ManageProfile(props) {
                   </Button>
                 )}
                 <Divider />
-                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setSetUpMfaDialog(true)}>
-                  Setup MFA
+              {userData?.isMFASetup ? (
+                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveMFAConfirmBox(true)}>
+                  Remove MFA
                 </Button>
+              ) : (<Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setSetUpMfaDialog(true)}>
+                  Setup MFA
+                </Button>)}
               </>
             }
           </div>
@@ -579,7 +600,9 @@ export default function ManageProfile(props) {
             <SetUpMfaDialog
               onClose={() => {
                 setSetUpMfaDialog(false);
-              }} />
+                onFetchUserData();
+              }}
+            />
           )}
           {/* {webCamDialog && (
             <WebcamDialog
@@ -624,6 +647,17 @@ export default function ManageProfile(props) {
               okBtnLoading={removingFace}
             />
           ) : null}
+          {
+            removeMFAConfirmBox ? (
+              <ConfirmationDialog
+                open={removeMFAConfirmBox}
+                message={`Are you sure you want to remove MFA ?`}
+                onClose={() => setRemoveMFAConfirmBox(false)}
+                onOk={handleRemoveMFA}
+                okBtnLoading={removingFace}
+              />
+            ) : null
+          }
         </div>
       </>
     </>
