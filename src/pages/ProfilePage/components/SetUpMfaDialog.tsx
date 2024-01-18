@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Typography } from '@material-ui/core'
+import { Box, Button, Dialog, Grid, TextField, Typography } from '@material-ui/core'
 import { useContext, useEffect, useState } from 'react'
 import { isMobile, isTablet } from 'react-device-detect'
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext'
@@ -13,6 +13,7 @@ function SetUpMfaDialog({ onClose }) {
 
     const [data, setData] = useState({ secret: '', qrCode: '' })
     const [loading, setLoading] = useState(false)
+    const [token, setToken] = useState(null);
     const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
@@ -31,6 +32,20 @@ function SetUpMfaDialog({ onClose }) {
             setLoading(false);
             toastConfig.setToastConfig(error);
         })
+    }
+
+    const validate = async (secretKey, token) => {
+        axiosInstance().put('/user/mfa/verify', { secretKey, token })
+            .then(({ data: { data } }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: 'MFA enabled successfully',
+                });
+                onClose();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            })
     }
 
     return (<Dialog fullScreen={isMobile || isTablet}
@@ -57,6 +72,36 @@ function SetUpMfaDialog({ onClose }) {
                         <Typography variant="body1" align="center">
                             Secret Key: {data?.secret}
                         </Typography>
+                    </Box>
+                    <Box mt={3} />
+                    <Box m={2}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={8}>
+                                <TextField
+                                    required
+                                    fullWidth
+                                    label="Enter OTP"
+                                    variant="outlined"
+                                    size="small"
+                                    value={token}
+                                    onChange={(e) => { 
+                                        setToken(e.target.value)
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                                <Button
+                                    fullWidth
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => {
+                                        validate(data.secret, token);
+                                    }}
+                                >
+                                    Validate
+                                </Button>
+                            </Grid>
+                        </Grid>
                     </Box>
                 </div>
             }
