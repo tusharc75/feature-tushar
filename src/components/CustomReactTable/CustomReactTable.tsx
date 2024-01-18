@@ -66,7 +66,6 @@ const CustomReactTable = ({
     limit,
     search,
     filters: customFilters,
-    sorting,
     error,
     visibleColumns,
     columnOrder

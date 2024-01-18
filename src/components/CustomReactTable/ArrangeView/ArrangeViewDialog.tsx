@@ -136,13 +136,15 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       }
       columnOrderToStore.push(col.id);
     }
+    const columnOrder = [...stickycolumns.left, ...columnOrderToStore, ...stickycolumns.right];
+    dispatch({ type: 'setVisibleColumns', visibleColumns: stateVisibleColumns });
+    dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
+
     if (renderedFrom && renderedFrom !== '') {
       const hidedColumns = Object.keys(stateVisibleColumns).filter((c) => !stateVisibleColumns[c]);
       updateGridHiddenColumns(hidedColumns, columnOrderToStore);
     }
-    const columnOrder = [...stickycolumns.left, ...columnOrderToStore, ...stickycolumns.right];
-    dispatch({ type: 'setVisibleColumns', visibleColumns: stateVisibleColumns });
-    dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
+
     onClose();
   };
 
