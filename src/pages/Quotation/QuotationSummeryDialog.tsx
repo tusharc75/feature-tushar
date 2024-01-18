@@ -90,14 +90,18 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
   const fetchProductInventory = async () => {
     var data: any = [];
     var inventory: any = [];
+    var additionalData: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
+    const additionalCostResponce = await axiosInstance().get(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}`);
     data = response?.data?.data;
+    additionalData = additionalCostResponce?.data?.data || [];
     inventory = data?.inventory ? data?.inventory : [];
-    const rows = data.material.filter((e) => e.parentId === null);
+    let rows = data.material.filter((e) => e.parentId === null);
+     rows = [...rows,...additionalData]
     const totalFinalPrice = rows
       .filter(
         (f) =>
-          f?.parentId === null &&
+          (f?.parentId || null) === null &&
           f?.hasOwnProperty('finalPrice_' + quotationData?.currency?.toLowerCase()) &&
           !isNaN(f['finalPrice_' + quotationData?.currency?.toLowerCase()])
       )
@@ -105,7 +109,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
     const totalSupplierPrice = rows
       .filter(
         (f) =>
-          f?.parentId === null &&
+        (f?.parentId || null) === null &&
           f?.hasOwnProperty('supplierPrice_' + quotationData?.currency?.toLowerCase()) &&
           !isNaN(f['supplierPrice_' + quotationData?.currency?.toLowerCase()])
       )
