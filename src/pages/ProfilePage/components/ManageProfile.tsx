@@ -40,6 +40,7 @@ import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { Image } from '@material-ui/icons';
 import WebcamDialog from './WebCamDialog';
 import FaceLiveNess from 'src/components/FacialLogin/FaceLiveNess';
+import SetUpMfaDialog from './SetUpMfaDialog';
 
 const useStyles = makeStyles((theme) => ({
   profileEdit: {
@@ -92,7 +93,7 @@ export default function ManageProfile(props) {
 
 
   const [addFaceDialog, setAddFaceDialog] = useState(false);
-  const [webCamDialog, setWebCamDialog] = useState(false);
+  const [setUpMfaDialog, setSetUpMfaDialog] = useState(false);
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -222,7 +223,7 @@ export default function ManageProfile(props) {
 
   const handleRemoveFace = () => {
     setRemovingFace(true);
-    axiosInstance().delete('/user/remove-face-data').then(({ data }) => {
+    axiosInstance().delete('/user/face/remove').then(({ data }) => {
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
@@ -239,12 +240,12 @@ export default function ManageProfile(props) {
   };
 
   const handleAddFace = async (sessionId: string) => {
-    await axiosInstance().post('/user/add-face-data', { sessionId }).then((res) => {
+    await axiosInstance().post('/user/face/add', { sessionId }).then(({data}) => {
       setAddFaceDialog(false);
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: res.data.message
+        message: data.message
       });
       onFetchUserData();
     }).catch((err) => {
@@ -374,6 +375,10 @@ export default function ManageProfile(props) {
                     Add Face
                   </Button>
                 )}
+                <Divider />
+                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setSetUpMfaDialog(true)}>
+                  Setup MFA
+                </Button>
               </>
             }
           </div>
@@ -569,6 +574,12 @@ export default function ManageProfile(props) {
             <FaceLiveNess
               onClose={() => setAddFaceDialog(false)}
               onComplete={handleAddFace} />
+          )}
+          {setUpMfaDialog && (
+            <SetUpMfaDialog
+              onClose={() => {
+                setSetUpMfaDialog(false);
+              }} />
           )}
           {/* {webCamDialog && (
             <WebcamDialog
