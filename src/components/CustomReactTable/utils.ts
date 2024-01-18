@@ -90,6 +90,12 @@ export const getDataFromLocalStorage = () => {
   }
 };
 
+export const getTableDataFromLocalStorage = (renderedFrom: string): { hide?: string[]; order?: string[] } | false => {
+  const data = getDataFromLocalStorage();
+  if (!data) return false;
+  return data[renderedFrom] || false;
+};
+
 export const returnHiddenCols = (renderedFrom, hideAction) => {
   const gridMetaData = getDataFromLocalStorage();
   const hiddenCols = gridMetaData[renderedFrom]?.hide || [];

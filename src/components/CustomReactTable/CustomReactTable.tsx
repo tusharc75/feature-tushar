@@ -68,8 +68,8 @@ const CustomReactTable = ({
     filters: customFilters,
     sorting,
     error,
-    showFilteredRecordsOnly,
-    colState
+    visibleColumns,
+    columnOrder
   }: TInitialState = state;
 
   const {
@@ -106,8 +106,6 @@ const CustomReactTable = ({
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
   const [sortedColumns, setSortedColumns] = useState([]);
-  const [columnOrder, setColumnOrder] = useState([]);
-  const [hiddenColumns, setHiddenColumns] = useState([]);
   const [getsorting, setSorting] = useState([]);
 
   // initialize
@@ -117,77 +115,18 @@ const CustomReactTable = ({
     }
   }, [newColumns]);
 
-  // For Column Order and hidden columns
-  useEffect(() => {
-    try {
-      const stickyColumnNames = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection });
-
-      const hColumns = [];
-      for (const col of newColumns) {
-        if (col.isVisible === false) {
-          hColumns.push(col.id);
-        }
-      }
-      if (reportSave) {
-        if (selectedReportView) {
-          let colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : [])];
-          selectedReportView?.columnState?.forEach((element) => {
-            if (!element?.isVisible) {
-              hColumns.push(element.accessor);
-            }
-          });
-          setHiddenColumns(hColumns);
-          setColumnOrder(colOrder);
-          dispatch({ type: 'updateColumnState', colState: selectedReportView?.columnState });
-        } else {
-          setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
-          setHiddenColumns(newColumns?.filter((e) => e?.show === false).map((m) => m?.id ?? m?.accessor));
-          dispatch({
-            type: 'updateColumnState',
-            colState: newColumns.map((m) => {
-              return { accessor: m?.id ?? m?.accessor, isVisible: m?.show === false ? false : true };
-            })
-          });
-        }
-      } else {
-        let gridMetaData = getDataFromLocalStorage();
-        if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
-          for (const n of [...gridMetaData[renderedFrom]?.hide]) {
-            if (stickyColumnNames.stickyColumns.includes(n) || !n) continue;
-            if (n === 'qtyDisplay') hColumns.push('qty');
-            if (n === 'qty') hColumns.push('qtyDisplay');
-            hColumns.push(n);
-          }
-          setHiddenColumns(hColumns);
-        } else {
-          setHiddenColumns(newColumns?.filter((e) => e?.show === false).map((m) => m?.id ?? m?.accessor));
-        }
-        if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
-          const colOrder = gridMetaData[renderedFrom]?.order || [];
-          let orderIndices = {};
-          for (let i = 0; i < colOrder.length; i++) {
-            orderIndices[colOrder[i]] = i;
-          }
-          let orderedArr = [...newColumns].sort((a, b) => orderIndices[a?.id || a?.accessor] - orderIndices[b?.id || b?.accessor]);
-          setSortedColumns(returnSortedColumns(newColumns, orderedArr));
-          setColumnOrder(orderedArr.map((m) => m?.id ?? m?.accessor));
-        } else {
-          setSortedColumns(newColumns);
-          setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
-        }
-      }
-    } catch (ex) {
-      console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
-    }
-  }, [newColumns, expander, hideSelection, renderedFrom, selectedReportView]);
-
+  // Column DND
   function reorder(draggedColumnId: string, targetColumnId: string, columnOrder: string[]) {
-    columnOrder.splice(columnOrder.indexOf(targetColumnId), 0, columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string);
+    const newColumnOrder = columnOrder.toSpliced(
+      columnOrder.indexOf(targetColumnId),
+      0,
+      columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string
+    );
     const dragItem = newColumns.find((col) => col?.id === draggedColumnId || col?.accessor === draggedColumnId);
-    const hoverItem = newColumns.find((col) => col?.id === targetColumnId || col?.accessor === targetColumnId);
 
-    if (dragItem?.id === 'action' || dragItem?.id === 'selection' || dragItem?.canDrag === false) return;
-    if (hoverItem?.id === 'action' || hoverItem?.id === 'selection' || hoverItem?.canDrag === false) return;
+    const stickyColumns = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection }).stickyColumns;
+
+    if (stickyColumns.includes(dragItem?.id)) return;
 
     const newBaseColumns = [...baseColumns].sort(
       (a, b) => columnOrder.findIndex((d) => d === a.accessor) - columnOrder.findIndex((d) => d === b.accessor)
@@ -197,14 +136,12 @@ const CustomReactTable = ({
       ?.filter((o) => !['left', 'right']?.includes(o?.sticky) && !['expander', 'selection', 'action']?.includes(o?.id))
       ?.map((o) => o?.id);
 
-    setBaseColumns(newBaseColumns);
-
     updateGridHiddenColumns({
       renderedFrom,
       user,
       columnOrder: newcolumnOrderToSave
     });
-
+    dispatch({ type: 'setColumnOrder', columnOrder: newColumnOrder });
     return [...columnOrder];
   }
 
@@ -291,15 +228,6 @@ const CustomReactTable = ({
     });
   }, [cellValue, currentEditingCellPosition, data, onSaveEdit]);
 
-  const getVisibleColumns = React.useCallback(() => {
-    const obj = {};
-
-    for (const col of newColumns) {
-      obj[col.id] = !hiddenColumns?.includes(col.id);
-    }
-    return obj;
-  }, [newColumns, hiddenColumns]);
-
   useEffect(() => {
     return setGlobalFilter(searchQuery);
   }, [searchQuery, setGlobalFilter]);
@@ -312,7 +240,7 @@ const CustomReactTable = ({
     },
     autoResetPageIndex,
     initialState: {
-      columnVisibility: getVisibleColumns()
+      columnVisibility: visibleColumns
     },
     state: {
       expanded,
@@ -320,7 +248,7 @@ const CustomReactTable = ({
       sorting: getsorting,
       globalFilter: isClientSideGrid ? debouncedSearch.trim() : '',
       columnFilters: isClientSideGrid ? columnFilters : [],
-      columnVisibility: getVisibleColumns(),
+      columnVisibility: visibleColumns,
       rowSelection
     },
     // flags
@@ -340,7 +268,6 @@ const CustomReactTable = ({
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
-    onColumnOrderChange: setColumnOrder,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
 
@@ -455,23 +382,19 @@ const CustomReactTable = ({
           <GridHeader
             resource={resource}
             dispatch={dispatch}
-            baseColumns={baseColumns}
-            customFilters={customFilters}
             renderedFrom={renderedFrom}
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
-            selectedRecords={selectedRecords}
             hideSelection={hideSelection}
             showFilters={showFilters}
             table={table}
             showArrangeView={showArrangeView}
             newColumns={newColumns}
             refreshGrid={refreshGrid}
-            setHiddenColumns={setHiddenColumns}
-            loading={loading}
             reportSave={reportSave}
-            setColumnOrder={setColumnOrder}
             setSelectedReportView={setSelectedReportView}
             selectedReportView={selectedReportView}
+            state={state}
+            expander={expander}
           />
           {!isMobileView && (
             <div className="relative">
