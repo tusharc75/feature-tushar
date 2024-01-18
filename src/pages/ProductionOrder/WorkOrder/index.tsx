@@ -13,10 +13,9 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORK_ORDER_STATUS,
   productionOrder,
-  sidebarResource,
   workOrder
 } from '../../../constants/helpers';
-import { flatMap, intersection, map, orderBy, startCase, uniq } from 'lodash';
+import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
@@ -36,6 +35,8 @@ import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import SyncIcon from '@material-ui/icons/Sync';
 import UploadDrawingDialog from './UploadDrawingDialog';
+import DescriptionIcon from '@material-ui/icons/Description';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -68,6 +69,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
 
   const [openUploadDrawingDialog, setOpenUploadDrawingDialog] = useState(false);
+
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
 
   const [isAutoCreating, setIsAutoCreating] = useState(true);
@@ -296,23 +299,36 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         return (
           <>
             {row?.original?.type === MATERIAL_TYPE.product && !row?.original?.parentId && (
-              <HtmlTooltip title="Auto Complete Work Order">
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setAutoCompleteData([row.original]);
-                    setCompleteConfirmBox(true);
-                  }}
-                  disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
-                >
-                  {row.original['workOrderStatus'] === 'Completed' ? (
-                    <CheckCircle className="[font-size:19px_!important] text-[var(--chip-color-completed)] dark:text-[var(--dark-yellow)]" />
-                  ) : (
-                    <AutoCompleteIcon size={18} />
-                  )}
-                </IconButton>
-              </HtmlTooltip>
+              <>
+                <HtmlTooltip title="Auto Complete Work Order">
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      setAutoCompleteData([row.original]);
+                      setCompleteConfirmBox(true);
+                    }}
+                    disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
+                  >
+                    {row.original['workOrderStatus'] === 'Completed' ? (
+                      <CheckCircle className="[font-size:19px_!important] text-[var(--chip-color-completed)] dark:text-[var(--dark-yellow)]" />
+                    ) : (
+                      <AutoCompleteIcon size={18} />
+                    )}
+                  </IconButton>
+                </HtmlTooltip>
+                <HtmlTooltip title="Drawings">
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      setShowDrawingDialog({ open: true, workOrder: row.original?.workOrder?._id })
+                    }}
+                  >
+                    <DescriptionIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              </>
             )}
             <HtmlTooltip title="Delete">
               <span>
@@ -668,6 +684,18 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
         {allowedToEdit && (
           <Box display="flex" gridColumnGap={5}>
+            <ImportExportMenu
+              permissions={permissions?.productionOrder}
+              module={routes.productionOrder.title}
+              api={`${productionOrder.api}/material/${productionOrderData._id}`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              recordsToExport={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).length}
+              ids={selectedRecords?.length ? selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.map((obj) => obj._id) : []}
+            />
+            <Box ml={1} />
             <ImportExportMenu
               permissions={permissions?.workOrder}
               module="Work Order Consumables"
@@ -1038,6 +1066,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <UploadDrawingDialog
           productionOrderData={productionOrderData}
           handleClose={() => setOpenUploadDrawingDialog(false)}
+        />
+      }
+      {showDrawingDialog.open &&
+        <DiagramDialog
+          referenceId={showDrawingDialog.workOrder}
+          currentVersion={null}
+          handleClose={() => {
+            setShowDrawingDialog({ open: false, workOrder: null })
+          }}
         />
       }
     </Fragment>
