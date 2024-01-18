@@ -36,7 +36,6 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { makeStyles } from '@material-ui/core/styles';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { getRentalProductAssets, getRentalDeliveryTicket, uniqueProduct } from './../rentalOfflineHelper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -49,8 +48,6 @@ import { ExpandMore } from '@material-ui/icons';
 import ExistingRentalJob from './ExistingRentalJob';
 import { groupBy, uniq, map, filter } from 'lodash';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
-import AddSerializedAsset from '../SerializedAsset/AddSerializedAsset';
-import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import ConsumeProduct from '../../../components/RentalManagment/ConsumeProduct';
 import { useData } from '../../../StateProvider/Provider';
@@ -114,9 +111,6 @@ const ReceivingTicket = ({
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
-  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
-  const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
-  const [replaceLoading, setReplaceLoading] = useState(false);
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
   const [seletedProducts, setSeletedProducts] = useState([]);
   const [columnHeader, setColumnHeader] = useState(null);
@@ -953,42 +947,6 @@ const ReceivingTicket = ({
     } else {
       return false;
     }
-  };
-
-  const handleOpenReplaceAssetReason = (rows) => {
-    const data: any = {};
-    data.referenceType = 'rentalJob';
-    data.referenceId = rentalManagementData._id;
-    const assets: any = [];
-    selectedRecords?.forEach((element: any) => {
-      const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
-      if (result.length) {
-        assets.push({ _id: element._id, status: element.status, deliveryTicketId: element.loadingTicketId, newId: result[0]._id });
-        result[0].isCounted = true;
-      }
-    });
-    data.assets = assets;
-    setShowReplaceReason({ open: true, data: data });
-  };
-
-  const handleReplaceAsset = (reason) => {
-    setReplaceLoading(true);
-    axiosInstance()
-      .post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
-      .then(({ data }) => {
-        setShowReplaceReason({ open: false, data: [] });
-        setAddSerializedAssetDialog({ open: false, products: [] });
-        setReplaceLoading(false);
-        fetchRecords();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Assets Replaced Successfully`
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
   };
 
   const handelProcessTickets = () => {
@@ -1978,31 +1936,6 @@ const ReceivingTicket = ({
             handleAddAssetsToRepairOrder(obj?._id);
           }}
           isClone={false}
-        />
-      )}
-      {addSerializedAssetDialog.open && (
-        <AddSerializedAsset
-          addSerializedAsset={handleOpenReplaceAssetReason}
-          handleSerializedAssetClose={() => {
-            setAddSerializedAssetDialog({ open: false, products: [] });
-          }}
-          referenceType={'ReplaceAsset'}
-          referenceData={{
-            _id: rentalManagementData?._id,
-            warehouse: rentalManagementData?.warehouse?.optionValue
-          }}
-          isAdding={replaceLoading}
-          selectedProducts={addSerializedAssetDialog.products}
-          filterByPlant={rentalManagementData?.warehouse}
-        />
-      )}
-      {showReplaceReason.open && (
-        <ReplaceAssetReason
-          handleClose={() => setShowReplaceReason({ open: false, data: {} })}
-          loading={replaceLoading}
-          handleSucess={(data) => {
-            handleReplaceAsset(data?.reason);
-          }}
         />
       )}
       {showConformationConsume?.open && (
