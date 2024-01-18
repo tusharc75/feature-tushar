@@ -665,7 +665,7 @@ const LoadingTicket = ({
     selectedRecords?.forEach((element: any) => {
       const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
       if (result.length) {
-        assets.push({ _id: element._id, status: element.status, deliveryTicketId: element.loadingTicketId, newId: result[0]._id });
+        assets.push({ _id: element._id, uniqueId: element.uniqueId, status: element.status, deliveryTicketId: element.loadingTicketId, newId: result[0]._id });
         result[0].isCounted = true;
       }
     });

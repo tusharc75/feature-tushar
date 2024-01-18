@@ -38,6 +38,7 @@ function UserAttendance() {
                 <FaceDialog
                     onClose={() => {
                         setOpenDialog({ open: false, type: "" })
+                        
                     }}
                 />
             )}
