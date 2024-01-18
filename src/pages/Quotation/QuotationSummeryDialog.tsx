@@ -101,7 +101,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
     const totalFinalPrice = rows
       .filter(
         (f) =>
-          (f?.parentId || null) === null &&
+          !f?.parentId &&
           f?.hasOwnProperty('finalPrice_' + quotationData?.currency?.toLowerCase()) &&
           !isNaN(f['finalPrice_' + quotationData?.currency?.toLowerCase()])
       )
@@ -109,7 +109,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
     const totalSupplierPrice = rows
       .filter(
         (f) =>
-        (f?.parentId || null) === null &&
+        !f?.parentId &&
           f?.hasOwnProperty('supplierPrice_' + quotationData?.currency?.toLowerCase()) &&
           !isNaN(f['supplierPrice_' + quotationData?.currency?.toLowerCase()])
       )
