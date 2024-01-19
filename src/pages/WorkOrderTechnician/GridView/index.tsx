@@ -1,5 +1,6 @@
 import { Box, Button, IconButton, Menu, MenuItem, Tab, Tabs } from '@material-ui/core';
 import { camelCase } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -11,13 +12,17 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { WORKORDER_SERVICE_STATUS, gridLoadingTimeout, prepareDataForGrid, workOrder } from 'src/constants/helpers';
 import DescriptionIcon from '@material-ui/icons/Description';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import { ExpandMore, Info } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import TechnicianDialog from '../TechnicianDialog';
 
 const GridView = ({ serviceStatus, filterQuery }) => {
   const renderedFrom = camelCase(routes?.workOrderTechnician.title);
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
+
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
   const {
@@ -31,6 +36,8 @@ const GridView = ({ serviceStatus, filterQuery }) => {
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
   const [isServiceCompleting, setIsServiceCompleting] = useState(false);
+  const [serviceOpen, setServiceOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
 
   useEffect(() => {
     setTabValue(serviceStatus[0]);
@@ -50,7 +57,19 @@ const GridView = ({ serviceStatus, filterQuery }) => {
         <>
           {row?.original?.serviceName ? (
             <div>
-              <h5 className="text-truncate">{row.original.serviceName}</h5>
+              <h5
+                className="link text-truncate"
+                onClick={() => {
+                  setSelectedService({
+                    uniqueId: row?.original?._id,
+                    workOrderId: row?.original?.workOrderDetail?._id,
+                    canPerform: row?.original?.canPerform
+                  });
+                  setServiceOpen(true);
+                }}
+              >
+                {row.original.serviceName}
+              </h5>
               <Box ml={1}>
                 {row?.original?.canPerformInfo ? (
                   <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
@@ -103,14 +122,14 @@ const GridView = ({ serviceStatus, filterQuery }) => {
     },
     ...(user?.user?.brandPolicy?.workOrderTimer
       ? [
-        {
-          accessor: 'stepData',
-          Header: 'Time',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (row.original['stepData'] ? <h5 className="text-truncate">{row.original.stepData}</h5> : <NoDataCell />)
-        }
-      ]
+          {
+            accessor: 'stepData',
+            Header: 'Time',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (row.original['stepData'] ? <h5 className="text-truncate">{row.original.stepData}</h5> : <NoDataCell />)
+          }
+        ]
       : []),
     {
       accessor: 'estimateCompleteDate',
@@ -131,6 +150,24 @@ const GridView = ({ serviceStatus, filterQuery }) => {
       canDrag: false,
       Cell: ({ row }) => (
         <>
+          <HtmlTooltip title="View">
+            <IconButton
+              size="small"
+              aria-label="Details"
+              color="primary"
+              onClick={(e) => {
+                setSelectedService({
+                  uniqueId: row?.original?._id,
+                  workOrderId: row?.original?.workOrderDetail?._id,
+                  canPerform: row?.original?.canPerform
+                });
+                setServiceOpen(true);
+              }}
+            >
+              <VisibilityIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
+
           {row?.original?.productionOrderNumber && (
             <HtmlTooltip title="Drawings">
               <IconButton
@@ -216,27 +253,32 @@ const GridView = ({ serviceStatus, filterQuery }) => {
 
   const handleCompleteService = () => {
     setIsServiceCompleting(true);
-    const data = selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.map((_s) => ({
-      workOrder: _s?.workOrderDetail?._id,
-      service: _s?.materialId,
-      uniqueId: _s?._id,
-      status: WORKORDER_SERVICE_STATUS.completed
-    }))
-    axiosInstance().put(`${workOrder.api}/service/work-orders-services-status`, data).then(({ data }) => {
-      setIsServiceCompleting(false);
-      setShowServiceCompleteConfirmBox(false);
-      dispatch({ type: 'selection', selectedRecords: [] });
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data?.message
+    const data = selectedRecords
+      ?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)
+      ?.map((_s) => ({
+        workOrder: _s?.workOrderDetail?._id,
+        service: _s?.materialId,
+        uniqueId: _s?._id,
+        status: WORKORDER_SERVICE_STATUS.completed
+      }));
+    axiosInstance()
+      .put(`${workOrder.api}/service/work-orders-services-status`, data)
+      .then(({ data }) => {
+        setIsServiceCompleting(false);
+        setShowServiceCompleteConfirmBox(false);
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((err) => {
+        setIsServiceCompleting(false);
+        setShowServiceCompleteConfirmBox(false);
+        toastConfig.setToastConfig(err);
       });
-    }).catch((err) => {
-      setIsServiceCompleting(false);
-      setShowServiceCompleteConfirmBox(false);
-      toastConfig.setToastConfig(err);
-    });
   };
 
   return (
@@ -296,8 +338,12 @@ const GridView = ({ serviceStatus, filterQuery }) => {
                   setShowServiceCompleteConfirmBox(true);
                   closeActions();
                 }}
-                disabled={selectedRecords?.length &&
-                  selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length ? false : true}
+                disabled={
+                  selectedRecords?.length &&
+                  selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+                    ? false
+                    : true
+                }
               >
                 Complete Service(s)
               </MenuItem>
@@ -339,6 +385,21 @@ const GridView = ({ serviceStatus, filterQuery }) => {
           handleClose={() => {
             setShowDrawingDialog({ open: false, workOrder: null });
           }}
+        />
+      )}
+
+      {serviceOpen && (
+        <TechnicianDialog
+          handleClose={() => {
+            setServiceOpen(false);
+            setSelectedService(null);
+            if (workOrder) {
+              history.push(`${routes.workOrderTechnician.path}`);
+            }
+          }}
+          workOrderId={selectedService?.workOrderId}
+          uniqueId={selectedService?.uniqueId}
+          canPerform={selectedService?.canPerform}
         />
       )}
     </>
