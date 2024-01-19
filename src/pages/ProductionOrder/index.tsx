@@ -179,6 +179,9 @@ const ProductionOrder = () => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+
+    if (!fieldOptions) return; // To prevent initial api call
+    
     const queryString = getQueryString();
 
     axiosInstance()
