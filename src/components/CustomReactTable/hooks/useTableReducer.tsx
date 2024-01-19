@@ -1,6 +1,5 @@
 import { useReducer } from 'react';
 import { gridPageSizes } from 'src/constants/helpers';
-import { FieldOption } from './types';
 
 function reducer(state: TInitialState, action: TActios) {
   switch (action.type) {
