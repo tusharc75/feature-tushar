@@ -36,9 +36,9 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   const handleFocusOnSlash = (e:KeyboardEvent) => {
     if(!inputRef.current)return;
     const input = inputRef.current;
-    const otherFocusedElements = document.querySelector(':focus');
+    const otherFocusedElements = document.querySelector(':focus-within');
     if(otherFocusedElements) return;
-    if(input.matches(':focus')) return;
+    if(input.matches(':focus-within')) return;
     if (e.key === '/') {
       e.preventDefault();
       inputRef.current?.focus();
@@ -141,7 +141,7 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
             setSearch(searchedValue);
             handleSearch(searchedValue);
           }}
-          className=' dark:placeholder:text-gray-500 placeholder:text-[15px]'
+          className=' dark:placeholder:text-gray-500 placeholder:text-[15px] placeholder:text-gray-400'
           style={{ borderRadius: showCloseButton ? '4px 4px 0 0' : '4px' }}
         />
         <IconButton className={styles.searchIcon}>
