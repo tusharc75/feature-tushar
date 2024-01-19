@@ -49,7 +49,7 @@ const GridHeader = ({
   useEffect(() => {
     const fetchAllColumns = async () => {
       try {
-        const columns = await fetchFieldOptions({ renderedFrom: resource, sidebarResource, toastConfig });
+        const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
         dispatch({ type: 'setFieldOptions', fieldOptions: columns });
       } catch (error) {
         dispatch({ type: 'setFieldOptions', fieldOptions: [] }); // fallback to empty list to fetch table data without filters
