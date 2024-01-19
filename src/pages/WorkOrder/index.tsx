@@ -93,17 +93,15 @@ const WorkOrder = () => {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance()
-      .get(`${workOrder.api}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          let finalObject: any = prepareDataForGrid(u, user);
-          finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.workOrder?.isDelete && u?.canDelete && finalObject?.ownerId === user?.user?._id && !data?.deleted;
-          return finalObject;
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
-      })
+    axiosInstance().get(`${workOrder.api}${queryString}`).then(({ data: { data, count } }) => {
+      let rows = data.map((u) => {
+        let finalObject: any = prepareDataForGrid(u, user);
+        finalObject['isChecked'] = false;
+        finalObject['canDelete'] = permissions?.workOrder?.isDelete && u?.canDelete && finalObject?.ownerId === user?.user?._id && !data?.deleted;
+        return finalObject;
+      });
+      dispatch({ type: 'initialize', data: rows, count: count });
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       })

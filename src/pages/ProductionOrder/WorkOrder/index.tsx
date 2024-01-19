@@ -428,7 +428,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         parent.hideSelection = true;
         parent.workOrderStatus = parent?.workOrder?.status;
       }
-      parent.status = parent?.workOrder?.status;
+      parent.status = parent?.workOrder?.serviceProcessStatus;
       parent.subRows = generateNestedData(data.material, parent);
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
         parent.canAutoCompleteWorkOrder = true;
