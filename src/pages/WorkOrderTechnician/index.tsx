@@ -78,27 +78,33 @@ const WorkOrderTechnician = () => {
             <CustomFilter field={FIELD_TO_FILTER} setFilterQuery={setFilterQuery} />
           </Box>
           <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} />
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setViewType(1);
-            }}
-          >
-            <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
-          </IconButton>
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setViewType(2);
-            }}
-          >
-            <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
-          </IconButton>
-          <IconButton size="small" aria-label="Clone" onClick={onClickRefreshIcon}>
-            <RefreshIcon />
-          </IconButton>
+          <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setViewType(1);
+              }}
+            >
+              <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title={`Table View`} arrow placement="top" enterTouchDelay={0}>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setViewType(2);
+              }}
+            >
+              <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title={`Refresh`} arrow placement="top" enterTouchDelay={0}>
+            <IconButton size="small" aria-label="Clone" onClick={onClickRefreshIcon}>
+              <RefreshIcon />
+            </IconButton>
+          </HtmlTooltip>
         </Box>
         {viewType === 1 && <CardView serviceStatus={selectedServiceStatus} filterQuery={filterQuery} ref={ref} />}
         {viewType === 2 && <GridView serviceStatus={selectedServiceStatus} filterQuery={filterQuery} />}
