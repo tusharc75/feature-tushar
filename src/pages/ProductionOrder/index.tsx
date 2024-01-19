@@ -19,8 +19,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { PRODUCTION_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, productionOrder, sidebarResource } from '../../constants/helpers';
-import styles from '../Leads/Header.module.scss';
+import { productionOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource, PRODUCTION_ORDER_STATUS } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageProductionOrder from './ManageProductionOrder';
@@ -63,12 +62,9 @@ const ProductionOrder = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
 
-  // Default Status Filter
   useEffect(() => {
     dispatch({ type: 'filter', filters: { status: { filter: [PRODUCTION_ORDER_STATUS.new, PRODUCTION_ORDER_STATUS.inProgress] } } });
-    return ()=> dispatch({ type: 'filter', filters: {} });
   }, []);
-
 
   useEffect(() => {
     fetchGridColumns();
