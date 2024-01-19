@@ -104,11 +104,6 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         columnOrder: typeof action.columnOrder === 'function' ? action.columnOrder(state.columnOrder) : action.columnOrder
       };
-    case 'setFieldOptions':
-      return {
-        ...state,
-        fieldOptions: typeof action.fieldOptions === 'function' ? action.fieldOptions(state.fieldOptions) : action.fieldOptions
-      };
     default:
       break;
   }
@@ -135,7 +130,6 @@ const intialState = {
   initialDataLoaded: false,
   visibleColumns: {},
   columnOrder: [],
-  fieldOptions: null
 };
 
 export type TInitialState = {
@@ -157,7 +151,6 @@ export type TInitialState = {
   initialDataLoaded: boolean;
   visibleColumns: { [key: string]: boolean };
   columnOrder: string[];
-  fieldOptions: FieldOption[] | null;
 };
 
 export type TActios =
@@ -180,7 +173,6 @@ export type TActios =
   | { type: 'loadingExpanderRowId'; loadingExpanderRowId: string | null }
   | { type: 'setVisibleColumns'; visibleColumns: { [key: string]: boolean } }
   | { type: 'setColumnOrder'; columnOrder: ((data: string[]) => string[]) | string[] }
-  | { type: 'setFieldOptions'; fieldOptions: ((data: FieldOption[]) => FieldOption[] | null) | FieldOption[] | null };
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);

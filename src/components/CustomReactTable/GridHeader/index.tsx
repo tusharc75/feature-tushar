@@ -1,17 +1,14 @@
 import { Button, IconButton, useMediaQuery } from '@material-ui/core';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { useContext, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { sidebarResource } from 'src/constants/helpers';
 import ArrangeView from '../ArrangeView';
 import DisplayFilters from '../DisplayFilters';
 import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
-import { fetchFieldOptions } from '../utils';
 
 const GridHeader = ({
   resource,
@@ -32,7 +29,6 @@ const GridHeader = ({
 }) => {
   const { selectedRecords, loading, filters: customFilters }: TInitialState = state;
   const isMobileView = useMediaQuery('(max-width:768px)');
-  const toastConfig = useContext(CustomToastContext);
 
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -45,21 +41,6 @@ const GridHeader = ({
   const handleFilterClose = () => {
     setIsFilterOpen(false);
   };
-
-  useEffect(() => {
-    const fetchAllColumns = async () => {
-      try {
-        const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
-        dispatch({ type: 'setFieldOptions', fieldOptions: columns });
-      } catch (error) {
-        dispatch({ type: 'setFieldOptions', fieldOptions: [] }); // fallback to empty list to fetch table data without filters
-        toastConfig.setToastConfig(error);
-      }
-    };
-    if (resource) fetchAllColumns();
-    else dispatch({ type: 'setFieldOptions', fieldOptions: [] }); // fallback to empty list to fetch table data without filters
-    return () => dispatch({ type: 'setFieldOptions', fieldOptions: null });
-  }, [resource, dispatch, toastConfig]);
 
   return (
     <div className={`flex items-center justify-between my-[8px] gap-[8px] flex-wrap`}>
@@ -84,7 +65,6 @@ const GridHeader = ({
         </div>
         {isFilterOpen && (
           <GridFilter
-            state={state}
             resource={resource}
             customFilters={customFilters}
             handleClose={handleFilterClose}
