@@ -111,7 +111,8 @@ export default function StepDialog({
         isReturnToStepOnFail: stepData?.isReturnToStepOnFail === null ? false : stepData?.isReturnToStepOnFail,
         returnToStepOnFail: stepData?.returnToStepOnFail || '',
         isReturnToServiceOnFail: stepData?.isReturnToServiceOnFail === null ? false : stepData?.isReturnToServiceOnFail,
-        returnToServiceOnFail: stepData?.returnToServiceOnFail || ''
+        returnToServiceOnFail: stepData?.returnToServiceOnFail || '',
+        stepDataCloneToService: stepData?.stepDataCloneToService || ''
       });
     } else if (stepId != '') {
       axiosInstance()
@@ -142,7 +143,8 @@ export default function StepDialog({
             isReturnToStepOnFail: data?.isReturnToStepOnFail === null ? false : data?.isReturnToStepOnFail,
             returnToStepOnFail: data?.returnToStepOnFail || '',
             isReturnToServiceOnFail: data?.isReturnToServiceOnFail === null ? false : data?.isReturnToServiceOnFail,
-            returnToServiceOnFail: data?.returnToServiceOnFail || ''
+            returnToServiceOnFail: data?.returnToServiceOnFail || '',
+            stepDataCloneToService: data?.stepDataCloneToService || ''
           });
         })
         .catch((err) => {
@@ -174,7 +176,8 @@ export default function StepDialog({
         isReturnToStepOnFail: false,
         returnToStepOnFail: '',
         isReturnToServiceOnFail: false,
-        returnToServiceOnFail: ''
+        returnToServiceOnFail: '',
+        stepDataCloneToService: ''
       });
     }
   }, []);
@@ -405,6 +408,33 @@ export default function StepDialog({
                         />
                       </Grid>
                     </Grid>
+                    <Box pt={2}>
+                      <Grid>
+                        <Grid xs={12} md={6} sm={6} item>
+                          <Autocomplete
+                            options={services}
+                            fullWidth
+                            size="small"
+                            disabled={notEditable}
+                            value={services?.find((data) => data?.optionValue === values?.stepDataCloneToService) ?? ''}
+                            getOptionLabel={(option) => option?.optionLabel}
+                            renderOption={(option) => option?.optionLabel}
+                            onChange={(_, newVal: any) => {
+                              setFieldValue('stepDataCloneToService', newVal?.optionValue ?? '');
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Step Data Clone To Service"
+                                name="stepDataCloneToService"
+                                disabled={notEditable}
+                                variant="outlined"
+                              />
+                            )}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
                     <Box pt={2}>
                       <FormControlLabel
                         disabled={notEditable}

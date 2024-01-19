@@ -84,6 +84,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   useEffect(() => {
     if (isFirstRender.current && sortedColumns.length > 0 && visibleColumns) {
       setAllChecked(sortedColumns.every((col) => visibleColumns[col.id]));
+      console.log('hello');
       isFirstRender.current = false;
     }
   }, [visibleColumns, sortedColumns]);
