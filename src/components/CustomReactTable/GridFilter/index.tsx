@@ -1,25 +1,25 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, TextField, Grid, Button, IconButton, Dialog, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
+import MomentUtils from '@date-io/moment';
+import { Box, Button, Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { isEmpty } from 'lodash';
+import moment from 'moment';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillEdit } from 'react-icons/ai';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
-import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import SaveFilterDialog from 'src/components/GridFilter/SaveFilterDialog';
+import { dateFormat, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import FormTypes from '../../Helpers/FormTypes';
-import { dateFormat } from 'src/constants/helpers';
-import moment from 'moment';
+import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../Helpers/CommonSkeleton';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import SaveFilterDialog from 'src/components/GridFilter/SaveFilterDialog';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
-import { isEmpty } from 'lodash';
-import { isMobile, isTablet } from 'react-device-detect';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import FormTypes from '../../Helpers/FormTypes';
+import { fetchFieldOptions } from '../utils';
 
 function GridFilter({
   resource,
@@ -30,12 +30,10 @@ function GridFilter({
   setCurrentFomValue,
   customFilters,
   dispatch,
-  state
 }) {
-  const { fieldOptions: coloums } = state;
   const toastConfig = useContext(CustomToastContext);
   const [formValues, setFormValues] = useState({});
-
+  const [coloums, setColoums] = useState(null)
   const [userFilters, setUserFilters] = useState([]);
   const [selectedUserFilter, setSelectedUserFilter] = useState(null);
 
@@ -46,6 +44,7 @@ function GridFilter({
   const [betweenDate, setBetweenDate] = useState(null);
 
   useEffect(() => {
+    fetchAllColumns();
     fetchUserFilters();
     if (currentFomValue) {
       for (const property in currentFomValue) {
@@ -57,6 +56,15 @@ function GridFilter({
     setFormValues(currentFomValue || {});
     setSelectedUserFilter(selectedFilter);
   }, []);
+
+  const fetchAllColumns = async () => {
+    try {
+      const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
+      setColoums(columns)
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchUserFilters = () => {
     axiosInstance()
