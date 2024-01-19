@@ -42,7 +42,7 @@ const WorkOrder = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
