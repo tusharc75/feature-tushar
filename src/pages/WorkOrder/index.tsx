@@ -14,7 +14,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import SearchBox from '../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
+import { WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer, fetchFieldOptions } from 'src/components/CustomReactTable';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -56,7 +56,7 @@ const WorkOrder = () => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, fieldOptions } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   useEffect(() => {
     fetchGridColumns();
@@ -82,16 +82,9 @@ const WorkOrder = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-
-  // Default Status Filter
   useEffect(() => {
-    if (!fieldOptions) return;
-    const statusOptions = fieldOptions.find((f) => f.fieldLabel === 'Status');
-    if (!statusOptions) return;
-    const filter = { [statusOptions.fieldName]: { filter: statusOptions?.option?.map((o) => o.optionValue).slice(0, 2) } };
-    dispatch({ type: 'filter', filters: filter });
-    return ()=> dispatch({ type: 'filter', filters: {} });
-  }, [fieldOptions, dispatch]);
+    dispatch({ type: 'filter', filters: { status: { filter: [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress] } } });
+  }, []);
 
   const fetchGridColumns = async () => {
     let data;
@@ -103,8 +96,6 @@ const WorkOrder = () => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-
-    if (!fieldOptions) return; // To prevent initial api call
     const queryString = getQueryString();
     axiosInstance().get(`${workOrder.api}${queryString}`).then(({ data: { data, count } }) => {
       let rows = data.map((u) => {
@@ -351,9 +342,8 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
-              deleteRecord?.workOrderName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
