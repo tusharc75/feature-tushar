@@ -103,14 +103,14 @@ const GridView = ({ serviceStatus, filterQuery }) => {
     },
     ...(user?.user?.brandPolicy?.workOrderTimer
       ? [
-          {
-            accessor: 'stepData',
-            Header: 'Time',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => (row.original['stepData'] ? <h5 className="text-truncate">{row.original.stepData}</h5> : <NoDataCell />)
-          }
-        ]
+        {
+          accessor: 'stepData',
+          Header: 'Time',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (row.original['stepData'] ? <h5 className="text-truncate">{row.original.stepData}</h5> : <NoDataCell />)
+        }
+      ]
       : []),
     {
       accessor: 'estimateCompleteDate',
@@ -156,6 +156,10 @@ const GridView = ({ serviceStatus, filterQuery }) => {
     }
   }, [page, limit, sorting, tabValue, filterQuery]);
 
+  useEffect(() => {
+    dispatch({ type: 'selection', selectedRecords: [] });
+  }, [tabValue]);
+
   const getQueryString = () => {
     let deepFilters = `?page=${page}&limit=${limit}&status=${tabValue}`;
 
@@ -173,7 +177,6 @@ const GridView = ({ serviceStatus, filterQuery }) => {
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
 
     const queryString = getQueryString();
     axiosInstance()
@@ -213,33 +216,27 @@ const GridView = ({ serviceStatus, filterQuery }) => {
 
   const handleCompleteService = () => {
     setIsServiceCompleting(true);
-    axiosInstance()
-      .put(
-        `${workOrder.api}/service/work-orders-services-status`,
-        selectedRecords
-          ?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)
-          ?.map((_s) => ({
-            workOrder: _s?.workOrderDetail?._id,
-            service: _s?.materialId,
-            uniqueId: _s?._id,
-            status: WORKORDER_SERVICE_STATUS.completed
-          }))
-      )
-      .then(({ data }) => {
-        setIsServiceCompleting(false);
-        setShowServiceCompleteConfirmBox(false);
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-      })
-      .catch((err) => {
-        setIsServiceCompleting(false);
-        setShowServiceCompleteConfirmBox(false);
-        toastConfig.setToastConfig(err);
+    const data = selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.map((_s) => ({
+      workOrder: _s?.workOrderDetail?._id,
+      service: _s?.materialId,
+      uniqueId: _s?._id,
+      status: WORKORDER_SERVICE_STATUS.completed
+    }))
+    axiosInstance().put(`${workOrder.api}/service/work-orders-services-status`, data).then(({ data }) => {
+      setIsServiceCompleting(false);
+      setShowServiceCompleteConfirmBox(false);
+      dispatch({ type: 'selection', selectedRecords: [] });
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
       });
+    }).catch((err) => {
+      setIsServiceCompleting(false);
+      setShowServiceCompleteConfirmBox(false);
+      toastConfig.setToastConfig(err);
+    });
   };
 
   return (
@@ -299,9 +296,10 @@ const GridView = ({ serviceStatus, filterQuery }) => {
                   setShowServiceCompleteConfirmBox(true);
                   closeActions();
                 }}
-                disabled={selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === 0}
+                disabled={selectedRecords?.length &&
+                  selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length ? false : true}
               >
-                Complete Service
+                Complete Service(s)
               </MenuItem>
             </Menu>
           </Box>
@@ -321,7 +319,7 @@ const GridView = ({ serviceStatus, filterQuery }) => {
           )}
         </Box>
       ) : (
-        <p>Please Select Status !! </p>
+        <p>Please Select Status </p>
       )}
       {showServiceCompleteConfirmBox && (
         <ConfirmationDialog
@@ -334,7 +332,6 @@ const GridView = ({ serviceStatus, filterQuery }) => {
           onOk={handleCompleteService}
         />
       )}
-
       {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog.workOrder}

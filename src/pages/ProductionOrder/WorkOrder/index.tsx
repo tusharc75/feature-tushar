@@ -65,7 +65,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [completeConfirmBox, setCompleteConfirmBox] = useState(false);
   const [isCompleting, setCompleting] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
-  const [isServiceCompleting, setIsServiceCompleting] = useState(false);
   const [isDeleting, setDeleting] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
@@ -372,7 +371,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(false);
   }, [page, limit, filters, sorting, isAutoCreating]);
 
   const getQueryString = (isExport = false) => {
@@ -397,9 +396,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (selectionReset = true) => {
     dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
+    if (selectionReset) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+    }
 
     const queryString = getQueryString();
     const {
@@ -412,15 +413,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       parent.detail = parent.detail
         ? parent.detail
         : parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.packageDetail?.packageName;
       parent.description = parent.description
         ? parent.description
         : parent.type === MATERIAL_TYPE.product
-        ? parent?.productDetail?.productDescription
-        : parent?.packageDetail?.packageDescription;
+          ? parent?.productDetail?.productDescription
+          : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
@@ -452,17 +453,17 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.detail = _subRow.detail
         ? _subRow.detail
         : _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceName
-        : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.packageDetail?.packageName;
       _subRow.description = _subRow.description
         ? _subRow.description
         : _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceDescription
-        : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productDescription
-        : _subRow?.packageDetail?.packageDescription;
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -490,18 +491,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     });
     return subRows;
   };
-
-  useEffect(() => {
-    dispatch({ type: 'selection', selectedRecords: [] });
-    setTimeout(() => {
-      dispatch({
-        type: 'selection',
-        selectedRecords: flattenArray(dataRows)?.filter(
-          (_f) => selectedServiceOption?.map((s) => s?.optionValue).includes(_f?.serviceDetail?._id) && !_f?.hideSelection
-        )
-      });
-    }, 100);
-  }, [selectedServiceOption]);
 
   const openActions = (event) => {
     setAnchorActionEl(event.currentTarget);
@@ -708,21 +697,16 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const handleCompleteService = () => {
-    setIsServiceCompleting(true);
-    axiosInstance()
-      .put(
-        `${workOrder.api}/service/work-orders-services-status`,
-        selectedRecords
-          ?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && !s?.hideSelection)
-          ?.map((_s) => ({
-            workOrder: _s?.workOrder?._id,
-            service: _s?.serviceDetail?._id,
-            uniqueId: _s?.uniqueId,
-            status: WORKORDER_SERVICE_STATUS.completed
-          }))
-      )
+    setSubmitting(true);
+    const data = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending)?.map((e) => ({
+      workOrder: e?.workOrder?._id,
+      service: e?.serviceDetail?._id,
+      uniqueId: e?.uniqueId,
+      status: WORKORDER_SERVICE_STATUS.completed
+    }));
+    axiosInstance().put(`${workOrder.api}/service/work-orders-services-status`, data)
       .then(({ data }) => {
-        setIsServiceCompleting(false);
+        setSubmitting(false);
         setShowServiceCompleteConfirmBox(false);
         fetchData();
         toastConfig.setToastConfig({
@@ -732,11 +716,29 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         });
       })
       .catch((err) => {
-        setIsServiceCompleting(false);
+        setSubmitting(false);
         setShowServiceCompleteConfirmBox(false);
         toastConfig.setToastConfig(err);
       });
   };
+
+  const handleServiceSelect = (newValue) => {
+    setSelectedServiceOption(newValue);
+    if (newValue && newValue?.length) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      setTimeout(() => {
+        dispatch({
+          type: 'selection',
+          selectedRecords: flattenArray(dataRows)?.filter(
+            (_f) => newValue?.map((s) => s?.optionValue).includes(_f?.serviceDetail?._id) && !_f?.hideSelection
+          )
+        });
+      }, 100);
+    }
+    else {
+      dispatch({ type: 'selection', selectedRecords: [] });
+    }
+  }
 
   return (
     <Fragment>
@@ -748,10 +750,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       <Box display="flex" alignItems="center" justifyContent={'space-between'} gridColumnGap={8} flex={1} m={1} my={1}>
         <Box>
           <Autocomplete
-            style={{ width: '350px' }}
+            style={{ width: '300px' }}
             multiple
             options={serviceOptions}
-            disableCloseOnSelect
             getOptionLabel={(option) => option?.optionLabel || ''}
             renderOption={(option: any) => (
               <React.Fragment>
@@ -763,7 +764,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             renderInput={(params) => <TextField {...params} label="Select Service" variant="outlined" />}
             value={selectedServiceOption}
             onChange={(event: any, newValue: any) => {
-              setSelectedServiceOption(newValue);
+              handleServiceSelect(newValue)
             }}
           />
         </Box>
@@ -896,7 +897,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                    checkUniqWorkOrder()
+                      checkUniqWorkOrder()
                       ? false
                       : true
                   }
@@ -927,8 +928,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 }}
                 disabled={
                   selectedRecords?.length &&
-                  selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-                  selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+                    selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+                    selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
                     ? false
                     : true
                 }
@@ -948,8 +949,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               <MenuItem
                 disabled={
                   checkUniqWorkOrder() &&
-                  (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-                    selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+                    (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+                      selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
                     ? false
                     : true
                 }
@@ -981,6 +982,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   setShowServiceCompleteConfirmBox(true);
                   closeActions();
                 }}
+                disabled={selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending)?.length ? false : true}
               >
                 Complete Service
               </MenuItem>
@@ -1108,7 +1110,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       )}
       {showServiceCompleteConfirmBox && (
         <ConfirmationDialog
-          okBtnLoading={isServiceCompleting}
+          okBtnLoading={isSubmitting}
           open={showServiceCompleteConfirmBox}
           message={`Are you sure you want to Complete this Service(s)`}
           onClose={() => {
