@@ -1,17 +1,18 @@
-import React, { useRef, useState } from 'react';
-import { Box, Checkbox, Chip, IconButton, TextField } from '@material-ui/core';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
+import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover, Tooltip } from '@material-ui/core';
+import { Close } from '@material-ui/icons';
 import AppsIcon from '@material-ui/icons/Apps';
-import CloseIcon from '@material-ui/icons/Close';
-import ViewListIcon from '@material-ui/icons/ViewList';
+import DonutLargeIcon from '@material-ui/icons/DonutLarge';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource } from 'src/constants/helpers';
+import ViewListIcon from '@material-ui/icons/ViewList';
+import React, { useRef, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CustomFilter from 'src/components/Helpers/CustomFilter';
+import routes from 'src/components/Helpers/Routes';
+import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource } from 'src/constants/helpers';
 import CardView from './CardView';
 import GridView from './GridView';
-import CustomFilter from 'src/components/Helpers/CustomFilter';
-import { Autocomplete } from '@material-ui/lab';
 
 const FIELD_TO_FILTER = [
   {
@@ -72,46 +73,12 @@ const WorkOrderTechnician = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Box display={'flex'} justifyContent={'end'} alignItems={'center'} mb={2}>
-          <Box width={'100%'} mt={1}>
+        <Box className="flex items-center flex-wrap gap-2 justify-end mb-4">
+          <Box className="flex-grow" mt={1}>
             <CustomFilter field={FIELD_TO_FILTER} setFilterQuery={setFilterQuery} />
           </Box>
-          <Box ml={1}>
-            <Autocomplete
-              fullWidth
-              multiple
-              style={{ minWidth: '390px' }}
-              options={WORKORDER_TECHNICIAN_SERVICE_STATUS || []}
-              disableCloseOnSelect
-              getOptionLabel={(option) => option}
-              renderOption={(option: any) => (
-                <React.Fragment>
-                  <Checkbox checked={selectedServiceStatus?.includes(option)} />
-                  {option}
-                </React.Fragment>
-              )}
-              size="small"
-              limitTags={2}
-              renderInput={(params) => <TextField {...params} label="Status" variant="outlined" />}
-              value={selectedServiceStatus}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => {
-                  return (
-                    <Chip
-                      style={{ fontWeight: 600 } as React.CSSProperties}
-                      label={option}
-                      deleteIcon={<CloseIcon style={{ color: '#000000', width: '14px' }} />}
-                      {...getTagProps({ index })}
-                    />
-                  );
-                })
-              }
-              onChange={(event: any, newValue: any) => {
-                setSelectedServiceStatus(newValue);
-              }}
-            />
-          </Box>
-          <Box>
+          <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} />
+          <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
             <IconButton
               size="small"
               aria-label="Clone"
@@ -121,8 +88,8 @@ const WorkOrderTechnician = () => {
             >
               <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
             </IconButton>
-          </Box>
-          <Box>
+          </HtmlTooltip>
+          <HtmlTooltip title={`Table View`} arrow placement="top" enterTouchDelay={0}>
             <IconButton
               size="small"
               aria-label="Clone"
@@ -132,12 +99,12 @@ const WorkOrderTechnician = () => {
             >
               <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
             </IconButton>
-          </Box>
-          <Box>
+          </HtmlTooltip>
+          <HtmlTooltip title={`Refresh`} arrow placement="top" enterTouchDelay={0}>
             <IconButton size="small" aria-label="Clone" onClick={onClickRefreshIcon}>
               <RefreshIcon />
             </IconButton>
-          </Box>
+          </HtmlTooltip>
         </Box>
         {viewType === 1 && <CardView serviceStatus={selectedServiceStatus} filterQuery={filterQuery} ref={ref} />}
         {viewType === 2 && <GridView serviceStatus={selectedServiceStatus} filterQuery={filterQuery} />}
@@ -147,3 +114,81 @@ const WorkOrderTechnician = () => {
 };
 
 export default WorkOrderTechnician;
+
+type StatusSelectorProps = {
+  selectedServiceStatus: string[];
+  setSelectedServiceStatus: React.Dispatch<React.SetStateAction<string[]>>;
+};
+const StatusSelector: React.FC<StatusSelectorProps> = ({ selectedServiceStatus, setSelectedServiceStatus }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const isStatusSelectorOpen = Boolean(anchorEl);
+  const handleStatusSelectorClose = () => {
+    setAnchorEl(null);
+  };
+  const handleCheck = (e: React.ChangeEvent<HTMLInputElement>, status) => {
+    const checked = e.target.checked;
+    if (checked) {
+      setSelectedServiceStatus([...selectedServiceStatus, status]);
+      return;
+    }
+    setSelectedServiceStatus(selectedServiceStatus.filter((s) => s !== status));
+  };
+  return (
+    <>
+      <HtmlTooltip title={`Select Status`} arrow placement="top" enterTouchDelay={0}>
+        <IconButton size="small" aria-label="Status" onClick={(e) => setAnchorEl(e.currentTarget)}>
+          <DonutLargeIcon />
+        </IconButton>
+      </HtmlTooltip>
+      <Popover
+        PaperProps={{
+          className: 'w-[min(400px,100%)_!important]',
+          style: {
+            borderRadius: 0,
+            boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)'
+          }
+        }}
+        open={isStatusSelectorOpen}
+        anchorEl={anchorEl}
+        onClose={handleStatusSelectorClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
+        <div className="">
+          <div className="[border-bottom:1px_solid_var(--common-border-color)] flex justify-between items-center px-[20px] py-[10px]">
+            <h6 className="text-[16px] font-semibold">Status</h6>
+            <Tooltip title="Close" arrow placement="top" enterTouchDelay={0}>
+              <IconButton size="small" onClick={handleStatusSelectorClose}>
+                <Close />
+              </IconButton>
+            </Tooltip>
+          </div>
+          <div className="p-[0_20px_20px]">
+            {Object.values(WORKORDER_TECHNICIAN_SERVICE_STATUS).map((s) => {
+              return (
+                <FormGroup row>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={selectedServiceStatus?.includes(s)}
+                        onChange={(e) => handleCheck(e, s)}
+                        inputProps={{ 'aria-label': 'primary checkbox' }}
+                      />
+                    }
+                    label={s}
+                  />
+                </FormGroup>
+              );
+            })}
+          </div>
+        </div>
+      </Popover>
+    </>
+  );
+};
