@@ -338,7 +338,6 @@ const CustomReactTable = ({
   }, [rowSelection]);
 
   // parent selection effects
-  console.log({selectedRecords, rowSelection})
   useEffect(() => {
     if (selectedRecords.length === 0) {
       table.resetRowSelection();
