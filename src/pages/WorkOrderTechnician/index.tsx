@@ -16,13 +16,13 @@ import GridView from './GridView';
 
 const FIELD_TO_FILTER = [
   {
-    fieldName: 'serviceMaster',
+    fieldName: 'service',
     fieldLabel: routes.serviceMaster.title,
     resource: sidebarResource.serviceMaster,
     type: 'dropDown'
   },
   {
-    fieldName: 'workOrder',
+    fieldName: '_id',
     fieldLabel: routes.workOrder.title,
     resource: sidebarResource.workOrder,
     type: 'dropDown'
@@ -119,6 +119,7 @@ type StatusSelectorProps = {
   selectedServiceStatus: string[];
   setSelectedServiceStatus: React.Dispatch<React.SetStateAction<string[]>>;
 };
+
 const StatusSelector: React.FC<StatusSelectorProps> = ({ selectedServiceStatus, setSelectedServiceStatus }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const isStatusSelectorOpen = Boolean(anchorEl);

@@ -1,5 +1,5 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import React, { useState, useEffect, Fragment, useContext } from 'react';
+import { Box, Button, Checkbox, IconButton, Menu, MenuItem, TextField, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -13,6 +13,7 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORK_ORDER_STATUS,
   productionOrder,
+  sidebarResource,
   workOrder
 } from '../../../constants/helpers';
 import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
@@ -37,13 +38,13 @@ import SyncIcon from '@material-ui/icons/Sync';
 import UploadDrawingDialog from './UploadDrawingDialog';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { Autocomplete } from '@material-ui/lab';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 var apiCallInterval: any = null;
 
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
-
   const {
     state: { user, permissions }
   }: any = useData();
@@ -57,6 +58,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
   const [userAssignDialog, setUserAssignDialog] = useState({ open: false, assignedUsers: [] });
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, assignedWorkStations: [] });
+  const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [arrangeView, setArrangeView] = useState(false);
   const [autoCompleteData, setAutoCompleteData] = useState(null);
@@ -72,13 +74,26 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
-
   const [isAutoCreating, setIsAutoCreating] = useState(true);
+
+  const [serviceOptions, setServiceOptions] = useState([]);
+  const [selectedServiceOption, setSelectedServiceOption] = useState([]);
   const { generateColumns } = useColumns();
 
   useEffect(() => {
     setNextStep(false);
     autoCreateWorkOrder();
+  }, []);
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.serviceMaster}`)
+      .then(({ data: { data } }) => {
+        setServiceOptions(data[sidebarResource.serviceMaster]);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   }, []);
 
   const autoCreateWorkOrder = async () => {
@@ -90,13 +105,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       if (apiCallInterval) {
         clearInterval(apiCallInterval);
       }
-      setIsAutoCreating(false)
+      setIsAutoCreating(false);
       checkAllWorkOrderComplete();
     } catch (error) {
-      setIsAutoCreating(false)
+      setIsAutoCreating(false);
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
   useEffect(() => {
     fetchFields();
@@ -107,7 +122,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     if (!!response?.data?.data?.isCompletedAll) {
       setNextStep(true);
     }
-  }
+  };
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
@@ -193,18 +208,17 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         ) : (
           <NoDataCell />
         )
-    }
+    };
     if (!newColumns?.find((e) => e.accessor === 'workOrderNumber')) {
       coloum.push(workOrderCol);
     }
     newColumns?.forEach((e) => {
       if (e.accessor === 'workOrderNumber') {
-        coloum.push(workOrderCol)
+        coloum.push(workOrderCol);
+      } else {
+        coloum.push(e);
       }
-      else {
-        coloum.push(e)
-      }
-    })
+    });
     coloum.push({
       accessor: 'status',
       Header: 'Status',
@@ -221,42 +235,45 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       accessor: 'assignedUsers',
       Header: 'Assigned Technician',
       width: 200,
-      Cell: ({ row }) =>
-        <div>{row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
-          row?.original['assignedUsers']?.map((e, i) => {
-            return i === row?.original['assignedUsers'].length - 1 ? (
-              <a
-                className="link text-truncate [flex-grow:0_!important]"
-                target="_blank"
-                href={`${routes.userDetail.path}/${e.optionValue}`}
-                rel="noreferrer"
-              >
-                {e?.optionLabel}
-              </a>
-            ) : (
-              <>
+      Cell: ({ row }) => (
+        <div>
+          {row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
+            row?.original['assignedUsers']?.map((e, i) => {
+              return i === row?.original['assignedUsers'].length - 1 ? (
                 <a
                   className="link text-truncate [flex-grow:0_!important]"
                   target="_blank"
                   href={`${routes.userDetail.path}/${e.optionValue}`}
                   rel="noreferrer"
                 >
-                  {e?.optionLabel},
+                  {e?.optionLabel}
                 </a>
-                &nbsp;
-              </>
-            );
-          })
-        ) : (
-          <NoDataCell />
-        )}</div>
+              ) : (
+                <>
+                  <a
+                    className="link text-truncate [flex-grow:0_!important]"
+                    target="_blank"
+                    href={`${routes.userDetail.path}/${e.optionValue}`}
+                    rel="noreferrer"
+                  >
+                    {e?.optionLabel},
+                  </a>
+                  &nbsp;
+                </>
+              );
+            })
+          ) : (
+            <NoDataCell />
+          )}
+        </div>
+      )
     });
     if (permissions?.workStations) {
       coloum.push({
         accessor: 'assignedWorkStations',
         Header: 'Assigned Work Station',
         width: 200,
-        Cell: ({ row }) =>
+        Cell: ({ row }) => (
           <div>
             {row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
               row?.original['assignedWorkStations']?.map((e, i) => {
@@ -287,6 +304,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               <NoDataCell />
             )}
           </div>
+        )
       });
     }
     coloum.push({
@@ -322,7 +340,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     size="small"
                     aria-label="Details"
                     onClick={() => {
-                      setShowDrawingDialog({ open: true, workOrder: row.original?.workOrder?._id })
+                      setShowDrawingDialog({ open: true, workOrder: row.original?.workOrder?._id });
                     }}
                   >
                     <DescriptionIcon fontSize="small" color={'primary'} />
@@ -353,7 +371,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(false);
   }, [page, limit, filters, sorting, isAutoCreating]);
 
   const getQueryString = (isExport = false) => {
@@ -378,9 +396,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (selectionReset = true) => {
     dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
+    if (selectionReset) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+    }
 
     const queryString = getQueryString();
     const {
@@ -409,7 +429,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         parent.hideSelection = true;
         parent.workOrderStatus = parent?.workOrder?.status;
       }
-      parent.status = parent?.workOrder?.status;
+      parent.status = parent?.workOrder?.serviceProcessStatus;
       parent.subRows = generateNestedData(data.material, parent);
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
         parent.canAutoCompleteWorkOrder = true;
@@ -450,8 +470,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
-      if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed ||
-        _subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+      if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed || _subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         _subRow.hideSelection = true;
       }
       _subRow.canDelete = false;
@@ -501,7 +520,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const handleDelete = async () => {
-    if (deleteData?.some((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type) || (MATERIAL_TYPE.product === e.type && e.parentId))) {
+    if (
+      deleteData?.some((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type) || (MATERIAL_TYPE.product === e.type && e.parentId))
+    ) {
       setDeleting(true);
       const records: any = [];
       deleteData?.forEach((data) => {
@@ -594,7 +615,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           setCompleting(false);
           setCompleteConfirmBox(false);
           fetchData();
-          checkAllWorkOrderComplete()
+          checkAllWorkOrderComplete();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -675,13 +696,78 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     }
   };
 
+  const handleCompleteService = () => {
+    setSubmitting(true);
+    const data = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending)?.map((e) => ({
+      workOrder: e?.workOrder?._id,
+      service: e?.serviceDetail?._id,
+      uniqueId: e?.uniqueId,
+      status: WORKORDER_SERVICE_STATUS.completed
+    }));
+    axiosInstance().put(`${workOrder.api}/service/work-orders-services-status`, data)
+      .then(({ data }) => {
+        setSubmitting(false);
+        setShowServiceCompleteConfirmBox(false);
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((err) => {
+        setSubmitting(false);
+        setShowServiceCompleteConfirmBox(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleServiceSelect = (newValue) => {
+    setSelectedServiceOption(newValue);
+    if (newValue && newValue?.length) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      setTimeout(() => {
+        dispatch({
+          type: 'selection',
+          selectedRecords: flattenArray(dataRows)?.filter(
+            (_f) => newValue?.map((s) => s?.optionValue).includes(_f?.serviceDetail?._id) && !_f?.hideSelection
+          )
+        });
+      }, 100);
+    }
+    else {
+      dispatch({ type: 'selection', selectedRecords: [] });
+    }
+  }
+
   return (
     <Fragment>
-      {isAutoCreating &&
+      {isAutoCreating && (
         <Box p={1} display="flex" alignItems="center">
-          <SyncIcon className="rotate" /> <Typography variant='subtitle2' >Work order Auto Creation in Progress</Typography>
-        </Box>}
-      <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
+          <SyncIcon className="rotate" /> <Typography variant="subtitle2">Work order Auto Creation in Progress</Typography>
+        </Box>
+      )}
+      <Box display="flex" alignItems="center" justifyContent={'space-between'} gridColumnGap={8} flex={1} m={1} my={1}>
+        <Box>
+          <Autocomplete
+            style={{ width: '300px' }}
+            multiple
+            options={serviceOptions}
+            getOptionLabel={(option) => option?.optionLabel || ''}
+            renderOption={(option: any) => (
+              <React.Fragment>
+                <Checkbox checked={selectedServiceOption?.some((_s) => _s.optionValue === option.optionValue)} />
+                {option?.optionLabel}
+              </React.Fragment>
+            )}
+            size="small"
+            renderInput={(params) => <TextField {...params} label="Select Service" variant="outlined" />}
+            value={selectedServiceOption}
+            onChange={(event: any, newValue: any) => {
+              handleServiceSelect(newValue)
+            }}
+          />
+        </Box>
         {allowedToEdit && (
           <Box display="flex" gridColumnGap={5}>
             <ImportExportMenu
@@ -693,7 +779,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               }}
               isExportAllOrSomeFeature={true}
               recordsToExport={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).length}
-              ids={selectedRecords?.length ? selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.map((obj) => obj._id) : []}
+              ids={
+                selectedRecords?.length ? selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.map((obj) => obj._id) : []
+              }
             />
             <Box ml={1} />
             <ImportExportMenu
@@ -707,9 +795,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               title={'Consumables'}
               recordsToExport={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).length}
               ids={[]}
-              additionalParams={`workOrderIds=${JSON.stringify(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length ?
-                selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.map((e) => e?.workOrder?._id)
-                : dataRows?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).map((e) => e?.workOrder?._id))}`}
+              additionalParams={`workOrderIds=${JSON.stringify(
+                selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length
+                  ? selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.map((e) => e?.workOrder?._id)
+                  : dataRows?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).map((e) => e?.workOrder?._id)
+              )}`}
             />
             <Box ml={1} />
             <Button
@@ -836,9 +926,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   closeActions();
                   setArrangeView(true);
                 }}
-                disabled={selectedRecords?.length &&
-                  selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-                  selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id) ? false : true
+                disabled={
+                  selectedRecords?.length &&
+                    selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+                    selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+                    ? false
+                    : true
                 }
               >
                 Arrange Services
@@ -883,6 +976,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 }}
               >
                 Upload Documents
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setShowServiceCompleteConfirmBox(true);
+                  closeActions();
+                }}
+                disabled={selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending)?.length ? false : true}
+              >
+                Complete Service
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -948,7 +1050,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       {userAssignDialog.open && (
         <AssignUserDialog
           warehouse={productionOrderData?.warehouse?.optionValue}
-          workOrderData={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
+          workOrderData={selectedRecords
+            .filter((e) => e.type === MATERIAL_TYPE.service)
             .map((d) => {
               return {
                 uniqueId: d?.uniqueId,
@@ -964,7 +1067,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             fetchData();
             setUserAssignDialog({ open: false, assignedUsers: [] });
           }}
-          competencies={uniq(flatMap(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || [])))}
+          competencies={uniq(
+            flatMap(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || []))
+          )}
         />
       )}
       {workStationAssignDialog.open && (
@@ -991,8 +1096,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       {arrangeView && (
         <ArrangeView
           data={
-            flattenArray(dataRows)?.filter((e) => e.type === MATERIAL_TYPE.service
-              && e?.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+            flattenArray(dataRows)
+              ?.filter((e) => e.type === MATERIAL_TYPE.service && e?.workOrder?._id === selectedRecords[0]?.workOrder?._id)
               ?.map((d) => {
                 return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
               }) || []
@@ -1001,6 +1106,17 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           handleClose={() => setArrangeView(false)}
           handleSubmit={(data) => handleArrangeUpdate(data, selectedRecords[0]?.workOrder?._id)}
           loading={false}
+        />
+      )}
+      {showServiceCompleteConfirmBox && (
+        <ConfirmationDialog
+          okBtnLoading={isSubmitting}
+          open={showServiceCompleteConfirmBox}
+          message={`Are you sure you want to Complete this Service(s)`}
+          onClose={() => {
+            setShowServiceCompleteConfirmBox(false);
+          }}
+          onOk={handleCompleteService}
         />
       )}
       {showConfirmBox && (
@@ -1062,21 +1178,18 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           }}
         />
       )}
-      {openUploadDrawingDialog &&
-        <UploadDrawingDialog
-          productionOrderData={productionOrderData}
-          handleClose={() => setOpenUploadDrawingDialog(false)}
-        />
-      }
-      {showDrawingDialog.open &&
+      {openUploadDrawingDialog && (
+        <UploadDrawingDialog productionOrderData={productionOrderData} handleClose={() => setOpenUploadDrawingDialog(false)} />
+      )}
+      {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog.workOrder}
           currentVersion={null}
           handleClose={() => {
-            setShowDrawingDialog({ open: false, workOrder: null })
+            setShowDrawingDialog({ open: false, workOrder: null });
           }}
         />
-      }
+      )}
     </Fragment>
   );
 };
