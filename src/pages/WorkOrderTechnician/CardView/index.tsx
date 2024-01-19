@@ -17,7 +17,7 @@ import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 const LIMIT = 25;
 
 const CardView = (props, ref) => {
-  const { serviceStatus, resource, resourceData } = props;
+  const { serviceStatus, filterQuery } = props;
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { workOrder, uniqueId } = parsed;
@@ -59,27 +59,29 @@ const CardView = (props, ref) => {
       { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
       {
         type: 'tooltip',
-        renderer: (data) =>
+        renderer: (data) => (
           <>
-            {data?.productionOrderNumber &&
+            {data?.productionOrderNumber && (
               <HtmlTooltip title="Drawings">
                 <IconButton
                   size="small"
                   aria-label="Details"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setShowDrawingDialog({ open: true, workOrder: data.workOrderDetail?._id })
+                    setShowDrawingDialog({ open: true, workOrder: data.workOrderDetail?._id });
                   }}
                 >
                   <DescriptionIcon fontSize="small" color={'primary'} />
                 </IconButton>
-              </HtmlTooltip>}
+              </HtmlTooltip>
+            )}
             {data?.canPerformInfo ? (
               <HtmlTooltip title={data.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
                 <Info className="[font-size:20px_!important] text-red-500" />
               </HtmlTooltip>
             ) : null}
           </>
+        )
       },
       ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : []),
       { accessor: 'estimateCompleteDate', title: 'Due Date', type: 'date' }
@@ -140,20 +142,27 @@ const CardView = (props, ref) => {
         dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: count }) });
         dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
       })
-      .catch((err) => { })
+      .catch((err) => {})
       .finally(() => {
         dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
       });
   }, []);
 
   useEffect(() => {
-    if (resource && resourceData) {
-      const query = `&${camelCase(resource?.resource)}=${resourceData?.optionValue}`;
+    if (filterQuery?.filterById?.length > 0 || filterQuery?.deepFilter?.length > 0) {
+      let query = `&filterType=and`;
+
+      if (filterQuery?.filterById?.length > 0) {
+        query = `${query}&filterById=${JSON.stringify(filterQuery?.filterById)}`;
+      }
+      if (filterQuery?.deepFilter?.length > 0) {
+        query = `${query}&deepFilter=${JSON.stringify(filterQuery?.deepFilter)}`;
+      }
       dispatch({ type: 'setFilterQuery', filterQuery: query });
     } else {
       dispatch({ type: 'setFilterQuery', filterQuery: '' });
     }
-  }, [resource, resourceData, dispatch]);
+  }, [filterQuery, dispatch]);
 
   return (
     <>
@@ -187,15 +196,15 @@ const CardView = (props, ref) => {
           canPerform={selectedService?.canPerform}
         />
       )}
-      {showDrawingDialog.open &&
+      {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog.workOrder}
           currentVersion={null}
           handleClose={() => {
-            setShowDrawingDialog({ open: false, workOrder: null })
+            setShowDrawingDialog({ open: false, workOrder: null });
           }}
         />
-      }
+      )}
     </>
   );
 };

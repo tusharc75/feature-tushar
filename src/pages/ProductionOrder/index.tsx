@@ -53,7 +53,7 @@ const ProductionOrder = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);

@@ -14,8 +14,7 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import { Info } from '@material-ui/icons';
 
-const GridView = ({ serviceStatus, resource, resourceData }) => {
-
+const GridView = ({ serviceStatus, filterQuery }) => {
   const renderedFrom = camelCase(routes?.workOrderTechnician.title);
   const toastConfig = useContext(CustomToastContext);
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
@@ -43,7 +42,24 @@ const GridView = ({ serviceStatus, resource, resourceData }) => {
       Header: 'Service',
       disableFilters: true,
       disableSortBy: true,
-      Cell: ({ row }) => (row.original['serviceName'] ? <h5 className="text-truncate">{row.original.serviceName}</h5> : <NoDataCell />)
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.serviceName ? (
+            <div>
+              <h5 className="text-truncate">{row.original.serviceName}</h5>
+              <Box ml={1}>
+                {row?.original?.canPerformInfo ? (
+                  <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+                    <Info className="[font-size:20px_!important] text-red-500" />
+                  </HtmlTooltip>
+                ) : null}
+              </Box>
+            </div>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
     },
     {
       accessor: 'workOrderNumber',
@@ -83,14 +99,14 @@ const GridView = ({ serviceStatus, resource, resourceData }) => {
     },
     ...(user?.user?.brandPolicy?.workOrderTimer
       ? [
-        {
-          accessor: 'stepData',
-          Header: 'Time',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (row.original['stepData'] ? <h5 className="text-truncate">{row.original.stepData}</h5> : <NoDataCell />)
-        }
-      ]
+          {
+            accessor: 'stepData',
+            Header: 'Time',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (row.original['stepData'] ? <h5 className="text-truncate">{row.original.stepData}</h5> : <NoDataCell />)
+          }
+        ]
       : []),
     {
       accessor: 'estimateCompleteDate',
@@ -111,26 +127,20 @@ const GridView = ({ serviceStatus, resource, resourceData }) => {
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {row?.original?.productionOrderNumber &&
+          {row?.original?.productionOrderNumber && (
             <HtmlTooltip title="Drawings">
               <IconButton
                 size="small"
                 aria-label="Details"
-                color='primary'
+                color="primary"
                 onClick={(e) => {
-                  setShowDrawingDialog({ open: true, workOrder: row?.original?.workOrderDetail?._id })
+                  setShowDrawingDialog({ open: true, workOrder: row?.original?.workOrderDetail?._id });
                 }}
               >
                 <DescriptionIcon fontSize="small" color={'primary'} />
               </IconButton>
-            </HtmlTooltip>}
-          <Box ml={1}>
-            {row?.original?.canPerformInfo ? (
-              <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                <Info className="[font-size:20px_!important] text-red-500" />
-              </HtmlTooltip>
-            ) : null}
-          </Box>
+            </HtmlTooltip>
+          )}
         </>
       )
     }
@@ -140,36 +150,46 @@ const GridView = ({ serviceStatus, resource, resourceData }) => {
     if (tabValue) {
       fetchData();
     }
-  }, [page, limit, sorting, tabValue, resourceData]);
+  }, [page, limit, sorting, tabValue, filterQuery]);
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&status=${tabValue}`;
-    if (resource && resourceData) {
-      deepFilter = `${deepFilter}&${camelCase(resource?.resource)}=${resourceData?.optionValue}`;
+    let deepFilters = `?page=${page}&limit=${limit}&status=${tabValue}`;
+
+    if (filterQuery?.filterById?.length > 0 || filterQuery?.deepFilter?.length > 0) {
+      deepFilters = `${deepFilters}&filterType=and`;
     }
-    return deepFilter;
+    if (filterQuery?.filterById?.length > 0) {
+      deepFilters = `${deepFilters}&filterById=${JSON.stringify(filterQuery?.filterById)}`;
+    }
+    if (filterQuery?.deepFilter?.length > 0) {
+      deepFilters = `${deepFilters}&deepFilter=${JSON.stringify(filterQuery?.deepFilter)}`;
+    }
+    return deepFilters;
   };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance().get(`/work-order-technician${queryString}`).then(({ data: { data, count } }) => {
-      let rows = data.map((u) => {
-        let finalObject = prepareDataForGrid(u, user);
-        finalObject['serviceName'] = u?.service?.serviceName;
-        finalObject['workOrderDetail'] = u?.workOrderDetail;
-        finalObject['productionOrderNumber'] = u?.workOrderDetail?.productionOrder?.optionLabel;
-        finalObject['workOrderNumber'] = u?.workOrderDetail?.workOrderNumber;
-        finalObject['reference'] = u?.workOrderDetail?.repairOrder?.optionLabel || u?.workOrderDetail?.productionOrder?.optionLabel;
-        finalObject['spoolNumber'] = u?.workOrderDetail?.spoolNumber;
-        finalObject['serializedAsset'] = u?.workOrderDetail?.serializedAsset?.optionLabel;
-        finalObject['estimateCompleteDate'] = u?.workOrderDetail?.estimateCompleteDate;
-        return finalObject;
-      });
-      dispatch({ type: 'initialize', data: rows, count: count });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    })
+    axiosInstance()
+      .get(`/work-order-technician${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['serviceName'] = u?.service?.serviceName;
+          finalObject['workOrderDetail'] = u?.workOrderDetail;
+          finalObject['productionOrderNumber'] = u?.workOrderDetail?.productionOrder?.optionLabel;
+          finalObject['workOrderNumber'] = u?.workOrderDetail?.workOrderNumber;
+          finalObject['reference'] = u?.workOrderDetail?.repairOrder?.optionLabel || u?.workOrderDetail?.productionOrder?.optionLabel;
+          finalObject['spoolNumber'] = u?.workOrderDetail?.spoolNumber;
+          finalObject['serializedAsset'] = u?.workOrderDetail?.serializedAsset?.optionLabel;
+          finalObject['estimateCompleteDate'] = u?.workOrderDetail?.estimateCompleteDate;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
       .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -206,7 +226,7 @@ const GridView = ({ serviceStatus, resource, resourceData }) => {
           </Tabs>
           {columns ? (
             <CustomReactTable
-              height={'calc(100vh - 380px)'}
+              height={'calc(100vh - 300px)'}
               columns={columns}
               state={state}
               dispatch={dispatch}
@@ -222,15 +242,15 @@ const GridView = ({ serviceStatus, resource, resourceData }) => {
       ) : (
         <p>Please Select Status !! </p>
       )}
-      {showDrawingDialog.open &&
+      {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog.workOrder}
           currentVersion={null}
           handleClose={() => {
-            setShowDrawingDialog({ open: false, workOrder: null })
+            setShowDrawingDialog({ open: false, workOrder: null });
           }}
         />
-      }
+      )}
     </>
   );
 };
