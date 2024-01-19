@@ -15,13 +15,13 @@ import { Autocomplete } from '@material-ui/lab';
 
 const FIELD_TO_FILTER = [
   {
-    fieldName: 'serviceMaster',
+    fieldName: 'service',
     fieldLabel: routes.serviceMaster.title,
     resource: sidebarResource.serviceMaster,
     type: 'dropDown'
   },
   {
-    fieldName: 'workOrder',
+    fieldName: '_id',
     fieldLabel: routes.workOrder.title,
     resource: sidebarResource.workOrder,
     type: 'dropDown'
