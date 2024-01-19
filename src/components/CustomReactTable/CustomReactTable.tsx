@@ -314,6 +314,7 @@ const CustomReactTable = ({
   }, [isClientSideGrid, limit, page, table, data, paginationLimit]);
 
   const { rows } = table.getRowModel();
+  const {flatRows: expandedRows} = table.getExpandedRowModel();
 
 
   // For row selection
@@ -345,7 +346,7 @@ const CustomReactTable = ({
   useEffect(() => {
     if (selectedRecords.length !== Object.keys(rowSelection).length) {
       const selectedRowIds = selectedRecords.map((d) => d._id);
-      for (const row of rows) {
+      for (const row of expandedRows) {
         if (selectedRowIds.includes(row.original._id) && !row.getIsSelected()) {
           row.toggleSelected(true);
         }

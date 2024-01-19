@@ -84,7 +84,6 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   useEffect(() => {
     if (isFirstRender.current && sortedColumns.length > 0 && visibleColumns) {
       setAllChecked(sortedColumns.every((col) => visibleColumns[col.id]));
-      console.log('hello');
       isFirstRender.current = false;
     }
   }, [visibleColumns, sortedColumns]);
@@ -258,7 +257,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
                       ) : (
                         <Switch
                           size="small"
-                          checked={column.isVisible}
+                          checked={stateVisibleColumns[column.id]}
                           onChange={(e) => {
                             handleToggle(column, e);
                           }}
