@@ -513,7 +513,7 @@ const QuotationDetails = () => {
                   )}
                   {currentVersion !== 1 &&
                     permissions?.quotation?.isDelete &&
-                    quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer && (
+                    quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer && quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.rejectByCustomer && (
                       <MenuItem
                         disabled={!allowedToEdit || loading}
                         onClick={() => {
