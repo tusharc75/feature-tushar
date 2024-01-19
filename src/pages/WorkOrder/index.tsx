@@ -103,6 +103,8 @@ const WorkOrder = () => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+
+    if (!fieldOptions) return; // To prevent initial api call
     const queryString = getQueryString();
     axiosInstance().get(`${workOrder.api}${queryString}`).then(({ data: { data, count } }) => {
       let rows = data.map((u) => {
