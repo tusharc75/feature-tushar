@@ -253,7 +253,7 @@ export const getCellValue = (cell) => {
   return row.original[column.id];
 };
 
-export const fetchFieldOptions = async ({ renderedFrom: resource, sidebarResource, toastConfig = null }) => {
+export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig = null }) => {
   const FILTER_NOT_APPLIED = [
     'fileUpload',
     'multiFileUpload',
