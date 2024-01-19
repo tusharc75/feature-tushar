@@ -4,7 +4,7 @@ import AppsIcon from '@material-ui/icons/Apps';
 import DonutLargeIcon from '@material-ui/icons/DonutLarge';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import ViewListIcon from '@material-ui/icons/ViewList';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -16,24 +16,28 @@ import GridView from './GridView';
 
 const FIELD_TO_FILTER = [
   {
+    key: 'serviceMaster',
     fieldName: 'service',
     fieldLabel: routes.serviceMaster.title,
     resource: sidebarResource.serviceMaster,
     type: 'dropDown'
   },
   {
+    key: 'workOrder',
     fieldName: '_id',
     fieldLabel: routes.workOrder.title,
     resource: sidebarResource.workOrder,
     type: 'dropDown'
   },
   {
+    key: 'repairOrder',
     fieldName: 'repairOrder',
     fieldLabel: routes.repairOrder.title,
     resource: sidebarResource.repairOrder,
     type: 'dropDown'
   },
   {
+    key: 'productionOrder',
     fieldName: 'productionOrder',
     fieldLabel: routes.productionOrder.title,
     resource: sidebarResource.productionOrder,
@@ -48,6 +52,7 @@ const WorkOrderTechnician = () => {
 
   const ref: any = useRef();
 
+  const [fieldToFilterList, setFieldToFilterList] = useState([]);
   const [viewType, setViewType] = useState(1);
   const [selectedServiceStatus, setSelectedServiceStatus] = useState([
     WORKORDER_SERVICE_STATUS.pending,
@@ -58,6 +63,16 @@ const WorkOrderTechnician = () => {
     filterById: [],
     deepFilter: []
   });
+
+  useEffect(() => {
+    const options: any = [];
+    FIELD_TO_FILTER?.forEach((item) => {
+      if (permissions[item.key] && permissions[item.key]?.isRead === true) {
+        options.push(item);
+      }
+    });
+    setFieldToFilterList(options);
+  }, []);
 
   const onClickRefreshIcon = () => {
     if (ref?.current) {
@@ -75,7 +90,7 @@ const WorkOrderTechnician = () => {
       <Box className={`detail-container-v1`}>
         <Box className="flex items-center flex-wrap gap-2 justify-end mb-4">
           <Box className="flex-grow" mt={1}>
-            <CustomFilter field={FIELD_TO_FILTER} setFilterQuery={setFilterQuery} />
+            <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterQuery} />
           </Box>
           <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} />
           <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>

@@ -82,10 +82,8 @@ const WorkOrder = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-   // Default Status Filter
-   useEffect(() => {
+  useEffect(() => {
     dispatch({ type: 'filter', filters: { status: { filter: [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress] } } });
-    return ()=> dispatch({ type: 'filter', filters: {} });
   }, []);
 
   const fetchGridColumns = async () => {
@@ -344,9 +342,8 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
-              deleteRecord?.workOrderName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

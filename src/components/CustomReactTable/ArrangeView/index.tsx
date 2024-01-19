@@ -28,42 +28,33 @@ const ArrangeView = ({
 
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
 
-  const gridMetaData = useMemo(() => {
-    return getTableDataFromLocalStorage(renderedFrom);
-  }, [renderedFrom]);
-
   const stickycolumns = useMemo(
     () => getStickyColumnNames({ allColumn: columns, hideSelection: hideSelection, expander: expander }),
     [columns, expander, hideSelection]
   );
 
-  //   initial column order and hidden columns
   useEffect(() => {
-    if (!gridMetaData) return;
-    let tempColumnOrder = [];
-    if (gridMetaData.order && gridMetaData.order.length > 0) {
+    const gridMetaData = getTableDataFromLocalStorage(renderedFrom);
+    if (gridMetaData && gridMetaData?.order && gridMetaData?.order?.length) {
+      let tempColumnOrder = [];
       tempColumnOrder = [...stickycolumns.left, ...gridMetaData.order, ...stickycolumns.right];
+      dispatchTable({ type: 'setColumnOrder', columnOrder: tempColumnOrder });
     }
-    dispatchTable({ type: 'setColumnOrder', columnOrder: tempColumnOrder });
-
-    
-    // if gridmeta empty
-    if (!gridMetaData.hide || gridMetaData.hide.length === 0) {
+    if (gridMetaData && gridMetaData?.hide && gridMetaData?.hide?.length) {
+      const visibleColumns = {};
+      for (const col of columns) {
+        visibleColumns[col.id] = !gridMetaData.hide?.includes(col.id);
+      }
+      dispatchTable({ type: 'setVisibleColumns', visibleColumns: visibleColumns });
+    }
+    else {
       const visibleColumns = {};
       columns.forEach((col) => {
-        visibleColumns[col.id] = true;
+        visibleColumns[col.id] = col?.show === false ? false : true;
       });
       dispatchTable({ type: 'setVisibleColumns', visibleColumns });
-      return;
     }
-
-    // if gridmeta not empty
-    const tempVisibleColumns = {};
-    for (const col of columns) {
-      tempVisibleColumns[col.id] = !gridMetaData.hide?.includes(col.id);
-    }
-    dispatchTable({ type: 'setVisibleColumns', visibleColumns: tempVisibleColumns });
-  }, [gridMetaData]);
+  }, [renderedFrom]);
 
   const {
     state: { user }
