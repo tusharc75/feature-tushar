@@ -51,39 +51,6 @@ const CustomFilter = ({ field, setFilterQuery }) => {
     setIsFilterOpen(false);
   };
 
-  useEffect(() => {
-    const filterById: any = [];
-    const chipData: any = [];
-
-    field
-      ?.filter((f) => f?.options)
-      ?.forEach((_f) => {
-        const value: any = [];
-        _f?.options?.forEach((o) => {
-          if (o?.default) {
-            value.push(o);
-          }
-        });
-        if (value?.length) {
-          setFormValues((prevState) => ({ ...prevState, [_f?.fieldName]: _f?.multiple ? value : value[0] }));
-          chipData.push({
-            title: _f?.fieldLabel,
-            name: _f?.fieldName,
-            value: value?.map((item) => item?.optionLabel)?.join(', ')
-          });
-          filterById.push({
-            field: _f?.fieldName,
-            term: value?.map((item) => item.optionValue)
-          });
-        }
-      });
-    setFilterQuery({
-      filterById,
-      deepFilter: []
-    });
-    setChipData(chipData);
-  }, []);
-
   const handleSelectFilter = (name, value) => {
     setFormValues((prevState) => ({ ...prevState, [name]: value }));
   };
@@ -350,17 +317,10 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                         ) : field?.type === 'dropDown' && field?.options ? (
                           <Grid item xs={12} sm={6} md={6} key={i}>
                             <Autocomplete
-                              multiple={field?.multiple ? true : false}
                               options={field?.options}
                               getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                              getOptionSelected={(option: any, val) => option.optionValue === val?.optionValue}
-                              value={
-                                !isEmpty(formValues) && formValues[field?.fieldName]
-                                  ? formValues[field?.fieldName]
-                                  : field?.multiple
-                                  ? []
-                                  : formValues[field?.fieldName]
-                              }
+                              getOptionSelected={(option: any, val) => option.optionValue === val}
+                              value={!isEmpty(formValues) && formValues[field?.fieldName]}
                               onChange={(e, val) => {
                                 handleSelectFilter(field?.fieldName, val);
                               }}
