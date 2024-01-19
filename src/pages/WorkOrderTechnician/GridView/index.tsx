@@ -1,4 +1,4 @@
-import { Box, IconButton, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem, Tab, Tabs } from '@material-ui/core';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -9,10 +9,11 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STATUS, gridLoadingTimeout, prepareDataForGrid, workOrder } from 'src/constants/helpers';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
-import { Info } from '@material-ui/icons';
+import { ExpandMore, Info } from '@material-ui/icons';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const GridView = ({ serviceStatus, filterQuery }) => {
   const renderedFrom = camelCase(routes?.workOrderTechnician.title);
@@ -24,9 +25,12 @@ const GridView = ({ serviceStatus, filterQuery }) => {
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
-  const { page, limit, sorting } = state;
+  const { page, limit, sorting, selectedRecords } = state;
 
   const [tabValue, setTabValue] = useState('');
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
+  const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
+  const [isServiceCompleting, setIsServiceCompleting] = useState(false);
 
   useEffect(() => {
     setTabValue(serviceStatus[0]);
@@ -99,14 +103,14 @@ const GridView = ({ serviceStatus, filterQuery }) => {
     },
     ...(user?.user?.brandPolicy?.workOrderTimer
       ? [
-          {
-            accessor: 'stepData',
-            Header: 'Time',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => (row.original['stepData'] ? <h5 className="text-truncate">{row.original.stepData}</h5> : <NoDataCell />)
-          }
-        ]
+        {
+          accessor: 'stepData',
+          Header: 'Time',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (row.original['stepData'] ? <h5 className="text-truncate">{row.original.stepData}</h5> : <NoDataCell />)
+        }
+      ]
       : []),
     {
       accessor: 'estimateCompleteDate',
@@ -152,6 +156,10 @@ const GridView = ({ serviceStatus, filterQuery }) => {
     }
   }, [page, limit, sorting, tabValue, filterQuery]);
 
+  useEffect(() => {
+    dispatch({ type: 'selection', selectedRecords: [] });
+  }, [tabValue]);
+
   const getQueryString = () => {
     let deepFilters = `?page=${page}&limit=${limit}&status=${tabValue}`;
 
@@ -169,6 +177,7 @@ const GridView = ({ serviceStatus, filterQuery }) => {
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
+
     const queryString = getQueryString();
     axiosInstance()
       .get(`/work-order-technician${queryString}`)
@@ -195,6 +204,39 @@ const GridView = ({ serviceStatus, filterQuery }) => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       });
+  };
+
+  const openActions = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorActionEl(null);
+  };
+
+  const handleCompleteService = () => {
+    setIsServiceCompleting(true);
+    const data = selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.map((_s) => ({
+      workOrder: _s?.workOrderDetail?._id,
+      service: _s?.materialId,
+      uniqueId: _s?._id,
+      status: WORKORDER_SERVICE_STATUS.completed
+    }))
+    axiosInstance().put(`${workOrder.api}/service/work-orders-services-status`, data).then(({ data }) => {
+      setIsServiceCompleting(false);
+      setShowServiceCompleteConfirmBox(false);
+      dispatch({ type: 'selection', selectedRecords: [] });
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
+      });
+    }).catch((err) => {
+      setIsServiceCompleting(false);
+      setShowServiceCompleteConfirmBox(false);
+      toastConfig.setToastConfig(err);
+    });
   };
 
   return (
@@ -224,6 +266,43 @@ const GridView = ({ serviceStatus, filterQuery }) => {
               );
             })}
           </Tabs>
+          <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
+            <Button
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+              disabled={tabValue !== WORKORDER_SERVICE_STATUS.pending || selectedRecords?.length === 0}
+              endIcon={<ExpandMore />}
+              className="new-dropdown-v1"
+            >
+              Actions
+            </Button>
+            <Menu
+              anchorEl={anchorActionEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorActionEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  setShowServiceCompleteConfirmBox(true);
+                  closeActions();
+                }}
+                disabled={selectedRecords?.length &&
+                  selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length ? false : true}
+              >
+                Complete Service(s)
+              </MenuItem>
+            </Menu>
+          </Box>
           {columns ? (
             <CustomReactTable
               height={'calc(100vh - 300px)'}
@@ -240,7 +319,18 @@ const GridView = ({ serviceStatus, filterQuery }) => {
           )}
         </Box>
       ) : (
-        <p>Please Select Status !! </p>
+        <p>Please Select Status </p>
+      )}
+      {showServiceCompleteConfirmBox && (
+        <ConfirmationDialog
+          okBtnLoading={isServiceCompleting}
+          open={showServiceCompleteConfirmBox}
+          message={`Are you sure you want to Complete this Service(s)`}
+          onClose={() => {
+            setShowServiceCompleteConfirmBox(false);
+          }}
+          onOk={handleCompleteService}
+        />
       )}
       {showDrawingDialog.open && (
         <DiagramDialog

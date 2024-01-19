@@ -46,7 +46,7 @@ const ProductionOrder = () => {
   const history = useHistory();
   let { type }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, fieldOptions } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -63,6 +63,16 @@ const ProductionOrder = () => {
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
+
+  // Default Status Filter
+  useEffect(() => {
+    if (!fieldOptions) return;
+    const statusOptions = fieldOptions.find((f) => f.fieldLabel === 'Status');
+    if (!statusOptions) return;
+    const filter = { [statusOptions.fieldName]: { filter: statusOptions?.option?.map((o) => o.optionValue).slice(0, 2) } };
+    dispatch({ type: 'filter', filters: filter });
+    return ()=> dispatch({ type: 'filter', filters: {} });
+  }, [fieldOptions, dispatch]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -169,6 +179,9 @@ const ProductionOrder = () => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+
+    if (!fieldOptions) return; // To prevent initial api call
+    
     const queryString = getQueryString();
 
     axiosInstance()

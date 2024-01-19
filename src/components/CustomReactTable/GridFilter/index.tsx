@@ -9,7 +9,7 @@ import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import FormTypes from '../../Helpers/FormTypes';
-import { dateFormat, sidebarResource } from 'src/constants/helpers';
+import { dateFormat } from 'src/constants/helpers';
 import moment from 'moment';
 import CommonSkeleton from '../../Helpers/CommonSkeleton';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -21,10 +21,19 @@ import { isEmpty } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
+function GridFilter({
+  resource,
+  handleClose,
+  setSelectedFilter,
+  selectedFilter,
+  currentFomValue,
+  setCurrentFomValue,
+  customFilters,
+  dispatch,
+  state
+}) {
+  const { fieldOptions: coloums } = state;
   const toastConfig = useContext(CustomToastContext);
-
-  const [coloums, setColoums] = useState(null);
   const [formValues, setFormValues] = useState({});
 
   const [userFilters, setUserFilters] = useState([]);
@@ -37,7 +46,6 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   const [betweenDate, setBetweenDate] = useState(null);
 
   useEffect(() => {
-    fetchColumns();
     fetchUserFilters();
     if (currentFomValue) {
       for (const property in currentFomValue) {
@@ -49,71 +57,6 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
     setFormValues(currentFomValue || {});
     setSelectedUserFilter(selectedFilter);
   }, []);
-
-  const FILTER_NOT_APPLIED = [
-    'fileUpload',
-    'multiFileUpload',
-    'imageUpload',
-    'multiImageUpload',
-    'richTextEditor',
-    'signature',
-    'colorPicker',
-    'number',
-    'decimal',
-    'switch'
-  ];
-
-  const fetchColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${resource}`)
-      .then(({ data: { data } }) => {
-        const coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
-        var modifiedColumn: any = coloum?.map((col: any) => {
-          const d = col.fieldData;
-          if (d?.type === 'dropDown') {
-            d.type = 'multiSelect';
-          }
-          return d;
-        });
-        if (resource === sidebarResource.user) {
-          modifiedColumn?.forEach((e) => {
-            if (e.fieldName === 'firstName') {
-              e.fieldName = 'concatedName';
-              e.fieldLabel = 'Name';
-              e.type = 'singleLine';
-            }
-          });
-          modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName');
-        } else if (
-          resource === sidebarResource.customerContact ||
-          resource === sidebarResource.supplierContact ||
-          resource === sidebarResource.lead
-        ) {
-          modifiedColumn?.forEach((e) => {
-            if (e.fieldName === 'firstName') {
-              e.fieldName = 'concatedName';
-              e.fieldLabel = 'Name';
-              e.type = 'singleLine';
-            }
-          });
-          modifiedColumn = modifiedColumn?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e.fieldName));
-        }
-        if (resource === sidebarResource.serializedAsset) {
-          const currentOwner: any = modifiedColumn?.find((e) => e.fieldName === 'currentOwner');
-          if (currentOwner) {
-            currentOwner.lookup = true;
-            currentOwner.option = [
-              ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.customerAccount)?.option || []),
-              ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.supplierAccount)?.option || [])
-            ];
-          }
-        }
-        setColoums(modifiedColumn);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
 
   const fetchUserFilters = () => {
     axiosInstance()
