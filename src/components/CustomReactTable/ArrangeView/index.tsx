@@ -46,17 +46,11 @@ const ArrangeView = ({
     }
     dispatchTable({ type: 'setColumnOrder', columnOrder: tempColumnOrder });
 
-    // visible columns
+    
     // if gridmeta empty
-    const showTrueColumns = columns.filter((c) => {
-      if ('show' in c) {
-        return c.show === true;
-      }
-      return true;
-    });
     if (!gridMetaData.hide || gridMetaData.hide.length === 0) {
       const visibleColumns = {};
-      showTrueColumns.forEach((col) => {
+      columns.forEach((col) => {
         visibleColumns[col.id] = true;
       });
       dispatchTable({ type: 'setVisibleColumns', visibleColumns });
@@ -65,11 +59,11 @@ const ArrangeView = ({
 
     // if gridmeta not empty
     const tempVisibleColumns = {};
-    for (const col of showTrueColumns) {
+    for (const col of columns) {
       tempVisibleColumns[col.id] = !gridMetaData.hide?.includes(col.id);
     }
     dispatchTable({ type: 'setVisibleColumns', visibleColumns: tempVisibleColumns });
-  }, []);
+  }, [gridMetaData]);
 
   const {
     state: { user }
