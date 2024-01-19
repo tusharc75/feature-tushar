@@ -28,48 +28,33 @@ const ArrangeView = ({
 
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
 
-  const gridMetaData = useMemo(() => {
-    return getTableDataFromLocalStorage(renderedFrom);
-  }, [renderedFrom]);
-
   const stickycolumns = useMemo(
     () => getStickyColumnNames({ allColumn: columns, hideSelection: hideSelection, expander: expander }),
     [columns, expander, hideSelection]
   );
 
-  //   initial column order and hidden columns
   useEffect(() => {
-    if (!gridMetaData) return;
-    let tempColumnOrder = [];
-    if (gridMetaData.order && gridMetaData.order.length > 0) {
+    const gridMetaData = getTableDataFromLocalStorage(renderedFrom);
+    if (gridMetaData && gridMetaData?.order && gridMetaData?.order?.length) {
+      let tempColumnOrder = [];
       tempColumnOrder = [...stickycolumns.left, ...gridMetaData.order, ...stickycolumns.right];
+      dispatchTable({ type: 'setColumnOrder', columnOrder: tempColumnOrder });
     }
-    dispatchTable({ type: 'setColumnOrder', columnOrder: tempColumnOrder });
-
-    // visible columns
-    // if gridmeta empty
-    const showTrueColumns = columns.filter((c) => {
-      if ('show' in c) {
-        return c.show === true;
-      }
-      return true;
-    });
-    if (!gridMetaData.hide || gridMetaData.hide.length === 0) {
+    if (gridMetaData && gridMetaData?.hide && gridMetaData?.hide?.length) {
       const visibleColumns = {};
-      showTrueColumns.forEach((col) => {
-        visibleColumns[col.id] = true;
+      for (const col of columns) {
+        visibleColumns[col.id] = !gridMetaData.hide?.includes(col.id);
+      }
+      dispatchTable({ type: 'setVisibleColumns', visibleColumns: visibleColumns });
+    }
+    else {
+      const visibleColumns = {};
+      columns.forEach((col) => {
+        visibleColumns[col.id] = col?.show === false ? false : true;
       });
       dispatchTable({ type: 'setVisibleColumns', visibleColumns });
-      return;
     }
-
-    // if gridmeta not empty
-    const tempVisibleColumns = {};
-    for (const col of showTrueColumns) {
-      tempVisibleColumns[col.id] = !gridMetaData.hide?.includes(col.id);
-    }
-    dispatchTable({ type: 'setVisibleColumns', visibleColumns: tempVisibleColumns });
-  }, []);
+  }, [renderedFrom]);
 
   const {
     state: { user }

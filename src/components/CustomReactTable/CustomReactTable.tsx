@@ -315,6 +315,7 @@ const CustomReactTable = ({
 
   const { rows } = table.getRowModel();
 
+
   // For row selection
   useEffect(() => {
     const selectedRowIds = Object.keys(rowSelection);

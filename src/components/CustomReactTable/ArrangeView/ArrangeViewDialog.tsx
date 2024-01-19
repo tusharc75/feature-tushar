@@ -112,15 +112,8 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     const colOrder = columns?.map((col) => col?.id);
     dispatch({ type: 'setColumnOrder', columnOrder: colOrder });
 
-    const showTrueColumns = columns.filter((c) => {
-      if ('show' in c) {
-        return c.show === true;
-      }
-      return true;
-    });
-
     const visibleColumns = {};
-    showTrueColumns.forEach((col) => {
+    columns.forEach((col) => {
       visibleColumns[col.id] = true;
     });
     dispatch({ type: 'setVisibleColumns', visibleColumns });
