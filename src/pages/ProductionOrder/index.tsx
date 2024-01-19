@@ -23,6 +23,7 @@ import { productionOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResourc
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageProductionOrder from './ManageProductionOrder';
+import styles from '../Leads/Header.module.scss';
 
 let searchTimeout;
 
