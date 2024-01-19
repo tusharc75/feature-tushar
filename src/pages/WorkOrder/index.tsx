@@ -1,4 +1,4 @@
-import { Button, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
@@ -6,7 +6,10 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -14,14 +17,11 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import SearchBox from '../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer, fetchFieldOptions } from 'src/components/CustomReactTable';
+import { WORK_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkOrder from './ManageWorkOrder';
-import { deleteDisable } from 'src/constants/messageHelpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -56,7 +56,7 @@ const WorkOrder = () => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, fieldOptions } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   useEffect(() => {
     fetchGridColumns();
@@ -82,16 +82,9 @@ const WorkOrder = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-
-  // Default Status Filter
   useEffect(() => {
-    if (!fieldOptions) return;
-    const statusOptions = fieldOptions.find((f) => f.fieldLabel === 'Status');
-    if (!statusOptions) return;
-    const filter = { [statusOptions.fieldName]: { filter: statusOptions?.option?.map((o) => o.optionValue).slice(0, 2) } };
-    dispatch({ type: 'filter', filters: filter });
-    return ()=> dispatch({ type: 'filter', filters: {} });
-  }, [fieldOptions, dispatch]);
+    dispatch({ type: 'filter', filters: { status: { filter: [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress] } } });
+  }, []);
 
   const fetchGridColumns = async () => {
     let data;
@@ -103,8 +96,6 @@ const WorkOrder = () => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-
-    if (!fieldOptions) return; // To prevent initial api call
     const queryString = getQueryString();
     axiosInstance().get(`${workOrder.api}${queryString}`).then(({ data: { data, count } }) => {
       let rows = data.map((u) => {
@@ -351,9 +342,8 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
-              deleteRecord?.workOrderName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

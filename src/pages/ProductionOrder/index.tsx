@@ -1,30 +1,29 @@
-import { Button, IconButton, Box } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { productionOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { productionOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource, PRODUCTION_ORDER_STATUS } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageProductionOrder from './ManageProductionOrder';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem } from '@material-ui/core';
-import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
-import queryString from 'query-string';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -46,7 +45,7 @@ const ProductionOrder = () => {
   const history = useHistory();
   let { type }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, fieldOptions } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -64,15 +63,9 @@ const ProductionOrder = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
 
-  // Default Status Filter
   useEffect(() => {
-    if (!fieldOptions) return;
-    const statusOptions = fieldOptions.find((f) => f.fieldLabel === 'Status');
-    if (!statusOptions) return;
-    const filter = { [statusOptions.fieldName]: { filter: statusOptions?.option?.map((o) => o.optionValue).slice(0, 2) } };
-    dispatch({ type: 'filter', filters: filter });
-    return ()=> dispatch({ type: 'filter', filters: {} });
-  }, [fieldOptions, dispatch]);
+    dispatch({ type: 'filter', filters: { status: { filter: [PRODUCTION_ORDER_STATUS.new, PRODUCTION_ORDER_STATUS.inProgress] } } });
+  }, []);
 
   useEffect(() => {
     fetchGridColumns();
@@ -179,9 +172,6 @@ const ProductionOrder = () => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-
-    if (!fieldOptions) return; // To prevent initial api call
-    
     const queryString = getQueryString();
 
     axiosInstance()
