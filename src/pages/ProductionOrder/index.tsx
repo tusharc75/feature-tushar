@@ -19,12 +19,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-<<<<<<< HEAD
 import { productionOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource, PRODUCTION_ORDER_STATUS } from '../../constants/helpers';
-=======
-import { PRODUCTION_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, productionOrder, sidebarResource } from '../../constants/helpers';
-import styles from '../Leads/Header.module.scss';
->>>>>>> 5be567f09f679920516c3e20492c98a0a094aedf
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageProductionOrder from './ManageProductionOrder';
