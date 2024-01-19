@@ -1,5 +1,6 @@
 import { useReducer } from 'react';
 import { gridPageSizes } from 'src/constants/helpers';
+import { FieldOption } from './types';
 
 function reducer(state: TInitialState, action: TActios) {
   switch (action.type) {
@@ -14,7 +15,7 @@ function reducer(state: TInitialState, action: TActios) {
         error: false,
         dataRows: action.data,
         rowCount: action.count,
-        initialDataLoaded: true,
+        initialDataLoaded: true
       };
     case 'selection':
       return {
@@ -93,6 +94,21 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         loadingExpanderRowId: action.loadingExpanderRowId
       };
+    case 'setVisibleColumns':
+      return {
+        ...state,
+        visibleColumns: action.visibleColumns
+      };
+    case 'setColumnOrder':
+      return {
+        ...state,
+        columnOrder: typeof action.columnOrder === 'function' ? action.columnOrder(state.columnOrder) : action.columnOrder
+      };
+    case 'setFieldOptions':
+      return {
+        ...state,
+        fieldOptions: typeof action.fieldOptions === 'function' ? action.fieldOptions(state.fieldOptions) : action.fieldOptions
+      };
     default:
       break;
   }
@@ -116,7 +132,10 @@ const intialState = {
   showFilteredRecordsOnly: false,
   colState: [],
   loadingExpanderRowId: null,
-  initialDataLoaded: false
+  initialDataLoaded: false,
+  visibleColumns: {},
+  columnOrder: [],
+  fieldOptions: null
 };
 
 export type TInitialState = {
@@ -136,6 +155,9 @@ export type TInitialState = {
   colState: any[];
   loadingExpanderRowId: string | null;
   initialDataLoaded: boolean;
+  visibleColumns: { [key: string]: boolean };
+  columnOrder: string[];
+  fieldOptions: FieldOption[] | null;
 };
 
 export type TActios =
@@ -153,10 +175,12 @@ export type TActios =
   | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null }
   | { type: 'error'; error: boolean }
   | { type: 'showFilteredRecordsOnly' }
-  | { type: 'columnOrder'; columnOrder: boolean }
   | { type: 'hiddenColumns'; hiddenColumns: boolean }
   | { type: 'updateColumnState'; colState: any[] }
-  | { type: 'loadingExpanderRowId'; loadingExpanderRowId: string | null };
+  | { type: 'loadingExpanderRowId'; loadingExpanderRowId: string | null }
+  | { type: 'setVisibleColumns'; visibleColumns: { [key: string]: boolean } }
+  | { type: 'setColumnOrder'; columnOrder: ((data: string[]) => string[]) | string[] }
+  | { type: 'setFieldOptions'; fieldOptions: ((data: FieldOption[]) => FieldOption[] | null) | FieldOption[] | null };
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);

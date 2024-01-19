@@ -19,7 +19,7 @@ import { DragHandle } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
 import update from 'immutability-helper';
 import { startCase } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { Dispatch, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider, DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -27,6 +27,7 @@ import { TouchBackend } from 'react-dnd-touch-backend';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
+import { TActios, TInitialState } from '../hooks/useTableReducer';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -46,10 +47,10 @@ interface ArrangeColumnsProps {
   columns: any[];
   updateGridHiddenColumns: any;
   renderedFrom: string;
-  setHiddenColumns?: any;
   getToggleHideAllColumnsProps?: any;
-  setColumnOrder?: any;
-  defaultColumns: any[];
+  dispatch: Dispatch<TActios>;
+  state: TInitialState;
+  stickycolumns: { left: any[]; right: any[]; stickyColumns: any[] };
 }
 
 const ItemTypes = {
@@ -57,65 +58,48 @@ const ItemTypes = {
 };
 
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
-  const { onClose, columns, updateGridHiddenColumns, renderedFrom, setHiddenColumns, getToggleHideAllColumnsProps, setColumnOrder, defaultColumns } =
-    props;
+  const { onClose, columns, updateGridHiddenColumns, renderedFrom, dispatch, state, stickycolumns } = props;
+  const { visibleColumns, columnOrder } = state;
+  const isFirstRender = useRef(true);
 
   const classes = useStyles();
   const [sortedColumns, setSortedColumns] = React.useState([]);
   const [searchedColumns, setSearchedColumns] = React.useState([]);
   const [searchVal, setSearchVal] = React.useState('');
+  const [stateVisibleColumns, setStateVisibleColumns] = useState(visibleColumns);
 
   const [allChecked, setAllChecked] = React.useState(true);
   const [isMinimized, setMinimized] = React.useState(true);
 
   React.useEffect(() => {
-    try {
-      const data = localStorage.getItem('gridMetaData');
-      const gridMetaData = JSON.parse(data || '{}');
-      const hiddenCols = gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length ?
-        gridMetaData[renderedFrom]?.hide : columns?.filter((e) => e?.show === false)?.map((m) => m?.id ?? m?.accessor);
-      var updatedCols = columns.map((col) => ({
-        ...col,
-        isVisible: !hiddenCols.includes(col.accessor)
-      }));
-      if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
-        const colOrder = gridMetaData[renderedFrom]?.order;
-        const actionCol = updatedCols.find((d) => d.accessor === 'action');
-        const expanderCol = updatedCols.find((d) => d.accessor === 'expander');
-        const selectionCol = updatedCols.find((d) => d.accessor === 'selection');
-        updatedCols = [
-          ...(expanderCol ? [expanderCol] : []),
-          ...(selectionCol ? [selectionCol] : []),
-          ...updatedCols
-            .filter((d) => !['expander', 'selection', 'action']?.includes(d.accessor))
-            .sort((a, b) => colOrder.findIndex((d) => d === a.accessor) - colOrder.findIndex((d) => d === b.accessor)),
-          ...(actionCol ? [actionCol] : [])
-        ];
-      }
-      setSortedColumns(updatedCols);
-    } catch (ex) {
-      setSortedColumns([...columns]);
-      console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
-    }
-  }, []);
+    const tempSortedColumns = columns
+      .filter((c) => !stickycolumns.stickyColumns.includes(c.id))
+      .toSorted((a: any, b: any) => {
+        return columnOrder?.indexOf(a.id) - columnOrder?.indexOf(b.id);
+      });
+
+    setSortedColumns(tempSortedColumns);
+  }, [columnOrder, columns, stickycolumns.stickyColumns]);
 
   useEffect(() => {
-    const allShow = sortedColumns.filter((f) => !['left', 'right']?.includes(f.sticky)).some((s) => s.isVisible === false);
-    setAllChecked(!allShow);
-  }, [sortedColumns]);
+    if (isFirstRender.current && sortedColumns.length > 0 && visibleColumns) {
+      setAllChecked(sortedColumns.every((col) => visibleColumns[col.id]));
+      console.log('hello');
+      isFirstRender.current = false;
+    }
+  }, [visibleColumns, sortedColumns]);
 
   const handleToggle = (column: any, event: React.ChangeEvent<HTMLInputElement>) => {
-    const newColumns = [...sortedColumns];
-    const getFieldIndex = sortedColumns.findIndex((d) => d.accessor === column.accessor);
-    newColumns[getFieldIndex].isVisible = event.target.checked;
-    setSortedColumns(newColumns);
+    const visibleColumnState = { ...stateVisibleColumns, [column.id]: event.target.checked };
+    setStateVisibleColumns(visibleColumnState);
+    setAllChecked(sortedColumns.every((col) => visibleColumnState[col.id]));
   };
 
   const handleToggleAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = [...sortedColumns];
-    newColumns?.forEach((e: any) => {
-      if (!e.disabled) {
-        e.isVisible = event.target.checked;
+    newColumns?.forEach((c: any) => {
+      if (!c.disabled) {
+        stateVisibleColumns[c.id] = event.target.checked;
       }
     });
     setAllChecked(event.target.checked);
@@ -125,42 +109,43 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     if (renderedFrom && renderedFrom !== '') {
       updateGridHiddenColumns([], []);
     }
-    setColumnOrder(defaultColumns?.map((col) => col?.id));
-    setHiddenColumns([]);
+    const colOrder = columns?.map((col) => col?.id);
+    dispatch({ type: 'setColumnOrder', columnOrder: colOrder });
+
+    const showTrueColumns = columns.filter((c) => {
+      if ('show' in c) {
+        return c.show === true;
+      }
+      return true;
+    });
+
+    const visibleColumns = {};
+    showTrueColumns.forEach((col) => {
+      visibleColumns[col.id] = true;
+    });
+    dispatch({ type: 'setVisibleColumns', visibleColumns });
     onClose();
   };
 
   const handleSaveChange = () => {
-    let dataToStore = [];
-    sortedColumns.forEach((f) => {
-      let object = {};
-      Object.keys(f).forEach((ff) => {
-        if (typeof f[ff] !== 'function' && typeof f[ff] !== 'object') {
-          object[ff] = f[ff];
-        }
-      });
-      dataToStore.push(object);
-    });
-    if (renderedFrom && renderedFrom !== '') {
-      const hidedColumns = dataToStore
-        ?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.accessor))
-        .map((o) => o?.accessor);
-      const columnOrder = dataToStore
-        ?.filter((o) => !['left', 'right']?.includes(o?.sticky) && !['expander', 'selection', 'action']?.includes(o?.accessor))
-        ?.map((o) => o?.accessor);
-      updateGridHiddenColumns(hidedColumns, columnOrder);
-    }
-    const columnOrder = [];
-    for (const col of [...sortedColumns]) {
-      if (col.id === 'qty' || col.id === 'qtyDisplay') {
-        columnOrder.push('qtyDisplay');
-        columnOrder.push('qty');
+    const columnOrderToStore = [];
+    for (const col of sortedColumns) {
+      if (col.accessor === 'qtyDisplay') {
+        columnOrderToStore.push('qtyDisplay');
+        columnOrderToStore.push('qty');
         continue;
       }
-      columnOrder.push(col.id ?? col.accessor);
+      columnOrderToStore.push(col.id);
     }
-    setColumnOrder(columnOrder);
-    setHiddenColumns([...sortedColumns].filter((f) => !['left', 'right']?.includes(f?.sticky) && f.isVisible === false).map((m) => m.id ?? m.accessor));
+    const columnOrder = [...stickycolumns.left, ...columnOrderToStore, ...stickycolumns.right];
+    dispatch({ type: 'setVisibleColumns', visibleColumns: stateVisibleColumns });
+    dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
+
+    if (renderedFrom && renderedFrom !== '') {
+      const hidedColumns = Object.keys(stateVisibleColumns).filter((c) => !stateVisibleColumns[c]);
+      updateGridHiddenColumns(hidedColumns, columnOrderToStore);
+    }
+
     onClose();
   };
 
@@ -237,13 +222,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
             <ListItem disableGutters>
               <ListItemText primary="All Columns" />
               <ListItemSecondaryAction>
-                {setHiddenColumns ? (
-                  <Switch size="small" checked={allChecked} onChange={handleToggleAll} />
-                ) : getToggleHideAllColumnsProps ? (
-                  <Switch size="small" {...getToggleHideAllColumnsProps()} />
-                ) : (
-                  ''
-                )}
+                <Switch size="small" checked={allChecked} onChange={handleToggleAll} />
               </ListItemSecondaryAction>
             </ListItem>
           )}
@@ -256,6 +235,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
                   column?.accessor !== 'expander' && (
                     <RenderListItem
                       key={column.accessor}
+                      checked={stateVisibleColumns[column.id]}
                       column={column}
                       handleToggle={handleToggle}
                       moveItem={moveItem}
@@ -324,6 +304,7 @@ interface ItemProps {
   accessor: string;
   index: number;
   columns: any[];
+  checked: boolean;
 }
 
 interface DragItem {
@@ -333,7 +314,7 @@ interface DragItem {
 }
 
 const RenderListItem = (props: ItemProps) => {
-  const { column, handleToggle, moveItem, accessor, index, columns } = props;
+  const { column, handleToggle, moveItem, accessor, index, columns, checked } = props;
   const classes = useStyles();
 
   const ref = React.useRef<HTMLDivElement>(null);
@@ -402,7 +383,7 @@ const RenderListItem = (props: ItemProps) => {
           <Switch
             size="small"
             disabled={column.disabled}
-            checked={column.isVisible}
+            checked={checked}
             onChange={(e) => {
               handleToggle(column, e);
             }}

@@ -90,6 +90,12 @@ export const getDataFromLocalStorage = () => {
   }
 };
 
+export const getTableDataFromLocalStorage = (renderedFrom: string): { hide?: string[]; order?: string[] } | false => {
+  const data = getDataFromLocalStorage();
+  if (!data) return false;
+  return data[renderedFrom] || false;
+};
+
 export const returnHiddenCols = (renderedFrom, hideAction) => {
   const gridMetaData = getDataFromLocalStorage();
   const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
@@ -245,4 +251,67 @@ export const getUniqueDataByKey = (rows: any[], key = '_id') => {
 export const getCellValue = (cell) => {
   const { row, column } = cell;
   return row.original[column.id];
+};
+
+export const fetchFieldOptions = async ({ renderedFrom: resource, sidebarResource, toastConfig = null }) => {
+  const FILTER_NOT_APPLIED = [
+    'fileUpload',
+    'multiFileUpload',
+    'imageUpload',
+    'multiImageUpload',
+    'richTextEditor',
+    'signature',
+    'colorPicker',
+    'number',
+    'decimal',
+    'switch'
+  ];
+
+  try {
+    const req = await axiosInstance().get(`/field?resource=${resource}`);
+    const {
+      data: { data }
+    } = req;
+    const coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
+    var modifiedColumn: any = coloum?.map((col: any) => {
+      const d = col.fieldData;
+      if (d?.type === 'dropDown') {
+        d.type = 'multiSelect';
+      }
+      return d;
+    });
+    if (resource === sidebarResource.user) {
+      modifiedColumn?.forEach((e) => {
+        if (e.fieldName === 'firstName') {
+          e.fieldName = 'concatedName';
+          e.fieldLabel = 'Name';
+          e.type = 'singleLine';
+        }
+      });
+      modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName');
+    } else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact || resource === sidebarResource.lead) {
+      modifiedColumn?.forEach((e) => {
+        if (e.fieldName === 'firstName') {
+          e.fieldName = 'concatedName';
+          e.fieldLabel = 'Name';
+          e.type = 'singleLine';
+        }
+      });
+      modifiedColumn = modifiedColumn?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e.fieldName));
+    }
+    if (resource === sidebarResource.serializedAsset) {
+      const currentOwner: any = modifiedColumn?.find((e) => e.fieldName === 'currentOwner');
+      if (currentOwner) {
+        currentOwner.lookup = true;
+        currentOwner.option = [
+          ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.customerAccount)?.option || []),
+          ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.supplierAccount)?.option || [])
+        ];
+      }
+    }
+    return modifiedColumn;
+  } catch (error) {
+    if (toastConfig) toastConfig.setToastConfig?.(error);
+    throw error;
+  }
 };

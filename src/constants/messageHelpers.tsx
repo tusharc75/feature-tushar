@@ -53,6 +53,7 @@ export const rentalManagementMessage = {
     receivingNotProduct: `Receiving Ticket cannot be created for product(s)`,
     receivingNotValidStatus: `Ticket cannot be created as asset status is not valid`,
     ticketNotForLost: `Ticket cannot be created for lost assets`,
+    onlySubleaseAsset: "Only Sublease assets can be selected for this action",
     notSubleaseAsset: "Sublease assets cannot be selected for this action",
     productsCanNotReplace: 'Product(s) cannot be replaced',
     loadingDeliveredForReplace: 'Loading Ticket must be delivered to replace assets',

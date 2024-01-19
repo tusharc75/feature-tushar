@@ -833,7 +833,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             >
               {permissions?.bulkAssetCreation?.isCreate && (
                 <MenuItem
-                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true)?.length === 0}
+                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
                   onClick={() => {
                     setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'bulkAssetCreation' }));
                     closeActions();
@@ -855,7 +855,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               )}
               {permissions?.sublease?.isCreate && (
                 <MenuItem
-                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true)?.length === 0}
+                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
                   onClick={() => {
                     setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
                     closeActions();
@@ -1074,7 +1074,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             });
           }}
           refrenceData={{
-            products: [...showOrderDialog?.products?.filter((e) => e.serialized === true)],
+            products: [...showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)],
             wellName: rentalManagementData?.wellName?.optionValue,
             wellNumber: rentalManagementData?.wellNumber
               ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
@@ -1132,7 +1132,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           }}
           referenceType="rentalJob"
           referenceId={rentalManagementData._id}
-          referenceData={{ ...rentalManagementData, material: [...showOrderDialog?.products?.filter((e) => e.serialized === true)] }}
+          referenceData={{ ...rentalManagementData, material: [...showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)] }}
         />
       )}
     </Fragment>

@@ -2,7 +2,7 @@ import camelCase from 'lodash/camelCase';
 import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
-import { Avatar } from '@material-ui/core';
+import { Avatar, Box } from '@material-ui/core';
 import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrencies, sidebarResourceObjectFromValues } from 'src/constants/helpers';
 import routes from '../../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -12,6 +12,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { isArray, isObject } from 'lodash';
+import InfoIcon from '@material-ui/icons/Info';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -249,15 +250,24 @@ export default function useColumns() {
             permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? (
               <span>
                 {row?.original?.[fieldName] ? (
-                  <Link
-                    className="link text-truncate"
-                    title={row?.original?.[fieldName]}
-                    to={`${detailScreenRoute}/${row?.original?._id}`}
-                    target={masterPage ? '_self' : '_blank'}
-                    rel="noopener noreferrer"
-                  >
-                    {row?.original?.[fieldName]}
-                  </Link>
+                  <>
+                    <Link
+                      className="link text-truncate"
+                      title={row?.original?.[fieldName]}
+                      to={`${detailScreenRoute}/${row?.original?._id}`}
+                      target={masterPage ? '_self' : '_blank'}
+                      rel="noopener noreferrer"
+                    >
+                      {row?.original?.[fieldName]}
+                    </Link>
+                    {row?.original?.deleted &&
+                      <Box ml={1}>
+                        <HtmlTooltip title={`Deleted`}>
+                          <InfoIcon className="cursor-pointer" fontSize="small" color="error" />
+                        </HtmlTooltip>
+                      </Box>
+                    }
+                  </>
                 ) : (
                   <NoDataCell />
                 )}
