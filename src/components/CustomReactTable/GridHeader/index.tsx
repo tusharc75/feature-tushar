@@ -57,6 +57,7 @@ const GridHeader = ({
       }
     };
     if (resource) fetchAllColumns();
+    else dispatch({ type: 'setFieldOptions', fieldOptions: [] }); // fallback to empty list to fetch table data without filters
     return () => dispatch({ type: 'setFieldOptions', fieldOptions: null });
   }, [resource, dispatch, toastConfig]);
 
