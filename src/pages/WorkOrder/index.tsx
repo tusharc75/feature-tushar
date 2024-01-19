@@ -15,7 +15,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer, fetchFieldOptions } from 'src/components/CustomReactTable';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -56,7 +56,7 @@ const WorkOrder = () => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, fieldOptions } = state;
 
   useEffect(() => {
     fetchGridColumns();
@@ -81,6 +81,17 @@ const WorkOrder = () => {
       fetchData();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+
+
+  // Default Status Filter
+  useEffect(() => {
+    if (!fieldOptions) return;
+    const statusOptions = fieldOptions.find((f) => f.fieldLabel === 'Status');
+    if (!statusOptions) return;
+    const filter = { [statusOptions.fieldName]: { filter: statusOptions?.option?.map((o) => o.optionValue).slice(0, 2) } };
+    dispatch({ type: 'filter', filters: filter });
+    return ()=> dispatch({ type: 'filter', filters: {} });
+  }, [fieldOptions, dispatch]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -332,14 +343,17 @@ const WorkOrder = () => {
             resource={sidebarResource.workOrder}
             setWholeRowsCellColor={(rowData) => (rowData.deleted ? 'error' : '')}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
+              deleteRecord?.workOrderName || ''
+            }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
