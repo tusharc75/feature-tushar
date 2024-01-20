@@ -2885,3 +2885,22 @@ export const FILE_PROCESS_STATUS = {
   processing: 'Processing',
   completed: 'Completed'
 } as const;
+
+export const convertBlobToBase64 = async (blobUrl) => {
+  const img = new Image();
+  img.crossOrigin = 'Anonymous';
+  return new Promise((resolve, reject) => {
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const dataURL = canvas.toDataURL('image/png');
+      canvas.remove();
+      resolve(dataURL);
+    };
+    img.onerror = () => reject('Error in converting blob to base64');
+    img.src = blobUrl;
+  });
+};
