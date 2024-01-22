@@ -101,6 +101,10 @@ export default function StepDialog({
         skipServiceOnPass: stepData?.skipServiceOnPass && Array.isArray(stepData?.skipServiceOnPass) ? stepData?.skipServiceOnPass : [],
         isSkipServiceOnFail: stepData?.isSkipServiceOnFail === null ? false : stepData?.isSkipServiceOnFail,
         skipServiceOnFail: stepData?.skipServiceOnFail && Array.isArray(stepData?.skipServiceOnFail) ? stepData?.skipServiceOnFail : [],
+        isReperformServicesOnPass: stepData?.isReperformServicesOnPass === null ? false : stepData?.isReperformServicesOnPass,
+        reperformServicesOnPass: stepData?.reperformServicesOnPass && Array.isArray(stepData?.reperformServicesOnPass) ? stepData?.reperformServicesOnPass : [],
+        isReperformServicesOnFail: stepData?.isReperformServicesOnFail === null ? false : stepData?.isReperformServicesOnFail,
+        reperformServicesOnFail: stepData?.reperformServicesOnFail && Array.isArray(stepData?.reperformServicesOnFail) ? stepData?.reperformServicesOnFail : [],
         isAddStepsOnPass: stepData?.isAddStepsOnPass === null ? false : stepData?.isAddStepsOnPass,
         isAddStepsOnFail: stepData?.isAddStepsOnFail === null ? false : stepData?.isAddStepsOnFail,
         isJumpStepPass: stepData?.isJumpStepPass === null ? false : stepData?.isJumpStepPass,
@@ -133,6 +137,10 @@ export default function StepDialog({
             skipServiceOnPass: data?.skipServiceOnPass && Array.isArray(data?.skipServiceOnPass) ? data?.skipServiceOnPass : [],
             isSkipServiceOnFail: data?.isSkipServiceOnFail === null ? false : data?.isSkipServiceOnFail,
             skipServiceOnFail: data?.skipServiceOnFail && Array.isArray(data?.skipServiceOnFail) ? data?.skipServiceOnFail : [],
+            isReperformServicesOnPass: data?.isReperformServicesOnPass === null ? false : data?.isReperformServicesOnPass,
+            reperformServicesOnPass: data?.reperformServicesOnPass && Array.isArray(data?.reperformServicesOnPass) ? data?.reperformServicesOnPass : [],
+            isReperformServicesOnFail: data?.isReperformServicesOnFail === null ? false : data?.isReperformServicesOnFail,
+            reperformServicesOnFail: data?.reperformServicesOnFail && Array.isArray(data?.reperformServicesOnFail) ? data?.reperformServicesOnFail : [],
             isAddStepsOnPass: data?.isAddStepsOnPass === null ? false : data?.isAddStepsOnPass,
             isAddStepsOnFail: data?.isAddStepsOnFail === null ? false : data?.isAddStepsOnFail,
             isJumpStepPass: data?.isJumpStepPass === null ? false : data?.isJumpStepPass,
@@ -166,6 +174,10 @@ export default function StepDialog({
         skipServiceOnPass: [],
         isSkipServiceOnFail: false,
         skipServiceOnFail: [],
+        isReperformServicesOnPass: false,
+        reperformServicesOnPass: [],
+        isReperformServicesOnFail: false,
+        reperformServicesOnFail: [],
         isAddStepsOnPass: false,
         isAddStepsOnFail: false,
         isJumpStepPass: false,
@@ -665,6 +677,104 @@ export default function StepDialog({
                                       disabled={notEditable}
                                       variant="outlined"
                                     />
+                                  )}
+                                />
+                              )}
+                            </Grid>
+                          </Grid>
+                        </Box>
+                        <Box pt={2}>
+                          <Grid container>
+                            <Grid item xs={12} md={6}>
+                              <FormControlLabel
+                                disabled={notEditable}
+                                control={
+                                  <Checkbox
+                                    name="isReperformServicesOnPass"
+                                    disabled={notEditable}
+                                    checked={values['isReperformServicesOnPass']}
+                                    onChange={(e) => {
+                                      setFieldValue('isReperformServicesOnPass', e.target.checked);
+                                      setFieldValue('reperformServicesOnPass', []);
+                                    }}
+                                    color="primary"
+                                  />
+                                }
+                                label="Reperform Services on Pass"
+                              />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                              {values['isReperformServicesOnPass'] && (
+                                <Autocomplete
+                                  options={[
+                                    { optionValue: 'all', optionLabel: 'Select All Consequent Services' },
+                                    ...services?.filter((data: any) => data.optionValue !== serviceId)
+                                  ]}
+                                  fullWidth
+                                  multiple
+                                  disabled={notEditable}
+                                  size="small"
+                                  value={values?.reperformServicesOnPass ? services?.filter((data: any) => values?.reperformServicesOnPass?.includes(data.optionValue)) : []}
+                                  getOptionLabel={(option) => option.optionLabel}
+                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  onChange={(_, newVal: any) => {
+                                    const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
+                                    const values = isAll
+                                      ? [...services?.filter((data: any) => data.optionValue !== serviceId)].map((o) => o.optionValue)
+                                      : newVal?.map((val) => val.optionValue);
+                                    setFieldValue('reperformServicesOnPass', values);
+                                  }}
+                                  renderInput={(params) => (
+                                    <TextField {...params} label="Reperform Services on Pass" name="reperformServicesOnPass" disabled={notEditable} variant="outlined" />
+                                  )}
+                                />
+                              )}
+                            </Grid>
+                          </Grid>
+                        </Box>
+                        <Box pt={2}>
+                          <Grid container>
+                            <Grid item xs={12} md={6}>
+                              <FormControlLabel
+                                disabled={notEditable}
+                                control={
+                                  <Checkbox
+                                    name="isReperformServicesOnFail"
+                                    disabled={notEditable}
+                                    checked={values['isReperformServicesOnFail']}
+                                    onChange={(e) => {
+                                      setFieldValue('isReperformServicesOnFail', e.target.checked);
+                                      setFieldValue('reperformServicesOnFail', []);
+                                    }}
+                                    color="primary"
+                                  />
+                                }
+                                label="Reperform Services on Fail"
+                              />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                              {values['isReperformServicesOnFail'] && (
+                                <Autocomplete
+                                  options={[
+                                    { optionValue: 'all', optionLabel: 'Select All Consequent Services' },
+                                    ...services?.filter((data: any) => data.optionValue !== serviceId)
+                                  ]}
+                                  fullWidth
+                                  multiple
+                                  disabled={notEditable}
+                                  size="small"
+                                  value={values?.reperformServicesOnFail ? services?.filter((data: any) => values?.reperformServicesOnFail?.includes(data.optionValue)) : []}
+                                  getOptionLabel={(option) => option.optionLabel}
+                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  onChange={(_, newVal: any) => {
+                                    const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
+                                    const values = isAll
+                                      ? [...services?.filter((data: any) => data.optionValue !== serviceId)].map((o) => o.optionValue)
+                                      : newVal?.map((val) => val.optionValue);
+                                    setFieldValue('reperformServicesOnFail', values);
+                                  }}
+                                  renderInput={(params) => (
+                                    <TextField {...params} label="Reperform Services on Fail" name="reperformServicesOnFail" disabled={notEditable} variant="outlined" />
                                   )}
                                 />
                               )}
