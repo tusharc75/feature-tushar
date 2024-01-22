@@ -4,12 +4,13 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { WORKORDER_SERVICE_STATUS, gridLoadingTimeout, prepareDataForGrid, workOrder } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
+import { Link } from 'react-router-dom';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import { ExpandMore, Info } from '@material-ui/icons';
@@ -19,7 +20,7 @@ const GridView = ({ serviceStatus, filterQuery }) => {
   const renderedFrom = camelCase(routes?.workOrderTechnician.title);
   const toastConfig = useContext(CustomToastContext);
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
-
+  const { generateColumns } = useColumns();
   const {
     state: { user }
   }: any = useData();
@@ -31,124 +32,110 @@ const GridView = ({ serviceStatus, filterQuery }) => {
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
   const [isServiceCompleting, setIsServiceCompleting] = useState(false);
-
+  const [columns,setColumns] = useState(null);
   useEffect(() => {
     setTabValue(serviceStatus[0]);
   }, [serviceStatus]);
+
+  useEffect(()=>{
+   fetchGridColumns();
+  },[])
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: string) => {
     setTabValue(newValue);
   };
 
-  const columns = [
-    {
-      accessor: 'serviceName',
-      Header: 'Service',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) => (
-        <>
-          {row?.original?.serviceName ? (
-            <div>
-              <h5 className="text-truncate">{row.original.serviceName}</h5>
-              <Box ml={1}>
-                {row?.original?.canPerformInfo ? (
-                  <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                    <Info className="[font-size:20px_!important] text-red-500" />
-                  </HtmlTooltip>
-                ) : null}
-              </Box>
-            </div>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    },
-    {
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`);
+    data = response?.data?.data;
+ 
+    const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path, true);
+    const columns = newColumns.filter((ele)=>ele.accessor!='owner' && ele.accessor!='collaborator' && ele.accessor!='workOrderNumber' );
+    const extraColumns = [
+      {
+        accessor: 'serviceName',
+        Header: 'Service',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <>
+            {row?.original?.serviceName ? (
+              <div>
+                <h5 className="text-truncate">{row.original.serviceName}</h5>
+                <Box ml={1}>
+                  {row?.original?.canPerformInfo ? (
+                    <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+                      <Info className="[font-size:20px_!important] text-red-500" />
+                    </HtmlTooltip>
+                  ) : null}
+                </Box>
+              </div>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
+      },
+          {
       accessor: 'workOrderNumber',
-      Header: 'Work Order',
+      Header: 'Work Order Number',
       disableFilters: true,
       disableSortBy: true,
-      Cell: ({ row }) => (row.original['workOrderNumber'] ? <h5 className="text-truncate">{row.original.workOrderNumber}</h5> : <NoDataCell />)
+      Cell: ({ row }) => (row.original['workOrderNumber'] ? <Link to = {`${routes?.workOrderDetail?.path}/${row?.original?.workOrderId}`}> <h5 className="link text-truncate">{row.original.workOrderNumber}</h5> </Link> : <NoDataCell />)
     },
-    {
-      accessor: 'reference',
-      Header: 'Job',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) => (row.original['reference'] ? <h5 className="text-truncate">{row.original.reference}</h5> : <NoDataCell />)
-    },
-    {
-      accessor: 'spoolNumber',
-      Header: 'Spool Number',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) => (row.original['spoolNumber'] ? <h5 className="text-truncate">{row.original.spoolNumber}</h5> : <NoDataCell />)
-    },
-    {
-      accessor: 'serializedAsset',
-      Header: 'Asset',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) => (row.original['serializedAsset'] ? <h5 className="text-truncate">{row.original.serializedAsset}</h5> : <NoDataCell />)
-    },
-    {
-      accessor: 'assignedWorkStations',
-      Header: 'Work Stations',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) =>
-        row.original['assignedWorkStations'] ? <h5 className="text-truncate">{row.original.assignedWorkStations}</h5> : <NoDataCell />
-    },
-    ...(user?.user?.brandPolicy?.workOrderTimer
-      ? [
-        {
-          accessor: 'stepData',
-          Header: 'Time',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (row.original['stepData'] ? <h5 className="text-truncate">{row.original.stepData}</h5> : <NoDataCell />)
-        }
-      ]
-      : []),
-    {
-      accessor: 'estimateCompleteDate',
-      Header: 'Due Date',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) =>
-        row.original['estimateCompleteDate'] ? <h5 className="text-truncate">{row.original.estimateCompleteDate}</h5> : <NoDataCell />
-    },
-    {
-      accessor: 'action',
-      Header: 'Actions',
-      minWidth: 100,
-      width: 100,
-      sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
-      Cell: ({ row }) => (
-        <>
-          {row?.original?.productionOrderNumber && (
-            <HtmlTooltip title="Drawings">
-              <IconButton
-                size="small"
-                aria-label="Details"
-                color="primary"
-                onClick={(e) => {
-                  setShowDrawingDialog({ open: true, workOrder: row?.original?.workOrderDetail?._id });
-                }}
-              >
-                <DescriptionIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </HtmlTooltip>
-          )}
-        </>
-      )
-    }
-  ];
+      {
+        accessor: 'assignedWorkStations',
+        Header: 'Work Stations',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) =>
+          row.original['assignedWorkStations'] ? <h5 className="text-truncate">{row.original.assignedWorkStations}</h5> : <NoDataCell />
+      },
+      ...(user?.user?.brandPolicy?.workOrderTimer
+        ? [
+          {
+            accessor: 'stepData',
+            Header: 'Time',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (row.original['stepData'] ? <h5 className="text-truncate">{row.original.stepData}</h5> : <NoDataCell />)
+          }
+        ]
+        : []),
+    ]
+    const finalColumns = [...extraColumns.slice(0,2),...columns,...extraColumns.slice(2),ActionsRenderer];
+  setColumns(finalColumns)
+  };
+
+  const ActionsRenderer =  {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {row?.original?.productionOrderId && (
+          <HtmlTooltip title="Drawings">
+            <IconButton
+              size="small"
+              aria-label="Details"
+              color="primary"
+              onClick={(e) => {
+                setShowDrawingDialog({ open: true, workOrder: row?.original?._id });
+              }}
+            >
+              <DescriptionIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </>
+    )
+  }
 
   useEffect(() => {
     if (tabValue) {
@@ -183,16 +170,14 @@ const GridView = ({ serviceStatus, filterQuery }) => {
       .get(`/work-order-technician${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
+          let finalObject: any = prepareDataForGrid(u, user);
+          let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
           finalObject['serviceName'] = u?.service?.serviceName;
-          finalObject['workOrderDetail'] = u?.workOrderDetail;
-          finalObject['productionOrderNumber'] = u?.workOrderDetail?.productionOrder?.optionLabel;
-          finalObject['workOrderNumber'] = u?.workOrderDetail?.workOrderNumber;
-          finalObject['reference'] = u?.workOrderDetail?.repairOrder?.optionLabel || u?.workOrderDetail?.productionOrder?.optionLabel;
-          finalObject['spoolNumber'] = u?.workOrderDetail?.spoolNumber;
-          finalObject['serializedAsset'] = u?.workOrderDetail?.serializedAsset?.optionLabel;
-          finalObject['estimateCompleteDate'] = u?.workOrderDetail?.estimateCompleteDate;
-          return finalObject;
+          finalObject['serviceStatus'] = u?.status;
+          finalObject['workOrderId'] = u?.workOrderDetail?._id;
+          delete workOrderDetailData?._id;
+          delete workOrderDetailData?.id;
+          return {...finalObject,...workOrderDetailData};
         });
         dispatch({ type: 'initialize', data: rows, count: count });
       })
@@ -216,7 +201,7 @@ const GridView = ({ serviceStatus, filterQuery }) => {
 
   const handleCompleteService = () => {
     setIsServiceCompleting(true);
-    const data = selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.map((_s) => ({
+    const data = selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.map((_s) => ({
       workOrder: _s?.workOrderDetail?._id,
       service: _s?.materialId,
       uniqueId: _s?._id,
@@ -297,7 +282,7 @@ const GridView = ({ serviceStatus, filterQuery }) => {
                   closeActions();
                 }}
                 disabled={selectedRecords?.length &&
-                  selectedRecords?.filter((s) => s?.status === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length ? false : true}
+                  selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length ? false : true}
               >
                 Complete Service(s)
               </MenuItem>
