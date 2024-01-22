@@ -56,7 +56,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
     }
     setLoading(true);
     axiosInstance()
-      .get('/user/pdf-to-images?fileName=' + data?.url)
+      .get(`/user/pdf?fileName=${data?.url}&attachmentId=${data?.attachmentId}`)
       .then(({ data }) => {
         const images = data.map((bufferData) => {
           const buffer = new Uint8Array(bufferData.data);
@@ -182,7 +182,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
       }
     });
 
-    const res = await axiosInstance().post('/user/images-to-pdf', { images: imageData });
+    const res = await axiosInstance().post('/user/pdf', { images: imageData });
     axiosInstance()
       .put(`/attachment/replace/${data?.attachmentId}`, { oldUrl: data?.url, url: res?.data?.fileName })
       .then(() => {
