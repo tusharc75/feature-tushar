@@ -400,6 +400,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     dispatch({ type: 'loading', loading: true });
     if (selectionReset) {
       dispatch({ type: 'selection', selectedRecords: [] });
+      if (selectedServiceOption?.length) {
+        setSelectedServiceOption([])
+      }
     }
 
     const queryString = getQueryString();
