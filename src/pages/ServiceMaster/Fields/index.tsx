@@ -9,7 +9,7 @@ import { CustomDialogTransition, fieldLabelToFieldName, serviceMaster } from 'sr
 import axiosInstance from 'src/axios/axiosInstance';
 import { map, uniq } from 'lodash';
 
-const ConfigureFields = ({ serviceId, handleClose, handleSucess }) => {
+const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '', fields = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [isSubmitting, setSubmitting] = useState(false);
@@ -17,35 +17,56 @@ const ConfigureFields = ({ serviceId, handleClose, handleSucess }) => {
   const [deleteField, setDeleteField] = useState([]);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`${serviceMaster.api}/service-fields/${serviceId}`)
-      .then(({ data: { data } }) => {
-        const _data = [];
-        const _section = uniq(map(data, 'sectionName'));
-        _section.forEach((element: any, index: number) => {
-          _data.push({
-            sectionId: index,
-            sectionName: element,
-            field: data?.filter((el: any) => el.sectionName === element)
-          });
+    if (reference === 'workOrder') {
+      const _data = [];
+      const _section = uniq(map(fields, 'sectionName'));
+      _section.forEach((element: any, index: number) => {
+        _data.push({
+          sectionId: index,
+          sectionName: element,
+          field: fields?.filter((el: any) => el.sectionName === element)
         });
-        if (_data?.length === 0) {
-          _data.push({
-            sectionId: parseInt((Math.random() * 100000).toString()),
-            sectionName: 'New Section 1',
-            srno: 1,
-            field: []
-          });
-        }
-        setSection(_data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
       });
+      if (_data?.length === 0) {
+        _data.push({
+          sectionId: parseInt((Math.random() * 100000).toString()),
+          sectionName: 'New Section 1',
+          srno: 1,
+          field: []
+        });
+      }
+      setSection(_data);
+    } else {
+      axiosInstance()
+        .get(`${serviceMaster.api}/service-fields/${serviceId}`)
+        .then(({ data: { data } }) => {
+          const _data = [];
+          const _section = uniq(map(data, 'sectionName'));
+          _section.forEach((element: any, index: number) => {
+            _data.push({
+              sectionId: index,
+              sectionName: element,
+              field: data?.filter((el: any) => el.sectionName === element)
+            });
+          });
+          if (_data?.length === 0) {
+            _data.push({
+              sectionId: parseInt((Math.random() * 100000).toString()),
+              sectionName: 'New Section 1',
+              srno: 1,
+              field: []
+            });
+          }
+          setSection(_data);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
   }, [serviceId]);
 
   const handleSave = async () => {
-	setSubmitting(true)
+    setSubmitting(true);
     let data = [];
     let order = 0;
     section.forEach((_section) => {
@@ -81,21 +102,26 @@ const ConfigureFields = ({ serviceId, handleClose, handleSucess }) => {
       return false;
     }
 
-    axiosInstance()
-      .post(`${serviceMaster.api}/service-fields/${serviceId}`, data)
-      .then(({ data }) => {
-		setSubmitting(false)
-        handleSucess();
-        toastConfig.setToastConfig({
-          open: true,
-          message: data.message,
-          severity: 'success'
+    if (reference === 'workOrder') {
+      handleSucess(data);
+	  setSubmitting(false);
+    } else {
+      axiosInstance()
+        .post(`${serviceMaster.api}/service-fields/${serviceId}`, data)
+        .then(({ data }) => {
+          setSubmitting(false);
+          handleSucess();
+          toastConfig.setToastConfig({
+            open: true,
+            message: data.message,
+            severity: 'success'
+          });
+        })
+        .catch((err) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(err);
         });
-      })
-      .catch((err) => {
-		setSubmitting(false)
-        toastConfig.setToastConfig(err);
-      });
+    }
   };
 
   const handleExportFields = () => {
