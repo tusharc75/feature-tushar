@@ -76,7 +76,7 @@ const GridView = ({ serviceStatus, filterQuery }) => {
                 onClick={() => {
                   setSelectedService({
                     uniqueId: row?.original?._id,
-                    workOrderId: row?.original?.workOrderDetail?._id,
+                    workOrderId: row?.original?.workOrderId,
                     canPerform: row?.original?.canPerform
                   });
                   setServiceOpen(true);
