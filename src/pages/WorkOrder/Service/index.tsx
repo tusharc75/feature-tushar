@@ -50,6 +50,7 @@ import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
+import ConfigureFields from 'src/pages/ServiceMaster/Fields';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -139,6 +140,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [isSubmitting, setSubmitting] = useState(false);
 
   const [reviseQuotation, setReviseQuotation] = useState(false);
+  const [openProperties, setOpenProperties] = useState(false);
 
   useEffect(() => {
     fetchServiceData();
@@ -504,6 +506,24 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const closeAddServiceActions = () => {
     setAddServiceAnchorEl(null);
   };
+
+  const handleProperties = (data) => {
+    axiosInstance()
+    .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-fields`, data)
+    .then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        message: data.message,
+        severity: 'success'
+      });
+      fetchServiceData()
+      setOpenProperties(false);
+    })
+    .catch((error) => {
+      setOpenProperties(false);
+      toastConfig.setToastConfig(error);
+    });
+  }
 
   return (
     <Box>
@@ -1238,6 +1258,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   Subcontract PO
                 </MenuItem>
               )}
+               <MenuItem
+                onClick={() => {
+                  setOpenProperties(true)
+                  setAnchorEl(null);
+                }}
+              >
+                Properties
+              </MenuItem>
               {resource === sidebarResource.workOrder &&
                 <MenuItem
                   disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
@@ -1485,6 +1513,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           onClose={() => {
             setSetpsInOtherServices(false);
           }}
+        />
+      )}
+
+      {openProperties && (
+        <ConfigureFields
+          serviceId={selectedService?._id}
+          handleClose={() => {
+            setOpenProperties(false)
+          }}
+          handleSucess={(data) => {
+            handleProperties(data)
+          }}
+          reference={'workOrder'}
+          fields={selectedService?.fields || []}
         />
       )}
     </Box>

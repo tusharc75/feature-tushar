@@ -52,8 +52,8 @@ const WorkOrderTechnician = () => {
 
   const ref: any = useRef();
 
+  const [viewType, setViewType] = useState(2);
   const [fieldToFilterList, setFieldToFilterList] = useState([]);
-  const [viewType, setViewType] = useState(1);
   const [selectedServiceStatus, setSelectedServiceStatus] = useState([
     WORKORDER_SERVICE_STATUS.pending,
     WORKORDER_SERVICE_STATUS.inProgress,

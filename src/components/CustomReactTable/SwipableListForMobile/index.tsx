@@ -249,7 +249,10 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
             {table?.getFooterGroups().map((group, index) => {
               const indexCol = group?.headers?.find((g) => g.id === 'index');
               return (
-                <div key={index} className="flex justify-between [border-top:1px_solid_var(--common-border-color)] pt-1 items-center mt-4 px-2">
+                <div
+                  key={index}
+                  className="flex flex-wrap gap-2 justify-between [border-top:1px_solid_var(--common-border-color)] pt-1 items-center mt-4 px-2"
+                >
                   <h6 className="text-[14px]">
                     {indexCol.isPlaceholder ? null : flexRender(indexCol.column.columnDef.footer, indexCol.getContext())}
                   </h6>
