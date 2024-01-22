@@ -116,7 +116,7 @@ export default function StepDialog({
         returnToStepOnFail: stepData?.returnToStepOnFail || '',
         isReturnToServiceOnFail: stepData?.isReturnToServiceOnFail === null ? false : stepData?.isReturnToServiceOnFail,
         returnToServiceOnFail: stepData?.returnToServiceOnFail || '',
-        stepDataCloneToService: stepData?.stepDataCloneToService || ''
+        stepDataCloneFromService: stepData?.stepDataCloneFromService || []
       });
     } else if (stepId != '') {
       axiosInstance()
@@ -152,7 +152,7 @@ export default function StepDialog({
             returnToStepOnFail: data?.returnToStepOnFail || '',
             isReturnToServiceOnFail: data?.isReturnToServiceOnFail === null ? false : data?.isReturnToServiceOnFail,
             returnToServiceOnFail: data?.returnToServiceOnFail || '',
-            stepDataCloneToService: data?.stepDataCloneToService || ''
+            stepDataCloneFromService: data?.stepDataCloneFromService || []
           });
         })
         .catch((err) => {
@@ -189,7 +189,7 @@ export default function StepDialog({
         returnToStepOnFail: '',
         isReturnToServiceOnFail: false,
         returnToServiceOnFail: '',
-        stepDataCloneToService: ''
+        stepDataCloneFromService: []
       });
     }
   }, []);
@@ -424,24 +424,26 @@ export default function StepDialog({
                       <Grid>
                         <Grid xs={12} md={6} sm={6} item>
                           <Autocomplete
-                            options={services}
+                            options={[
+                              { optionValue: 'all', optionLabel: 'Select All Consequent Services' },
+                              ...services?.filter((data: any) => data.optionValue !== serviceId)
+                            ]}
                             fullWidth
-                            size="small"
+                            multiple
                             disabled={notEditable}
-                            value={services?.find((data) => data?.optionValue === values?.stepDataCloneToService) ?? ''}
-                            getOptionLabel={(option) => option?.optionLabel}
-                            renderOption={(option) => option?.optionLabel}
+                            size="small"
+                            value={values?.stepDataCloneFromService ? services?.filter((data: any) => values?.stepDataCloneFromService?.includes(data.optionValue)) : []}
+                            getOptionLabel={(option) => option.optionLabel}
+                            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                             onChange={(_, newVal: any) => {
-                              setFieldValue('stepDataCloneToService', newVal?.optionValue ?? '');
+                              const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
+                              const values = isAll
+                                ? [...services?.filter((data: any) => data.optionValue !== serviceId)].map((o) => o.optionValue)
+                                : newVal?.map((val) => val.optionValue);
+                              setFieldValue('stepDataCloneFromService', values);
                             }}
                             renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label="Step Data Clone To Service"
-                                name="stepDataCloneToService"
-                                disabled={notEditable}
-                                variant="outlined"
-                              />
+                              <TextField {...params} label="Step Data Clone From Service" name="stepDataCloneFromService" disabled={notEditable} variant="outlined" />
                             )}
                           />
                         </Grid>

@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -31,13 +31,13 @@ const GridView = ({ serviceStatus, filterQuery }) => {
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
-  const { page, limit, sorting, selectedRecords } = state;
+  const { page, limit, sorting, selectedRecords, filters } = state;
 
   const [tabValue, setTabValue] = useState('');
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
-  const [isServiceCompleting, setIsServiceCompleting] = useState(false);
-  const [columns,setColumns] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [columns, setColumns] = useState(null);
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
 
@@ -45,9 +45,9 @@ const GridView = ({ serviceStatus, filterQuery }) => {
     setTabValue(serviceStatus[0]);
   }, [serviceStatus]);
 
-  useEffect(()=>{
-   fetchGridColumns();
-  },[])
+  useEffect(() => {
+    fetchGridColumns();
+  }, [])
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: string) => {
     setTabValue(newValue);
@@ -57,54 +57,55 @@ const GridView = ({ serviceStatus, filterQuery }) => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`);
     data = response?.data?.data;
- 
-    const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path, true);
-    const columns = newColumns.filter((ele)=>ele.accessor!='owner' && ele.accessor!='collaborator' && ele.accessor!='workOrderNumber' );
-    
-  const extraColumns = [
-    {
-      accessor: 'serviceName',
-      Header: 'Service',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) => (
-        <>
-          {row?.original?.serviceName ? (
-            <div>
-              <h5
-                className="link text-truncate"
-                onClick={() => {
-                  setSelectedService({
-                    uniqueId: row?.original?._id,
-                    workOrderId: row?.original?.workOrderId,
-                    canPerform: row?.original?.canPerform
-                  });
-                  setServiceOpen(true);
-                }}
-              >
-                {row.original.serviceName}
-              </h5>
-              <Box ml={1}>
-                {row?.original?.canPerformInfo ? (
-                  <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                    <Info className="[font-size:20px_!important] text-red-500" />
-                  </HtmlTooltip>
-                ) : null}
-              </Box>
-            </div>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    },
-    {
-      accessor: 'workOrderNumber',
-      Header: 'Work Order Number',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) => (row.original['workOrderNumber'] ? <Link to = {`${routes?.workOrderDetail?.path}/${row?.original?.workOrderId}`}> <h5 className="link text-truncate">{row.original.workOrderNumber}</h5> </Link> : <NoDataCell />)
-    },
+
+    const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path);
+    const columns = newColumns.filter((ele) => ele.accessor != 'workOrderNumber');
+
+    const extraColumns = [
+      {
+        accessor: 'serviceName',
+        Header: 'Service',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <>
+            {row?.original?.serviceName ? (
+              <div>
+                <h5
+                  className="link text-truncate"
+                  onClick={() => {
+                    setSelectedService({
+                      uniqueId: row?.original?._id,
+                      workOrderId: row?.original?.workOrderId,
+                      canPerform: row?.original?.canPerform
+                    });
+                    setServiceOpen(true);
+                  }}
+                >
+                  {row.original.serviceName}
+                </h5>
+                <Box ml={1}>
+                  {row?.original?.canPerformInfo ? (
+                    <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+                      <Info className="[font-size:20px_!important] text-red-500" />
+                    </HtmlTooltip>
+                  ) : null}
+                </Box>
+              </div>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
+      },
+      {
+        accessor: 'workOrderNumber',
+        Header: 'Work Order Number',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (row.original['workOrderNumber'] ?
+          <h5 className=" text-truncate">{row.original.workOrderNumber}</h5> : <NoDataCell />)
+      },
       {
         accessor: 'assignedWorkStations',
         Header: 'Work Stations',
@@ -112,24 +113,13 @@ const GridView = ({ serviceStatus, filterQuery }) => {
         disableSortBy: true,
         Cell: ({ row }) =>
           row.original['assignedWorkStations'] ? <h5 className="text-truncate">{row.original.assignedWorkStations}</h5> : <NoDataCell />
-      },
-      ...(user?.user?.brandPolicy?.workOrderTimer
-        ? [
-          {
-            accessor: 'stepData',
-            Header: 'Time',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => (row.original['stepData'] ? <h5 className="text-truncate">{row.original.stepData}</h5> : <NoDataCell />)
-          }
-        ]
-        : []),
+      }
     ]
-    const finalColumns = [...extraColumns.slice(0,2),...columns,...extraColumns.slice(2),ActionsRenderer];
-  setColumns(finalColumns)
+    const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2), ActionsRenderer];
+    setColumns(finalColumns)
   };
 
-  const ActionsRenderer =  {
+  const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
@@ -162,30 +152,39 @@ const GridView = ({ serviceStatus, filterQuery }) => {
     if (tabValue) {
       fetchData();
     }
-  }, [page, limit, sorting, tabValue, filterQuery]);
+  }, [page, limit, sorting, tabValue, filterQuery, filters]);
 
   useEffect(() => {
     dispatch({ type: 'selection', selectedRecords: [] });
   }, [tabValue]);
 
   const getQueryString = () => {
-    let deepFilters = `?page=${page}&limit=${limit}&status=${tabValue}`;
-
-    if (filterQuery?.filterById?.length > 0 || filterQuery?.deepFilter?.length > 0) {
-      deepFilters = `${deepFilters}&filterType=and`;
+    let deepFilter = `?page=${page}&limit=${limit}&status=${tabValue}`;
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    if (filterQuery?.filterById?.length) {
+      filterQuery?.filterById?.forEach((e) => {
+        filterByIds.push(e)
+      })
     }
-    if (filterQuery?.filterById?.length > 0) {
-      deepFilters = `${deepFilters}&filterById=${JSON.stringify(filterQuery?.filterById)}`;
+    if (filterQuery?.deepFilter?.length) {
+      filterQuery?.deepFilter?.forEach((e) => {
+        deepFilters.push(e)
+      })
     }
-    if (filterQuery?.deepFilter?.length > 0) {
-      deepFilters = `${deepFilters}&deepFilter=${JSON.stringify(filterQuery?.deepFilter)}`;
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-    return deepFilters;
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    return deepFilter;
   };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-
     const queryString = getQueryString();
     axiosInstance()
       .get(`/work-order-technician${queryString}`)
@@ -198,7 +197,7 @@ const GridView = ({ serviceStatus, filterQuery }) => {
           finalObject['workOrderId'] = u?.workOrderDetail?._id;
           delete workOrderDetailData?._id;
           delete workOrderDetailData?.id;
-          return {...finalObject,...workOrderDetailData};
+          return { ...finalObject, ...workOrderDetailData };
         });
         dispatch({ type: 'initialize', data: rows, count: count });
       })
@@ -221,15 +220,15 @@ const GridView = ({ serviceStatus, filterQuery }) => {
   };
 
   const handleCompleteService = () => {
-    setIsServiceCompleting(true);
+    setIsSubmitting(true);
     const data = selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.map((_s) => ({
-      workOrder: _s?.workOrderDetail?._id,
+      workOrder: _s?.workOrderId,
       service: _s?.materialId,
       uniqueId: _s?._id,
       status: WORKORDER_SERVICE_STATUS.completed
     }))
     axiosInstance().put(`${workOrder.api}/service/work-orders-services-status`, data).then(({ data }) => {
-      setIsServiceCompleting(false);
+      setIsSubmitting(false);
       setShowServiceCompleteConfirmBox(false);
       dispatch({ type: 'selection', selectedRecords: [] });
       fetchData();
@@ -238,7 +237,10 @@ const GridView = ({ serviceStatus, filterQuery }) => {
         type: 'success',
         message: data?.message
       });
-  })
+    }).catch((error) => {
+      setIsSubmitting(false);
+      toastConfig.setToastConfig(error);
+    })
   }
   return (
     <>
@@ -324,7 +326,7 @@ const GridView = ({ serviceStatus, filterQuery }) => {
       )}
       {showServiceCompleteConfirmBox && (
         <ConfirmationDialog
-          okBtnLoading={isServiceCompleting}
+          okBtnLoading={isSubmitting}
           open={showServiceCompleteConfirmBox}
           message={`Are you sure you want to Complete this Service(s)`}
           onClose={() => {

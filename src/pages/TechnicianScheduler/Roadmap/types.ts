@@ -151,5 +151,5 @@ export interface Step {
   skipServiceOnFail?: any[];
   isAddStepsOnPass?: boolean;
   isAddStepsOnFail?: boolean;
-  stepDataCloneToService?: string;
+  stepDataCloneFromService?: string;
 }
