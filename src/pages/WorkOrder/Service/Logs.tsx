@@ -185,7 +185,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
             <Box className={styles.main}>
               {keys?.map((key: string) => {
                 return (
-                  <div className={styles.singleGroup}>
+                  <div key={key} className={styles.singleGroup}>
                     <Box key={key}>
                       <p className={styles.date}>{moment(key).format('MMM Do YYYY')}</p>
                     </Box>
