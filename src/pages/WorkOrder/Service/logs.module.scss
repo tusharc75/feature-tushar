@@ -21,8 +21,8 @@
     font-weight: 700;
     font-size: 14px;
     line-height: 17px;
-    color: #5b5b5b;
-    background: #ededed;
+    color: var(--dark-primary-text, #5b5b5b);
+    background: var(--dark-secondary, #ededed);
     border-radius: 20px;
     padding: 9px 26px;
     max-width: max-content;
@@ -89,8 +89,8 @@
     font-weight: 500;
     font-size: 12px;
     line-height: 17px;
-    color: #5b5b5b;
-    background: #ededed;
+    color: var(--dark-primary-text, #5b5b5b);
+    background: var(--dark-secondary, #ededed);
     padding: 6px 15px;
     border-radius: 20px;
     display: inline-block;
@@ -101,7 +101,7 @@
   font-weight: 500;
   font-size: 14px;
   line-height: 19px;
-  color: #3a3a3a;
+  color: var(--primary-text);
   strong {
     font-weight: 600;
   }
