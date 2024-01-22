@@ -47,7 +47,7 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose }) => 
       },
       {
         accessor: 'stepName',
-        Header: 'StepName',
+        Header: 'Step Name',
         width: 100,
         sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.stepName}</p>

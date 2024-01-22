@@ -35,10 +35,14 @@ const ArrangeView = ({
 
   useEffect(() => {
     const gridMetaData = getTableDataFromLocalStorage(renderedFrom);
+
     if (gridMetaData && gridMetaData?.order && gridMetaData?.order?.length) {
-      let tempColumnOrder = [];
-      tempColumnOrder = [...stickycolumns.left, ...gridMetaData.order, ...stickycolumns.right];
+      let tempColumnOrder = [...stickycolumns.left, ...gridMetaData.order];
+      const missingColumns = columns.filter((c) => ![...stickycolumns.stickyColumns, ...gridMetaData.order].includes(c.id)).map((c) => c.id);
+      tempColumnOrder = [...tempColumnOrder, ...missingColumns, ...stickycolumns.right];
       dispatchTable({ type: 'setColumnOrder', columnOrder: tempColumnOrder });
+    } else {
+      dispatchTable({ type: 'setColumnOrder', columnOrder: columns.map((c) => c.id) });
     }
     if (gridMetaData && gridMetaData?.hide && gridMetaData?.hide?.length) {
       const visibleColumns = {};
@@ -46,8 +50,7 @@ const ArrangeView = ({
         visibleColumns[col.id] = !gridMetaData.hide?.includes(col.id);
       }
       dispatchTable({ type: 'setVisibleColumns', visibleColumns: visibleColumns });
-    }
-    else {
+    } else {
       const visibleColumns = {};
       columns.forEach((col) => {
         visibleColumns[col.id] = col?.show === false ? false : true;
