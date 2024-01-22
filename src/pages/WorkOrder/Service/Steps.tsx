@@ -432,11 +432,18 @@ const Steps = ({
     if (tempServiceData) {
       stepData = tempServiceData;
       if (step?.fields?.length) {
+        let isDataAlreadyAdded = false;
+        const fieldNames = step?.fields?.map((e) => e.fieldName)
+        for (var key in tempServiceData) {
+          if (fieldNames?.includes(key)) {
+            isDataAlreadyAdded = true
+          }
+        }
         fieldData = {
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: tempServiceData,
-          values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate)
+          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate) : getObjKeys('', fieldsDataForCreate)
         };
       }
     } else {

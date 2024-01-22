@@ -48,7 +48,7 @@ const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
             id="zip-upload"
             name="zip-upload"
             type="file"
-            accept=".zip,application/zip,application/x-zip-compressed,application/pdf,.pdf"
+            accept=".zip,application/zip,application/x-zip-compressed,application/pdf,.pdf,image/jpeg,image/png,image/gif,image/bmp"
             multiple
             onChange={handleUpload}
             style={{ display: 'none' }}
