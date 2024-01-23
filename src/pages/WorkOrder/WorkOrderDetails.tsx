@@ -145,7 +145,7 @@ const WorkOrderDetails = () => {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
-        setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
+        setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.status === WORK_ORDER_STATUS.onHold || data?.deleted ? true : false);
         setWorkOrderData({ ...data });
       })
       .catch((err) => {
