@@ -169,7 +169,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       }
     }
 
-    setStepSubmitedData(workOrderDetail?.stepData || []);
+    setStepSubmitedData(workOrderDetail?.stepData?.filter((e) => e.status) || []);
 
     if (workOrderDetail?.services?.length) {
       workOrderDetail?.services?.forEach((e) => {
@@ -185,7 +185,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         if (pendingServiceIndex === -1) {
           let tempServiceSortedArray = reverse([...services]);
           pendingServiceIndex = tempServiceSortedArray.findIndex((d) =>
-            [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
+            [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(d.status)
           );
           if (pendingServiceIndex === -1) {
             pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
