@@ -250,6 +250,31 @@ const WorkOrderDetails = () => {
                   )}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
+                  (workOrderData?.status === WORK_ORDER_STATUS.onHold ?
+                    <HtmlTooltip title={`Change Status ${WORK_ORDER_STATUS.inProgress}`} placement="top" arrow>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        size="small"
+                        onClick={() => updateJobStatus(WORK_ORDER_STATUS.inProgress)}
+                        className={'btn-outline-v1'}
+                      >
+                        {WORK_ORDER_STATUS.inProgress}
+                      </Button>
+                    </HtmlTooltip> :
+                    [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status) ?
+                      <HtmlTooltip title={`Change Status ${WORK_ORDER_STATUS.onHold}`} placement="top" arrow>
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          size="small"
+                          onClick={() => updateJobStatus(WORK_ORDER_STATUS.onHold)}
+                          className={'btn-outline-v1'}
+                        >
+                          {WORK_ORDER_STATUS.onHold}
+                        </Button>
+                      </HtmlTooltip> : null)
+                }
+                {permissions?.workOrder?.isUpdate &&
+                  allowedToEdit &&
                   workOrderData?.canComplete &&
                   workOrderData?.status !== WORK_ORDER_STATUS.completed && (
                     <div className="relative isolate ">
