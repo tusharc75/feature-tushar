@@ -866,9 +866,9 @@ const Steps = ({
                     Add Steps
                   </Button>
                 )}
-                {serviceDetails?.fields?.length > 0 && resource === sidebarResource.workOrder && (
+                {serviceDetails?.fields?.length > 0 && (
                   <>
-                    {serviceDetails?.serviceFieldsValue && (
+                    {!serviceDetails?.serviceFieldsValue && (
                       <Button
                         variant="outlined"
                         color="primary"
