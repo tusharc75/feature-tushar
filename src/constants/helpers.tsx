@@ -2668,6 +2668,7 @@ export const WORK_ORDER_STATUS = {
   postWork: 'Post-Work In-Progress',
   inProgress: 'In-Progress',
   onHold: 'On-hold',
+  deleted: 'Deleted',
   completed: 'Completed'
 };
 
