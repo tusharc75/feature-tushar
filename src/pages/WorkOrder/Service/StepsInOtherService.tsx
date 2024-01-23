@@ -64,7 +64,7 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
       .then(({ data: { data } }) => {
         const services: any = [];
         data?.services?.forEach((s) => {
-          if (s?.order > service?.order && s?.status !== WORKORDER_SERVICE_STATUS.completed) {
+          if (s?.order > service?.order && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(s?.status)) {
             services.push({
               optionLabel: s?.serviceName,
               optionValue: s?._id,
