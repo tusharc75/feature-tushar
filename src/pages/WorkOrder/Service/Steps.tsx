@@ -59,6 +59,7 @@ import { isDesktop, isMobile, isTablet } from 'react-device-detect';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
 import { WorkStations } from 'src/assets/svg/svgIcons';
 import DiagramDialog from '../Diagram/DiagramDialog';
+import ServiceFieldValueDialig from './ServiceFielValuedDialig';
 
 export interface StepDataInterface {
   _id: string;
@@ -232,6 +233,7 @@ const Steps = ({
   const [addNewStep, setAddNewStep] = useState({ open: false, clone: false, cloneStepData: null });
 
   const [showDrawing, setShowDrawing] = useState(false);
+  const [openServiceFieldValueDialig, setOpenServiceFieldValueDialig] = useState(false)
 
 
   const {
@@ -864,6 +866,19 @@ const Steps = ({
                     startIcon={<AiOutlinePlus />}
                   >
                     Add Steps
+                  </Button>
+                )}
+                {serviceDetails?.fields?.length > 0 && resource === sidebarResource.workOrder && (
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenServiceFieldValueDialig(true)
+                    }}
+                  >
+                    Enter Value
                   </Button>
                 )}
                 {serviceDetails?.steps?.length > 0 && resource === sidebarResource.workOrder && (
@@ -1617,6 +1632,21 @@ const Steps = ({
                   } else {
                     handleStartEnd('reopen', reOpenServiceDialog.stepId);
                   }
+                }}
+              />
+            )}
+            {openServiceFieldValueDialig && (
+              <ServiceFieldValueDialig
+                workOrderId={workOrderId}
+                fields={serviceDetails?.fields || []}
+                fieldsValue={serviceDetails?.serviceFieldsValue || {}}
+                service={selectedService}
+                handleClose={()=>{
+                  setOpenServiceFieldValueDialig(false)
+                }}
+                handleSuccess={()=>{
+                  fetchServiceData()
+                  setOpenServiceFieldValueDialig(false)
                 }}
               />
             )}
