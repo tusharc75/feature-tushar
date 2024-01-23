@@ -51,6 +51,7 @@ import AssignWorkStationDialog from './AssignWorkStationDialog';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
 import ConfigureFields from 'src/pages/ServiceMaster/Fields';
+import MessageIcon from '@material-ui/icons/Message';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -733,13 +734,19 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                               title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
                                             >
                                               <span>
-                                                <WorkStations className=" align-text-top" />
+                                                <WorkStations className="align-text-top" />
                                               </span>
                                             </HtmlTooltip>
                                           </Box>
                                         )}
+                                        {data?.comment &&
+                                          <Box ml={1}>
+                                            <HtmlTooltip enterTouchDelay={0} title={data?.comment}>
+                                              <MessageIcon style={{ fontSize: 20 }} />
+                                            </HtmlTooltip>
+                                          </Box>
+                                        }
                                       </Box>
-
                                       {/* Chips */}
                                       <Box style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', flexBasis: '100%', gap: '8px' }}>
                                         {data?.type === 'service' && (
