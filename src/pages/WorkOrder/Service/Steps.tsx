@@ -868,11 +868,19 @@ const Steps = ({
                     Add Steps
                   </Button>
                 )}
-                {serviceDetails?.fields?.length > 0 && resource === sidebarResource.workOrder && (
+                {serviceDetails?.fields?.length > 0 && (
                   <Button
                     variant="outlined"
                     color="primary"
                     size="small"
+                    disabled={
+                      allowedToEdit &&
+                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                          selectedService?.status
+                        )
+                        ? false
+                        : true
+                    }
                     onClick={(e) => {
                       e.stopPropagation();
                       setOpenServiceFieldValueDialig(true)
@@ -1641,10 +1649,10 @@ const Steps = ({
                 fields={serviceDetails?.fields || []}
                 fieldsValue={serviceDetails?.serviceFieldsValue || {}}
                 service={selectedService}
-                handleClose={()=>{
+                handleClose={() => {
                   setOpenServiceFieldValueDialig(false)
                 }}
-                handleSuccess={()=>{
+                handleSuccess={() => {
                   fetchServiceData()
                   setOpenServiceFieldValueDialig(false)
                 }}
