@@ -164,6 +164,7 @@ export default function NewCreateQuotePdfTemplate() {
     if (id && id !== '0') {
       (async () => {
         let tempPdfTemplate = null;
+        let tempQuoteData = null;
         if (queryParams.quote && queryParams.version) {
           history.replace(`?quote=${queryParams.quote}&version=${queryParams.version}`);
           try {
@@ -177,10 +178,12 @@ export default function NewCreateQuotePdfTemplate() {
               setHasPermissionToUpdate(true);
             }
             tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
+            tempQuoteData = data;
           } catch (e) {
             toastConfig.setToastConfig(e);
           }
-        } else if (queryParams.quotation && queryParams.version) {
+        }
+        else if (queryParams.quotation && queryParams.version) {
           history.replace(`?quotation=${queryParams.quotation}&version=${queryParams.version}`);
           try {
             const res = await axiosInstance().get(`${quotation.api}/${queryParams?.quotation}?entity=${selectedEntity}`);
@@ -193,6 +196,7 @@ export default function NewCreateQuotePdfTemplate() {
               setHasPermissionToUpdate(true);
             }
             tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
+            tempQuoteData = data;
           } catch (e) {
             toastConfig.setToastConfig(e);
           }
@@ -246,7 +250,7 @@ export default function NewCreateQuotePdfTemplate() {
               aboveTable: data?.aboveTable,
               belowTable: data?.belowTable
             });
-            if (quoteData?._id) {
+            if (tempQuoteData?._id) {
               setHasPermissionToUpdate(true);
             } else if (
               data?.owner &&
