@@ -17,21 +17,6 @@ import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { debounce } from 'lodash';
 
-const colorPalette = [
-  { iconsColor: ['#059825', '#059825 ', '#60D778'], color: '#F9FDEC' },
-  { iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'], color: '#FFEFEE' },
-  { iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'], color: '#F3F8FF' },
-  { iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6'], color: '#FFFAEC' },
-  { iconsColor: ['#AD14F5', '#6203AC', '#BE74E5'], color: '#F6F1FF' },
-  { iconsColor: ['#FFA800', '#E35200', '#FBC56E'], color: '#EBEBEB' },
-  { iconsColor: ['#059825', '#059825', '#60D778'], color: '#F9FDEC' },
-  { iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'], color: '#FFEFEE' },
-  { iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6 '], color: '#FFFAEC' },
-  { iconsColor: ['#059825', '#059825', '#60D778'], color: '#F9FDEC' },
-  { iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'], color: '#FFEFEE' },
-  { iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'], color: '#F3F8FF' }
-];
-
 type TReportFromHelper = {
   title: string;
   permission: string;
