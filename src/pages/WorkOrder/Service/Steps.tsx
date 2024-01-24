@@ -1412,6 +1412,23 @@ const Steps = ({
                   >
                     Clone Step
                   </MenuItem>
+                  <MenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), selectedStep._id);
+                      setAnchorEl(null);
+                    }}
+                    disabled={
+                      allowedToEdit &&
+                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                          selectedService?.status
+                        )
+                        ? false
+                        : true
+                    }
+                  >
+                    Skip Step
+                  </MenuItem>
                   {resource === sidebarResource.workOrder && (
                     <MenuItem
                       onClick={(e) => {
