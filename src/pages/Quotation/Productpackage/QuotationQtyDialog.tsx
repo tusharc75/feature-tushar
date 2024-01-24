@@ -468,9 +468,9 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                               (field.fieldName === 'pricingCondition' || field.fieldName === 'pricingMethod') &&
                                               initialData.fields?.find((e) => e.fieldName === 'pricingMethod')
                                             ) {
-                                              if(field.fieldName === 'pricingCondition'){
-                                                setFieldValue('pricingMethod', '');
-                                              }
+                                              // if(field.fieldName === 'pricingCondition'){
+                                              //   setFieldValue('pricingMethod', '');
+                                              // }
                                               
                                               const priceConditionOption = uniqBy(
                                                 (value !== ''
@@ -513,11 +513,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                               } else if (field.fieldName === 'pricingMethod') {
                                                 initialData?.fields.forEach((element) => {
                                                   if (element.fieldName === 'pricingCondition') {
-                                                    if (value === '') {
                                                       element.option = priceConditionOption;
-                                                    } else {
-                                                      element.option = priceConditionOption;
-                                                    }
                                                   }
                                                 });
                                                 setInitialData(initialData);
@@ -534,9 +530,16 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                               //     })
                                               // );
                                               let priceFieldName = 'price_' + quotationData?.currency?.toLowerCase();
-                                              const priceValue = priceConditionListConst?.find((d) => d.conditionId === value);
+                                              
+                                              let priceValue
+                                              if(field.fieldName==='pricingCondition'){
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod=== values['pricingMethod']);
+                                              }else{
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod=== value);
+                                              }
+                                             
                                               const result = autoCalculateSpecificFields(
-                                                { [priceFieldName]: priceValue?.mrp, [field.fieldName]: value },
+                                                { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
                                                 values,
                                                 initialData.fields
                                               );
