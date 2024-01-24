@@ -14,6 +14,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import Loader from 'src/components/Loader';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
+import { kebabCase } from 'lodash';
 
 type ValueTypes = {
   customReportName: string;
@@ -46,8 +47,8 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
   useEffect(() => {
     const options = []
     REPORT_LIST?.forEach((item) => {
-      if (permissions[item.permission] && permissions[item.permission]?.isRead === true && item.key !== "purchaseOrderType") {
-        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key })
+      if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
+        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key, type: item.type })
       }
     })
     setResourceOption(options)
@@ -83,6 +84,28 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
       });
     }
   }, [id]);
+
+  const fetchGridColumns = async (resource: any) => {
+    if (resource.key === 'standardReport') {
+      let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${kebabCase(resource.type)}/column`);
+      setResourceColumns(columnFields);
+    }
+    else {
+      const { data: { data } }: any = await axiosInstance().get(`/field?resource=${resource.value}`);
+      if (resource.value === 'Serialized Asset') {
+        const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+        if (lookupResource) {
+          data?.forEach((e) => {
+            if (e?.fieldData?.fieldName === 'currentOwner') {
+              e.fieldData.lookup = true;
+              e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
+            }
+          });
+        }
+      }
+      setResourceColumns(data);
+    }
+  };
 
   useEffect(() => {
     if (!scheduleData) return;
@@ -143,169 +166,34 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
   useEffect(() => {
     if (!resourceColumns && resourceColumns.length === 0) return;
     const optionsData: any = {};
-    const filteredData = [...resourceColumns]
-      .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'date' || d.fieldData.type === 'checkBox'))
-      .map((d: any) => {
-        if (d.fieldData.type === 'dropDown') {
-          optionsData[d.fieldData.fieldName] = {
-            options: d.fieldData.option,
-            type: d.fieldData.type,
-            lookup: Boolean(d?.fieldData.lookup)
-          };
-        }
-        if (d.fieldData.type === 'date') {
-          d['timeFrame'] = 'custom';
-        }
-        return d.fieldData;
-      });
+    const filteredData = [...resourceColumns].filter((d: any) => d.isRead && (['dropDown', 'date', 'checkBox', 'singleLine']?.includes(d.fieldData.type))).map((d: any) => {
+      if (d.fieldData.type === 'dropDown') {
+        optionsData[d.fieldData.fieldName] = {
+          options: d.fieldData.option,
+          type: d.fieldData.type,
+          lookup: Boolean(d?.fieldData.lookup)
+        };
+      }
+      if (d.fieldData.type === 'date') {
+        d['timeFrame'] = 'custom';
+      }
+      return d.fieldData;
+    });
     setResourceOptions(optionsData);
     if (id || formikRef.current?.values?.resource) {
       setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
     }
   }, [resourceColumns, formikRef.current?.values?.resource]);
 
-  const fetchGridColumns = async (resource: any) => {
-    if (resource.key === 'purchaseOrderType') {
-      let resourceFieldData = [];
-      if (resource.value === 'Purchase Order Product') {
-        let {
-          data: { data: POFields }
-        } = await axiosInstance().get(`/field?resource=Purchase Order`);
-        let {
-          data: { data: POProductFields }
-        } = await axiosInstance().get(`/field?resource=Purchase Order Product`);
-        let {
-          data: { data: productFields }
-        } = await axiosInstance().get(`/field?resource=Product`);
-        let {
-          data: { data: productOption }
-        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
-
-        POFields.filter((field) =>
-          ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
-        ).forEach((field: any) => {
-          resourceFieldData.push(field);
-        });
-
-        productFields
-          .filter((field) => ['productName'].includes(field?.fieldData.fieldName))
-          .forEach((field: any) => {
-            resourceFieldData.push({
-              ...field,
-              fieldData: { ...field.fieldData, fieldName: 'productId', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
-            });
-          });
-
-        POProductFields.forEach((f) => {
-          if (['expectedDelivery', 'unit', 'taxSchedule'].includes(f.fieldData.fieldName)) {
-            f = {
-              ...f,
-              fieldData: {
-                ...f.fieldData,
-                type: ''
-              }
-            };
-          }
-
-          resourceFieldData.push(f);
-        });
-
-        resourceFieldData.push({
-          fieldData: {
-            fieldName: 'soldQty',
-            fieldLabel: 'Sold Qty',
-            type: 'text'
-          }
-        });
-      } else if (resource.value === 'Product Average Costing') {
-        let {
-          data: { data: productFields }
-        } = await axiosInstance().get(`/field?resource=Product`);
-        let {
-          data: { data: POFields }
-        } = await axiosInstance().get(`/field?resource=Purchase Order`);
-
-        POFields.filter((field) => ['purchaseOrderDate', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
-          if (field?.fieldData.fieldName === 'warehouse') {
-            resourceFieldData.push(field);
-          }
-          if (field?.fieldData.fieldName === 'purchaseOrderDate') {
-            resourceFieldData.push({
-              ...field,
-              fieldData: { ...field.fieldData, fieldLabel: 'Date', fieldName: 'date', type: 'date' }
-            });
-          }
-        });
-
-        productFields.forEach((o: any) => {
-          resourceFieldData.push(o);
-        });
-
-        resourceFieldData.push(
-          {
-            fieldData: {
-              fieldName: 'qty',
-              fieldLabel: 'Qty',
-              type: 'text'
-            }
-          },
-          {
-            fieldData: {
-              fieldName: 'unitPrice',
-              fieldLabel: 'Unit Price',
-              type: 'text'
-            }
-          },
-          {
-            fieldData: {
-              fieldName: 'total',
-              fieldLabel: 'Total',
-              type: 'text'
-            }
-          }
-        );
-        if (productFields?.filter((e) => e.fieldData.fieldName === 'listPrice')?.length) {
-          resourceFieldData.push({
-            fieldData: {
-              fieldName: 'margin',
-              fieldLabel: 'Margin',
-              type: 'text'
-            }
-          });
-        }
-      }
-
-      setResourceColumns(resourceFieldData);
-    } else {
-      const { data: { data } }: any = await axiosInstance().get(`/field?resource=${resource.value}`);
-      if (resource.value === 'Serialized Asset') {
-        const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
-        if (lookupResource) {
-          data?.forEach((e) => {
-            if (e?.fieldData?.fieldName === 'currentOwner') {
-              e.fieldData.lookup = true;
-              e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
-            }
-          });
-        }
-      }
-      setResourceColumns(data);
-    }
-  };
-
   const handleSelectFilter = (type: string, name: string, value: any) => {
     let fieldProps: any = {};
-    if (type === 'date') {
-      fieldProps.type = 'date';
-      fieldProps.lookup = false;
-    }
-    else if (type === 'checkBox') {
-      fieldProps.type = 'checkBox';
-      fieldProps.lookup = false;
-    }
-    else {
+    if (type === 'dropDown' || type === 'multiSelect') {
       fieldProps.type = resourceOptions[name].type;
       fieldProps.lookup = resourceOptions[name].lookup;
+    }
+    else {
+      fieldProps.type = type;
+      fieldProps.lookup = false;
     }
     const newData: any = {
       type: fieldProps.type,
@@ -345,6 +233,14 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
           };
           filters.push(obj);
         }
+        else if (selectedData[key]?.type === 'singleLine') {
+          let obj = {
+            type: selectedData[key]?.type,
+            term: key,
+            value: selectedData[key].value
+          };
+          filters.push(obj);
+        }
         else {
           if (selectedData[key] && selectedData[key]?.value?.length) {
             let obj = {
@@ -370,6 +266,8 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
         }
       });
     }
+    console.log(selectedData)
+    console.log(filters)
     const newValues = {
       ...values,
       filters,

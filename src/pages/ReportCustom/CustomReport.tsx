@@ -52,6 +52,7 @@ const CustomReport = () => {
   const { rowCount, page, limit, search, filters, sorting, loading } = state;
 
   const renderedFrom = `custom-report_${id}`;
+  let resourceCamelCase = camelCase(resource);
 
   const fetchGridColumns = async (res) => {
     setLoadingColumns(true);
@@ -123,9 +124,6 @@ const CustomReport = () => {
 
   React.useEffect(() => {
     if (showGrid && resource) {
-      // if (gridApi && dataRows?.length == 0) {
-      //   setTimeout(() => { gridApi.sizeColumnsToFit(); }, 300);
-      // }
       fetchResourceData();
     }
   }, [resource, page, sorting, search, limit, filters, selectedEntity, customReportData]);
@@ -148,16 +146,19 @@ const CustomReport = () => {
 
   const fetchResourceData = () => {
     setShowGrid(true);
-    let filterQuery = getFilter();
+    let queryString = getQueryString();
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .get(`${camelCase(resource) !== 'quotes' ? routes[camelCase(resource)].path : 'quote-builder'}/report${filterQuery}`, {
-        cancelToken: cancelTokenSource.token
-      })
+    let api = `/report${routes[resourceCamelCase].path}${queryString}`;;
+    if (resourceCamelCase === 'quotes') {
+      api = `/report/quote-builder/${queryString}`;
+    } else {
+      api = `/report${routes[resourceCamelCase].path}${queryString}`;
+    }
+    axiosInstance().get(api, { cancelToken: cancelTokenSource.token })
       .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
@@ -178,35 +179,39 @@ const CustomReport = () => {
       });
   };
 
-  const getFilter = (isExport = false) => {
-    let filterQuery = `page=${page}&`;
-    if (!isExport) {
-      filterQuery = `${filterQuery}limit=${limit}&`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
     }
-    if (sorting.length > 0) {
-      filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
-    }
-    if (search) {
-      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
-    }
-    let deepFilter = [];
+    let customDeepFilter = [];
     customReportData?.filters?.forEach((filter: any) => {
       if (filter?.type === 'checkBox') {
-        deepFilter.push({
+        customDeepFilter.push({
           field: filter.term,
           term: filter.value ? 'Yes' : 'No'
         });
-      } else {
-        deepFilter.push({
+      }
+      else {
+        customDeepFilter.push({
           field: filter.term,
           term: filter.value
         });
       }
     });
-    if (deepFilter && deepFilter.length > 0) {
-      filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
+    if (customDeepFilter && customDeepFilter?.length > 0) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(customDeepFilter))}`;
     }
-    return `?${filterQuery}`;
+    if (customDeepFilter?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+    return deepFilter;
   };
 
   const exportData = () => {
@@ -222,12 +227,12 @@ const CustomReport = () => {
         ? columns.filter((col) => customReportData?.column.includes(col.accessor)).map((col) => col.accessor)
         : columns.map((col) => col.accessor);
     setExporting(true);
-    let filterQuery = getFilter(true);
+    let queryString = getQueryString(true);
     axiosInstance()
       .get(
         `${camelCase(resource) !== 'quotes' ? routes[camelCase(resource)].path : 'quote-builder'}/report/export?exportColumn=${JSON.stringify(
           exportColumns
-        )}&export=1&${filterQuery}`,
+        )}&export=1&${queryString}`,
         {
           responseType: 'arraybuffer'
         }
