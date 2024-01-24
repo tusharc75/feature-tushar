@@ -10,12 +10,10 @@ import {
   MoreHoriz,
   DeleteOutline,
   People,
-  AddCircleOutline,
   FileCopyOutlined
 } from '@material-ui/icons';
 import {
   convertMsToTime,
-  CustomDialogTransition,
   getChipColor,
   getObjKeys,
   getObjKeysWithValues,
@@ -34,11 +32,9 @@ import {
   Chip,
   Menu,
   MenuItem,
-  ClickAwayListener,
   useMediaQuery,
   Checkbox,
   CircularProgress,
-  Dialog
 } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -1057,7 +1053,8 @@ const Steps = ({
                                       [
                                         WORKORDER_SERVICE_STEP_STATUS.passed,
                                         WORKORDER_SERVICE_STEP_STATUS.failed,
-                                        WORKORDER_SERVICE_STEP_STATUS.completed
+                                        WORKORDER_SERVICE_STEP_STATUS.completed,
+                                        WORKORDER_SERVICE_STEP_STATUS.skipped
                                       ].includes(stepData?.passFailStatus)
                                     }
                                     onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
@@ -1315,7 +1312,8 @@ const Steps = ({
                                 [
                                   WORKORDER_SERVICE_STEP_STATUS.passed,
                                   WORKORDER_SERVICE_STEP_STATUS.failed,
-                                  WORKORDER_SERVICE_STEP_STATUS.completed
+                                  WORKORDER_SERVICE_STEP_STATUS.completed,
+                                  WORKORDER_SERVICE_STEP_STATUS.skipped
                                 ].includes(stepData?.passFailStatus)
                               }
                               onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
@@ -1413,6 +1411,23 @@ const Steps = ({
                     }
                   >
                     Clone Step
+                  </MenuItem>
+                  <MenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), selectedStep._id);
+                      setAnchorEl(null);
+                    }}
+                    disabled={
+                      allowedToEdit &&
+                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                          selectedService?.status
+                        )
+                        ? false
+                        : true
+                    }
+                  >
+                    Skip Step
                   </MenuItem>
                   {resource === sidebarResource.workOrder && (
                     <MenuItem
