@@ -23,6 +23,7 @@ const AssignServiceDialog = ({
   extraStaticFilter = [],
   isSubmitting = false,
   hideQty = false,
+  extraFilterById = null,
   pricingCondition = null
 }) => {
   const renderedFrom = `${camelCase(routes.serviceMaster?.title)}_Assign`;
@@ -139,6 +140,11 @@ const AssignServiceDialog = ({
           updatedFilters.push(e);
         }
       });
+    }
+    if (extraFilterById && extraFilterById?.length) {
+      extraFilterById?.forEach((e) => {
+        filterByIds.push(e)
+      })
     }
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
