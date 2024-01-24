@@ -743,6 +743,18 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     }
   }
 
+  const checkDisabledCompleteService = () => {
+    let flag = true;
+    selectedRecords?.forEach(s => {
+      if(s?.assignedUsers?.length > 0){
+        if(!s?.assignedUsers?.map(a => a?.optionValue).includes(user?.user?._id)){
+          flag = false
+        }
+      }
+    });
+    return flag;
+  }
+
   return (
     <Fragment>
       {isAutoCreating && (
@@ -985,7 +997,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   setShowServiceCompleteConfirmBox(true);
                   closeActions();
                 }}
-                disabled={selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending)?.length ? false : true}
+                disabled={checkDisabledCompleteService() && selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending)?.length ? false : true}
               >
                 Complete Service
               </MenuItem>
