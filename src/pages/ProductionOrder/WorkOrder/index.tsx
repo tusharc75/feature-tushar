@@ -77,7 +77,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [isAutoCreating, setIsAutoCreating] = useState(true);
 
   const [serviceOptions, setServiceOptions] = useState([]);
-  const [selectedServiceOption, setSelectedServiceOption] = useState([]);
+  const [selectedServiceOption, setSelectedServiceOption] = useState(null);
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -400,8 +400,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     dispatch({ type: 'loading', loading: true });
     if (selectionReset) {
       dispatch({ type: 'selection', selectedRecords: [] });
-      if (selectedServiceOption?.length) {
-        setSelectedServiceOption([])
+      if (selectedServiceOption) {
+        setSelectedServiceOption(null);
       }
     }
 
@@ -416,15 +416,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       parent.detail = parent.detail
         ? parent.detail
         : parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.packageDetail?.packageName;
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.packageDetail?.packageName;
       parent.description = parent.description
         ? parent.description
         : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription
-          : parent?.packageDetail?.packageDescription;
+        ? parent?.productDetail?.productDescription
+        : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
@@ -456,17 +456,17 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.detail = _subRow.detail
         ? _subRow.detail
         : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.packageDetail?.packageName;
+        ? _subRow?.serviceDetail?.serviceName
+        : _subRow.type === MATERIAL_TYPE.product
+        ? _subRow.productDetail?.productName
+        : _subRow.packageDetail?.packageName;
       _subRow.description = _subRow.description
         ? _subRow.description
         : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceDescription
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription
-            : _subRow?.packageDetail?.packageDescription;
+        ? _subRow?.serviceDetail?.serviceDescription
+        : _subRow.type === MATERIAL_TYPE.product
+        ? _subRow?.productDetail?.productDescription
+        : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -701,13 +701,16 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const handleCompleteService = () => {
     setSubmitting(true);
-    const data = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending)?.map((e) => ({
-      workOrder: e?.workOrder?._id,
-      service: e?.serviceDetail?._id,
-      uniqueId: e?.uniqueId,
-      status: WORKORDER_SERVICE_STATUS.completed
-    }));
-    axiosInstance().put(`${workOrder.api}/service/work-orders-services-status`, data)
+    const data = selectedRecords
+      ?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending)
+      ?.map((e) => ({
+        workOrder: e?.workOrder?._id,
+        service: e?.serviceDetail?._id,
+        uniqueId: e?.uniqueId,
+        status: WORKORDER_SERVICE_STATUS.completed
+      }));
+    axiosInstance()
+      .put(`${workOrder.api}/service/work-orders-services-status`, data)
       .then(({ data }) => {
         setSubmitting(false);
         setShowServiceCompleteConfirmBox(false);
@@ -727,21 +730,49 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const handleServiceSelect = (newValue) => {
     setSelectedServiceOption(newValue);
-    if (newValue && newValue?.length) {
+    if (newValue) {
       dispatch({ type: 'selection', selectedRecords: [] });
       setTimeout(() => {
         dispatch({
           type: 'selection',
-          selectedRecords: flattenArray(dataRows)?.filter(
-            (_f) => newValue?.map((s) => s?.optionValue).includes(_f?.serviceDetail?._id) && !_f?.hideSelection
-          )
+          selectedRecords: flattenArray(dataRows)?.filter((_f) => [newValue?.optionValue].includes(_f?.serviceDetail?._id) && !_f?.hideSelection)
         });
       }, 100);
-    }
-    else {
+    } else {
       dispatch({ type: 'selection', selectedRecords: [] });
     }
-  }
+  };
+
+  const isDisabledCompleteService = () => {
+    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending);
+    if (records?.length === 0) {
+      return true;
+    }
+
+    const data = [];
+    
+    records?.forEach((record) => {
+      let disabled = false;
+      if (record?.assignedUsers?.length > 0) {
+        if (!record?.assignedUsers?.map((a) => a?.optionValue).includes(user?.user?._id)) {
+          disabled = true;
+        }
+      }
+
+      if (!disabled) {
+        if (
+          dataRows
+            ?.find((d) => d?._id === record?.parentId)
+            ?.subRows?.filter((s) => s?.order < record?.order)
+            ?.every((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status))
+        ) {
+          data.push(record);
+        }
+      }
+    });
+
+    return !(data?.length === records?.length);
+  };
 
   return (
     <Fragment>
@@ -754,20 +785,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <Box>
           <Autocomplete
             style={{ width: '300px' }}
-            multiple
             options={serviceOptions}
             getOptionLabel={(option) => option?.optionLabel || ''}
-            renderOption={(option: any) => (
-              <React.Fragment>
-                <Checkbox checked={selectedServiceOption?.some((_s) => _s.optionValue === option.optionValue)} />
-                {option?.optionLabel}
-              </React.Fragment>
-            )}
+            // renderOption={(option: any) => (
+            //   <React.Fragment>
+            //     <Checkbox checked={selectedServiceOption?.some((_s) => _s.optionValue === option.optionValue)} />
+            //     {option?.optionLabel}
+            //   </React.Fragment>
+            // )}
             size="small"
             renderInput={(params) => <TextField {...params} label="Select Service" variant="outlined" />}
             value={selectedServiceOption}
             onChange={(event: any, newValue: any) => {
-              handleServiceSelect(newValue)
+              handleServiceSelect(newValue);
             }}
           />
         </Box>
@@ -900,7 +930,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                      checkUniqWorkOrder()
+                    checkUniqWorkOrder()
                       ? false
                       : true
                   }
@@ -931,8 +961,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 }}
                 disabled={
                   selectedRecords?.length &&
-                    selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-                    selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+                  selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+                  selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
                     ? false
                     : true
                 }
@@ -952,8 +982,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               <MenuItem
                 disabled={
                   checkUniqWorkOrder() &&
-                    (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-                      selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+                  (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+                    selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
                     ? false
                     : true
                 }
@@ -985,7 +1015,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   setShowServiceCompleteConfirmBox(true);
                   closeActions();
                 }}
-                disabled={selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending)?.length ? false : true}
+                disabled={isDisabledCompleteService()}
               >
                 Complete Service
               </MenuItem>
