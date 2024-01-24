@@ -18,8 +18,9 @@ import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import { ExpandMore, Info } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import TechnicianDialog from '../TechnicianDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
-const GridView = ({ serviceStatus, filterQuery }) => {
+const GridView = ({ serviceStatus, filterQuery, permissions }) => {
   const renderedFrom = camelCase(routes?.workOrderTechnician.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -193,8 +194,11 @@ const GridView = ({ serviceStatus, filterQuery }) => {
           let finalObject: any = prepareDataForGrid(u, user);
           let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
           finalObject['serviceName'] = u?.service?.serviceName;
+          finalObject['serviceId'] = u?.service?._id;
           finalObject['serviceStatus'] = u?.status;
           finalObject['workOrderId'] = u?.workOrderDetail?._id;
+          const matchedTempMaterial = workOrderDetailData?.tempMaterial?.find(t => t?.materialId === u?.service?._id);
+          finalObject['uniqueId'] = matchedTempMaterial?._id;
           delete workOrderDetailData?._id;
           delete workOrderDetailData?.id;
           return { ...finalObject, ...workOrderDetailData };
@@ -270,6 +274,16 @@ const GridView = ({ serviceStatus, filterQuery }) => {
             })}
           </Tabs>
           <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
+            <ImportExportMenu
+              permissions={permissions}
+              module={sidebarResource.workOrderTechnician}
+              api={`work-order-technician`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              disabled={selectedRecords.length!==1}
+              additionalParams={`productionOrder=${selectedRecords[0]?.productionOrderId}&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
+            />
             <Button
               variant="outlined"
               color="default"
