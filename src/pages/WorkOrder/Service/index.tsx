@@ -1238,7 +1238,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 Complete Service
               </MenuItem>
               <MenuItem
-                disabled={[WORKORDER_SERVICE_STATUS.pending].includes(selectedService?.status) ? false : true}
+                disabled={[WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) ? false : true}
                 onClick={() => {
                   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.skipped);
                   setAnchorEl(null);
