@@ -8,7 +8,6 @@ import { workOrder, WORKORDER_SERVICE_STEP_STATUS, yupSchema, convertMsToTime, s
 import { dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
 import styles from './StepFieldsDialog.module.scss';
-import CloseIcon from '@material-ui/icons/Close';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -24,7 +23,6 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
-import { isEmpty } from 'lodash';
 import CustomButton from 'src/components/Helpers/CustomButton';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -102,8 +100,9 @@ const StepFieldsDialog = ({
   allowedToEdit,
   isSubmitting,
   selectedService = null,
-  eidtable = true,
-  open = true
+  editable = true,
+  open = true,
+  nextStep = false
 }) => {
   const classes = useStyles();
   const {
@@ -112,7 +111,7 @@ const StepFieldsDialog = ({
     }
   } = useData();
 
-  const [isEditing, setEditing] = React.useState(eidtable);
+  const [isEditing, setEditing] = React.useState(editable);
   const [viewStep, setViewStep] = React.useState(false);
   const toastConfig = useContext(CustomToastContext);
   const containerRef = React.useRef(null);
@@ -125,6 +124,9 @@ const StepFieldsDialog = ({
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
 
   const steps = selectedService?.steps || [];
+
+  const [saveAndComplete, setSaveAndComplete] = React.useState({ saveAndComplete: false, saveAndNextAndComplete: false });
+
 
   const RenderStepData = () => {
     const [time, setTime] = React.useState(
@@ -266,6 +268,16 @@ const StepFieldsDialog = ({
         handleClose();
       });
   };
+
+  const handleSubmitData = async (values) => {
+    if (saveAndComplete.saveAndComplete || saveAndComplete.saveAndNextAndComplete) {
+      handleSubmit(values, step, saveAndComplete.saveAndComplete, saveAndComplete.saveAndNextAndComplete);
+    }
+    else {
+      handleSubmit(values, step);
+    }
+  }
+
   return (
     <>
       <Dialog
@@ -295,7 +307,7 @@ const StepFieldsDialog = ({
         <Formik
           initialValues={fieldData?.values}
           validationSchema={yupSchema(fieldData?.fields)}
-          onSubmit={(values) => { }}
+          onSubmit={handleSubmitData}
           enableReinitialize
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
@@ -462,10 +474,8 @@ const StepFieldsDialog = ({
                           variant="contained"
                           color="primary"
                           onClick={() => {
+                            setSaveAndComplete({ saveAndComplete: false, saveAndNextAndComplete: false })
                             submitForm();
-                            if (isEmpty(errors)) {
-                              handleSubmit(values, step);
-                            }
                           }}
                         >
                           {' '}
@@ -480,15 +490,30 @@ const StepFieldsDialog = ({
                               variant="contained"
                               color="primary"
                               onClick={() => {
+                                setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: false })
                                 submitForm();
-                                if (isEmpty(errors)) {
-                                  handleSubmit(values, step, true);
-                                }
                               }}
                             >
                               {' '}
-                              Save & Complete
+                              Complete
                             </CustomButton>
+                            {nextStep &&
+                              <>
+                                <Box ml={1} />
+                                <CustomButton
+                                  disabled={isSubmitting}
+                                  loading={isSubmitting}
+                                  variant="contained"
+                                  color="primary"
+                                  onClick={() => {
+                                    setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: true })
+                                    submitForm();
+                                  }}
+                                >
+                                  {' '}
+                                  Complete & Next
+                                </CustomButton>
+                              </>}
                           </>
                         }
                       </>
