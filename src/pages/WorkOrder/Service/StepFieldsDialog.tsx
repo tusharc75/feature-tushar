@@ -20,12 +20,12 @@ import { RenderPassFailChip } from './Steps';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from 'src/components/FormBuilder/AddField';
-
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
 import { isEmpty } from 'lodash';
+import CustomButton from 'src/components/Helpers/CustomButton';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -100,6 +100,7 @@ const StepFieldsDialog = ({
   stepData,
   resource,
   allowedToEdit,
+  isSubmitting,
   selectedService = null,
   eidtable = true,
   open = true
@@ -455,35 +456,41 @@ const StepFieldsDialog = ({
                           Cancel
                         </Button>
                         <Box ml={1} />
-                        <Button
+                        <CustomButton
+                          disabled={isSubmitting}
+                          loading={isSubmitting}
                           variant="contained"
-                          size="small"
+                          color="primary"
                           onClick={() => {
                             submitForm();
                             if (isEmpty(errors)) {
-                              setEditing(false);
                               handleSubmit(values, step);
                             }
                           }}
-                          color="primary"
                         >
+                          {' '}
                           Save
-                        </Button>
-                        <Box ml={1} />
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => {
-                            submitForm();
-                            if (isEmpty(errors)) {
-                              setEditing(false);
-                              handleSubmit(values, step, true);
-                            }
-                          }}
-                          color="primary"
-                        >
-                          Save & Complete
-                        </Button>
+                        </CustomButton>
+                        {!step?.isPassFail &&
+                          <>
+                            <Box ml={1} />
+                            <CustomButton
+                              disabled={isSubmitting}
+                              loading={isSubmitting}
+                              variant="contained"
+                              color="primary"
+                              onClick={() => {
+                                submitForm();
+                                if (isEmpty(errors)) {
+                                  handleSubmit(values, step, true);
+                                }
+                              }}
+                            >
+                              {' '}
+                              Save & Complete
+                            </CustomButton>
+                          </>
+                        }
                       </>
                     )}
                   </div>

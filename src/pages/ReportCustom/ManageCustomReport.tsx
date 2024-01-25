@@ -32,7 +32,6 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
   const [formData, setFormData] = useState(null);
   const [resourceColumns, setResourceColumns] = useState([]);
   const [filterOptions, setFilterOptions] = useState([]);
-  const [resourceOptions, setResourceOptions] = useState(null);
   const [selectedData, setSelectedData] = useState(null);
   const [statusTimeFrame, setStatusTimeFrame] = useState('custom');
   const [statusPeriod, setStatusPeriod] = useState(false);
@@ -189,53 +188,9 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     return () => clearTimeout(timeout);
   }, [scheduleData, filterOptions, resourceColumns]);
 
-  // useEffect(() => {
-  //   if (!resourceColumns && resourceColumns.length === 0) return;
-  //   const optionsData: any = {};
-  //   const filteredData = [...resourceColumns]
-  //     .filter((d: any) => d.isRead && ['dropDown', 'date', 'checkBox', 'singleLine']?.includes(d.fieldData.type))
-  //     .map((d: any) => {
-  //       if (d.fieldData.type === 'dropDown') {
-  //         optionsData[d.fieldData.fieldName] = {
-  //           options: d.fieldData.option,
-  //           type: d.fieldData.type,
-  //           lookup: Boolean(d?.fieldData.lookup)
-  //         };
-  //       }
-  //       if (d.fieldData.type === 'date') {
-  //         d['timeFrame'] = 'custom';
-  //       }
-  //       return d.fieldData;
-  //     });
-  //   setResourceOptions(optionsData);
-  //   if (id || formikRef.current?.values?.resource) {
-  //     console.log('filteredData', filteredData);
-  //     // setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
-  //   }
-  // }, [resourceColumns, formikRef.current?.values?.resource]);
 
   const handleSelectFilter = (type: string, name: string, value: any) => {
-    // console.log('ssssssss', type, name, value);
-    // console.log('resourceOptions', resourceOptions);
-    // let fieldProps: any = {};
-    // if (type === 'dropDown' || type === 'multiSelect') {
-    //   fieldProps.type = resourceOptions[name].type;
-    //   fieldProps.lookup = resourceOptions[name].lookup;
-    // } else {
-    //   fieldProps.type = type;
-    //   fieldProps.lookup = false;
-    // }
-    // const newData: any = {
-    //   type: fieldProps.type,
-    //   lookup: fieldProps.lookup
-    // };
-    // if (Array.isArray(value)) {
-    //   newData.value = resourceOptions[name].options?.filter((d) => value?.includes(d.optionValue));
-    //   setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
-    // } else {
-    // newData.value = value;
     setSelectedData((prevState) => ({ ...prevState, [name]: { type, value } }));
-    // }
     setFilterValues((prevState) => ({ ...prevState, [name]: value }));
   };
 
