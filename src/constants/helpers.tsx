@@ -2665,12 +2665,10 @@ export const PRODUCTION_ORDER_STATUS = {
 export const WORK_ORDER_STATUS = {
   new: 'New',
   preWork: 'Pre-Work In-Progress',
-  // buildingQuote: 'Building Quote',
-  // waitingQuote: 'Waiting On Quote',
-  // quoteAccepted: 'Quote Accepted',
-  // quoteRejected: 'Quote Rejected',
   postWork: 'Post-Work In-Progress',
   inProgress: 'In-Progress',
+  onHold: 'On-hold',
+  deleted: 'Deleted',
   completed: 'Completed'
 };
 

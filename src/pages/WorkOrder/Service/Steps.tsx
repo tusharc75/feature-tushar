@@ -10,12 +10,10 @@ import {
   MoreHoriz,
   DeleteOutline,
   People,
-  AddCircleOutline,
   FileCopyOutlined
 } from '@material-ui/icons';
 import {
   convertMsToTime,
-  CustomDialogTransition,
   getChipColor,
   getObjKeys,
   getObjKeysWithValues,
@@ -34,11 +32,9 @@ import {
   Chip,
   Menu,
   MenuItem,
-  ClickAwayListener,
   useMediaQuery,
   Checkbox,
   CircularProgress,
-  Dialog
 } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -233,8 +229,8 @@ const Steps = ({
   const [addNewStep, setAddNewStep] = useState({ open: false, clone: false, cloneStepData: null });
 
   const [showDrawing, setShowDrawing] = useState(false);
-  const [openServiceFieldValueDialig, setOpenServiceFieldValueDialig] = useState(false)
-
+  const [openServiceFieldValueDialig, setOpenServiceFieldValueDialig] = useState(false);
+  const [isEditableServiceFieldValueDialog, setIsEditableServiceFieldValueDialog] = useState(false);
 
   const {
     state: {
@@ -435,10 +431,10 @@ const Steps = ({
       stepData = tempServiceData;
       if (step?.fields?.length) {
         let isDataAlreadyAdded = false;
-        const fieldNames = step?.fields?.map((e) => e.fieldName)
+        const fieldNames = step?.fields?.map((e) => e.fieldName);
         for (var key in tempServiceData) {
           if (fieldNames?.includes(key)) {
-            isDataAlreadyAdded = true
+            isDataAlreadyAdded = true;
           }
         }
         fieldData = {
@@ -792,12 +788,10 @@ const Steps = ({
 
   let isStepsAllowToPerform = false;
   if (selectedService?.assignedUsers?.length) {
-    isStepsAllowToPerform = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) ? true : false
-  }
-  else if (selectedService?.competencies?.filter(e => user?.competencies?.includes(e))?.length) {
+    isStepsAllowToPerform = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) ? true : false;
+  } else if (selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length) {
     isStepsAllowToPerform = true;
-  }
-  else if (allowedToEdit) {
+  } else if (allowedToEdit) {
     isStepsAllowToPerform = true;
   }
 
@@ -808,13 +802,13 @@ const Steps = ({
           <Box className={`max-[768px]:mb-[70px] relative overflow-hidden`}>
             <div className="flex justify-between items-center gap-[8px] p-[8px] flex-wrap">
               <div className="flex items-center gap-[15px] flex-wrap pl-2">
-                {(allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck)) ? (
+                {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
                   <>
                     <label htmlFor="select-all" className={`cursor-pointer`}>
                       <Checkbox id="select-all" color="primary" checked={isAllChecked()} onChange={() => checkAll()} />
                       <span className="font-medium select-none">Select All</span>
                     </label>
-                    {isStepsAllowToPerform &&
+                    {isStepsAllowToPerform && (
                       <Button
                         variant="contained"
                         color="primary"
@@ -829,23 +823,23 @@ const Steps = ({
                           `(${isAllChecked() ? 'All' : selectedSteps.length})`
                         )}
                       </Button>
-                    }
+                    )}
                   </>
                 ) : null}
               </div>
               <div className={`d-flex flex-wrap align-center justify-end gap-[8px] ml-auto ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
-                {resource === sidebarResource.workOrderTechnician && workOrderData?.type === WORK_ORDER_TYPE.productionOrder &&
+                {resource === sidebarResource.workOrderTechnician && workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
                   <Button
                     variant={'contained'}
                     color="primary"
                     size="small"
                     onClick={() => {
-                      setShowDrawing(true)
+                      setShowDrawing(true);
                     }}
                   >
                     Drawings
                   </Button>
-                }
+                )}
                 {resource === sidebarResource.workOrder && (
                   <Button
                     variant="outlined"
@@ -869,25 +863,41 @@ const Steps = ({
                   </Button>
                 )}
                 {serviceDetails?.fields?.length > 0 && (
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    disabled={
-                      allowedToEdit &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        )
-                        ? false
-                        : true
+                  <>
+                    {serviceDetails?.serviceFieldsValue ?
+                      <IconButton
+                        aria-label="info"
+                        size="small"
+                        color="primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenServiceFieldValueDialig(true);
+                        }}
+                      >
+                        <Info fontSize="inherit" />
+                      </IconButton> :
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        disabled={
+                          allowedToEdit &&
+                            ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                              selectedService?.status
+                            )
+                            ? false
+                            : true
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenServiceFieldValueDialig(true);
+                          setIsEditableServiceFieldValueDialog(true);
+                        }}
+                      >
+                        Enter Value
+                      </Button>
                     }
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenServiceFieldValueDialig(true)
-                    }}
-                  >
-                    Enter Value
-                  </Button>
+                  </>
                 )}
                 {serviceDetails?.steps?.length > 0 && resource === sidebarResource.workOrder && (
                   <Button
@@ -953,7 +963,10 @@ const Steps = ({
                 </Menu>
               </div>
             </div>
-            <div className={`w-full ${minHeightClass ? minHeightClass : 'h-[calc(100vh-265px)] '} max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] overflow-y-auto`}>
+            <div
+              className={`w-full ${minHeightClass ? minHeightClass : 'h-[calc(100vh-265px)] '
+                } max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] overflow-y-auto`}
+            >
               {serviceDetails?.steps?.map((step, index) => {
                 const { stepData, isStepValid } = getFields(step);
                 if (resource === sidebarResource.workOrderTechnician && stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) {
@@ -969,7 +982,7 @@ const Steps = ({
                       } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
                   >
                     <Box sx={{ display: 'flex' }} gridGap={'8px'}>
-                      {(allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck)) ? (
+                      {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
                         <Checkbox
                           name={`checkbox_${step._id}`}
                           color={'primary'}
@@ -1040,7 +1053,8 @@ const Steps = ({
                                       [
                                         WORKORDER_SERVICE_STEP_STATUS.passed,
                                         WORKORDER_SERVICE_STEP_STATUS.failed,
-                                        WORKORDER_SERVICE_STEP_STATUS.completed
+                                        WORKORDER_SERVICE_STEP_STATUS.completed,
+                                        WORKORDER_SERVICE_STEP_STATUS.skipped
                                       ].includes(stepData?.passFailStatus)
                                     }
                                     onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
@@ -1269,7 +1283,7 @@ const Steps = ({
                           >
                             <MoreHoriz />
                           </IconButton>
-                          {(allowedToEdit && ![WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status)) ? (
+                          {allowedToEdit && ![WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status) ? (
                             <HtmlTooltip enterTouchDelay={0} title="Clone" placement="top" arrow>
                               <IconButton
                                 size="small"
@@ -1298,7 +1312,8 @@ const Steps = ({
                                 [
                                   WORKORDER_SERVICE_STEP_STATUS.passed,
                                   WORKORDER_SERVICE_STEP_STATUS.failed,
-                                  WORKORDER_SERVICE_STEP_STATUS.completed
+                                  WORKORDER_SERVICE_STEP_STATUS.completed,
+                                  WORKORDER_SERVICE_STEP_STATUS.skipped
                                 ].includes(stepData?.passFailStatus)
                               }
                               onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
@@ -1396,6 +1411,23 @@ const Steps = ({
                     }
                   >
                     Clone Step
+                  </MenuItem>
+                  <MenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), selectedStep._id);
+                      setAnchorEl(null);
+                    }}
+                    disabled={
+                      allowedToEdit &&
+                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                          selectedService?.status
+                        )
+                        ? false
+                        : true
+                    }
+                  >
+                    Skip Step
                   </MenuItem>
                   {resource === sidebarResource.workOrder && (
                     <MenuItem
@@ -1650,12 +1682,15 @@ const Steps = ({
                 fieldsValue={serviceDetails?.serviceFieldsValue || {}}
                 service={selectedService}
                 handleClose={() => {
-                  setOpenServiceFieldValueDialig(false)
+                  setOpenServiceFieldValueDialig(false);
+                  setIsEditableServiceFieldValueDialog(false);
                 }}
                 handleSuccess={() => {
-                  fetchServiceData()
-                  setOpenServiceFieldValueDialig(false)
+                  fetchServiceData();
+                  setOpenServiceFieldValueDialig(false);
+                  setIsEditableServiceFieldValueDialog(false);
                 }}
+                editable={isEditableServiceFieldValueDialog}
               />
             )}
           </Box>
@@ -1713,15 +1748,15 @@ const Steps = ({
           isClone={addNewStep.clone}
         />
       )}
-      {showDrawing &&
+      {showDrawing && (
         <DiagramDialog
           referenceId={workOrderData?._id}
-          currentVersion={(workOrderData?.versions?.length + 1) || 1}
+          currentVersion={workOrderData?.versions?.length + 1 || 1}
           handleClose={() => {
-            setShowDrawing(false)
+            setShowDrawing(false);
           }}
         />
-      }
+      )}
     </>
   );
 };

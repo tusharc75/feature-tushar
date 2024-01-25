@@ -320,8 +320,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         item.type === 'Product'
           ? item?.productDetail?.productDescription
           : item.type === 'Service'
-          ? item?.serviceDetail?.serviceDescription
-          : item?.description;
+            ? item?.serviceDetail?.serviceDescription
+            : item?.description;
       res.materialId = item.type === 'Product' ? item?.productDetail?._id : item.type === 'Service' ? item?.serviceDetail?._id : item?._id;
       res.productNumber = item.productDetail?.productNumber;
       res.serializedProduct = item.productDetail?.serializedProduct;
@@ -703,12 +703,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               <MenuItem
                 disabled={
                   selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
-                  uniq(
-                    map(
-                      selectedRecords?.filter((e) => !e.hideSelection),
-                      'type'
-                    )
-                  )?.length === 1
+                    uniq(
+                      map(
+                        selectedRecords?.filter((e) => !e.hideSelection),
+                        'type'
+                      )
+                    )?.length === 1
                     ? false
                     : true
                 }
@@ -747,7 +747,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           </div>
         </Box>
       )}
-      {columns  ? (
+      {columns ? (
         <Box zIndex={5} >
           <CustomReactTable
             height={'calc(100vh - 393px)'}
@@ -776,21 +776,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           extraDeepFilter={
             purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false
               ? [
-                  {
-                    field: 'expenseItem',
-                    term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
-                  }
-                ]
+                {
+                  field: 'expenseItem',
+                  term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
+                }
+              ]
               : []
           }
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                  {
-                    field: 'chartOfAccount',
-                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                  }
-                ]
+                {
+                  field: 'chartOfAccount',
+                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                }
+              ]
               : []
           }
           isSubmitting={isAddingProducts}
@@ -848,6 +848,16 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             setAddServiceDialog(false);
           }}
           isSubmitting={isSubmitting}
+          extraFilterById={
+            purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
+              ? [
+                {
+                  field: 'chartOfAccount',
+                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                }
+              ]
+              : []
+          }
         />
       )}
       {showDeleteConfirmBox && (

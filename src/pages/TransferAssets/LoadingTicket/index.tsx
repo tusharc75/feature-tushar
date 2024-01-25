@@ -14,7 +14,8 @@ import {
   prepareDataForGrid,
   ASSET_STATUS,
   TRANSFER_ASSET_STATUS,
-  COLOUR_MASTER
+  COLOUR_MASTER,
+  dateTimeFormat
 } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -30,6 +31,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import moment from 'moment';
 
 interface LoadingGridProps {
   permissions: any;
@@ -121,13 +123,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           if (o?.accessor === 'assetNumber') {
             o.cell = ({ row }) =>
               row?.original?.assetNumber ? (
-                <div className="d-flex gap-2 align-items-center" style={{
-                  backgroundColor:
-                    row?.original?.isReplaced
+                <div
+                  className="d-flex gap-2 align-items-center"
+                  style={{
+                    backgroundColor: row?.original?.isReplaced
                       ? COLOUR_MASTER.replaceAssetColor.background
-                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status) ? COLOUR_MASTER.lostAssets.background
-                        : '',
-                }}>
+                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                      ? COLOUR_MASTER.lostAssets.background
+                      : ''
+                  }}
+                >
                   <p> {row.original?.assetNumber}</p>
                   <Box ml={1}>
                     <IconButton
@@ -150,8 +155,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               ) : (
                 <NoDataCell />
               );
-          }
-          else if (o?.accessor === 'product') {
+          } else if (o?.accessor === 'product') {
             o.cell = ({ row }) =>
               row?.original?.product ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -211,6 +215,36 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             primaryField: true,
             width: 200,
             Cell: ({ row }) => <p className="text-truncate">{row?.original?.loadingTicketStatus || <NoDataCell />}</p>
+          },
+          {
+            accessor: 'createDate',
+            Header: 'Create Date',
+            width: 200,
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) =>
+              row.original?.createDate ? (
+                <div className="createBy" title={`${moment(row.original?.createDate)?.format(dateTimeFormat)}`}>
+                  {moment(row.original?.createDate)?.format(dateTimeFormat)}
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          },
+          {
+            accessor: 'deliveryDate',
+            Header: 'Delivery Date',
+            width: 200,
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) =>
+              row.original?.deliveryDate ? (
+                <div className="createBy" title={`${moment(row.original?.deliveryDate)?.format(dateTimeFormat)}`}>
+                  {moment(row.original?.deliveryDate)?.format(dateTimeFormat)}
+                </div>
+              ) : (
+                <NoDataCell />
+              )
           }
         ];
         setColumns(column);
@@ -233,6 +267,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             assetData[j].loadingTicket = ticketData[i].ticketName;
             assetData[j].loadingTicketId = ticketData[i]._id;
             assetData[j].loadingTicketStatus = ticketData[i].status;
+            assetData[j].createDate = ticketData[i]?.createdBy?.date;
+            assetData[j].deliveryDate = ticketData[i].actualDeliveryDate;
           }
         }
       }
@@ -462,7 +498,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                       !canReceive ||
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                      selectedRecords.length
+                        selectedRecords.length
                     }
                     onClick={() => {
                       setShowConfirmBoxReceive(true);
@@ -476,7 +512,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     disabled={
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                      selectedRecords.length
+                        selectedRecords.length
                     }
                     onClick={() => {
                       const products = [];
@@ -501,9 +537,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   </MenuItem>
 
                   {permissions?.transferAsset?.isUpdate &&
-                    selectedRecords.length &&
-                    selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                      ?.length === selectedRecords?.length ? (
+                  selectedRecords.length &&
+                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                    ?.length === selectedRecords?.length ? (
                     <MenuItem
                       onClick={() => {
                         setShowConfirmBox(true);
@@ -605,4 +641,3 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 };
 
 export default LoadingTicketGrid;
-

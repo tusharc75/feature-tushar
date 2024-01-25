@@ -58,7 +58,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
   const [userAssignDialog, setUserAssignDialog] = useState({ open: false, assignedUsers: [] });
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, assignedWorkStations: [] });
-  const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
+  const [showServiceActionConfirmBox, setShowServiceActionConfirmBox] = useState({ open: false, action: '' });
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [arrangeView, setArrangeView] = useState(false);
   const [autoCompleteData, setAutoCompleteData] = useState(null);
@@ -77,7 +77,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [isAutoCreating, setIsAutoCreating] = useState(true);
 
   const [serviceOptions, setServiceOptions] = useState([]);
-  const [selectedServiceOption, setSelectedServiceOption] = useState([]);
+  const [selectedServiceOption, setSelectedServiceOption] = useState(null);
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -400,8 +400,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     dispatch({ type: 'loading', loading: true });
     if (selectionReset) {
       dispatch({ type: 'selection', selectedRecords: [] });
-      if (selectedServiceOption?.length) {
-        setSelectedServiceOption([])
+      if (selectedServiceOption) {
+        setSelectedServiceOption(null);
       }
     }
 
@@ -473,7 +473,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
-      if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed || _subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+      if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         _subRow.hideSelection = true;
       }
       _subRow.canDelete = false;
@@ -701,16 +701,18 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const handleCompleteService = () => {
     setSubmitting(true);
-    const data = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending)?.map((e) => ({
-      workOrder: e?.workOrder?._id,
-      service: e?.serviceDetail?._id,
-      uniqueId: e?.uniqueId,
-      status: WORKORDER_SERVICE_STATUS.completed
-    }));
-    axiosInstance().put(`${workOrder.api}/service/work-orders-services-status`, data)
+    const data = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service)
+      ?.map((e) => ({
+        workOrder: e?.workOrder?._id,
+        service: e?.serviceDetail?._id,
+        uniqueId: e?.uniqueId,
+        status: showServiceActionConfirmBox.action
+      }));
+    axiosInstance()
+      .put(`${workOrder.api}/service/work-orders-services-status`, data)
       .then(({ data }) => {
         setSubmitting(false);
-        setShowServiceCompleteConfirmBox(false);
+        setShowServiceActionConfirmBox({ open: false, action: '' });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
@@ -720,28 +722,51 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       })
       .catch((err) => {
         setSubmitting(false);
-        setShowServiceCompleteConfirmBox(false);
+        setShowServiceActionConfirmBox({ open: false, action: '' });
         toastConfig.setToastConfig(err);
       });
   };
 
   const handleServiceSelect = (newValue) => {
     setSelectedServiceOption(newValue);
-    if (newValue && newValue?.length) {
+    if (newValue) {
       dispatch({ type: 'selection', selectedRecords: [] });
       setTimeout(() => {
         dispatch({
           type: 'selection',
-          selectedRecords: flattenArray(dataRows)?.filter(
-            (_f) => newValue?.map((s) => s?.optionValue).includes(_f?.serviceDetail?._id) && !_f?.hideSelection
-          )
+          selectedRecords: flattenArray(dataRows)?.filter((_f) => [newValue?.optionValue].includes(_f?.serviceDetail?._id) && !_f?.hideSelection)
         });
       }, 100);
-    }
-    else {
+    } else {
       dispatch({ type: 'selection', selectedRecords: [] });
     }
-  }
+  };
+
+  const isDisabledCompleteService = () => {
+    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending);
+    if (records?.length === 0) {
+      return true;
+    }
+    if (records?.length !== selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service)?.length) {
+      return true;
+    }
+    const data = [];
+    records?.forEach((record) => {
+      let disabled = false;
+      if (record?.assignedUsers?.length > 0) {
+        if (!record?.assignedUsers?.map((a) => a?.optionValue).includes(user?.user?._id)) {
+          disabled = true;
+        }
+      }
+      if (!disabled) {
+        if (dataRows?.find((d) => d?._id === record?.parentId)?.subRows?.filter((s) => s?.order < record?.order)?.every((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status))
+        ) {
+          data.push(record);
+        }
+      }
+    });
+    return !(data?.length === records?.length);
+  };
 
   return (
     <Fragment>
@@ -754,20 +779,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <Box>
           <Autocomplete
             style={{ width: '300px' }}
-            multiple
             options={serviceOptions}
             getOptionLabel={(option) => option?.optionLabel || ''}
-            renderOption={(option: any) => (
-              <React.Fragment>
-                <Checkbox checked={selectedServiceOption?.some((_s) => _s.optionValue === option.optionValue)} />
-                {option?.optionLabel}
-              </React.Fragment>
-            )}
             size="small"
             renderInput={(params) => <TextField {...params} label="Select Service" variant="outlined" />}
             value={selectedServiceOption}
             onChange={(event: any, newValue: any) => {
-              handleServiceSelect(newValue)
+              handleServiceSelect(newValue);
             }}
           />
         </Box>
@@ -982,12 +1000,31 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  setShowServiceCompleteConfirmBox(true);
+                  setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
                   closeActions();
                 }}
-                disabled={selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending)?.length ? false : true}
+                disabled={isDisabledCompleteService()}
               >
                 Complete Service
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
+                  closeActions();
+                }}
+                disabled={isDisabledCompleteService()}
+              >
+                Skip Service
+              </MenuItem>
+              <MenuItem
+                disabled={selectedRecords?.length &&
+                  selectedRecords?.filter(((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending))?.length === selectedRecords?.length ? false : true}
+                onClick={() => {
+                  setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
+                  closeActions();
+                }}
+              >
+                Revert Service
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -1111,13 +1148,14 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           loading={false}
         />
       )}
-      {showServiceCompleteConfirmBox && (
+      {showServiceActionConfirmBox.open && (
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
-          open={showServiceCompleteConfirmBox}
-          message={`Are you sure you want to Complete this Service(s)`}
+          open={showServiceActionConfirmBox.open}
+          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed ? 'complete' :
+            showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped ? 'skip' : 'revert'} this Service(s)`}
           onClose={() => {
-            setShowServiceCompleteConfirmBox(false);
+            setShowServiceActionConfirmBox({ open: false, action: '' });
           }}
           onOk={handleCompleteService}
         />
