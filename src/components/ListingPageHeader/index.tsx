@@ -1,12 +1,11 @@
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import React, { ReactNode, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import CustomContainer from 'src/components/CustomContainer';
-import HideWhenOffline from '../HideWhenOffline';
-import SearchBox from '../Helpers/SearchBox';
 import { Button, ButtonProps, Menu } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import queryString from 'query-string';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import SearchBox from '../Helpers/SearchBox';
+import HideWhenOffline from '../HideWhenOffline';
 
 type ListingPageHeaderProps = {
   toggleButtonList?: { key: string; value: number }[];

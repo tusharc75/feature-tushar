@@ -23,6 +23,7 @@ import { gridLoadingTimeout, prepareDataForGrid, repairOrder, sidebarResource } 
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRepairOrder from './ManageRepairOrder';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 let searchTimeout;
 
@@ -53,7 +54,6 @@ const RepairOrder = () => {
 
   const [columns, setColumns] = useState(null);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
   const [showManageRepairOrderDialog, setShowManageRepairOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
@@ -234,7 +234,6 @@ const RepairOrder = () => {
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
     const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
     if (referenceId && referenceType) {
       history.push(`?type=${value}&referenceType=${referenceType}&referenceId=${referenceId}`);
     } else {
@@ -252,14 +251,6 @@ const RepairOrder = () => {
       search: queryParams.toString()
     });
     fetchData();
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const showConfirmBox = (row) => {
@@ -332,6 +323,19 @@ const RepairOrder = () => {
     }
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+        onClick={() => {
+          showConfirmBox(null);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -354,83 +358,24 @@ const RepairOrder = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              <div>
-                <ToggleButtonGroup
-                  size="small"
-                  className="align-items-center gap-1 "
-                  value={types[selectedType - 1].key}
-                  exclusive
-                  onChange={onTypeChange}
-                >
-                  {types.map((k, index) => {
-                    return (
-                      <ToggleButton value={k.key} key={index}>
-                        {k.key}
-                      </ToggleButton>
-                    );
-                  })}
-                </ToggleButtonGroup>
-                {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.repairOrder?.isCreate && (
-                  <Button
-                    onClick={() => {
-                      setShowManageRepairOrderDialog({ open: true, isClone: false, idToClone: null });
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={'no-shadow'}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                <Button
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                  disabled={selectedRecords?.length ? false : true}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                    onClick={() => {
-                      closeActions();
-                      showConfirmBox(null);
-                    }}
-                  >
-                    {`Delete (${selectedRecords?.length})`}
-                  </MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContents={
+            referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />
+          }
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+          addButtonOnclick={() => {
+            setShowManageRepairOrderDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.repairOrder?.isCreate ? true : false}
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

@@ -86,7 +86,6 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [viewSingleInvoiceDialog, setViewSingleInvoiceDialog] = useState({ open: false, invoice: null });
   const [selectedResource, setSelectedResource] = useState(null);
   const [resourceList, setResourceList] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const renderedFrom = resourceRendered
     ? `${camelCase(routes[`${resourceRendered}Invoice`].title + ' Invoice')}`
@@ -258,14 +257,6 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const checkUniqCreateInvoice = () => {
     if (selectedRecords.length === 0) {
       return true;
@@ -312,7 +303,6 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         disabled={checkUniqCreateInvoice()}
         onClick={() => {
           setCreateInvoiceDialog({ open: true, data: selectedRecords });
-          closeActions();
         }}
       >
         Create Invoice
