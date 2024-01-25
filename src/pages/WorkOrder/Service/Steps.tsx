@@ -1686,7 +1686,7 @@ const Steps = ({
                       _id: reOpenServiceDialog.step._id
                     });
                   } else {
-                    handleStartEnd('reopen', reOpenServiceDialog);
+                    handleStartEnd('reopen', reOpenServiceDialog.step);
                   }
                 }}
               />
