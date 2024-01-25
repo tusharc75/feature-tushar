@@ -18,7 +18,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { WORK_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
-import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkOrder from './ManageWorkOrder';
@@ -97,15 +96,17 @@ const WorkOrder = () => {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance().get(`${workOrder.api}${queryString}`).then(({ data: { data, count } }) => {
-      let rows = data.map((u) => {
-        let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['canDelete'] = permissions?.workOrder?.isDelete && u?.canDelete && finalObject?.ownerId === user?.user?._id && !data?.deleted;
-        return finalObject;
-      });
-      dispatch({ type: 'initialize', data: rows, count: count });
-    })
+    axiosInstance()
+      .get(`${workOrder.api}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject: any = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = false;
+          finalObject['canDelete'] = permissions?.workOrder?.isDelete && u?.canDelete && finalObject?.ownerId === user?.user?._id && !data?.deleted;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       })
@@ -278,7 +279,7 @@ const WorkOrder = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+              <SearchBox onChange={handleSearch} size="small" value={search} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.workOrder?.isDelete && (
                   <Button
@@ -342,8 +343,9 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
+              deleteRecord?.workOrderName || ''
+            }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

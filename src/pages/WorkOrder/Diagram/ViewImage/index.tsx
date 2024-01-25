@@ -27,6 +27,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const [selectedObject, setSelectedObject] = useState(null);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [highlighterPaths, setHighlighterPaths] = useState([]);
+  const [isHighlighterMode, setHighlighterMode] = useState(false);
+  const [brushPaths, setBrushPaths] = useState([]);
 
   useEffect(() => {
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
@@ -127,16 +129,27 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     canvas.add(newCircle);
   };
 
+  const handleRemoveObject = (obj) => {
+    if (obj.highlighter) {
+      const index = highlighterPaths.indexOf(obj);
+      if (index !== -1) {
+        highlighterPaths.splice(index, 1);
+      }
+    }
+    canvas.remove(obj);
+    canvas.requestRenderAll();
+  };
+
   const handleRemove = () => {
     const activeObject = canvas.getActiveObject();
-    if (activeObject.type === 'activeSelection') {
-      activeObject.forEachObject((obj) => {
-        canvas.remove(obj);
-      });
-    } else {
-      canvas.remove(activeObject);
+    if (activeObject) {
+      if (activeObject.type === 'activeSelection') {
+        activeObject.forEachObject(handleRemoveObject);
+      } else {
+        handleRemoveObject(activeObject);
+      }
+      canvas.discardActiveObject();
     }
-    canvas.discardActiveObject();
   };
 
   const handleSave = async () => {
@@ -180,35 +193,6 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     }
   };
 
-  const handleAddHighlight = () => {
-    const highlighterBrush = new fabric.PencilBrush(canvas);
-    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity
-    highlighterBrush.width = 10; // Highlighter stroke width
-
-    canvas.freeDrawingBrush = highlighterBrush;
-    canvas.isDrawingMode = true;
-
-    canvas.on('path:created', (options) => {
-      const path = options.path;
-      path.set({
-        selectable: false,
-        evented: false,
-      });
-
-      setHighlighterPaths((prevPaths) => [...prevPaths, path]); // Keep track of highlighter paths
-      canvas.isDrawingMode = false; // Disable drawing mode
-    });
-  };
-
-  const handleUndo = () => {
-    const lastHighlighterPath = highlighterPaths.pop();
-
-    if (lastHighlighterPath) {
-      canvas.remove(lastHighlighterPath);
-      canvas.requestRenderAll();
-    }
-  };
-
   const handleColorChange = (event) => {
     const newColor = event.target.value;
     const activeObject = canvas.getActiveObject();
@@ -222,18 +206,78 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
             obj.set('fill', newColor);
           }
         });
+      } else if (activeObject && activeObject.ishighlighter) {
+        const highlighterOpacity = 0.2; // Set your desired opacity value
+        const rgbaColor = fabric.Color.fromHex(newColor).setAlpha(highlighterOpacity).toRgba();
+
+        activeObject.set({
+          stroke: rgbaColor,
+          strokeWidth: 10,
+        });
+
+        canvas.requestRenderAll();
       } else {
         if (activeObject.type === 'line' || activeObject.type === 'path') {
           activeObject.set('stroke', newColor);
         } else if (activeObject.type === 'path') {
           activeObject.set('stroke', newColor);
-        }else {
+        } else {
           activeObject.set('fill', newColor);
         }
+
       }
-      canvas.requestRenderAll(); // Re-render the canvas to show the color change
+      canvas.requestRenderAll();
     }
-  }
+  };
+
+  const handleUndo = () => {
+    if (isHighlighterMode) {
+      const lastHighlighterPath = highlighterPaths.pop();
+      if (lastHighlighterPath) {
+        canvas.remove(lastHighlighterPath);
+        canvas.requestRenderAll();
+      }
+    }
+    if (isDrawingMode) {
+      const lastBrushPath = brushPaths.pop();
+      if (lastBrushPath) {
+        canvas.remove(lastBrushPath);
+        canvas.requestRenderAll();
+      }
+    }
+  };
+
+  const enterHighlighterMode = () => {
+    setHighlighterMode(true);
+
+    const highlighterBrush = new fabric.PencilBrush(canvas);
+    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity
+    highlighterBrush.width = 10; // Highlighter stroke width
+
+    canvas.freeDrawingBrush = highlighterBrush;
+    canvas.isDrawingMode = true;
+
+    canvas.on('path:created', (options) => {
+      const path = options.path;
+      path.set({
+        selectable: true,
+        evented: true,
+        draggable: true,
+        ishighlighter: true, // Additional property to identify highlighter paths
+      });
+
+      setHighlighterPaths((prevPaths) => [...prevPaths, path]);
+    });
+  };
+
+  const exitHighlighterMode = () => {
+    setHighlighterMode(false);
+    // Switch back to the normal pencil brush
+    canvas.off('path:created');
+    const pencilBrush = new fabric.PencilBrush(canvas);
+    canvas.freeDrawingBrush = pencilBrush;
+    canvas.isDrawingMode = false;
+  };
 
   const getSelectedColor = () => {
     const activeObject = canvas.getActiveObject();
@@ -252,11 +296,33 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const toggleDrawingMode = () => {
     setIsDrawingMode(!isDrawingMode);
     if (!isDrawingMode) {
+      const drawingBrush = new fabric.PencilBrush(canvas);
+      drawingBrush.color = 'black';
+      drawingBrush.width = 2;
+      canvas.freeDrawingBrush = drawingBrush;
       canvas.isDrawingMode = true;
-      setCanvas(canvas);
+      canvas.on('path:created', (options) => {
+        const path = options.path;
+        path.set({
+          ishighlighter: false,
+          selectable: true,
+          evented: true,
+          draggable: true,
+        });
+        setBrushPaths((prevPaths) => [...prevPaths, path]);
+      });
     } else {
       canvas.isDrawingMode = false;
       setCanvas(canvas);
+      canvas.off('path:created');
+    }
+  };
+
+  const toggleHighlighterMode = () => {
+    if (isHighlighterMode) {
+      exitHighlighterMode();
+    } else {
+      enterHighlighterMode();
     }
   };
 
@@ -299,42 +365,30 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     <Box>
       <div className="flex flex-wrap items-center justify-between gap-2 min-h-[40px] my-2">
         <div className={'flex gap-2 flex-wrap'}>
-          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddText}>
+          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddText}>
             Add Text
           </Button>
-          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddLine}>
+          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddLine}>
             Add Line
           </Button>
-          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddRectangle}>
+          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddRectangle}>
             Add Rectangle
           </Button>
-          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddCircle}>
+          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddCircle}>
             Add Circle
           </Button>
-          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddHighlight}>
-            Add Highlight
+          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={toggleHighlighterMode}>
+            {isHighlighterMode ? 'Exit highlighter Mode' : 'Enter highlighter Mode'}
           </Button>
-          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleUndo}>
-            Undo Highlight
-          </Button>
-          <Button
-            disabled={loading}
-            variant="outlined"
-            color="primary"
-            size="small"
-            onClick={toggleDrawingMode}
-          >
+          <Button disabled={loading || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={toggleDrawingMode}>
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
           </Button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            accept="image/*"
-            onChange={handleImageUpload}
-          />
+          {(isDrawingMode || isHighlighterMode) && (<Button disabled={loading} variant="outlined" color="primary" size="small" onClick={handleUndo}>
+            Undo
+          </Button>)}
+          <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
           <Button
-            disabled={loading || isDrawingMode}
+            disabled={loading || isDrawingMode || isHighlighterMode}
             variant="outlined"
             color="primary"
             size="small"
@@ -347,7 +401,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         </div>
         {selectedObject && (
           <Box className="flex items-center gap-2">
-            <FormControl size="small" margin='none' variant="outlined">
+            <FormControl size="small" margin="none" variant="outlined">
               <input
                 type="color"
                 value={getSelectedColor()}
@@ -355,7 +409,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
                 style={{ marginLeft: '10px' }}
               />
             </FormControl>
-            <DeleteButton mode='light' text="Remove" size="small" onClick={handleRemove} />
+            <DeleteButton mode="light" text="Remove" size="small" onClick={handleRemove} />
           </Box>
         )}
         <div className="flex flex-wrap gap-2 items-center">

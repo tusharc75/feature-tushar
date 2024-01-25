@@ -7,13 +7,14 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -21,10 +22,8 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
-import styles from '../Leads/Header.module.scss';
-import ManagePurchaseOrder from './ManagePurchaseOrder';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import ManagePurchaseOrder from './ManagePurchaseOrder';
 
 const PurchaseOrder = () => {
   const PurchaseOrderType = [
@@ -331,7 +330,6 @@ const PurchaseOrder = () => {
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox
                 onChange={handleSearch}
-                className={isMobile ? styles.search_box_input : ''}
                 width="242px"
                 size="small"
                 value={search}

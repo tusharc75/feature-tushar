@@ -1,25 +1,25 @@
 import { Box, Button, Grid, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import { camelCase, map, uniq } from 'lodash';
-import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, INVOICE_STATUS, FIELD_TICKET_STATUS } from 'src/constants/helpers';
+import { ExpandMore } from '@material-ui/icons';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import styles from '../Leads/Header.module.scss';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import { Autocomplete } from '@material-ui/lab';
+import { camelCase, map, uniq } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { FIELD_TICKET_STATUS, INVOICE_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import ViewInvoice from '../Invoice/ViewInvoice';
+import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
 import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
-import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
-import ViewInvoice from '../Invoice/ViewInvoice';
-import { ExpandMore } from '@material-ui/icons';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 const GENERATE_RESOURCE = [
   {
@@ -86,7 +86,6 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [viewSingleInvoiceDialog, setViewSingleInvoiceDialog] = useState({ open: false, invoice: null });
   const [selectedResource, setSelectedResource] = useState(null);
   const [resourceList, setResourceList] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const renderedFrom = resourceRendered
     ? `${camelCase(routes[`${resourceRendered}Invoice`].title + ' Invoice')}`
@@ -258,14 +257,6 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const checkUniqCreateInvoice = () => {
     if (selectedRecords.length === 0) {
       return true;
@@ -281,6 +272,42 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     } else {
       return true;
     }
+  };
+
+  const LeftSideContents = () => {
+    return (
+      <>
+        {!resourceRendered && (
+          <Autocomplete
+            id="generate-invoice"
+            style={{ width: '300px' }}
+            options={resourceList?.map((item) => item)}
+            renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+            getOptionLabel={(option) => option?.title}
+            onChange={(e, val) => {
+              dispatch({ type: 'selection', selectedRecords: [] });
+              dispatch({ type: 'pageChange', page: 0 });
+              setSelectedResource(val);
+            }}
+            disableClearable={true}
+            value={selectedResource}
+          />
+        )}
+      </>
+    );
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={checkUniqCreateInvoice()}
+        onClick={() => {
+          setCreateInvoiceDialog({ open: true, data: selectedRecords });
+        }}
+      >
+        Create Invoice
+      </MenuItem>
+    );
   };
 
   return selectedResource ? (
@@ -302,74 +329,15 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         <Grid item md={8} sm={1} xs={2} />
       </Grid>
       <div className="main-container">
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              {!resourceRendered &&
-                <Autocomplete
-                  id="generate-invoice"
-                  style={{ width: '300px' }}
-                  options={resourceList?.map((item) => item)}
-                  renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
-                  getOptionLabel={(option) => option?.title}
-                  onChange={(e, val) => {
-                    dispatch({ type: 'selection', selectedRecords: [] });
-                    dispatch({ type: 'pageChange', page: 0 });
-                    setSelectedResource(val);
-                  }}
-                  disableClearable={true}
-                  value={selectedResource}
-                />
-              }
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                className={styles.search_box_input}
-                value={search}
-                size="small"
-              />
-              {selectedResource.resource === sidebarResource.fieldTicket && (
-                <div className="flex gap-[8px] flex-wrap items-center">
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
-                    aria-controls="action-menu"
-                    className={`new-dropdown-v1`}
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      disabled={checkUniqCreateInvoice()}
-                      onClick={() => {
-                        setCreateInvoiceDialog({ open: true, data: selectedRecords });
-                        closeActions();
-                      }}
-                    >
-                      Create Invoice
-                    </MenuItem>
-                  </Menu>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          leftSideContents={<LeftSideContents />}
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={selectedResource.resource === sidebarResource.fieldTicket}
+          actionMenuItems={<ActionMenuItems />}
+          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          isAddButtonVisible={false}
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

@@ -1,30 +1,24 @@
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import { Button, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import CustomReactTable, {
-  getStaticFields,
-  gridFilterParser,
-  useColumns,
-  useTableReducer
-} from 'src/components/CustomReactTable';
-import axiosInstance from 'src/axios/axiosInstance';
-import { camelCase } from 'lodash';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import ManageDeviceTemplates from './ManageDeviceTemplates';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ManageDeviceTemplates from './ManageDeviceTemplates';
 
 let searchTimeout;
 
@@ -234,7 +228,7 @@ export default function DeviceTemplates() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
                   variant={'contained'}
@@ -300,9 +294,11 @@ export default function DeviceTemplates() {
             showFilters={true}
             resource={sidebarResource.deviceTemplates}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
 
       {open?.open && (
@@ -321,8 +317,9 @@ export default function DeviceTemplates() {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.deviceTemplates?.title?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
-            }?`}
+          message={`Are you sure you want to delete ${routes?.deviceTemplates?.title?.toLowerCase()} ${
+            deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
+          }?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

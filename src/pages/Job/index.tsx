@@ -1,38 +1,36 @@
-import { useState, useEffect, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import AppsIcon from '@material-ui/icons/Apps';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import ViewListIcon from '@material-ui/icons/ViewList';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
+import { useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { cloneDisable } from 'src/constants/messageHelpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
 import {
   gridLoadingTimeout,
   prepareDataForGrid,
   // getLocalStorageArrayData,
   sidebarResource
 } from '../../constants/helpers';
-import { Button, Box, IconButton, Menu, MenuItem } from '@material-ui/core';
-import CustomContainer from '../../components/CustomContainer';
-import routes from './../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../StateProvider/Provider';
-import axiosInstance from '../../axios/axiosInstance';
-import AppsIcon from '@material-ui/icons/Apps';
-import ViewListIcon from '@material-ui/icons/ViewList';
-import { camelCase } from 'lodash';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import ManageJobDialog from './ManageJobDialog';
+import routes from './../../components/Helpers/Routes';
 import CardView from './CardView';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import { vi } from 'date-fns/locale';
+import ManageJobDialog from './ManageJobDialog';
 
 let jobTimeout;
 
@@ -142,7 +140,7 @@ const Job = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.job?.isCreate ? "Clone" : cloneDisable}  >
+        <HtmlTooltip title={permissions?.job?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -160,7 +158,7 @@ const Job = () => {
           <IconButton
             size="small"
             aria-label="Delete"
-            disabled = {row?.original?.canDelete ? false : true}
+            disabled={row?.original?.canDelete ? false : true}
             onClick={() => {
               setSingleJobDelete({
                 show: true,
@@ -169,7 +167,7 @@ const Job = () => {
               });
             }}
           >
-          <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'}/>
+            <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -243,7 +241,6 @@ const Job = () => {
     history.push(`?type=${values}`);
   };
 
-
   const showConfirmBox = () => {
     if (selectedRecords?.find((d) => d.canDelete === false)) {
       setShowDeleteWarningConfirmBox(true);
@@ -290,8 +287,6 @@ const Job = () => {
   const closeActions = () => {
     setAnchorEl(null);
   };
-
-
 
   return (
     <section className="main-container-v1">
@@ -383,7 +378,7 @@ const Job = () => {
             </div>
 
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
                   variant={'contained'}
@@ -448,27 +443,28 @@ const Job = () => {
           />
         )}
 
-        {viewType === 2 &&
-          (
-            <>
-              {columns ? (
-                <CustomReactTable
-                  height={'calc(100vh - 200px)'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={false}
-                  refreshGrid={fetchJob}
-                  showOnlyShowFilteredRecordSwitch={false}
-                  showFilters={true}
-                  resource={sidebarResource.job}
-                />
-              ) : <Box p={2} height={500}>
+        {viewType === 2 && (
+          <>
+            {columns ? (
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={false}
+                refreshGrid={fetchJob}
+                showOnlyShowFilteredRecordSwitch={false}
+                showFilters={true}
+                resource={sidebarResource.job}
+              />
+            ) : (
+              <Box p={2} height={500}>
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>}
-            </>
-          )}
+              </Box>
+            )}
+          </>
+        )}
 
         {showDeleteConfirmBox && (
           <ConfirmationDialog

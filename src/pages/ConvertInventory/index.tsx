@@ -1,24 +1,20 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, IconButton, Tooltip, Button, Menu, MenuItem } from '@material-ui/core';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import { Box, TextField } from '@material-ui/core';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { isObjectEmpty, gridLoadingTimeout, convertInventory, sidebarResource } from 'src/constants/helpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { useData } from 'src/StateProvider/Provider';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
+import { Box, Button, Grid, IconButton, Menu, MenuItem, TextField, Tooltip } from '@material-ui/core';
+import { ExpandMore } from '@material-ui/icons';
+import CachedIcon from '@material-ui/icons/Cached';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { convertInventory, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import InventoryToAsset from './InventoryToAsset';
-import { ExpandMore } from '@material-ui/icons';
-import { SiConvertio } from 'react-icons/si';
-import CachedIcon from '@material-ui/icons/Cached';
 
 let searchTimeout;
 const ConvertInventory = () => {
@@ -274,7 +270,7 @@ const ConvertInventory = () => {
               )}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+              <SearchBox onChange={handleSearch} size="small" value={search} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.inventoryToAsset?.isUpdate ? (
                   <>

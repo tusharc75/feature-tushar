@@ -1,18 +1,18 @@
-import { useState, useEffect, useContext } from 'react';
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from 'src/constants/helpers';
+import styles from 'src/pages/Leads/Header.module.scss';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import SearchBox from '../Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serviceMaster, sidebarResource } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import routes from '../Helpers/Routes';
-import styles from 'src/pages/Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CommonSkeleton from '../Helpers/CommonSkeleton';
-import { camelCase } from 'lodash';
 import CustomTabs, { CustomTab } from '../CustomTabs';
+import CommonSkeleton from '../Helpers/CommonSkeleton';
+import routes from '../Helpers/Routes';
+import SearchBox from '../Helpers/SearchBox';
 
 let searchTimeout;
 
@@ -143,8 +143,8 @@ const AssignServiceDialog = ({
     }
     if (extraFilterById && extraFilterById?.length) {
       extraFilterById?.forEach((e) => {
-        filterByIds.push(e)
-      })
+        filterByIds.push(e);
+      });
     }
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -217,7 +217,7 @@ const AssignServiceDialog = ({
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
-                <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
+                <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
                 <Button
                   disabled={isSubmitting || selectedRecords?.length === 0}
                   onClick={() => {

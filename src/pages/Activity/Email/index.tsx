@@ -1,40 +1,37 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
-import { useHistory } from 'react-router-dom';
-import queryString from 'query-string';
-import { GetReferenceName, GetEmails } from '../../../axios/activity';
-import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
-import { useData } from '../../../StateProvider/Provider';
-import CustomContainer from '../../../components/CustomContainer';
-import { Button, MenuItem, Menu, IconButton, TextField, Chip, Box } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import axiosInstance from '../../../axios/axiosInstance';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import MessageDialog from '../../../components/Helpers/MessageDialog';
-import { Delete as DeleteIcon } from '@material-ui/icons';
-import { convertNodeToElement } from 'react-html-parser';
+import { Box, Button, Chip, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
+import { Delete as DeleteIcon, ExpandMore } from '@material-ui/icons';
+import queryString from 'query-string';
+import { useContext, useEffect, useState } from 'react';
+import { convertNodeToElement } from 'react-html-parser';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import { GetEmails, GetReferenceName } from '../../../axios/activity';
+import axiosInstance from '../../../axios/axiosInstance';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
+import CustomContainer from '../../../components/CustomContainer';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import MessageDialog from '../../../components/Helpers/MessageDialog';
 import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
 
-import './email.scss';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../../constants/helpers';
 import { AddOutlined } from '@material-ui/icons';
-import { displayDate } from '../../../constants/helpers';
-import routes from '../../../components/Helpers/Routes';
-import { Autocomplete } from '@material-ui/lab';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
-import { ViewEmail } from 'src/components/Activity/Email/ViewEmail';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { deleteDisable } from 'src/constants/messageHelpers';
+import { Autocomplete } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import { isMobile, isTablet } from 'react-device-detect';
+import { ViewEmail } from 'src/components/Activity/Email/ViewEmail';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { camelCase } from 'lodash';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../../Leads/Header.module.scss';
+import { deleteDisable } from 'src/constants/messageHelpers';
+import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
+import './email.scss';
 
 const tabs = {
   Inbox: 1,
@@ -441,7 +438,7 @@ const Email = () => {
                 )}
               </div>
               <div className="flex flex-wrap gap-[8px] justify-end items-center">
-                <SearchBox onChange={handleChangeFilter} className={styles.search_box_input} value={search} size="small" />
+                <SearchBox onChange={handleChangeFilter} value={search} size="small" />
                 <div className="flex gap-[8px] flex-wrap items-center">
                   <Button
                     variant={'contained'}

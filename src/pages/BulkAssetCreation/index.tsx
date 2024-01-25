@@ -2,18 +2,19 @@ import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -21,10 +22,8 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { bulkAssetCreation, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import styles from '../Leads/Header.module.scss';
-import ManageBulkAssetCreation from './ManageBulkAssetCreation';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 
 const BulkAssetCreation = () => {
   const types = [
@@ -69,7 +68,7 @@ const BulkAssetCreation = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.bulkAssetCreation}`)
       .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.bulkAssetCreationDetail.path, true)
+        const newColumns = generateColumns(renderedFrom, data, routes.bulkAssetCreationDetail.path, true);
         setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
@@ -85,7 +84,7 @@ const BulkAssetCreation = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.bulkAssetCreation?.isCreate ? "Clone" : cloneDisable}  >
+        <HtmlTooltip title={permissions?.bulkAssetCreation?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -99,7 +98,7 @@ const BulkAssetCreation = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
@@ -116,7 +115,7 @@ const BulkAssetCreation = () => {
         </HtmlTooltip>
       </>
     )
-  }
+  };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -270,13 +269,7 @@ const BulkAssetCreation = () => {
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <div className={`flex flex-wrap items-center gap-2 `}>
                 {types && (
-                  <ToggleButtonGroup
-                    size="small"
-                    className="ml-2"
-                    value={types[selectedType - 1].key}
-                    exclusive
-                    onChange={handleFilter}
-                  >
+                  <ToggleButtonGroup size="small" className="ml-2" value={types[selectedType - 1].key} exclusive onChange={handleFilter}>
                     {types.map((k, index) => {
                       return (
                         <ToggleButton value={k.key} key={index}>
@@ -290,14 +283,7 @@ const BulkAssetCreation = () => {
               {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                className={isMobile ? styles.search_box_input : ''}
-                width="242px"
-                size="small"
-                value={search}
-                style={isMobile ? { flex: 1 } : {}}
-              />
+              <SearchBox onChange={handleSearch} width="242px" size="small" value={search} style={isMobile ? { flex: 1 } : {}} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.bulkAssetCreation?.isCreate && (
                   <Button
@@ -383,8 +369,9 @@ const BulkAssetCreation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.bulkAssetCreation?.title?.toLowerCase()}${selectedRecords.length ? "s" : ""} ${deleteRecord?._id ? deleteRecord?.baNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.bulkAssetCreation?.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
+            deleteRecord?._id ? deleteRecord?.baNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -1,22 +1,21 @@
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
-import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { Box, Button, TextField } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
+import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import { Autocomplete } from '@material-ui/lab';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { dateTimeFormat, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import ManageSendOutboundMessage from './manageSendOutboundMessage';
-import moment from 'moment';
 
 let searchTimeout;
 
@@ -66,13 +65,14 @@ const SendOutboundMessage = () => {
       accessor: 'date',
       Header: 'Date',
       disableFilters: true,
-      Cell: ({ row }) => (row?.original?.date ? <h5 className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</h5> : <NoDataCell />)
+      Cell: ({ row }) =>
+        row?.original?.date ? <h5 className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</h5> : <NoDataCell />
     },
     {
       accessor: 'user',
       Header: 'User',
       Cell: ({ row }) => (row?.original?.user ? <h5 className="text-truncate">{row?.original?.user}</h5> : <NoDataCell />)
-    },
+    }
   ];
 
   const fetchGridColumns = () => {
@@ -114,7 +114,8 @@ const SendOutboundMessage = () => {
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance().get(`/iot-out-bound-message${queryString}`)
+    axiosInstance()
+      .get(`/iot-out-bound-message${queryString}`)
       .then(({ data: { data, count } }) => {
         const rows = data?.map((d) => {
           delete d?.outboundMessageDetail?._id;
@@ -202,7 +203,7 @@ const SendOutboundMessage = () => {
               />
             </div>
             <div className="flex flex-wrap gap-[8px] justify-end align-items-center">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
                   variant={'contained'}

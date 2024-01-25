@@ -1,34 +1,32 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { IconButton, Box, Button, Menu, MenuItem } from '@material-ui/core';
-import { Link, useHistory } from 'react-router-dom';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
-import axiosInstance from '../../axios/axiosInstance';
-import { useData } from '../../StateProvider/Provider';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, processFieldName, sidebarResource } from '../../constants/helpers';
-import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
-import { lead, prepareDataForGrid } from '../../constants/helpers';
-import NoDataCell from '../../components/Helpers/NoDataCell';
-import { SiConvertio } from 'react-icons/si';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomContainer from '../../components/CustomContainer';
-import './style.scss';
-import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import { SiConvertio } from 'react-icons/si';
+import { Link, useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { camelCase } from 'lodash';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { isMobile } from 'react-device-detect';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import styles from '../Leads/Header.module.scss';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import NoDataCell from '../../components/Helpers/NoDataCell';
+import { gridLoadingTimeout, lead, prepareDataForGrid, processFieldName, sidebarResource } from '../../constants/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
+import './style.scss';
 
 const Leads = () => {
   const LeadTypes = [
@@ -72,7 +70,6 @@ const Leads = () => {
     fetchGridColumns();
   }, []);
 
-
   useEffect(() => {
     fetchData();
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
@@ -85,16 +82,23 @@ const Leads = () => {
     newColumns = [
       ...newColumns,
       {
-        accessor: 'relatedOpportunity', Header: 'Related Opportunity', show: true,
+        accessor: 'relatedOpportunity',
+        Header: 'Related Opportunity',
+        show: true,
         Cell: ({ row }) => (
           <>
             {row.original?.relatedOpportunity ? (
-              <Link className="link" to={`${routes.opportunityDetail.path}/${row.original?.relatedOpportunityId}`} title={row.original?.relatedOpportunity}>
+              <Link
+                className="link"
+                to={`${routes.opportunityDetail.path}/${row.original?.relatedOpportunityId}`}
+                title={row.original?.relatedOpportunity}
+              >
                 {row.original?.relatedOpportunity}
               </Link>
             ) : (
               <NoDataCell />
-            )}</>
+            )}
+          </>
         )
       },
       ...getStaticFields()
@@ -127,7 +131,7 @@ const Leads = () => {
           </span>
         </HtmlTooltip>
         {hasPermissionToConvertInOpportunity && generateLeadToOpportunityButton(row?.original)}
-        <HtmlTooltip title={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
@@ -144,7 +148,7 @@ const Leads = () => {
         </HtmlTooltip>
       </>
     )
-  }
+  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -259,7 +263,7 @@ const Leads = () => {
           className="cursor-stop"
           title={`To convert lead to opportunity, you must need create permission of ${dontHavePermissions.join(', ')}`}
         >
-          <IconButton size='small' aria-label="Convert to opportunity">
+          <IconButton size="small" aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
         </HtmlTooltip>
@@ -267,7 +271,7 @@ const Leads = () => {
     ) : convertedToOpportunity ? (
       <>
         <HtmlTooltip className="cursor-stop" title="This lead is already converted to opportunity">
-          <IconButton size='small' aria-label="Convert to opportunity">
+          <IconButton size="small" aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
         </HtmlTooltip>
@@ -275,7 +279,7 @@ const Leads = () => {
     ) : !isAllowedToUpdate ? (
       <>
         <HtmlTooltip className="cursor-stop" title="You are not allowed to convert as you are neither owner nor collaborator">
-          <IconButton size='small' aria-label="Convert to opportunity">
+          <IconButton size="small" aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
         </HtmlTooltip>
@@ -283,7 +287,7 @@ const Leads = () => {
     ) : !isCurrentLeadStatusQualified ? (
       <>
         <HtmlTooltip className="cursor-stop" title="To covert this lead to opportunity, Lead status must be qualified">
-          <IconButton size='small' aria-label="Convert to opportunity">
+          <IconButton size="small" aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
         </HtmlTooltip>
@@ -291,7 +295,7 @@ const Leads = () => {
     ) : (
       <HtmlTooltip title="Convert to opportunity">
         <IconButton
-          size='small'
+          size="small"
           aria-label="Convert to opportunity"
           onClick={() => {
             setConvertLeadToOpportunityConfirmationDialog({
@@ -375,7 +379,6 @@ const Leads = () => {
     }
   };
 
-
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -411,13 +414,7 @@ const Leads = () => {
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <div className={`flex flex-wrap items-center gap-2 `}>
                 {LeadTypes && (
-                  <ToggleButtonGroup
-                    size="small"
-                    className="ml-2"
-                    value={LeadTypes[selectedType - 1].key}
-                    exclusive
-                    onChange={handleFilter}
-                  >
+                  <ToggleButtonGroup size="small" className="ml-2" value={LeadTypes[selectedType - 1].key} exclusive onChange={handleFilter}>
                     {LeadTypes.map((k, index) => {
                       return (
                         <ToggleButton value={k.key} key={index}>
@@ -430,14 +427,7 @@ const Leads = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                className={isMobile ? styles.search_box_input : ''}
-                width="242px"
-                size="small"
-                value={search}
-                style={isMobile ? { flex: 1 } : {}}
-              />
+              <SearchBox onChange={handleSearch} width="242px" size="small" value={search} style={isMobile ? { flex: 1 } : {}} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.lead?.isCreate && (
                   <Button
@@ -453,7 +443,7 @@ const Leads = () => {
                     Add
                   </Button>
                 )}
-                <HtmlTooltip title={!selectedRecords.length ? "Please select some leads" : ""}>
+                <HtmlTooltip title={!selectedRecords.length ? 'Please select some leads' : ''}>
                   <span>
                     <Button
                       variant={'outlined'}
@@ -574,17 +564,14 @@ const Leads = () => {
         )}
 
         {messageDialog.open ? (
-          <MessageDialog
-            open={messageDialog.open}
-            message={messageDialog.message}
-            onClose={() => setMessageDialog({ open: false, message: null })}
-          />
+          <MessageDialog open={messageDialog.open} message={messageDialog.message} onClose={() => setMessageDialog({ open: false, message: null })} />
         ) : null}
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${deleteRecord?.concatedName
-              ? deleteRecord?.concatedName : ''}?`}
+            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${
+              deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
+            }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

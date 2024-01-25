@@ -1,35 +1,32 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
+import DateFnsUtils from '@date-io/date-fns';
 import { Box, IconButton, TextField } from '@material-ui/core';
-import routes from '../../components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import {
-  serializedAssetsCertification,
-  serializedAsset,
-  gridLoadingTimeout,
-  ASSET_STATUS,
-  COLOUR_MASTER,
-  sidebarResource,
-  dateFormatForInputControl
-} from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { useData } from '../../StateProvider/Provider';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import { prepareDataForGrid } from '../../constants/helpers';
-import { camelCase } from 'lodash';
-import moment from 'moment';
-import IssueCertificateDialog from './IssueCertificateDialog';
-import CertificateHistoryDialog from './CertificateHistoryDialog';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
+import Grid from '@material-ui/core/Grid';
 import HistoryIcon from '@material-ui/icons/History';
+import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateFnsUtils from '@date-io/date-fns';
+import { camelCase } from 'lodash';
+import moment from 'moment';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import routes from '../../components/Helpers/Routes';
+import {
+  dateFormatForInputControl,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  serializedAsset,
+  serializedAssetsCertification,
+  sidebarResource
+} from '../../constants/helpers';
+import CertificateHistoryDialog from './CertificateHistoryDialog';
+import IssueCertificateDialog from './IssueCertificateDialog';
 
 let searchTimeout;
 const SerializedAssetsCertification = () => {
@@ -98,7 +95,7 @@ const SerializedAssetsCertification = () => {
     const response = await axiosInstance().get(`/field?resource=${serializedAsset.resource}`);
     data = response?.data?.data;
     let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
-    setColumns( [...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = () => {
@@ -108,7 +105,7 @@ const SerializedAssetsCertification = () => {
       .get(`${serializedAssetsCertification.api}${queryString}`)
       .then(({ data }) => {
         let rows = data?.data?.map((u, user) => {
-          let finalObject = prepareDataForGrid(u,user);
+          let finalObject = prepareDataForGrid(u, user);
           const dateToQuery = moment().add(30, 'days').toDate();
           const certificateExpiryDate = u.certificateExpiryDate ? moment(u.certificateExpiryDate).toDate() : null;
           finalObject['canIssueCertificate'] = !certificateExpiryDate || certificateExpiryDate <= dateToQuery;
@@ -199,33 +196,33 @@ const SerializedAssetsCertification = () => {
     Cell: ({ row }) => (
       <>
         {row?.original?.canIssueCertificate && (
-        <HtmlTooltip title="Attach Certificate">
+          <HtmlTooltip title="Attach Certificate">
+            <IconButton
+              size="small"
+              aria-label="Issue"
+              onClick={() => {
+                setIssueCertificateDialog({
+                  open: true,
+                  id: row?.original?._id,
+                  certificateExpiryDate: row?.original?.certificateExpiryDate || null
+                });
+              }}
+            >
+              <NoteAddIcon color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+        <HtmlTooltip title="Certificate History">
           <IconButton
             size="small"
-            aria-label="Issue"
+            aria-label="View"
             onClick={() => {
-              setIssueCertificateDialog({
-                open: true,
-                id: row?.original?._id,
-                certificateExpiryDate: row?.original?.certificateExpiryDate || null
-              });
+              setCertificateHistoryDialog({ open: true, id: row?.original?._id });
             }}
           >
-            <NoteAddIcon color="primary" />
+            <HistoryIcon color="primary" />
           </IconButton>
         </HtmlTooltip>
-      )}
-      <HtmlTooltip title="Certificate History">
-        <IconButton
-          size="small"
-          aria-label="View"
-          onClick={() => {
-            setCertificateHistoryDialog({ open: true, id: row?.original?._id });
-          }}
-        >
-          <HistoryIcon color="primary" />
-        </IconButton>
-      </HtmlTooltip>
       </>
     )
   };
@@ -345,7 +342,6 @@ const SerializedAssetsCertification = () => {
                 style: { minHeight: '38px' }
               }}
               onChange={handleSearch}
-              className={styles.search_box_input}
               width={'150px'}
               size="small"
               value={search}
@@ -364,9 +360,11 @@ const SerializedAssetsCertification = () => {
             showFilters={true}
             resource={sidebarResource.serializedAsset}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </div>
       {issueCertificateDialog?.open && (
         <IssueCertificateDialog

@@ -1,7 +1,14 @@
-import { Button, IconButton, Box } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -11,16 +18,7 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CreateZone from './CreateZone';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem } from '@material-ui/core';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -229,7 +227,9 @@ const Zone = () => {
           permissions={permissions?.zone}
           module={routes.zone.title}
           api={routes.zone.path}
-          afterImportCompleted={() => { fetchData() }}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -245,20 +245,22 @@ const Zone = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.zone?.isCreate && (<Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>)}
+                {permissions?.zone?.isCreate && (
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    className={`no-shadow`}
+                    onClick={() => {
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
+                    }}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
                 {permissions?.zone?.isDelete && (
                   <>
                     <Button
@@ -313,9 +315,11 @@ const Zone = () => {
             showFilters={true}
             resource={sidebarResource.zone}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog
