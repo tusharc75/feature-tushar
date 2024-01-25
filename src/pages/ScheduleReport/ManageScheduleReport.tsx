@@ -14,7 +14,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import Loader from 'src/components/Loader';
 import routes from './../../components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
-import { camelCase, kebabCase } from 'lodash';
+import { camelCase, isEmpty, kebabCase } from 'lodash';
 import React from 'react';
 
 type ValueTypes = {
@@ -27,10 +27,10 @@ type ValueTypes = {
   time: any;
   week: string;
   day: any;
+  hour: any;
 };
 
 const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
-
   const formikRef = useRef<FormikProps<ValueTypes>>(null);
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -40,7 +40,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   const [resourceColumns, setResourceColumns] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [filterOptions, setFilterOptions] = useState([]);
-  const [resourceOptions, setResourceOptions] = useState(null);
   const [selectedData, setSelectedData] = useState(null);
   const [statusTimeFrame, setStatusTimeFrame] = useState('custom');
   const [statusPeriod, setStatusPeriod] = useState(false);
@@ -49,25 +48,29 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   const [statusPeriodDate, setStatusPeriodDate] = useState(null);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const { state: { user, selectedEntity, permissions } }: any = useData();
+  const {
+    state: { user, selectedEntity, permissions }
+  }: any = useData();
   const [resourceOption, setResourceOption] = useState(null);
   const [loadingColumns, setLoadingColumns] = useState(false);
 
   useEffect(() => {
-    const options = []
+    const options = [];
     REPORT_LIST?.forEach((item) => {
       if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
-        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key })
+        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key });
       }
-    })
-    setResourceOption(options)
+    });
+    setResourceOption(options);
   }, []);
 
   useEffect(() => {
     if (id) {
       (async () => {
         try {
-          let { data: { data } } = await axiosInstance().get(`/schedule-report/${id}`);
+          let {
+            data: { data }
+          } = await axiosInstance().get(`/schedule-report/${id}`);
 
           let resource: any = REPORT_LIST.find((item) => item.title === data.resource);
           resource = { title: resource.type === 'dynamic' ? routes[resource.key]?.title : resource.title, value: resource.title, key: resource.key };
@@ -78,6 +81,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             resource,
             frequency: data?.frequency,
             day: data?.day,
+            hour: data?.hour,
             time: data?.time,
             week: data?.week,
             filters: data?.filters,
@@ -99,7 +103,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         frequency: 'Daily',
         time: '',
         week: '',
-        day: new Date().getDay().toString()
+        day: new Date().getDay().toString(),
+        hour: ''
       });
     }
   }, [id]);
@@ -128,8 +133,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             ...acc,
             [val.fieldName]: {
               type: val.type,
-              lookup: val.lookup,
-              value: val.option.filter((option) => filterData[val.fieldName].includes(option.optionValue))
+              // lookup: val.lookup,
+              value: val.option.filter((option) => filterData[val.fieldName].includes(option.optionValue))?.map((v) => v?.optionValue)
             }
           }),
           {}
@@ -179,33 +184,10 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       });
   }, []);
 
-  useEffect(() => {
-    if (!resourceColumns && resourceColumns.length === 0) return;
-    const optionsData: any = {};
-    const filteredData = [...resourceColumns]
-      .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'date' || d.fieldData.type === 'checkBox'))
-      .map((d: any) => {
-        if (d.fieldData.type === 'dropDown') {
-          optionsData[d.fieldData.fieldName] = {
-            options: d.fieldData.option,
-            type: d.fieldData.type,
-            lookup: Boolean(d?.fieldData.lookup)
-          };
-        }
-        if (d.fieldData.type === 'date') {
-          d['timeFrame'] = 'custom';
-        }
-        return d.fieldData;
-      });
-    setResourceOptions(optionsData);
-    if (id || formikRef.current?.values?.resource) {
-      setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
-    }
-  }, [resourceColumns, formikRef.current?.values?.resource]);
-
   const fetchGridColumns = async (resource: any) => {
     setLoadingColumns(true);
     try {
+      let filterOptions;
       if (resource.key === 'purchaseOrderType') {
         let resourceFieldData = [];
         if (resource.value === 'Purchase Order Product') {
@@ -316,15 +298,31 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           }
         } else {
           let {
-            data: { data: { columnFields, filterFields } }
+            data: {
+              data: { columnFields, filterFields }
+            }
           } = await axiosInstance().get(`/report/${kebabCase(resource.value)}/column`);
           resourceFieldData.push(...columnFields);
+          filterOptions = filterFields;
         }
         setResourceColumns(resourceFieldData);
+      } else if (resource.key === 'standardReport') {
+        let {
+          data: {
+            data: { columnFields, filterFields }
+          }
+        } = await axiosInstance().get(`/report/${kebabCase(resource.value)}/column`);
+
+        filterOptions = filterFields;
+        setResourceColumns(columnFields);
       } else {
-        const { data: { data } }: any = await axiosInstance().get(`/field?resource=${resource.value}`);
+        const {
+          data: { data }
+        }: any = await axiosInstance().get(`/field?resource=${resource.value}`);
         if (resource.value === 'Serialized Asset') {
-          const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+          const {
+            data: { data: lookupResource }
+          } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
           if (lookupResource) {
             data?.forEach((e) => {
               if (e?.fieldData?.fieldName === 'currentOwner') {
@@ -334,8 +332,15 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             });
           }
         }
+        filterOptions = data;
         setResourceColumns(data);
       }
+      setFilterOptions([
+        { fieldLabel: 'All', fieldName: 'all', _id: '0' },
+        ...filterOptions
+          ?.filter((d) => d?.isRead && ['dropDown', 'multiSelect', 'date', 'checkBox', 'singleLine']?.includes(d?.fieldData?.type))
+          ?.map((f) => f?.fieldData)
+      ]);
       setLoadingColumns(false);
     } catch (err) {
       setLoadingColumns(false);
@@ -344,38 +349,13 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   };
 
   const handleSelectFilter = (type: string, name: string, value: any) => {
-    let fieldProps: any = {};
-    if (type === 'date') {
-      fieldProps.type = 'date';
-      fieldProps.lookup = false;
-    }
-    else if (type === 'checkBox') {
-      fieldProps.type = 'checkBox';
-      fieldProps.lookup = false;
-    }
-    else {
-      fieldProps.type = resourceOptions[name].type;
-      fieldProps.lookup = resourceOptions[name].lookup;
-    }
-
-    const newData: any = {
-      type: fieldProps.type,
-      lookup: fieldProps.lookup
-    };
-
-    if (Array.isArray(value)) {
-      newData.value = resourceOptions[name].options?.filter((d) => value?.includes(d.optionValue));
-      setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
-    } else {
-      newData.value = value;
-      setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
-    }
+    setSelectedData((prevState) => ({ ...prevState, [name]: { type, value } }));
     setFilterValues((prevState) => ({ ...prevState, [name]: value }));
   };
 
   const validate = (values: ValueTypes) => {
     let errors = {};
-    if (!values.scheduleName || values.scheduleName === "") {
+    if (!values.scheduleName || values.scheduleName === '') {
       errors['scheduleName'] = 'Schedule name is required';
     }
     if (!values.resource) {
@@ -396,27 +376,36 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       if (values.frequency === 'Monthly' && !values.day) {
         errors['day'] = 'Date is required';
       }
+      if (values.frequency === 'Hourly' && !values.hour) {
+        errors['hour'] = 'Hour is required';
+      }
     }
     return errors;
   };
 
   const handleSubmit = (values: ValueTypes) => {
     const filters = [];
-    if (selectedData) {
-      const filterKeys = Object.keys(selectedData);
+    const data = {};
+    values?.filters?.forEach((v) => {
+      if (Object.keys(selectedData).includes(v?.fieldName)) {
+        data[v?.fieldName] = selectedData[v?.fieldName];
+      }
+    });
+
+    if (!isEmpty(data)) {
+      const filterKeys = Object.keys(data);
       filterKeys.forEach((key) => {
-        if (selectedData[key]?.type === 'checkBox') {
+        if (data[key]?.type === 'checkBox') {
           let obj = {
             term: key,
-            value: selectedData[key]?.value
+            value: data[key]?.value
           };
           filters.push(obj);
-        }
-        else {
-          if (selectedData[key] && selectedData[key]?.value?.length) {
+        } else {
+          if (data[key] && data[key]?.value?.length) {
             let obj = {
               term: key,
-              value: selectedData[key]?.value.map((item) => item.optionValue)
+              value: data[key]?.value.map((item) => item)
             };
             filters.push(obj);
           }
@@ -484,12 +473,12 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   };
 
   const getTimeOption = () => {
-    const option: any = []
+    const option: any = [];
     for (let i = 0; i < 24; i++) {
-      option.push(`${i}:00`)
+      option.push(`${i}:00`);
     }
     return option;
-  }
+  };
 
   return (
     <Dialog
@@ -562,7 +551,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           getOptionSelected={(option, value) => option.value === value.value}
                           value={values.resource}
                           onChange={(_, newVal) => {
-                            const result = { resource: newVal, filters: [], column: [] }
+                            const result = { resource: newVal, filters: [], column: [] };
                             setValues({ ...values, ...result });
                             if (newVal) {
                               fetchGridColumns(newVal);
@@ -613,9 +602,12 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               variant="outlined"
                               InputProps={{
                                 ...params.InputProps,
-                                endAdornment: (<>
-                                  {loadingColumns && <CircularProgress size={18} color="inherit" />}
-                                </>)
+                                endAdornment: (
+                                  <React.Fragment>
+                                    {loadingColumns ? <CircularProgress size={18} color="inherit" /> : null}
+                                    {params.InputProps.endAdornment}
+                                  </React.Fragment>
+                                )
                               }}
                             />
                           )}
@@ -706,7 +698,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           getOptionLabel={(option) => option ?? ''}
                           value={values.time}
                           onChange={(_, newVal) => {
-                            setFieldValue('time', newVal)
+                            setFieldValue('time', newVal);
                           }}
                           renderInput={(params) => (
                             <TextField
@@ -769,6 +761,29 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                                     variant="outlined"
                                     error={touched['day'] && Boolean(errors['day'])}
                                     helperText={touched['day'] && errors['day']}
+                                  />
+                                )}
+                              />
+                            </Box>
+                          )}
+                          {values?.frequency === 'Hourly' && (
+                            <Box mt={2}>
+                              <Autocomplete
+                                options={[...new Array(12).keys()].map((_, index) => `${index + 1}`)}
+                                style={{ width: 200 }}
+                                size="small"
+                                onChange={(_, newVal) => {
+                                  setFieldValue('hour', newVal);
+                                }}
+                                value={values['hour']}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Hour"
+                                    name="hour"
+                                    variant="outlined"
+                                    error={touched['hour'] && Boolean(errors['hour'])}
+                                    helperText={touched['hour'] && errors['hour']}
                                   />
                                 )}
                               />
