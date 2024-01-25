@@ -580,8 +580,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       });
   };
 
-  console.log(selectedRecords);
-
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
     rows?.forEach((e: any) => {
       delete e.name;
