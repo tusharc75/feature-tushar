@@ -25,6 +25,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
+import { isEmpty } from 'lodash';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -170,11 +171,11 @@ const StepFieldsDialog = ({
         </h6>
         <div className={classes.transition} style={{ height: height }}>
           <div className={classes.sectionRow} ref={containerRef}>
-            {stepData.passFailStatus ? (
+            {stepData?.passFailStatus ? (
               <div>
                 <p className={classes.sectionColTItle}>Status :</p>
                 <p className={classes.sectionColDetail}>
-                  <RenderPassFailChip status={stepData.passFailStatus} className={classes.stepTags} />
+                  <RenderPassFailChip status={stepData?.passFailStatus} className={classes.stepTags} />
                 </p>
               </div>
             ) : null}
@@ -186,26 +187,26 @@ const StepFieldsDialog = ({
                 </p>
               </div>
             ) : null}
-            {stepData.startedBy && (
+            {stepData?.startedBy && (
               <div>
                 <p className={classes.sectionColTItle}>Started By:</p>
                 <p className={classes.sectionColDetail}>{stepData.startedBy?.optionLabel}</p>
               </div>
             )}
-            {stepData.endedBy && (
+            {stepData?.endedBy && (
               <div>
                 <p className={classes.sectionColTItle}>Ended By:</p>
                 <p className={classes.sectionColDetail}>{stepData.endedBy?.optionLabel}</p>
               </div>
             )}
-            {stepData.startDate ? (
+            {stepData?.startDate ? (
               <div>
                 <p className={classes.sectionColTItle}>Start Date:</p>
                 <p className={classes.sectionColDetail}>{moment(stepData.startDate).format(dateTimeFormat)}</p>
               </div>
             ) : null}
 
-            {stepData.endDate ? (
+            {stepData?.endDate ? (
               <div>
                 <p className={classes.sectionColTItle}>End Date:</p>
                 <p className={classes.sectionColDetail}>{moment(stepData.endDate).format(dateTimeFormat)}</p>
@@ -264,7 +265,6 @@ const StepFieldsDialog = ({
         handleClose();
       });
   };
-
   return (
     <>
       <Dialog
@@ -280,7 +280,7 @@ const StepFieldsDialog = ({
         fullWidth
       >
         <CustomDialogHeader
-          title={step?.stepName}
+          title={`${step?.idx} - ${step?.stepName}`}
           onClose={() => {
             handleClose();
             setDialogOpen(false);
@@ -294,7 +294,7 @@ const StepFieldsDialog = ({
         <Formik
           initialValues={fieldData?.values}
           validationSchema={yupSchema(fieldData?.fields)}
-          onSubmit={(values) => handleSubmit(values, step)}
+          onSubmit={(values) => { }}
           enableReinitialize
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
@@ -460,11 +460,29 @@ const StepFieldsDialog = ({
                           size="small"
                           onClick={() => {
                             submitForm();
-                            setEditing(false);
+                            if (isEmpty(errors)) {
+                              setEditing(false);
+                              handleSubmit(values, step);
+                            }
                           }}
                           color="primary"
                         >
                           Save
+                        </Button>
+                        <Box ml={1} />
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => {
+                            submitForm();
+                            if (isEmpty(errors)) {
+                              setEditing(false);
+                              handleSubmit(values, step, true);
+                            }
+                          }}
+                          color="primary"
+                        >
+                          Save & Complete
                         </Button>
                       </>
                     )}

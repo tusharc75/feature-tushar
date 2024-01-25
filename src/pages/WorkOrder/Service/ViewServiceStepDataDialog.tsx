@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Box, Dialog, TextField } from '@material-ui/core';
+import { Box, Dialog, TextField, Typography } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 
 const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose }) => {
@@ -12,29 +11,34 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose }) => 
   const renderedFrom = `${routes?.workOrder?.title}_Service_StepData`;
   const { generateColumns } = useColumns();
   const [serviceOptions, setServiceOptions] = useState(null);
-  const [selectedService, setSelectedService] = useState(null);
-  const [columns, setColumns] = useState(null);
+  const [selectedServices, setSelectedServices] = useState([]);
   const { state, dispatch } = useTableReducer();
 
   useEffect(() => {
     const services = [];
-    servicesData?.map((e) => {
+    servicesData?.forEach((sd) => {
+      const rows = stepsData?.filter((s) => s.uniqueId === sd.uniqueId).map((e, index) => {
+        const matchingStep = sd?.steps?.find((item) => item?._id === e?.stepId);
+        return {
+          index: index + 1,
+          stepName: matchingStep?.stepName,
+          ...e
+        };
+      });
+      const columns = fetchGridColumns(sd?.steps);
       services.push({
-        optionLabel: e.serviceName,
-        optionValue: e?._id,
-        uniqueId: e?.uniqueId,
-        steps: e?.steps
+        optionLabel: sd.serviceName,
+        optionValue: sd?._id,
+        uniqueId: sd?.uniqueId,
+        steps: sd?.steps,
+        row: rows,
+        column: columns
       });
     });
     setServiceOptions(services);
+    setSelectedServices([services[0]]);
   }, []);
 
-  useEffect(() => {
-    if (selectedService) {
-      fetchGridColumns(selectedService?.steps);
-      fetchData(selectedService?.uniqueId);
-    }
-  }, [selectedService]);
 
   const fetchGridColumns = (steps: any) => {
     const initialColumns = [
@@ -63,19 +67,8 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose }) => 
       });
     });
     let newColumns = generateColumns(renderedFrom, stepColumns);
-    setColumns([...initialColumns, ...newColumns]);
-  };
-
-  const fetchData = (id: any) => {
-    const rows = stepsData?.filter((e) => e.uniqueId === id).map((e, index) => {
-      const matchingStep = selectedService?.steps.find((item) => item?._id === e?.stepId);
-      return {
-        index: index + 1,
-        stepName: matchingStep?.stepName,
-        ...e
-      };
-    });
-    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    // setColumns([...initialColumns, ...newColumns]);
+    return [...initialColumns, ...newColumns];
   };
 
   return (
@@ -83,36 +76,43 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose }) => 
       <CustomDialogHeader title={'View Service Steps Data'} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent>
         <Autocomplete
+          multiple
           id="service"
           style={{ width: '300px' }}
           options={serviceOptions}
-          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-          getOptionSelected={(option: any, val) => option.optionValue === val}
-          value={selectedService}
-          onChange={(e: any, value) => {
-            setSelectedService(value);
+          getOptionLabel={(option) => option?.optionLabel}
+          value={selectedServices}
+          onChange={(event, newValue) => {
+            setSelectedServices(newValue);
           }}
-          disableClearable
           renderInput={(params) => (
             <TextField {...params} margin="dense" variant="outlined" label="Select Service" placeholder="Select Service" name="service" />
           )}
         />
-        {selectedService ? (
-          <Box mt={1}>
-            <CustomReactTable
-              height={'calc(100vh - 200px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              refreshGrid={() => fetchData(selectedService?.uniqueId)}
-              hideSelection={true}
-              hideAction={true}
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-              showArrangeView={false}
-            />
-          </Box>
-        ) : null}
+        {selectedServices?.map(s => (
+          (
+            <Box mt={2}>
+              <Typography variant="h6">{s?.optionLabel}</Typography>
+              <CustomReactTable
+                key={s?.uniqueId}
+                height={'calc(400px)'}
+                columns={s?.column}
+                state={{
+                  ...state,
+                  dataRows: s?.row || [],
+                  rowCount: s?.row?.length || 0,
+                  initialDataLoaded: true
+                }}
+                dispatch={dispatch}
+                hideSelection={true}
+                hideAction={true}
+                renderedFrom={`${renderedFrom}_${s?.uniqueId}`}
+                isClientSideGrid={true}
+                showArrangeView={false}
+              />
+            </Box>
+          )
+        ))}
       </CustomDialogContent>
     </Dialog>
   );
