@@ -28,6 +28,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
   const [pageImages, setPageImages] = useState([]);
   const [canvasStates, setCanvasStates] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [highlighterPaths, setHighlighterPaths] = useState([]);
   const [originalDimensions, setOriginalDimensions] = useState({ width: null, height: null });
 
   useEffect(() => {
@@ -233,14 +234,46 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
       } else {
         if (activeObject.type === 'line' || activeObject.type === 'path') {
           activeObject.set('stroke', newColor);
+        } else  if (activeObject.type === 'path') {
+          activeObject.set('stroke', newColor);
         } else {
           activeObject.set('fill', newColor);
         }
+          
       }
-      canvas.requestRenderAll(); // Re-render the canvas to show the color change
+      canvas.requestRenderAll(); 
     }
   };
 
+  const handleAddHighlight = () => {
+    const highlighterBrush = new fabric.PencilBrush(canvas);
+    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity
+    highlighterBrush.width = 10; 
+
+    canvas.freeDrawingBrush = highlighterBrush;
+    canvas.isDrawingMode = true;
+
+    canvas.on('path:created', (options) => {
+      const path = options.path;
+      path.set({
+        selectable: false,
+        evented: false,
+      });
+
+      setHighlighterPaths((prevPaths) => [...prevPaths, path]); // Keep track of highlighter paths
+      canvas.isDrawingMode = false; 
+    });
+  };
+
+  const handleUndo = () => {
+    const lastHighlighterPath = highlighterPaths.pop();
+
+    if (lastHighlighterPath) {
+      canvas.remove(lastHighlighterPath);
+      canvas.requestRenderAll();
+    }
+  };
+  
   const getSelectedColor = () => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) {
@@ -329,6 +362,12 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
           </Button>
           <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddCircle}>
             Add Circle
+          </Button>
+          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddHighlight}>
+            Add Highlight
+          </Button>
+          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleUndo}>
+            Undo Highlight
           </Button>
           <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={toggleDrawingMode}>
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}

@@ -476,7 +476,7 @@ const Steps = ({
     return { fieldData, stepData, isStepValid };
   };
 
-  const handleSubmit = async (values, step) => {
+  const handleSubmit = async (values, step, autoComplete = false) => {
     let tempData = {
       uniqueId: selectedService?.uniqueId,
       serviceId: selectedService._id,
@@ -496,6 +496,9 @@ const Steps = ({
         if (step?.isPassFail) {
           const type = automatePassFail(values, step);
           handlePassFail(type, step);
+        }
+        if (autoComplete) {
+          handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
         }
       })
       .catch((error) => {
@@ -520,7 +523,7 @@ const Steps = ({
     return Object.keys(invalidValues).length > 0 ? WORKORDER_SERVICE_STEP_STATUS.failed : WORKORDER_SERVICE_STEP_STATUS.passed;
   };
 
-  const handleStartEnd = (type, stepId) => {
+  const handleStartEnd = (type, stepId, step = null, stepData = null) => {
     setLoadingStep(true);
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/${type}`, {
@@ -537,6 +540,12 @@ const Steps = ({
         });
         fetchService();
         setReOpenServiceDialog({ open: false, type: null, stepId: null });
+        if (!step?.isPassFail) {
+          setSelectedStep(step);
+          setFieldDialog(true);
+          setIsFieldDialogEditable(true);
+          setStepState(stepData);
+        }
       })
       .catch((error) => {
         setLoadingStep(false);
@@ -972,7 +981,7 @@ const Steps = ({
                 if (resource === sidebarResource.workOrderTechnician && stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) {
                   return '';
                 }
-
+                step.idx = resource === sidebarResource.workOrderTechnician ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`;
                 return (
                   <Box
                     key={`${step._id}_${selectedService?.uniqueId}}`}
@@ -1146,7 +1155,7 @@ const Steps = ({
                                     if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
                                       updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
                                     }
-                                    handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step._id);
+                                    handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step._id, step, stepData);
                                   }}
                                 >
                                   Start
