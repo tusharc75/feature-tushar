@@ -26,6 +26,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const [loading, setLoading] = useState(true);
   const [selectedObject, setSelectedObject] = useState(null);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [highlighterPaths, setHighlighterPaths] = useState([]);
 
   useEffect(() => {
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
@@ -179,6 +180,35 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     }
   };
 
+  const handleAddHighlight = () => {
+    const highlighterBrush = new fabric.PencilBrush(canvas);
+    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity
+    highlighterBrush.width = 10; // Highlighter stroke width
+
+    canvas.freeDrawingBrush = highlighterBrush;
+    canvas.isDrawingMode = true;
+
+    canvas.on('path:created', (options) => {
+      const path = options.path;
+      path.set({
+        selectable: false,
+        evented: false,
+      });
+
+      setHighlighterPaths((prevPaths) => [...prevPaths, path]); // Keep track of highlighter paths
+      canvas.isDrawingMode = false; // Disable drawing mode
+    });
+  };
+
+  const handleUndo = () => {
+    const lastHighlighterPath = highlighterPaths.pop();
+
+    if (lastHighlighterPath) {
+      canvas.remove(lastHighlighterPath);
+      canvas.requestRenderAll();
+    }
+  };
+
   const handleColorChange = (event) => {
     const newColor = event.target.value;
     const activeObject = canvas.getActiveObject();
@@ -195,7 +225,9 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
       } else {
         if (activeObject.type === 'line' || activeObject.type === 'path') {
           activeObject.set('stroke', newColor);
-        } else {
+        } else if (activeObject.type === 'path') {
+          activeObject.set('stroke', newColor);
+        }else {
           activeObject.set('fill', newColor);
         }
       }
@@ -278,6 +310,12 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           </Button>
           <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddCircle}>
             Add Circle
+          </Button>
+          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddHighlight}>
+            Add Highlight
+          </Button>
+          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleUndo}>
+            Undo Highlight
           </Button>
           <Button
             disabled={loading}

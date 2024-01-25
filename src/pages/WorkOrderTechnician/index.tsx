@@ -122,7 +122,7 @@ const WorkOrderTechnician = () => {
           </HtmlTooltip>
         </Box>
         {viewType === 1 && <CardView serviceStatus={selectedServiceStatus} filterQuery={filterQuery} ref={ref} />}
-        {viewType === 2 && <GridView serviceStatus={selectedServiceStatus} filterQuery={filterQuery} />}
+        {viewType === 2 && <GridView serviceStatus={selectedServiceStatus} filterQuery={filterQuery} permissions={permissions?.workOrderTechnician} />}
       </Box>
     </Box>
   );

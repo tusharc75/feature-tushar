@@ -14,7 +14,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import Loader from 'src/components/Loader';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
-import { kebabCase } from 'lodash';
+import { isEmpty, kebabCase } from 'lodash';
 
 type ValueTypes = {
   customReportName: string;
@@ -32,7 +32,6 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
   const [formData, setFormData] = useState(null);
   const [resourceColumns, setResourceColumns] = useState([]);
   const [filterOptions, setFilterOptions] = useState([]);
-  const [resourceOptions, setResourceOptions] = useState(null);
   const [selectedData, setSelectedData] = useState(null);
   const [statusTimeFrame, setStatusTimeFrame] = useState('custom');
   const [statusPeriod, setStatusPeriod] = useState(false);
@@ -41,27 +40,36 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
   const [statusPeriodDate, setStatusPeriodDate] = useState(null);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const { state: { user, selectedEntity, permissions } }: any = useData();
+  const {
+    state: { user, selectedEntity, permissions }
+  }: any = useData();
   const [resourceOption, setResourceOption] = useState(null);
 
   useEffect(() => {
-    const options = []
+    const options = [];
     REPORT_LIST?.forEach((item) => {
       if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
-        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key, type: item.type })
+        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key, type: item.type });
       }
-    })
-    setResourceOption(options)
+    });
+    setResourceOption(options);
   }, []);
 
   useEffect(() => {
     if (id) {
       (async () => {
         try {
-          let { data: { data } } = await axiosInstance().get(`/custom-report/${id}`);
+          let {
+            data: { data }
+          } = await axiosInstance().get(`/custom-report/${id}`);
 
           let resource: any = REPORT_LIST?.find((item) => item.title === data.resource);
-          resource = { title: resource.type === 'dynamic' ? routes[resource.key]?.title : resource.title, value: resource.title, key: resource.key };
+          resource = {
+            title: resource.type === 'dynamic' ? routes[resource.key]?.title : resource.title,
+            value: resource.title,
+            key: resource.key,
+            type: resource.type
+          };
 
           await fetchGridColumns(resource);
           let newData: any = {
@@ -86,14 +94,24 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
   }, [id]);
 
   const fetchGridColumns = async (resource: any) => {
+    let filterOptions;
     if (resource.key === 'standardReport') {
-      let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${kebabCase(resource.type)}/column`);
+      let {
+        data: {
+          data: { columnFields, filterFields }
+        }
+      } = await axiosInstance().get(`/report/${kebabCase(resource.type)}/column`);
+
+      filterOptions = filterFields;
       setResourceColumns(columnFields);
-    }
-    else {
-      const { data: { data } }: any = await axiosInstance().get(`/field?resource=${resource.value}`);
+    } else {
+      const {
+        data: { data }
+      }: any = await axiosInstance().get(`/field?resource=${resource.value}`);
       if (resource.value === 'Serialized Asset') {
-        const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+        const {
+          data: { data: lookupResource }
+        } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
         if (lookupResource) {
           data?.forEach((e) => {
             if (e?.fieldData?.fieldName === 'currentOwner') {
@@ -103,8 +121,15 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
           });
         }
       }
+      filterOptions = data;
       setResourceColumns(data);
     }
+    setFilterOptions([
+      { fieldLabel: 'All', fieldName: 'all', _id: '0' },
+      ...filterOptions
+        ?.filter((d) => d?.isRead && ['dropDown', 'multiSelect', 'date', 'checkBox', 'singleLine']?.includes(d?.fieldData?.type))
+        ?.map((f) => f?.fieldData)
+    ]);
   };
 
   useEffect(() => {
@@ -131,8 +156,8 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
             ...acc,
             [val.fieldName]: {
               type: val.type,
-              lookup: val.lookup,
-              value: val.option.filter((option) => filterData[val.fieldName].includes(option.optionValue))
+              // lookup: val.lookup,
+              value: val.option.filter((option) => filterData[val.fieldName].includes(option.optionValue))?.map((v) => v?.optionValue)
             }
           }),
           {}
@@ -163,49 +188,9 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     return () => clearTimeout(timeout);
   }, [scheduleData, filterOptions, resourceColumns]);
 
-  useEffect(() => {
-    if (!resourceColumns && resourceColumns.length === 0) return;
-    const optionsData: any = {};
-    const filteredData = [...resourceColumns].filter((d: any) => d.isRead && (['dropDown', 'date', 'checkBox', 'singleLine']?.includes(d.fieldData.type))).map((d: any) => {
-      if (d.fieldData.type === 'dropDown') {
-        optionsData[d.fieldData.fieldName] = {
-          options: d.fieldData.option,
-          type: d.fieldData.type,
-          lookup: Boolean(d?.fieldData.lookup)
-        };
-      }
-      if (d.fieldData.type === 'date') {
-        d['timeFrame'] = 'custom';
-      }
-      return d.fieldData;
-    });
-    setResourceOptions(optionsData);
-    if (id || formikRef.current?.values?.resource) {
-      setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
-    }
-  }, [resourceColumns, formikRef.current?.values?.resource]);
 
   const handleSelectFilter = (type: string, name: string, value: any) => {
-    let fieldProps: any = {};
-    if (type === 'dropDown' || type === 'multiSelect') {
-      fieldProps.type = resourceOptions[name].type;
-      fieldProps.lookup = resourceOptions[name].lookup;
-    }
-    else {
-      fieldProps.type = type;
-      fieldProps.lookup = false;
-    }
-    const newData: any = {
-      type: fieldProps.type,
-      lookup: fieldProps.lookup
-    };
-    if (Array.isArray(value)) {
-      newData.value = resourceOptions[name].options?.filter((d) => value?.includes(d.optionValue));
-      setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
-    } else {
-      newData.value = value;
-      setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
-    }
+    setSelectedData((prevState) => ({ ...prevState, [name]: { type, value } }));
     setFilterValues((prevState) => ({ ...prevState, [name]: value }));
   };
 
@@ -222,31 +207,36 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
 
   const handleSubmit = (values: ValueTypes) => {
     const filters = [];
-    if (selectedData) {
-      const filterKeys = Object.keys(selectedData);
+    const data = {};
+    values?.filters?.forEach((v) => {
+      if (Object.keys(selectedData).includes(v?.fieldName)) {
+        data[v?.fieldName] = selectedData[v?.fieldName];
+      }
+    });
+
+    if (!isEmpty(data)) {
+      const filterKeys = Object.keys(data);
       filterKeys.forEach((key) => {
-        if (selectedData[key]?.type === 'checkBox') {
+        if (data[key]?.type === 'checkBox') {
           let obj = {
-            type: selectedData[key]?.type,
+            type: data[key]?.type,
             term: key,
-            value: selectedData[key].value ? true : false
+            value: data[key].value ? true : false
           };
           filters.push(obj);
-        }
-        else if (selectedData[key]?.type === 'singleLine') {
+        } else if (data[key]?.type === 'singleLine') {
           let obj = {
-            type: selectedData[key]?.type,
+            type: data[key]?.type,
             term: key,
-            value: selectedData[key].value
+            value: data[key].value
           };
           filters.push(obj);
-        }
-        else {
-          if (selectedData[key] && selectedData[key]?.value?.length) {
+        } else {
+          if (data[key] && data[key]?.value?.length) {
             let obj = {
-              type: selectedData[key]?.type,
+              type: data[key]?.type,
               term: key,
-              value: selectedData[key]?.value.map((item) => item.optionValue)
+              value: data[key]?.value.map((item) => item)
             };
             filters.push(obj);
           }
@@ -258,7 +248,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
       filterKeys.forEach((key) => {
         if (betweenDate[key] && betweenDate[key]) {
           let obj = {
-            type: selectedData[key]?.type,
+            type: data[key]?.type,
             term: key,
             value: betweenDate[key]
           };
@@ -266,14 +256,13 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
         }
       });
     }
-    console.log(selectedData)
-    console.log(filters)
     const newValues = {
       ...values,
       filters,
       resource: values.resource?.value,
       column: values.column.length > 0 ? values.column.map((field) => field.fieldName) : []
     };
+
     setSubmitting(true);
     if (id) {
       let newData = { _id: id, ...newValues };
@@ -337,7 +326,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
           <Loader minHeight={350} />
         </CustomDialogContent>
       )}
-      {(formData && resourceOption) && (
+      {formData && resourceOption && (
         <Formik
           innerRef={(ref) => {
             if (ref) {
