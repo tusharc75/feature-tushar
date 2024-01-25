@@ -580,6 +580,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       });
   };
 
+  console.log(selectedRecords);
+
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
     rows?.forEach((e: any) => {
       delete e.name;
@@ -826,6 +828,18 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               )}`}
             />
             <Box ml={1} /> */}
+            <ImportExportMenu
+              permissions={permissions?.workOrder}
+              module={sidebarResource.workOrder}
+              api={`work-order-technician`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              title={'Steps Data'}
+              disabled={!(selectedRecords.length===1 && selectedRecords[0].type===MATERIAL_TYPE.service)}
+              additionalParams={`productionOrder=${productionOrderData._id}&serviceId=${selectedRecords[0]?.serviceDetail?._id}&uniqueId=${selectedRecords[0]?.uniqueId}`}
+            />
+            <Box ml={1} />
             <Button
               variant={'outlined'}
               color="primary"
