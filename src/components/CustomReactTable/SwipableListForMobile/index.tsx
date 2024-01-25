@@ -50,7 +50,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   const otherFields: any[] | null = React.useMemo(
     () =>
       allColumns?.filter(
-        (item) => item.id !== primaryField.id && !['selection', 'action', 'expander'].includes(item.id) && item.isVisible !== false
+        (item) => item.id !== primaryField?.id && !['selection', 'action', 'expander'].includes(item.id) && item.isVisible !== false
       ) || null,
     [allColumns, primaryField]
   );

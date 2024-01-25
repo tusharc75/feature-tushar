@@ -58,7 +58,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     const options = [];
     REPORT_LIST?.forEach((item) => {
       if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
-        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key });
+        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key, type: item?.type });
       }
     });
     setResourceOption(options);
@@ -73,7 +73,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           } = await axiosInstance().get(`/schedule-report/${id}`);
 
           let resource: any = REPORT_LIST.find((item) => item.title === data.resource);
-          resource = { title: resource.type === 'dynamic' ? routes[resource.key]?.title : resource.title, value: resource.title, key: resource.key };
+          resource = { title: resource.type === 'dynamic' ? routes[resource.key]?.title : resource.title, value: resource.title, key: resource.key, type: resource.type };
 
           await fetchGridColumns(resource);
           let newData: any = {
@@ -188,130 +188,12 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     setLoadingColumns(true);
     try {
       let filterOptions;
-      if (resource.key === 'purchaseOrderType') {
-        let resourceFieldData = [];
-        if (resource.value === 'Purchase Order Product') {
-          let {
-            data: { data: POFields }
-          } = await axiosInstance().get(`/field?resource=Purchase Order`);
-          let {
-            data: { data: POProductFields }
-          } = await axiosInstance().get(`/field?resource=Purchase Order Product`);
-          let {
-            data: { data: productFields }
-          } = await axiosInstance().get(`/field?resource=Product`);
-          let {
-            data: { data: productOption }
-          } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
-
-          POFields.filter((field) =>
-            ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
-          ).forEach((field: any) => {
-            resourceFieldData.push(field);
-          });
-
-          productFields
-            .filter((field) => ['productName'].includes(field?.fieldData.fieldName))
-            .forEach((field: any) => {
-              resourceFieldData.push({
-                ...field,
-                fieldData: { ...field.fieldData, fieldName: 'productId', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
-              });
-            });
-
-          POProductFields.forEach((f) => {
-            if (['expectedDelivery', 'unit', 'taxSchedule'].includes(f.fieldData.fieldName)) {
-              f = {
-                ...f,
-                fieldData: {
-                  ...f.fieldData,
-                  type: ''
-                }
-              };
-            }
-
-            resourceFieldData.push(f);
-          });
-
-          resourceFieldData.push({
-            fieldData: {
-              fieldName: 'soldQty',
-              fieldLabel: 'Sold Qty',
-              type: 'text'
-            }
-          });
-        } else if (resource.value === 'Product Average Costing') {
-          let {
-            data: { data: productFields }
-          } = await axiosInstance().get(`/field?resource=Product`);
-          let {
-            data: { data: POFields }
-          } = await axiosInstance().get(`/field?resource=Purchase Order`);
-
-          POFields.filter((field) => ['purchaseOrderDate', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
-            if (field?.fieldData.fieldName === 'warehouse') {
-              resourceFieldData.push(field);
-            }
-            if (field?.fieldData.fieldName === 'purchaseOrderDate') {
-              resourceFieldData.push({
-                ...field,
-                fieldData: { ...field.fieldData, fieldLabel: 'Date', fieldName: 'date', type: 'date' }
-              });
-            }
-          });
-
-          productFields.forEach((o: any) => {
-            resourceFieldData.push(o);
-          });
-
-          resourceFieldData.push(
-            {
-              fieldData: {
-                fieldName: 'qty',
-                fieldLabel: 'Qty',
-                type: 'text'
-              }
-            },
-            {
-              fieldData: {
-                fieldName: 'unitPrice',
-                fieldLabel: 'Unit Price',
-                type: 'text'
-              }
-            },
-            {
-              fieldData: {
-                fieldName: 'total',
-                fieldLabel: 'Total',
-                type: 'text'
-              }
-            }
-          );
-          if (productFields?.filter((e) => e.fieldData.fieldName === 'listPrice')?.length) {
-            resourceFieldData.push({
-              fieldData: {
-                fieldName: 'margin',
-                fieldLabel: 'Margin',
-                type: 'text'
-              }
-            });
-          }
-        } else {
-          let {
-            data: {
-              data: { columnFields, filterFields }
-            }
-          } = await axiosInstance().get(`/report/${kebabCase(resource.value)}/column`);
-          resourceFieldData.push(...columnFields);
-          filterOptions = filterFields;
-        }
-        setResourceColumns(resourceFieldData);
-      } else if (resource.key === 'standardReport') {
+      if (resource.key === 'standardReport') {
         let {
           data: {
             data: { columnFields, filterFields }
           }
-        } = await axiosInstance().get(`/report/${kebabCase(resource.value)}/column`);
+        } = await axiosInstance().get(`/report/${kebabCase(resource.type)}/column`);
 
         filterOptions = filterFields;
         setResourceColumns(columnFields);
