@@ -10,7 +10,7 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose }) => 
 
   const renderedFrom = `${routes?.workOrder?.title}_Service_StepData`;
   const { generateColumns } = useColumns();
-  const [serviceOptions, setServiceOptions] = useState(null);
+  const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
   const { state, dispatch } = useTableReducer();
 
@@ -78,41 +78,48 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose }) => 
         <Autocomplete
           multiple
           id="service"
-          style={{ width: '300px' }}
-          options={serviceOptions}
+          style={{ width: '50%' }}
+          options={[{ optionValue: 'selectAll', optionLabel: 'Select All' }, ...serviceOptions]}
           getOptionLabel={(option) => option?.optionLabel}
           value={selectedServices}
           onChange={(event, newValue) => {
-            setSelectedServices(newValue);
+            if (newValue?.some((e) => e?.optionValue === 'selectAll')) {
+              setSelectedServices(serviceOptions);
+              return;
+            } else {
+              setSelectedServices(newValue);
+            }
           }}
           renderInput={(params) => (
             <TextField {...params} margin="dense" variant="outlined" label="Select Service" placeholder="Select Service" name="service" />
           )}
         />
-        {selectedServices?.map(s => (
-          (
-            <Box mt={2}>
-              <Typography variant="h6">{s?.optionLabel}</Typography>
-              <CustomReactTable
-                key={s?.uniqueId}
-                height={'calc(400px)'}
-                columns={s?.column}
-                state={{
-                  ...state,
-                  dataRows: s?.row || [],
-                  rowCount: s?.row?.length || 0,
-                  initialDataLoaded: true
-                }}
-                dispatch={dispatch}
-                hideSelection={true}
-                hideAction={true}
-                renderedFrom={`${renderedFrom}_${s?.uniqueId}`}
-                isClientSideGrid={true}
-                showArrangeView={false}
-              />
-            </Box>
-          )
-        ))}
+        <Box style={{ overflowY: 'auto', height: 'calc(100% - 70px)' }}>
+          {selectedServices?.filter((e) => e?.optionValue !== 'selectAll')?.map(s => (
+            (
+              <Box mt={2}>
+                <Typography variant="h6">{s?.optionLabel}</Typography>
+                <CustomReactTable
+                  key={s?.uniqueId}
+                  height={'calc(400px)'}
+                  columns={s?.column}
+                  state={{
+                    ...state,
+                    dataRows: s?.row || [],
+                    rowCount: s?.row?.length || 0,
+                    initialDataLoaded: true
+                  }}
+                  dispatch={dispatch}
+                  hideSelection={true}
+                  hideAction={true}
+                  renderedFrom={`${renderedFrom}_${s?.uniqueId}`}
+                  isClientSideGrid={true}
+                  showArrangeView={false}
+                />
+              </Box>
+            )
+          ))}
+        </Box>
       </CustomDialogContent>
     </Dialog>
   );

@@ -21,7 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { camelCase, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, isArray, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
 import { stepIconInterface } from 'src/components/Steps/icons';
 
 interface stepInterface extends stepIconInterface {
@@ -895,7 +895,7 @@ export const profileMenuItems = {
   securityPrivacy: 5
 };
 
-export const SCHEDULE_FREQUENCY = ['Daily', 'Weekly', 'Monthly'];
+export const SCHEDULE_FREQUENCY = ['Daily', 'Weekly', 'Monthly', 'Hourly'];
 export const FREQUENCY_WEEKS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
@@ -921,6 +921,9 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       let defaultOptions = key.option?.filter((item: any) => item.default === true);
       if (defaultOptions?.length === 0 && key.required && key.option?.length === 1) {
         defaultOptions = key.option;
+      }
+      if (value && isArray(value) && value?.length && key.fieldName === "collaborator" && obj['owner']) {
+        value = value?.filter((e) => obj['owner'] !== e)
       }
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? (typeof value === 'string' ? [value] : value) : options;
