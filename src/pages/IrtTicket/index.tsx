@@ -1,30 +1,25 @@
 import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import routes from 'src/components/Helpers/Routes';
-import styles from '../Leads/Header.module.scss';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import { camelCase } from 'lodash';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
-import { useData } from 'src/StateProvider/Provider';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import axiosInstance from 'src/axios/axiosInstance';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from 'src/constants/helpers';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ManageIrtTicket from './ManageIrtTicket';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { cloneDisable} from 'src/constants/messageHelpers';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { cloneDisable } from 'src/constants/messageHelpers';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ManageIrtTicket from './ManageIrtTicket';
 
 let searchTimeout;
 
@@ -48,7 +43,6 @@ const IrtTicket = () => {
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
-
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.irtTicket}`);
@@ -56,7 +50,6 @@ const IrtTicket = () => {
     const newColumns = generateColumns(renderedFrom, data, routes.irtTicketDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
-
 
   const fetchIrtTicketData = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -148,7 +141,7 @@ const IrtTicket = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.irtTicket?.isCreate ? "Clone" : cloneDisable}  >
+        <HtmlTooltip title={permissions?.irtTicket?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -213,7 +206,6 @@ const IrtTicket = () => {
     fetchGridColumns();
   }, []);
 
-
   useEffect(() => {
     fetchIrtTicketData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
@@ -250,10 +242,9 @@ const IrtTicket = () => {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-            </div>
+            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.irtTicket?.isCreate && (
                   <Button
@@ -324,9 +315,11 @@ const IrtTicket = () => {
             showFilters={true}
             resource={sidebarResource.irtTicket}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog

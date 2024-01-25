@@ -1,10 +1,18 @@
 import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useContext, useEffect, useReducer, useState } from 'react';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -18,21 +26,6 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
 import './style.scss';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, {
-  checkStaticField,
-  getStaticFields,
-  gridFilterParser,
-  useColumns,
-  useTableReducer
-} from 'src/components/CustomReactTable';
-import { camelCase } from 'lodash';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import styles from '../Leads/Header.module.scss';
 
 const Opportunities = () => {
   const types = [
@@ -324,14 +317,7 @@ const Opportunities = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                className={isMobile ? styles.search_box_input : ''}
-                width="242px"
-                size="small"
-                value={search}
-                style={isMobile ? { flex: 1 } : {}}
-              />
+              <SearchBox onChange={handleSearch} width="242px" size="small" value={search} style={isMobile ? { flex: 1 } : {}} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.opportunity?.isCreate && (
                   <Button

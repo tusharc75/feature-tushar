@@ -1,4 +1,4 @@
-import { Button, Chip, IconButton, Menu, MenuItem, MenuList, Box } from '@material-ui/core';
+import { Box, Button, Chip, IconButton, Menu, MenuItem, MenuList } from '@material-ui/core';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Grow from '@material-ui/core/Grow';
@@ -11,17 +11,19 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { camelCase } from 'lodash';
+import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import queryString from 'query-string';
 import { FcApproval } from 'react-icons/fc';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { Link, useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { cloneDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomContainer from '../../components/CustomContainer';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import EntitySelectionsDialog from '../../components/EntitySelections';
@@ -33,23 +35,19 @@ import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
-import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageAccountDialog from './ManageAccount/index';
 import WarhouseList from './Warehouse/WarhouseList';
 import accountClass from './account.module.scss';
-import { cloneDisable } from 'src/constants/messageHelpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const options = ['All', 'Approved', 'Disapproved'];
 
 export default function Account(props) {
-
   const {
     account: { accountApi, accountResource, accountRoute }
   } = props;
-  
+
   const types = [
     {
       key: `My ${routes[accountResource]?.title}`,
@@ -670,7 +668,7 @@ export default function Account(props) {
                 </div>
               </div>
               <div className="flex flex-wrap gap-[8px]  justify-end">
-                <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+                <SearchBox onChange={handleSearch} value={search} size="small" />
                 <div className="flex gap-[8px] flex-wrap items-center">
                   <Button
                     disabled={!accountPermissions.isCreate}

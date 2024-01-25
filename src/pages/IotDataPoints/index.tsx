@@ -1,29 +1,24 @@
-import { Button, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
-import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { camelCase } from 'lodash';
-import { useData } from 'src/StateProvider/Provider';
-import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import axiosInstance from 'src/axios/axiosInstance';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource,
-} from 'src/constants/helpers';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import ManageIotDataPoints from './ManageIotDataPoints';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ManageIotDataPoints from './ManageIotDataPoints';
 
 let searchTimeout;
 
@@ -252,7 +247,7 @@ const IotDataPoints = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className={'d-flex align-items-center gap-1'}></div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+              <SearchBox onChange={handleSearch} size="small" value={search} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.iotDataPoints?.isCreate && (
                   <Button
@@ -321,9 +316,11 @@ const IotDataPoints = () => {
             showFilters={true}
             resource={sidebarResource.iotDataPoints}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

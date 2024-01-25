@@ -1,4 +1,3 @@
-import { useState, useEffect, useContext } from 'react';
 import {
   Button,
   Checkbox,
@@ -13,16 +12,17 @@ import {
   ListItemText,
   Typography
 } from '@material-ui/core';
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import Loader from '../Loader';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { customerAccount, customerContact, opportunity, quoteBuilder } from '../../constants/helpers';
 import { startCase } from 'lodash';
-import SearchBox from '../Helpers/SearchBox';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import { customerAccount, customerContact, opportunity, quoteBuilder } from '../../constants/helpers';
+import CustomDialogContent from '../CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import SearchBox from '../Helpers/SearchBox';
+import Loader from '../Loader';
 const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleCloseDialog, assignedProjectSales, type }) => {
   const toastConfig = useContext(CustomToastContext);
   const {

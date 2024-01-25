@@ -1,17 +1,16 @@
-import { useState, useEffect, useContext } from 'react';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Dialog, Button, CircularProgress, Typography } from '@material-ui/core';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from 'src/pages/Leads/Header.module.scss';
-import { useData } from 'src/StateProvider/Provider';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
+import { Box, Button, CircularProgress, Dialog, Typography } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer, } from 'src/components/CustomReactTable';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 
 const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, renderedFrom, ignoreIds }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,7 +44,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
         editable: true,
         disableFilters: true,
         disableSortBy: true,
-        canDrag: false,
+        canDrag: false
       },
       {
         accessor: 'inventory',
@@ -55,7 +54,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
         editable: false,
         disableFilters: true,
         disableSortBy: true,
-        canDrag: false,
+        canDrag: false
       }
     );
     setColumns([...newColumns, ...getStaticFields()]);
@@ -138,10 +137,12 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   };
 
   const handleClickSave = () => {
-    const _data = selectedRecords?.filter((e) => !e?.hideSelection)?.map((d) => ({
-      product: d._id,
-      qty: Number(d.qty)
-    }));
+    const _data = selectedRecords
+      ?.filter((e) => !e?.hideSelection)
+      ?.map((d) => ({
+        product: d._id,
+        qty: Number(d.qty)
+      }));
     submit(_data);
   };
 
@@ -209,14 +210,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
             )}
           </div>
           <Box order={isMobile ? 1 : 2} display="flex" justifyContent={'space-between'} minWidth={isMobile ? '100%' : '300px'}>
-            <SearchBox
-              onChange={handleSearch}
-              className={styles.search_box_input}
-              width={'245px'}
-              style={isMobile ? { flex: 1 } : {}}
-              size="small"
-              value={search}
-            />
+            <SearchBox onChange={handleSearch} width={'245px'} style={isMobile ? { flex: 1 } : {}} size="small" value={search} />
             <Box mx={1} />
             <Box>
               <Button

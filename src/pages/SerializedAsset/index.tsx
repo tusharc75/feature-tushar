@@ -9,15 +9,18 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import WarningIcon from '@material-ui/icons/Warning';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
-import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { GiStockpiles } from 'react-icons/gi';
 import { Link, useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -34,13 +37,8 @@ import {
   serializedAsset,
   sidebarResource
 } from '../../constants/helpers';
-import styles from '../Leads/Header.module.scss';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import CustomContainer from 'src/components/CustomContainer';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 let searchTimeout;
 
@@ -617,7 +615,7 @@ const SerializedAsset = () => {
               )}
             </div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
                   disabled={!permissions?.serializedAsset?.isCreate}

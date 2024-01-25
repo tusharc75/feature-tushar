@@ -1,7 +1,7 @@
+import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
+import { ExpandMore } from '@material-ui/icons';
 import { useState } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
 
 import styles from '../Leads/Header.module.scss';
 
@@ -24,7 +24,7 @@ function DoaHeader(props) {
       </Grid>
       <Grid item xs={6} className={styles.filter_side}>
         <Box className={styles.filter_side_header} component="div">
-          <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small"  width="242px" />
+          <SearchBox onChange={onSearch} value={searchVal} size="small" width="242px" />
 
           {DoaPermissions.isDelete && (
             <>

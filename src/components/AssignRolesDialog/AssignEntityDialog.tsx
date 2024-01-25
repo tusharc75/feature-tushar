@@ -1,4 +1,3 @@
-import { useState, useEffect, useContext } from 'react';
 import {
   Button,
   Checkbox,
@@ -11,24 +10,21 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  makeStyles,
-  Typography
+  Typography,
+  makeStyles
 } from '@material-ui/core';
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import Loader from '../Loader';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { Check } from '@material-ui/icons';
 import { startCase } from 'lodash';
-import Stepper from '@material-ui/core/Stepper';
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
-import StepContent from '@material-ui/core/StepContent';
-import { roleTypes } from '../../constants/helpers';
-import SearchBox from '../Helpers/SearchBox';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
-import { Check, CheckCircle } from '@material-ui/icons';
+import axiosInstance from '../../axios/axiosInstance';
+import { roleTypes } from '../../constants/helpers';
+import CustomDialogContent from '../CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import SearchBox from '../Helpers/SearchBox';
+import Loader from '../Loader';
 
 const useStyles = makeStyles((theme) => ({
   button: {

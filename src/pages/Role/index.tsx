@@ -4,10 +4,15 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/AssignRegionalRolesUserDialog';
 import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialog';
 import CustomContainer from '../../components/CustomContainer';
@@ -23,16 +28,10 @@ import {
   roleTypes,
   sidebarResource
 } from '../../constants/helpers';
-import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import CreateRole from './CreateRole';
 import AssignUnassignResourceDialog from './AssignUnassignResource';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import CreateRole from './CreateRole';
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 let searchTimeout;
@@ -388,7 +387,7 @@ const Roles: FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
               <div className="flex flex-wrap gap-[8px] justify-end">
-                <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+                <SearchBox onChange={handleSearch} value={search} size="small" />
                 <div className="flex gap-[8px] flex-wrap items-center">
                   <Button
                     variant={'contained'}
