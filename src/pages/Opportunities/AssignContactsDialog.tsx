@@ -1,4 +1,3 @@
-import React, { useState, useContext } from 'react';
 import {
   Button,
   Checkbox,
@@ -13,14 +12,15 @@ import {
   ListItemText,
   Typography
 } from '@material-ui/core';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import Loader from '../../components/Loader';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { cloneDeep } from 'lodash';
+import { useContext, useState } from 'react';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import SearchBox from '../../components/Helpers/SearchBox';
+import Loader from '../../components/Loader';
 
 export default function AssignContactsDialog({
   opportunityId,

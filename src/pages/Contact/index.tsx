@@ -1,6 +1,7 @@
 import { Box, Button, Chip, Dialog, Grid, Menu, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
@@ -8,19 +9,14 @@ import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import { Link, useHistory } from 'react-router-dom';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, {
-  getStaticFields,
-  checkStaticField,
-  gridFilterParser,
-  useColumns,
-  useTableReducer
-} from 'src/components/CustomReactTable';
-import DeleteIcon from '@material-ui/icons/Delete';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import CustomContainer from '../../components/CustomContainer';
 import EntitySelectionsDialog from '../../components/EntitySelections';
@@ -36,8 +32,6 @@ import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageContactDialog from './ManageContact';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const types = [
   {
@@ -255,7 +249,9 @@ export default function Contact(props) {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={contactPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'Entity' : 'You do not have permission to update entity'}  >
+        <HtmlTooltip
+          title={contactPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'Entity' : 'You do not have permission to update entity'}
+        >
           <span>
             <IconButton
               size="small"
@@ -495,7 +491,7 @@ export default function Contact(props) {
               </div>
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
 
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
@@ -615,15 +611,16 @@ export default function Contact(props) {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            
             refreshGrid={getContacts}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource[contactResource]}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
 
         <Box component="div">
           {showDeleteWarningConfirmBox?.show ? (
@@ -656,7 +653,7 @@ export default function Contact(props) {
               onClose={() => {
                 setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
               }}
-              onSuccess={() => { }}
+              onSuccess={() => {}}
               isRedirectToDetailPage={true}
             />
           )}

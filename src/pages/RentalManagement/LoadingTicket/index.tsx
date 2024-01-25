@@ -626,7 +626,7 @@ const LoadingTicket = ({
       if (rentalManagementData?.processor?.optionValue) {
         data['processor'] = rentalManagementData?.processor?.optionValue;
       }
-      data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+      //data['status'] = DELIVERY_TICKET_STATUS.indTransit;
       setShowTicketDialog({ open: true, data: data });
     }
   };

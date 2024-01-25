@@ -60,6 +60,7 @@ import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import moment from 'moment';
+import AddSerializedAsset from '../SerializedAsset/AddSerializedAsset';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -120,6 +121,8 @@ const ReceivingTicket = ({
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -894,7 +897,7 @@ const ReceivingTicket = ({
     if (rentalManagementData?.processor?.optionValue) {
       data['processor'] = rentalManagementData?.processor?.optionValue;
     }
-    data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+    //data['status'] = DELIVERY_TICKET_STATUS.indTransit;
 
     setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
     closeActions();
@@ -1229,6 +1232,37 @@ const ReceivingTicket = ({
       });
   };
 
+  const handleSwapAssets = (rows) => {
+    const data = [];
+    selectedRecords?.forEach((element: any) => {
+      const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
+      if (result.length) {
+        data.push({ _id: element._id, newId: result[0]._id });
+        result[0].isCounted = true;
+      }
+    });
+    setIsSubmitting(true);
+    axiosInstance().post(`${rentalManagement.api}/swap-inuse-assets`, {
+      assets: data?.map((e) => e._id),
+      newAssets: data?.map((e) => e.newId),
+      rentalJob: rentalManagementData?._id
+    })
+      .then(({ data }) => {
+        setAddSerializedAssetDialog({ open: false, products: [] });
+        setIsSubmitting(false);
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Assets Swapped Successfully`
+        });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   const validateAction = (action) => {
     const errorMessages = [];
     selectedRecords.forEach((e) => {
@@ -1351,6 +1385,13 @@ const ReceivingTicket = ({
           ![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.complete].includes(e.rentalAssetStatus)
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
+        }
+      } else if (action === rentalManagementActions.swapInUseAssets) {
+        if (e.type !== 'Asset') {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlySwapAssets });
+        }
+        else if (![ASSET_STATUS.inUse].includes(e.status) && ![RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlySwapInUseAssets });
         }
       }
     });
@@ -1581,6 +1622,32 @@ const ReceivingTicket = ({
                 }}
               >
                 {`Transfer to another ${routes.rentalManagement.title}`}
+              </MenuItem>
+            )}
+            {!isOffline && (
+              <MenuItem
+                onClick={() => {
+                  if (!validateAction(rentalManagementActions.swapInUseAssets)) {
+                    const products = [];
+                    selectedRecords?.forEach((element) => {
+                      const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
+                      if (foundProduct.length) {
+                        foundProduct[0].qty += 1;
+                      } else {
+                        products.push({
+                          _id: element?.product?.optionValue,
+                          id: element?.product?.optionValue,
+                          productName: element?.product?.optionLabel,
+                          qty: 1
+                        });
+                      }
+                    });
+                    setAddSerializedAssetDialog({ open: true, products: products });
+                  }
+                  closeActions();
+                }}
+              >
+                {`Swap In-Use Assets`}
               </MenuItem>
             )}
             {permissions?.repairJob?.isCreate && !isOffline && (
@@ -2013,6 +2080,22 @@ const ReceivingTicket = ({
           onClose={() => {
             setOpenMessageDialog({ open: false, errorMessages: [] });
           }}
+        />
+      )}
+      {addSerializedAssetDialog.open && (
+        <AddSerializedAsset
+          addSerializedAsset={handleSwapAssets}
+          handleSerializedAssetClose={() => {
+            setAddSerializedAssetDialog({ open: false, products: [] });
+          }}
+          referenceType={'SwapAssets'}
+          referenceData={{
+            _id: rentalManagementData?._id,
+            warehouse: rentalManagementData?.warehouse?.optionValue
+          }}
+          isAdding={isSubmitting}
+          selectedProducts={addSerializedAssetDialog.products}
+          filterByPlant={rentalManagementData?.warehouse}
         />
       )}
     </>

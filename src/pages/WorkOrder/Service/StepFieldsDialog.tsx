@@ -103,7 +103,8 @@ const StepFieldsDialog = ({
   isSubmitting,
   selectedService = null,
   eidtable = true,
-  open = true
+  open = true,
+  nextStep=false
 }) => {
   const classes = useStyles();
   const {
@@ -490,7 +491,27 @@ const StepFieldsDialog = ({
                               Save & Complete
                             </CustomButton>
                           </>
-                        }
+                          }
+                          {!step?.isPassFail && nextStep &&
+                            <>
+                              <Box ml={1} />
+                              <CustomButton
+                                disabled={isSubmitting}
+                                loading={isSubmitting}
+                                variant="contained"
+                                color="primary"
+                                onClick={() => {
+                                  submitForm();
+                                  if (isEmpty(errors)) {
+                                    handleSubmit(values, step, true, true);
+                                  }
+                                }}
+                              >
+                                {' '}
+                                Save & Complete & Next
+                              </CustomButton>
+                            </>
+                          }
                       </>
                     )}
                   </div>

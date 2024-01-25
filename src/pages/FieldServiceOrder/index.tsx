@@ -1,38 +1,31 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { useHistory } from 'react-router-dom';
-import { IconButton, Box, Button, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import {
-  gridLoadingTimeout,
-  fieldServiceOrder,
-  prepareDataForGrid,
-  sidebarResource
-} from '../../constants/helpers';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import { useHistory } from 'react-router-dom';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { isMobile } from 'react-device-detect';
-import { camelCase } from 'lodash';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import routes from '../../components/Helpers/Routes';
+import { fieldServiceOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import ManageServiceOrder from './ManageServiceOrder';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 let serviceOrderTimeout;
 
 const ServiceOrder = () => {
-
   const types = [
     {
       key: `My ${routes.fieldServiceOrder.title}`,
@@ -159,7 +152,7 @@ const ServiceOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.fieldServiceOrder?.isCreate ? "Clone" : cloneDisable}  >
+        <HtmlTooltip title={permissions?.fieldServiceOrder?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -173,7 +166,7 @@ const ServiceOrder = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
@@ -296,13 +289,7 @@ const ServiceOrder = () => {
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <div className={`flex flex-wrap items-center gap-2 `}>
                 {types && (
-                  <ToggleButtonGroup
-                    size="small"
-                    className="ml-2"
-                    value={types[selectedType - 1].key}
-                    exclusive
-                    onChange={onTypeChange}
-                  >
+                  <ToggleButtonGroup size="small" className="ml-2" value={types[selectedType - 1].key} exclusive onChange={onTypeChange}>
                     {types.map((k, index) => {
                       return (
                         <ToggleButton value={k.key} key={index}>
@@ -315,14 +302,7 @@ const ServiceOrder = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                className={isMobile ? styles.search_box_input : ''}
-                width="242px"
-                size="small"
-                value={search}
-                style={isMobile ? { flex: 1 } : {}}
-              />
+              <SearchBox onChange={handleSearch} width="242px" size="small" value={search} style={isMobile ? { flex: 1 } : {}} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.fieldServiceOrder?.isCreate && (
                   <Button
@@ -397,7 +377,9 @@ const ServiceOrder = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? "s" : ""} ${deleteRecord?.fieldServiceOrderNumber || ''} ? `}
+            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
+              deleteRecord?.fieldServiceOrderNumber || ''
+            } ? `}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -406,21 +388,19 @@ const ServiceOrder = () => {
           />
         )}
       </div>
-      {
-        showManageDialog.open && (
-          <ManageServiceOrder
-            isClone={showManageDialog.isClone}
-            serviceOrderId={showManageDialog.idToClone}
-            onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
-            onSuccess={(data) => {
-              history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
-              setShowManageDialog({ open: false, isClone: false, idToClone: null });
-            }}
-            open={showManageDialog.open}
-          />
-        )
-      }
-    </section >
+      {showManageDialog.open && (
+        <ManageServiceOrder
+          isClone={showManageDialog.isClone}
+          serviceOrderId={showManageDialog.idToClone}
+          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
+          onSuccess={(data) => {
+            history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
+            setShowManageDialog({ open: false, isClone: false, idToClone: null });
+          }}
+          open={showManageDialog.open}
+        />
+      )}
+    </section>
   );
 };
 

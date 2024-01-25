@@ -11,6 +11,10 @@ import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { RiBillLine } from 'react-icons/ri';
 import { useHistory } from 'react-router-dom';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { childDisable, cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -22,11 +26,6 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import CreateProduct from '../../components/Product/CreateProduct';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
 import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
-import styles from '../Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { childDisable, cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -464,7 +463,6 @@ const Product = () => {
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox
                 onChange={handleSearch}
-                className={isMobile ? styles.search_box_input : ''}
                 width="242px"
                 size="small"
                 value={search}

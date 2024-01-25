@@ -1,18 +1,18 @@
-import { useState, useEffect, useContext } from 'react';
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
+import styles from 'src/pages/Leads/Header.module.scss';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import SearchBox from '../Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, product, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import routes from '../Helpers/Routes';
-import styles from 'src/pages/Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CommonSkeleton from '../Helpers/CommonSkeleton';
-import { camelCase } from 'lodash';
 import CustomTabs, { CustomTab } from '../CustomTabs';
+import CommonSkeleton from '../Helpers/CommonSkeleton';
+import routes from '../Helpers/Routes';
+import SearchBox from '../Helpers/SearchBox';
 
 let searchTimeout;
 
@@ -246,7 +246,7 @@ const AssignProductDialog = ({
             <Grid container className={styles.filter_side_container}>
               <Grid item xs={12} className={styles.filter_side}>
                 <Box className={styles.filter_side_header} component="div">
-                  <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
+                  <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
                   <Button
                     disabled={isSubmitting || selectedRecords?.length === 0}
                     onClick={() => {
@@ -266,7 +266,7 @@ const AssignProductDialog = ({
           {pricingCondition && (
             <Box>
               <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Products`}  {...a11yProps(0)} />
+                <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Products`} {...a11yProps(0)} />
                 <CustomTab className={'tabLayout'} value={1} index={1} label={'All Products'} {...a11yProps(1)} />
               </CustomTabs>
             </Box>

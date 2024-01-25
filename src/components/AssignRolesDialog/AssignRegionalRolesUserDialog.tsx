@@ -1,4 +1,3 @@
-import { useState, useEffect, useContext } from 'react';
 import {
   Button,
   Checkbox,
@@ -11,20 +10,21 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  makeStyles,
-  Typography
+  Typography,
+  makeStyles
 } from '@material-ui/core';
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import Loader from '../Loader';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
 import StepContent from '@material-ui/core/StepContent';
+import StepLabel from '@material-ui/core/StepLabel';
+import Stepper from '@material-ui/core/Stepper';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomDialogContent from '../CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import SearchBox from '../Helpers/SearchBox';
+import Loader from '../Loader';
 
 const useStyles = makeStyles((theme) => ({
   button: {

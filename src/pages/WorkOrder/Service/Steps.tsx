@@ -479,7 +479,21 @@ const Steps = ({
     return { fieldData, stepData, isStepValid };
   };
 
-  const handleSubmit = async (values, step, autoComplete = false) => {
+
+  const getNextStep = (serviceSteps: any[], currentStep: any): any | null => {
+    const currentStepIndex = serviceSteps.findIndex(step => step?._id === currentStep?._id);
+
+    if (currentStepIndex === -1 || currentStepIndex === serviceSteps.length - 1)
+      return null;
+    const nextStep = serviceSteps[currentStepIndex + 1];
+    const { stepData, isStepValid } = getFields(nextStep);
+    return !nextStep?.isPassFail && isStepValid ? {
+      step: nextStep,
+      stepData: stepData
+    } : null;
+  };
+
+  const handleSubmit = async (values, step, autoComplete = false, nextStep=false) => {
     setIsSubmitting(true)
     let tempData = {
       uniqueId: selectedService?.uniqueId,
@@ -501,10 +515,14 @@ const Steps = ({
         if (autoComplete) {
           handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
         }
+        fetchService();
         setSelectedStep(null);
         setFieldDialog(false);
-        fetchService();
         setIsSubmitting(false)
+        if (autoComplete && nextStep) {
+          const nextStepData = getNextStep(serviceDetails?.steps, step);
+          handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, nextStepData?.step, nextStepData?.stepData);
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -695,9 +713,10 @@ const Steps = ({
       });
   };
 
-  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, step) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
+    setSelectedStep({ ...step, stepData: getFields(step)?.stepData });
   };
 
   const handleCloseMenu = (event) => {
@@ -1051,8 +1070,7 @@ const Steps = ({
                                   aria-label="delete"
                                   disabled={!allowedToEdit}
                                   onClick={(event) => {
-                                    handleOpenMenu(event);
-                                    setSelectedStep(step);
+                                    handleOpenMenu(event, step);
                                   }}
                                 >
                                   <MoreHoriz />
@@ -1292,8 +1310,7 @@ const Steps = ({
                             aria-label="delete"
                             disabled={!allowedToEdit}
                             onClick={(event) => {
-                              handleOpenMenu(event);
-                              setSelectedStep(step);
+                              handleOpenMenu(event, step);
                             }}
                           >
                             <MoreHoriz />
@@ -1429,6 +1446,7 @@ const Steps = ({
                   </MenuItem>
                   <MenuItem
                     onClick={(e) => {
+                      console.log(selectedStep)
                       e.stopPropagation();
                       handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), selectedStep);
                       setAnchorEl(null);
@@ -1437,7 +1455,7 @@ const Steps = ({
                       allowedToEdit &&
                         ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                           selectedService?.status
-                        )
+                        ) && !selectedStep?.stepData
                         ? false
                         : true
                     }
@@ -1493,6 +1511,7 @@ const Steps = ({
                 stepData={stepState}
                 isSubmitting={isSubmitting}
                 eidtable={isFieldDialogEditable}
+                nextStep={!!getNextStep(serviceDetails?.steps, selectedStep)}
               />
             )}
             {commentsDialog && (

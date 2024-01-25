@@ -1,29 +1,27 @@
-import { Button, Chip, IconButton } from '@material-ui/core';
+import { Box, Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
+import { AiOutlineDeploymentUnit } from 'react-icons/ai';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import EntitySelectionsDialog from 'src/components/EntitySelections';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import EntitySelectionsDialog from 'src/components/EntitySelections';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageWarehouse from './ManageWarehouse';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Box } from '@material-ui/core';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
 let searchTimeout;
 
@@ -276,7 +274,9 @@ const Warehouse = () => {
           permissions={permissions?.warehouse}
           module={routes.warehouse.title}
           api={routes?.warehouse.path}
-          afterImportCompleted={() => { fetchData() }}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -288,25 +288,24 @@ const Warehouse = () => {
           extraImportExportLinks={
             user?.user?.brandPolicy?.warehouseAccessByUser
               ? [
-                {
-                  title: 'Assign Users Template',
-                  api: `warehouse/user/template`,
-                  type: 'download'
-                },
-                {
-                  title: 'Assign Users Export',
-                  api: `warehouse/user/template?export=true${selectedRecords.length
-                    ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}`
-                    : ''
+                  {
+                    title: 'Assign Users Template',
+                    api: `warehouse/user/template`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Assign Users Export',
+                    api: `warehouse/user/template?export=true${
+                      selectedRecords.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                  type: 'export'
-                },
-                {
-                  title: 'Assign Users Import',
-                  api: `warehouse/user/import`,
-                  type: 'import'
-                }
-              ]
+                    type: 'export'
+                  },
+                  {
+                    title: 'Assign Users Import',
+                    api: `warehouse/user/import`,
+                    type: 'import'
+                  }
+                ]
               : []
           }
         />
@@ -316,7 +315,7 @@ const Warehouse = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.warehouse?.isCreate && (
                   <Button
@@ -431,9 +430,11 @@ const Warehouse = () => {
             showFilters={true}
             resource={sidebarResource.warehouse}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
       {userAssignDialog && (
         <AssignDynamicDialog
@@ -450,7 +451,9 @@ const Warehouse = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.warehouse?.title?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.warehouseName : '') : ''} ?`}
+          message={`Are you sure you want to delete ${routes?.warehouse?.title?.toLowerCase()} ${
+            deleteRecord ? (deleteRecord?._id ? deleteRecord?.warehouseName : '') : ''
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
