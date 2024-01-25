@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Grid, useTheme, Button, Box } from '@material-ui/core';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, kebabCase, startCase } from 'lodash';
 import axios from 'axios';
 import { MdChevronLeft } from 'react-icons/md';
 import styles from '../Leads/Header.module.scss';
@@ -12,7 +12,15 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
+import {
+  prepareDataForGrid,
+  gridLoadingTimeout,
+  downloadExcel,
+  primaryFields,
+  sidebarResource,
+  isObjectEmpty,
+  REPORT_LIST
+} from './../../constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from '../Report/ReportFilters';
@@ -52,36 +60,53 @@ const CustomReport = () => {
   const { rowCount, page, limit, search, filters, sorting, loading } = state;
 
   const renderedFrom = `custom-report_${id}`;
-  let resourceCamelCase = camelCase(resource);
 
   const fetchGridColumns = async (res) => {
+    let result = [];
     setLoadingColumns(true);
-    const {
-      data: { data }
-    }: any = await axiosInstance().get(`/field?resource=${startCase(res)}`);
-    if (startCase(res) === 'Serialized Asset') {
+    if (REPORT_LIST?.find(r => r?.title === startCase(res))?.key === 'standardReport') {
+      let {
+        data: {
+          data: { columnFields }
+        }
+      } = await axiosInstance().get(`/report/${kebabCase(REPORT_LIST?.find(r => r?.title === startCase(res))?.type)}/column`);
+
+      result = columnFields;
+    } else {
       const {
-        data: { data: lookupResource }
-      } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
-      if (lookupResource) {
-        data?.forEach((e) => {
-          if (e?.fieldData?.fieldName === 'currentOwner') {
-            e.fieldData.lookup = true;
-            e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
-          }
-        });
+        data: { data }
+      }: any = await axiosInstance().get(`/field?resource=${startCase(res)}`);
+      if (startCase(res) === 'Serialized Asset') {
+        const {
+          data: { data: lookupResource }
+        } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+        if (lookupResource) {
+          data?.forEach((e) => {
+            if (e?.fieldData?.fieldName === 'currentOwner') {
+              e.fieldData.lookup = true;
+              e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
+            }
+          });
+        }
       }
+      result = data;
     }
-    setResourceColumns(data);
+
+    setResourceColumns(result);
     setLoadingColumns(false);
     let columns = [];
 
-    data.forEach((o) => {
+    result.forEach((o) => {
       if (o?.fieldData?.fieldName === primaryFields[camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)]) {
         o.fieldData.primaryField = true;
       }
     });
-    let newColumns = generateColumns(renderedFrom, data, routes[`${camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)}Detail`].path, true);
+    let newColumns = generateColumns(
+      renderedFrom,
+      result,
+      camelCase(res) === 'quotes' ? routes['quoteBuilder']?.path : routes[`${camelCase(res)}Detail`] ? routes[`${camelCase(res)}Detail`]?.path : null,
+      true
+    );
     columns = [...newColumns, ...getStaticFields()];
 
     if (startCase(res) === 'Purchase Order') {
@@ -112,15 +137,17 @@ const CustomReport = () => {
   }, [id]);
 
   React.useEffect(() => {
-    axiosInstance()
-      .get(`/report-colum-setting?resource=${resource}`)
-      .then(({ data: { data } }) => {
-        setReportList(data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, [showGrid]);
+    if (resource) {
+      axiosInstance()
+        .get(`/report-colum-setting?resource=${kebabCase(resource)}`)
+        .then(({ data: { data } }) => {
+          setReportList(data);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }, [showGrid, resource]);
 
   React.useEffect(() => {
     if (showGrid && resource) {
@@ -152,13 +179,16 @@ const CustomReport = () => {
     }
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
-    let api = `/report${routes[resourceCamelCase].path}${queryString}`;;
-    if (resourceCamelCase === 'quotes') {
-      api = `/report/quote-builder/${queryString}`;
-    } else {
-      api = `/report${routes[resourceCamelCase].path}${queryString}`;
-    }
-    axiosInstance().get(api, { cancelToken: cancelTokenSource.token })
+    const api = `/report${
+      camelCase(resource) === 'quotes'
+        ? '/quote-builder'
+        : routes[camelCase(resource)]
+        ? routes[camelCase(resource)]?.path
+        : `/${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
+    }${queryString}`;
+
+    axiosInstance()
+      .get(api, { cancelToken: cancelTokenSource.token })
       .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
@@ -191,8 +221,7 @@ const CustomReport = () => {
           field: filter.term,
           term: filter.value ? 'Yes' : 'No'
         });
-      }
-      else {
+      } else {
         customDeepFilter.push({
           field: filter.term,
           term: filter.value
@@ -230,9 +259,13 @@ const CustomReport = () => {
     let queryString = getQueryString(true);
     axiosInstance()
       .get(
-        `${camelCase(resource) !== 'quotes' ? routes[camelCase(resource)].path : 'quote-builder'}/report/export?exportColumn=${JSON.stringify(
-          exportColumns
-        )}&export=1&${queryString}`,
+        `${
+          camelCase(resource) === 'quotes'
+            ? 'quote-builder'
+            : routes[camelCase(resource)]
+            ? routes[camelCase(resource)]?.path
+            : `${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
+        }/report/export?exportColumn=${JSON.stringify(exportColumns)}&export=1&${queryString}`,
         {
           responseType: 'arraybuffer'
         }
