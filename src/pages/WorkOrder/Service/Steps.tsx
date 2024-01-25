@@ -479,7 +479,18 @@ const Steps = ({
     return { fieldData, stepData, isStepValid };
   };
 
-  const handleSubmit = async (values, step, autoComplete = false) => {
+
+  const getNextStep = (currentStep: any): any | null => {
+    const allSteps = serviceDetails?.steps;
+    const currentStepIndex = allSteps?.findIndex(step => step?._id === currentStep?._id);
+    if (currentStepIndex === -1 || currentStepIndex === allSteps?.length - 1)
+      return null;
+    const nextStep = allSteps[currentStepIndex + 1];
+    const { stepData } = getFields(nextStep);
+    return nextStep?.isPassFail ? null : { step: nextStep, stepData: stepData };
+  };
+
+  const handleSubmit = async (values, step, autoComplete = false, nextStep = false) => {
     setIsSubmitting(true)
     let tempData = {
       uniqueId: selectedService?.uniqueId,
@@ -498,13 +509,32 @@ const Steps = ({
           const type = automatePassFail(values, step);
           handlePassFail(type, step);
         }
-        if (autoComplete) {
+        if (autoComplete && !nextStep) {
           handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
+          setSelectedStep(null);
+          setFieldDialog(false);
         }
-        setSelectedStep(null);
-        setFieldDialog(false);
-        fetchService();
+        else if (autoComplete && nextStep) {
+          if (autoComplete) {
+            handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
+          }
+          const nextStepData = getNextStep(step);
+          if (!nextStepData?.stepData) {
+            handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, nextStepData?.step, nextStepData?.stepData);
+          }
+          else if (nextStepData?.stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+            setSelectedStep(nextStepData?.step);
+            setFieldDialog(true);
+            setIsFieldDialogEditable(true);
+            setStepState(nextStepData?.stepData);
+          }
+        }
+        else {
+          setSelectedStep(null);
+          setFieldDialog(false);
+        }
         setIsSubmitting(false)
+        fetchService();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -695,9 +725,10 @@ const Steps = ({
       });
   };
 
-  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, step) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
+    setSelectedStep({ ...step, stepData: getFields(step)?.stepData });
   };
 
   const handleCloseMenu = (event) => {
@@ -1051,8 +1082,7 @@ const Steps = ({
                                   aria-label="delete"
                                   disabled={!allowedToEdit}
                                   onClick={(event) => {
-                                    handleOpenMenu(event);
-                                    setSelectedStep(step);
+                                    handleOpenMenu(event, step);
                                   }}
                                 >
                                   <MoreHoriz />
@@ -1292,8 +1322,7 @@ const Steps = ({
                             aria-label="delete"
                             disabled={!allowedToEdit}
                             onClick={(event) => {
-                              handleOpenMenu(event);
-                              setSelectedStep(step);
+                              handleOpenMenu(event, step);
                             }}
                           >
                             <MoreHoriz />
@@ -1437,7 +1466,7 @@ const Steps = ({
                       allowedToEdit &&
                         ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                           selectedService?.status
-                        )
+                        ) && !selectedStep?.stepData
                         ? false
                         : true
                     }
@@ -1492,7 +1521,8 @@ const Steps = ({
                 step={selectedStep}
                 stepData={stepState}
                 isSubmitting={isSubmitting}
-                eidtable={isFieldDialogEditable}
+                editable={isFieldDialogEditable}
+                nextStep={getNextStep(selectedStep) ? true : false}
               />
             )}
             {commentsDialog && (
