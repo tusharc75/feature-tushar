@@ -52,7 +52,7 @@ const ListingPageHeader = ({
   const handleToggle = (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>, value: string) => {
     const data = toggleButtonList.find((d) => d.key === value).value;
     history.push(`?type=${data}`);
-    setSelectedType(data);
+    setSelectedType && setSelectedType(data);
     onToggle && onToggle(event, data);
   };
 
@@ -106,7 +106,9 @@ const ListingPageHeader = ({
                 })}
               </ToggleButtonGroup>
             </HideWhenOffline>
-          ) : null}
+          ) : (
+            <div />
+          )}
           {leftSideButtons ? <HideWhenOffline>{leftSideButtons}</HideWhenOffline> : null}
         </div>
         <div className="flex flex-wrap gap-[8px] justify-end">
