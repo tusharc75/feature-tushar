@@ -18,7 +18,7 @@ import { fetch_quotation_product_fields } from 'src/components/Quotation/helper'
 import PriceRequestDialog from './PriceRequestDialog';
 import { ExpandMore } from '@material-ui/icons';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
-import { capitalize, uniqBy } from 'lodash';
+import { capitalize, isArray, uniqBy } from 'lodash';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -477,14 +477,25 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     if (quotationData) {
       const data: any = {};
       data.conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? [PRICING_SETUP_TYPE.price] : [PRICING_SETUP_TYPE.rent];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: [ele?.unit].flat(1).pop(),
-        currency: quotationData?.currency
-      }));
+      const material: any = []
+      arr?.forEach((ele) => {
+        const obj = {
+          materialId: ele?.materialId,
+          materialType: ele?.type,
+          qty: ele?.qty,
+          pricingMethod: ele?.pricingMethod,
+          currency: quotationData?.currency
+        }
+        if (isArray(ele?.unit)) {
+          ele?.unit?.forEach((e) => {
+            material.push({ ...obj, unit: e })
+          })
+        }
+        else {
+          material.push({ ...obj, unit: ele?.unit })
+        }
+      })
+      data.material = material;
       data.supplier = [];
       data.customer = [quotationData?.customerAccount?.optionValue];
       data.warehouse = [quotationData?.warehouse?.optionValue];

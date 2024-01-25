@@ -13,7 +13,7 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { uniq, map, orderBy, isEqual, unionBy, uniqBy } from 'lodash';
+import { uniq, map, orderBy, isEqual, unionBy, uniqBy, isEmpty } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
@@ -59,12 +59,13 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const ref = useRef(null);
-  const [priceConditionList, setPriceConditionList] = useState([]);
-  const [priceConditionListConst, setPriceConditionListConst] = useState([]);
 
   const toastConfig = useContext(CustomToastContext);
 
-  const [priceMethodList, setPriceMethodList] = useState([]);
+  const [priceConditionListConst, setPriceConditionListConst] = useState([]);
+  const [priceMethodListConst, setPriceMethodListConst] = useState([]);
+  const [priceConditionList, setPriceConditionList] = useState([]);
+  const [pricingMethodList, setPricingMethodList] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -144,8 +145,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
-      setPriceMethodList(pricingMethodOptions);
-      let pricingConditionOptions = await getPricing(rowData, pricingMethodOptions);
+      setPriceMethodListConst(pricingMethodOptions);
+      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
       data.forEach((element) => {
         if (rowData?.type === 'serializedAsset') {
           if (element.fieldName === 'qty') {
@@ -177,11 +178,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
             element.option = pricingMethodOptions;
           }
         }
-        if (element.fieldName === 'pricingCondition') {
-          if (Array.isArray(pricingConditionOptions)) {
-            element.option = pricingConditionOptions;
-          }
-        }
       });
       if (rowData?.actualStartDate === '' || rowData?.actualStartDate === '') {
         data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
@@ -210,67 +206,55 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  async function getPricing(values: any, pricingMethodOptions: any = null) {
-    const isPricingMethod = allFields?.find((e) => e.fieldName === 'pricingMethod');
+  async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
     if (rowData) {
-      if (values?.qty > 0 && values?.unit !== '' && (!isPricingMethod || values?.pricingMethod !== '')) {
-        const priceData: any = await calculatePrice([
-          {
-            materialId: rowData.materialId,
-            type: rowData.type,
-            qty: values.qty,
-            // pricingMethod: pricingMethodOptions ? pricingMethodOptions.map((d) => d.optionLabel).join() : values?.pricingMethod,
-            pricingMethod: rowData?.productDetail?.pricingMethod.join(),
-            unit: values.unit
-          }
-        ]);
-        let tempPriceData = priceData?.filter((d) => d.mrp !== undefined && d.mrp !== null && d.mrp !== 0);
-        setPriceConditionList(
-          uniqBy(
-            tempPriceData.map((d) => {
-              return {
-                optionLabel: d?.conditionName,
-                optionValue: d?.conditionId
-              };
-            }),
-            'optionValue'
-          )
-        );
-        setPriceConditionListConst(tempPriceData || []);
-        if (pricingMethodOptions) {
-          // setPriceConditionListConst(tempPriceData || []);
-          setPriceMethodList(
-            tempPriceData
-              .filter((d) => d.conditionId === rowData['pricingCondition']?.optionValue)
-              .map((d) => {
-                return {
-                  optionLabel: d?.pricingMethod,
-                  optionValue: d?.pricingMethod
-                };
-              })
-          );
-          return uniqBy(
-            tempPriceData.map((d) => {
-              return {
-                optionLabel: d?.conditionName,
-                optionValue: d?.conditionId
-              };
-            }),
-            'optionValue'
-          );
+      const priceData: any = await calculatePrice([
+        {
+          materialId: rowData.materialId,
+          type: rowData.type,
+          qty: 1,
+          pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || '',
+          unit: unitOptions?.map((d) => d.optionLabel)
         }
-        if (priceData && priceData.length) {
-          // let pricingConditionIndex = priceData.findIndex((d) => d?.conditionId === values?.pricingCondition);
-          // let price: any = pricingConditionIndex > -1 ? priceData[pricingConditionIndex]?.mrp : 0;
-          let pricingConditionIndex = tempPriceData.findIndex((d) => d?.conditionId === values?.pricingCondition && d?.pricingMethod===values?.pricingMethod && d?.unit=== values?.unit);
-          let price: any = pricingConditionIndex > -1 ? tempPriceData[pricingConditionIndex]?.mrp : 0;
-          return { price, priceConditionListConst: tempPriceData };
-        }
-        return 0;
-      } else {
-        return 0;
-      }
+      ]);
+      setPriceConditionListConst(priceData || []);
+      updateRateChangeState(values, priceData, pricingMethodOptions)
     }
+  }
+
+  const updateRateChangeState = (values: any, priceData: any, pricingMethodOptions: any) => {
+    var tempPriceCondition = [...priceData];
+    if (values['unit'] && values['unit'] !== '') {
+      tempPriceCondition = tempPriceCondition?.filter((e) => e.unit === values['unit']);
+    }
+    if (values['pricingMethod'] && values['pricingMethod'] !== '') {
+      tempPriceCondition = tempPriceCondition?.filter((e) => e.pricingMethod === values['pricingMethod']);
+    }
+    tempPriceCondition = uniqBy(
+      tempPriceCondition?.map((d) => {
+        return {
+          optionLabel: d?.conditionName,
+          optionValue: d?.conditionId
+        };
+      }),
+      'optionValue'
+    )
+    setPriceConditionList(tempPriceCondition);
+    var tempPricingMethod = pricingMethodOptions;
+    if (values['pricingCondition'] && values['pricingCondition'] !== '') {
+      tempPricingMethod = uniqBy(
+        priceData?.filter((d) => d.conditionId === values['pricingCondition'] || values['pricingCondition']?.optionValue)?.map((d) => {
+          return {
+            optionLabel: d?.pricingMethod,
+            optionValue: d?.pricingMethod
+          };
+        }),
+        'optionValue'
+      )
+    }
+    setPricingMethodList(tempPricingMethod)
+
+    return { tempPriceCondition, tempPricingMethod }
   }
 
   const EvaluteproductFields = async (fields) => {
@@ -464,128 +448,40 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
-                                          options={field.option}
+                                          options={field.fieldName === 'pricingCondition' ? priceConditionList :
+                                            field.fieldName === 'pricingMethod' ? pricingMethodList : field.option}
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            const defaultPricingMethodOptions = rowData?.productDetail?.pricingMethod?.map((d) => {
-                                              return {
-                                                optionLabel: d,
-                                                optionValue: d
-                                              };
-                                            });
-                                            if (
-                                              (field.fieldName === 'pricingCondition' || field.fieldName === 'pricingMethod') &&
-                                              initialData.fields?.find((e) => e.fieldName === 'pricingMethod')
-                                            ) {
-                                              // if(field.fieldName === 'pricingCondition'){
-                                              //   setFieldValue('pricingMethod', '');
-                                              // }
-                                              
-                                              const priceConditionOption = uniqBy(
-                                                (value !== ''
-                                                  ? priceConditionListConst.filter((ele) => ele.pricingMethod === value)
-                                                  : priceConditionListConst
-                                                ).map((d) => {
-                                                  return {
-                                                    optionLabel: d?.conditionName,
-                                                    optionValue: d?.conditionId
-                                                  };
-                                                }),
-                                                'optionValue'
-                                              );
-
-                                              const pricingMethodOptions = priceConditionListConst
-                                                ?.filter((d) => d.conditionId === value)
-                                                .map((d) => {
-                                                  return {
-                                                    optionLabel: d?.pricingMethod,
-                                                    optionValue: d?.pricingMethod
-                                                  };
-                                                });
-                                              if (field.fieldName === 'pricingCondition') {
-                                                initialData?.fields.forEach((element) => {
-                                                  if (element.fieldName === 'pricingMethod') {
-                                                    if (value === '') {
-                                                      element.option = defaultPricingMethodOptions;
-                                                    } else {
-                                                      element.option = pricingMethodOptions;
-                                                    }
-                                                  }
-                                                });
-                                                setInitialData(initialData);
-                                              } else if (field.fieldName === 'pricingMethod') {
-                                                initialData?.fields.forEach((element) => {
-                                                  if (element.fieldName === 'pricingCondition') {
-                                                      element.option = priceConditionOption;
-                                                  }
-                                                });
-                                                setInitialData(initialData);
+                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
+                                            if (values['pricingCondition']) {
+                                              if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
+                                                setFieldValue('pricingCondition', '');
+                                                setPricingMethodList(priceMethodListConst);
                                               }
-
-                                              // setPriceMethodList(
-                                              //   priceConditionListConst
-                                              //     ?.filter((d) => d.conditionId === value)
-                                              //     .map((d) => {
-                                              //       return {
-                                              //         optionLabel: d?.pricingMethod,
-                                              //         optionValue: d?.pricingMethod
-                                              //       };
-                                              //     })
-                                              // );
-                                              let priceFieldName = 'price_' + quotationData?.currency?.toLowerCase();
-                                              
-                                              let priceValue
-                                              if(field.fieldName==='pricingCondition'){
-                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod=== values['pricingMethod']);
-                                              }else{
-                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod=== value);
+                                            }
+                                            if (values['pricingMethod']) {
+                                              if (!tempPricingMethod?.find((e) => e.optionValue === values['pricingMethod'])) {
+                                                setFieldValue('pricingMethod', '');
                                               }
-                                             
-                                              const result = autoCalculateSpecificFields(
-                                                { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
-                                                values,
-                                                initialData.fields
-                                              );
-                                              if (Object.keys(result).length >= 1) {
-                                                for (var x in result) {
-                                                  setFieldValue(x, result[x]);
-                                                }
-                                              }
+                                            }
+                                            let priceValue
+                                            if (field.fieldName === 'pricingCondition') {
+                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
+                                            } else if (field.fieldName === 'pricingMethod') {
+                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.unit === values['unit']);
                                             } else {
-                                              getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
-                                                const priceConditionOption = uniqBy(
-                                                  price?.priceConditionListConst
-                                                    .filter((ele) => ele.pricingMethod === values['pricingMethod'])
-                                                    .map((d) => {
-                                                      return {
-                                                        optionLabel: d?.conditionName,
-                                                        optionValue: d?.conditionId
-                                                      };
-                                                    }),
-                                                  'optionValue'
-                                                );
-
-                                                initialData?.fields.forEach((element) => {
-                                                  if (element.fieldName === 'pricingCondition') {
-                                                    element.option = priceConditionOption;
-                                                  }
-                                                  if(element.fieldName=== 'pricingMethod'){
-                                                    element.option = defaultPricingMethodOptions;
-                                                  }
-                                                });
-                                                setInitialData(initialData);
-                                                let priceFieldName = 'price_' + quotationData?.currency?.toLowerCase();
-                                                const result = autoCalculateSpecificFields(
-                                                  { [priceFieldName]: price?.price, [field.fieldName]: value },
-                                                  values,
-                                                  initialData.fields
-                                                );
-                                                if (Object.keys(result).length >= 1) {
-                                                  for (var x in result) {
-                                                    setFieldValue(x, result[x]);
-                                                  }
-                                                }
-                                              });
+                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === values['pricingMethod'] && d.unit === value);
+                                            }
+                                            let priceFieldName = 'price_' + quotationData?.currency?.toLowerCase();
+                                            const result = autoCalculateSpecificFields(
+                                              { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
+                                              values,
+                                              initialData.fields
+                                            );
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
                                             }
                                           }}
                                           required={field.required}
