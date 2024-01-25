@@ -894,7 +894,7 @@ const ReceivingTicket = ({
     if (rentalManagementData?.processor?.optionValue) {
       data['processor'] = rentalManagementData?.processor?.optionValue;
     }
-    data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+    //data['status'] = DELIVERY_TICKET_STATUS.indTransit;
 
     setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
     closeActions();
