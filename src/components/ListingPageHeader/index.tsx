@@ -13,10 +13,10 @@ type ListingPageHeaderProps = {
   onToggle?: (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>, value: number) => void;
   selectedType?: number;
   setSelectedType?: (value: number) => void;
-  leftSideButtons?: ReactNode;
+  leftSideContents?: ReactNode;
   searchValue?: string;
   onSearch?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  rightSideButtons?: ReactNode;
+  rightSideContents?: ReactNode;
   isActionButtonVisible: boolean;
   actionButtonProps?: ButtonProps;
   actionMenuItems?: ReactNode;
@@ -31,8 +31,8 @@ const ListingPageHeader = ({
   selectedType,
   setSelectedType,
 
-  leftSideButtons,
-  rightSideButtons,
+  leftSideContents,
+  rightSideContents,
 
   searchValue,
   onSearch,
@@ -106,10 +106,8 @@ const ListingPageHeader = ({
                 })}
               </ToggleButtonGroup>
             </HideWhenOffline>
-          ) : (
-            <div />
-          )}
-          {leftSideButtons ? <HideWhenOffline>{leftSideButtons}</HideWhenOffline> : null}
+          ) : null}
+          {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
         <div className="flex flex-wrap gap-[8px] justify-end">
           {onSearch ? (
@@ -117,56 +115,58 @@ const ListingPageHeader = ({
               <SearchBox onChange={onSearch} value={searchValue} size="small" />
             </HideWhenOffline>
           ) : null}
-          <div className="flex gap-[8px] flex-wrap items-center">
-            {rightSideButtons ? rightSideButtons : null}
-            <HideWhenOffline>
-              {isAddButtonVisible ? (
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  {...addButtonProps}
-                  onClick={(e) => {
-                    addButtonOnclick && addButtonOnclick(e);
-                  }}
-                  className={`no-shadow ${addButtonProps.className}`}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-              ) : null}
-              {isActionButtonVisible ? (
-                <>
+          {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
+            <div className="flex gap-[8px] flex-wrap items-center">
+              {rightSideContents ? rightSideContents : null}
+              <HideWhenOffline>
+                {isAddButtonVisible ? (
                   <Button
-                    variant={'outlined'}
-                    color="default"
+                    variant={'contained'}
+                    color="primary"
                     size="small"
-                    className={`new-dropdown-v1`}
-                    {...actionButtonProps}
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+                    {...addButtonProps}
+                    onClick={(e) => {
+                      addButtonOnclick && addButtonOnclick(e);
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
+                    className={`no-shadow ${addButtonProps.className}`}
+                    startIcon={<AddOutlined />}
                   >
-                    <span onClick={() => closeActions()}>{actionMenuItems}</span>
-                  </Menu>
-                </>
-              ) : null}
-            </HideWhenOffline>
-          </div>
+                    Add
+                  </Button>
+                ) : null}
+                {isActionButtonVisible ? (
+                  <>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      className={`new-dropdown-v1`}
+                      {...actionButtonProps}
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
+                    >
+                      Actions
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <span onClick={() => closeActions()}>{actionMenuItems}</span>
+                    </Menu>
+                  </>
+                ) : null}
+              </HideWhenOffline>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

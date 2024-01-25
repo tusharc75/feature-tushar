@@ -42,7 +42,9 @@ const DynamicForm = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+
   const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -202,12 +204,33 @@ const DynamicForm = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
+        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
       });
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        onClick={() => {
+          setShowDeleteConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
   };
 
   return (
@@ -238,23 +261,13 @@ const DynamicForm = () => {
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={true}
-          actionMenuItems={
-            <>
-              <MenuItem
-                disabled={selectedRecords?.length ? false : true}
-                onClick={() => {
-                  setShowDeleteConfirmBox(true);
-                }}
-              >
-                {`Delete (${selectedRecords?.length})`}
-              </MenuItem>
-            </>
-          }
+          isActionButtonVisible={permissions[renderedFrom]?.isDelete}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
-          isAddButtonVisible={true}
+          isAddButtonVisible={permissions[renderedFrom]?.isCreate}
         />
         {columns ? (
           <CustomReactTable

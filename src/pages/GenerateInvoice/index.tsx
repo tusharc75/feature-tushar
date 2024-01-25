@@ -19,6 +19,7 @@ import ViewInvoice from '../Invoice/ViewInvoice';
 import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
 import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 const GENERATE_RESOURCE = [
   {
@@ -282,6 +283,43 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     }
   };
 
+  const LeftSideContents = () => {
+    return (
+      <>
+        {!resourceRendered && (
+          <Autocomplete
+            id="generate-invoice"
+            style={{ width: '300px' }}
+            options={resourceList?.map((item) => item)}
+            renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+            getOptionLabel={(option) => option?.title}
+            onChange={(e, val) => {
+              dispatch({ type: 'selection', selectedRecords: [] });
+              dispatch({ type: 'pageChange', page: 0 });
+              setSelectedResource(val);
+            }}
+            disableClearable={true}
+            value={selectedResource}
+          />
+        )}
+      </>
+    );
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={checkUniqCreateInvoice()}
+        onClick={() => {
+          setCreateInvoiceDialog({ open: true, data: selectedRecords });
+          closeActions();
+        }}
+      >
+        Create Invoice
+      </MenuItem>
+    );
+  };
+
   return selectedResource ? (
     <Fragment>
       <Grid container className="headerbox">
@@ -301,69 +339,15 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         <Grid item md={8} sm={1} xs={2} />
       </Grid>
       <div className="main-container">
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              {!resourceRendered && (
-                <Autocomplete
-                  id="generate-invoice"
-                  style={{ width: '300px' }}
-                  options={resourceList?.map((item) => item)}
-                  renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
-                  getOptionLabel={(option) => option?.title}
-                  onChange={(e, val) => {
-                    dispatch({ type: 'selection', selectedRecords: [] });
-                    dispatch({ type: 'pageChange', page: 0 });
-                    setSelectedResource(val);
-                  }}
-                  disableClearable={true}
-                  value={selectedResource}
-                />
-              )}
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              {selectedResource.resource === sidebarResource.fieldTicket && (
-                <div className="flex gap-[8px] flex-wrap items-center">
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
-                    aria-controls="action-menu"
-                    className={`new-dropdown-v1`}
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      disabled={checkUniqCreateInvoice()}
-                      onClick={() => {
-                        setCreateInvoiceDialog({ open: true, data: selectedRecords });
-                        closeActions();
-                      }}
-                    >
-                      Create Invoice
-                    </MenuItem>
-                  </Menu>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          leftSideContents={<LeftSideContents />}
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={selectedResource.resource === sidebarResource.fieldTicket}
+          actionMenuItems={<ActionMenuItems />}
+          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          isAddButtonVisible={false}
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

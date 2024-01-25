@@ -474,12 +474,12 @@ const RentalManagement = () => {
           onToggle={() => dispatch({ type: 'pageChange', page: 0 })}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          leftSideButtons={<LeftSideButtons />}
+          leftSideContents={<LeftSideButtons />}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={true}
           actionMenuItems={<ActionMenuItems />}
-          isAddButtonVisible={true}
+          isAddButtonVisible={permissions?.rentalManagement?.isCreate && permissions?.rentalManagement?.isUpdate}
           addButtonOnclick={() => {
             setShowManageRentalManagementDialog({ open: true, isClone: false, idToClone: null });
           }}
