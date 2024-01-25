@@ -480,17 +480,14 @@ const Steps = ({
   };
 
 
-  const getNextStep = (serviceSteps: any[], currentStep: any): any | null => {
-    const currentStepIndex = serviceSteps.findIndex(step => step?._id === currentStep?._id);
-
-    if (currentStepIndex === -1 || currentStepIndex === serviceSteps.length - 1)
+  const getNextStep = (currentStep: any): any | null => {
+    const allSteps = serviceDetails?.steps;
+    const currentStepIndex = allSteps?.findIndex(step => step?._id === currentStep?._id);
+    if (currentStepIndex === -1 || currentStepIndex === allSteps?.length - 1)
       return null;
-    const nextStep = serviceSteps[currentStepIndex + 1];
-    const { stepData, isStepValid } = getFields(nextStep);
-    return !nextStep?.isPassFail && isStepValid ? {
-      step: nextStep,
-      stepData: stepData
-    } : null;
+    const nextStep = allSteps[currentStepIndex + 1];
+    const { stepData } = getFields(nextStep);
+    return nextStep?.isPassFail ? null : { step: nextStep, stepData: stepData };
   };
 
   const handleSubmit = async (values, step, autoComplete = false, nextStep = false) => {
@@ -512,17 +509,32 @@ const Steps = ({
           const type = automatePassFail(values, step);
           handlePassFail(type, step);
         }
-        if (autoComplete) {
+        if (autoComplete && !nextStep) {
           handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
+          setSelectedStep(null);
+          setFieldDialog(false);
         }
-        fetchService();
-        setSelectedStep(null);
-        setFieldDialog(false);
+        else if (autoComplete && nextStep) {
+          if (autoComplete) {
+            handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
+          }
+          const nextStepData = getNextStep(step);
+          if (!nextStepData?.stepData) {
+            handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, nextStepData?.step, nextStepData?.stepData);
+          }
+          else if (nextStepData?.stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+            setSelectedStep(nextStepData?.step);
+            setFieldDialog(true);
+            setIsFieldDialogEditable(true);
+            setStepState(nextStepData?.stepData);
+          }
+        }
+        else {
+          setSelectedStep(null);
+          setFieldDialog(false);
+        }
         setIsSubmitting(false)
-        if (autoComplete && nextStep) {
-          const nextStepData = getNextStep(serviceDetails?.steps, step);
-          handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, nextStepData?.step, nextStepData?.stepData);
-        }
+        fetchService();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -1446,7 +1458,6 @@ const Steps = ({
                   </MenuItem>
                   <MenuItem
                     onClick={(e) => {
-                      console.log(selectedStep)
                       e.stopPropagation();
                       handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), selectedStep);
                       setAnchorEl(null);
@@ -1511,7 +1522,7 @@ const Steps = ({
                 stepData={stepState}
                 isSubmitting={isSubmitting}
                 editable={isFieldDialogEditable}
-                nextStep={!!getNextStep(serviceDetails?.steps, selectedStep)}
+                nextStep={getNextStep(selectedStep) ? true : false}
               />
             )}
             {commentsDialog && (
