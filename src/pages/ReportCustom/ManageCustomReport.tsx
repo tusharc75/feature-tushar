@@ -188,7 +188,6 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     return () => clearTimeout(timeout);
   }, [scheduleData, filterOptions, resourceColumns]);
 
-
   const handleSelectFilter = (type: string, name: string, value: any) => {
     setSelectedData((prevState) => ({ ...prevState, [name]: { type, value } }));
     setFilterValues((prevState) => ({ ...prevState, [name]: value }));
