@@ -8,7 +8,6 @@ import { workOrder, WORKORDER_SERVICE_STEP_STATUS, yupSchema, convertMsToTime, s
 import { dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
 import styles from './StepFieldsDialog.module.scss';
-import CloseIcon from '@material-ui/icons/Close';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -24,7 +23,6 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
-import { isEmpty } from 'lodash';
 import CustomButton from 'src/components/Helpers/CustomButton';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -127,8 +125,7 @@ const StepFieldsDialog = ({
 
   const steps = selectedService?.steps || [];
 
-  const [saveAndComplete, setSaveAndComplete] = React.useState(false);
-  const [saveAndNextAndComplete, setSaveAndNextAndComplete] = React.useState(false);
+  const [saveAndComplete, setSaveAndComplete] = React.useState({ saveAndComplete: false, saveAndNextAndComplete: false });
 
 
   const RenderStepData = () => {
@@ -273,11 +270,8 @@ const StepFieldsDialog = ({
   };
 
   const handleSubmitData = async (values) => {
-    if (saveAndComplete) {
-      handleSubmit(values, step, true);
-    }
-    else if (saveAndNextAndComplete) {
-      handleSubmit(values, step, true, true);
+    if (saveAndComplete.saveAndComplete || saveAndComplete.saveAndNextAndComplete) {
+      handleSubmit(values, step, saveAndComplete.saveAndComplete, saveAndComplete.saveAndNextAndComplete);
     }
     else {
       handleSubmit(values, step);
@@ -480,8 +474,7 @@ const StepFieldsDialog = ({
                           variant="contained"
                           color="primary"
                           onClick={() => {
-                            setSaveAndComplete(false)
-                            setSaveAndNextAndComplete(false)
+                            setSaveAndComplete({ saveAndComplete: false, saveAndNextAndComplete: false })
                             submitForm();
                           }}
                         >
@@ -497,13 +490,12 @@ const StepFieldsDialog = ({
                               variant="contained"
                               color="primary"
                               onClick={() => {
-                                setSaveAndComplete(true)
-                                setSaveAndNextAndComplete(false)
+                                setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: false })
                                 submitForm();
                               }}
                             >
                               {' '}
-                              Save & Complete
+                              Complete
                             </CustomButton>
                             {nextStep &&
                               <>
@@ -514,13 +506,12 @@ const StepFieldsDialog = ({
                                   variant="contained"
                                   color="primary"
                                   onClick={() => {
-                                    setSaveAndComplete(false)
-                                    setSaveAndNextAndComplete(true)
+                                    setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: true })
                                     submitForm();
                                   }}
                                 >
                                   {' '}
-                                  Save & Complete & Next
+                                  Complete & Next
                                 </CustomButton>
                               </>}
                           </>
