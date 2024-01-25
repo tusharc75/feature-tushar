@@ -27,7 +27,8 @@ export const rentalManagementActions = {
     cancelDeliveredTicket: 'Cancel Delivered Ticket',
     createRepairJob: 'Create Repair Job',
     createRepairOrder: 'Create Repair Order',
-    transferToAnotherRental: 'Transfer to another Rental'
+    transferToAnotherRental: 'Transfer to another Rental',
+    swapInUseAssets: 'Swap In-Use Assets'
 };
 
 export const rentalManagementMessage = {
@@ -67,6 +68,8 @@ export const rentalManagementMessage = {
     repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
     repairSameWarehouse: `Selected assets must be in same ${routes.warehouse.title} to perform this action`,
     transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
+    onlySwapAssets: 'Only Assets can be swapped',
+    onlySwapInUseAssets: 'Only In-Use assets can be swapped',
 };
 
 export const subleaseActions = {

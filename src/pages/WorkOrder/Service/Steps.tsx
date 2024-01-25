@@ -713,9 +713,10 @@ const Steps = ({
       });
   };
 
-  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, step) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
+    setSelectedStep({ ...step, stepData: getFields(step)?.stepData });
   };
 
   const handleCloseMenu = (event) => {
@@ -1069,8 +1070,7 @@ const Steps = ({
                                   aria-label="delete"
                                   disabled={!allowedToEdit}
                                   onClick={(event) => {
-                                    handleOpenMenu(event);
-                                    setSelectedStep(step);
+                                    handleOpenMenu(event, step);
                                   }}
                                 >
                                   <MoreHoriz />
@@ -1310,8 +1310,7 @@ const Steps = ({
                             aria-label="delete"
                             disabled={!allowedToEdit}
                             onClick={(event) => {
-                              handleOpenMenu(event);
-                              setSelectedStep(step);
+                              handleOpenMenu(event, step);
                             }}
                           >
                             <MoreHoriz />
@@ -1447,6 +1446,7 @@ const Steps = ({
                   </MenuItem>
                   <MenuItem
                     onClick={(e) => {
+                      console.log(selectedStep)
                       e.stopPropagation();
                       handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), selectedStep);
                       setAnchorEl(null);
@@ -1455,7 +1455,7 @@ const Steps = ({
                       allowedToEdit &&
                         ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                           selectedService?.status
-                        )
+                        ) && !selectedStep?.stepData
                         ? false
                         : true
                     }
