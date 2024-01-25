@@ -20,11 +20,12 @@ import { RenderPassFailChip } from './Steps';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from 'src/components/FormBuilder/AddField';
-
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
+import { isEmpty } from 'lodash';
+import CustomButton from 'src/components/Helpers/CustomButton';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -99,6 +100,7 @@ const StepFieldsDialog = ({
   stepData,
   resource,
   allowedToEdit,
+  isSubmitting,
   selectedService = null,
   eidtable = true,
   open = true
@@ -170,11 +172,11 @@ const StepFieldsDialog = ({
         </h6>
         <div className={classes.transition} style={{ height: height }}>
           <div className={classes.sectionRow} ref={containerRef}>
-            {stepData.passFailStatus ? (
+            {stepData?.passFailStatus ? (
               <div>
                 <p className={classes.sectionColTItle}>Status :</p>
                 <p className={classes.sectionColDetail}>
-                  <RenderPassFailChip status={stepData.passFailStatus} className={classes.stepTags} />
+                  <RenderPassFailChip status={stepData?.passFailStatus} className={classes.stepTags} />
                 </p>
               </div>
             ) : null}
@@ -186,26 +188,26 @@ const StepFieldsDialog = ({
                 </p>
               </div>
             ) : null}
-            {stepData.startedBy && (
+            {stepData?.startedBy && (
               <div>
                 <p className={classes.sectionColTItle}>Started By:</p>
                 <p className={classes.sectionColDetail}>{stepData.startedBy?.optionLabel}</p>
               </div>
             )}
-            {stepData.endedBy && (
+            {stepData?.endedBy && (
               <div>
                 <p className={classes.sectionColTItle}>Ended By:</p>
                 <p className={classes.sectionColDetail}>{stepData.endedBy?.optionLabel}</p>
               </div>
             )}
-            {stepData.startDate ? (
+            {stepData?.startDate ? (
               <div>
                 <p className={classes.sectionColTItle}>Start Date:</p>
                 <p className={classes.sectionColDetail}>{moment(stepData.startDate).format(dateTimeFormat)}</p>
               </div>
             ) : null}
 
-            {stepData.endDate ? (
+            {stepData?.endDate ? (
               <div>
                 <p className={classes.sectionColTItle}>End Date:</p>
                 <p className={classes.sectionColDetail}>{moment(stepData.endDate).format(dateTimeFormat)}</p>
@@ -264,7 +266,6 @@ const StepFieldsDialog = ({
         handleClose();
       });
   };
-
   return (
     <>
       <Dialog
@@ -280,7 +281,7 @@ const StepFieldsDialog = ({
         fullWidth
       >
         <CustomDialogHeader
-          title={step?.stepName}
+          title={`${step?.idx} - ${step?.stepName}`}
           onClose={() => {
             handleClose();
             setDialogOpen(false);
@@ -294,7 +295,7 @@ const StepFieldsDialog = ({
         <Formik
           initialValues={fieldData?.values}
           validationSchema={yupSchema(fieldData?.fields)}
-          onSubmit={(values) => handleSubmit(values, step)}
+          onSubmit={(values) => { }}
           enableReinitialize
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
@@ -455,17 +456,41 @@ const StepFieldsDialog = ({
                           Cancel
                         </Button>
                         <Box ml={1} />
-                        <Button
+                        <CustomButton
+                          disabled={isSubmitting}
+                          loading={isSubmitting}
                           variant="contained"
-                          size="small"
+                          color="primary"
                           onClick={() => {
                             submitForm();
-                            setEditing(false);
+                            if (isEmpty(errors)) {
+                              handleSubmit(values, step);
+                            }
                           }}
-                          color="primary"
                         >
+                          {' '}
                           Save
-                        </Button>
+                        </CustomButton>
+                        {!step?.isPassFail &&
+                          <>
+                            <Box ml={1} />
+                            <CustomButton
+                              disabled={isSubmitting}
+                              loading={isSubmitting}
+                              variant="contained"
+                              color="primary"
+                              onClick={() => {
+                                submitForm();
+                                if (isEmpty(errors)) {
+                                  handleSubmit(values, step, true);
+                                }
+                              }}
+                            >
+                              {' '}
+                              Save & Complete
+                            </CustomButton>
+                          </>
+                        }
                       </>
                     )}
                   </div>
