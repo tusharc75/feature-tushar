@@ -493,7 +493,7 @@ const Steps = ({
     } : null;
   };
 
-  const handleSubmit = async (values, step, autoComplete = false, nextStep=false) => {
+  const handleSubmit = async (values, step, autoComplete = false, nextStep = false) => {
     setIsSubmitting(true)
     let tempData = {
       uniqueId: selectedService?.uniqueId,
@@ -1510,7 +1510,7 @@ const Steps = ({
                 step={selectedStep}
                 stepData={stepState}
                 isSubmitting={isSubmitting}
-                eidtable={isFieldDialogEditable}
+                editable={isFieldDialogEditable}
                 nextStep={!!getNextStep(serviceDetails?.steps, selectedStep)}
               />
             )}
