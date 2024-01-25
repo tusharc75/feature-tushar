@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
 import { Grid, Button, Box, IconButton } from '@material-ui/core';
-import { camelCase, capitalize, startCase } from 'lodash';
+import { camelCase, capitalize, isArray, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdFilterList } from 'react-icons/md';
@@ -322,7 +322,9 @@ const Report = () => {
     }
 
     const SerialNumberRenderer = (row) => {
-        return (<div>{row.original.serialNumber?.length ? row.original.serialNumber?.map((e) => e?.serialNumber)?.toString() : <NoDataCell />}</div>)
+        return (<div>{row.original?.serialNumber
+            && isArray(row.original.serialNumber)
+            && row.original.serialNumber?.length ? row?.original?.serialNumber?.map((e) => e?.serialNumber)?.toString() : <NoDataCell />}</div>)
     }
 
     const ActionsRenderer = {

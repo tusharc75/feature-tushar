@@ -251,8 +251,11 @@ const Steps = ({
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, loading: false, steps: [] });
   const [selectedSteps, setSelectedSteps] = useState<string[]>([]);
   const [isCompleteAllLoading, setIsCompleteAllLoading] = useState(false);
-  const [reOpenServiceDialog, setReOpenServiceDialog] = useState({ open: false, type: null, stepId: null });
+  const [reOpenServiceDialog, setReOpenServiceDialog] = useState({ open: false, type: null, step: null });
   const [loadingStep, setLoadingStep] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   useEffect(() => {
     if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService.uniqueId) && selectedService.uniqueId) {
@@ -477,6 +480,7 @@ const Steps = ({
   };
 
   const handleSubmit = async (values, step, autoComplete = false) => {
+    setIsSubmitting(true)
     let tempData = {
       uniqueId: selectedService?.uniqueId,
       serviceId: selectedService._id,
@@ -490,9 +494,6 @@ const Steps = ({
           type: 'success',
           message: data.message
         });
-        setSelectedStep(null);
-        setFieldDialog(false);
-        fetchService();
         if (step?.isPassFail) {
           const type = automatePassFail(values, step);
           handlePassFail(type, step);
@@ -500,9 +501,14 @@ const Steps = ({
         if (autoComplete) {
           handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
         }
+        setSelectedStep(null);
+        setFieldDialog(false);
+        fetchService();
+        setIsSubmitting(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsSubmitting(false)
       });
   };
 
@@ -523,13 +529,13 @@ const Steps = ({
     return Object.keys(invalidValues).length > 0 ? WORKORDER_SERVICE_STEP_STATUS.failed : WORKORDER_SERVICE_STEP_STATUS.passed;
   };
 
-  const handleStartEnd = (type, stepId, step = null, stepData = null) => {
+  const handleStartEnd = (type, step, stepData = null) => {
     setLoadingStep(true);
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/${type}`, {
         uniqueId: selectedService?.uniqueId,
         serviceId: selectedService._id,
-        stepId: stepId
+        stepId: step._id
       })
       .then(({ data }) => {
         setLoadingStep(false);
@@ -539,8 +545,8 @@ const Steps = ({
           message: data.message
         });
         fetchService();
-        setReOpenServiceDialog({ open: false, type: null, stepId: null });
-        if (!step?.isPassFail) {
+        setReOpenServiceDialog({ open: false, type: null, step: null });
+        if (type === WORKORDER_SERVICE_STEP_STATUS.start && step?.fields?.length) {
           setSelectedStep(step);
           setFieldDialog(true);
           setIsFieldDialogEditable(true);
@@ -785,7 +791,7 @@ const Steps = ({
           type: 'success',
           message: data.message
         });
-        setReOpenServiceDialog({ open: false, type: null, stepId: null });
+        setReOpenServiceDialog({ open: false, type: null, step: null });
         fetchService();
         fetchServiceData();
       })
@@ -1155,7 +1161,7 @@ const Steps = ({
                                     if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
                                       updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
                                     }
-                                    handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step._id, step, stepData);
+                                    handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step, stepData);
                                   }}
                                 >
                                   Start
@@ -1227,9 +1233,9 @@ const Steps = ({
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         if (selectedService?.status === WORKORDER_SERVICE_STATUS.completed) {
-                                          setReOpenServiceDialog({ open: true, type: null, stepId: step._id });
+                                          setReOpenServiceDialog({ open: true, type: null, step: step });
                                         } else {
-                                          handleStartEnd('reopen', step._id);
+                                          handleStartEnd('reopen', step);
                                         }
                                       }}
                                     >
@@ -1300,7 +1306,7 @@ const Steps = ({
                                 aria-label="Clone"
                                 onClick={() => {
                                   if (selectedService?.status === WORKORDER_SERVICE_STATUS.completed) {
-                                    setReOpenServiceDialog({ open: true, type: 'clone', stepId: step._id });
+                                    setReOpenServiceDialog({ open: true, type: 'clone', step: step });
                                   } else {
                                     cloneStep(step);
                                   }
@@ -1424,7 +1430,7 @@ const Steps = ({
                   <MenuItem
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), selectedStep._id);
+                      handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), selectedStep);
                       setAnchorEl(null);
                     }}
                     disabled={
@@ -1485,6 +1491,7 @@ const Steps = ({
                 allowedToEdit={allowedToEdit}
                 step={selectedStep}
                 stepData={stepState}
+                isSubmitting={isSubmitting}
                 eidtable={isFieldDialogEditable}
               />
             )}
@@ -1667,7 +1674,7 @@ const Steps = ({
                 open={reOpenServiceDialog.open}
                 message={`By performing this action, the service status will change from ${WORKORDER_SERVICE_STATUS.completed} to ${WORKORDER_SERVICE_STATUS.inProgress}. Do you wish to continue?`}
                 onClose={() => {
-                  setReOpenServiceDialog({ open: false, type: null, stepId: null });
+                  setReOpenServiceDialog({ open: false, type: null, step: null });
                 }}
                 forwardText={'Continue'}
                 okBtnLoading={loadingStep}
@@ -1676,10 +1683,10 @@ const Steps = ({
                   if (reOpenServiceDialog.type === 'clone') {
                     cloneStep({
                       workOrderId: workOrderId,
-                      _id: reOpenServiceDialog.stepId
+                      _id: reOpenServiceDialog.step._id
                     });
                   } else {
-                    handleStartEnd('reopen', reOpenServiceDialog.stepId);
+                    handleStartEnd('reopen', reOpenServiceDialog.step);
                   }
                 }}
               />

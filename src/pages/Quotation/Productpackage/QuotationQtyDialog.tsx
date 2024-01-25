@@ -219,7 +219,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
             materialId: rowData.materialId,
             type: rowData.type,
             qty: values.qty,
-            pricingMethod: pricingMethodOptions ? pricingMethodOptions.map((d) => d.optionLabel).join() : values?.pricingMethod,
+            // pricingMethod: pricingMethodOptions ? pricingMethodOptions.map((d) => d.optionLabel).join() : values?.pricingMethod,
+            pricingMethod: rowData?.productDetail?.pricingMethod.join(),
             unit: values.unit
           }
         ]);
@@ -259,8 +260,10 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
           );
         }
         if (priceData && priceData.length) {
-          let pricingConditionIndex = priceData.findIndex((d) => d?.conditionId === values?.pricingCondition);
-          let price: any = pricingConditionIndex > -1 ? priceData[pricingConditionIndex]?.mrp : 0;
+          // let pricingConditionIndex = priceData.findIndex((d) => d?.conditionId === values?.pricingCondition);
+          // let price: any = pricingConditionIndex > -1 ? priceData[pricingConditionIndex]?.mrp : 0;
+          let pricingConditionIndex = tempPriceData.findIndex((d) => d?.conditionId === values?.pricingCondition && d?.pricingMethod===values?.pricingMethod && d?.unit=== values?.unit);
+          let price: any = pricingConditionIndex > -1 ? tempPriceData[pricingConditionIndex]?.mrp : 0;
           return { price, priceConditionListConst: tempPriceData };
         }
         return 0;
@@ -464,6 +467,12 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                           options={field.option}
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
+                                            const defaultPricingMethodOptions = rowData?.productDetail?.pricingMethod?.map((d) => {
+                                              return {
+                                                optionLabel: d,
+                                                optionValue: d
+                                              };
+                                            });
                                             if (
                                               (field.fieldName === 'pricingCondition' || field.fieldName === 'pricingMethod') &&
                                               initialData.fields?.find((e) => e.fieldName === 'pricingMethod')
@@ -493,12 +502,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                                     optionValue: d?.pricingMethod
                                                   };
                                                 });
-                                              const defaultPricingMethodOptions = rowData?.productDetail?.pricingMethod?.map((d) => {
-                                                return {
-                                                  optionLabel: d,
-                                                  optionValue: d
-                                                };
-                                              });
                                               if (field.fieldName === 'pricingCondition') {
                                                 initialData?.fields.forEach((element) => {
                                                   if (element.fieldName === 'pricingMethod') {
@@ -565,6 +568,9 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                                 initialData?.fields.forEach((element) => {
                                                   if (element.fieldName === 'pricingCondition') {
                                                     element.option = priceConditionOption;
+                                                  }
+                                                  if(element.fieldName=== 'pricingMethod'){
+                                                    element.option = defaultPricingMethodOptions;
                                                   }
                                                 });
                                                 setInitialData(initialData);

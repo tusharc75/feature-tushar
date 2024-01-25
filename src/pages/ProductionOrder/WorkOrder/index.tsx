@@ -701,13 +701,16 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const handleCompleteService = () => {
     setSubmitting(true);
-    const data = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service)
-      ?.map((e) => ({
-        workOrder: e?.workOrder?._id,
-        service: e?.serviceDetail?._id,
-        uniqueId: e?.uniqueId,
-        status: showServiceActionConfirmBox.action
-      }));
+    var records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service)
+    if (showServiceActionConfirmBox.action === 'revert') {
+      records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)
+    }
+    const data = records?.map((e) => ({
+      workOrder: e?.workOrder?._id,
+      service: e?.serviceDetail?._id,
+      uniqueId: e?.uniqueId,
+      status: showServiceActionConfirmBox.action
+    }));
     axiosInstance()
       .put(`${workOrder.api}/service/work-orders-services-status`, data)
       .then(({ data }) => {
@@ -805,7 +808,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               }
             />
             <Box ml={1} />
-            <ImportExportMenu
+            {/* <ImportExportMenu
               permissions={permissions?.workOrder}
               module="Work Order Consumables"
               api={`${workOrder.api}/unknown/consumable`}
@@ -822,7 +825,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   : dataRows?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).map((e) => e?.workOrder?._id)
               )}`}
             />
-            <Box ml={1} />
+            <Box ml={1} /> */}
             <Button
               variant={'outlined'}
               color="primary"
@@ -1018,7 +1021,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               </MenuItem>
               <MenuItem
                 disabled={selectedRecords?.length &&
-                  selectedRecords?.filter(((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending))?.length === selectedRecords?.length ? false : true}
+                  selectedRecords?.some(((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)) ? false : true}
                 onClick={() => {
                   setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
                   closeActions();
