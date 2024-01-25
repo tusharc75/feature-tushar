@@ -1,29 +1,28 @@
+import { Box, Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
+import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, repairOrder, sidebarResource } from 'src/constants/helpers';
-import { useHistory } from 'react-router-dom';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import queryString from 'query-string';
-import { useData } from 'src/StateProvider/Provider';
-import { Button, Chip, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import styles from '../Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import axiosInstance from 'src/axios/axiosInstance';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import DeleteIcon from '@material-ui/icons/Delete';
-import ManageRepairOrder from './ManageRepairOrder';
+import { gridLoadingTimeout, prepareDataForGrid, repairOrder, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ManageRepairOrder from './ManageRepairOrder';
 
 let searchTimeout;
 
@@ -378,7 +377,7 @@ const RepairOrder = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.repairOrder?.isCreate && (
                   <Button
@@ -444,9 +443,11 @@ const RepairOrder = () => {
             showFilters={true}
             resource={sidebarResource.repairOrder}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
 
         {showDeleteWarningConfirmBox && (
           <MessageDialog
@@ -458,8 +459,9 @@ const RepairOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
+              deleteRecord.repairOrderNumber || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

@@ -1,14 +1,10 @@
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Button, Menu, MenuItem } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
-import routes from 'src/components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
 import SearchBox from '../../components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
 
 function QuoteHeader({
   selectedRecords,
@@ -99,7 +95,7 @@ function QuoteHeader({
         {children}
       </div>
       <div className="flex flex-wrap gap-[8px]  justify-end">
-        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" />
+        <SearchBox onChange={onSearch} value={searchVal} size="small" />
 
         <div className="flex gap-[8px] flex-wrap items-center">
           {QuotePermissions.isCreate && (

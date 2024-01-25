@@ -1,16 +1,16 @@
-import { useState, useEffect, useContext } from 'react';
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset, sidebarResource } from 'src/constants/helpers';
+import styles from 'src/pages/Leads/Header.module.scss';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import SearchBox from '../Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset, sidebarResource } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import routes from '../Helpers/Routes';
-import styles from 'src/pages/Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
+import routes from '../Helpers/Routes';
+import SearchBox from '../Helpers/SearchBox';
 
 let searchTimeout;
 
@@ -207,37 +207,38 @@ const AssignSerializedAssetDialog = ({
               <Box style={{ display: 'inline' }}>
                 {products.length > 0
                   ? products?.map((d) => (
-                    <Box
-                      m={0.5}
-                      p={1}
-                      border={1}
-                      className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                      <Box
+                        m={0.5}
+                        p={1}
+                        border={1}
+                        className={`cursor-pointer rounded-sm ${
+                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                         }`}
-                      borderColor="var(--common-border-color)"
-                      onClick={() => {
-                        if (selectedProduct === d.id) {
-                          setSelectedProduct(null);
-                        } else {
-                          setSelectedProduct(d.id);
-                        }
-                      }}
-                      style={{ display: 'inline-block' }}
-                    >
-                      {d?.qty < 0 ? (
-                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                      ) : d?.qty === 0 ? (
-                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                      ) : (
-                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                      )}
-                    </Box>
-                  ))
+                        borderColor="var(--common-border-color)"
+                        onClick={() => {
+                          if (selectedProduct === d.id) {
+                            setSelectedProduct(null);
+                          } else {
+                            setSelectedProduct(d.id);
+                          }
+                        }}
+                        style={{ display: 'inline-block' }}
+                      >
+                        {d?.qty < 0 ? (
+                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                        ) : d?.qty === 0 ? (
+                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                        ) : (
+                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                        )}
+                      </Box>
+                    ))
                   : null}
               </Box>
             </Grid>
             <Grid item xs={12} md={6} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
-                <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
+                <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
                 <Button
                   disabled={isAssigning || disableSaveButton || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0)}
                   onClick={() => {

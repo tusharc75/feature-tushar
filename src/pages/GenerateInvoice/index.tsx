@@ -1,25 +1,24 @@
 import { Box, Button, Grid, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import { camelCase, map, uniq } from 'lodash';
-import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, INVOICE_STATUS, FIELD_TICKET_STATUS } from 'src/constants/helpers';
+import { ExpandMore } from '@material-ui/icons';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import styles from '../Leads/Header.module.scss';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import { Autocomplete } from '@material-ui/lab';
+import { camelCase, map, uniq } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { FIELD_TICKET_STATUS, INVOICE_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import ViewInvoice from '../Invoice/ViewInvoice';
+import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
 import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
-import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
-import ViewInvoice from '../Invoice/ViewInvoice';
-import { ExpandMore } from '@material-ui/icons';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const GENERATE_RESOURCE = [
   {
@@ -305,7 +304,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              {!resourceRendered &&
+              {!resourceRendered && (
                 <Autocomplete
                   id="generate-invoice"
                   style={{ width: '300px' }}
@@ -320,15 +319,10 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                   disableClearable={true}
                   value={selectedResource}
                 />
-              }
+              )}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                className={styles.search_box_input}
-                value={search}
-                size="small"
-              />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               {selectedResource.resource === sidebarResource.fieldTicket && (
                 <div className="flex gap-[8px] flex-wrap items-center">
                   <Button

@@ -1,33 +1,32 @@
-import { useContext, useEffect, useState } from 'react';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore, Warning } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { useHistory, Link } from 'react-router-dom';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { useContext, useEffect, useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import routes from 'src/components/Helpers/Routes';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import { useData } from 'src/StateProvider/Provider';
-import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid, rentalManagement, serializedAsset, sidebarResource } from 'src/constants/helpers';
-import CustomContainer from 'src/components/CustomContainer';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import { Button, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
-import { AddOutlined, ExpandMore, Warning } from '@material-ui/icons';
-import axiosInstance from 'src/axios/axiosInstance';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import styles from '../Leads/Header.module.scss';
-import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
-import ManageRentalManagementDialog from './ManageRental';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import HideWhenOffline from 'src/components/HideWhenOffline';
+import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid, rentalManagement, serializedAsset, sidebarResource } from 'src/constants/helpers';
+import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ManageRentalManagementDialog from './ManageRental';
+import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
 
 let searchTimeout;
 
@@ -498,7 +497,7 @@ const RentalManagement = () => {
             </div>
             <div className="flex flex-wrap gap-[8px] justify-end">
               <HideWhenOffline>
-                <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+                <SearchBox onChange={handleSearch} value={search} size="small" />
               </HideWhenOffline>
               <div className="flex gap-[8px] flex-wrap items-center">
                 <HideWhenOffline>

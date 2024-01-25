@@ -1,32 +1,30 @@
-import { useState, FC, useReducer, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, Chip, Menu, MenuItem } from '@material-ui/core';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import { useData } from '../../StateProvider/Provider';
-import CreateProjectSales from './CreateProjectSales';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { customerAccount, gridLoadingTimeout, supplierAccount } from '../../constants/helpers';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import EntitySelectionsDialog from '../../components/EntitySelections';
-import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import IconButton from '@material-ui/core/IconButton';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
-import { useHistory } from 'react-router-dom';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { FC, useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import { AiOutlineDeploymentUnit } from 'react-icons/ai';
+import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { cloneDisable, deleteDisable, entityDisable } from 'src/constants/messageHelpers';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { isMobile } from 'react-device-detect';
-import styles from '../Leads/Header.module.scss';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { cloneDisable, deleteDisable, entityDisable } from 'src/constants/messageHelpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import EntitySelectionsDialog from '../../components/EntitySelections';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import routes from '../../components/Helpers/Routes';
+import { customerAccount, gridLoadingTimeout, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
+import CreateProjectSales from './CreateProjectSales';
 
 
 
@@ -349,7 +347,6 @@ const ProjectSales: FC = () => {
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox
                 onChange={handleSearch}
-                className={isMobile ? styles.search_box_input : ''}
                 width="242px"
                 size="small"
                 value={search}

@@ -1,34 +1,27 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { useHistory } from 'react-router-dom';
-import { Chip, IconButton, Tooltip, Button, Box } from '@material-ui/core';
+import { Box, Button, Chip, IconButton, Tooltip } from '@material-ui/core';
+import { AddOutlined } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import ManageRepairJob from './ManageRepairJob';
-import { customerAccount, supplierAccount, gridLoadingTimeout, repairJob, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import routes from './../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import { useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import { customerAccount, gridLoadingTimeout, prepareDataForGrid, repairJob, sidebarResource, supplierAccount } from '../../constants/helpers';
 import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
-import { camelCase } from 'lodash';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import CustomReactTable, {
-  checkStaticField,
-  getStaticFields,
-  gridFilterParser,
-  useColumns,
-  useTableReducer
-} from 'src/components/CustomReactTable';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { AddOutlined } from '@material-ui/icons';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ManageRepairJob from './ManageRepairJob';
 
 let repairJobTimeout;
 
@@ -395,7 +388,7 @@ const RepairJob = () => {
               {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.repairJob?.isCreate && (
                   <Button

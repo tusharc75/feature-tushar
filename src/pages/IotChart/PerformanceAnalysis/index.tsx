@@ -1,13 +1,13 @@
-import { useContext, useEffect, useState } from 'react';
-import { Box, FormGroup, Collapse, IconButton, TextField, Grid } from '@material-ui/core';
+import { Box, FormGroup, Grid } from '@material-ui/core';
 import moment from 'moment';
-import FilterModel from '../Helper/FilterModel';
-import Chart from '../Helper/Chart';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import axiosInstance from 'src/axios/axiosInstance';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import TreeViewNew from './TreeView';
+import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import Chart from '../Helper/Chart';
+import FilterModel from '../Helper/FilterModel';
+import TreeViewNew from './TreeView';
 
 const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }) => {
   const toastConfig = useContext(CustomToastContext);

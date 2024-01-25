@@ -7,26 +7,24 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferInventory } from 'src/constants/helpers';
-import styles from '../Leads/Header.module.scss';
-import ManageTransferInventory from './ManageTransferInventory';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import ManageTransferInventory from './ManageTransferInventory';
 
 const TransferInventory = () => {
-
   const types = [
     {
       key: `My ${routes.transferInventory.title}`,
@@ -83,7 +81,7 @@ const TransferInventory = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.transferInventory?.isCreate ? "Clone" : cloneDisable}  >
+        <HtmlTooltip title={permissions?.transferInventory?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -97,7 +95,7 @@ const TransferInventory = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
@@ -252,11 +250,7 @@ const TransferInventory = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                className={styles.search_box_input}
-                size="small"
-                value={search} />
+              <SearchBox onChange={handleSearch} size="small" value={search} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.transferInventory?.isCreate && (
                   <Button

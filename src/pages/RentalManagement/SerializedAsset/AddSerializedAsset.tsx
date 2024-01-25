@@ -1,43 +1,43 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../../axios/axiosInstance';
 import { Box, CircularProgress } from '@material-ui/core';
-import SearchBox from '../../../components/Helpers/SearchBox';
-import routes from '../../../components/Helpers/Routes';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog/Dialog';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import { Autocomplete } from '@material-ui/lab';
+import { camelCase, map, uniq } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { Link } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import routes from '../../../components/Helpers/Routes';
+import SearchBox from '../../../components/Helpers/SearchBox';
 import {
-  serializedAsset,
-  isObjectEmpty,
-  gridLoadingTimeout,
-  CustomDialogTransition,
   ASSET_STATUS,
-  transferAsset,
+  CustomDialogTransition,
   DELIVERY_FROM_TO_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
-  DELIVERY_TICKET_REFERENCE_TYPE,
+  deliveryTicket,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
   rentalManagement,
-  deliveryTicket
+  serializedAsset,
+  transferAsset
 } from '../../../constants/helpers';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { useData } from '../../../StateProvider/Provider';
-import Dialog from '@material-ui/core/Dialog/Dialog';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import { prepareDataForGrid } from '../../../constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
-import { uniq, map, camelCase } from 'lodash';
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
-import { Autocomplete } from '@material-ui/lab';
-import TextField from '@material-ui/core/TextField';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import { Link } from 'react-router-dom';
-import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
 
 let searchTimeout;
 
