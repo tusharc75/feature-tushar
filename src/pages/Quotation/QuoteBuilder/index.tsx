@@ -63,11 +63,7 @@ const QuoteBuilder = ({
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
+    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, quotationData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -84,25 +80,25 @@ const QuoteBuilder = ({
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) => 
-        row.original['type'] ? (
-          <p className="text-truncate">
-            {row.original.type === 'serializedAsset' ? 'Asset' : `${capitalize(row.original.type)} `}
-            {row.original['type'] === 'product'
-              ? row.original?.productDetail?.serializedProduct
-                ? '(Serialized)'
-                : '(Non-Serialized)'
-              : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                  : ''}
-          </p>
-        ) : (
-          <NoDataCell />
-        )
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p className="text-truncate">
+              {row.original.type === 'serializedAsset' ? 'Asset' : `${capitalize(row.original.type)} `}
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'detail',

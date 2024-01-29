@@ -13,7 +13,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
 import { isMobile, isTablet } from 'react-device-detect';
 import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isArray, startCase } from 'lodash';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { flattenArray } from 'src/constants/columns';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
@@ -72,10 +72,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     }
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
     let coloum: any = [
@@ -265,7 +261,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
               ? parent?.serializedAssetDetail?.product?.productDescription
               : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
-      parent.qtyDisplay = parent.qty;
       parent.assetQty = assignedAssets.filter((i) => i.parentId === parent._id).length;
       parent.isValid = parent['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.subRows = generateNestedData(data.material, parent);
@@ -299,8 +294,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
             : _subRow.type === 'serializedAsset'
               ? parent.description
               : _subRow?.serviceDetail?.serviceDescription;
-      _subRow.qty = _subRow.qty;
-      _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -425,14 +418,25 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     if (invoiceData) {
       const data: any = {};
       data.conditionType = [PRICING_SETUP_TYPE.rent];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: invoiceData?.currency
-      }));
+      const material: any = []
+      arr?.forEach((ele) => {
+        const obj = {
+          materialId: ele?.materialId,
+          materialType: ele?.type,
+          qty: ele?.qty,
+          pricingMethod: ele?.pricingMethod,
+          currency: invoiceData?.currency
+        }
+        if (isArray(ele?.unit)) {
+          ele?.unit?.forEach((e) => {
+            material.push({ ...obj, unit: e })
+          })
+        }
+        else {
+          material.push({ ...obj, unit: ele?.unit })
+        }
+      })
+      data.material = material;
       data.supplier = [];
       data.customer = [invoiceData?.customerAccount?.optionValue];
       data.warehouse = [invoiceData?.warehouse?.optionValue];
@@ -451,9 +455,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);

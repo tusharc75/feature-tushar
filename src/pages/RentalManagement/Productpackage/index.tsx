@@ -92,11 +92,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         e.isColumnEditable = false;
       });
     }
-    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
+    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, rentalManagementData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -562,6 +558,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   };
 
   const onConfirmSave = async (inputField, updatedData) => {
+    console.log(inputField)
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (rowData.parentId && !showConfirmationDialog.open) {
       setShowConfirmationDialog({
