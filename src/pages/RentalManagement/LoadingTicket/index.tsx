@@ -302,13 +302,17 @@ const LoadingTicket = ({
         }
       });
 
-      if (
-        productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0 &&
+      if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0 &&
         productAssets?.some((e: any) => e.startDate)
       ) {
         setNextStep(true);
       } else {
-        setNextStepToolTip(rentalManagementMessage.loadingCreatedAndDelivered);
+        if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === 0) {
+          setNextStepToolTip(rentalManagementMessage.loadingCreatedAndDelivered);
+        }
+        else {
+          setNextStepToolTip(rentalManagementMessage.changeStatusToInUse);
+        }
       }
 
       setUniqueLoadingTicket([...new Set(productAssets.filter((d) => d.loadingTicketId !== undefined).map((d) => d.loadingTicketId))]);
@@ -908,11 +912,12 @@ const LoadingTicket = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        } else if (e?.type === 'Asset' && ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(e?.status)) {
+        } else if (e?.type === 'Asset' && ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered]?.includes(e?.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.statusInUseCancelLoading });
         } else if (
           e?.type === 'Asset' &&
-          ![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
+          ![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy,
+          RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable, RENTAL_INTERNAL_ASSET_STATUS.delivered]?.includes(
             e?.rentalAssetStatus
           )
         ) {

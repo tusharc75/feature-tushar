@@ -138,10 +138,9 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   };
 
   const fetchData = async () => {
+    setNextStep(false);
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-
-    setNextStep(false);
     try {
       var data: any = [];
       if (isOffline) {

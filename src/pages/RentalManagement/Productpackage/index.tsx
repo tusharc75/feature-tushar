@@ -92,11 +92,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         e.isColumnEditable = false;
       });
     }
-    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
+    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, rentalManagementData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -265,17 +261,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   }
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
-
     setNextStep(false);
     setNextStepToolTip(null)
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
-
     var nextStepMessage = null;
-
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
       inventory = data.productInventory;
@@ -371,7 +364,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === MATERIAL_TYPE.package) {
+    if (subRows?.length) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
@@ -564,6 +557,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   };
 
   const onConfirmSave = async (inputField, updatedData) => {
+    console.log(inputField)
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (rowData.parentId && !showConfirmationDialog.open) {
       setShowConfirmationDialog({

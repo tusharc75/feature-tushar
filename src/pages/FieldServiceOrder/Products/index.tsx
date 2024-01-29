@@ -57,10 +57,6 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       e.isColumnEditable = false;
     });
     const newColumns = generateColumns(renderedFrom, allFields, null, false, serviceOrderData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     let column: any = [
       {
         accessor: 'index',
@@ -223,7 +219,6 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : parent?.description;
-      parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data, parent);
     });
 
@@ -255,7 +250,6 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : _subRow?.description || '';
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;

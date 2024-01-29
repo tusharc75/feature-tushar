@@ -91,11 +91,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         e.isColumnEditable = false;
       });
     }
-    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
+    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, rentalManagementData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -269,11 +265,10 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   }
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
-
     setNextStep(false);
     setNextStepToolTip(null)
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     try {
       var data: any = [];
       var inventory: any = [];

@@ -62,10 +62,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     data = CURReplaceByCurrencySingle(data, purchaseRequisitionData?.currency);
     setAllFields(data);
     const newColumns = generateColumns(renderedFrom, data, null, false, purchaseRequisitionData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     let coloum: any = [
       {
         accessor: 'index',
@@ -202,8 +198,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       parent.index = i + 1;
       parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.serviceDetail?.serviceName;
       parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.serviceDetail?.serviceDescription;
-      parent.qty = parent.qty;
-      parent.qtyDisplay = parent.qty;
     });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
@@ -318,9 +312,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
