@@ -284,11 +284,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    if (rowData) {
-      if (values.qty < rowData.assetQty) {
-        errors['qty'] = 'The quantity is less than what was assigned.';
-      }
-    }
     return errors;
   }
 

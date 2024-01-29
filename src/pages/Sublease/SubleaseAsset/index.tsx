@@ -229,7 +229,7 @@ const SerializedAsset = ({
           <Box>
             <ImportExportLinks
               permissions={permissions?.packages}
-              module="packages-products"
+              module={routes.serializedAsset.title}
               api={`${serializedAsset.api}/custom-template`}
               afterImportCompleted={() => {
                 fetchRecords();

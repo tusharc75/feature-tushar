@@ -82,7 +82,7 @@ const SupportTicket = () => {
     axiosInstance()
       .get(`${routes.supportTicket.path}/fields?brand=${user?.user?.brand}`)
       .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.supportTicketDetail.path, true);
+        const newColumns = generateColumns(renderedFrom, data?.filter((field) => field?.fieldData?.sectionName !== 'Internal Information'), routes.supportTicketDetail.path, true);
         newColumns?.forEach((o) => {
           if (o?.accessor === 'supportTicketNumber') {
             o.cell = ({ row }) =>

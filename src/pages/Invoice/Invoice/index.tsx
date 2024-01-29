@@ -43,10 +43,6 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
         e.isColumnEditable = false;
       });
       const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
-      let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-      if (qtyIndex > -1) {
-        newColumns[qtyIndex].accessor = 'qtyDisplay';
-      }
       let coloum: any = [
         {
           accessor: 'index',
@@ -146,7 +142,6 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
               ? parent?.serializedAssetDetail?.product?.productDescription
               : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
-      parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -174,7 +169,6 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
               ? parent.description
               : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
-      _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;

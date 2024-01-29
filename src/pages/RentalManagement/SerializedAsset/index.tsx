@@ -80,7 +80,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   };
 
   const fetchFields = async () => {
-    setNextStep(false);
     var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     data?.forEach((e) => {
       e.isColumnEditable = false;
@@ -300,6 +299,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
     
     setNextStepToolTip(null);
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     try {
       var data: any = [];
       var transferAssets: any = [];
@@ -611,7 +612,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   };
 
   const handleAddSerializedAsset = (assets, withTransfer = false) => {
-    setNextStep(false);
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
     flatArray = uniqBy(flatArray, '_id');
@@ -658,7 +658,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   };
 
   const handleRemoveInventory = async () => {
-    setNextStep(false);
     if (deleteData.length >= 1) {
       if (isOffline) {
         setDeleting(true);

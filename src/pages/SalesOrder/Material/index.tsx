@@ -13,7 +13,7 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { isMobile, isTablet } from 'react-device-detect';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isArray, startCase } from 'lodash';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
@@ -28,9 +28,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
-
 const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
-
   const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -70,10 +68,6 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
     let coloum: any = [
@@ -259,7 +253,6 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
             : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -292,7 +285,6 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
             : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -429,14 +421,24 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     if (salesOrderData) {
       const data: any = {};
       data.conditionType = [PRICING_SETUP_TYPE.price];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: salesOrderData?.currency
-      }));
+      const material: any = [];
+      arr?.forEach((ele) => {
+        const obj = {
+          materialId: ele?.materialId,
+          materialType: ele?.type,
+          qty: ele?.qty,
+          pricingMethod: ele?.pricingMethod,
+          currency: salesOrderData?.currency
+        };
+        if (isArray(ele?.unit)) {
+          ele?.unit?.forEach((e) => {
+            material.push({ ...obj, unit: e });
+          });
+        } else {
+          material.push({ ...obj, unit: ele?.unit });
+        }
+      });
+      data.material = material;
       data.supplier = [];
       data.customer = [salesOrderData?.customerAccount?.optionValue];
       data.warehouse = [salesOrderData?.warehouse?.optionValue];

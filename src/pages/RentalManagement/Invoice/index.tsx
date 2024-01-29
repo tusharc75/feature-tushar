@@ -61,10 +61,6 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
         e.isColumnEditable = false;
       });
       const newColumns = generateColumns(renderedFrom, fields, null, false, rentalManagementData?.currency);
-      let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-      if (qtyIndex > -1) {
-        newColumns[qtyIndex].accessor = 'qtyDisplay';
-      }
       var column: any = [
         {
           accessor: 'index',
