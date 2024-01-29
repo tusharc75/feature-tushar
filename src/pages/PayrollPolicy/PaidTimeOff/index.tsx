@@ -198,7 +198,7 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
                 <Box ml={1} />
                 <ImportExportMenu
                   permissions={permissions?.payrollPolicy}
-                  module="packages-products"
+                  module="paid-time-off"
                   api={`${routes.payrollPolicy.path}/paid-time-off/${payrollPolicyData?._id}`}
                   afterImportCompleted={() => {
                     fetchData();

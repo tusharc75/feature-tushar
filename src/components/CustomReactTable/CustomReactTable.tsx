@@ -131,9 +131,7 @@ const CustomReactTable = ({
       (a, b) => columnOrder.findIndex((d) => d === a.accessor) - columnOrder.findIndex((d) => d === b.accessor)
     );
 
-    const newcolumnOrderToSave = newBaseColumns
-      ?.filter((o) => !['left', 'right']?.includes(o?.sticky) && !['expander', 'selection', 'action']?.includes(o?.id))
-      ?.map((o) => o?.id);
+    const newcolumnOrderToSave = newBaseColumns?.filter((o) => !stickyColumns?.includes(o?.id))?.map((o) => o?.id);
 
     updateGridHiddenColumns({
       renderedFrom,
@@ -314,8 +312,7 @@ const CustomReactTable = ({
   }, [isClientSideGrid, limit, page, table, data, paginationLimit]);
 
   const { rows } = table.getRowModel();
-  const {flatRows: expandedRows} = table.getExpandedRowModel();
-
+  const { flatRows: expandedRows } = table.getExpandedRowModel();
 
   // For row selection
   useEffect(() => {
