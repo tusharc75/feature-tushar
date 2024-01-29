@@ -32,8 +32,8 @@ export const fetch_rental_cost_fields = async (currency, isOffline) => {
 export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => {
     if (rentalManagementData) {
         const data: any = {};
-        const material:any = []
         data.conditionType = [PRICING_SETUP_TYPE.rent];
+        const material: any = []
         arr?.forEach((ele) => {
             const obj = {
               materialId: ele?.materialId,
@@ -51,6 +51,14 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
               material.push({ ...obj, unit: ele?.unit })
             }
           })
+        // data.material = arr.map((ele) => ({
+        //     materialId: ele?.materialId,
+        //     materialType: ele?.type,
+        //     qty: ele?.qty,
+        //     pricingMethod: ele?.pricingMethod,
+        //     unit: [ele?.unit].flat(1).pop(),
+        //     currency: rentalManagementData?.currency
+        // }));
         data.material = material;
         data.supplier = [];
         data.customer = [rentalManagementData?.customerAccount?.optionValue];
