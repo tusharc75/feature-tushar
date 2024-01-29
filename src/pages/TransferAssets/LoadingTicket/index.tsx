@@ -129,8 +129,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     backgroundColor: row?.original?.isReplaced
                       ? COLOUR_MASTER.replaceAssetColor.background
                       : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
-                      ? COLOUR_MASTER.lostAssets.background
-                      : ''
+                        ? COLOUR_MASTER.lostAssets.background
+                        : ''
                   }}
                 >
                   <p> {row.original?.assetNumber}</p>
@@ -218,7 +218,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           },
           {
             accessor: 'createDate',
-            Header: 'Create Date',
+            Header: 'Shipped Date',
             width: 200,
             disableFilters: true,
             disableSortBy: true,
@@ -232,15 +232,15 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               )
           },
           {
-            accessor: 'deliveryDate',
+            accessor: 'actualDeliveryDate',
             Header: 'Delivery Date',
             width: 200,
             disableFilters: true,
             disableSortBy: true,
             Cell: ({ row }) =>
-              row.original?.deliveryDate ? (
-                <div className="createBy" title={`${moment(row.original?.deliveryDate)?.format(dateTimeFormat)}`}>
-                  {moment(row.original?.deliveryDate)?.format(dateTimeFormat)}
+              row.original?.actualDeliveryDate ? (
+                <div className="createBy" title={`${moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}`}>
+                  {moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}
                 </div>
               ) : (
                 <NoDataCell />
@@ -268,7 +268,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             assetData[j].loadingTicketId = ticketData[i]._id;
             assetData[j].loadingTicketStatus = ticketData[i].status;
             assetData[j].createDate = ticketData[i]?.createdBy?.date;
-            assetData[j].deliveryDate = ticketData[i].actualDeliveryDate;
+            assetData[j].actualDeliveryDate = ticketData[i].actualDeliveryDate;
           }
         }
       }
@@ -498,7 +498,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                       !canReceive ||
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       setShowConfirmBoxReceive(true);
@@ -512,7 +512,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     disabled={
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       const products = [];
@@ -537,9 +537,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   </MenuItem>
 
                   {permissions?.transferAsset?.isUpdate &&
-                  selectedRecords.length &&
-                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                    ?.length === selectedRecords?.length ? (
+                    selectedRecords.length &&
+                    selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                      ?.length === selectedRecords?.length ? (
                     <MenuItem
                       onClick={() => {
                         setShowConfirmBox(true);
