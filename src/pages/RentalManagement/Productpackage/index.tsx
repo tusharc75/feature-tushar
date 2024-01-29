@@ -225,7 +225,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             </HtmlTooltip>
             {allowedToEdit || !quotationApproved ? (
               row.original.hideSelection ? (
-                <HtmlTooltip title={row.original?.assetQtyWithChildren ? 'Asset is already assigned' :
+                <HtmlTooltip title={row.original?.assetQty ? 'Asset is already assigned' :
                   row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''}>
                   <span>
                     <IconButton size="small" aria-label="Details" disabled={true}>
@@ -312,9 +312,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+      parent.hideSelection = parent?.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
-      parent.assetQtyWithChildren = parent?.assetQty + parent?.subRows?.reduce((acc, curr) => acc + (curr?.assetQty || 0), 0);
-      parent.hideSelection = parent?.assetQtyWithChildren > 0 ? true : parent?.status ? true : false;
       if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
         nextStepMessage = rentalManagementMessage.addProductInPackage
       }
@@ -357,9 +356,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
+      _subRow.hideSelection = _subRow?.assetQty > 0 ? true : _subRow?.status ? true : false;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
-      _subRow.assetQtyWithChildren = _subRow?.assetQty + _subRow?.subRows?.reduce((acc, curr) => acc + (curr?.assetQty || 0), 0);
-      _subRow.hideSelection = _subRow?.assetQtyWithChildren > 0 ? true : _subRow?.status ? true : false;
     });
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
