@@ -29,8 +29,37 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const [highlighterPaths, setHighlighterPaths] = useState([]);
   const [isHighlighterMode, setHighlighterMode] = useState(false);
   const [brushPaths, setBrushPaths] = useState([]);
+  const isSelected = useRef(false);
 
   useEffect(() => {
+    // for touchScroll
+    (function () {
+      const addListener = fabric.util.addListener,
+        removeListener = fabric.util.removeListener,
+        addEventOptions = { passive: false };
+
+      fabric.util.object.extend(
+        fabric.Canvas.prototype,
+        /** @lends fabric.Canvas.prototype */ {
+          _onTouchStart: function (e) {
+            // prevent touchScroll if any objce is currently selected
+            if (isSelected.current) e.preventDefault();
+            if (this.mainTouchId === null) {
+              this.mainTouchId = this.getPointerId(e);
+            }
+            this.__onMouseDown(e);
+            this._resetTransformEventData();
+            const canvasElement = this.upperCanvasEl,
+              eventTypePrefix = this._getEventPrefix();
+            addListener(fabric.document, 'touchend', this._onTouchEnd, addEventOptions);
+            addListener(fabric.document, 'touchmove', this._onMouseMove, addEventOptions);
+            // Unbind mousedown to prevent double triggers from touch devices
+            removeListener(canvasElement, eventTypePrefix + 'down', this._onMouseDown);
+          }
+        }
+      );
+    })();
+
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
       preserveObjectStacking: true,
       selection: false,
@@ -41,9 +70,17 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     fabric.Object.prototype.transparentCorners = false;
     fabric.Object.prototype.cornerStyle = 'circle';
     fabricCanvas.on({
-      'selection:updated': onObjectSelected,
-      'selection:created': onObjectSelected,
-      'selection:cleared': onObjectSelected
+      'selection:updated': (obj) => {
+        onObjectSelected(obj);
+      },
+      'selection:created': (obj) => {
+        isSelected.current = true;
+        onObjectSelected(obj);
+      },
+      'selection:cleared': (obj) => {
+        isSelected.current = false;
+        onObjectSelected(obj);
+      }
     });
     setCanvas(fabricCanvas);
     loadImage(fabricCanvas);
@@ -212,7 +249,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
 
         activeObject.set({
           stroke: rgbaColor,
-          strokeWidth: 10,
+          strokeWidth: 10
         });
 
         canvas.requestRenderAll();
@@ -224,7 +261,6 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         } else {
           activeObject.set('fill', newColor);
         }
-
       }
       canvas.requestRenderAll();
     }
@@ -263,7 +299,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         selectable: true,
         evented: true,
         draggable: true,
-        ishighlighter: true, // Additional property to identify highlighter paths
+        ishighlighter: true // Additional property to identify highlighter paths
       });
 
       setHighlighterPaths((prevPaths) => [...prevPaths, path]);
@@ -296,6 +332,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const toggleDrawingMode = () => {
     setIsDrawingMode(!isDrawingMode);
     if (!isDrawingMode) {
+      isSelected.current = true;
       const drawingBrush = new fabric.PencilBrush(canvas);
       drawingBrush.color = 'black';
       drawingBrush.width = 2;
@@ -307,11 +344,12 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           ishighlighter: false,
           selectable: true,
           evented: true,
-          draggable: true,
+          draggable: true
         });
         setBrushPaths((prevPaths) => [...prevPaths, path]);
       });
     } else {
+      isSelected.current = false;
       canvas.isDrawingMode = false;
       setCanvas(canvas);
       canvas.off('path:created');
@@ -320,8 +358,10 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
 
   const toggleHighlighterMode = () => {
     if (isHighlighterMode) {
+      isSelected.current = false;
       exitHighlighterMode();
     } else {
+      isSelected.current = true;
       enterHighlighterMode();
     }
   };
@@ -336,10 +376,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         const canvasWidth = canvas.getWidth();
         const canvasHeight = canvas.getHeight();
 
-        let scalingFactor = Math.min(
-          canvasWidth / img.width,
-          canvasHeight / img.height
-        );
+        let scalingFactor = Math.min(canvasWidth / img.width, canvasHeight / img.height);
 
         const scaleRelativeToCanvas = 0.9;
         scalingFactor *= scaleRelativeToCanvas;
@@ -349,8 +386,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
 
         // Set image position to center of the canvas
         img.set({
-          left: (canvasWidth - (img.width * img.scaleX)) / 2,
-          top: (canvasHeight - (img.height * img.scaleY)) / 2,
+          left: (canvasWidth - img.width * img.scaleX) / 2,
+          top: (canvasHeight - img.height * img.scaleY) / 2
         });
 
         // Add the image to the canvas
@@ -371,7 +408,13 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddLine}>
             Add Line
           </Button>
-          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddRectangle}>
+          <Button
+            disabled={loading || isDrawingMode || isHighlighterMode}
+            variant="outlined"
+            color="primary"
+            size="small"
+            onClick={handleAddRectangle}
+          >
             Add Rectangle
           </Button>
           <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddCircle}>
@@ -383,9 +426,11 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           <Button disabled={loading || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={toggleDrawingMode}>
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
           </Button>
-          {(isDrawingMode || isHighlighterMode) && (<Button disabled={loading} variant="outlined" color="primary" size="small" onClick={handleUndo}>
-            Undo
-          </Button>)}
+          {(isDrawingMode || isHighlighterMode) && (
+            <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={handleUndo}>
+              Undo
+            </Button>
+          )}
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
           <Button
             disabled={loading || isDrawingMode || isHighlighterMode}
@@ -402,12 +447,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         {selectedObject && (
           <Box className="flex items-center gap-2">
             <FormControl size="small" margin="none" variant="outlined">
-              <input
-                type="color"
-                value={getSelectedColor()}
-                onChange={handleColorChange}
-                style={{ marginLeft: '10px' }}
-              />
+              <input type="color" value={getSelectedColor()} onChange={handleColorChange} style={{ marginLeft: '10px' }} />
             </FormControl>
             <DeleteButton mode="light" text="Remove" size="small" onClick={handleRemove} />
           </Box>
@@ -431,12 +471,11 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         </div>
       </div>
       <Box height={'calc(100vh - 140px)'} width={'calc(100vw - 20px)'} style={{ overflow: 'auto' }}>
-        {loading ?
-          <Box pt={2} >
+        {loading ? (
+          <Box pt={2}>
             <Typography>Image Loading...</Typography>
           </Box>
-          : null
-        }
+        ) : null}
         <canvas ref={canvasRef} />
       </Box>
     </Box>
