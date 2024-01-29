@@ -294,10 +294,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
   const fetchData = async () => {
     setNextStep(false);
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
-
-    
     setNextStepToolTip(null);
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
