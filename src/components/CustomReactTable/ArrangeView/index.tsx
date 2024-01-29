@@ -33,6 +33,9 @@ const ArrangeView = ({
     [columns, expander, hideSelection]
   );
 
+  // for recalculating column order if new dynamic columns are added to the grid.
+  const columnCount = useMemo(() => columns?.length || 0, [columns]);
+
   useEffect(() => {
     const gridMetaData = getTableDataFromLocalStorage(renderedFrom);
 
@@ -57,7 +60,7 @@ const ArrangeView = ({
       });
       dispatchTable({ type: 'setVisibleColumns', visibleColumns });
     }
-  }, [renderedFrom]);
+  }, [renderedFrom, columnCount]);
 
   const {
     state: { user }

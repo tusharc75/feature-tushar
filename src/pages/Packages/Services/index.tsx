@@ -244,7 +244,7 @@ const ServiceTable = ({ packageId, packageData }) => {
           <Box ml={1} />
           <ImportExportMenu
             permissions={permissions?.packages}
-            module="packages-products"
+            module="services"
             api={`${packages.api}/${packageId}/services`}
             afterImportCompleted={() => {
               fetchData();
