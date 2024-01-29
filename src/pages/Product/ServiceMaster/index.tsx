@@ -532,7 +532,7 @@ const ServiceMaster = (props: Props) => {
             <Box display="flex" style={{ marginLeft: 'auto' }}>
               <ImportExportMenu
                 permissions={permissions?.packages}
-                module="packages-products"
+                module="products"
                 api={`${product.api}/unknown/service-master`}
                 afterImportCompleted={() => {
                   fetchData();

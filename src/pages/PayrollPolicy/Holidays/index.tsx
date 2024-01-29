@@ -198,7 +198,7 @@ const Holidays = ({ payrollPolicyData }) => {
                 <Box ml={1} />
                 <ImportExportMenu
                   permissions={permissions?.payrollPolicy}
-                  module="packages-products"
+                  module="holidays"
                   api={`${routes.payrollPolicy.path}/holidays/${payrollPolicyData?._id}`}
                   afterImportCompleted={() => {
                     fetchData();
