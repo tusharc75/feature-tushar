@@ -261,17 +261,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   }
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
-
     setNextStep(false);
     setNextStepToolTip(null)
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
-
     var nextStepMessage = null;
-
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
       inventory = data.productInventory;
@@ -365,7 +362,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (subRows?.length) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
