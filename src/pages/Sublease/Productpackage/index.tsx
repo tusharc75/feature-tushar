@@ -73,11 +73,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         e.isColumnEditable = false;
       }
     });
-    const newColumns = generateColumns(renderedFrom, data, null, false, subleaseData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
+    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, subleaseData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
