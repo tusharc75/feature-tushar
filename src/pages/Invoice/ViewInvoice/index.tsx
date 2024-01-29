@@ -73,11 +73,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData.currency ? invoiceData.currency : 'USD');
-      let qtyIndex = newColumns?.findIndex((d) => d.accessor === 'qty');
-      if (qtyIndex > -1) {
-        newColumns[qtyIndex].accessor = 'qtyDisplay';
-      }
+      const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, invoiceData.currency ? invoiceData.currency : 'USD');
       var column: any = [
         {
           accessor: 'index',

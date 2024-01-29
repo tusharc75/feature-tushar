@@ -58,10 +58,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
     let newColumns = generateColumns(renderedFrom, data, null, false, productionOrderData?.currency || 'USD');
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     let coloum: any = [
       {
         accessor: 'index',
@@ -243,7 +239,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           ? parent?.productDetail?.productDescription
           : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
-      parent.qtyDisplay = parent.qty;
       parent.canDelete = parent?.workOrder ? false : true;
       if (parent?.workOrder) {
         parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -288,7 +283,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           ? _subRow?.productDetail?.productDescription
           : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
-      _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
       if (_subRow?.workOrder) {
         _subRow.workOrderNumber = _subRow?.workOrder?.workOrderNumber;
@@ -359,9 +353,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);

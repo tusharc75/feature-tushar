@@ -53,11 +53,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, demandOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateColumns(renderedFrom, data, null, false, demandOrderData?.currency || 'USD');
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
+    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, demandOrderData?.currency || 'USD');
     let coloum: any = [
       {
         accessor: 'index',
