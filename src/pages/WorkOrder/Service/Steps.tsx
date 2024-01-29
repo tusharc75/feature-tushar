@@ -519,7 +519,6 @@ const Steps = ({
             handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
           }
           const nextStepData = getNextStep(step);
-          console.log('nextStepData', nextStepData);
           if (!nextStepData?.stepData) {
             handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, nextStepData?.step, nextStepData?.stepData);
           }
