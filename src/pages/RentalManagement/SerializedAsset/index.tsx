@@ -647,7 +647,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             type: 'success',
             message: data.message
           });
-          setNextStep(true);
+          // setNextStep(true);
         })
         .catch((error) => {
           setAdding(false);
