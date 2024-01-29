@@ -119,15 +119,15 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
           row.original['type'] ? (
             <p>
               {`${startCase(row.original?.type)} `}
-              {row.original['type'] === 'product'
+              {row.original['type'] === MATERIAL_TYPE.product
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
                   : '(Non-Serialized)'
-                : row.original?.type === 'package'
+                : row.original?.type === MATERIAL_TYPE.package
                   ? row.original?.packageDetail.packageType === 'Product'
                     ? '(Product)'
                     : '(Service)'
-                  : row.original.type === 'service'
+                  : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
             </p>
@@ -175,11 +175,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             <IconButton
               size="small"
               onClick={() => {
-                if (row.original.type === 'service') {
+                if (row.original.type === MATERIAL_TYPE.service) {
                   window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'product') {
+                } else if (row.original.type === MATERIAL_TYPE.product) {
                   window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'serializedAsset') {
+                } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                   window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                 } else {
                   window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -286,9 +286,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       inventory = data.inventory?.filter((e) => !e.isReplaced);
       nonSerializeAsset = data.nonSerializeAsset;
     }
-    let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== 'service');
-    let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale);
-    let packages = rows.filter((e) => e.type === 'package' && e.packageDetail?.packageType !== 'Service');
+    let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== MATERIAL_TYPE.service);
+    let products = rows.filter((e) => e.type === MATERIAL_TYPE.product && !e?.isConsumbale);
+    let packages = rows.filter((e) => e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service');
 
     rows = [...products, ...packages];
 
@@ -342,20 +342,20 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service'
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
         ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === 'package'
+        : _subRow.type === MATERIAL_TYPE.package
           ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow.productDetail?.productName
             : ''
         } `;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
@@ -368,10 +368,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       _subRow.assetQtyWithChildren = _subRow?.assetQty + _subRow?.subRows?.reduce((acc, curr) => acc + (curr?.assetQty || 0), 0);
       _subRow.hideSelection = _subRow?.assetQtyWithChildren > 0 ? true : _subRow?.status ? true : false;
     });
-    if (subRows.length === 0 && parent.type === 'package') {
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (parent.type === MATERIAL_TYPE.package) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
