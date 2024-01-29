@@ -111,6 +111,8 @@ const StepFieldsDialog = ({
     }
   } = useData();
 
+  console.log(nextStep)
+
   const [isEditing, setEditing] = React.useState(editable);
   const [viewStep, setViewStep] = React.useState(false);
   const toastConfig = useContext(CustomToastContext);

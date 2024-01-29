@@ -519,6 +519,7 @@ const Steps = ({
             handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
           }
           const nextStepData = getNextStep(step);
+          console.log('nextStepData', nextStepData);
           if (!nextStepData?.stepData) {
             handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, nextStepData?.step, nextStepData?.stepData);
           }
@@ -1522,7 +1523,7 @@ const Steps = ({
                 stepData={stepState}
                 isSubmitting={isSubmitting}
                 editable={isFieldDialogEditable}
-                nextStep={getNextStep(selectedStep) ? true : false}
+                nextStep={(getNextStep(selectedStep) && getNextStep(selectedStep)?.stepData?.status!== WORKORDER_SERVICE_STEP_STATUS.end) ? true : false}
               />
             )}
             {commentsDialog && (
