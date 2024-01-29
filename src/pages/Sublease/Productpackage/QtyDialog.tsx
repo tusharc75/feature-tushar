@@ -3,7 +3,7 @@ import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { groupBy, unionBy } from 'lodash';
+import { groupBy, unionBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema, SUBLEASE_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -32,7 +32,7 @@ interface EditDialogProps {
   loading: any;
 }
 
-const rateChangeFields = ['unit', 'pricingMethod'];
+const rateChangeFields = ['unit', 'pricingMethod','pricingCondition'];
 
 const QtyDialog: FC<EditDialogProps> = ({
   calculatePrice,
@@ -51,6 +51,10 @@ const QtyDialog: FC<EditDialogProps> = ({
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [priceConditionListConst, setPriceConditionListConst] = useState([]);
+  const [priceMethodListConst, setPriceMethodListConst] = useState([]);
+  const [priceConditionList, setPriceConditionList] = useState([]);
+  const [pricingMethodList, setPricingMethodList] = useState([]);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -116,6 +120,8 @@ const QtyDialog: FC<EditDialogProps> = ({
       if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
+      setPriceMethodListConst(pricingMethodOptions);
+      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
       data.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
@@ -256,28 +262,56 @@ const QtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  const getPricing = async (values: any) => {
+  async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any)  {
     if (rowData) {
-      if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
-        const priceData = await calculatePrice([
-          {
-            materialId: rowData.materialId,
-            type: rowData.type,
-            qty: values.qty,
-            pricingMethod: values.pricingMethod,
-            unit: values.unit
-          }
-        ]);
-        if (priceData && priceData.length && priceData[0].mrp) {
-          let price: any = priceData[0].mrp;
-          return price;
+      const priceData: any = await calculatePrice([
+        {
+          materialId: rowData.materialId,
+          type: rowData.type,
+          qty: 1,
+          pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || '',
+          unit: unitOptions?.map((d) => d.optionLabel)
         }
-        return 0;
-      } else {
-        return 0;
-      }
+      ]);
+      setPriceConditionListConst(priceData || []);
+      updateRateChangeState(values, priceData, pricingMethodOptions)
     }
   };
+
+  const updateRateChangeState = (values: any, priceData: any, pricingMethodOptions: any) => {
+    var tempPriceCondition = [...priceData];
+    if (values['unit'] && values['unit'] !== '') {
+      tempPriceCondition = tempPriceCondition?.filter((e) => e.unit === values['unit']);
+    }
+    if (values['pricingMethod'] && values['pricingMethod'] !== '') {
+      tempPriceCondition = tempPriceCondition?.filter((e) => e.pricingMethod === values['pricingMethod']);
+    }
+    tempPriceCondition = uniqBy(
+      tempPriceCondition?.map((d) => {
+        return {
+          optionLabel: d?.conditionName,
+          optionValue: d?.conditionId
+        };
+      }),
+      'optionValue'
+    )
+    setPriceConditionList(tempPriceCondition);
+    var tempPricingMethod = pricingMethodOptions;
+    if (values['pricingCondition'] && values['pricingCondition'] !== '') {
+      tempPricingMethod = uniqBy(
+        priceData?.filter((d) => d.conditionId === values['pricingCondition'] || values['pricingCondition']?.optionValue)?.map((d) => {
+          return {
+            optionLabel: d?.pricingMethod,
+            optionValue: d?.pricingMethod
+          };
+        }),
+        'optionValue'
+      )
+    }
+    setPricingMethodList(tempPricingMethod)
+
+    return { tempPriceCondition, tempPricingMethod }
+  }
 
   function validate(values) {
     const errors = {};
@@ -393,42 +427,44 @@ const QtyDialog: FC<EditDialogProps> = ({
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           type={field.type}
-                                          options={field.option}
+                                          options={field.fieldName === 'pricingCondition' ? priceConditionList :
+                                          field.fieldName === 'pricingMethod' ? pricingMethodList : field.option}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
-                                              if (price) {
-                                                let priceFieldName = 'price_' + subleaseData?.currency?.toLowerCase();
-                                                const result = autoCalculateSpecificFields(
-                                                  { [priceFieldName]: price, [field.fieldName]: value },
-                                                  values,
-                                                  initialData.fields
-                                                );
-                                                if (Object.keys(result).length >= 1) {
-                                                  for (var x in result) {
-                                                    setFieldValue(x, result[x]);
-                                                  }
-                                                }
-                                              } else {
-                                                const result = handleAutoCalculation(
-                                                  field,
-                                                  initialData.fields,
-                                                  values,
-                                                  field.fieldName,
-                                                  '',
-                                                  '',
-                                                  value
-                                                );
-                                                if (Object.keys(result).length >= 1) {
-                                                  for (var x in result) {
-                                                    setFieldValue(x, result[x]);
-                                                  }
-                                                }
+                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
+                                            if (values['pricingCondition']) {
+                                              if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
+                                                setFieldValue('pricingCondition', '');
+                                                setPricingMethodList(priceMethodListConst);
                                               }
-                                            });
+                                            }
+                                            if (values['pricingMethod']) {
+                                              if (!tempPricingMethod?.find((e) => e.optionValue === values['pricingMethod'])) {
+                                                setFieldValue('pricingMethod', '');
+                                              }
+                                            }
+                                            let priceValue
+                                            if (field.fieldName === 'pricingCondition') {
+                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
+                                            } else if (field.fieldName === 'pricingMethod') {
+                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.unit === values['unit']);
+                                            } else {
+                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === values['pricingMethod'] && d.unit === value);
+                                            }
+                                            let priceFieldName = 'price_' + subleaseData?.currency?.toLowerCase();
+                                            const result = autoCalculateSpecificFields(
+                                              { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
+                                              values,
+                                              initialData.fields
+                                            );
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
+                                            }
                                           }}
                                           required={field.required}
                                           fullWidth
