@@ -229,7 +229,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             </HtmlTooltip>
             {allowedToEdit || !quotationApproved ? (
               row.original.hideSelection ? (
-                <HtmlTooltip title={row.original.assetQty ? 'Asset is already assigned' :
+                <HtmlTooltip title={row.original?.assetQtyWithChildren ? 'Asset is already assigned' :
                   row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''}>
                   <span>
                     <IconButton size="small" aria-label="Details" disabled={true}>
@@ -294,23 +294,23 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'service'
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
         ? parent.serviceDetail
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
-        : parent.type === 'product'
+        : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
         }`;
       parent.description =
-        parent.type === 'service'
+        parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
+          : parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
+            : parent.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription || ''
               : '';
-      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
+      parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       if (!parent.isValid) {
@@ -319,8 +319,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-      parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+      parent.assetQtyWithChildren = parent?.assetQty + parent?.subRows?.reduce((acc, curr) => acc + (curr?.assetQty || 0), 0);
+      parent.hideSelection = parent?.assetQtyWithChildren > 0 ? true : parent?.status ? true : false;
       if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
         nextStepMessage = rentalManagementMessage.addProductInPackage
       }
@@ -363,8 +364,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
+      _subRow.assetQtyWithChildren = _subRow?.assetQty + _subRow?.subRows?.reduce((acc, curr) => acc + (curr?.assetQty || 0), 0);
+      _subRow.hideSelection = _subRow?.assetQtyWithChildren > 0 ? true : _subRow?.status ? true : false;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
