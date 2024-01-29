@@ -362,7 +362,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (subRows?.length) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
