@@ -119,7 +119,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
         {allowedToEdit && (
           <ImportExportLinks
             permissions={permissions?.packages}
-            module="packages-products"
+            module={routes.serializedAsset.title}
             api={`${serializedAsset.api}/custom-template`}
             afterImportCompleted={() => {
               fetchData();

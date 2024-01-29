@@ -213,7 +213,7 @@ const PackagesTable = ({ packageId, packageData }) => {
           <Box ml={1} />
           <ImportExportMenu
             permissions={permissions?.packages}
-            module="packages-products"
+            module="packages"
             api={`${packages.api}/${packageId}/package`}
             afterImportCompleted={() => {
               fetchData();

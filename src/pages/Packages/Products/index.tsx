@@ -412,7 +412,7 @@ const Products = ({ packageId, packageData }) => {
           <Box ml={1} />
           <ImportExportMenu
             permissions={permissions?.packages}
-            module="packages-products"
+            module="products"
             api={`${packages.api}/${packageId}/products`}
             afterImportCompleted={() => {
               fetchData();
