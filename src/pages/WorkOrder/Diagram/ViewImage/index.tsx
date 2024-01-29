@@ -332,6 +332,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const toggleDrawingMode = () => {
     setIsDrawingMode(!isDrawingMode);
     if (!isDrawingMode) {
+      isSelected.current = true;
       const drawingBrush = new fabric.PencilBrush(canvas);
       drawingBrush.color = 'black';
       drawingBrush.width = 2;
@@ -348,6 +349,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         setBrushPaths((prevPaths) => [...prevPaths, path]);
       });
     } else {
+      isSelected.current = false;
       canvas.isDrawingMode = false;
       setCanvas(canvas);
       canvas.off('path:created');
@@ -356,8 +358,10 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
 
   const toggleHighlighterMode = () => {
     if (isHighlighterMode) {
+      isSelected.current = false;
       exitHighlighterMode();
     } else {
+      isSelected.current = true;
       enterHighlighterMode();
     }
   };
