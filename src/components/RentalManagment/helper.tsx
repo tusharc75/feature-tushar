@@ -50,15 +50,7 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
             else {
               material.push({ ...obj, unit: ele?.unit })
             }
-          })
-        // data.material = arr.map((ele) => ({
-        //     materialId: ele?.materialId,
-        //     materialType: ele?.type,
-        //     qty: ele?.qty,
-        //     pricingMethod: ele?.pricingMethod,
-        //     unit: [ele?.unit].flat(1).pop(),
-        //     currency: rentalManagementData?.currency
-        // }));
+        })
         data.material = material;
         data.supplier = [];
         data.customer = [rentalManagementData?.customerAccount?.optionValue];
