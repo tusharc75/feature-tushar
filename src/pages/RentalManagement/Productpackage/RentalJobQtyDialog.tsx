@@ -352,64 +352,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  async function getPricing(values: any, pricingMethodOptions: any = null) {
-    if (rowData) {
-      if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
-        const priceData: any = await calculatePrice(rentalManagementData, [
-          {
-            materialId: rowData.materialId,
-            type: rowData.type,
-            qty: values.qty,
-            pricingMethod: pricingMethodOptions ? pricingMethodOptions.map((d) => d.optionLabel).join() : values?.pricingMethod,
-            unit: values.unit
-          }
-        ]);
-        let tempPriceData = priceData.filter((d) => d.mrp !== undefined && d.mrp !== null && d.mrp !== 0);
-        setPriceConditionList(
-          uniqBy(
-            tempPriceData.map((d) => {
-              return {
-                optionLabel: d?.conditionName,
-                optionValue: d?.conditionId
-              };
-            }),
-            'optionValue'
-          )
-        );
-        if (pricingMethodOptions) {
-          setPriceConditionListConst(tempPriceData);
-          setPriceMethodList(
-            tempPriceData
-              .filter((d) => d.conditionId === rowData['pricingCondition']?.optionValue)
-              .map((d) => {
-                return {
-                  optionLabel: d?.pricingMethod,
-                  optionValue: d?.pricingMethod
-                };
-              })
-          );
-          return uniqBy(
-            tempPriceData.map((d) => {
-              return {
-                optionLabel: d?.conditionName,
-                optionValue: d?.conditionId
-              };
-            }),
-            'optionValue'
-          );
-        }
-        if (priceData && priceData.length) {
-          let pricingConditionIndex = priceData.findIndex((d) => d?.conditionId === values?.pricingCondition);
-          let price: any = pricingConditionIndex > -1 ? priceData[pricingConditionIndex]?.mrp : 0;
-          return price;
-        }
-        return 0;
-      } else {
-        return 0;
-      }
-    }
-  }
-
   async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
     if (rowData) {
       const priceData: any = await calculatePrice(rentalManagementData, [
@@ -584,17 +526,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                           }}
                                           options={field.fieldName === 'pricingCondition' ? priceConditionList :
                                             field.fieldName === 'pricingMethod' ? priceMethodList : field.option}
-                                          // options={
-                                          //   field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
-                                          //     ? priceMethodList
-                                          //     : field.fieldName === 'pricingCondition' && values['pricingMethod']
-                                          //     ? priceConditionList
-                                          //     : field.option
-                                          // }
-                                          
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            console.log('priceConditionListConst', priceConditionListConst)
                                             const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
                                             if (values['pricingCondition']) {
                                               if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
@@ -626,47 +559,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                                 setFieldValue(x, result[x]);
                                               }
                                             }
-
-
-
-                                            // if (field.fieldName === 'pricingCondition') {
-                                            //   setFieldValue('pricingMethod', '');
-                                            //   setPriceMethodList(
-                                            //     priceConditionListConst
-                                            //       ?.filter((d) => d.conditionId === value)
-                                            //       .map((d) => {
-                                            //         return {
-                                            //           optionLabel: d?.pricingMethod,
-                                            //           optionValue: d?.pricingMethod
-                                            //         };
-                                            //       })
-                                            //   );
-                                            //   let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-                                            //   const result = autoCalculateSpecificFields(
-                                            //     { [priceFieldName]: 0, [field.fieldName]: value },
-                                            //     values,
-                                            //     initialData.fields
-                                            //   );
-                                            //   if (Object.keys(result).length >= 1) {
-                                            //     for (var x in result) {
-                                            //       setFieldValue(x, result[x]);
-                                            //     }
-                                            //   }
-                                            // } else {
-                                            //   getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
-                                            //     let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-                                            //     const result = autoCalculateSpecificFields(
-                                            //       { [priceFieldName]: price, [field.fieldName]: value },
-                                            //       values,
-                                            //       initialData.fields
-                                            //     );
-                                            //     if (Object.keys(result).length >= 1) {
-                                            //       for (var x in result) {
-                                            //         setFieldValue(x, result[x]);
-                                            //       }
-                                            //     }
-                                            //   });
-                                            // }
                                           }}
                                           required={field.required}
                                           fullWidth
