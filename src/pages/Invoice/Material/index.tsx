@@ -13,7 +13,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
 import { isMobile, isTablet } from 'react-device-detect';
 import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isArray, startCase } from 'lodash';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { flattenArray } from 'src/constants/columns';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
@@ -425,14 +425,25 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     if (invoiceData) {
       const data: any = {};
       data.conditionType = [PRICING_SETUP_TYPE.rent];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: invoiceData?.currency
-      }));
+      const material: any = []
+      arr?.forEach((ele) => {
+        const obj = {
+          materialId: ele?.materialId,
+          materialType: ele?.type,
+          qty: ele?.qty,
+          pricingMethod: ele?.pricingMethod,
+          currency: invoiceData?.currency
+        }
+        if (isArray(ele?.unit)) {
+          ele?.unit?.forEach((e) => {
+            material.push({ ...obj, unit: e })
+          })
+        }
+        else {
+          material.push({ ...obj, unit: ele?.unit })
+        }
+      })
+      data.material = material;
       data.supplier = [];
       data.customer = [invoiceData?.customerAccount?.optionValue];
       data.warehouse = [invoiceData?.warehouse?.optionValue];

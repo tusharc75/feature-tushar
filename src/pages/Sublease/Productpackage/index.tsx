@@ -25,6 +25,7 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { isArray } from 'lodash';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
 
@@ -382,14 +383,25 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     if (subleaseData) {
       const data: any = {};
       data.conditionType = [PRICING_SETUP_TYPE.rent];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: subleaseData?.currency
-      }));
+      const material: any = []
+      arr?.forEach((ele) => {
+        const obj = {
+          materialId: ele?.materialId,
+          materialType: ele?.type,
+          qty: ele?.qty,
+          pricingMethod: ele?.pricingMethod,
+          currency: subleaseData?.currency
+        }
+        if (isArray(ele?.unit)) {
+          ele?.unit?.forEach((e) => {
+            material.push({ ...obj, unit: e })
+          })
+        }
+        else {
+          material.push({ ...obj, unit: ele?.unit })
+        }
+      })
+      data.material = material;
       data.supplier = [subleaseData?.supplierAccount?.optionValue];
       data.customer = [];
       data.warehouse = [];
