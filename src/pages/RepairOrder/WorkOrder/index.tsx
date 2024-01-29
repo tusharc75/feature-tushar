@@ -771,10 +771,12 @@ const WorkOrder = ({
   const handleAddConsumables = (rows, records = []) => {
     setSubmitting(true);
     const data: any = [];
-    let workOrderId = '';
-    const asset = records?.find((s) => s.type === MATERIAL_TYPE.serializedAsset);
-    if (asset) {
-      workOrderId = asset?.workOrder?._id;
+    const workOrderId: any = [];
+    const asset = records?.filter((s) => s.type === MATERIAL_TYPE.serializedAsset);
+    if (asset?.length > 0) {
+      asset?.forEach(_asset => {
+        workOrderId.push(_asset?.workOrder?._id)
+      });
       rows?.forEach((e) => {
         data.push({
           product: e._id,
@@ -787,7 +789,7 @@ const WorkOrder = ({
       });
     } else {
       const services = records?.filter((s) => s.type === MATERIAL_TYPE.service);
-      workOrderId = services[0]?.workOrder?._id;
+      workOrderId.push(services[0]?.workOrder?._id)
       services?.forEach((s) => {
         rows?.forEach((e) => {
           data.push({
@@ -803,7 +805,7 @@ const WorkOrder = ({
       });
     }
     axiosInstance()
-      .post(`${workOrder.api}/${workOrderId}/consumable`, data)
+      .post(`${workOrder.api}/id/consumable/add-multiple`, { products: data, workOrder: workOrderId })
       .then(({ data }) => {
         if (
           isPostWorkService &&
@@ -906,8 +908,8 @@ const WorkOrder = ({
               {!user?.brandPolicy?.workOrderConsumableHide && (
                 <MenuItem
                   disabled={
-                    selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                      checkUniqWorkOrder()
+                    selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 
+                      // checkUniqWorkOrder()
                       ? false
                       : true
                   }
