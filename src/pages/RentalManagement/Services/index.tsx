@@ -265,11 +265,10 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   }
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
-
     setNextStep(false);
     setNextStepToolTip(null)
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     try {
       var data: any = [];
       var inventory: any = [];
