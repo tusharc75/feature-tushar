@@ -235,10 +235,6 @@ const Quotation = ({
     ];
 
     const newColumns = generateColumns(renderedFrom, data, null, false, quotationInfo?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
@@ -331,7 +327,6 @@ const Quotation = ({
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
@@ -367,7 +362,6 @@ const Quotation = ({
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -394,7 +388,6 @@ const Quotation = ({
     rows.forEach((element) => {
       delete element.index;
       delete element.detail;
-      delete element.qtyDisplay;
       delete element.isValid;
       delete element.hideSelection;
       delete element.assetQty;
@@ -568,9 +561,6 @@ const Quotation = ({
         }
       });
     } else {
-      if (inputField.hasOwnProperty('qtyDisplay')) {
-        inputField['qty'] = inputField['qtyDisplay'];
-      }
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, allFields, updatedData);
       handleSaveData(rows);

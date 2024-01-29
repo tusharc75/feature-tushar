@@ -63,10 +63,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     data = CURReplaceByCurrencySingle(data, planningData?.currency);
     setAllFields(data);
     const newColumns = generateColumns(renderedFrom, data, null, false, planningData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     let coloum: any = [
       {
         accessor: 'index',
@@ -248,7 +244,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             ? parent?.packageDetail?.packageDescription
             : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
-      parent.qtyDisplay = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === MATERIAL_TYPE.serializedAsset)?.length;
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
@@ -289,7 +284,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
               : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
-      _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -403,9 +397,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);

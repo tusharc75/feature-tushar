@@ -87,10 +87,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     }
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns: any = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     let column: any = [
       {
         accessor: 'index',
@@ -295,7 +291,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -332,7 +327,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct || false;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
 
       if (_subRow.type === MATERIAL_TYPE.serializedAsset) {
@@ -555,9 +549,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
