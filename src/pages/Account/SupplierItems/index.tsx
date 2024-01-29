@@ -59,7 +59,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
     const path = tabValue === 0 ? routes.productCategoryDetail.path : tabValue === 1 ? routes.productDetail.path : routes.serializedAssetDetail.path;
     const response = await axiosInstance().get(`/field?resource=${selectedResourceData}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, path, true)
+    const newColumns = generateColumns(renderedFrom, data, path, false)
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
