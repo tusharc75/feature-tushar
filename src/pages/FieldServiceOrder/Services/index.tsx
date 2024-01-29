@@ -58,10 +58,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     var allFields = await fetch_service_order_detail_fields(serviceOrderData?.currency);
     setAllFields(allFields);
     const newColumns = generateColumns(renderedFrom, allFields, null, false, serviceOrderData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     let column: any = [
       {
         accessor: 'index',
@@ -216,7 +212,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
-      parent.qtyDisplay = parent.qty;
       parent.canDelete = technician.some((d) => d._id === parent._id) ? false : true;
       parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate;
       parent.estimateEndDate = parent.estimateEndDate ? parent.estimateEndDate : serviceOrderData?.estimateEndDate;
@@ -249,7 +244,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.canDelete = technician.some((d) => d.service.optionValue === _subRow._id) ? false : true;
       _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate;
       _subRow.estimateEndDate = _subRow.estimateEndDate ? _subRow.estimateEndDate : serviceOrderData?.estimateEndDate;
@@ -358,9 +352,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);

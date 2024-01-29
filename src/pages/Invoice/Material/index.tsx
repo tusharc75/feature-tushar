@@ -72,10 +72,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     }
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
     let coloum: any = [
@@ -265,7 +261,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
               ? parent?.serializedAssetDetail?.product?.productDescription
               : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
-      parent.qtyDisplay = parent.qty;
       parent.assetQty = assignedAssets.filter((i) => i.parentId === parent._id).length;
       parent.isValid = parent['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.subRows = generateNestedData(data.material, parent);
@@ -299,8 +294,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
             : _subRow.type === 'serializedAsset'
               ? parent.description
               : _subRow?.serviceDetail?.serviceDescription;
-      _subRow.qty = _subRow.qty;
-      _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -462,9 +455,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);

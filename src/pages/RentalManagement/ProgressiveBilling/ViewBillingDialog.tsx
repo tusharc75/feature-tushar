@@ -59,11 +59,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
         e.isColumnEditable = false;
       });
       setAllFields(JSON.parse(JSON.stringify(data)));
-      const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
-      let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-      if (qtyIndex > -1) {
-        newColumns[qtyIndex].accessor = 'qtyDisplay';
-      }
+      const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, invoiceData?.currency);
       var column: any = [
         {
           accessor: 'index',

@@ -113,11 +113,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
     }
     setAllFields(JSON.parse(JSON.stringify(fields)));
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
-
     const column: any = [{
       accessor: 'index',
       Header: 'Index',
@@ -318,7 +313,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
         parent.productName = parent?.productDetail?.productName;
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
-        parent.qtyDisplay = parent?.qty;
         parent.serviceId = parent?.service?.optionValue;
         parent.service = parent?.service?.optionLabel;
       });
@@ -462,8 +456,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const dataRow = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
 
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      if (parseInt(inputField?.qtyDisplay) === 0) {
+    if (inputField.hasOwnProperty('qty')) {
+      if (parseInt(inputField?.qty) === 0) {
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
@@ -471,7 +465,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
         });
         return;
       }
-      inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...dataRow, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
