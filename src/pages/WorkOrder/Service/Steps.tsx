@@ -487,7 +487,7 @@ const Steps = ({
       return null;
     const nextStep = allSteps[currentStepIndex + 1];
     const { stepData } = getFields(nextStep);
-    return nextStep?.isPassFail ? null : { step: nextStep, stepData: stepData };
+    return (nextStep?.isPassFail || stepData?.status === WORKORDER_SERVICE_STEP_STATUS.end) ? null : { step: nextStep, stepData: stepData };
   };
 
   const handleSubmit = async (values, step, autoComplete = false, nextStep = false) => {
@@ -1522,7 +1522,7 @@ const Steps = ({
                 stepData={stepState}
                 isSubmitting={isSubmitting}
                 editable={isFieldDialogEditable}
-                nextStep={(getNextStep(selectedStep) && getNextStep(selectedStep)?.stepData?.status!== WORKORDER_SERVICE_STEP_STATUS.end) ? true : false}
+                nextStep={getNextStep(selectedStep) ? true : false}
               />
             )}
             {commentsDialog && (
