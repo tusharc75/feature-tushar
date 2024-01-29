@@ -130,12 +130,12 @@ const InvoiceDetails = () => {
       }
       setHeadingLabel(data.invoiceNumber);
       setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
-      setInvoiceData(data);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
+      setInvoiceData(data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -334,41 +334,47 @@ const InvoiceDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps
-            isNextStep={false}
-            nextStep={nextStep}
-            steps={invoiceProcessSteps}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
-          />
-          <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {currentStep === 0 && invoiceData && (
-              <Material
-                invoiceData={invoiceData}
-                fetchInvoiceData={fetchInvoiceData}
-                setNextStep={setNextStep}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}
+        <Grid item xs={12} sm={12} md={12} lg={12}> 
+          {invoiceData ? (
+            <Grid item xs={12} sm={12} md={12} lg={12}>
+              <Steps
+                isNextStep={false}
+                nextStep={nextStep}
+                steps={invoiceProcessSteps}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
+                isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
               />
-            )}
-            {currentStep === 1 && invoiceData && (
-              <AdditionalCost
-                invoiceData={invoiceData}
-                setNextStep={setNextStep}
-                stepFullScreen={stepFullScreen}
-              />
-            )}
-            {currentStep === 2 && invoiceData && (
-              <Invoice
-                invoiceData={invoiceData}
-                setNextStep={setNextStep}
-                handleChangeStatus={handleChangeStatus}
-                stepFullScreen={stepFullScreen}
-                statusOptions={statusOptions}
-              />
-            )}
-          </ContentFullScreen>
+              <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                {currentStep === 0 && invoiceData && (
+                  <Material
+                    invoiceData={invoiceData}
+                    fetchInvoiceData={fetchInvoiceData}
+                    setNextStep={setNextStep}
+                    stepFullScreen={stepFullScreen}
+                    allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}
+                  />
+                )}
+                {currentStep === 1 && invoiceData && (
+                  <AdditionalCost invoiceData={invoiceData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
+                )}
+                {currentStep === 2 && invoiceData && (
+                  <Invoice
+                    invoiceData={invoiceData}
+                    setNextStep={setNextStep}
+                    handleChangeStatus={handleChangeStatus}
+                    stepFullScreen={stepFullScreen}
+                    statusOptions={statusOptions}
+                  />
+                )}
+              </ContentFullScreen>
+            </Grid>
+          ) : (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          )}
+          </Grid>
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <CreditMemo
