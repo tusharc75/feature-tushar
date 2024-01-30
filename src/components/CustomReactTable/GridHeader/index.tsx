@@ -64,7 +64,6 @@ const GridHeader = ({
         }
       };
     }
-
     const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
 
     xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);

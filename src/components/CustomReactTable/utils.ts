@@ -334,10 +334,10 @@ export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]
           value = col.accessorFn(row);
           break;
         case col.id === 'createdBy':
-          value = `${row?.createdBy} • ${moment(row?.createdByDate?.slice(0, 10)).format(dateFormat)}`;
+          value = `${row?.createdBy || noCellData} • ${moment(row?.createdByDate?.slice(0, 10)).format(dateFormat)}`;
           break;
         case col.id === 'updatedBy':
-          value = `${row?.original?.updatedBy} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`;
+          value = `${row?.updatedBy || noCellData} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`;
           break;
         case col.type === 'date':
           value = value ? moment(value).format(dateFormat) : noCellData;
