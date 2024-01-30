@@ -1,6 +1,8 @@
 import { isEmpty } from 'lodash';
+import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import { dateFormat, dateTimeFormat, formatAmountWithCurrency } from 'src/constants/helpers';
 import { TColType } from './TableComponents/TableHelperComponents';
 
 export const childrenProperty = 'subRows';
@@ -315,3 +317,58 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
     throw error;
   }
 };
+
+export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]) => {
+  const data = [];
+  if (!rowData || rowData.length === 0) return false;
+  const noCellData = '------';
+
+  for (let row of rowData) {
+    const temp = {};
+    for (let col of columns) {
+      let value = row[col.id];
+      switch (true) {
+        case ['action', 'selection', 'expander'].includes(col.id):
+          continue;
+        case Boolean(col.accessorFn):
+          value = col.accessorFn(row);
+          break;
+        case col.id === 'createdBy':
+          value = `${row?.createdBy} • ${moment(row?.createdByDate?.slice(0, 10)).format(dateFormat)}`;
+          break;
+        case col.id === 'updatedBy':
+          value = `${row?.original?.updatedBy} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`;
+          break;
+        case col.type === 'date':
+          value = value ? moment(value).format(dateFormat) : noCellData;
+          break;
+        case col.type === 'dateTime':
+          value = value ? moment(value).format(dateTimeFormat) : noCellData;
+          break;
+        case col.type === 'checkBox':
+          value = Boolean(value) ? 'Yes' : 'No';
+          break;
+        case col.type === 'number':
+          value = value ?? 0;
+          break;
+        case col.type === 'currencyAmount':
+          value = formatAmountWithCurrency(col.currency, value)?.amountWithouCurrencyCode;
+          break;
+        default:
+          break;
+      }
+      temp[col.Header] = value || noCellData;
+    }
+    data.push(temp);
+    if (row[childrenProperty]) {
+      const tempData = createJsonDataForTableExport(columns, row[childrenProperty]);
+      if (tempData) data.push(...tempData);
+    }
+  }
+  return data;
+};
+
+export function camelCaseToWords(s: string) {
+  const result = s.replace(/([A-Z])/g, ' $1');
+  return result.charAt(0).toUpperCase() + result.slice(1);
+}
