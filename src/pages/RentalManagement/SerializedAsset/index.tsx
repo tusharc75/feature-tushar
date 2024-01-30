@@ -60,7 +60,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
+  const { dataRows, selectedRecords, loading } = state;
   const { generateColumns } = useColumns();
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -68,6 +68,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   useEffect(() => {
     fetchFields();
   }, []);
+
+  useEffect(()=>{
+    if(loading){
+      setNextStep(false)
+    }
+  },[loading])
 
   const OpenInNewWindow = (url) => {
     window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank');
@@ -266,7 +272,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
     fetchData();
-    setNextStep(true);
+    // setNextStep(true);
   };
 
   const checkProductInside = (item, material) => {
@@ -287,7 +293,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   };
 
   const fetchData = async () => {
-
     setNextStep(false);
     setNextStepToolTip(null);
     dispatch({ type: 'loading', loading: true });
@@ -423,7 +428,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         setNextStep(true);
         setNextStepToolTip(null);
       }
-
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -639,7 +643,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             type: 'success',
             message: data.message
           });
-          setNextStep(true);
+          // setNextStep(true);
         })
         .catch((error) => {
           setAdding(false);
@@ -670,13 +674,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             fetchData();
             setDeleteData(null);
             setShowConfirmBox(false);
-            setNextStep(true);
+            // setNextStep(true);
           })
           .catch((error) => {
             setDeleting(false);
             toastConfig.setToastConfig(error);
             setDeleteData(null);
-            setNextStep(true);
+            // setNextStep(true);
           });
       }
     }
