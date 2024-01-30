@@ -3,14 +3,14 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import xlsx from 'xlsx';
+import xlsx from 'xlsx-js-style';
 import ArrangeView from '../ArrangeView';
 import DisplayFilters from '../DisplayFilters';
 import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
-import { camelCaseToWords, createJsonDataForTableExport } from '../utils';
+import { camelCaseToWords, createJsonDataForTableExport, getExcelColumnNameFromRange } from '../utils';
 
 import moment from 'moment';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
@@ -54,6 +54,17 @@ const GridHeader = ({
     if (!data) return;
     const wb = xlsx.utils.book_new();
     const ws = xlsx.utils.json_to_sheet(data);
+
+    // for table head style
+    for (const col of getExcelColumnNameFromRange(ws['!ref'])) {
+      ws[`${col}1`].s = {
+        font: {
+          name: 'Calibri',
+          bold: true
+        }
+      };
+    }
+
     const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
 
     xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);

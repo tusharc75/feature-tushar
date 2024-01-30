@@ -372,3 +372,34 @@ export function camelCaseToWords(s: string) {
   const result = s.replace(/([A-Z])/g, ' $1');
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
+
+export function alphaToNum(alpha) {
+  let i = 0,
+    num = 0,
+    len = alpha.length;
+  for (; i < len; i++) {
+    num = num * 26 + alpha.charCodeAt(i) - 0x40;
+  }
+  return num - 1;
+}
+export function numToAlpha(num) {
+  let alpha = '';
+  for (; num >= 0; num = parseInt(num / 26, 10) - 1) {
+    alpha = String.fromCharCode((num % 26) + 0x41) + alpha;
+  }
+  return alpha;
+}
+export function getExcelColumnNameFromRange(range) {
+  let res = [],
+    rangeNum = range.split(':').map(function (val) {
+      return alphaToNum(val.replace(/[0-9]/g, ''));
+    }),
+    start = rangeNum[0],
+    end = rangeNum[1] + 1;
+
+  for (let i = start; i < end; i++) {
+    res.push(numToAlpha(i));
+  }
+
+  return res;
+}
