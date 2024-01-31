@@ -20,7 +20,7 @@ const ResourceLogs = () => {
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState([]);
   const { state, dispatch } = useTableReducer();
-  const { page, limit} = state;
+  const { page, limit } = state;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -29,6 +29,23 @@ const ResourceLogs = () => {
   const [selectedResource, setSelectedResource] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
+
+  const actionOptions = [
+    {
+      optionLabel: 'Create',
+      optionValue: 'create'
+    },
+    {
+      optionLabel: 'Update',
+      optionValue: 'update'
+    },
+    {
+      optionLabel: 'Delete',
+      optionValue: 'delete'
+    }
+  ];
+
+  const [selectedAction, setSelectedAction] = useState(null);
 
   useEffect(() => {
     const data: any = [];
@@ -64,7 +81,7 @@ const ResourceLogs = () => {
     if (selectedResource) {
       fetchData();
     }
-  }, [selectedResource, selectedOption, page, limit]);
+  }, [selectedResource, selectedOption, selectedAction, page, limit]);
 
   const fetchGridColumns = () => {
     let columns = [
@@ -73,6 +90,8 @@ const ResourceLogs = () => {
         Header: 'Resource',
         width: 120,
         sticky: isMobile ? 'none' : 'left',
+        disableFilters: true,
+        disableSortBy: true,
         Cell: ({ row }) => (
           <p
             className="text-truncate link"
@@ -88,6 +107,8 @@ const ResourceLogs = () => {
         Header: 'Updated By',
         width: 120,
         sticky: isMobile ? 'none' : 'left',
+        disableFilters: true,
+        disableSortBy: true,
         Cell: ({ row }) => (
           <p
             className="link text-truncate"
@@ -99,21 +120,28 @@ const ResourceLogs = () => {
         )
       },
       {
+        accessor: 'actions',
+        Header: 'Action',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.action}</p>
+      },
+      {
         accessor: 'date',
         Header: 'Updated Date Time',
         width: 120,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
-          <p
-            className="text-truncate"
-          >
-            {moment(row?.original?.date)?.format(dateTimeFormat)}
-          </p>
-        )
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p>
       },
       {
         accessor: 'changeString',
         Header: 'Changes',
+        disableFilters: true,
+        disableSortBy: true,
         width: 120,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.changeString}</p>
@@ -134,7 +162,7 @@ const ResourceLogs = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-         <HtmlTooltip title="View Changes">
+        <HtmlTooltip title="View Changes">
           <IconButton
             onClick={() =>
               setOpenDialog({
@@ -157,6 +185,9 @@ const ResourceLogs = () => {
     query = `page=${page}&limit=${limit}&resource=${selectedResource?.optionValue}`;
     if (selectedOption) {
       query = `${query}&referenceId=${selectedOption.optionValue}`;
+    }
+    if (selectedAction) {
+      query = `${query}&action=${selectedAction?.optionValue}`;
     }
     return query;
   };
@@ -259,18 +290,32 @@ const ResourceLogs = () => {
               renderInput={(params) => <TextField {...params} label="Select Resource" variant="outlined" />}
             />
             {selectedResource && (
-              <Autocomplete
-                options={option}
-                fullWidth
-                getOptionLabel={(option: any) => option.optionLabel}
-                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                value={selectedOption}
-                onChange={(event, newValue) => {
-                  setSelectedOption(newValue);
-                }}
-                size="small"
-                renderInput={(params) => <TextField {...params} label={`Select ${selectedResource?.optionLabel}`} variant="outlined" />}
-              />
+              <>
+                <Autocomplete
+                  options={option}
+                  fullWidth
+                  getOptionLabel={(option: any) => option.optionLabel}
+                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                  value={selectedOption}
+                  onChange={(event, newValue) => {
+                    setSelectedOption(newValue);
+                  }}
+                  size="small"
+                  renderInput={(params) => <TextField {...params} label={`Select ${selectedResource?.optionLabel}`} variant="outlined" />}
+                />
+                <Autocomplete
+                  options={actionOptions}
+                  fullWidth
+                  getOptionLabel={(option: any) => option.optionLabel}
+                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                  value={selectedAction}
+                  onChange={(event, newValue) => {
+                    setSelectedAction(newValue);
+                  }}
+                  size="small"
+                  renderInput={(params) => <TextField {...params} label={'Select Action'} variant="outlined" />}
+                />
+              </>
             )}
           </div>
         </div>
@@ -282,7 +327,7 @@ const ResourceLogs = () => {
             dispatch={dispatch}
             renderedFrom={'resourceLogs'}
             refreshGrid={fetchData}
-            hideSelection = {true}
+            hideSelection={true}
           />
         ) : (
           <Box p={2} height={500}>
