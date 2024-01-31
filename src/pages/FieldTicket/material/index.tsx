@@ -259,6 +259,9 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
       }
+      if (calValues && calValues['finalQty']) {
+        element.finalQty = calValues['finalQty'];
+      }
       if (taxCodeData) {
         element.taxCode = taxCodeData?.optionValue;
         element.taxPercentage = taxCodeData?.taxRate || 0;
