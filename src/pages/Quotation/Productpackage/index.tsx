@@ -402,7 +402,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       .then(() => {
         setAddDialog({ open: false, type: '', parentId: null });
         fetchData();
-        fetchQuotationData()
+        fetchQuotationData(version)
         setSubmitting(false);
       })
       .catch((error) => {
@@ -448,7 +448,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       .then(() => {
         setDeleting(false);
         fetchData();
-        fetchQuotationData()
+        fetchQuotationData(version)
         setDeleteData(null);
       })
       .catch((error) => {
