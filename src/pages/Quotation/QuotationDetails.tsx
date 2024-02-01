@@ -333,7 +333,7 @@ const QuotationDetails = () => {
         setShowConfirmBox(false);
       });
   };
-console.log(currVersionId)
+  
   const handleConvert = () => {
     axiosInstance()
     .post(`${quotation.api}/convert`,{quotationId:quotationData._id, versionId:currVersionId})
