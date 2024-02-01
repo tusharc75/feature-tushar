@@ -326,7 +326,6 @@ const Details = (props: DetailProps) => {
           >
             {value ? (
               <img
-                className='dark:[filter:invert(1)]'
                 src={value}
                 onError={(e) => {
                   const target = e.currentTarget as HTMLImageElement;
