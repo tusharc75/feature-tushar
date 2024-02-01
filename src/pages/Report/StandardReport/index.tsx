@@ -107,7 +107,7 @@ const Report = () => {
                     o.disableFilters = true;
                     o.disableSortBy = true;
                 }
-                if (type === "number-of-assets-by-status" && o?.accessor === "product") {
+                if (type === "number-of-assets-by-status" && (o?.accessor === 'productName' || o?.accessor === 'product')) {
                     o.cell = ({ row }) => ProductRenderer(row)
                 }
                 o.editable = false

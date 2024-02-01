@@ -39,10 +39,8 @@ const QuoteBuilder = ({
 
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
 
   const [columns, setColumns] = useState(null);
-  const [allColumn, setAllColumn] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -50,7 +48,7 @@ const QuoteBuilder = ({
 
   useEffect(() => {
     if (versionData) {
-      fetchProductInventory();
+      fetchData();
     }
   }, [versionData]);
 
@@ -82,20 +80,22 @@ const QuoteBuilder = ({
         width: 100,
         Cell: ({ row }) =>
           row.original['type'] ? (
-            <p className="text-truncate">
-              {row.original.type === 'serializedAsset' ? 'Asset' : `${capitalize(row.original.type)} `}
-              {row.original['type'] === 'product'
-                ? row.original?.productDetail?.serializedProduct
-                  ? '(Serialized)'
-                  : '(Non-Serialized)'
-                : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
-            </p>
+            <div>
+              <p className="text-truncate">
+                {row.original.type === 'serializedAsset' ? 'Asset' : `${capitalize(row.original.type)} `}
+                {row.original['type'] === 'product'
+                  ? row.original?.productDetail?.serializedProduct
+                    ? '(Serialized)'
+                    : '(Non-Serialized)'
+                  : row.original?.type === 'package'
+                    ? row.original?.packageDetail.packageType === 'Product'
+                      ? '(Product)'
+                      : '(Service)'
+                    : row.original.type === 'service'
+                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                      : ''}
+              </p>
+            </div>
           ) : (
             <NoDataCell />
           )
@@ -166,10 +166,9 @@ const QuoteBuilder = ({
     ];
     column = [...column, ...newColumns];
     setColumns(column);
-    setAllColumn(column.map((d) => d.Header));
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
@@ -399,7 +398,7 @@ const QuoteBuilder = ({
             columns={columns}
             state={state}
             dispatch={dispatch}
-            refreshGrid={fetchProductInventory}
+            refreshGrid={fetchData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             renderedFrom={renderedFrom}
             hideSelection={true}

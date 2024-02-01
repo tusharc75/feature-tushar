@@ -71,6 +71,7 @@ export const rentalManagementMessage = {
     transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
     onlySwapAssets: 'Only Assets can be swapped',
     onlySwapInUseAssets: 'Only In-Use assets can be swapped',
+    onlyAssetsCanBeRepaired: 'Only assets can be repaired'
 };
 
 export const subleaseActions = {

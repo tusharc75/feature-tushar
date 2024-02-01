@@ -555,7 +555,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   };
 
   const onConfirmSave = async (inputField, updatedData) => {
-    console.log(inputField)
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (rowData.parentId && !showConfirmationDialog.open) {
       setShowConfirmationDialog({
