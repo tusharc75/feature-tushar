@@ -43,6 +43,7 @@ export const getStaticFields = () => {
       accessor: 'createdBy',
       size: 200,
       header: 'Created By',
+      Header: 'Created By',
       show: true,
       minSize: 185,
       disableFilters: true,
@@ -62,6 +63,7 @@ export const getStaticFields = () => {
       accessor: 'updatedBy',
       size: 200,
       header: 'Updated By',
+      Header: 'Updated By',
       minSize: 185,
       show: true,
       disableFilters: true,
@@ -130,7 +132,7 @@ export default function useColumns() {
 
   const generateColumns = (renderedFrom, fields, detailScreenRoute = null, masterPage = false, currency = null) => {
     if (!currency) {
-      currency = user?.user?.brandCurrency || 'USD'
+      currency = user?.user?.brandCurrency || 'USD';
     }
     let data = localStorage.getItem('gridMetaData');
     let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
@@ -144,10 +146,12 @@ export default function useColumns() {
     _fields.forEach((field) => {
       let commonFieldData: any = {
         id: field?.fieldName,
+        ...(currency ? { currency: currency } : {}),
         accessorKey: field?.fieldName,
         accessor: field?.fieldName,
         minWidth: 180,
         width: 200,
+        type: field?.type,
         Header: headerName[field?.fieldName] ?? field?.fieldLabel,
         show: gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
         primaryField: field?.primaryField ?? false,
@@ -155,7 +159,7 @@ export default function useColumns() {
       };
 
       if (field?.stopHideColumn || field?.primaryField) {
-        commonFieldData['disabled'] = true
+        commonFieldData['disabled'] = true;
       }
 
       if (hideColumns.indexOf(field?.fieldName) >= 0) {
@@ -217,7 +221,8 @@ export default function useColumns() {
               },
               Footer: (info) => {
                 let rows = info.table.getExpandedRowModel().rows;
-                const total = rows?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(fieldName) && !isNaN(f.original[fieldName]))
+                const total = rows
+                  ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(fieldName) && !isNaN(f.original[fieldName]))
                   .reduce((sum, row) => row.original[fieldName] + sum, 0);
                 return (
                   <>
@@ -236,9 +241,7 @@ export default function useColumns() {
           id: 'concatedName',
           accessor: 'concatedName',
           accessorKey: 'concatedName',
-          cell: ({ row }) => (
-            <p className="text-truncate">{row?.original?.concatedName ? <p>{row?.original?.concatedName}</p> : <NoDataCell />}</p>
-          )
+          cell: ({ row }) => <p className="text-truncate">{row?.original?.concatedName ? <p>{row?.original?.concatedName}</p> : <NoDataCell />}</p>
         });
       } else if (field?.primaryField === true && detailScreenRoute) {
         const fieldName = field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName;
@@ -260,13 +263,13 @@ export default function useColumns() {
                     >
                       {row?.original?.[fieldName]}
                     </Link>
-                    {row?.original?.deleted &&
+                    {row?.original?.deleted && (
                       <Box ml={1}>
                         <HtmlTooltip title={`Deleted`}>
                           <InfoIcon className="cursor-pointer" fontSize="small" color="error" />
                         </HtmlTooltip>
                       </Box>
-                    }
+                    )}
                   </>
                 ) : (
                   <NoDataCell />
@@ -280,8 +283,11 @@ export default function useColumns() {
         column.push({
           ...commonFieldData,
           accessorFn: (original) => {
-            return isArray(original?.[field?.fieldName]) ? original?.[field?.fieldName][0]?.optionLabel :
-              isObject(original?.[field?.fieldName]) ? original?.[field?.fieldName]?.optionLabel : original?.[field?.fieldName]
+            return isArray(original?.[field?.fieldName])
+              ? original?.[field?.fieldName][0]?.optionLabel
+              : isObject(original?.[field?.fieldName])
+              ? original?.[field?.fieldName]?.optionLabel
+              : original?.[field?.fieldName];
           },
           cell: ({ row }) => <DropdownCell permissions={permissions} permissionForLinks={permissionForLinks} field={field} original={row?.original} />
         });
@@ -351,7 +357,7 @@ export default function useColumns() {
       } else if (field?.type === 'checkBox') {
         column.push({
           ...commonFieldData,
-          accessorFn: (data) => Boolean(data[field?.fieldName]) ? 'Yes' : 'No',
+          accessorFn: (data) => (Boolean(data[field?.fieldName]) ? 'Yes' : 'No'),
           cell: ({ row }) => (
             <div>
               <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
@@ -396,7 +402,8 @@ export default function useColumns() {
           cell: ({ row }) => (row.original[field.fieldName] ? <p>{row.original[field.fieldName]}</p> : <NoDataCell />),
           Footer: (info) => {
             let rows = info.table.getExpandedRowModel().rows;
-            const total = rows?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))
+            const total = rows
+              ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))
               .reduce((sum, row) => row.original[commonFieldData.accessor] + sum, 0);
             return <>{field?.isHideColumnSum ? '' : total}</>;
           }
