@@ -1,13 +1,16 @@
-import { Chip, IconButton, Box } from '@material-ui/core';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Box, Chip, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { GiAbstract055 } from 'react-icons/gi';
-import { useHistory, Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import HideWhenOffline from 'src/components/HideWhenOffline';
+import { deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
@@ -17,22 +20,11 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import SearchBox from '../../components/Helpers/SearchBox';
-import {
-  deliveryTicket,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource,
-  DELIVERY_FROM_TO_TYPE
-} from '../../constants/helpers';
+import { DELIVERY_FROM_TO_TYPE, deliveryTicket, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import { findAll, findOne, objectStore } from '../../constants/indexdbhelper';
-import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
-import { deleteDisable } from 'src/constants/messageHelpers';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let deliveryTicketTimeout;
 
@@ -106,8 +98,8 @@ const DeliveryTicket = () => {
                 row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.pickupFromId}`
                   : row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.customer
-                    ? `${routes.customerAccountDetail.path}/${row.original?.pickupFromId}`
-                    : `${routes.supplierAccountDetail.path}/${row.original?.pickupFromId}`
+                  ? `${routes.customerAccountDetail.path}/${row.original?.pickupFromId}`
+                  : `${routes.supplierAccountDetail.path}/${row.original?.pickupFromId}`
               }
             >
               {row.original[column.accessor]}
@@ -125,8 +117,8 @@ const DeliveryTicket = () => {
                 row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.deliveryToId}`
                   : row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer
-                    ? `${routes.customerAccountDetail.path}/${row.original?.deliveryToId}`
-                    : `${routes.supplierAccountDetail.path}/${row.original?.deliveryToId}`
+                  ? `${routes.customerAccountDetail.path}/${row.original?.deliveryToId}`
+                  : `${routes.supplierAccountDetail.path}/${row.original?.deliveryToId}`
               }
             >
               {row.original[column.accessor]}
@@ -390,7 +382,7 @@ const DeliveryTicket = () => {
                 </HideWhenOffline>
               </div>
               <div className="flex flex-wrap gap-[8px]  justify-end">
-                <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
+                <SearchBox onChange={handleSearch} size="small" value={search} />
                 {/* {deliveryPermissions?.isCreate &&
                     <Button className={'no-shadow'}
                       onClick={() => setShowManageDeliveryTicket(true)}
@@ -442,9 +434,11 @@ const DeliveryTicket = () => {
               showFilters={true}
               resource={sidebarResource.deliveryTicket}
             />
-          ) : <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>}
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
               open={showDeleteWarningConfirmBox}
@@ -455,8 +449,9 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}   ${deleteRecord.ticketName || ''
-                } ?`}
+              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}   ${
+                deleteRecord.ticketName || ''
+              } ?`}
               onClose={() => {
                 setDeleteRecord(null);
                 setIsConformDialogVisible(false);

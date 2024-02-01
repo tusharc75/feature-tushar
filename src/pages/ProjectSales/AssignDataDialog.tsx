@@ -1,4 +1,3 @@
-import { useState, useEffect, useContext } from 'react';
 import {
   Button,
   Checkbox,
@@ -13,16 +12,17 @@ import {
   ListItemText,
   Typography
 } from '@material-ui/core';
-import { startCase, camelCase, kebabCase, lowerCase } from 'lodash';
+import { camelCase, kebabCase, lowerCase, startCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 
-import Loader from '../../components/Loader';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
+import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../../components/Helpers/SearchBox';
-import { useData } from '../../StateProvider/Provider';
+import Loader from '../../components/Loader';
 
 const AssignDataDialog = (props) => {
   const { dialogOpen, onSuccess, handleCloseDialog, type, projectID, existingData, accountId = '', entityIds = [], users } = props;
@@ -56,6 +56,10 @@ const AssignDataDialog = (props) => {
 
       case 'quote-builder':
         url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`;
+        break;
+
+      case 'quotation':
+        url = `/${type}?filterById=[{"field":"customerAccount", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`;
         break;
 
       case 'user':

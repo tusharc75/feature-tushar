@@ -1,7 +1,8 @@
-import { Box, CircularProgress, useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from '@material-ui/core';
 import {
-  ColumnDef,
   ExpandedState,
+  Row,
+  SortingState,
   getCoreRowModel,
   getExpandedRowModel,
   getFacetedMinMaxValues,
@@ -10,29 +11,26 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  Row,
-  SortingState,
   useReactTable
 } from '@tanstack/react-table';
-import { debounce } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
+import { useData } from 'src/StateProvider/Provider';
+import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
 import { useDebounce } from 'src/hooks';
-import { SEARCH, useStore } from 'src/StateProvider/fastContext';
-import { useData } from 'src/StateProvider/Provider';
 import { gridPageSizes } from '../../constants/helpers';
 import GridHeader from './GridHeader';
-import Pagination from './TableComponents/Pagination';
 import { fuzzyFilter, serverFilter } from './ReactTableHelpers';
+import Pagination from './TableComponents/Pagination';
+import TableComponent from './TableComponents/Table';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
 import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
-import TableComponent from './TableComponents/Table';
 
 const CustomReactTable = ({
   columns,
@@ -56,7 +54,8 @@ const CustomReactTable = ({
   setSelectedReportView = null,
   reportSave = false,
   virtualization = false,
-  showArrangeView = true
+  showArrangeView = true,
+  exportTable = false
 }) => {
   const {
     currentEditingCellPosition,
@@ -68,10 +67,9 @@ const CustomReactTable = ({
     limit,
     search,
     filters: customFilters,
-    sorting,
     error,
-    showFilteredRecordsOnly,
-    colState
+    visibleColumns,
+    columnOrder
   }: TInitialState = state;
 
   const {
@@ -101,17 +99,6 @@ const CustomReactTable = ({
     toggleExpandChange
   });
 
-  const columnFilters = React.useMemo(() => {
-    const filters = [];
-
-    for (const key of Object.keys(customFilters)) {
-      // in case of complex filters api should porovide filtered value
-      if (typeof customFilters[key].filter !== 'string') continue;
-      filters.push({ id: key, value: customFilters[key].filter });
-    }
-    return filters;
-  }, [customFilters]);
-
   const [searchQuery] = useStore((store) => store[SEARCH]);
   const [cellValue, setCellValue] = React.useState('');
   const [baseColumns, setBaseColumns] = React.useState(() => newColumns);
@@ -119,8 +106,6 @@ const CustomReactTable = ({
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
   const [sortedColumns, setSortedColumns] = useState([]);
-  const [columnOrder, setColumnOrder] = useState([]);
-  const [hiddenColumns, setHiddenColumns] = useState([]);
   const [getsorting, setSorting] = useState([]);
 
   // initialize
@@ -130,89 +115,31 @@ const CustomReactTable = ({
     }
   }, [newColumns]);
 
-  // For Column Order and hidden columns
-  useEffect(() => {
-    try {
-      const stickyColumnNames = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection });
-
-      const hColumns = [];
-      for (const col of newColumns) {
-        if (col.isVisible === false) {
-          hColumns.push(col.id);
-        }
-      }
-      if (reportSave) {
-        if (selectedReportView) {
-          let colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : [])];
-          selectedReportView?.columnState?.forEach(element => {
-            if (!element?.isVisible) {
-              hColumns.push(element.accessor);
-            }
-          });
-          setHiddenColumns(hColumns);
-          setColumnOrder(colOrder);
-          dispatch({ type: 'updateColumnState', colState: selectedReportView?.columnState });
-        } else {
-          setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
-          setHiddenColumns(newColumns?.filter((e) => e?.show === false).map((m) => m?.id ?? m?.accessor));
-          dispatch({ type: 'updateColumnState', colState: newColumns.map((m) => { return { accessor: m?.id ?? m?.accessor, isVisible: m?.show === false ? false : true } }) });
-        }
-      } else {
-        let gridMetaData = getDataFromLocalStorage();
-        if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
-          for (const n of [...gridMetaData[renderedFrom]?.hide]) {
-            if (stickyColumnNames.stickyColumns.includes(n) || !n) continue;
-            if (n === 'qtyDisplay') hColumns.push('qty');
-            if (n === 'qty') hColumns.push('qtyDisplay');
-            hColumns.push(n);
-          }
-          setHiddenColumns(hColumns);
-        } else {
-          setHiddenColumns(newColumns?.filter((e) => e?.show === false).map((m) => m?.id ?? m?.accessor));
-        }
-        if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
-          const colOrder = gridMetaData[renderedFrom]?.order || [];
-          let orderIndices = {};
-          for (let i = 0; i < colOrder.length; i++) {
-            orderIndices[colOrder[i]] = i;
-          }
-          let orderedArr = [...newColumns].sort((a, b) => orderIndices[a?.id || a?.accessor] - orderIndices[b?.id || b?.accessor]);
-          setSortedColumns(returnSortedColumns(newColumns, orderedArr));
-          setColumnOrder(orderedArr.map((m) => m?.id ?? m?.accessor));
-        } else {
-          setSortedColumns(newColumns);
-          setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
-        }
-      }
-    } catch (ex) {
-      console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
-    }
-  }, [newColumns, expander, hideSelection, renderedFrom, selectedReportView]);
-
+  // Column DND
   function reorder(draggedColumnId: string, targetColumnId: string, columnOrder: string[]) {
-    columnOrder.splice(columnOrder.indexOf(targetColumnId), 0, columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string);
+    const newColumnOrder = columnOrder.toSpliced(
+      columnOrder.indexOf(targetColumnId),
+      0,
+      columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string
+    );
     const dragItem = newColumns.find((col) => col?.id === draggedColumnId || col?.accessor === draggedColumnId);
-    const hoverItem = newColumns.find((col) => col?.id === targetColumnId || col?.accessor === targetColumnId);
 
-    if (dragItem?.id === 'action' || dragItem?.id === 'selection' || dragItem?.canDrag === false) return;
-    if (hoverItem?.id === 'action' || hoverItem?.id === 'selection' || hoverItem?.canDrag === false) return;
+    const stickyColumns = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection }).stickyColumns;
+
+    if (stickyColumns.includes(dragItem?.id)) return;
 
     const newBaseColumns = [...baseColumns].sort(
       (a, b) => columnOrder.findIndex((d) => d === a.accessor) - columnOrder.findIndex((d) => d === b.accessor)
     );
 
-    const newcolumnOrderToSave = newBaseColumns
-      ?.filter((o) => !['left', 'right']?.includes(o?.sticky) && !['expander', 'selection', 'action']?.includes(o?.id))
-      ?.map((o) => o?.id);
-
-    setBaseColumns(newBaseColumns);
+    const newcolumnOrderToSave = newBaseColumns?.filter((o) => !stickyColumns?.includes(o?.id))?.map((o) => o?.id);
 
     updateGridHiddenColumns({
       renderedFrom,
       user,
       columnOrder: newcolumnOrderToSave
     });
-
+    dispatch({ type: 'setColumnOrder', columnOrder: newColumnOrder });
     return [...columnOrder];
   }
 
@@ -224,44 +151,35 @@ const CustomReactTable = ({
     setSortedColumns(returnSortedColumns(newColumns, columnOrder));
   }, [columnOrder, returnSortedColumns, newColumns]);
 
-  const sortingRef = useRef(null);
+  const columnFilters = React.useMemo(() => {
+    const filters = [];
+    for (const key of Object.keys(customFilters)) {
+      if (typeof customFilters[key].filter !== 'string') continue;
+      filters.push({ id: key, value: customFilters[key].filter });
+    }
+    return filters;
+  }, [customFilters]);
 
   const setColumnFilters = (filtersfn) => {
-    const MINIMUM_SEARCH_DELAY = 600;
-
+    if (!isClientSideGrid) return;
     const filters = filtersfn();
-
-    const debouncedFilterDispatch = debounce((updatedCustomFilters) => {
-      dispatch({ type: 'filter', filters: updatedCustomFilters, loading: isClientSideGrid ? false : true });
-    }, MINIMUM_SEARCH_DELAY);
-    const instantFilterDispatch = (updatedCustomFilters) => {
-      dispatch({ type: 'filter', filters: updatedCustomFilters, loading: isClientSideGrid ? false : true });
-    };
-
-    setTimeout(() => {
-      let tempArray = Object.keys(customFilters).map((key, i) => {
-        return { id: key, value: customFilters[key].filter };
-      });
-
-      if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-        var tempResult = {};
-        filters?.forEach((v) => {
-          if (v.value && v.value !== '') {
-            tempResult[v.id] = { filter: v.value };
-          } else {
-            //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
-            if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
-              tempResult[v.id] = customFilters[v.id];
-            }
-          }
-        });
-        if (isClientSideGrid) {
-          instantFilterDispatch(tempResult);
+    let tempArray = Object.keys(customFilters).map((key, i) => {
+      return { id: key, value: customFilters[key].filter };
+    });
+    if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
+      var tempResult = {};
+      filters?.forEach((v) => {
+        if (v.value && v.value !== '') {
+          tempResult[v.id] = { filter: v.value };
         } else {
-          debouncedFilterDispatch(tempResult);
+          //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
+          if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
+            tempResult[v.id] = customFilters[v.id];
+          }
         }
-      }
-    }, MINIMUM_SEARCH_DELAY);
+      });
+      dispatch({ type: 'filter', filters: tempResult, loading: isClientSideGrid ? false : true });
+    }
   };
 
   const setGlobalFilter = useCallback(
@@ -298,7 +216,7 @@ const CustomReactTable = ({
     const updatedData = flattenArray(data)?.find((row) => row?._id === currentEditingCellPosition.rowId);
     updatedData[currentEditingCellPosition.columnName] = cellValue;
     const inputField = { [`${currentEditingCellPosition.columnName}`]: cellValue };
-    
+
     if (onSaveEdit && ![undefined, null].includes(cellValue)) {
       onSaveEdit(inputField, updatedData);
     }
@@ -307,15 +225,6 @@ const CustomReactTable = ({
       cellPosition: null
     });
   }, [cellValue, currentEditingCellPosition, data, onSaveEdit]);
-
-  const getVisibleColumns = React.useCallback(() => {
-    const obj = {};
-
-    for (const col of newColumns) {
-      obj[col.id] = !hiddenColumns?.includes(col.id);
-    }
-    return obj;
-  }, [newColumns, hiddenColumns]);
 
   useEffect(() => {
     return setGlobalFilter(searchQuery);
@@ -329,7 +238,7 @@ const CustomReactTable = ({
     },
     autoResetPageIndex,
     initialState: {
-      columnVisibility: getVisibleColumns()
+      columnVisibility: visibleColumns
     },
     state: {
       expanded,
@@ -337,7 +246,7 @@ const CustomReactTable = ({
       sorting: getsorting,
       globalFilter: isClientSideGrid ? debouncedSearch.trim() : '',
       columnFilters: isClientSideGrid ? columnFilters : [],
-      columnVisibility: getVisibleColumns(),
+      columnVisibility: visibleColumns,
       rowSelection
     },
     // flags
@@ -347,6 +256,7 @@ const CustomReactTable = ({
     enablePinning: true,
     enableFilters: true,
     enableColumnResizing: true,
+    filterFromLeafRows: true,
     columnResizeMode: 'onChange',
 
     // custom functions
@@ -356,12 +266,11 @@ const CustomReactTable = ({
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
-    onColumnOrderChange: setColumnOrder,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
 
     // accessors
-    getRowId: (row) => row._id,
+    getRowId: (row) => `${row._id}_${row?.index || 0}`,
     getSubRows: (row) => row[childrenProperty],
 
     // table models
@@ -404,6 +313,7 @@ const CustomReactTable = ({
   }, [isClientSideGrid, limit, page, table, data, paginationLimit]);
 
   const { rows } = table.getRowModel();
+  const { flatRows: expandedRows } = table.getExpandedRowModel();
 
   // For row selection
   useEffect(() => {
@@ -415,7 +325,7 @@ const CustomReactTable = ({
     const testData = getUniqueDataByKey([...currentPageSelectedRows, ...selectedRecords]);
     const newData = [];
     for (const data of testData) {
-      if (selectedRowIds.includes(data._id)) newData.push(data);
+      if (selectedRowIds.includes(`${data._id}_${data?.index || 0}`)) newData.push(data);
     }
 
     if (onSelect) onSelect(newData);
@@ -434,7 +344,7 @@ const CustomReactTable = ({
   useEffect(() => {
     if (selectedRecords.length !== Object.keys(rowSelection).length) {
       const selectedRowIds = selectedRecords.map((d) => d._id);
-      for (const row of rows) {
+      for (const row of expandedRows) {
         if (selectedRowIds.includes(row.original._id) && !row.getIsSelected()) {
           row.toggleSelected(true);
         }
@@ -471,23 +381,20 @@ const CustomReactTable = ({
           <GridHeader
             resource={resource}
             dispatch={dispatch}
-            baseColumns={baseColumns}
-            customFilters={customFilters}
             renderedFrom={renderedFrom}
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
-            selectedRecords={selectedRecords}
             hideSelection={hideSelection}
             showFilters={showFilters}
             table={table}
             showArrangeView={showArrangeView}
             newColumns={newColumns}
             refreshGrid={refreshGrid}
-            setHiddenColumns={setHiddenColumns}
-            loading={loading}
             reportSave={reportSave}
-            setColumnOrder={setColumnOrder}
             setSelectedReportView={setSelectedReportView}
             selectedReportView={selectedReportView}
+            state={state}
+            expander={expander}
+            exportTable={exportTable}
           />
           {!isMobileView && (
             <div className="relative">

@@ -158,6 +158,7 @@ const LoadingTicket = ({
           ?.filter((e) => e.replace != true)
           .map((d) => ({
             ...d.inventory,
+            uniqueId: d._id,
             isReplaced: d.isReplaced,
             replaceReason: d.replaceReason,
             replaceAsset: d?.replaceAsset
@@ -277,7 +278,7 @@ const LoadingTicket = ({
       deliveryTicketList.map((obj) => {
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
-            if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
+            if (obj?.assets?.some((p) => p?.asset === d?._id && p?.uniqueId === d?.uniqueId)) {
               productAssets[index]['loadingTicket'] = obj?.ticketName;
               productAssets[index]['loadingTicketId'] = obj?._id;
               productAssets[index]['loadingTicketStatus'] = obj?.status;
@@ -301,13 +302,17 @@ const LoadingTicket = ({
         }
       });
 
-      if (
-        productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0 &&
+      if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0 &&
         productAssets?.some((e: any) => e.startDate)
       ) {
         setNextStep(true);
       } else {
-        setNextStepToolTip(rentalManagementMessage.loadingCreatedAndDelivered);
+        if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === 0) {
+          setNextStepToolTip(rentalManagementMessage.loadingCreatedAndDelivered);
+        }
+        else {
+          setNextStepToolTip(rentalManagementMessage.changeStatusToInUse);
+        }
       }
 
       setUniqueLoadingTicket([...new Set(productAssets.filter((d) => d.loadingTicketId !== undefined).map((d) => d.loadingTicketId))]);
@@ -625,7 +630,7 @@ const LoadingTicket = ({
       if (rentalManagementData?.processor?.optionValue) {
         data['processor'] = rentalManagementData?.processor?.optionValue;
       }
-      data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+      //data['status'] = DELIVERY_TICKET_STATUS.indTransit;
       setShowTicketDialog({ open: true, data: data });
     }
   };
@@ -664,7 +669,7 @@ const LoadingTicket = ({
     selectedRecords?.forEach((element: any) => {
       const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
       if (result.length) {
-        assets.push({ _id: element._id, status: element.status, deliveryTicketId: element.loadingTicketId, newId: result[0]._id });
+        assets.push({ _id: element._id, uniqueId: element.uniqueId, status: element.status, deliveryTicketId: element.loadingTicketId, newId: result[0]._id });
         result[0].isCounted = true;
       }
     });
@@ -907,11 +912,12 @@ const LoadingTicket = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        } else if (e?.type === 'Asset' && ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(e?.status)) {
+        } else if (e?.type === 'Asset' && ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered]?.includes(e?.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.statusInUseCancelLoading });
         } else if (
           e?.type === 'Asset' &&
-          ![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
+          ![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy,
+          RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable, RENTAL_INTERNAL_ASSET_STATUS.delivered]?.includes(
             e?.rentalAssetStatus
           )
         ) {
@@ -1301,7 +1307,7 @@ const LoadingTicket = ({
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
-          productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
+          assets={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={selectedRecords?.filter((e) => e.type === 'Product')}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });

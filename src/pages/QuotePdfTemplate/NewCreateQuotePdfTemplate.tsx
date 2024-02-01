@@ -162,8 +162,9 @@ export default function NewCreateQuotePdfTemplate() {
 
   useEffect(() => {
     if (id && id !== '0') {
-        (async () => {
+      (async () => {
         let tempPdfTemplate = null;
+        let tempQuoteData = null;
         if (queryParams.quote && queryParams.version) {
           history.replace(`?quote=${queryParams.quote}&version=${queryParams.version}`);
           try {
@@ -177,10 +178,12 @@ export default function NewCreateQuotePdfTemplate() {
               setHasPermissionToUpdate(true);
             }
             tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
+            tempQuoteData = data;
           } catch (e) {
             toastConfig.setToastConfig(e);
           }
-        } else if (queryParams.quotation && queryParams.version) {
+        }
+        else if (queryParams.quotation && queryParams.version) {
           history.replace(`?quotation=${queryParams.quotation}&version=${queryParams.version}`);
           try {
             const res = await axiosInstance().get(`${quotation.api}/${queryParams?.quotation}?entity=${selectedEntity}`);
@@ -193,6 +196,7 @@ export default function NewCreateQuotePdfTemplate() {
               setHasPermissionToUpdate(true);
             }
             tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
+            tempQuoteData = data;
           } catch (e) {
             toastConfig.setToastConfig(e);
           }
@@ -246,7 +250,7 @@ export default function NewCreateQuotePdfTemplate() {
               aboveTable: data?.aboveTable,
               belowTable: data?.belowTable
             });
-            if (quoteData?._id) {
+            if (tempQuoteData?._id) {
               setHasPermissionToUpdate(true);
             } else if (
               data?.owner &&
@@ -370,7 +374,7 @@ export default function NewCreateQuotePdfTemplate() {
           } else {
             if (isBreakCrumbPath) {
               history.push({ pathname: isBreakCrumbPath });
-            }       
+            }
             setIsUpdating(false);
             toastConfig.setToastConfig({
               open: true,
@@ -428,7 +432,7 @@ export default function NewCreateQuotePdfTemplate() {
             } else {
               if (isBreakCrumbPath) {
                 history.push({ pathname: isBreakCrumbPath });
-              }           
+              }
             }
             toastConfig.setToastConfig({
               open: true,
@@ -445,6 +449,21 @@ export default function NewCreateQuotePdfTemplate() {
         });
     }
   };
+
+  const handleClose = () => {
+    if (quoteData?._id) {
+      if (queryParams.quotation) {
+        history.push(`${routes.quotationDetail.path}/${quoteData._id}`);
+      } else {
+        history.push(`/quotes/detail/${quoteData?._id}`, {
+          versionNumber: `${version}`,
+          tabValue: 1
+        });
+      }
+    } else {
+      history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
+    }
+  }
 
   return initialValues && pdfResourceOption ? (
     <Formik
@@ -510,18 +529,7 @@ export default function NewCreateQuotePdfTemplate() {
                   color="primary"
                   variant="contained"
                   onClick={() => {
-                    if (quoteData?._id) {
-                      if (queryParams.quotation) {
-                        history.push(`${routes.quotationDetail.path}/${quoteData._id}`);
-                      } else {
-                        history.push(`/quotes/detail/${quoteData?._id}`, {
-                          versionNumber: `${version}`,
-                          tabValue: 1
-                        });
-                      }
-                    } else {
-                      history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
-                    }
+                    handleClose()
                   }}
                 >
                   Close
@@ -566,8 +574,8 @@ export default function NewCreateQuotePdfTemplate() {
                           setFieldValue('entity', val && val?.map((d) => d._id));
                           val && val.length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                         }}
                         renderInput={(params) => (
@@ -599,8 +607,8 @@ export default function NewCreateQuotePdfTemplate() {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (
@@ -634,8 +642,8 @@ export default function NewCreateQuotePdfTemplate() {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (
@@ -846,19 +854,7 @@ export default function NewCreateQuotePdfTemplate() {
                   submitForm();
                 }}
                 onClose={() => {
-                  //  This condition is to check either user is redirected from quote details screen or not
-                  if (history.location?.state?.redirectTo) {
-                    if (isBreakCrumbPath) {
-                      history.push({ pathname: routes.quotePdfTemplate.path });
-                      setIsBreakCrumbPath('');
-                    } else {
-                      history.push(history.location?.state?.redirectTo);
-                    }
-                  } else {
-                    setShowConfirmDialog(false);
-                    history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
-                    setIsBreakCrumbPath('');
-                  }
+                  handleClose()
                 }}
               />
             ) : null}

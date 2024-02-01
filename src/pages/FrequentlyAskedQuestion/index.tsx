@@ -1,28 +1,23 @@
-import { Box, Button, Menu, MenuItem, IconButton } from '@material-ui/core';
-import { useState, useEffect, useContext, useReducer } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
-import styles from '../Leads/Header.module.scss';
-import routes from 'src/components/Helpers/Routes';
-import { useData } from 'src/StateProvider/Provider';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import axiosInstance from 'src/axios/axiosInstance';
-import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from 'src/constants/helpers';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
 
 let searchTimeout;
 
@@ -35,8 +30,7 @@ const FrequentlyAskedQuestion = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
-    state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -59,7 +53,7 @@ const FrequentlyAskedQuestion = () => {
     const response = await axiosInstance().get('/field?resource=Frequently Asked Question');
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.frequentlyAskedQuestionDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(),ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchFrequentlyAskedQuestionData = async () => {
@@ -72,7 +66,7 @@ const FrequentlyAskedQuestion = () => {
       data = response?.data?.data;
       count = response?.data?.data?.count;
       let rows = data?.data.map((u) => {
-        let finalObject: any = prepareDataForGrid(u,user);
+        let finalObject: any = prepareDataForGrid(u, user);
         finalObject['canDelete'] = permissions?.frequentlyAskedQuestion?.isDelete;
         finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
         finalObject['allowedToEdit'] = permissions?.frequentlyAskedQuestion?.isUpdate;
@@ -119,7 +113,7 @@ const FrequentlyAskedQuestion = () => {
               size="small"
               aria-label="Clone"
               onClick={() => {
-                setOpen({ open: true, isClone: true});
+                setOpen({ open: true, isClone: true });
               }}
             >
               <FileCopyIcon fontSize="small" color="primary" />
@@ -219,7 +213,7 @@ const FrequentlyAskedQuestion = () => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   return (
-  <section className="main-container-v1">
+    <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.frequentlyAskedQuestion]} />
         <ImportExportLinks
@@ -244,7 +238,7 @@ const FrequentlyAskedQuestion = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.frequentlyAskedQuestion?.isCreate && (
                   <Button
@@ -253,7 +247,7 @@ const FrequentlyAskedQuestion = () => {
                     size="small"
                     className={`no-shadow`}
                     onClick={() => {
-                      setOpen({ open: true, isClone: false});
+                      setOpen({ open: true, isClone: false });
                     }}
                     startIcon={<AddOutlined />}
                   >
@@ -323,9 +317,11 @@ const FrequentlyAskedQuestion = () => {
             showFilters={true}
             resource={sidebarResource.frequentlyAskedQuestion}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog
@@ -340,16 +336,16 @@ const FrequentlyAskedQuestion = () => {
         />
       )}
       {open?.open && (
-          <ManageFrequentlyAskedQuestion
-            id={freqentlyAskedQuestionId}
-            isClone={open?.isClone}
-            onClose={() => setOpen({ open: false, isClone: false })}
-            onSuccess={() => {
-              setOpen({ open: false, isClone: false });
-              fetchFrequentlyAskedQuestionData();
-            }}
-          />
-        )}
+        <ManageFrequentlyAskedQuestion
+          id={freqentlyAskedQuestionId}
+          isClone={open?.isClone}
+          onClose={() => setOpen({ open: false, isClone: false })}
+          onSuccess={() => {
+            setOpen({ open: false, isClone: false });
+            fetchFrequentlyAskedQuestionData();
+          }}
+        />
+      )}
     </section>
   );
 };

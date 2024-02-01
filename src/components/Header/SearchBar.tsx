@@ -21,6 +21,7 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   //   dispatch
   // }: any = useData();
   const [searchQuery, setStore] = useStore((store) => store[SEARCH]);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [sections, setSections] = useState([]);
   const [showCloseButton, setShowCloseButton] = useState(false);
@@ -30,6 +31,24 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   useEffect(() => {
     filterDispatch({ type: 'resetIndex' });
   }, [search.trim() !== '', search]);
+
+
+  const handleFocusOnSlash = (e:KeyboardEvent) => {
+    if(!inputRef.current)return;
+    const input = inputRef.current;
+    const otherFocusedElements = document.querySelector(':focus-within');
+    if(otherFocusedElements) return;
+    if(input.matches(':focus-within')) return;
+    if (e.key === '/') {
+      e.preventDefault();
+      inputRef.current?.focus();
+    }
+  }
+  
+  useEffect(()=>{
+    document.addEventListener('keydown', handleFocusOnSlash)
+    return () => document.removeEventListener('keydown', handleFocusOnSlash);
+  },[])
 
   useEffect(() => {
     let arr = [];
@@ -113,14 +132,16 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
       <div className={`${styles.search_input}`} style={{ borderRadius: showCloseButton ? '4px 4px 0 0' : '4px' }}>
         <input
           type="text"
+          ref={inputRef}
           value={search}
-          placeholder="Search"
+          placeholder="Type / to search"
           onChange={(e) => {
             const searchedValue = e.target.value;
             searchedValue.length > 0 ? setShowCloseButton(true) : setShowCloseButton(false);
             setSearch(searchedValue);
             handleSearch(searchedValue);
           }}
+          className=' dark:placeholder:text-gray-500 placeholder:text-[15px] placeholder:text-gray-400'
           style={{ borderRadius: showCloseButton ? '4px 4px 0 0' : '4px' }}
         />
         <IconButton className={styles.searchIcon}>

@@ -1,36 +1,19 @@
-import { Grid, Typography, Box, Container, Button, Divider } from '@material-ui/core';
-import routes from './../../components/Helpers/Routes';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import { REPORT_LIST } from './../../constants/helpers';
-import { MdDescription } from 'react-icons/md';
-import { Link } from 'react-router-dom';
-import { kebabCase } from 'lodash';
-import { useData } from '../../StateProvider/Provider';
-import { AiFillCalendar } from 'react-icons/ai';
+import { Box, Button, Typography } from '@material-ui/core';
+import { debounce, kebabCase } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
-import axiosInstance from 'src/axios/axiosInstance';
-import styles from './index.module.scss';
-import { ReportIcon } from 'src/assets/svg/svgIcons';
+import { AiFillCalendar } from 'react-icons/ai';
 import { HiArrowRight } from 'react-icons/hi';
-import { getColors } from '../Home/helpers';
+import { Link } from 'react-router-dom';
+import { ReportIcon } from 'src/assets/svg/svgIcons';
+import axiosInstance from 'src/axios/axiosInstance';
 import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { debounce } from 'lodash';
-
-const colorPalette = [
-  { iconsColor: ['#059825', '#059825 ', '#60D778'], color: '#F9FDEC' },
-  { iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'], color: '#FFEFEE' },
-  { iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'], color: '#F3F8FF' },
-  { iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6'], color: '#FFFAEC' },
-  { iconsColor: ['#AD14F5', '#6203AC', '#BE74E5'], color: '#F6F1FF' },
-  { iconsColor: ['#FFA800', '#E35200', '#FBC56E'], color: '#EBEBEB' },
-  { iconsColor: ['#059825', '#059825', '#60D778'], color: '#F9FDEC' },
-  { iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'], color: '#FFEFEE' },
-  { iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6 '], color: '#FFFAEC' },
-  { iconsColor: ['#059825', '#059825', '#60D778'], color: '#F9FDEC' },
-  { iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'], color: '#FFEFEE' },
-  { iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'], color: '#F3F8FF' }
-];
+import { useData } from '../../StateProvider/Provider';
+import { getColors } from '../Home/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import { REPORT_LIST } from './../../constants/helpers';
+import styles from './index.module.scss';
 
 type TReportFromHelper = {
   title: string;

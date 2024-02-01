@@ -1,19 +1,19 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../../axios/axiosInstance';
 import { Box, CircularProgress } from '@material-ui/core';
-import SearchBox from '../../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, prepareDataForGrid } from '../../../constants/helpers';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog/Dialog';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import Grid from '@material-ui/core/Grid';
 import { startCase } from 'lodash';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import routes from '../../../components/Helpers/Routes';
+import SearchBox from '../../../components/Helpers/SearchBox';
+import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid } from '../../../constants/helpers';
 
 let searchTimeout;
 const AddExistingProductInventory = ({
@@ -89,7 +89,7 @@ const AddExistingProductInventory = ({
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);;
           finalObject['type'] = type;
-          finalObject['qty'] = 0;
+          finalObject['qty'] = 1;
           const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
           if (qtyAdded.length) {
             finalObject['qty'] = qtyAdded[0].qty;
@@ -152,7 +152,7 @@ const AddExistingProductInventory = ({
         let columns = [];
         let newColumns = generateColumns(renderedFrom, data, type === 'product' ? routes.productDetail.path : routes.packagesDetail.path);
         columns = [...newColumns, ...getStaticFields()];
-        setColumns([...columns, ...defaultColumns]);
+        setColumns([...defaultColumns, ...columns]);
       });
   };
 

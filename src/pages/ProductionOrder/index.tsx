@@ -1,30 +1,28 @@
-import { Button, IconButton, Box } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { productionOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { PRODUCTION_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, productionOrder, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageProductionOrder from './ManageProductionOrder';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem } from '@material-ui/core';
-import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
-import queryString from 'query-string';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -53,7 +51,7 @@ const ProductionOrder = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -63,6 +61,10 @@ const ProductionOrder = () => {
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
+
+  useEffect(() => {
+    dispatch({ type: 'filter', filters: { status: { filter: [PRODUCTION_ORDER_STATUS.new, PRODUCTION_ORDER_STATUS.inProgress] } } });
+  }, []);
 
   useEffect(() => {
     fetchGridColumns();
@@ -104,7 +106,7 @@ const ProductionOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.productionOrder?.isCreate ? "Clone" : cloneDisable}  >
+        <HtmlTooltip title={permissions?.productionOrder?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -118,7 +120,7 @@ const ProductionOrder = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
@@ -290,7 +292,7 @@ const ProductionOrder = () => {
               </ToggleButtonGroup>
             </div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
                   variant={'contained'}
@@ -357,9 +359,11 @@ const ProductionOrder = () => {
             showFilters={true}
             resource={sidebarResource.productionOrder}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog

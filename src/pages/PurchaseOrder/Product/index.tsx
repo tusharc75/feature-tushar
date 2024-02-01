@@ -9,7 +9,6 @@ import { purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { prepareDataForGrid } from 'src/constants/helpers';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_po_cost_fields, fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
@@ -309,9 +308,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
     setMaterial(JSON.parse(JSON.stringify(data)));
     let rows = data?.map((item, index) => {
-      let finalObject = prepareDataForGrid(item);
+      let finalObject = item;
       finalObject['isChecked'] = selectedRecords?.some((s) => s._id === item._id);
-      finalObject['allowedToEdit'] = allowedToEdit;
       let res: any = {
         ...finalObject
       };

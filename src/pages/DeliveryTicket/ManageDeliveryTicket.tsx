@@ -13,7 +13,6 @@ import {
   CustomDialogTransition,
   setFieldsInAscendingOrder,
   generateUniqueIdOnly,
-  DELIVERY_TICKET_STATUS,
   convertDateInDateTime
 } from './../../constants/helpers';
 import {
@@ -47,7 +46,7 @@ const ManageDeliveryTicket = ({
   ticketType = null,
   referenceType = null,
   referenceData = null,
-  productInventory = null,
+  assets = null,
   products = null,
   serialNumber = null
 }) => {
@@ -85,13 +84,13 @@ const ManageDeliveryTicket = ({
   const [createDateMin, setCreateDateMin] = useState(new Date())
 
   useEffect(() => {
-    if (initialData?.fields?.some(field => field?.fieldName === "createDate") && productInventory?.length) {
+    if (initialData?.fields?.some(field => field?.fieldName === "createDate") && assets?.length) {
       findValidationDate()
     }
-  }, [initialData, productInventory])
+  }, [initialData, assets])
 
   const findValidationDate = async () => {
-    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: productInventory?.map((e) => e._id), last: 1 })
+    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets?.map((e) => e._id), last: 1 })
     var lastDate: any = new Date();
     if (data?.date) {
       lastDate = new Date(data?.date);
@@ -275,7 +274,7 @@ const ManageDeliveryTicket = ({
         var isPickupFromStorageLocationDisable = false;
         var isDeliveryToStorageLocationDisable = false;
 
-        if ((productInventory || products) && referenceType && referenceData) {
+        if ((assets || products) && referenceType && referenceData) {
           if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && user?.user?.brandPolicy?.storageLocation &&
             user?.user?.brandPolicy?.rentalInventoryDebit
@@ -306,7 +305,15 @@ const ManageDeliveryTicket = ({
           }
           tempInitialData['type'] = referenceType;
           tempInitialData['ticketType'] = ticketType;
-          tempInitialData['productInventory'] = productInventory?.map((d) => d?._id);
+          tempInitialData['assets'] = [];
+          assets?.forEach((ele) => {
+            const obj: any = {}
+            obj.asset = ele._id;
+            if (ele?.uniqueId) {
+              obj.uniqueId = ele.uniqueId;
+            }
+            tempInitialData['assets'].push(obj);
+          });
           tempInitialData['products'] = [];
           products?.forEach((ele) => {
             const obj: any = {}
@@ -527,7 +534,7 @@ const ManageDeliveryTicket = ({
 
   function validate(values) {
     const errors = {};
-    if (initialData?.fields?.some(field => field?.fieldName === "createDate") && productInventory?.length) {
+    if (initialData?.fields?.some(field => field?.fieldName === "createDate") && assets?.length) {
       let startDate = moment(values?.pickUpDate);
       let endDate = moment(values?.deliveryDate);
       if (endDate.diff(startDate, 'days') < 0) {

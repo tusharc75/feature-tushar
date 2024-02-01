@@ -1,25 +1,23 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { useHistory, Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { priceTemplate, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, priceTemplate } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Box } from '@material-ui/core';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 let searchTimeout;
 
@@ -93,21 +91,21 @@ const PriceTemplate = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.priceTemplate?.isCreate ? "Clone" : cloneDisable}  >
+        <HtmlTooltip title={permissions?.priceTemplate?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Clone"
               disabled={permissions?.priceTemplate?.isCreate ? false : true}
               onClick={() => {
-                CreateNew(row?.original?.id, true)
+                CreateNew(row?.original?.id, true);
               }}
             >
               <FileCopyIcon fontSize="small" color={permissions?.priceTemplate?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
@@ -232,7 +230,7 @@ const PriceTemplate = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.priceTemplate?.isCreate && (
                   <Button

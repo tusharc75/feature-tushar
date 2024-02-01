@@ -1,8 +1,15 @@
-import { Button, Chip, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
+import { Box, Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -10,18 +17,10 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import styles from '../Leads/Header.module.scss';
 import { customerAccount, gridLoadingTimeout, invoice, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let invoiceTimeout;
 
@@ -274,7 +273,7 @@ const Invoice = () => {
           permissions={permissions?.invoice}
           module="invoice"
           api={invoice.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -318,7 +317,7 @@ const Invoice = () => {
               )}
             </div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.invoice?.isCreate && (
                   <>
@@ -390,9 +389,11 @@ const Invoice = () => {
             showFilters={true}
             resource={sidebarResource.invoice}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

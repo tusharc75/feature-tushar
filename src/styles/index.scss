@@ -4005,25 +4005,7 @@ $isAppliedBillDark: #234623;
 }
 .form-types {
   .MuiChip-root.MuiAutocomplete-tag {
-    max-width: 341px !important;
-    @media all and (max-width: 900px) {
-      max-width: 250px !important;
-    }
-    @media all and (max-width: 710px) {
-      max-width: 200px !important;
-    }
-    @media all and (max-width: 600px) {
-      max-width: 270px !important;
-    }
-    @media all and (max-width: 460px) {
-      max-width: 202px !important;
-    }
-    // & span {
-    //   max-width: 341px !important;
-    //   @media all and (max-width: 600px) {
-    //     max-width: 288px !important;
-    //   }
-    // }
+    min-width: 0;
   }
 }
 .w-full-chip {

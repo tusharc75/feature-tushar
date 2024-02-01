@@ -1150,6 +1150,36 @@ const routes = {
     title: storedRoutes && storedRoutes.fieldTicketInvoice && storedRoutes.fieldTicketInvoice.title ? storedRoutes.fieldTicketInvoice?.title : RESOURCE_LABEL.fieldTicketInvoice,
     path: '/field-ticket-invoice'
   },
+  payrollPolicy: {
+    title: storedRoutes && storedRoutes.payrollPolicy && storedRoutes.payrollPolicy.title ? storedRoutes.payrollPolicy?.title : RESOURCE_LABEL.payrollPolicy,
+    path: '/payroll-policy'
+  },
+  payrollPolicyDetail: {
+    title:
+      storedRoutes && storedRoutes.payrollPolicy && storedRoutes.payrollPolicy.title
+        ? storedRoutes.payrollPolicy?.title
+        : RESOURCE_LABEL.payrollPolicy,
+    path: '/payroll-policy/detail'
+  },
+  triggerNotificationMaster: {
+    title: storedRoutes && storedRoutes.triggerNotificationMaster && storedRoutes.triggerNotificationMaster.title ? storedRoutes.triggerNotificationMaster?.title : RESOURCE_LABEL.triggerNotificationMaster,
+    path: '/trigger-notification-master'
+  },
+  triggerNotificationMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.triggerNotificationMaster && storedRoutes.triggerNotificationMaster.title
+        ? storedRoutes.triggerNotificationMaster?.title
+        : RESOURCE_LABEL.triggerNotificationMaster,
+    path: '/trigger-notification-master/detail'
+  },
+  triggerNotificationHistory: {
+    title: storedRoutes && storedRoutes.triggerNotificationHistory && storedRoutes.triggerNotificationHistory.title ? storedRoutes.triggerNotificationHistory?.title : RESOURCE_LABEL.triggerNotificationHistory,
+    path: '/trigger-notification-history'
+  },
+  userAttendance: {
+    title: storedRoutes && storedRoutes.userAttendance && storedRoutes.userAttendance.title ? storedRoutes.userAttendance?.title : RESOURCE_LABEL.userAttendance,
+    path: '/user-attendance'
+  },
 };
 
 export default routes;

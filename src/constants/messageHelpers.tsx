@@ -27,7 +27,8 @@ export const rentalManagementActions = {
     cancelDeliveredTicket: 'Cancel Delivered Ticket',
     createRepairJob: 'Create Repair Job',
     createRepairOrder: 'Create Repair Order',
-    transferToAnotherRental: 'Transfer to another Rental'
+    transferToAnotherRental: 'Transfer to another Rental',
+    swapInUseAssets: 'Swap In-Use Assets'
 };
 
 export const rentalManagementMessage = {
@@ -37,7 +38,8 @@ export const rentalManagementMessage = {
     addServiceInPackage: 'Add Service in package to proceed',
     assignAssets: 'Assign Assets to proceed',
     loadingCreatedAndDelivered: 'Create and Deliver at least one Loading Ticket to proceed',
-    receivingCreatedAndDelivered: 'Create and Receive at least one Receiving or Return Ticket to proceed',
+    changeStatusToInUse: 'Change Assets status In-Use to proceed',
+    receivingCreatedAndDelivered: 'Create and Receive Receiving or Return Ticket to proceed',
     loadingAlreadyCreated: 'Loading Ticket is already created',
     loadingNotCreated: 'Loading Ticket is not created',
     loadingAlreadyDelivered: 'Loading Ticket is already delivered',
@@ -53,6 +55,7 @@ export const rentalManagementMessage = {
     receivingNotProduct: `Receiving Ticket cannot be created for product(s)`,
     receivingNotValidStatus: `Ticket cannot be created as asset status is not valid`,
     ticketNotForLost: `Ticket cannot be created for lost assets`,
+    onlySubleaseAsset: "Only Sublease assets can be selected for this action",
     notSubleaseAsset: "Sublease assets cannot be selected for this action",
     productsCanNotReplace: 'Product(s) cannot be replaced',
     loadingDeliveredForReplace: 'Loading Ticket must be delivered to replace assets',
@@ -66,6 +69,9 @@ export const rentalManagementMessage = {
     repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
     repairSameWarehouse: `Selected assets must be in same ${routes.warehouse.title} to perform this action`,
     transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
+    onlySwapAssets: 'Only Assets can be swapped',
+    onlySwapInUseAssets: 'Only In-Use assets can be swapped',
+    onlyAssetsCanBeRepaired: 'Only assets can be repaired'
 };
 
 export const subleaseActions = {

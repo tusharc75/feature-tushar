@@ -236,7 +236,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
             <Box display="flex" style={{ marginLeft: 'auto' }}>
               <ImportExportMenu
                 permissions={permissions?.packages}
-                module="packages-products"
+                module="packages"
                 api={`${product.api}/unknown/package`}
                 afterImportCompleted={() => {
                   fetchData();

@@ -145,7 +145,7 @@ const WorkOrderDetails = () => {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
-        setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
+        setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.status === WORK_ORDER_STATUS.onHold || data?.deleted ? true : false);
         setWorkOrderData({ ...data });
       })
       .catch((err) => {
@@ -248,6 +248,31 @@ const WorkOrderDetails = () => {
                       {isMobile && !isTablet ? <RiFileShredFill /> : `${ASSET_STATUS.scrap} Asset`}
                     </Button>
                   )}
+                {permissions?.workOrder?.isUpdate &&
+                  allowedToEdit &&
+                  (workOrderData?.status === WORK_ORDER_STATUS.onHold ?
+                    <HtmlTooltip title={`Change Status ${WORK_ORDER_STATUS.inProgress}`} placement="top" arrow>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        size="small"
+                        onClick={() => updateJobStatus(WORK_ORDER_STATUS.inProgress)}
+                        className={'btn-outline-v1'}
+                      >
+                        {WORK_ORDER_STATUS.inProgress}
+                      </Button>
+                    </HtmlTooltip> :
+                    [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status) ?
+                      <HtmlTooltip title={`Change Status ${WORK_ORDER_STATUS.onHold}`} placement="top" arrow>
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          size="small"
+                          onClick={() => updateJobStatus(WORK_ORDER_STATUS.onHold)}
+                          className={'btn-outline-v1'}
+                        >
+                          {WORK_ORDER_STATUS.onHold}
+                        </Button>
+                      </HtmlTooltip> : null)
+                }
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
                   workOrderData?.canComplete &&
@@ -375,7 +400,7 @@ const WorkOrderDetails = () => {
           )}
           {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
             <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawing
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawings
             </CustomTab>
           )}
           {!(isMobile && !isTablet) && (

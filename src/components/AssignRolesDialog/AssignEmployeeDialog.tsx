@@ -1,26 +1,23 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
-import { Box, Button, ButtonGroup, CircularProgress, Dialog, Grid, IconButton, TextField } from '@material-ui/core';
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import axiosInstance from 'src/axios/axiosInstance';
+import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import SearchBox from '../Helpers/SearchBox';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import {
+  employeeMaster,
   gridLoadingTimeout,
   isObjectEmpty,
-  packages,
   prepareDataForGrid,
-  getLocalStorageArrayData,
-  workOrder,
-  employeeMaster,
   sidebarResource
 } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomDialogContent from '../CustomDialog/CustomDialogContent';
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
-import { Autocomplete } from '@material-ui/lab';
+import routes from '../Helpers/Routes';
+import SearchBox from '../Helpers/SearchBox';
 
 let searchTimeout;
 
@@ -211,7 +208,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
                 </Grid>
                 <Grid item xs={12} md={6} className={styles.filter_side}>
                   <Box className={styles.filter_side_header} component="div">
-                    <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
+                    <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
                     <Button
                       disabled={isAssigning || disableSaveButton || selectedRecords?.length === 0}
                       onClick={handleSubmit}

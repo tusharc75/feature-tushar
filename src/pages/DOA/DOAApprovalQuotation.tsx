@@ -125,7 +125,6 @@ const DoaQuotationApproval = () => {
         }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.subRows = generateNestedData(material, parent);
     });
@@ -147,7 +146,6 @@ const DoaQuotationApproval = () => {
         }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = true;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -160,10 +158,6 @@ const DoaQuotationApproval = () => {
       e.isColumnEditable = false;
     });
     const newColumns = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     let column: any = [
       {
         accessor: 'index',

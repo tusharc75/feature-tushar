@@ -1,24 +1,23 @@
-import { Box, Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
-import {  useContext, useEffect, useReducer, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import routes from 'src/components/Helpers/Routes';
-import styles from '../Leads/Header.module.scss';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import { camelCase } from 'lodash';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { useData } from '../../StateProvider/Provider';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { gridLoadingTimeout, prepareDataForGrid,  sidebarResource } from 'src/constants/helpers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ManagePadMaster from './ManagePadMaster';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { useData } from '../../StateProvider/Provider';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ManagePadMaster from './ManagePadMaster';
 
 let searchTimeout;
 
@@ -44,16 +43,15 @@ const PadMaster = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.padMaster}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.padMasterDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(),ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const fetchPadMasterData =async () => {
+  const fetchPadMasterData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-    .get(`${routes?.padMaster.path}${queryString}`)
+      .get(`${routes?.padMaster.path}${queryString}`)
       .then(({ data: { data, count } }) => {
-        
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.padMaster?.isDelete;
@@ -132,7 +130,6 @@ const PadMaster = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -149,9 +146,8 @@ const PadMaster = () => {
             <IconButton
               size="small"
               aria-label="Clone"
-              
               onClick={() => {
-                setOpen({ open: true, isClone: true});
+                setOpen({ open: true, isClone: true });
               }}
             >
               <FileCopyIcon fontSize="small" color="primary" />
@@ -220,9 +216,9 @@ const PadMaster = () => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   return (
-<section className="main-container-v1">
+    <section className="main-container-v1">
       <div className="headerbox-v1">
-      <CustomBreadCrumbs routes={[ routes.padMaster ]} />
+        <CustomBreadCrumbs routes={[routes.padMaster]} />
         <ImportExportLinks
           permissions={permissions?.padMaster}
           module="padMaster"
@@ -245,7 +241,7 @@ const PadMaster = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.padMaster?.isCreate && (
                   <Button
@@ -254,7 +250,7 @@ const PadMaster = () => {
                     size="small"
                     className={`no-shadow`}
                     onClick={() => {
-                      setOpen({ open: true, isClone: false});
+                      setOpen({ open: true, isClone: false });
                     }}
                     startIcon={<AddOutlined />}
                   >
@@ -295,7 +291,7 @@ const PadMaster = () => {
                         }
                         onClick={() => {
                           closeActions();
-                         
+
                           {
                             selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
                           }
@@ -311,7 +307,7 @@ const PadMaster = () => {
             </div>
           </div>
         </div>
-         {columns ? (
+        {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
@@ -324,9 +320,11 @@ const PadMaster = () => {
             showFilters={true}
             resource={sidebarResource.padMaster}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog
@@ -341,16 +339,16 @@ const PadMaster = () => {
         />
       )}
       {open?.open && (
-          <ManagePadMaster
-            id={padMasterId}
-            isClone={open?.isClone}
-            onClose={() => setOpen({ open: false, isClone: false })}
-            onSuccess={() => {
-              setOpen({ open: false, isClone: false });
-              fetchPadMasterData();
-            }}
-          />
-        )}
+        <ManagePadMaster
+          id={padMasterId}
+          isClone={open?.isClone}
+          onClose={() => setOpen({ open: false, isClone: false })}
+          onSuccess={() => {
+            setOpen({ open: false, isClone: false });
+            fetchPadMasterData();
+          }}
+        />
+      )}
     </section>
   );
 };

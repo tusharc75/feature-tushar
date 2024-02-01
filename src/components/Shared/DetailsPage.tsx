@@ -333,7 +333,7 @@ const Details = (props: DetailProps) => {
                   newItem.innerHTML = '--';
                   target.parentNode.replaceChild(newItem, target);
                 }}
-                style={{ maxWidth: 50, maxHeight: 50, width: '100%', height: 'auto' }}
+                className='max-w-[50px] max-h-[50px] w-full block h-auto dark:[filter:invert(100%)]'
                 alt="Signature"
               />
             ) : (

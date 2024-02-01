@@ -1,42 +1,26 @@
-import { useState, FC, useEffect, useContext, useReducer, Fragment } from 'react';
 import {
-  Badge,
-  Box,
-  Button,
-  capitalize,
-  Chip,
-  ClickAwayListener,
-  Divider,
   Grid,
   IconButton,
-  InputBase,
-  List,
-  ListItem,
-  ListItemText,
-  Menu,
-  MenuItem,
-  TextField,
-  Tooltip,
-  Typography
+  TextField
 } from '@material-ui/core';
-import routes from './../../components/Helpers/Routes';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import { useData } from '../../StateProvider/Provider';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomContainer from '../../components/CustomContainer';
-import { Autocomplete } from '@material-ui/lab';
-import { isMobile, isTablet } from 'react-device-detect';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import axiosInstance from 'src/axios/axiosInstance';
-import styles2 from '../Leads/Header.module.scss';
 import CropFreeIcon from '@material-ui/icons/CropFree';
-import { camelCase, filter } from 'lodash';
 import HistoryIcon from '@material-ui/icons/History';
+import { Autocomplete } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import axiosInstance from 'src/axios/axiosInstance';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { cageManagement } from 'src/constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import CustomContainer from '../../components/CustomContainer';
 import Scan from '../Pos/Scan';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import CageHistory from './CageHistory';
 import ProductGridLayout from './Product';
 import QuantityDialog from './QuantityDialog';
-import { cageManagement } from 'src/constants/helpers';
-import CageHistory from './CageHistory';
 
 const CageManagement = () => {
   const renderedFrom = camelCase(routes?.cageManagement.title);
@@ -215,7 +199,6 @@ const CageManagement = () => {
                 onChange={(e) => {
                   setSearchVal(e.target.value);
                 }}
-                className={styles2.search_box_input}
                 value={searchVal}
                 size="small"
               />

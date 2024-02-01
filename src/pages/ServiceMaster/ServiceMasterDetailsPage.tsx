@@ -19,6 +19,7 @@ import Steps from './Steps';
 import Product from './Product';
 import { Skeleton } from '@material-ui/lab';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import ConfigureFields from './Fields';
 
 const ServiceMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,6 +32,7 @@ const ServiceMasterDetailsPage = () => {
   const [serviceMasterDetailData, setServiceMasterDetailData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [openConfigureFields, setOpenConfigureFields] = useState(false);
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -92,6 +94,18 @@ const ServiceMasterDetailsPage = () => {
               <Skeleton variant="text" width="150px" height="32px" />
             ) : (
               <>
+                {permissions?.product?.isUpdate && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={() => {
+                      setOpenConfigureFields(true);
+                    }}
+                  >
+                    Configure Fields
+                  </Button>
+                )}
                 {permissions?.product?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -184,6 +198,19 @@ const ServiceMasterDetailsPage = () => {
           onSuccess={() => {
             setOpenUpdateDialog(false);
             fetchData();
+          }}
+        />
+      )}
+
+      {openConfigureFields && (
+        <ConfigureFields
+          serviceId={id}
+          handleClose={() => {
+            setOpenConfigureFields(false);
+          }}
+          handleSucess={() => {
+            setOpenConfigureFields(false);
+            fetchData()
           }}
         />
       )}

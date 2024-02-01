@@ -112,10 +112,10 @@ const TransferAssetViews = (props) => {
           position: { x: xPosition, y: lIdx * 70 },
           style: customNodeStyles.loadingTicket
         });
-        loadingTicket?.productInventory?.map((productInventory) => {
+        loadingTicket?.assets?.map((_asset) => {
           flowEdge.push({
-            id: `asset-loading-${productInventory?.optionValue}-${loadingTicket._id}`,
-            source: productInventory?.optionValue,
+            id: `asset-loading-${_asset?.asset}-${loadingTicket._id}`,
+            source: _asset?.asset,
             target: loadingTicket._id,
             arrowHeadType: 'arrow'
           });

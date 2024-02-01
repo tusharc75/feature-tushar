@@ -118,13 +118,18 @@ const ChatNotification = () => {
         });
     }
 
-    setChatOpen(true);
-    setAnchorEl(null);
     if (d.chatterId) {
       const selectedChat = chatList.find((c) => c.id === d.chatterId);
-      if (selectedChat) setSelectedChat(selectedChat);
+      if (selectedChat) {
+        setAnchorEl(null);
+        setChatOpen(true);
+        setSelectedChat(selectedChat);
+      }
     }
   };
+  const isDisable = (d)=>{
+    return !Boolean(chatList.find((c) => c.id === d.chatterId))
+  }
 
   const handleClickHistory = (chat) => {
     setSelectedChat(chat);
@@ -223,6 +228,7 @@ const ChatNotification = () => {
             data={notificationData}
             setNewChat={setNewChat}
             handleClickHistory={handleClickHistory}
+            isDisable={isDisable}
           />
         )}
       </Popover>

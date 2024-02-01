@@ -1,35 +1,29 @@
-import { Box, Button, Chip, IconButton } from '@material-ui/core';
+import { Box, Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {
-  PLANNING_STATUS,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from '../../constants/helpers';
+import { PLANNING_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManagePlanning from './ManagePlanning';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem } from '@material-ui/core';
-import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import queryString from 'query-string';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 let searchTimeout;
 
 const Planning = () => {
@@ -150,7 +144,7 @@ const Planning = () => {
               </IconButton>
             </span>
           </HtmlTooltip>
-        ) : (
+        ) : row?.original?.canConvert ? (
           <HtmlTooltip title={permissions?.planning?.isUpdate ? 'Convert' : 'You do not have permission to convert'}>
             <span>
               <IconButton
@@ -165,21 +159,22 @@ const Planning = () => {
               </IconButton>
             </span>
           </HtmlTooltip>
-        )}
-        {row?.original?.canDelete && (
-          <HtmlTooltip title="Delete">
+        ) : null}
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
             <IconButton
               size="small"
               aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        )}
+          </span>
+        </HtmlTooltip>
       </>
     )
   };
@@ -226,6 +221,7 @@ const Planning = () => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.planning?.isUpdate;
+          finalObject['canConvert'] = !u?.canDelete;
           finalObject['canDelete'] = permissions?.planning?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           return finalObject;
         });
@@ -309,7 +305,9 @@ const Planning = () => {
           permissions={permissions?.planning}
           module={routes.planning.title}
           api={routes?.planning?.path}
-          afterImportCompleted={() => { fetchData() }}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -369,7 +367,7 @@ const Planning = () => {
               )}
             </div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
                   variant={'contained'}
@@ -441,9 +439,11 @@ const Planning = () => {
             showFilters={true}
             resource={sidebarResource.planning}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog

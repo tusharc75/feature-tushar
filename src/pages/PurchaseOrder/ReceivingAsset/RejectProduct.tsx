@@ -233,7 +233,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                     }}
                   />
                 </Box>
-                {product?.serializedProduct ? (
+                {product?.serializedProduct && user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory ? (
                   <Fragment>
                     <Box my={2} mx={1}>
                       <Divider />

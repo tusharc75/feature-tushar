@@ -87,7 +87,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         Header: 'Index',
         width: 120,
         sticky: 'left',
-        disableFilters : false,
+        disableFilters: false,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -98,24 +98,11 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
-        disabled : true,
-        disableFilters : true,
+        disabled: true,
+        disableFilters: true,
         Cell: ({ row }) =>
           row.original['type'] ? (
-            <p>
-              {`${startCase(row.original?.type)} `}
-              {/* {row.original['type'] === MATERIAL_TYPE.product
-                ? row.original?.productDetail?.serializedProduct
-                  ? '(Serialized)'
-                  : '(Non-Serialized)'
-                : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail?.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === MATERIAL_TYPE.service
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''} */}
-            </p>
+            <div><p className="text-truncate" title={startCase(row.original?.type)}> {startCase(row.original?.type)}</p></div>
           ) : (
             <NoDataCell />
           )
@@ -239,6 +226,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         obj.serializedAssetDetail = _asset?.serializedAssetDetail;
         obj.actualStartDate = product?.actualStartDate;
         obj.pricingMethod = product?.pricingMethod;
+        obj.qty = 1;
         newMaterial.push(obj);
       })
     }
@@ -477,9 +465,9 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                   isClientSideGrid={true}
                   hideSelection={!progressiveBilling}
                   expander={resource === sidebarResource.fieldTicket ? false : true}
-                  refreshGrid = {fetchData}
-                  dispatch = {dispatch}
-                  hideAction = {true}
+                  refreshGrid={fetchData}
+                  dispatch={dispatch}
+                  hideAction={true}
                 />
               </Box>
             ) : (

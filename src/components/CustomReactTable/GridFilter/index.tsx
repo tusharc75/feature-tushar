@@ -1,32 +1,39 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, TextField, Grid, Button, IconButton, Dialog, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
+import MomentUtils from '@date-io/moment';
+import { Box, Button, Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { isEmpty } from 'lodash';
+import moment from 'moment';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillEdit } from 'react-icons/ai';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
-import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import SaveFilterDialog from 'src/components/GridFilter/SaveFilterDialog';
+import { dateFormat, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import FormTypes from '../../Helpers/FormTypes';
-import { dateFormat, sidebarResource } from 'src/constants/helpers';
-import moment from 'moment';
+import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../Helpers/CommonSkeleton';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import SaveFilterDialog from 'src/components/GridFilter/SaveFilterDialog';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
-import { isEmpty } from 'lodash';
-import { isMobile, isTablet } from 'react-device-detect';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import FormTypes from '../../Helpers/FormTypes';
+import { fetchFieldOptions } from '../utils';
 
-function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
+function GridFilter({
+  resource,
+  handleClose,
+  setSelectedFilter,
+  selectedFilter,
+  currentFomValue,
+  setCurrentFomValue,
+  customFilters,
+  dispatch,
+}) {
   const toastConfig = useContext(CustomToastContext);
-
-  const [coloums, setColoums] = useState(null);
   const [formValues, setFormValues] = useState({});
-
+  const [coloums, setColoums] = useState(null)
   const [userFilters, setUserFilters] = useState([]);
   const [selectedUserFilter, setSelectedUserFilter] = useState(null);
 
@@ -37,7 +44,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   const [betweenDate, setBetweenDate] = useState(null);
 
   useEffect(() => {
-    fetchColumns();
+    fetchAllColumns();
     fetchUserFilters();
     if (currentFomValue) {
       for (const property in currentFomValue) {
@@ -50,69 +57,13 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
     setSelectedUserFilter(selectedFilter);
   }, []);
 
-  const FILTER_NOT_APPLIED = [
-    'fileUpload',
-    'multiFileUpload',
-    'imageUpload',
-    'multiImageUpload',
-    'richTextEditor',
-    'signature',
-    'colorPicker',
-    'number',
-    'decimal',
-    'switch'
-  ];
-
-  const fetchColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${resource}`)
-      .then(({ data: { data } }) => {
-        const coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
-        var modifiedColumn: any = coloum?.map((col: any) => {
-          const d = col.fieldData;
-          if (d?.type === 'dropDown') {
-            d.type = 'multiSelect';
-          }
-          return d;
-        });
-        if (resource === sidebarResource.user) {
-          modifiedColumn?.forEach((e) => {
-            if (e.fieldName === 'firstName') {
-              e.fieldName = 'concatedName';
-              e.fieldLabel = 'Name';
-              e.type = 'singleLine';
-            }
-          });
-          modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName');
-        } else if (
-          resource === sidebarResource.customerContact ||
-          resource === sidebarResource.supplierContact ||
-          resource === sidebarResource.lead
-        ) {
-          modifiedColumn?.forEach((e) => {
-            if (e.fieldName === 'firstName') {
-              e.fieldName = 'concatedName';
-              e.fieldLabel = 'Name';
-              e.type = 'singleLine';
-            }
-          });
-          modifiedColumn = modifiedColumn?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e.fieldName));
-        }
-        if (resource === sidebarResource.serializedAsset) {
-          const currentOwner: any = modifiedColumn?.find((e) => e.fieldName === 'currentOwner');
-          if (currentOwner) {
-            currentOwner.lookup = true;
-            currentOwner.option = [
-              ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.customerAccount)?.option || []),
-              ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.supplierAccount)?.option || [])
-            ];
-          }
-        }
-        setColoums(modifiedColumn);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchAllColumns = async () => {
+    try {
+      const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
+      setColoums(columns)
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const fetchUserFilters = () => {

@@ -225,7 +225,7 @@ const PurchaseOrderViews = (props) => {
           source: `${item?._id}`,
           target: `${pId}_received`
         });
-      })
+      });
       allSerializedAssets?.map((item, sIdx) => {
         flowEdge.push({
           id: `${pId}_${item}_received_edge`,
@@ -263,6 +263,13 @@ const PurchaseOrderViews = (props) => {
       //     target: `${pId}_closed`
       //   });
       // }
+      if (flowEdge.length === 0) {
+        flowEdge.push({
+          id: `${pId}_${pId}_edge`,
+          source: `${pId}`,
+          target: `${pId}_received`
+        });
+      }
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
     } catch (error) {

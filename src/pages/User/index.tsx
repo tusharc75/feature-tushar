@@ -4,10 +4,14 @@ import { camelCase, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
 import { FaUserAltSlash, FaUserCheck } from 'react-icons/all';
 import { Link, useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import AssignRolesDialog from '../../components/AssignRolesDialog/AssignRolesDialog';
 import CustomContainer from '../../components/CustomContainer';
@@ -20,13 +24,9 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from './../../constants/helpers';
 import ApprovalProcessDialog from './ApprovalProcessDialog';
+import GenerateAutoPassword from './GenerateAutoPassword';
 import ManageUserDialog from './ManageUserDialog';
 import UserSetupDialog from './UserSetupDialog';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { deleteDisable } from 'src/constants/messageHelpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import styles from '../Leads/Header.module.scss';
-import SearchBox from 'src/components/Helpers/SearchBox';
 
 let searchTimeout: ReturnType<typeof setTimeout>;
 
@@ -72,6 +72,7 @@ const User: FC = () => {
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [generateAutoPassword, setGenerateAutoPassword] = useState(false);
 
   const extraColumns = [
     {
@@ -632,7 +633,7 @@ const User: FC = () => {
                 )}
               </div>
               <div className="flex flex-wrap gap-[8px] justify-end">
-                <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+                <SearchBox onChange={handleSearch} value={search} size="small" />
                 <div className="flex gap-[8px] flex-wrap items-center">
                   <Button
                     variant={'contained'}
@@ -731,6 +732,16 @@ const User: FC = () => {
                     >
                       User Setup
                     </MenuItem>
+                    {user?.user?.userType === userType.brandAdmin && (
+                      <MenuItem
+                        onClick={() => {
+                          setGenerateAutoPassword(true);
+                          closeActions();
+                        }}
+                      >
+                        Generate Password
+                      </MenuItem>
+                    )}
                     <MenuItem
                       disabled={!permissions?.user?.isUpdate}
                       onClick={() => {
@@ -853,6 +864,15 @@ const User: FC = () => {
             selectedRecords={selectedRecords}
           />
         ) : null}
+
+        {generateAutoPassword && (
+          <GenerateAutoPassword
+            onClose={() => {
+              setGenerateAutoPassword(false);
+            }}
+            ids={selectedRecords?.map((d) => d?._id)}
+          />
+        )}
       </section>
     </>
   );

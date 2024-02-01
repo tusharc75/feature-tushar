@@ -185,8 +185,11 @@ const Login = () => {
                   <Form>
                     <UnauthenticatedTemplate>
                       <AzureLogin />
+                      {/* <FacialLogin
+                        dispatch={dispatch}
+                        notification={notification}
+                        chatNotification={chatNotification} /> */}
                     </UnauthenticatedTemplate>
-                    <FacialLogin />
                     <Box className={styles.or}>
                       <Typography>or sign in with</Typography>
                     </Box>

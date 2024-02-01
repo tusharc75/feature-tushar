@@ -1,5 +1,5 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import React, { useState, useEffect, Fragment, useContext } from 'react';
+import { Box, Button, Checkbox, IconButton, Menu, MenuItem, TextField, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -13,6 +13,7 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORK_ORDER_STATUS,
   productionOrder,
+  sidebarResource,
   workOrder
 } from '../../../constants/helpers';
 import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
@@ -20,7 +21,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CheckCircle, Delete, ExpandMore } from '@material-ui/icons';
+import { Add, CheckCircle, Delete, ExpandMore, CloudUpload } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
@@ -34,13 +35,16 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import SyncIcon from '@material-ui/icons/Sync';
+import UploadDrawingDialog from './UploadDrawingDialog';
+import DescriptionIcon from '@material-ui/icons/Description';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { Autocomplete } from '@material-ui/lab';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 var apiCallInterval: any = null;
 
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
-
   const {
     state: { user, permissions }
   }: any = useData();
@@ -54,6 +58,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
   const [userAssignDialog, setUserAssignDialog] = useState({ open: false, assignedUsers: [] });
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, assignedWorkStations: [] });
+  const [showServiceActionConfirmBox, setShowServiceActionConfirmBox] = useState({ open: false, action: '' });
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [arrangeView, setArrangeView] = useState(false);
   const [autoCompleteData, setAutoCompleteData] = useState(null);
@@ -65,13 +70,30 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
 
+  const [openUploadDrawingDialog, setOpenUploadDrawingDialog] = useState(false);
+
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
   const [isAutoCreating, setIsAutoCreating] = useState(true);
+
+  const [serviceOptions, setServiceOptions] = useState([]);
+  const [selectedServiceOption, setSelectedServiceOption] = useState(null);
   const { generateColumns } = useColumns();
 
   useEffect(() => {
     setNextStep(false);
     autoCreateWorkOrder();
+  }, []);
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.serviceMaster}`)
+      .then(({ data: { data } }) => {
+        setServiceOptions(data[sidebarResource.serviceMaster]);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   }, []);
 
   const autoCreateWorkOrder = async () => {
@@ -83,13 +105,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       if (apiCallInterval) {
         clearInterval(apiCallInterval);
       }
-      setIsAutoCreating(false)
+      setIsAutoCreating(false);
       checkAllWorkOrderComplete();
     } catch (error) {
-      setIsAutoCreating(false)
+      setIsAutoCreating(false);
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
   useEffect(() => {
     fetchFields();
@@ -100,11 +122,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     if (!!response?.data?.data?.isCompletedAll) {
       setNextStep(true);
     }
-  }
+  };
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
+    var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     data?.forEach((e) => {
       e.isColumnEditable = false;
@@ -160,49 +182,62 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         accessor: 'description',
         Header: 'Description',
         width: 200,
+        show: false,
         Cell: ({ row }) => {
           return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
         }
-      },
-      {
-        accessor: 'workOrder',
-        Header: 'Work Order',
-        width: 200,
-        Cell: ({ row }) =>
-          row.original.workOrder ? (
-            <div className="d-flex gap-2 align-items-center">
-              <h5 className="text-truncate">{row.original.workOrderNumber}</h5>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.workOrderDetail.path}/${row.original?.workOrder?._id}`);
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      {
-        accessor: 'status',
-        Header: 'Status',
-        width: 200,
-        Cell: ({ row }) => <div>{row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />}</div>
-      },
-      {
-        accessor: 'serviceStatus',
-        Header: 'Result',
-        width: 200,
-        Cell: ({ row }) => <div>{row?.original['serviceStatus'] ? <h5> {row?.original?.serviceStatus}</h5> : <NoDataCell />}</div>
-      },
-      {
-        accessor: 'assignedUsers',
-        Header: 'Assigned Technician',
-        width: 200,
-        Cell: ({ row }) =>
-          <div>{row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
+      }
+    ];
+    const workOrderCol = {
+      accessor: 'workOrder',
+      Header: 'Work Order',
+      width: 200,
+      Cell: ({ row }) =>
+        row.original.workOrder ? (
+          <div className="d-flex gap-2 align-items-center">
+            <h5 className="text-truncate">{row.original.workOrderNumber}</h5>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.workOrderDetail.path}/${row.original?.workOrder?._id}`);
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+    };
+    if (!newColumns?.find((e) => e.accessor === 'workOrderNumber')) {
+      coloum.push(workOrderCol);
+    }
+    newColumns?.forEach((e) => {
+      if (e.accessor === 'workOrderNumber') {
+        coloum.push(workOrderCol);
+      } else {
+        coloum.push(e);
+      }
+    });
+    coloum.push({
+      accessor: 'status',
+      Header: 'Status',
+      width: 200,
+      Cell: ({ row }) => <div>{row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />}</div>
+    });
+    coloum.push({
+      accessor: 'serviceStatus',
+      Header: 'Result',
+      width: 200,
+      Cell: ({ row }) => <div>{row?.original['serviceStatus'] ? <h5> {row?.original?.serviceStatus}</h5> : <NoDataCell />}</div>
+    });
+    coloum.push({
+      accessor: 'assignedUsers',
+      Header: 'Assigned Technician',
+      width: 200,
+      Cell: ({ row }) => (
+        <div>
+          {row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers']?.map((e, i) => {
               return i === row?.original['assignedUsers'].length - 1 ? (
                 <a
@@ -229,15 +264,16 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             })
           ) : (
             <NoDataCell />
-          )}</div>
-      }
-    ];
-    if (permissions?.workStations?.isRead) {
+          )}
+        </div>
+      )
+    });
+    if (permissions?.workStations) {
       coloum.push({
         accessor: 'assignedWorkStations',
         Header: 'Assigned Work Station',
         width: 200,
-        Cell: ({ row }) =>
+        Cell: ({ row }) => (
           <div>
             {row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
               row?.original['assignedWorkStations']?.map((e, i) => {
@@ -268,9 +304,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               <NoDataCell />
             )}
           </div>
+        )
       });
     }
-    coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
@@ -281,23 +317,36 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         return (
           <>
             {row?.original?.type === MATERIAL_TYPE.product && !row?.original?.parentId && (
-              <HtmlTooltip title="Auto Complete Work Order">
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setAutoCompleteData([row.original]);
-                    setCompleteConfirmBox(true);
-                  }}
-                  disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
-                >
-                  {row.original['workOrderStatus'] === 'Completed' ? (
-                    <CheckCircle className="[font-size:19px_!important] text-[var(--chip-color-completed)] dark:text-[var(--dark-yellow)]" />
-                  ) : (
-                    <AutoCompleteIcon size={18} />
-                  )}
-                </IconButton>
-              </HtmlTooltip>
+              <>
+                <HtmlTooltip title="Auto Complete Work Order">
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      setAutoCompleteData([row.original]);
+                      setCompleteConfirmBox(true);
+                    }}
+                    disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
+                  >
+                    {row.original['workOrderStatus'] === 'Completed' ? (
+                      <CheckCircle className="[font-size:19px_!important] text-[var(--chip-color-completed)] dark:text-[var(--dark-yellow)]" />
+                    ) : (
+                      <AutoCompleteIcon size={18} />
+                    )}
+                  </IconButton>
+                </HtmlTooltip>
+                <HtmlTooltip title="Drawings">
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      setShowDrawingDialog({ open: true, workOrder: row.original?.workOrder?._id });
+                    }}
+                  >
+                    <DescriptionIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              </>
             )}
             <HtmlTooltip title="Delete">
               <span>
@@ -322,7 +371,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(false);
   }, [page, limit, filters, sorting, isAutoCreating]);
 
   const getQueryString = (isExport = false) => {
@@ -347,9 +396,14 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (selectionReset = true) => {
     dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
+    if (selectionReset) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      if (selectedServiceOption) {
+        setSelectedServiceOption(null);
+      }
+    }
 
     const queryString = getQueryString();
     const {
@@ -378,7 +432,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         parent.hideSelection = true;
         parent.workOrderStatus = parent?.workOrder?.status;
       }
-      parent.status = parent?.workOrder?.status;
+      parent.status = parent?.workOrder?.serviceProcessStatus;
       parent.subRows = generateNestedData(data.material, parent);
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
         parent.canAutoCompleteWorkOrder = true;
@@ -419,8 +473,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
-      if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed ||
-        _subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+      if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         _subRow.hideSelection = true;
       }
       _subRow.canDelete = false;
@@ -470,7 +523,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const handleDelete = async () => {
-    if (deleteData?.some((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type) || (MATERIAL_TYPE.product === e.type && e.parentId))) {
+    if (
+      deleteData?.some((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type) || (MATERIAL_TYPE.product === e.type && e.parentId))
+    ) {
       setDeleting(true);
       const records: any = [];
       deleteData?.forEach((data) => {
@@ -563,7 +618,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           setCompleting(false);
           setCompleteConfirmBox(false);
           fetchData();
-          checkAllWorkOrderComplete()
+          checkAllWorkOrderComplete();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -644,26 +699,116 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     }
   };
 
-  const checkUniqCompetencies = () => {
-    if (selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length === 0) {
-      return true;
-    } else if (uniq((map(selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service), 'serviceDetail.competencies'))?.map((e) => e?.toString())).length === 1) {
-      return false;
+  const handleCompleteService = () => {
+    setSubmitting(true);
+    var records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service)
+    if (showServiceActionConfirmBox.action === 'revert') {
+      records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)
+    }
+    const data = records?.map((e) => ({
+      workOrder: e?.workOrder?._id,
+      service: e?.serviceDetail?._id,
+      uniqueId: e?.uniqueId,
+      status: showServiceActionConfirmBox.action
+    }));
+    axiosInstance()
+      .put(`${workOrder.api}/service/work-orders-services-status`, data)
+      .then(({ data }) => {
+        setSubmitting(false);
+        setShowServiceActionConfirmBox({ open: false, action: '' });
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((err) => {
+        setSubmitting(false);
+        setShowServiceActionConfirmBox({ open: false, action: '' });
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleServiceSelect = (newValue) => {
+    setSelectedServiceOption(newValue);
+    if (newValue) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      setTimeout(() => {
+        dispatch({
+          type: 'selection',
+          selectedRecords: flattenArray(dataRows)?.filter((_f) => [newValue?.optionValue].includes(_f?.serviceDetail?._id) && !_f?.hideSelection)
+        });
+      }, 100);
     } else {
+      dispatch({ type: 'selection', selectedRecords: [] });
+    }
+  };
+
+  const isDisabledCompleteService = () => {
+    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending);
+    if (records?.length === 0) {
       return true;
     }
+    if (records?.length !== selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service)?.length) {
+      return true;
+    }
+    const data = [];
+    records?.forEach((record) => {
+      let disabled = false;
+      if (record?.assignedUsers?.length > 0) {
+        if (!record?.assignedUsers?.map((a) => a?.optionValue).includes(user?.user?._id)) {
+          disabled = true;
+        }
+      }
+      if (!disabled) {
+        if (dataRows?.find((d) => d?._id === record?.parentId)?.subRows?.filter((s) => s?.order < record?.order)?.every((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status))
+        ) {
+          data.push(record);
+        }
+      }
+    });
+    return !(data?.length === records?.length);
   };
 
   return (
     <Fragment>
-      {isAutoCreating &&
+      {isAutoCreating && (
         <Box p={1} display="flex" alignItems="center">
-          <SyncIcon className="rotate" /> <Typography variant='subtitle2' >Work order Auto Creation in Progress</Typography>
-        </Box>}
-      <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
+          <SyncIcon className="rotate" /> <Typography variant="subtitle2">Work order Auto Creation in Progress</Typography>
+        </Box>
+      )}
+      <Box display="flex" alignItems="center" justifyContent={'space-between'} gridColumnGap={8} flex={1} m={1} my={1}>
+        <Box>
+          <Autocomplete
+            style={{ width: '300px' }}
+            options={serviceOptions}
+            getOptionLabel={(option) => option?.optionLabel || ''}
+            size="small"
+            renderInput={(params) => <TextField {...params} label="Select Service" variant="outlined" />}
+            value={selectedServiceOption}
+            onChange={(event: any, newValue: any) => {
+              handleServiceSelect(newValue);
+            }}
+          />
+        </Box>
         {allowedToEdit && (
           <Box display="flex" gridColumnGap={5}>
             <ImportExportMenu
+              permissions={permissions?.productionOrder}
+              module={routes.productionOrder.title}
+              api={`${productionOrder.api}/material/${productionOrderData._id}`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              recordsToExport={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).length}
+              ids={
+                selectedRecords?.length ? selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.map((obj) => obj._id) : []
+              }
+            />
+            <Box ml={1} />
+            {/* <ImportExportMenu
               permissions={permissions?.workOrder}
               module="Work Order Consumables"
               api={`${workOrder.api}/unknown/consumable`}
@@ -674,11 +819,38 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               title={'Consumables'}
               recordsToExport={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).length}
               ids={[]}
-              additionalParams={`workOrderIds=${JSON.stringify(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length ?
-                selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.map((e) => e?.workOrder?._id)
-                : dataRows?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).map((e) => e?.workOrder?._id))}`}
+              additionalParams={`workOrderIds=${JSON.stringify(
+                selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length
+                  ? selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.map((e) => e?.workOrder?._id)
+                  : dataRows?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).map((e) => e?.workOrder?._id)
+              )}`}
             />
-            <Box ml={1}></Box>
+            <Box ml={1} /> */}
+            <ImportExportMenu
+              permissions={permissions?.workOrder}
+              module={sidebarResource.workOrder}
+              api={`work-order-technician`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              title={'Steps Data'}
+              disabled={!(selectedRecords.length===1 && selectedRecords[0].type===MATERIAL_TYPE.service)}
+              additionalParams={`productionOrder=${productionOrderData._id}&serviceId=${selectedRecords[0]?.serviceDetail?._id}&uniqueId=${selectedRecords[0]?.uniqueId}`}
+            />
+            <Box ml={1} />
+            <Button
+              variant={'outlined'}
+              color="primary"
+              size="small"
+              startIcon={<CloudUpload />}
+              onClick={() => {
+                setOpenUploadDrawingDialog(true);
+              }}
+              aria-controls="add-menu"
+            >
+              Upload Drawings
+            </Button>
+            <Box ml={1} />
             <Button
               variant="outlined"
               color="default"
@@ -720,7 +892,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 Add New Service
               </MenuItem>
               <MenuItem
-                disabled={checkUniqCompetencies()}
+                disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length ? false : true}
                 onClick={() => {
                   closeActions();
                   const uniqueAssignedUsers: any = flatMap(
@@ -790,9 +962,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   closeActions();
                   setArrangeView(true);
                 }}
-                disabled={selectedRecords?.length &&
-                  selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-                  selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id) ? false : true
+                disabled={
+                  selectedRecords?.length &&
+                    selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+                    selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+                    ? false
+                    : true
                 }
               >
                 Arrange Services
@@ -837,6 +1012,34 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 }}
               >
                 Upload Documents
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
+                  closeActions();
+                }}
+                disabled={isDisabledCompleteService()}
+              >
+                Complete Service
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
+                  closeActions();
+                }}
+                disabled={isDisabledCompleteService()}
+              >
+                Skip Service
+              </MenuItem>
+              <MenuItem
+                disabled={selectedRecords?.length &&
+                  selectedRecords?.some(((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)) ? false : true}
+                onClick={() => {
+                  setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
+                  closeActions();
+                }}
+              >
+                Revert Service
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -926,7 +1129,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       )}
       {workStationAssignDialog.open && (
         <AssignWorkStationDialog
-          warehouse={productionOrderData?.warehouse}
+          warehouse={productionOrderData?.warehouse?.optionValue}
           workOrderData={selectedRecords
             .filter((e) => e.type === MATERIAL_TYPE.service)
             .map((d) => {
@@ -948,8 +1151,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       {arrangeView && (
         <ArrangeView
           data={
-            flattenArray(dataRows)?.filter((e) => e.type === MATERIAL_TYPE.service
-              && e?.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+            flattenArray(dataRows)
+              ?.filter((e) => e.type === MATERIAL_TYPE.service && e?.workOrder?._id === selectedRecords[0]?.workOrder?._id)
               ?.map((d) => {
                 return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
               }) || []
@@ -958,6 +1161,18 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           handleClose={() => setArrangeView(false)}
           handleSubmit={(data) => handleArrangeUpdate(data, selectedRecords[0]?.workOrder?._id)}
           loading={false}
+        />
+      )}
+      {showServiceActionConfirmBox.open && (
+        <ConfirmationDialog
+          okBtnLoading={isSubmitting}
+          open={showServiceActionConfirmBox.open}
+          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed ? 'complete' :
+            showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped ? 'skip' : 'revert'} this Service(s)`}
+          onClose={() => {
+            setShowServiceActionConfirmBox({ open: false, action: '' });
+          }}
+          onOk={handleCompleteService}
         />
       )}
       {showConfirmBox && (
@@ -1016,6 +1231,18 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               uniqueServiceId: null,
               serviceName: null
             });
+          }}
+        />
+      )}
+      {openUploadDrawingDialog && (
+        <UploadDrawingDialog productionOrderData={productionOrderData} handleClose={() => setOpenUploadDrawingDialog(false)} />
+      )}
+      {showDrawingDialog.open && (
+        <DiagramDialog
+          referenceId={showDrawingDialog.workOrder}
+          currentVersion={null}
+          handleClose={() => {
+            setShowDrawingDialog({ open: false, workOrder: null });
           }}
         />
       )}

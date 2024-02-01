@@ -353,7 +353,7 @@ const Steps = ({ serviceId }) => {
 
                 <ImportExportMenu
                   permissions={permissions?.packages}
-                  module="packages-products"
+                  module="stpes"
                   api={`${serviceMaster.api}/steps/${serviceId}`}
                   afterImportCompleted={() => {
                     fetchStepsData();

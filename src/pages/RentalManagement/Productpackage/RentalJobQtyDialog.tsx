@@ -67,14 +67,16 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
-  const [priceConditionList, setPriceConditionList] = useState([]);
-  const [priceConditionListConst, setPriceConditionListConst] = useState([]);
-  const [priceMethodList, setPriceMethodList] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
   const { isOffline } = useContext(CustomOfflineContext);
+
+  const [priceConditionListConst, setPriceConditionListConst] = useState([]);
+  const [priceMethodListConst, setPriceMethodListConst] = useState([]);
+  const [priceConditionList, setPriceConditionList] = useState([]);
+  const [priceMethodList, setPriceMethodList] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -82,19 +84,35 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
 
   const fetchTaxRate = async (billingAddress: any) => {
     const zipCode = billingAddress?.zipCode;
-    const state = billingAddress?.state
+    const state = billingAddress?.state;
     let materialType;
-    if (isBulkedit)
-      materialType = rowData[0]?.type;
-    else
-      materialType = rowData?.type
+    if (isBulkedit) materialType = rowData[0]?.type;
+    else materialType = rowData?.type;
     try {
-      const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}`);
+      const response = await axiosInstance().get(
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}`
+      );
       return response?.data?.data || [];
     } catch (e) {
       toastConfig.setToastConfig(e);
     }
   };
+
+  useEffect(() => {
+    if (ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
+      const { setErrors, setTouched } = ref.current;
+      let errors: any = {};
+      let touched: any = {};
+      initialData.fields.forEach(({ fieldName, required, fieldLabel }) => {
+        if (required && !initialData.values[fieldName]) {
+          errors[fieldName] = fieldLabel + ' is a required field';
+          touched[fieldName] = true;
+        }
+      });
+      setErrors(errors);
+      setTouched(touched);
+    }
+  }, [initialData, ref.current, isInlineEdit]);
 
   const fetchData = async () => {
     setFetchingData(true);
@@ -149,7 +167,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
           actualJobDuration: ''
         }
       });
-      setFetchingData(false);
     } else {
       let unitOptions: any = [];
       let pricingMethodOptions: any = [];
@@ -159,19 +176,14 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
-      setPriceMethodList(pricingMethodOptions);
-      let pricingConditionOptions = await getPricing(rowData, pricingMethodOptions);
+      setPriceMethodListConst(pricingMethodOptions);
+      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
       data.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
-        }
-        if (element.fieldName === 'pricingCondition') {
-          if (Array.isArray(pricingConditionOptions)) {
-            element.option = pricingConditionOptions;
-          }
         }
         // if (element.fieldName === "qty" && rowData?.serializedProduct === false && rowData?.hideSelection) {
         //   element.isUneditable = true;
@@ -181,45 +193,28 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
       }
 
-      let initialValues = getObjKeysWithValues(rowData, data);
-      const priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+      // let initialValues = getObjKeysWithValues(rowData, data);
+      // const priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
 
-      if (rowData[priceFieldName]) {
-        getPricing({ ...initialValues, [priceFieldName]: rowData[priceFieldName] }).then((price: any) => {
-          const result = autoCalculateSpecificFields({ [priceFieldName]: price, [priceFieldName]: rowData[priceFieldName] }, initialValues, data);
-          initialValues = { ...initialValues, ...result };
-          setInitialData({
-            fields: data,
-            values: initialValues
-          });
-        });
-      } else {
+      // if (rowData[priceFieldName]) {
+      //   getPricing({ ...initialValues, [priceFieldName]: rowData[priceFieldName] }).then((price: any) => {
+      //     const result = autoCalculateSpecificFields({ [priceFieldName]: price, [priceFieldName]: rowData[priceFieldName] }, initialValues, data);
+      //     initialValues = { ...initialValues, ...result };
+      //     setInitialData({
+      //       fields: data,
+      //       values: initialValues
+      //     });
+      //   });
+      // } else {
         setInitialData({
           fields: data,
-          values: initialValues
+          values: getObjKeysWithValues(rowData, data)
         });
-      }
-      setFetchingData(false);
+      // }
     }
     EvaluteproductFields(data);
     setFetchingData(false);
   };
-
-  useEffect(() => {
-    if (ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
-      const { setErrors, setTouched } = ref.current;
-      let errors: any = {};
-      let touched: any = {};
-      initialData.fields.forEach(({ fieldName, required, fieldLabel }) => {
-        if (required && !initialData.values[fieldName]) {
-          errors[fieldName] = fieldLabel + ' is a required field';
-          touched[fieldName] = true;
-        }
-      });
-      setErrors(errors);
-      setTouched(touched);
-    }
-  }, [initialData, ref.current, isInlineEdit]);
 
   const EvaluteproductFields = async (fields) => {
     if (isQtyOnly) {
@@ -229,7 +224,10 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    if (rentalManagementData?.customerAccount?.taxApplicable && (rentalManagementData?.billingAddress?.zipCode || rentalManagementData?.billingAddress?.state)) {
+    if (
+      rentalManagementData?.customerAccount?.taxApplicable &&
+      (rentalManagementData?.billingAddress?.zipCode || rentalManagementData?.billingAddress?.state)
+    ) {
       const taxCodeOptions = await fetchTaxRate(rentalManagementData?.billingAddress);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -340,8 +338,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       }
       const updatedRows: any = [];
       rows?.forEach((ele) => {
-        updatedRows.push({ _id: ele._id, ...getObjKeysWithValues(ele, allFields) })
-      })
+        updatedRows.push({ _id: ele._id, ...getObjKeysWithValues(ele, allFields) });
+      });
       handleSaveData(updatedRows);
     } else {
       if (rowData.parentId && !showConfirmationDialog) {
@@ -354,63 +352,58 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  async function getPricing(values: any, pricingMethodOptions: any = null) {
+  async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
     if (rowData) {
-      if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
-        const priceData: any = await calculatePrice(rentalManagementData, [
-          {
-            materialId: rowData.materialId,
-            type: rowData.type,
-            qty: values.qty,
-            pricingMethod: pricingMethodOptions ? pricingMethodOptions.map((d) => d.optionLabel).join() : values?.pricingMethod,
-            unit: values.unit
-          }
-        ]);
-        let tempPriceData = priceData.filter((d) => d.mrp !== undefined && d.mrp !== null && d.mrp !== 0);
-        setPriceConditionList(
-          uniqBy(
-            tempPriceData.map((d) => {
-              return {
-                optionLabel: d?.conditionName,
-                optionValue: d?.conditionId
-              };
-            }),
-            'optionValue'
-          )
-        );
-        if (pricingMethodOptions) {
-          setPriceConditionListConst(tempPriceData);
-          setPriceMethodList(
-            tempPriceData
-              .filter((d) => d.conditionId === rowData['pricingCondition']?.optionValue)
-              .map((d) => {
-                return {
-                  optionLabel: d?.pricingMethod,
-                  optionValue: d?.pricingMethod
-                };
-              })
-          );
-          return uniqBy(
-            tempPriceData.map((d) => {
-              return {
-                optionLabel: d?.conditionName,
-                optionValue: d?.conditionId
-              };
-            }),
-            'optionValue'
-          );
+      const priceData: any = await calculatePrice(rentalManagementData, [
+        {
+          materialId: rowData.materialId,
+          type: rowData.type,
+          qty: 1,
+          pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || '',
+          unit: unitOptions?.map((d) => d.optionLabel)
         }
-        if (priceData && priceData.length) {
-          let pricingConditionIndex = priceData.findIndex((d) => d?.conditionId === values?.pricingCondition);
-          let price: any = pricingConditionIndex > -1 ? priceData[pricingConditionIndex]?.mrp : 0;
-          return price;
-        }
-        return 0;
-      } else {
-        return 0;
-      }
+      ]);
+      setPriceConditionListConst(priceData || []);
+      updateRateChangeState(values, priceData, pricingMethodOptions);
     }
   }
+
+  const updateRateChangeState = (values: any, priceData: any, pricingMethodOptions: any) => {
+    var tempPriceCondition = [...priceData];
+    if (values['unit'] && values['unit'] !== '') {
+      tempPriceCondition = tempPriceCondition?.filter((e) => e.unit === values['unit']);
+    }
+    if (values['pricingMethod'] && values['pricingMethod'] !== '') {
+      tempPriceCondition = tempPriceCondition?.filter((e) => e.pricingMethod === values['pricingMethod']);
+    }
+    tempPriceCondition = uniqBy(
+      tempPriceCondition?.map((d) => {
+        return {
+          optionLabel: d?.conditionName,
+          optionValue: d?.conditionId
+        };
+      }),
+      'optionValue'
+    );
+    setPriceConditionList(tempPriceCondition);
+    var tempPricingMethod = pricingMethodOptions;
+    if (values['pricingCondition'] && values['pricingCondition'] !== '') {
+      tempPricingMethod = uniqBy(
+        priceData
+          ?.filter((d) => d.conditionId === values['pricingCondition'] || values['pricingCondition']?.optionValue)
+          ?.map((d) => {
+            return {
+              optionLabel: d?.pricingMethod,
+              optionValue: d?.pricingMethod
+            };
+          }),
+        'optionValue'
+      );
+    }
+    setPriceMethodList(tempPricingMethod);
+
+    return { tempPriceCondition, tempPricingMethod };
+  };
 
   function validate(values) {
     const errors = {};
@@ -528,55 +521,43 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           type={field.type}
-                                          options={
-                                            field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
-                                              ? priceMethodList
-                                              : field.fieldName === 'pricingCondition' && values['pricingMethod']
-                                                ? priceConditionList
-                                                : field.option
-                                          }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
+                                          options={field.fieldName === 'pricingCondition' ? priceConditionList :
+                                            field.fieldName === 'pricingMethod' ? priceMethodList : field.option}
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            if (field.fieldName === 'pricingCondition') {
-                                              setFieldValue('pricingMethod', '');
-                                              setPriceMethodList(
-                                                priceConditionListConst
-                                                  ?.filter((d) => d.conditionId === value)
-                                                  .map((d) => {
-                                                    return {
-                                                      optionLabel: d?.pricingMethod,
-                                                      optionValue: d?.pricingMethod
-                                                    };
-                                                  })
-                                              );
-                                              let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-                                              const result = autoCalculateSpecificFields(
-                                                { [priceFieldName]: 0, [field.fieldName]: value },
-                                                values,
-                                                initialData.fields
-                                              );
-                                              if (Object.keys(result).length >= 1) {
-                                                for (var x in result) {
-                                                  setFieldValue(x, result[x]);
-                                                }
+                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
+                                            if (values['pricingCondition']) {
+                                              if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
+                                                setFieldValue('pricingCondition', '');
+                                                setPriceMethodList(priceMethodListConst);
                                               }
+                                            }
+                                            if (values['pricingMethod']) {
+                                              if (!tempPricingMethod?.find((e) => e.optionValue === values['pricingMethod'])) {
+                                                setFieldValue('pricingMethod', '');
+                                              }
+                                            }
+                                            let priceValue
+                                            if (field.fieldName === 'pricingCondition') {
+                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
+                                            } else if (field.fieldName === 'pricingMethod') {
+                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.unit === values['unit']);
                                             } else {
-                                              getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
-                                                let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-                                                const result = autoCalculateSpecificFields(
-                                                  { [priceFieldName]: price, [field.fieldName]: value },
-                                                  values,
-                                                  initialData.fields
-                                                );
-                                                if (Object.keys(result).length >= 1) {
-                                                  for (var x in result) {
-                                                    setFieldValue(x, result[x]);
-                                                  }
-                                                }
-                                              });
+                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === values['pricingMethod'] && d.unit === value);
+                                            }
+                                            let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+                                            const result = autoCalculateSpecificFields(
+                                              { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
+                                              values,
+                                              initialData.fields
+                                            );
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
                                             }
                                           }}
                                           required={field.required}

@@ -1,21 +1,19 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import styles from '../Leads/Header.module.scss';
-import cardStyle from '../ReportMaster/index.module.scss';
-import CustomContainer from 'src/components/CustomContainer';
-import routes from 'src/components/Helpers/Routes';
-import { Link } from 'react-router-dom';
-import { serializedAsset } from '../../constants/helpers';
-import axiosInstance from 'src/axios/axiosInstance';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import DashBoardCardShell from 'src/components/DashBoardCardShell';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { getColors } from '../Home/helpers';
-import { DataPointsIcon } from 'src/assets/svg/svgIcons';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { Box, Button, Typography } from '@material-ui/core';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
+import { useContext, useEffect, useState } from 'react';
 import { MdChevronLeft } from 'react-icons/md';
+import { Link } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { DataPointsIcon } from 'src/assets/svg/svgIcons';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import DashBoardCardShell from 'src/components/DashBoardCardShell';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { serializedAsset } from '../../constants/helpers';
+import cardStyle from '../ReportMaster/index.module.scss';
 
 function IotChart() {
   const toastConfig = useContext(CustomToastContext);

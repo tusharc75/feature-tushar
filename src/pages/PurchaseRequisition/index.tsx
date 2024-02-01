@@ -1,7 +1,14 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -9,20 +16,10 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Box } from '@material-ui/core';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -284,7 +281,7 @@ const PurchaseRequisition = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
                   variant={'contained'}
