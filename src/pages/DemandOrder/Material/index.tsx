@@ -28,7 +28,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { generateColumns } = useColumns()
+  const { generateColumns } = useColumns();
 
   const [isUpdating, setUpdating] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -53,7 +53,15 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, demandOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, demandOrderData?.currency || 'USD');
+    const newColumns = generateColumns(
+      renderedFrom,
+      data?.map((e) => {
+        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
+      }),
+      null,
+      false,
+      demandOrderData?.currency || 'USD'
+    );
     let coloum: any = [
       {
         accessor: 'index',
@@ -89,7 +97,8 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext:
+                      row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -155,7 +164,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, table }) =>
+      Cell: ({ row, table }) => (
         <Grid container spacing={1}>
           <IconButton
             size="small"
@@ -178,7 +187,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
             <DeleteIcon fontSize="small" color="error" />
           </IconButton>
         </Grid>
-
+      )
     });
     setColumns(coloum);
     fetchData();
@@ -221,14 +230,14 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.serviceDetail?.serviceName;
+          ? _subRow.packageDetail?.packageName
+          : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -466,6 +475,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
               state={state}
               dispatch={dispatch}
               refreshGrid={fetchData}
+              exportTable={true}
             />
           </Box>
         </>

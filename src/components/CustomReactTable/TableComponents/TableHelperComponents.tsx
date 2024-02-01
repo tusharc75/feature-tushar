@@ -9,6 +9,24 @@ import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
 
 export type TColType = {
+  Header: string;
+  header: string;
+  type?:
+    | 'mobileNumber'
+    | 'phone'
+    | 'email'
+    | 'imageUpload'
+    | 'date'
+    | 'dateTime'
+    | 'colorPicker'
+    | 'checkBox'
+    | 'number'
+    | 'signature'
+    | 'decimal'
+    | 'currencyAmount'
+    | 'converter';
+  currency?: string;
+  accessorFn: (data: any) => string;
   sticky: undefined | 'left' | 'right';
   disableFilters: undefined | boolean;
   disableSortBy: undefined | boolean;

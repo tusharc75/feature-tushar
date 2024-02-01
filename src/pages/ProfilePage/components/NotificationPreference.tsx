@@ -29,13 +29,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const RenderCheckBox = ({ name, val, id, onChange }) => (
+const RenderCheckBox = ({ name, val, id, onChange, isDisable }) => (
   // <FormControlLabel
   //     control={<Checkbox size="small" checked={val}
   //         onChange={(e) => onChange(e.target.checked, id, name)} name={name} />}
   //     label={name}
   // />
-  <Checkbox checked={val} onChange={(e) => onChange(e.target.checked, id, name)} name={name} />
+  <Checkbox disabled={isDisable} checked={val} onChange={(e) => onChange(e.target.checked, id, name)} name={name} />
 );
 
 const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
@@ -62,6 +62,7 @@ export default function NotificationPreference({ notificationPreferenceData, use
   const toastConfig = useContext(CustomToastContext);
   const [rows, setRows] = useState(notificationPreferenceData);
   const [isUpdating, setUpdating] = useState(false);
+  const [isEdit,setIsEdit]=  useState(false);
   const [isAllPreference, setAllPreference] = useState({
     portal: notificationPreferenceData.every((d) => d.portal),
     email: notificationPreferenceData.every((d) => d.email)
@@ -123,6 +124,7 @@ export default function NotificationPreference({ notificationPreferenceData, use
         });
         onSuccess();
         setUpdating(false);
+        setIsEdit(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -151,6 +153,7 @@ export default function NotificationPreference({ notificationPreferenceData, use
         </Box>
         <div className="header-panel">
           <div className="flex flex-wrap gap-[8px] justify-end">
+            {isEdit && (
             <Button
               disabled={isUpdating}
               variant="contained"
@@ -163,6 +166,20 @@ export default function NotificationPreference({ notificationPreferenceData, use
               {isUpdating && <CircularProgress size={22} />}
               Update
             </Button>
+            )}
+            {!isEdit && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={() => {
+                setIsEdit(!isEdit)
+              }}
+            >
+              {isUpdating && <CircularProgress size={22} />}
+              Edit
+            </Button>
+            )}
           </div>
         </div>
         <TableContainer component={Paper}>
@@ -172,14 +189,14 @@ export default function NotificationPreference({ notificationPreferenceData, use
               <TableCell padding="checkbox">
                 <FormControlLabel
                   className={classes.label}
-                  control={<Checkbox checked={isAllPreference.portal} onChange={() => handleSelectAll('portal')} title="Portal" />}
+                  control={<Checkbox checked={isAllPreference.portal} disabled={!isEdit} onChange={() => handleSelectAll('portal')} title="Portal" />}
                   label="Portal"
                 />
               </TableCell>
               <TableCell padding="checkbox">
                 <FormControlLabel
                   className={classes.label}
-                  control={<Checkbox checked={isAllPreference.email} onChange={() => handleSelectAll('email')} title="Email" />}
+                  control={<Checkbox checked={isAllPreference.email} disabled={!isEdit} onChange={() => handleSelectAll('email')} title="Email" />}
                   label="Email"
                 />
               </TableCell>
@@ -191,10 +208,10 @@ export default function NotificationPreference({ notificationPreferenceData, use
                     {row.name}
                   </TableCell>
                   <TableCell padding="checkbox">
-                    <RenderCheckBox name="portal" val={row.portal} id={row.id} onChange={handleChange} />
+                    <RenderCheckBox name="portal" val={row.portal} id={row.id} onChange={handleChange} isDisable={!isEdit} />
                   </TableCell>
                   <TableCell padding="checkbox">
-                    <RenderCheckBox name="email" val={row.email} onChange={handleChange} id={row.id} />
+                    <RenderCheckBox name="email" val={row.email} onChange={handleChange} id={row.id} isDisable={!isEdit} />
                   </TableCell>
                 </TableRow>
               ))}
