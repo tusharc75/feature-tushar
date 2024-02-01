@@ -1,6 +1,7 @@
 .gradient {
   position: relative;
   padding-bottom: 15px;
+  padding-top: 5px;
   &::before {
     content: '';
     position: absolute;
