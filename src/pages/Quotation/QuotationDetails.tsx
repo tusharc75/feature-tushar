@@ -333,10 +333,10 @@ const QuotationDetails = () => {
         setShowConfirmBox(false);
       });
   };
-
+console.log(currVersionId)
   const handleConvert = () => {
     axiosInstance()
-    .post(`${quotation.api}/${quotationData._id}/convert/${currVersionId}`)
+    .post(`${quotation.api}/convert`,{quotationId:quotationData._id, versionId:currVersionId})
       .then(({ data: { data } }) => {
         fetchQuotationData();
         setConvertConfirmBox(false);
