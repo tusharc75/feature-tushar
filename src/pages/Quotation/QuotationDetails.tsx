@@ -336,7 +336,7 @@ const QuotationDetails = () => {
 
   const handleConvert = () => {
     axiosInstance()
-      .post(`${quotation.api}/${quotationData._id}/convert`)
+    .post(`${quotation.api}/${quotationData._id}/convert/${currVersionId}`)
       .then(({ data: { data } }) => {
         fetchQuotationData();
         setConvertConfirmBox(false);
