@@ -2534,8 +2534,8 @@ export const COLOUR_MASTER = {
     borderColor: '#db765c'
   },
   replaceAssetColor: {
-    background: '#FFFF99',
-    borderColor: '#FFFF99'
+    background: 'var(--replaceAsset-bg)',
+    borderColor: 'var(--replaceAsset-bg)'
   }
 };
 
