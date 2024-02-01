@@ -608,14 +608,15 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 Add Existing Packages
               </MenuItem>
             )}
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddDialog({ open: true, type: 'service', parentId: null });
-              }}
-            >
-              Add Existing Services
-            </MenuItem>
+            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null :
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddDialog({ open: true, type: 'service', parentId: null });
+                }}
+              >
+                Add Existing Services
+              </MenuItem>}
           </Menu>
         </Box>
         <Box display="flex">
