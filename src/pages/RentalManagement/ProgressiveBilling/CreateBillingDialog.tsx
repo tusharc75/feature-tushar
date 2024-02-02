@@ -58,7 +58,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [proRata, setProRata] = useState(true);
 
   const { state, dispatch } = useTableReducer();
-  const { selectedRecords, dataRows } = state;
+  const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   useEffect(() => {
