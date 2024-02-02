@@ -361,6 +361,7 @@ const RepairOrder = () => {
         <ListingPageHeader
           toggleButtonList={types}
           onToggle={onTypeChange}
+          setQueryString={false}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
           leftSideContents={
