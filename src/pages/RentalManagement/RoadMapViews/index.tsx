@@ -487,41 +487,41 @@ const RentalManagementViews = (props) => {
           style: item.status === 'Delivered' ? customDeliveredNodeStyle.loadingTicket : customNodeStyles.loadingTicket
         });
 
-        item?.productInventory?.map((product: any, productIndex) => {
+        item?.assets?.map((asset: any, productIndex) => {
           flow.push({
-            id: `${product.optionValue}`,
+            id: `${asset.optionValue}`,
             sourcePosition: 'right',
             targetPosition: 'left',
             type: 'default',
             data: {
               ref_type: 'asset',
-              ref_id: product.optionValue,
+              ref_id: asset.optionValue,
               label: (
-                <HtmlTooltip arrow placement="top" title={productsWithStatus[product.optionValue]}>
-                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.optionLabel}</div>
+                <HtmlTooltip arrow placement="top" title={productsWithStatus[asset.optionValue]}>
+                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{asset.optionLabel}</div>
                 </HtmlTooltip>
               )
             },
             position: { x: xPosition + 300, y: loadingAssets * 80 },
             style:
-              productsWithStatus[product.optionValue] === ASSET_STATUS.lost || productsWithStatus[product.optionValue] === ASSET_STATUS.scrap
-                ? productsWithStatus[product.optionValue] === ASSET_STATUS.lost
+              productsWithStatus[asset.optionValue] === ASSET_STATUS.lost || productsWithStatus[asset.optionValue] === ASSET_STATUS.scrap
+                ? productsWithStatus[asset.optionValue] === ASSET_STATUS.lost
                   ? customNodeStyles.lostAssets
                   : customNodeStyles.scrapAssets
                 : customNodeStyles.productAssets
           });
           loadingAssets += 1;
           flowEdge.push({
-            id: `edge-loading-${item._id}-${product.optionValue}`,
-            source: `${product.optionLabel}-${product.optionValue}`,
+            id: `edge-loading-${item._id}-${asset.optionValue}`,
+            source: `${asset.optionLabel}-${asset.optionValue}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
           });
           flowEdge.push({
-            id: `edge-loading-assets-${product.optionValue}`,
+            id: `edge-loading-assets-${asset.optionValue}`,
             source: `${item._id}`,
             arrowHeadType: 'arrow',
-            target: `${product.optionValue}`
+            target: `${asset.optionValue}`
           });
         });
       });
@@ -617,10 +617,10 @@ const RentalManagementViews = (props) => {
         });
         lastYPosition = receivingAndReturnIdx * 80;
         receivingAndReturnIdx += 1;
-        item.productInventory?.map((product: any) => {
+        item.assets?.map((asset: any) => {
           flowEdge.push({
-            id: `edge-receiving-${product.optionValue}`,
-            source: `${product.optionValue}`,
+            id: `edge-receiving-${asset.optionValue}`,
+            source: `${asset.optionValue}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
           });
@@ -705,10 +705,10 @@ const RentalManagementViews = (props) => {
         });
         lastYPosition = receivingAndReturnIdx * 80;
         receivingAndReturnIdx += 1;
-        item.productInventory?.map((product: any) => {
+        item.assets?.map((asset: any) => {
           flowEdge.push({
-            id: `edge-return-${product.optionValue}`,
-            source: `${product.optionValue}`,
+            id: `edge-return-${asset.optionValue}`,
+            source: `${asset.optionValue}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
           });
