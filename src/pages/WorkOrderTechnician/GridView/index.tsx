@@ -282,7 +282,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
                 fetchData();
               }}
               disabled={selectedRecords.length!==1}
-              additionalParams={`productionOrder=${selectedRecords[0]?.productionOrderId}&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
+              additionalParams={`${selectedRecords[0]?.repairOrderId ? `repairOrder=${selectedRecords[0]?.repairOrderId}` : `productionOrder=${selectedRecords[0]?.productionOrderId}`}&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
             />
             <Button
               variant="outlined"
