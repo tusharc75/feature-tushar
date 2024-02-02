@@ -35,9 +35,9 @@ import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
+  
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = 'rental_management_serialized_asset';
-  const history = useHistory();
 
   const [deleting, setDeleting] = useState(false);
   const [isAdding, setAdding] = useState(false);
@@ -60,7 +60,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords, loading } = state;
+  const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -68,12 +68,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   useEffect(() => {
     fetchFields();
   }, []);
-
-  useEffect(()=>{
-    if(loading){
-      setNextStep(false)
-    }
-  },[loading])
 
   const OpenInNewWindow = (url) => {
     window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank');
@@ -272,7 +266,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
     fetchData();
-    // setNextStep(true);
   };
 
   const checkProductInside = (item, material) => {
@@ -643,12 +636,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             type: 'success',
             message: data.message
           });
-          // setNextStep(true);
         })
         .catch((error) => {
           setAdding(false);
           toastConfig.setToastConfig(error);
-          setNextStep(true);
         });
     }
   };
@@ -674,13 +665,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             fetchData();
             setDeleteData(null);
             setShowConfirmBox(false);
-            // setNextStep(true);
           })
           .catch((error) => {
             setDeleting(false);
             toastConfig.setToastConfig(error);
             setDeleteData(null);
-            // setNextStep(true);
           });
       }
     }

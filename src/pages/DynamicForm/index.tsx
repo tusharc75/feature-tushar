@@ -44,7 +44,6 @@ const DynamicForm = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -204,7 +203,6 @@ const DynamicForm = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -213,13 +211,7 @@ const DynamicForm = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   const ActionMenuItems = () => {
     return (

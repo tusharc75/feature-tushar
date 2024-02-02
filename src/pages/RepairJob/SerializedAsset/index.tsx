@@ -337,6 +337,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     if (repairJobData?.processor?.optionValue) {
       data['processor'] = repairJobData?.processor?.optionValue;
     }
+    data['status'] = DELIVERY_TICKET_STATUS.delivered;
 
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
     closeActions();

@@ -22,11 +22,13 @@ type ListingPageHeaderProps = {
   addButtonProps?: ButtonProps;
   addButtonOnclick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   isAddButtonVisible: boolean;
+  setQueryString?: boolean;
 } & React.ComponentProps<'div'>;
 
 const ListingPageHeader = ({
   toggleButtonList,
   onToggle,
+  setQueryString=true,
   selectedType,
   setSelectedType,
 
@@ -50,9 +52,9 @@ const ListingPageHeader = ({
 
   const handleToggle = (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>, value: string) => {
     const data = toggleButtonList.find((d) => d.key === value).value;
-    history.push(`?type=${data}`);
+    if(setQueryString) history.push(`?type=${data}`);
     setSelectedType && setSelectedType(data);
-    onToggle && onToggle(event, data);
+    onToggle && onToggle(event, value);
   };
 
   const openActions = (event) => {
@@ -84,7 +86,7 @@ const ListingPageHeader = ({
   }, [locationKeys]);
 
   return (
-    <div className="header-panel">
+    <div className="header-panel listing-head">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
         <div className={'flex flex-wrap items-center gap-2 w-full'}>
           {toggleButtonList ? (
