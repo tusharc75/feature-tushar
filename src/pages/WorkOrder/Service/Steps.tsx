@@ -313,7 +313,7 @@ const Steps = ({
         ele.isAllowToCheck = stepSubmitedData?.find(
           (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === ele?._id
         )
-          ? false
+          ? ele?.fields?.some(_f => _f?.required) ? ele?.fields?.filter(_f => _f?.required)?.map(f => f?.fieldName)?.every(_fieldName => stepSubmitedData?.find(s => s.stepId === ele?._id)[_fieldName]) ? true : false : true
           : ele.isAllowToPerform;
       });
     }
