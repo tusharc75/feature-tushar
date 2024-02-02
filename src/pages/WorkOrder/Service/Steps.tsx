@@ -1439,23 +1439,6 @@ const Steps = ({
                   >
                     Comments
                   </MenuItem>
-                  {/* <MenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setAddNewStep({ open: true, clone: true, cloneStepData: selectedStep });
-                      setAnchorEl(null);
-                    }}
-                    disabled={
-                      allowedToEdit &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        )
-                        ? false
-                        : true
-                    }
-                  >
-                    Clone Step
-                  </MenuItem> */}
                   <MenuItem
                     onClick={(e) => {
                       e.stopPropagation();
