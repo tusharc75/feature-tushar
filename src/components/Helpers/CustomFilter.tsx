@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Button, Chip, CircularProgress, Dialog, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { Box, Button, Chip, Dialog, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
 import { BiFilterAlt } from 'react-icons/bi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -21,32 +21,21 @@ const CustomFilter = ({ field, setFilterQuery }) => {
   const [formValues, setFormValues] = useState({});
 
   const [options, setOptions] = useState([]);
-  const [loading, setLoading] = useState({ loading: false, resource: null });
+  const [loading, setLoading] = useState(false);
   const [statusTimeFrame, setStatusTimeFrame] = useState<any>({});
   const [betweenDate, setBetweenDate] = useState(null);
   const [chipData, setChipData] = useState([]);
   const [inputValues, setInputValues] = useState({});
-  const [currentPage, setCurrentPage] = useState(0);
-
 
   const fetchOptions = useCallback(
-    debounce(async (resource: string, searchKey: string = '', page: number = 0) => {
+    debounce(async (resource: string, searchKey: string = '') => {
       try {
         const lookupResourceName = resource;
-        if (searchKey !== '') {
-          setCurrentPage(0);
-        }
-        if (page === 0) { 
-          setOptions([]);
-        }
-        let query = `sa-field/options?resource=${lookupResourceName}&limit=25&page=${page}&search=${searchKey}`;
+        let query = `sa-field/options?resource=${lookupResourceName}&limit=10&search=${searchKey}`;
         const response = await axiosInstance().get(query);
-        if (page > 0 && response.data.data?.length > 0) {
-          setCurrentPage(page);
-        }
-        const optionsToShow = page === 0 ? [...response.data.data] : [...options, ...response.data.data || []];
-        setOptions(optionsToShow);
-        setLoading({ loading: false, resource: null });
+        const options = [...response.data.data];
+        setOptions(options);
+        setLoading(false);
       } catch (error) {
         console.error(error);
       }
@@ -344,12 +333,11 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                           ) : (
                             <Grid item xs={12} sm={6} md={6} key={i}>
                               <Autocomplete
-                                key={`${field?.fieldName}-${field?.resource}`}
                                 multiple
                                 inputValue={inputValues[field?.fieldName] || ''}
                                 onOpen={() => {
                                   setOptions([]);
-                                  setLoading({ loading: true, resource: field?.resource });
+                                  setLoading(true);
                                   fetchOptions(field?.resource, '');
                                 }}
                                 onInputChange={(event, value, reason) => {
@@ -361,7 +349,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                                 disableCloseOnSelect
                                 options={options}
                                 fullWidth
-                                loading={loading.loading && loading.resource === field?.resource}
+                                loading={loading}
                                 getOptionLabel={(option: any) => option.optionLabel ?? ''}
                                 getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
                                 value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
@@ -370,28 +358,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                                   setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: '' }));
                                 }}
                                 size="small"
-                                renderInput={(params) => <TextField {...params}
-                                  label={field?.fieldLabel}
-                                  variant="outlined"
-                                  name={field?.fieldName}
-                                  InputProps={{
-                                    ...params.InputProps,
-                                    endAdornment: (
-                                      <>
-                                        {loading.loading && loading.resource === field?.resource ? <CircularProgress color="inherit" size={20} /> : null}
-                                        {params.InputProps.endAdornment}
-                                      </>
-                                    )
-                                  }}
-                                />}
-                                ListboxProps={{
-                                  onScroll: (e) => {
-                                    if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
-                                      setLoading({ loading: true, resource: field?.resource });
-                                      fetchOptions(field?.resource, '', currentPage + 1);
-                                    }
-                                  }
-                                }}
+                                renderInput={(params) => <TextField {...params} label={field?.fieldLabel} variant="outlined" name={field?.fieldName} />}
                               />
                             </Grid>
                           )}
