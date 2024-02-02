@@ -1439,7 +1439,7 @@ const Steps = ({
                   >
                     Comments
                   </MenuItem>
-                  <MenuItem
+                  {/* <MenuItem
                     onClick={(e) => {
                       e.stopPropagation();
                       setAddNewStep({ open: true, clone: true, cloneStepData: selectedStep });
@@ -1455,7 +1455,7 @@ const Steps = ({
                     }
                   >
                     Clone Step
-                  </MenuItem>
+                  </MenuItem> */}
                   <MenuItem
                     onClick={(e) => {
                       e.stopPropagation();
