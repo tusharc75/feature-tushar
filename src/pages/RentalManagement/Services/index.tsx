@@ -52,7 +52,6 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
-  const [isRateRequired, setIsRateRequired] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
@@ -200,8 +199,6 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         }
       }
     ];
-    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-    setIsRateRequired(isPriceRequired);
     column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
@@ -289,6 +286,8 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       let rows = data.material.filter((e) => e.parentId === null);
       rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
+      const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail =
@@ -307,7 +306,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
                 : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.qtyDisplay = parent.qty;
-        parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
+        parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
         if (!parent.isValid) {
           nextStepMessage = rentalManagementMessage.validPrice
         }
@@ -315,7 +314,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           ? inventory?.filter((e) => e._id === parent._id).length
           : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
         parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
-        parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+        parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent, isPriceRequired);
         if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
           nextStepMessage = rentalManagementMessage.addServiceInPackage
         }
@@ -350,7 +349,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
     }
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
+  const generateNestedData = (material, inventory, nonSerializeAsset, parent, isPriceRequired) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
@@ -372,12 +371,12 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
       _subRow.pricingCondition = _subRow.pricingCondition?.optionValue;
-      _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
+      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, isPriceRequired);
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
