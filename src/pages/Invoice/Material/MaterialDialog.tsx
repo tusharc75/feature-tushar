@@ -203,7 +203,6 @@ const MaterialDialog: FC<EditDialogProps> = ({
           unit: unitOptions?.map((d) => d.optionLabel)
         }
       ]);
-      console.log(priceData)
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions)
     }
