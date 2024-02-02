@@ -296,7 +296,6 @@ const WorkOrder = () => {
           // addButtonOnclick
           isAddButtonVisible={false}
          />
-       
 
         {columns ? (
           <CustomReactTable
