@@ -22,11 +22,13 @@ type ListingPageHeaderProps = {
   addButtonProps?: ButtonProps;
   addButtonOnclick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   isAddButtonVisible: boolean;
+  setQueryString?: boolean;
 } & React.ComponentProps<'div'>;
 
 const ListingPageHeader = ({
   toggleButtonList,
   onToggle,
+  setQueryString=true,
   selectedType,
   setSelectedType,
 
@@ -50,7 +52,7 @@ const ListingPageHeader = ({
 
   const handleToggle = (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>, value: string) => {
     const data = toggleButtonList.find((d) => d.key === value).value;
-    history.push(`?type=${data}`);
+    if(setQueryString) history.push(`?type=${data}`);
     setSelectedType && setSelectedType(data);
     onToggle && onToggle(event, data);
   };

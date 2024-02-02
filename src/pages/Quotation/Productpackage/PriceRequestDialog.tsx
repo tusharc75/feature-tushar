@@ -62,6 +62,7 @@ const AccordionDetails = withStyles((theme) => ({
 }))(MuiAccordionDetails);
 
 const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId }) => {
+
   let renderedFrom = 'ViewQuotationSupplierPrice';
   const toastConfig = useContext(CustomToastContext);
 
