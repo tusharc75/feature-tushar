@@ -538,7 +538,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       _subRow.assetAssignedQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.realAssetQty : 0;
+      _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' || _subRow.type === 'service' ? _subRow.qty * parent.realAssetQty : 0;
       _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
       // _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : true;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
