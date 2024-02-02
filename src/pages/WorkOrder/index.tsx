@@ -233,30 +233,19 @@ const WorkOrder = () => {
     setAnchorEl(null);
   };
 
-  const ActionMenuItems = ()=>{
-    return  <Menu
-    anchorEl={anchorEl}
-    keepMounted
-    getContentAnchorEl={null}
-    anchorOrigin={{
-      vertical: 'bottom',
-      horizontal: 'left'
-    }}
-    id="action-menu"
-    open={Boolean(anchorEl)}
-    onClose={closeActions}
-  >
-    <MenuItem
-      disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-      onClick={() => {
-        setIsConformDialogVisible(true);
-        closeActions();
-      }}
-    >
-      Delete
-    </MenuItem>
-  </Menu>
-  }
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+        onClick={() => {
+          setIsConformDialogVisible(true);
+          closeActions();
+        }}
+      >
+        Delete
+      </MenuItem>
+    );
+  };
 
   return (
     <section className="main-container-v1">
@@ -280,7 +269,7 @@ const WorkOrder = () => {
         />
       </div>
       <CustomContainer>
-        <ListingPageHeader 
+        <ListingPageHeader
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
@@ -290,12 +279,12 @@ const WorkOrder = () => {
           onSearch={handleSearch}
           // rightSideContents
           isActionButtonVisible={permissions?.workOrder?.isDelete}
-          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
-          actionMenuItems={<ActionMenuItems/>}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           // addButtonOnclick
           isAddButtonVisible={false}
-         />
+        />
 
         {columns ? (
           <CustomReactTable

@@ -86,7 +86,7 @@ const ListingPageHeader = ({
   }, [locationKeys]);
 
   return (
-    <div className="header-panel">
+    <div className="header-panel listing-head">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
         <div className={'flex flex-wrap items-center gap-2 w-full'}>
           {toggleButtonList ? (
