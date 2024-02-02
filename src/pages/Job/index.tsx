@@ -31,6 +31,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CardView from './CardView';
 import ManageJobDialog from './ManageJobDialog';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 let jobTimeout;
 
@@ -67,7 +68,6 @@ const Job = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
 
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [singleJobDelete, setSingleJobDelete] = useState({
     id: null,
     show: false,
@@ -236,9 +236,6 @@ const Job = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const values = JobType.find((d) => d.key === type).value;
-    setSelectedType(values);
-    history.push(`?type=${values}`);
   };
 
   const showConfirmBox = () => {
@@ -271,7 +268,6 @@ const Job = () => {
         fetchJob();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -280,12 +276,66 @@ const Job = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+
+
+  const LeftSideContent = () => {
+    return (
+      <>
+        {permissions?.fleetDispatch?.isRead && (
+          <ToggleButtonGroup size="small">
+            <ToggleButton
+              onClick={() => {
+                history.push(`${routes.fleetDispatch.path}`);
+              }}
+            >
+              <span>{routes.fleetDispatch.title}</span>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        )}
+        {permissions?.fleetReceiver?.isRead && (
+          <ToggleButtonGroup size="small">
+            <ToggleButton
+              onClick={() => {
+                history.push(`${routes.fleetReceiver.path}`);
+              }}
+            >
+              <span>{routes.fleetReceiver.title}</span>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        )}
+
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setViewType(1);
+          }}
+        >
+          <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+        </IconButton>
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setViewType(2);
+          }}
+        >
+          <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+        </IconButton>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        onClick={() => {
+          showConfirmBox();
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
   };
 
   return (
@@ -310,129 +360,25 @@ const Job = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              <ToggleButtonGroup
-                size="small"
-                className="align-items-center gap-1 "
-                value={JobType[selectedType - 1].key}
-                exclusive
-                onChange={onTypeChange}
-              >
-                {JobType.map((k, index) => {
-                  return (
-                    <ToggleButton value={k.key} key={index}>
-                      {k.key}
-                    </ToggleButton>
-                  );
-                })}
-                {permissions?.fleetDispatch?.isRead && (
-                  <Box>
-                    <ToggleButtonGroup size="small">
-                      <ToggleButton
-                        onClick={() => {
-                          history.push(`${routes.fleetDispatch.path}`);
-                        }}
-                      >
-                        <span>{routes.fleetDispatch.title}</span>
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  </Box>
-                )}
-                {permissions?.fleetReceiver?.isRead && (
-                  <Box>
-                    <ToggleButtonGroup size="small">
-                      <ToggleButton
-                        onClick={() => {
-                          history.push(`${routes.fleetReceiver.path}`);
-                        }}
-                      >
-                        <span>{routes.fleetReceiver.title}</span>
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  </Box>
-                )}
-
-                <Box>
-                  <IconButton
-                    size="small"
-                    aria-label="Clone"
-                    onClick={() => {
-                      setViewType(1);
-                    }}
-                  >
-                    <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    aria-label="Clone"
-                    onClick={() => {
-                      setViewType(2);
-                    }}
-                  >
-                    <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
-                  </IconButton>
-                </Box>
-              </ToggleButtonGroup>
-            </div>
-
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setShowManageJobDialog({ open: true, isClone: false, idToClone: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                {permissions?.job?.isDelete && (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={`new-dropdown-v1`}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                      disabled={selectedRecords?.length ? false : true}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          showConfirmBox();
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={JobType}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContents={<LeftSideContent />}
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={permissions?.job?.isDelete}
+          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
+          actionMenuItems={<ActionMenuItems/>}
+          // addButtonProps
+          addButtonOnclick={() => {
+            setShowManageJobDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={true}
+        />
+   
         {viewType === 1 && (
           <CardView
             jobs={dataRows}

@@ -65,27 +65,7 @@ const RepairOrder = () => {
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [locationKeys, setLocationKeys] = useState([]);
-
-  useEffect(() => {
-    return history.listen((location) => {
-      const { type }: any = queryString.parse(history.location.search);
-      if (history.action === 'PUSH') {
-        setLocationKeys([location.key]);
-      }
-      if (history.action === 'POP') {
-        if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys);
-          // Handle forward event
-          setSelectedType(type ? parseInt(type) : 1);
-        } else {
-          setLocationKeys((keys) => [location.key, ...keys]);
-          // Handle back event
-          setSelectedType(type ? parseInt(type) : 1);
-        }
-      }
-    });
-  }, [locationKeys]);
+  
 
   useEffect(() => {
     fetchGridColumns();

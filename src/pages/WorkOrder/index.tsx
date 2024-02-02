@@ -53,7 +53,6 @@ const WorkOrder = () => {
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageWorkOrder, setShowManageWorkOrder] = useState({ open: false, isClone: false, idToClone: null });
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -225,13 +224,6 @@ const WorkOrder = () => {
     }
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   const ActionMenuItems = () => {
     return (
@@ -239,7 +231,6 @@ const WorkOrder = () => {
         disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
         onClick={() => {
           setIsConformDialogVisible(true);
-          closeActions();
         }}
       >
         Delete
