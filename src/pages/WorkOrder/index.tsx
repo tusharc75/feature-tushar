@@ -21,6 +21,7 @@ import { WORK_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResou
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkOrder from './ManageWorkOrder';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 let searchTimeout;
 
@@ -52,7 +53,6 @@ const WorkOrder = () => {
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageWorkOrder, setShowManageWorkOrder] = useState({ open: false, isClone: false, idToClone: null });
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -189,9 +189,6 @@ const WorkOrder = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
-    history.push(`?type=${value}`);
   };
 
   const handleDeleteWorkOrder = async () => {
@@ -227,12 +224,18 @@ const WorkOrder = () => {
     }
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+        onClick={() => {
+          setIsConformDialogVisible(true);
+        }}
+      >
+        Delete
+      </MenuItem>
+    );
   };
 
   return (
@@ -257,70 +260,22 @@ const WorkOrder = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              <div>
-                <ToggleButtonGroup
-                  size="small"
-                  className="align-items-center gap-1 "
-                  value={types[selectedType - 1].key}
-                  exclusive
-                  onChange={onTypeChange}
-                >
-                  {types.map((k, index) => {
-                    return (
-                      <ToggleButton value={k.key} key={index}>
-                        {k.key}
-                      </ToggleButton>
-                    );
-                  })}
-                </ToggleButtonGroup>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} size="small" value={search} />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.workOrder?.isDelete && (
-                  <Button
-                    className={` new-dropdown-v1`}
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    disabled={selectedRecords?.length ? false : true}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
-                )}
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                    onClick={() => {
-                      setIsConformDialogVisible(true);
-                      closeActions();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          // leftSideContents
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={permissions?.workOrder?.isDelete}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+          // addButtonProps
+          // addButtonOnclick
+          isAddButtonVisible={false}
+        />
 
         {columns ? (
           <CustomReactTable
