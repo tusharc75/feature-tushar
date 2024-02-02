@@ -14,9 +14,9 @@ import _, { capitalize } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 
 const customNodeStyles = {
-  workOrder: { name: 'WorkOrder', ...COLOUR_MASTER.repairJob },
+  workOrder: { name: 'Work Order', ...COLOUR_MASTER.repairJob },
   workOrderClosed: {
-    name: 'WorkOrder Closed', ...COLOUR_MASTER.repairJob
+    name: 'Work Order Closed', ...COLOUR_MASTER.repairJob
   },
   preWorkService: {
     name: 'Pre Work Service',
