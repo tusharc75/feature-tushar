@@ -54,7 +54,7 @@ const ListingPageHeader = ({
     const data = toggleButtonList.find((d) => d.key === value).value;
     if(setQueryString) history.push(`?type=${data}`);
     setSelectedType && setSelectedType(data);
-    onToggle && onToggle(event, data);
+    onToggle && onToggle(event, value);
   };
 
   const openActions = (event) => {

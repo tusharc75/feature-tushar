@@ -102,28 +102,6 @@ const RepairJob = () => {
     setColumns([...newColumns, ActionsRenderer]);
   };
 
-  //  Grid Variables - End
-  const [locationKeys, setLocationKeys] = useState([]);
-  useEffect(() => {
-    return history.listen((location) => {
-      const { type }: any = queryString.parse(history.location.search);
-      if (history.action === 'PUSH') {
-        setLocationKeys([location.key]);
-      }
-      if (history.action === 'POP') {
-        if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys);
-          // Handle forward event
-          setSelectedType(type ? parseInt(type) : 1);
-        } else {
-          setLocationKeys((keys) => [location.key, ...keys]);
-          // Handle back event
-          setSelectedType(type ? parseInt(type) : 1);
-        }
-      }
-    });
-  }, [locationKeys]);
-
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (repairJobTimeout) {

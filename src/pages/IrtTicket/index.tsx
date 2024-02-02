@@ -40,7 +40,6 @@ const IrtTicket = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
 
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const fetchGridColumns = async () => {
     let data;
@@ -107,13 +106,7 @@ const IrtTicket = () => {
     return deepFilter;
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -192,7 +185,6 @@ const IrtTicket = () => {
         fetchIrtTicketData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -221,7 +213,6 @@ const IrtTicket = () => {
     return (
         <MenuItem
           onClick={() => {
-            closeActions();
             showConfirmBox();
           }}
         >
