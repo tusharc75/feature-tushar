@@ -20,6 +20,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageDeviceTemplateAlert from './ManageDeviceTemplateAlert';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 export default function DeviceTemplatesAlerts() {
   const renderedFrom = camelCase(routes?.deviceTemplateAlert.title);
@@ -34,7 +35,6 @@ export default function DeviceTemplatesAlerts() {
   const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false, id: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -188,13 +188,7 @@ export default function DeviceTemplatesAlerts() {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   const handleDelete = () => {
     let ids = [];
@@ -222,6 +216,22 @@ export default function DeviceTemplatesAlerts() {
       });
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={!(permissions?.deviceTemplateAlert?.isDelete && selectedRecords?.every((s) => s?.canDelete))}
+          onClick={() => {
+            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -244,66 +254,25 @@ export default function DeviceTemplatesAlerts() {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  disabled={!permissions?.deviceTemplateAlert?.isCreate}
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setOpen({ open: true, isClone: false, id: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                <Button
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                  disabled={selectedRecords?.length ? false : true}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={!(permissions?.deviceTemplateAlert?.isDelete && selectedRecords?.every((s) => s?.canDelete))}
-                    onClick={() => {
-                      closeActions();
-                      {
-                        selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                      }
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords?.length})`}
-                  </MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          // toggleButtonList
+          // onToggle
+          // selectedType
+          // setSelectedType
+          // leftSideContents
+          searchValue={search}
+          onSearch={handleSearch}
+          rightSideContents
+          isActionButtonVisible
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems/>}
+          addButtonProps={{ disabled: !permissions?.deviceTemplateAlert?.isCreate }}
+          addButtonOnclick={() => {
+            setOpen({ open: true, isClone: false, id: null });
+          }}
+          isAddButtonVisible={true}
+        />
+     
 
         {columns ? (
           <CustomReactTable
