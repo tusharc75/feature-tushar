@@ -610,8 +610,8 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
               open={Boolean(anchorActionEl)}
               onClose={closeActions}
             >
+              {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product)?.length > 0 && (
               <MenuItem
-                disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product)?.length <= 0}
                 onClick={() => {
                   closeActions();
                   setAddExistingProductDialog({
@@ -626,6 +626,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
               >
                 Assign Assets
               </MenuItem>
+              )}
               <MenuItem
                 disabled={selectedRecords?.filter((e) => e.canDelete)?.length === selectedRecords?.length ? false : true}
                 onClick={() => {
