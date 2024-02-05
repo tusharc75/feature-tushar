@@ -123,7 +123,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
   const [logsDialog, setLogsDialog] = useState(false);
   const [commentsDialog, setCommentsDialog] = useState(false);
-  const [viewServiceStepDataDialog, setViewServiceStepDataDialog] = useState(false);
+  const [viewServiceStepDataDialog, setViewServiceStepDataDialog] = useState({ open: false, selectedService: null });
   const [showManagePurchaseOrder, setShowManagePurchaseOrder] = useState(false);
   const [isColapsed, setIsColapsed] = useState(resource === sidebarResource.workOrder ? false : true);
   const mobScreen = useMediaQuery('(max-width:768px)');
@@ -784,7 +784,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                               size="small"
                                               color="primary"
                                               aria-label="menu"
-                                              disabled={!isAllowedToServiceEdit}
                                               onClick={(event) => {
                                                 handleOpenMenu(event);
                                                 setSelectedService(data);
@@ -1129,7 +1128,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
               {allowedToEdit && resource === sidebarResource.workOrder && (
                 <MenuItem
-                  disabled={allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
+                  disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
                   onClick={() => {
                     setUserAssignDialog(true);
                     setAnchorEl(null);
@@ -1140,7 +1139,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               )}
               {allowedToEdit && resource === sidebarResource.workOrder && permissions?.workStations?.isRead && (
                 <MenuItem
-                  disabled={allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
+                  disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
                   onClick={() => {
                     setWorkStationAssignDialog(true);
                     setAnchorEl(null);
@@ -1151,7 +1150,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               )}
               {resource === sidebarResource.workOrder && (
                 <MenuItem
-                  disabled={!allowedToEdit}
+                  disabled={!isAllowedToServiceEdit}
                   onClick={() => {
                     setServiceDialog({ open: true, type: 'service', uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
                     setAnchorEl(null);
@@ -1185,7 +1184,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               )}
               <MenuItem
                 onClick={() => {
-                  setViewServiceStepDataDialog(true);
+                  setViewServiceStepDataDialog({ open: true, selectedService: selectedService });
                   setAnchorEl(null);
                 }}
               >
@@ -1202,13 +1201,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   });
                   setAnchorEl(null);
                 }}
-                disabled={!allowedToEdit}
+                disabled={!isAllowedToServiceEdit}
               >
                 Upload Documents
               </MenuItem>
               {!user?.brandPolicy?.workOrderConsumableHide && (
                 resource === sidebarResource.workOrder &&
                 <MenuItem
+                  disabled={!isAllowedToServiceEdit}
                   onClick={() => {
                     setConsumablesDialog({
                       open: true,
@@ -1225,10 +1225,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               )}
               <MenuItem
                 disabled={
-                  disableCompleteFail ||
-                  [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                    selectedService?.status
-                  )
+                  !isAllowedToServiceEdit && (disableCompleteFail ||
+                    [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                      selectedService?.status
+                    ))
                 }
                 onClick={() => {
                   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
@@ -1238,7 +1238,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 Complete Service
               </MenuItem>
               <MenuItem
-                disabled={[WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) ? false : true}
+                disabled={isAllowedToServiceEdit &&
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) ? false : true}
                 onClick={() => {
                   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.skipped);
                   setAnchorEl(null);
@@ -1246,12 +1247,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               >
                 Skip Service
               </MenuItem>
-
               <MenuItem
                 onClick={() => {
                   setCommentsDialog(true);
                   setAnchorEl(null);
                 }}
+                disabled={!isAllowedToServiceEdit}
               >
                 Comments
               </MenuItem>
@@ -1278,6 +1279,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   setOpenProperties(true)
                   setAnchorEl(null);
                 }}
+                disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
               >
                 Properties
               </MenuItem>
@@ -1407,12 +1409,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
         />
       )}
-      {viewServiceStepDataDialog && (
+      {viewServiceStepDataDialog.open && (
         <ViewServiceStepDataDialog
           servicesData={serviceSteps}
           stepsData={stepSubmitedData}
+          selectedService={selectedService}
           handleClose={() => {
-            setViewServiceStepDataDialog(false);
+            setViewServiceStepDataDialog({ open: false, selectedService: null });
           }}
         />
       )}

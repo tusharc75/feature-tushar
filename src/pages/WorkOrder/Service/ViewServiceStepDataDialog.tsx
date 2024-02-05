@@ -6,7 +6,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 
-const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose }) => {
+const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selectedService }) => {
 
   const renderedFrom = `${routes?.workOrder?.title}_Service_StepData`;
   const { generateColumns } = useColumns();
@@ -36,7 +36,9 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose }) => 
       });
     });
     setServiceOptions(services);
-    setSelectedServices([services[0]]);
+    if (selectedService && services?.find((e) => e.uniqueId === selectedService?.uniqueId)) {
+      setSelectedServices([services?.find((e) => e.uniqueId === selectedService?.uniqueId)]);
+    }
   }, []);
 
 
@@ -96,28 +98,26 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose }) => 
         />
         <Box style={{ overflowY: 'auto', height: 'calc(100% - 70px)' }}>
           {selectedServices?.filter((e) => e?.optionValue !== 'selectAll')?.map(s => (
-            (
-              <Box mt={2}>
-                <Typography variant="h6">{s?.optionLabel}</Typography>
-                <CustomReactTable
-                  key={s?.uniqueId}
-                  height={'calc(400px)'}
-                  columns={s?.column}
-                  state={{
-                    ...state,
-                    dataRows: s?.row || [],
-                    rowCount: s?.row?.length || 0,
-                    initialDataLoaded: true
-                  }}
-                  dispatch={dispatch}
-                  hideSelection={true}
-                  hideAction={true}
-                  renderedFrom={`${renderedFrom}_${s?.uniqueId}`}
-                  isClientSideGrid={true}
-                  showArrangeView={false}
-                />
-              </Box>
-            )
+            (<Box mt={2}>
+              <Typography variant="h6">{s?.optionLabel}</Typography>
+              <CustomReactTable
+                key={s?.uniqueId}
+                height={s?.row?.length === 0 && 'calc(100px)'}
+                columns={s?.column}
+                state={{
+                  ...state,
+                  dataRows: s?.row || [],
+                  rowCount: s?.row?.length || 0,
+                  initialDataLoaded: true
+                }}
+                dispatch={dispatch}
+                hideSelection={true}
+                hideAction={true}
+                renderedFrom={`${renderedFrom}_${s?.uniqueId}`}
+                isClientSideGrid={true}
+                showArrangeView={false}
+              />
+            </Box>)
           ))}
         </Box>
       </CustomDialogContent>
