@@ -38,6 +38,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
           setCurrentPage(0);
         }
         if (page === 0) { 
+          setCurrentPage(0);
           setOptions([]);
         }
         let query = `sa-field/options?resource=${lookupResourceName}&limit=25&page=${page}&search=${searchKey}`;
