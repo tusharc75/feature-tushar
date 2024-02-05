@@ -67,17 +67,6 @@ const Report = () => {
       data: { data }
     }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}`);
 
-    data?.forEach((e) => {
-      if(e?.fieldData?.fieldName === "serializedAsset") {
-        let options = e?.fieldData?.option;
-        options?.forEach((o) => {
-          if (typeof o?.optionLabel === "number") {
-            o.optionLabel = o.optionLabel.toString();
-          }
-        })
-      }
-    });
-
     if (resourceStartCase === 'Serialized Asset') {
       const {
         data: { data: lookupResource }
