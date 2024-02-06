@@ -332,6 +332,7 @@ const Opportunities = () => {
             setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.opportunity?.isCreate}
+          synchronizeType={true}
         />
     
         {columns ? (

@@ -23,6 +23,7 @@ type ListingPageHeaderProps = {
   addButtonOnclick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   isAddButtonVisible: boolean;
   setQueryString?: boolean;
+  synchronizeType?: boolean;
 } & React.ComponentProps<'div'>;
 
 const ListingPageHeader = ({
@@ -44,7 +45,8 @@ const ListingPageHeader = ({
 
   isActionButtonVisible,
   actionButtonProps = {},
-  actionMenuItems
+  actionMenuItems,
+  synchronizeType=false
 }: ListingPageHeaderProps) => {
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -66,8 +68,10 @@ const ListingPageHeader = ({
   };
 
   useEffect(() => {
+    const { type }: any = queryString.parse(history.location.search);
+    if(synchronizeType) setSelectedType(type ? parseInt(type) : 1);
+
     return history.listen((location) => {
-      const { type }: any = queryString.parse(history.location.search);
       if (history.action === 'PUSH') {
         setLocationKeys([location.key]);
       }
