@@ -1,28 +1,25 @@
-import React, { useState, useEffect, useCallback, Fragment } from 'react';
+import { Box, Button, ClickAwayListener, Dialog, Grow, MenuItem, MenuList, Paper, Popper } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Box, Button, Dialog, Grid, MenuItem, Popper, Grow, Paper, ClickAwayListener, MenuList } from '@material-ui/core';
 import { lowerCase, startCase } from 'lodash';
-import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
+import React, { useCallback, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import MyCalendar from './MyCalendar';
-import { GetBoard } from '../../../axios/activity';
-import CustomContainer from '../../../components/CustomContainer';
-import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
-import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
-import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
-import { useData } from '../../../StateProvider/Provider';
-import { CreateTask } from '../../../components/Activity/Task/CreateTask';
-import { CreateCase } from '../../../components/Activity/Case/CreateCase';
-import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomDialogTransition } from '../../../constants/helpers';
 import { BiTask } from 'react-icons/bi';
 import { BsBriefcase } from 'react-icons/bs';
 import { VscCalendar } from 'react-icons/vsc';
+import { useHistory } from 'react-router-dom';
+import { useData } from '../../../StateProvider/Provider';
+import { GetBoard, GetReferenceName } from '../../../axios/activity';
+import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
+import { CreateCase } from '../../../components/Activity/Case/CreateCase';
+import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
+import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
+import { CreateTask } from '../../../components/Activity/Task/CreateTask';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
+import CustomContainer from '../../../components/CustomContainer';
 import routes from '../../../components/Helpers/Routes';
-import styles from '../../Leads/Header.module.scss';
-import { GetReferenceName } from '../../../axios/activity';
+import { CustomDialogTransition } from '../../../constants/helpers';
+import MyCalendar from './MyCalendar';
 
 const useStyles = makeStyles((theme) => ({
   topbar: {

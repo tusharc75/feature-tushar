@@ -18,7 +18,7 @@ import { fetch_quotation_product_fields } from 'src/components/Quotation/helper'
 import PriceRequestDialog from './PriceRequestDialog';
 import { ExpandMore } from '@material-ui/icons';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
-import { capitalize, uniqBy } from 'lodash';
+import { capitalize, isArray, uniqBy } from 'lodash';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -87,10 +87,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     }
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns: any = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     let column: any = [
       {
         accessor: 'index',
@@ -295,7 +291,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -332,7 +327,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct || false;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
 
       if (_subRow.type === MATERIAL_TYPE.serializedAsset) {
@@ -408,7 +402,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       .then(() => {
         setAddDialog({ open: false, type: '', parentId: null });
         fetchData();
-        fetchQuotationData()
+        fetchQuotationData(version)
         setSubmitting(false);
       })
       .catch((error) => {
@@ -454,7 +448,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       .then(() => {
         setDeleting(false);
         fetchData();
-        fetchQuotationData()
+        fetchQuotationData(version)
         setDeleteData(null);
       })
       .catch((error) => {
@@ -477,14 +471,25 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     if (quotationData) {
       const data: any = {};
       data.conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? [PRICING_SETUP_TYPE.price] : [PRICING_SETUP_TYPE.rent];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: [ele?.unit].flat(1).pop(),
-        currency: quotationData?.currency
-      }));
+      const material: any = []
+      arr?.forEach((ele) => {
+        const obj = {
+          materialId: ele?.materialId,
+          materialType: ele?.type,
+          qty: ele?.qty,
+          pricingMethod: ele?.pricingMethod,
+          currency: quotationData?.currency
+        }
+        if (isArray(ele?.unit)) {
+          ele?.unit?.forEach((e) => {
+            material.push({ ...obj, unit: e })
+          })
+        }
+        else {
+          material.push({ ...obj, unit: ele?.unit })
+        }
+      })
+      data.material = material;
       data.supplier = [];
       data.customer = [quotationData?.customerAccount?.optionValue];
       data.warehouse = [quotationData?.warehouse?.optionValue];
@@ -544,9 +549,6 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      inputField['qty'] = inputField['qtyDisplay'];
-    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
@@ -606,14 +608,15 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 Add Existing Packages
               </MenuItem>
             )}
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddDialog({ open: true, type: 'service', parentId: null });
-              }}
-            >
-              Add Existing Services
-            </MenuItem>
+            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null :
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddDialog({ open: true, type: 'service', parentId: null });
+                }}
+              >
+                Add Existing Services
+              </MenuItem>}
           </Menu>
         </Box>
         <Box display="flex">

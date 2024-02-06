@@ -52,7 +52,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
-  const [isRateRequired, setIsRateRequired] = useState(false);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
   const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
@@ -70,8 +69,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
 
   useEffect(() => {
     fetchFields();
-    fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [allFields]);
 
   useEffect(() => {
     if (allFields) {
@@ -92,11 +94,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         e.isColumnEditable = false;
       });
     }
-    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
+    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, rentalManagementData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -119,15 +117,15 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
           row.original['type'] ? (
             <p>
               {`${startCase(row.original?.type)} `}
-              {row.original['type'] === 'product'
+              {row.original['type'] === MATERIAL_TYPE.product
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
                   : '(Non-Serialized)'
-                : row.original?.type === 'package'
+                : row.original?.type === MATERIAL_TYPE.package
                   ? row.original?.packageDetail.packageType === 'Product'
                     ? '(Product)'
                     : '(Service)'
-                  : row.original.type === 'service'
+                  : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
             </p>
@@ -175,11 +173,11 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             <IconButton
               size="small"
               onClick={() => {
-                if (row.original.type === 'service') {
+                if (row.original.type === MATERIAL_TYPE.service) {
                   window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'product') {
+                } else if (row.original.type === MATERIAL_TYPE.product) {
                   window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'serializedAsset') {
+                } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                   window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                 } else {
                   window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -200,8 +198,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         }
       }
     ];
-    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-    setIsRateRequired(isPriceRequired);
     column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
@@ -229,7 +225,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             </HtmlTooltip>
             {allowedToEdit || !quotationApproved ? (
               row.original.hideSelection ? (
-                <HtmlTooltip title={row.original.assetQty ? 'Asset is already assigned' :
+                <HtmlTooltip title={row.original?.assetQty ? 'Asset is already assigned' :
                   row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''}>
                   <span>
                     <IconButton size="small" aria-label="Details" disabled={true}>
@@ -265,17 +261,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   }
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
-
     setNextStep(false);
     setNextStepToolTip(null)
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
-
     var nextStepMessage = null;
-
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
       inventory = data.productInventory;
@@ -286,41 +279,43 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       inventory = data.inventory?.filter((e) => !e.isReplaced);
       nonSerializeAsset = data.nonSerializeAsset;
     }
-    let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== 'service');
-    let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale);
-    let packages = rows.filter((e) => e.type === 'package' && e.packageDetail?.packageType !== 'Service');
+    let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== MATERIAL_TYPE.service);
+    let products = rows.filter((e) => e.type === MATERIAL_TYPE.product && !e?.isConsumbale);
+    let packages = rows.filter((e) => e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service');
 
     rows = [...products, ...packages];
 
+    const isPriceRequired = allFields.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'service'
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
         ? parent.serviceDetail
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
-        : parent.type === 'product'
+        : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
         }`;
       parent.description =
-        parent.type === 'service'
+        parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
+          : parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
+            : parent.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription || ''
               : '';
-      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
+      parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       if (!parent.isValid) {
         nextStepMessage = rentalManagementMessage.validPrice
       }
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-      parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
-      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+      parent.hideSelection = parent?.assetQty > 0 ? true : parent?.status ? true : false;
+      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent, isPriceRequired);
       if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
         nextStepMessage = rentalManagementMessage.addProductInPackage
       }
@@ -337,39 +332,39 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
+  const generateNestedData = (material, inventory, nonSerializeAsset, parent, isPriceRequired) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service'
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
         ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === 'package'
+        : _subRow.type === MATERIAL_TYPE.package
           ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow.productDetail?.productName
             : ''
         } `;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
-      _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
+      _subRow.hideSelection = _subRow?.assetQty > 0 ? true : _subRow?.status ? true : false;
+      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, isPriceRequired);
     });
-    if (subRows.length === 0 && parent.type === 'package') {
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (subRows?.length) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;

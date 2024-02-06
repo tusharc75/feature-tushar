@@ -176,7 +176,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             );
             var loadingTicketAssets = []
             loadingTicket?.forEach(element => {
-                loadingTicketAssets = [...loadingTicketAssets, ...element?.productInventory]
+                loadingTicketAssets = [...loadingTicketAssets, ...element?.assets?.map((e)=> e.asset)]
             });
             let rows = data.material.filter((e) => !e.parentId);
             rows.forEach((parent, i) => {
@@ -260,7 +260,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 warehouse: _inventory.inventoryDetail?.warehouse,
                 _id: _inventory.inventory,
                 isValid: _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved ? false : true,
-                canDelete: loadingTicketAssets?.find((e) => e.optionValue === _inventory.inventory) ? false : true
+                canDelete: loadingTicketAssets?.find((e) => e === _inventory.inventory) ? false : true
             });
         });
 

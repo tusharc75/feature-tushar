@@ -14,7 +14,8 @@ import {
   prepareDataForGrid,
   ASSET_STATUS,
   TRANSFER_ASSET_STATUS,
-  COLOUR_MASTER
+  COLOUR_MASTER,
+  dateTimeFormat
 } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -30,6 +31,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import moment from 'moment';
 
 interface LoadingGridProps {
   permissions: any;
@@ -121,13 +123,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           if (o?.accessor === 'assetNumber') {
             o.cell = ({ row }) =>
               row?.original?.assetNumber ? (
-                <div className="d-flex gap-2 align-items-center" style={{
-                  backgroundColor:
-                    row?.original?.isReplaced
+                <div
+                  className="d-flex gap-2 align-items-center"
+                  style={{
+                    backgroundColor: row?.original?.isReplaced
                       ? COLOUR_MASTER.replaceAssetColor.background
-                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status) ? COLOUR_MASTER.lostAssets.background
-                        : '',
-                }}>
+                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                        ? COLOUR_MASTER.lostAssets.background
+                        : ''
+                  }}
+                >
                   <p> {row.original?.assetNumber}</p>
                   <Box ml={1}>
                     <IconButton
@@ -150,8 +155,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               ) : (
                 <NoDataCell />
               );
-          }
-          else if (o?.accessor === 'product') {
+          } else if (o?.accessor === 'product') {
             o.cell = ({ row }) =>
               row?.original?.product ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -211,6 +215,36 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             primaryField: true,
             width: 200,
             Cell: ({ row }) => <p className="text-truncate">{row?.original?.loadingTicketStatus || <NoDataCell />}</p>
+          },
+          {
+            accessor: 'createDate',
+            Header: 'Shipped Date',
+            width: 200,
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) =>
+              row.original?.createDate ? (
+                <div className="createBy" title={`${moment(row.original?.createDate)?.format(dateTimeFormat)}`}>
+                  {moment(row.original?.createDate)?.format(dateTimeFormat)}
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          },
+          {
+            accessor: 'actualDeliveryDate',
+            Header: 'Delivery Date',
+            width: 200,
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) =>
+              row.original?.actualDeliveryDate ? (
+                <div className="createBy" title={`${moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}`}>
+                  {moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}
+                </div>
+              ) : (
+                <NoDataCell />
+              )
           }
         ];
         setColumns(column);
@@ -223,18 +257,18 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     await fetchFields();
     try {
       const result = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`);
-
       let assetData = result?.data?.data?.assets;
-
       let replaceAssetLog = result?.data?.data?.replaceAssetLog ? result?.data?.data?.replaceAssetLog : [];
       let ticketData: any = await fetchLoadingTickets();
       ticketData = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.loading);
       for (let i = 0; i < ticketData.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
-          if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
+          if (ticketData[i]?.assets.some((e: any) => assetData[j]._id === e.asset)) {
             assetData[j].loadingTicket = ticketData[i].ticketName;
             assetData[j].loadingTicketId = ticketData[i]._id;
             assetData[j].loadingTicketStatus = ticketData[i].status;
+            assetData[j].createDate = ticketData[i]?.createdBy?.date;
+            assetData[j].actualDeliveryDate = ticketData[i].actualDeliveryDate;
           }
         }
       }
@@ -547,7 +581,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           ticketType={DELIVERY_TICKET_TYPE.loading}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}
           referenceData={showTicketDialog.data}
-          productInventory={assetWithNoTicket}
+          assets={assetWithNoTicket}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
@@ -607,4 +641,3 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 };
 
 export default LoadingTicketGrid;
-

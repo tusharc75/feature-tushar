@@ -20,7 +20,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { ExpandMore } from '@material-ui/icons';
-import { capitalize } from 'lodash';
+import { capitalize, isArray } from 'lodash';
 import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
 import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
 import Versions from 'src/pages/Quotation/Versions';
@@ -235,10 +235,6 @@ const Quotation = ({
     ];
 
     const newColumns = generateColumns(renderedFrom, data, null, false, quotationInfo?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
@@ -331,7 +327,6 @@ const Quotation = ({
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
@@ -367,7 +362,6 @@ const Quotation = ({
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -394,7 +388,6 @@ const Quotation = ({
     rows.forEach((element) => {
       delete element.index;
       delete element.detail;
-      delete element.qtyDisplay;
       delete element.isValid;
       delete element.hideSelection;
       delete element.assetQty;
@@ -472,14 +465,25 @@ const Quotation = ({
     if (quotationData) {
       const data: any = {};
       data.conditionType = [PRICING_SETUP_TYPE.price];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: quotationData?.currency
-      }));
+      const material: any = []
+      arr?.forEach((ele) => {
+        const obj = {
+          materialId: ele?.materialId,
+          materialType: ele?.type,
+          qty: ele?.qty,
+          pricingMethod: ele?.pricingMethod,
+          currency: quotationData?.currency
+        }
+        if (isArray(ele?.unit)) {
+          ele?.unit?.forEach((e) => {
+            material.push({ ...obj, unit: e })
+          })
+        }
+        else {
+          material.push({ ...obj, unit: ele?.unit })
+        }
+      })
+      data.material = material;
       data.supplier = [];
       data.customer = [quotationData?.customerAccount?.optionValue];
       data.warehouse = [quotationData?.warehouse?.optionValue];
@@ -568,9 +572,6 @@ const Quotation = ({
         }
       });
     } else {
-      if (inputField.hasOwnProperty('qtyDisplay')) {
-        inputField['qty'] = inputField['qtyDisplay'];
-      }
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, allFields, updatedData);
       handleSaveData(rows);

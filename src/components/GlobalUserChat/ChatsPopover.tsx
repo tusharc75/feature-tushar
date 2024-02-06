@@ -166,7 +166,7 @@ const ChatsPopover = (props) => {
                   disablePadding
                   dense
                   className={`${classes.listRoot} `}
-                  style={{ overflowY: 'auto', height: isSmallScreen ? 'calc(100vh - 225px)' : '394px' }}
+                  style={{ overflowY: 'auto', height: isSmallScreen ? 'calc(100vh - 225px)' : '394px', background: 'var(--dark-secondary)' }}
                 >
                   {filteredChatList.map((chat, i) => (
                     <ChatListITem key={chat.id} userId={user._id} socket={socket} chat={chat} setSelectedChat={setSelectedChat} getChats={getChats} />

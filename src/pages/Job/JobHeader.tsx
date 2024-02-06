@@ -5,13 +5,9 @@ import ViewListIcon from '@material-ui/icons/ViewList';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { useState } from 'react';
-import { isMobile } from 'react-device-detect';
-import { MdOutlineFilterAlt } from 'react-icons/md';
-import { TbArrowsSort } from 'react-icons/tb';
 import { useHistory } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
 
 function JobHeader(props) {
   const {
@@ -148,7 +144,7 @@ function JobHeader(props) {
         {children}
       </div>
       <div className="flex flex-wrap gap-[8px]  justify-end items-start">
-        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" />
+        <SearchBox onChange={onSearch} value={searchVal} size="small" />
 
         <div className="flex gap-[8px] flex-wrap items-center">
           {permissions?.job?.isCreate && permissions?.job?.isUpdate && (

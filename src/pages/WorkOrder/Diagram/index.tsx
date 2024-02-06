@@ -18,6 +18,7 @@ import { getFileIcon, getFileNameWithExtension } from './utils';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { FileCopyIcon } from 'src/assets/svg/svgIcons';
+import PdfPreview from './ShowPdf/PdfPreview';
 
 const Diagram = ({ resource, referenceId, currentVersion }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -280,7 +281,8 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
             {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
               <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
             ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-              <ShowPdf data={selectedAttachment} />
+              // <ShowPdf data={selectedAttachment} />
+               <PdfPreview data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
             ) : (
               <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
             )}

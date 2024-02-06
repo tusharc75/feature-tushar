@@ -29,9 +29,9 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     {
       accessor: 'invoiceNumber',
       Header: 'Invoice Number',
-      minWidth: 150,
       width: 150,
       primaryField: true,
+      disabled: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.invoiceNumber ? (
@@ -47,8 +47,8 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     {
       accessor: 'invoiceDate',
       Header: 'Invoice Date',
-      minWidth: 150,
       width: 150,
+      disabled: true,
       disabledFilters: true,
       Cell: ({ row }) => (
         <>
@@ -66,6 +66,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
       accessor: 'action',
       Header: 'Actions',
       minWidth: 100,
+      maxWdth: 100,
       width: 110,
       sticky: 'right',
       disableFilters: true,

@@ -1,15 +1,15 @@
 import { Box, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import { startCase } from 'lodash';
 import moment from 'moment';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import { dateTimeFormat } from 'src/constants/helpers';
 import TreeView from './TreeView';
-import RefreshIcon from '@material-ui/icons/Refresh';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import SearchBox from 'src/components/Helpers/SearchBox';
 
 export default function Current({ deviceTemplate, assetId }) {
   const toastConfig = useContext(CustomToastContext);

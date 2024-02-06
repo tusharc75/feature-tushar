@@ -1,7 +1,8 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { FormControl, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Select, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
 import React, { Fragment, useCallback, useContext, useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
@@ -11,6 +12,10 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
 import { WORKORDER_SERVICE_STATUS, dateFormatForInputControl, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
+import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
 
 const RESOURCE = [
   { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
@@ -31,10 +36,12 @@ const WorkOrderSupervisor = () => {
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
+  const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
+  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
 
   const [usersOption, setUsersOption] = useState([]);
   const [serviceMasterOption, setServiceMasterOption] = useState([]);
-
+  const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [selectedResource, setSelectedResource] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
   const [selectedResourceOption, setSelectedResourceOption] = useState(null);
@@ -83,10 +90,11 @@ const WorkOrderSupervisor = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=User,Service Master`)
+      .get(`/sa-formbuilder/lookup?lookupResource=Service Master,Employee Master`)
       .then(({ data: { data } }) => {
-        setUsersOption(data['User']);
-        setServiceMasterOption(data['Service Master']);
+        setServiceMasterOption(data['Service Master'] || []);
+        setUsersOption(data['Employee Master'] || []);
+
       });
   }, []);
 
@@ -102,10 +110,37 @@ const WorkOrderSupervisor = () => {
 
   useEffect(() => {
     const cardDataRows: datarowInterface[] = [
-      { accessor: 'workOrderNumber', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?._id}` },
-      { accessor: 'serviceName', title: 'Service Name', type: 'text' },
+      { accessor: 'serviceName', title: 'Service Name', type: 'title' },
+      {
+        accessor: 'productionOrderNumber',
+        type: 'link',
+        title: routes.productionOrder.title,
+        link: (data) => `${routes.productionOrderDetail.path}/${data?.productionOrder?.optionValue}`,
+        target: '_blank'
+      },
+      {
+        accessor: 'repairOrderNumber',
+        type: 'link',
+        title: routes.repairOrder.title,
+        link: (data) => `${routes.repairOrderDetail.path}/${data?.repairOrder?.optionValue}`,
+        target: '_blank'
+      },
+      {
+        accessor: 'workOrderNumber',
+        type: 'link',
+        title: 'Work Order',
+        link: (data) => `${routes.workOrderDetail.path}/${data?._id}`,
+        target: '_blank'
+      },
+      { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
       { accessor: 'assignedUser', title: 'Technician', type: 'text' },
-      { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' }
+      { accessor: 'workStation', title: routes.workStations.title, type: 'text' },
+      { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
+      {
+        type: 'tooltip',
+        accessor: 'tooltip',
+        renderer: (data) => <RenderAssignOptions openAssignHandler={openAssignHandler} data={data} permissions={permissions} />
+      }
     ];
 
     dispatch({
@@ -122,6 +157,15 @@ const WorkOrderSupervisor = () => {
       });
   }, []);
 
+  const openAssignHandler = (value: any, data: any) => {
+    setSelectedServiceData(data);
+    if (value === 'assignTechnician') {
+      setAssignTechnicianDialog(true);
+    } else {
+      setWorkStationAssignDialog(true);
+    }
+  };
+
   const fetchSingleColumn = useCallback(
     (column: string, page = 0, appendData = true, filterQuery) => {
       let api = `${workOrderSupervisor.api}?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
@@ -132,8 +176,11 @@ const WorkOrderSupervisor = () => {
           const setData = (prev: { [key: string]: any[] }, appendData: boolean) => {
             const rows = data.map((item) => {
               const newObj = { ...item };
+              newObj['productionOrderNumber'] = newObj?.productionOrder?.optionLabel;
+              newObj['repairOrderNumber'] = newObj?.repairOrder?.optionLabel;
               newObj['serviceName'] = newObj?.service?.optionLabel;
               newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
+              newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
               return newObj;
             });
             const newData = prev;
@@ -207,140 +254,164 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3 align-items-center">
-              <Autocomplete
-                fullWidth
-                options={usersOption}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => {
-                  return option.optionValue === val.optionValue;
-                }}
-                value={
-                  usersOption.filter((data) => data.optionValue === selectedUser).length
-                    ? usersOption.filter((data) => data.optionValue === selectedUser)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setSelectedUser(val && val.optionValue ? val.optionValue : '');
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    margin="none"
-                    size="small"
-                    name="user"
-                    placeholder="Technician"
-                    label="Technician"
-                    variant="outlined"
-                    fullWidth
-                  />
-                )}
-              />
-              <Autocomplete
-                fullWidth
-                options={serviceMasterOption}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => {
-                  return option.optionValue === val.optionValue;
-                }}
-                value={
-                  serviceMasterOption.filter((data) => data.optionValue === selectedService).length
-                    ? serviceMasterOption.filter((data) => data.optionValue === selectedService)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setSelectedService(val && val.optionValue ? val.optionValue : '');
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} margin="none" size="small" name="user" placeholder="Service" label="Service" variant="outlined" fullWidth />
-                )}
-              />
-              <Autocomplete
-                fullWidth
-                options={resourceFilter}
-                getOptionLabel={(option: any) => (option ? option?.title : '')}
-                value={selectedResource}
-                onChange={(e, val) => {
-                  setSelectedResourceOption(null);
-                  setSelectedResource(val);
-                }}
-                renderInput={(params) => <TextField {...params} margin="none" size="small" label="Select Resource" variant="outlined" fullWidth />}
-              />
-              {selectedResource && (
+            <div className="grid grid-cols-[1fr_30px] gap-2 items-start">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3 align-items-center">
                 <Autocomplete
                   fullWidth
-                  options={resourceOptions}
+                  options={usersOption}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => {
                     return option.optionValue === val.optionValue;
                   }}
                   value={
-                    resourceOptions.filter((data) => data.optionValue === selectedResourceOption).length
-                      ? resourceOptions.filter((data) => data.optionValue === selectedResourceOption)[0]
+                    usersOption.filter((data) => data.optionValue === selectedUser).length
+                      ? usersOption.filter((data) => data.optionValue === selectedUser)[0]
                       : ''
                   }
                   onChange={(e, val) => {
-                    setSelectedResourceOption(val && val.optionValue ? val.optionValue : '');
+                    setSelectedUser(val && val.optionValue ? val.optionValue : '');
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="none" size="small" label={`Select ${selectedResource?.title}`} variant="outlined" fullWidth />
+                    <TextField
+                      {...params}
+                      margin="none"
+                      size="small"
+                      name="user"
+                      placeholder="Technician"
+                      label="Technician"
+                      variant="outlined"
+                      fullWidth
+                    />
                   )}
                 />
-              )}
-              <FormControl fullWidth size="small" margin="none" variant="outlined">
-                <InputLabel id="duration">Select Duration</InputLabel>
-                <Select
-                  labelId="duration"
-                  id="time-duration"
-                  value={timeFrame}
-                  onChange={(e) => setTimeFrame(e.target.value)}
-                  label="Select Duration"
-                  SelectDisplayProps={{
-                    style: { minHeight: 22.5 }
-                  }}
+                <Autocomplete
                   fullWidth
-                >
-                  <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                  <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                  <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                  <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                  <MenuItem value={'custom'}>Custom</MenuItem>
-                </Select>
-              </FormControl>
-              <KeyboardDatePicker
-                disabled={timeFrame !== 'custom'}
-                inputVariant="outlined"
-                variant="inline"
-                size="small"
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-                autoOk
-                format={dateFormatForInputControl}
-                maxDate={globalFilters.to}
-                label="From"
-                value={globalFilters.from}
-                onChange={(date) => {
-                  setGlobalFilters({ ...globalFilters, from: date });
-                }}
-              />
-              <KeyboardDatePicker
-                disabled={timeFrame !== 'custom'}
-                inputVariant="outlined"
-                variant="inline"
-                autoOk
-                size="small"
-                InputProps={{
-                  style: { minHeight: '38px' }
-                }}
-                minDate={globalFilters.from}
-                format={dateFormatForInputControl}
-                label="To"
-                value={globalFilters.to}
-                onChange={(date) => {
-                  setGlobalFilters({ ...globalFilters, to: date });
-                }}
-              />
+                  options={serviceMasterOption}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => {
+                    return option.optionValue === val.optionValue;
+                  }}
+                  value={
+                    serviceMasterOption.filter((data) => data.optionValue === selectedService).length
+                      ? serviceMasterOption.filter((data) => data.optionValue === selectedService)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setSelectedService(val && val.optionValue ? val.optionValue : '');
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      margin="none"
+                      size="small"
+                      name="user"
+                      placeholder="Service"
+                      label="Service"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+                <Autocomplete
+                  fullWidth
+                  options={resourceFilter}
+                  getOptionLabel={(option: any) => (option ? option?.title : '')}
+                  value={selectedResource}
+                  onChange={(e, val) => {
+                    setSelectedResourceOption(null);
+                    setSelectedResource(val);
+                  }}
+                  renderInput={(params) => <TextField {...params} margin="none" size="small" label="Select Resource" variant="outlined" fullWidth />}
+                />
+                {selectedResource && (
+                  <Autocomplete
+                    fullWidth
+                    options={resourceOptions}
+                    getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                    getOptionSelected={(option: any, val) => {
+                      return option.optionValue === val.optionValue;
+                    }}
+                    value={
+                      resourceOptions.filter((data) => data.optionValue === selectedResourceOption).length
+                        ? resourceOptions.filter((data) => data.optionValue === selectedResourceOption)[0]
+                        : ''
+                    }
+                    onChange={(e, val) => {
+                      setSelectedResourceOption(val && val.optionValue ? val.optionValue : '');
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} margin="none" size="small" label={`Select ${selectedResource?.title}`} variant="outlined" fullWidth />
+                    )}
+                  />
+                )}
+                <FormControl fullWidth size="small" margin="none" variant="outlined">
+                  <InputLabel id="duration">Select Duration</InputLabel>
+                  <Select
+                    labelId="duration"
+                    id="time-duration"
+                    value={timeFrame}
+                    onChange={(e) => setTimeFrame(e.target.value)}
+                    label="Select Duration"
+                    SelectDisplayProps={{
+                      style: { minHeight: 22.5 }
+                    }}
+                    fullWidth
+                  >
+                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                    <MenuItem value={'custom'}>Custom</MenuItem>
+                  </Select>
+                </FormControl>
+                <KeyboardDatePicker
+                  disabled={timeFrame !== 'custom'}
+                  inputVariant="outlined"
+                  variant="inline"
+                  size="small"
+                  InputProps={{
+                    style: { minHeight: '38px' }
+                  }}
+                  autoOk
+                  format={dateFormatForInputControl}
+                  maxDate={globalFilters.to}
+                  label="From"
+                  value={globalFilters.from}
+                  onChange={(date) => {
+                    setGlobalFilters({ ...globalFilters, from: date });
+                  }}
+                />
+                <KeyboardDatePicker
+                  disabled={timeFrame !== 'custom'}
+                  inputVariant="outlined"
+                  variant="inline"
+                  autoOk
+                  size="small"
+                  InputProps={{
+                    style: { minHeight: '38px' }
+                  }}
+                  minDate={globalFilters.from}
+                  format={dateFormatForInputControl}
+                  label="To"
+                  value={globalFilters.to}
+                  onChange={(date) => {
+                    setGlobalFilters({ ...globalFilters, to: date });
+                  }}
+                />
+              </div>
+              <div className="pt-[4px]">
+                <HtmlTooltip title={'Refresh'}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      dispatch({ type: 'refreshData' });
+                    }}
+                    style={{ display: 'flex', marginLeft: 'auto' }}
+                  >
+                    <RefreshIcon />
+                  </IconButton>
+                </HtmlTooltip>
+              </div>
             </div>
           </div>
           <CardColTimeline
@@ -351,9 +422,97 @@ const WorkOrderSupervisor = () => {
             passFailAccessor="serviceStatus"
           />
         </div>
+        {assignTechnicianDialog && (
+          <AssignUserDialog
+            warehouse={selectedServiceData?.warehouse}
+            workOrderData={[
+              {
+                uniqueId: selectedServiceData?.uniqueId,
+                workOrderId: selectedServiceData?._id
+              }
+            ]}
+            assignedUsers={selectedServiceData?.assignedUsers}
+            reference={'service'}
+            handleClose={() => {
+              setAssignTechnicianDialog(false);
+            }}
+            handleSucess={() => {
+              setAssignTechnicianDialog(false);
+              dispatch({ type: 'refreshData' });
+            }}
+            competencies={selectedServiceData?.competencies}
+          />
+        )}
+        {workStationAssignDialog && (
+          <AssignWorkStationDialog
+            warehouse={selectedServiceData?.warehouse}
+            workOrderData={[
+              {
+                uniqueId: selectedServiceData?.uniqueId,
+                workOrderId: selectedServiceData?._id
+              }
+            ]}
+            workStations={selectedServiceData?.assignedWorkStations}
+            handleClose={() => {
+              setWorkStationAssignDialog(false);
+            }}
+            handleSucess={() => {
+              setWorkStationAssignDialog(false);
+              dispatch({ type: 'refreshData' });
+            }}
+          />
+        )}
       </Fragment>
     </MuiPickersUtilsProvider>
   );
 };
 
 export default WorkOrderSupervisor;
+
+const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  return (
+    <>
+      <IconButton
+        size="small"
+        color="primary"
+        aria-label="menu"
+        disabled={data?.status === WORKORDER_SERVICE_STATUS.completed}
+        onClick={(event) => {
+          handleOpenMenu(event);
+        }}
+      >
+        <MoreHorizIcon />
+      </IconButton>
+      {anchorEl && (
+        <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+          <MenuItem
+            onClick={() => {
+              openAssignHandler('assignTechnician', data);
+              setAnchorEl(null);
+            }}
+          >
+            {'Assign Technician'}
+          </MenuItem>
+          {permissions?.workStations?.isRead && (
+            <MenuItem
+              onClick={() => {
+                openAssignHandler('assignWorkStations', data);
+                setAnchorEl(null);
+              }}
+            >
+              {`Assign ${routes.workStations.title}`}
+            </MenuItem>
+          )}
+        </Menu>
+      )}
+    </>
+  );
+};

@@ -137,7 +137,8 @@ const Notification = () => {
     if (d?.entity) {
       handleRedirect(d?.entity, d?.resourceId, resourcePath);
     } else {
-      history.push(resourcePath, { data: d?.of ? d?.of : null });
+      // history.push(resourcePath, { data: d?.of ? d?.of : null });
+      history.push(d?.resourcePath);
     }
   };
 

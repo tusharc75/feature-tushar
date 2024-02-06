@@ -74,7 +74,6 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
           let res: any = {
             ...prepareDataForGrid(u, user)
           };
-          res['isChecked'] = false;
           res['hideSelection'] = [DELIVERY_TICKET_STATUS.delivered].includes(res.status);
           return res;
         });

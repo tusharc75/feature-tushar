@@ -39,6 +39,8 @@ import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { Image } from '@material-ui/icons';
 import WebcamDialog from './WebCamDialog';
+import FaceLiveNess from 'src/components/FacialLogin/FaceLiveNess';
+import SetUpMfaDialog from './SetUpMfaDialog';
 
 const useStyles = makeStyles((theme) => ({
   profileEdit: {
@@ -75,7 +77,7 @@ export default function ManageProfile(props) {
   const classes = useStyles();
   const { displayUserDetails, displayUserProfileImage, userFields, userData, loading, userLoading, onFetchUserData, otherDetails, userProxy } = props;
   const {
-    state: { user },
+    state: { user, permissions },
     dispatch
   }: any = useData();
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -86,11 +88,16 @@ export default function ManageProfile(props) {
   const [isPasswordUpdate, setPasswordUpdate] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [removeFaceConfirmBox, setRemoveFaceConfirmBox] = useState(false);
+  const [removeMFAConfirmBox, setRemoveMFAConfirmBox] = useState(false);
   const [removingFace, setRemovingFace] = useState(false);
   const [showAddProxyDialog, setShowAddProxyDialog] = useState(false);
+
+
+  const [addFaceDialog, setAddFaceDialog] = useState(false);
+  const [setUpMfaDialog, setSetUpMfaDialog] = useState(false);
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const [webCamDialog, setWebCamDialog] = useState(false);
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -217,24 +224,53 @@ export default function ManageProfile(props) {
 
   const handleRemoveFace = () => {
     setRemovingFace(true);
-    axiosInstance()
-      .delete('/user/remove-face-data')
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        setRemoveFaceConfirmBox(false);
-        setRemovingFace(false);
-        onFetchUserData();
-      })
+    axiosInstance().delete('/user/face/remove').then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      setRemoveFaceConfirmBox(false);
+      setRemovingFace(false);
+      onFetchUserData();
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setRemovingFace(false);
       });
   };
 
+  const handleRemoveMFA = () => {
+    setRemovingFace(true);
+    axiosInstance().delete('/user/mfa/remove').then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      setRemoveMFAConfirmBox(false);
+      onFetchUserData();
+    })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setRemovingFace(false);
+      });
+  };
+
+  const handleAddFace = async (sessionId: string) => {
+    await axiosInstance().post('/user/face/add', { sessionId }).then(({data}) => {
+      setAddFaceDialog(false);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      onFetchUserData();
+    }).catch((err) => {
+      setAddFaceDialog(false);
+      toastConfig.setToastConfig(err);
+    });
+  }
   return (
     <>
       {openUpdateDialog && (
@@ -341,22 +377,31 @@ export default function ManageProfile(props) {
               Change Password
             </Button>
             <Divider />
-
             <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setShowAddProxyDialog(true)}>
               Add DOA Proxy
             </Button>
-            <div style={{ display: 'none' }}>
-              <Divider />
-              {userData?.faceData && userData?.faceId ? (
-                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveFaceConfirmBox(true)}>
-                  Remove Face
+            {permissions?.payrollPolicy &&
+              <>
+                <Divider />
+                {(userData?.faceId || userData?.faceData) ? (
+                  <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveFaceConfirmBox(true)}>
+                    Remove Face
+                  </Button>
+                ) : (
+                  <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setAddFaceDialog(true)}>
+                    Add Face
+                  </Button>
+                )}
+                <Divider />
+              {userData?.isMFASetup ? (
+                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveMFAConfirmBox(true)}>
+                  Remove MFA
                 </Button>
-              ) : (
-                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setWebCamDialog(true)}>
-                  Add Face
-                </Button>
-              )}
-            </div>
+              ) : (<Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setSetUpMfaDialog(true)}>
+                  Setup MFA
+                </Button>)}
+              </>
+            }
           </div>
         ) : null}
         <div style={{ borderRadius: 8, minWidth: '300px' }}>
@@ -546,6 +591,31 @@ export default function ManageProfile(props) {
               }}
             />
           ) : null}
+          {addFaceDialog && (
+            <FaceLiveNess
+              onClose={() => setAddFaceDialog(false)}
+              onComplete={handleAddFace} />
+          )}
+          {setUpMfaDialog && (
+            <SetUpMfaDialog
+              onClose={() => {
+                setSetUpMfaDialog(false);
+                onFetchUserData();
+              }}
+            />
+          )}
+          {/* {webCamDialog && (
+            <WebcamDialog
+              open={webCamDialog}
+              onClose={() => {
+                setWebCamDialog(false);
+              }}
+              onSuccess={() => {
+                onFetchUserData();
+                setWebCamDialog(false);
+              }}
+            />
+          )} */}
           {showAddProxyDialog && (
             <AddProxyDialog
               open={showAddProxyDialog}
@@ -568,18 +638,6 @@ export default function ManageProfile(props) {
               userId={user?.user?._id}
             />
           )}
-          {webCamDialog && (
-            <WebcamDialog
-              open={webCamDialog}
-              onClose={() => {
-                setWebCamDialog(false);
-              }}
-              onSuccess={() => {
-                onFetchUserData();
-                setWebCamDialog(false);
-              }}
-            />
-          )}
           {removeFaceConfirmBox ? (
             <ConfirmationDialog
               open={removeFaceConfirmBox}
@@ -589,6 +647,17 @@ export default function ManageProfile(props) {
               okBtnLoading={removingFace}
             />
           ) : null}
+          {
+            removeMFAConfirmBox ? (
+              <ConfirmationDialog
+                open={removeMFAConfirmBox}
+                message={`Are you sure you want to remove MFA ?`}
+                onClose={() => setRemoveMFAConfirmBox(false)}
+                onOk={handleRemoveMFA}
+                okBtnLoading={removingFace}
+              />
+            ) : null
+          }
         </div>
       </>
     </>

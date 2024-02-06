@@ -68,6 +68,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
     start: 'Start',
     completed: 'Completed',
     passed: 'Passed',
+    skipped: 'Skipped',
     failed: 'Failed',
     valueAdded: 'valueAdded',
     valueUpdated: 'valueUpdated',
@@ -81,6 +82,9 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
         icon = <BsExclamationLg />;
         break;
       case operations.completed:
+        icon = <BsCheckLg />;
+        break;
+      case operations.skipped:
         icon = <BsCheckLg />;
         break;
       case operations.start:
@@ -120,6 +124,9 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
       case operations.passed:
         color = { '--icon-color': '#138A86', '--icon-bg-color': '#E2FBEC' } as React.CSSProperties;
         break;
+      case operations.skipped:
+        color = { '--icon-color': '#138A86', '--icon-bg-color': '#E2FBEC' } as React.CSSProperties;
+        break;
       case operations.failed:
         color = { '--icon-color': '#D15241', '--icon-bg-color': '#FEE4E0' } as React.CSSProperties;
         break;
@@ -154,6 +161,9 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
       case operations.failed:
         message = `<span>Failed</span> ${stepName} ${serviceName}`;
         break;
+      case operations.skipped:
+        message = `<span>Skipped</span> ${stepName} ${serviceName}`;
+        break;
       case operations.valueAdded:
         message = `<span>Added value</span> ${stepName} ${serviceName}`;
         break;
@@ -185,7 +195,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
             <Box className={styles.main}>
               {keys?.map((key: string) => {
                 return (
-                  <div className={styles.singleGroup}>
+                  <div key={key} className={styles.singleGroup}>
                     <Box key={key}>
                       <p className={styles.date}>{moment(key).format('MMM Do YYYY')}</p>
                     </Box>

@@ -17,6 +17,8 @@ interface CardColInterface extends BoxProps {
   state: TInitialState;
   dispatch: React.Dispatch<TActios>;
   fetchSingleColumn: (column: string, page: number, appendData?: boolean, filterQuery?: string) => void;
+  assignOptions?: any;
+  openAssignHandler?: (option: any, data: any) => void;
 }
 
 export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTitle | TLinkTitle | TTooltip;
@@ -24,7 +26,7 @@ export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTit
 type TCommon = {
   accessor: string;
   title?: string;
-  renderer?: (data: any) => string;
+  renderer?: (data: any) => string | ReactNode | Element;
 };
 
 type TDate = TCommon & {
@@ -42,6 +44,7 @@ type TTimer = TCommon & {
 type TLink = TCommon & {
   type: 'link';
   link: (data: any) => string;
+  target?: '_blank' | '_self' | '_parent' | '_top';
 };
 type TTitle = TCommon & {
   type: 'title';
@@ -50,9 +53,10 @@ type TLinkTitle = TCommon & {
   type: 'linkTitle';
   link: (data: any) => string;
 };
-type TTooltip = TCommon & {
+type TTooltip = {
   type: 'tooltip';
-  renderer: (data: any) => ReactNode;
+  accessor: string;
+  renderer: (data: any) => ReactNode | Element;
 };
 
 const CardColTimeline: React.FC<CardColInterface> = ({
@@ -72,7 +76,7 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = React.useState(600);
 
-  const { count, columnOrder, visibleColumns, rowDef } = state;
+  const { count, columnOrder, visibleColumns } = state;
 
   // sort columns
   const columns = useMemo(() => {

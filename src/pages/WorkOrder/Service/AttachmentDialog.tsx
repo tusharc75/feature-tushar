@@ -192,6 +192,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                           <Autocomplete
                             id="attachmentType"
                             size="small"
+                            disabled={!canEdit}
                             options={Object.values(ATTACHMENT_TYPE)}
                             renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="dense" />}
                             getOptionLabel={(option) => option}
@@ -228,7 +229,11 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                                   />
                                 </Box>
                                 <Box pl={2}>
-                                  <CustomButton variant="contained" color="primary" onClick={() => setDocumentScanDialog(true)}>
+                                  <CustomButton
+                                    variant="contained"
+                                    color="primary"
+                                    disabled={!canEdit}
+                                    onClick={() => setDocumentScanDialog(true)}>
                                     Scan Document
                                   </CustomButton>
                                 </Box>

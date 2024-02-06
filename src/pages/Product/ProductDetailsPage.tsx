@@ -476,6 +476,7 @@ const ProductDetailsPage = () => {
                               <Box className="single-form-v1">
                                 <Box className="form-head-v1" display="flex" justifyContent="space-between" alignItems="center">
                                   <Typography variant="subtitle2">{routes?.serializedAsset?.title}</Typography>
+                                  <Box>
                                   {permissions?.serializedAsset?.isCreate && (
                                     <IconButton
                                       title={`Create ${routes.serializedAsset.title}`}
@@ -488,6 +489,10 @@ const ProductDetailsPage = () => {
                                       <ControlPoint fontSize="small" />
                                     </IconButton>
                                   )}
+                                  <IconButton size="small" onClick={getWarehouses}>
+                                    <RefreshIcon fontSize="small" />
+                                  </IconButton>
+                                  </Box>
                                 </Box>
 
                                 <Box className="formdata-v1" style={{ minHeight }}>

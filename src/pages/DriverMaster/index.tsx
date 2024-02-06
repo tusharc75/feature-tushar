@@ -1,25 +1,25 @@
 import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import routes from 'src/components/Helpers/Routes';
-import styles from '../Leads/Header.module.scss';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import { camelCase } from 'lodash';
-import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ManageDriverMaster from './ManageDriverMaster';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ManageDriverMaster from './ManageDriverMaster';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 const DriverMaster = () => {
   const renderedFrom = camelCase(routes?.driverMaster.title);
@@ -35,7 +35,6 @@ const DriverMaster = () => {
 
   const [driverMasterId, setDriverMasterId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
-  const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
@@ -164,14 +163,6 @@ const DriverMaster = () => {
     return deepFilter;
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -209,6 +200,23 @@ const DriverMaster = () => {
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={!(permissions?.driverMaster?.isDelete && selectedRecords?.every((s) => s?.canDelete))}
+          onClick={() => {
+            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -231,67 +239,26 @@ const DriverMaster = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  disabled={!permissions?.driverMaster?.isCreate}
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setDriverMasterId(null);
-                    setOpen({ open: true, isClone: false });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                <Button
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                  disabled={selectedRecords?.length ? false : true}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={!(permissions?.driverMaster?.isDelete && selectedRecords?.every((s) => s?.canDelete))}
-                    onClick={() => {
-                      closeActions();
-                      {
-                        selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                      }
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords?.length})`}
-                  </MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          // toggleButtonList
+          // onToggle
+          // selectedType
+          // setSelectedType
+          // leftSideContents
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems/>}
+          addButtonProps={{ disabled: !permissions?.driverMaster?.isCreate }}
+          addButtonOnclick={() => {
+            setDriverMasterId(null);
+            setOpen({ open: true, isClone: false });
+          }}
+          isAddButtonVisible={true}
+        />
+      
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

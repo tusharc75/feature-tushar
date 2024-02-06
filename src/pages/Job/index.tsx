@@ -1,38 +1,37 @@
-import { useState, useEffect, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import AppsIcon from '@material-ui/icons/Apps';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import ViewListIcon from '@material-ui/icons/ViewList';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
+import { useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { cloneDisable } from 'src/constants/messageHelpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
 import {
   gridLoadingTimeout,
   prepareDataForGrid,
   // getLocalStorageArrayData,
   sidebarResource
 } from '../../constants/helpers';
-import { Button, Box, IconButton, Menu, MenuItem } from '@material-ui/core';
-import CustomContainer from '../../components/CustomContainer';
-import routes from './../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../StateProvider/Provider';
-import axiosInstance from '../../axios/axiosInstance';
-import AppsIcon from '@material-ui/icons/Apps';
-import ViewListIcon from '@material-ui/icons/ViewList';
-import { camelCase } from 'lodash';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import ManageJobDialog from './ManageJobDialog';
+import routes from './../../components/Helpers/Routes';
 import CardView from './CardView';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import { vi } from 'date-fns/locale';
+import ManageJobDialog from './ManageJobDialog';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 let jobTimeout;
 
@@ -69,7 +68,6 @@ const Job = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
 
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [singleJobDelete, setSingleJobDelete] = useState({
     id: null,
     show: false,
@@ -142,7 +140,7 @@ const Job = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.job?.isCreate ? "Clone" : cloneDisable}  >
+        <HtmlTooltip title={permissions?.job?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -160,7 +158,7 @@ const Job = () => {
           <IconButton
             size="small"
             aria-label="Delete"
-            disabled = {row?.original?.canDelete ? false : true}
+            disabled={row?.original?.canDelete ? false : true}
             onClick={() => {
               setSingleJobDelete({
                 show: true,
@@ -169,7 +167,7 @@ const Job = () => {
               });
             }}
           >
-          <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'}/>
+            <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -238,11 +236,7 @@ const Job = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const values = JobType.find((d) => d.key === type).value;
-    setSelectedType(values);
-    history.push(`?type=${values}`);
   };
-
 
   const showConfirmBox = () => {
     if (selectedRecords?.find((d) => d.canDelete === false)) {
@@ -274,7 +268,6 @@ const Job = () => {
         fetchJob();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -283,15 +276,67 @@ const Job = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+
+
+  const LeftSideContent = () => {
+    return (
+      <>
+        {permissions?.fleetDispatch?.isRead && (
+          <ToggleButtonGroup size="small">
+            <ToggleButton
+              onClick={() => {
+                history.push(`${routes.fleetDispatch.path}`);
+              }}
+            >
+              <span>{routes.fleetDispatch.title}</span>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        )}
+        {permissions?.fleetReceiver?.isRead && (
+          <ToggleButtonGroup size="small">
+            <ToggleButton
+              onClick={() => {
+                history.push(`${routes.fleetReceiver.path}`);
+              }}
+            >
+              <span>{routes.fleetReceiver.title}</span>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        )}
+
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setViewType(1);
+          }}
+        >
+          <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+        </IconButton>
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setViewType(2);
+          }}
+        >
+          <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+        </IconButton>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <MenuItem
+        onClick={() => {
+          showConfirmBox();
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
   };
-
-
 
   return (
     <section className="main-container-v1">
@@ -315,129 +360,25 @@ const Job = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              <ToggleButtonGroup
-                size="small"
-                className="align-items-center gap-1 "
-                value={JobType[selectedType - 1].key}
-                exclusive
-                onChange={onTypeChange}
-              >
-                {JobType.map((k, index) => {
-                  return (
-                    <ToggleButton value={k.key} key={index}>
-                      {k.key}
-                    </ToggleButton>
-                  );
-                })}
-                {permissions?.fleetDispatch?.isRead && (
-                  <Box>
-                    <ToggleButtonGroup size="small">
-                      <ToggleButton
-                        onClick={() => {
-                          history.push(`${routes.fleetDispatch.path}`);
-                        }}
-                      >
-                        <span>{routes.fleetDispatch.title}</span>
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  </Box>
-                )}
-                {permissions?.fleetReceiver?.isRead && (
-                  <Box>
-                    <ToggleButtonGroup size="small">
-                      <ToggleButton
-                        onClick={() => {
-                          history.push(`${routes.fleetReceiver.path}`);
-                        }}
-                      >
-                        <span>{routes.fleetReceiver.title}</span>
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  </Box>
-                )}
-
-                <Box>
-                  <IconButton
-                    size="small"
-                    aria-label="Clone"
-                    onClick={() => {
-                      setViewType(1);
-                    }}
-                  >
-                    <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    aria-label="Clone"
-                    onClick={() => {
-                      setViewType(2);
-                    }}
-                  >
-                    <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
-                  </IconButton>
-                </Box>
-              </ToggleButtonGroup>
-            </div>
-
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setShowManageJobDialog({ open: true, isClone: false, idToClone: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                {permissions?.job?.isDelete && (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={`new-dropdown-v1`}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                      disabled={selectedRecords?.length ? false : true}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          showConfirmBox();
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={JobType}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContents={<LeftSideContent />}
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={permissions?.job?.isDelete}
+          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
+          actionMenuItems={<ActionMenuItems/>}
+          // addButtonProps
+          addButtonOnclick={() => {
+            setShowManageJobDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={true}
+        />
+   
         {viewType === 1 && (
           <CardView
             jobs={dataRows}
@@ -448,27 +389,28 @@ const Job = () => {
           />
         )}
 
-        {viewType === 2 &&
-          (
-            <>
-              {columns ? (
-                <CustomReactTable
-                  height={'calc(100vh - 200px)'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={false}
-                  refreshGrid={fetchJob}
-                  showOnlyShowFilteredRecordSwitch={false}
-                  showFilters={true}
-                  resource={sidebarResource.job}
-                />
-              ) : <Box p={2} height={500}>
+        {viewType === 2 && (
+          <>
+            {columns ? (
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={false}
+                refreshGrid={fetchJob}
+                showOnlyShowFilteredRecordSwitch={false}
+                showFilters={true}
+                resource={sidebarResource.job}
+              />
+            ) : (
+              <Box p={2} height={500}>
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>}
-            </>
-          )}
+              </Box>
+            )}
+          </>
+        )}
 
         {showDeleteConfirmBox && (
           <ConfirmationDialog

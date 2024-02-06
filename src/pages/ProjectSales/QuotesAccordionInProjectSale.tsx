@@ -206,7 +206,7 @@ export default function QuotesAccordionInProjectSale({
               </Box>
             </Grid>
             <Grid item xs={4} container justify="flex-end" alignItems="center">
-              {(permissions.isUpdate && isTeamMember) || isManager ? (
+              {(permissions?.isUpdate && isTeamMember) || isManager ? (
                 <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleClick}>
                   <MoreVert />
                 </IconButton>
@@ -262,7 +262,7 @@ export default function QuotesAccordionInProjectSale({
                                     ) : (
                                       ''
                                     )}
-                                    {(permissions.isUpdate && isTeamMember) || isManager ? (
+                                    {(permissions?.isUpdate && isTeamMember) || isManager ? (
                                       <>
                                         <Box ml={1} />
                                         <IconButton title={`Remove quote ${obj.quoteName}`} size="small" onClick={() => handleRemove(obj)}>

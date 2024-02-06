@@ -1,11 +1,16 @@
 import { Box, Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { AddOutlined, Delete, ExpandMore, Help, Warning } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { camelCase } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -15,11 +20,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import SearchBox from '../../components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import {
   QUOTATION_TYPE,
   customerAccount,
@@ -29,9 +30,7 @@ import {
   sidebarResource,
   supplierAccount
 } from '../../constants/helpers';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageQuotationDialog from './ManageQuotationDialog';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let quotationTimeout;
 
@@ -85,7 +84,7 @@ const Quotation = () => {
     columns?.forEach((column) => {
       if (column?.primaryField) {
         column.cell = ({ row }) => (
-          <div style={{display:'flex', alignItems:'center'}}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <Link className="link text-truncate" title={row.original[column.accessor]} to={`${routes.quotation.path}/detail/${row.original._id}`}>
               {row.original[column.accessor]}
             </Link>
@@ -334,12 +333,16 @@ const Quotation = () => {
           permissions={permissions?.quotation}
           module="quotation"
           api={quotation.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={fetchData}
+          onExportToExcelSuccess={() => {
+            fetchData();
+          }}
           additionalParams={getQueryString(true)}
         />
       </div>
@@ -378,7 +381,7 @@ const Quotation = () => {
               )}
             </div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.quotation?.isCreate && (
                   <>
@@ -449,9 +452,11 @@ const Quotation = () => {
             showFilters={true}
             resource={sidebarResource.quotation}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

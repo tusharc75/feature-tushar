@@ -125,6 +125,7 @@ export const PreviewDialog = ({
                   allColumn={allColumn}
                   resource={resource}
                   type={"PDF"}
+                  defaultColumns={defaultColumns}
                 />}
               {type?.includes('Excel') &&
                 <Box mt={3}>
@@ -138,6 +139,7 @@ export const PreviewDialog = ({
                     allColumn={allColumn}
                     resource={resource}
                     type={"Excel"}
+                    defaultColumns={defaultColumns}
                   />
                 </Box>
               }

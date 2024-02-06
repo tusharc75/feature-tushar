@@ -159,9 +159,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       const receivingTicket = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.receiving);
       for (let i = 0; i < receivingTicket.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
-          if (
-            receivingTicket[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))
-          ) {
+          if (receivingTicket[i]?.assets.some((e: any) => assetData[j]._id === e.asset)) {
             assetData[j].receivingTicket = receivingTicket[i].ticketName;
             assetData[j].receivingTicketId = receivingTicket[i]._id;
             assetData[j].receivingTicketStatus = receivingTicket[i].status;
@@ -170,14 +168,13 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       }
       for (let i = 0; i < loadingTicket.length; i++) {
         for (let j = 0; j < assetData.length; j++) {
-          if (loadingTicket[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
+          if (loadingTicket[i]?.assets.some((e: any) => assetData[j]._id === e.asset)) {
             assetData[j].loadingTicket = loadingTicket[i].ticketName;
             assetData[j].loadingTicketId = loadingTicket[i]._id;
             assetData[j].loadingTicketStatus = loadingTicket[i].status;
           }
         }
       }
-
       assetData = assetData?.map((d: any, index: number) => {
         let finalObject: any = prepareDataForGrid(d);
         return {
@@ -370,7 +367,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           ticketType={DELIVERY_TICKET_TYPE.receiving}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}
           referenceData={showTicketDialog.data}
-          productInventory={assetWithNoTicket}
+          assets={assetWithNoTicket}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });

@@ -1,22 +1,21 @@
-import { useState, useEffect, useContext } from 'react';
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import styles from 'src/pages/Leads/Header.module.scss';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import SearchBox from '../Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import routes from '../Helpers/Routes';
-import styles from 'src/pages/Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
-import { camelCase } from 'lodash';
+import routes from '../Helpers/Routes';
+import SearchBox from '../Helpers/SearchBox';
 
 let searchTimeout;
 
 const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids = [], isSubmitting = false, hideQty = false }) => {
-
   const renderedFrom = `${camelCase(routes.packages?.title)}_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -27,7 +26,6 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
   const {
     state: { selectedEntity }
   }: any = useData();
-
 
   const [columns, setColumns] = useState(null);
 
@@ -81,7 +79,7 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
       .then(({ data }) => {
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['unitMain'] = u?.unit;
           finalObject['pricingMethodMain'] = u?.pricingMethod;
           finalObject['qty'] = 1;
@@ -157,8 +155,7 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
       if (editRow) {
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
-    } 
-    else {
+    } else {
       const updatedSelectedRecords = selectedRecords?.map((e) => {
         if (e?._id === row?._id) {
           return { ...e, qty: parseInt(data?.qty), isChecked: true };
@@ -178,7 +175,7 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
-                <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
+                <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
                 <Button
                   disabled={isSubmitting || selectedRecords?.length === 0}
                   onClick={() => {

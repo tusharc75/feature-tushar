@@ -10,12 +10,10 @@ import {
   MoreHoriz,
   DeleteOutline,
   People,
-  AddCircleOutline,
   FileCopyOutlined
 } from '@material-ui/icons';
 import {
   convertMsToTime,
-  CustomDialogTransition,
   getChipColor,
   getObjKeys,
   getObjKeysWithValues,
@@ -34,11 +32,9 @@ import {
   Chip,
   Menu,
   MenuItem,
-  ClickAwayListener,
   useMediaQuery,
   Checkbox,
   CircularProgress,
-  Dialog
 } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -58,9 +54,8 @@ import AssignUserDialog from './AssignUserDialog';
 import { isDesktop, isMobile, isTablet } from 'react-device-detect';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
 import { WorkStations } from 'src/assets/svg/svgIcons';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import Diagram from '../Diagram';
+import DiagramDialog from '../Diagram/DiagramDialog';
+import ServiceFieldValueDialig from './ServiceFielValuedDialig';
 
 export interface StepDataInterface {
   _id: string;
@@ -217,7 +212,6 @@ const Steps = ({
   minHeightClass = null
 }) => {
   const workOrderId = workOrderData?._id;
-  const warehouse = workOrderData?.warehouse;
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -235,7 +229,8 @@ const Steps = ({
   const [addNewStep, setAddNewStep] = useState({ open: false, clone: false, cloneStepData: null });
 
   const [showDrawing, setShowDrawing] = useState(false);
-
+  const [openServiceFieldValueDialig, setOpenServiceFieldValueDialig] = useState(false);
+  const [isEditableServiceFieldValueDialog, setIsEditableServiceFieldValueDialog] = useState(false);
 
   const {
     state: {
@@ -256,8 +251,11 @@ const Steps = ({
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, loading: false, steps: [] });
   const [selectedSteps, setSelectedSteps] = useState<string[]>([]);
   const [isCompleteAllLoading, setIsCompleteAllLoading] = useState(false);
-  const [reOpenServiceDialog, setReOpenServiceDialog] = useState({ open: false, type: null, stepId: null });
+  const [reOpenServiceDialog, setReOpenServiceDialog] = useState({ open: false, type: null, step: null });
   const [loadingStep, setLoadingStep] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   useEffect(() => {
     if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService.uniqueId) && selectedService.uniqueId) {
@@ -315,7 +313,16 @@ const Steps = ({
         ele.isAllowToCheck = stepSubmitedData?.find(
           (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === ele?._id
         )
-          ? false
+          ? stepSubmitedData?.find((s) => s.stepId === ele?._id)?.status !== WORKORDER_SERVICE_STEP_STATUS.start
+            ? false
+            : ele?.fields?.some((_f) => _f?.required)
+            ? ele?.fields
+                ?.filter((_f) => _f?.required)
+                ?.map((f) => f?.fieldName)
+                ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
+              ? true
+              : false
+            : true
           : ele.isAllowToPerform;
       });
     }
@@ -435,11 +442,18 @@ const Steps = ({
     if (tempServiceData) {
       stepData = tempServiceData;
       if (step?.fields?.length) {
+        let isDataAlreadyAdded = false;
+        const fieldNames = step?.fields?.map((e) => e.fieldName);
+        for (var key in tempServiceData) {
+          if (fieldNames?.includes(key)) {
+            isDataAlreadyAdded = true;
+          }
+        }
         fieldData = {
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: tempServiceData,
-          values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate)
+          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate) : getObjKeys('', fieldsDataForCreate)
         };
       }
     } else {
@@ -474,7 +488,19 @@ const Steps = ({
     return { fieldData, stepData, isStepValid };
   };
 
-  const handleSubmit = async (values, step) => {
+
+  const getNextStep = (currentStep: any): any | null => {
+    const allSteps = serviceDetails?.steps;
+    const currentStepIndex = allSteps?.findIndex(step => step?._id === currentStep?._id);
+    if (currentStepIndex === -1 || currentStepIndex === allSteps?.length - 1)
+      return null;
+    const nextStep = allSteps[currentStepIndex + 1];
+    const { stepData } = getFields(nextStep);
+    return (nextStep?.isPassFail || stepData?.status === WORKORDER_SERVICE_STEP_STATUS.end) ? null : { step: nextStep, stepData: stepData };
+  };
+
+  const handleSubmit = async (values, step, autoComplete = false, nextStep = false) => {
+    setIsSubmitting(true)
     let tempData = {
       uniqueId: selectedService?.uniqueId,
       serviceId: selectedService._id,
@@ -488,16 +514,40 @@ const Steps = ({
           type: 'success',
           message: data.message
         });
-        setSelectedStep(null);
-        setFieldDialog(false);
-        fetchService();
         if (step?.isPassFail) {
           const type = automatePassFail(values, step);
           handlePassFail(type, step);
         }
+        if (autoComplete && !nextStep) {
+          handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
+          setSelectedStep(null);
+          setFieldDialog(false);
+        }
+        else if (autoComplete && nextStep) {
+          if (autoComplete) {
+            handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
+          }
+          const nextStepData = getNextStep(step);
+          if (!nextStepData?.stepData) {
+            handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, nextStepData?.step, nextStepData?.stepData);
+          }
+          else if (nextStepData?.stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+            setSelectedStep(nextStepData?.step);
+            setFieldDialog(true);
+            setIsFieldDialogEditable(true);
+            setStepState(nextStepData?.stepData);
+          }
+        }
+        else {
+          setSelectedStep(null);
+          setFieldDialog(false);
+        }
+        setIsSubmitting(false)
+        fetchService();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsSubmitting(false)
       });
   };
 
@@ -518,13 +568,13 @@ const Steps = ({
     return Object.keys(invalidValues).length > 0 ? WORKORDER_SERVICE_STEP_STATUS.failed : WORKORDER_SERVICE_STEP_STATUS.passed;
   };
 
-  const handleStartEnd = (type, stepId) => {
+  const handleStartEnd = (type, step, stepData = null) => {
     setLoadingStep(true);
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/${type}`, {
         uniqueId: selectedService?.uniqueId,
         serviceId: selectedService._id,
-        stepId: stepId
+        stepId: step._id
       })
       .then(({ data }) => {
         setLoadingStep(false);
@@ -534,7 +584,13 @@ const Steps = ({
           message: data.message
         });
         fetchService();
-        setReOpenServiceDialog({ open: false, type: null, stepId: null });
+        setReOpenServiceDialog({ open: false, type: null, step: null });
+        if (type === WORKORDER_SERVICE_STEP_STATUS.start && step?.fields?.length) {
+          setSelectedStep(step);
+          setFieldDialog(true);
+          setIsFieldDialogEditable(true);
+          setStepState(stepData);
+        }
       })
       .catch((error) => {
         setLoadingStep(false);
@@ -678,9 +734,10 @@ const Steps = ({
       });
   };
 
-  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, step) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
+    setSelectedStep({ ...step, stepData: getFields(step)?.stepData });
   };
 
   const handleCloseMenu = (event) => {
@@ -774,7 +831,7 @@ const Steps = ({
           type: 'success',
           message: data.message
         });
-        setReOpenServiceDialog({ open: false, type: null, stepId: null });
+        setReOpenServiceDialog({ open: false, type: null, step: null });
         fetchService();
         fetchServiceData();
       })
@@ -784,6 +841,15 @@ const Steps = ({
       });
   };
 
+  let isStepsAllowToPerform = false;
+  if (selectedService?.assignedUsers?.length) {
+    isStepsAllowToPerform = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) ? true : false;
+  } else if (selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length) {
+    isStepsAllowToPerform = true;
+  } else if (allowedToEdit) {
+    isStepsAllowToPerform = true;
+  }
+
   return (
     <>
       {serviceDetails ? (
@@ -791,42 +857,44 @@ const Steps = ({
           <Box className={`max-[768px]:mb-[70px] relative overflow-hidden`}>
             <div className="flex justify-between items-center gap-[8px] p-[8px] flex-wrap">
               <div className="flex items-center gap-[15px] flex-wrap pl-2">
-                {(allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck)) ? (
+                {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
                   <>
                     <label htmlFor="select-all" className={`cursor-pointer`}>
                       <Checkbox id="select-all" color="primary" checked={isAllChecked()} onChange={() => checkAll()} />
                       <span className="font-medium select-none">Select All</span>
                     </label>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      disabled={selectedSteps.length ? false : true}
-                      onClick={completeAllSteps}
-                    >
-                      Complete
-                      {isCompleteAllLoading ? (
-                        <CircularProgress size={20} className="ml-[8px]" />
-                      ) : (
-                        `(${isAllChecked() ? 'All' : selectedSteps.length})`
-                      )}
-                    </Button>
+                    {isStepsAllowToPerform && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        disabled={selectedSteps.length ? false : true}
+                        onClick={completeAllSteps}
+                      >
+                        Complete
+                        {isCompleteAllLoading ? (
+                          <CircularProgress size={20} className="ml-[8px]" />
+                        ) : (
+                          `(${isAllChecked() ? 'All' : selectedSteps.length})`
+                        )}
+                      </Button>
+                    )}
                   </>
                 ) : null}
               </div>
               <div className={`d-flex flex-wrap align-center justify-end gap-[8px] ml-auto ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
-                {resource === sidebarResource.workOrderTechnician && workOrderData?.type === WORK_ORDER_TYPE.productionOrder &&
+                {resource === sidebarResource.workOrderTechnician && workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
                   <Button
                     variant={'contained'}
                     color="primary"
                     size="small"
                     onClick={() => {
-                      setShowDrawing(true)
+                      setShowDrawing(true);
                     }}
                   >
-                    Drawing
+                    Drawings
                   </Button>
-                }
+                )}
                 {resource === sidebarResource.workOrder && (
                   <Button
                     variant="outlined"
@@ -848,6 +916,43 @@ const Steps = ({
                   >
                     Add Steps
                   </Button>
+                )}
+                {serviceDetails?.fields?.length > 0 && (
+                  <>
+                    {serviceDetails?.serviceFieldsValue ?
+                      <IconButton
+                        aria-label="info"
+                        size="small"
+                        color="primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenServiceFieldValueDialig(true);
+                        }}
+                      >
+                        <Info fontSize="inherit" />
+                      </IconButton> :
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        disabled={
+                          allowedToEdit &&
+                            ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                              selectedService?.status
+                            )
+                            ? false
+                            : true
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenServiceFieldValueDialig(true);
+                          setIsEditableServiceFieldValueDialog(true);
+                        }}
+                      >
+                        Enter Value
+                      </Button>
+                    }
+                  </>
                 )}
                 {serviceDetails?.steps?.length > 0 && resource === sidebarResource.workOrder && (
                   <Button
@@ -913,22 +1018,16 @@ const Steps = ({
                 </Menu>
               </div>
             </div>
-            <div className={`w-full ${minHeightClass ? minHeightClass : 'h-[calc(100vh-265px)] '} max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] overflow-y-auto`}>
+            <div
+              className={`w-full ${minHeightClass ? minHeightClass : 'h-[calc(100vh-265px)] '
+                } max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] overflow-y-auto`}
+            >
               {serviceDetails?.steps?.map((step, index) => {
                 const { stepData, isStepValid } = getFields(step);
                 if (resource === sidebarResource.workOrderTechnician && stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) {
                   return '';
                 }
-                let isStepsAllowToPerform = false;
-                if (selectedService?.assignedUsers?.length) {
-                  isStepsAllowToPerform = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) ? true : false
-                }
-                else if (selectedService?.competencies?.filter(e => user?.competencies?.includes(e))?.length) {
-                  isStepsAllowToPerform = true;
-                }
-                else if (allowedToEdit) {
-                  isStepsAllowToPerform = true;
-                }
+                step.idx = resource === sidebarResource.workOrderTechnician ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`;
                 return (
                   <Box
                     key={`${step._id}_${selectedService?.uniqueId}}`}
@@ -938,7 +1037,7 @@ const Steps = ({
                       } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
                   >
                     <Box sx={{ display: 'flex' }} gridGap={'8px'}>
-                      {(allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck)) ? (
+                      {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
                         <Checkbox
                           name={`checkbox_${step._id}`}
                           color={'primary'}
@@ -992,8 +1091,7 @@ const Steps = ({
                                   aria-label="delete"
                                   disabled={!allowedToEdit}
                                   onClick={(event) => {
-                                    handleOpenMenu(event);
-                                    setSelectedStep(step);
+                                    handleOpenMenu(event, step);
                                   }}
                                 >
                                   <MoreHoriz />
@@ -1009,7 +1107,8 @@ const Steps = ({
                                       [
                                         WORKORDER_SERVICE_STEP_STATUS.passed,
                                         WORKORDER_SERVICE_STEP_STATUS.failed,
-                                        WORKORDER_SERVICE_STEP_STATUS.completed
+                                        WORKORDER_SERVICE_STEP_STATUS.completed,
+                                        WORKORDER_SERVICE_STEP_STATUS.skipped
                                       ].includes(stepData?.passFailStatus)
                                     }
                                     onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
@@ -1101,7 +1200,7 @@ const Steps = ({
                                     if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
                                       updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
                                     }
-                                    handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step._id);
+                                    handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step, stepData);
                                   }}
                                 >
                                   Start
@@ -1173,9 +1272,9 @@ const Steps = ({
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         if (selectedService?.status === WORKORDER_SERVICE_STATUS.completed) {
-                                          setReOpenServiceDialog({ open: true, type: null, stepId: step._id });
+                                          setReOpenServiceDialog({ open: true, type: null, step: step });
                                         } else {
-                                          handleStartEnd('reopen', step._id);
+                                          handleStartEnd('reopen', step);
                                         }
                                       }}
                                     >
@@ -1232,13 +1331,12 @@ const Steps = ({
                             aria-label="delete"
                             disabled={!allowedToEdit}
                             onClick={(event) => {
-                              handleOpenMenu(event);
-                              setSelectedStep(step);
+                              handleOpenMenu(event, step);
                             }}
                           >
                             <MoreHoriz />
                           </IconButton>
-                          {(allowedToEdit && ![WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status)) ? (
+                          {allowedToEdit && ![WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status) ? (
                             <HtmlTooltip enterTouchDelay={0} title="Clone" placement="top" arrow>
                               <IconButton
                                 size="small"
@@ -1246,7 +1344,7 @@ const Steps = ({
                                 aria-label="Clone"
                                 onClick={() => {
                                   if (selectedService?.status === WORKORDER_SERVICE_STATUS.completed) {
-                                    setReOpenServiceDialog({ open: true, type: 'clone', stepId: step._id });
+                                    setReOpenServiceDialog({ open: true, type: 'clone', step: step });
                                   } else {
                                     cloneStep(step);
                                   }
@@ -1267,7 +1365,8 @@ const Steps = ({
                                 [
                                   WORKORDER_SERVICE_STEP_STATUS.passed,
                                   WORKORDER_SERVICE_STEP_STATUS.failed,
-                                  WORKORDER_SERVICE_STEP_STATUS.completed
+                                  WORKORDER_SERVICE_STEP_STATUS.completed,
+                                  WORKORDER_SERVICE_STEP_STATUS.skipped
                                 ].includes(stepData?.passFailStatus)
                               }
                               onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
@@ -1352,19 +1451,19 @@ const Steps = ({
                   <MenuItem
                     onClick={(e) => {
                       e.stopPropagation();
-                      setAddNewStep({ open: true, clone: true, cloneStepData: selectedStep });
+                      handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), selectedStep);
                       setAnchorEl(null);
                     }}
                     disabled={
                       allowedToEdit &&
                         ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                           selectedService?.status
-                        )
+                        ) && !selectedStep?.stepData
                         ? false
                         : true
                     }
                   >
-                    Clone Step
+                    Skip Step
                   </MenuItem>
                   {resource === sidebarResource.workOrder && (
                     <MenuItem
@@ -1413,7 +1512,9 @@ const Steps = ({
                 allowedToEdit={allowedToEdit}
                 step={selectedStep}
                 stepData={stepState}
-                eidtable={isFieldDialogEditable}
+                isSubmitting={isSubmitting}
+                editable={isFieldDialogEditable}
+                nextStep={getNextStep(selectedStep) ? true : false}
               />
             )}
             {commentsDialog && (
@@ -1559,7 +1660,7 @@ const Steps = ({
             )}
             {workStationAssignDialog && (
               <AssignWorkStationDialog
-                warehouse={warehouse}
+                warehouse={workOrderData?.warehouse?.optionValue}
                 workOrderData={[
                   {
                     uniqueId: selectedService?.uniqueId,
@@ -1595,7 +1696,7 @@ const Steps = ({
                 open={reOpenServiceDialog.open}
                 message={`By performing this action, the service status will change from ${WORKORDER_SERVICE_STATUS.completed} to ${WORKORDER_SERVICE_STATUS.inProgress}. Do you wish to continue?`}
                 onClose={() => {
-                  setReOpenServiceDialog({ open: false, type: null, stepId: null });
+                  setReOpenServiceDialog({ open: false, type: null, step: null });
                 }}
                 forwardText={'Continue'}
                 okBtnLoading={loadingStep}
@@ -1604,12 +1705,30 @@ const Steps = ({
                   if (reOpenServiceDialog.type === 'clone') {
                     cloneStep({
                       workOrderId: workOrderId,
-                      _id: reOpenServiceDialog.stepId
+                      _id: reOpenServiceDialog.step._id
                     });
                   } else {
-                    handleStartEnd('reopen', reOpenServiceDialog.stepId);
+                    handleStartEnd('reopen', reOpenServiceDialog.step);
                   }
                 }}
+              />
+            )}
+            {openServiceFieldValueDialig && (
+              <ServiceFieldValueDialig
+                workOrderId={workOrderId}
+                fields={serviceDetails?.fields || []}
+                fieldsValue={serviceDetails?.serviceFieldsValue || {}}
+                service={selectedService}
+                handleClose={() => {
+                  setOpenServiceFieldValueDialig(false);
+                  setIsEditableServiceFieldValueDialog(false);
+                }}
+                handleSuccess={() => {
+                  fetchServiceData();
+                  setOpenServiceFieldValueDialig(false);
+                  setIsEditableServiceFieldValueDialog(false);
+                }}
+                editable={isEditableServiceFieldValueDialog}
               />
             )}
           </Box>
@@ -1667,33 +1786,15 @@ const Steps = ({
           isClone={addNewStep.clone}
         />
       )}
-      {showDrawing &&
-        <Dialog
-          open
-          aria-labelledby="customized-dialog-title"
-          maxWidth="md"
-          onClose={(e, reason) => {
-            setShowDrawing(false)
+      {showDrawing && (
+        <DiagramDialog
+          referenceId={workOrderData?._id}
+          currentVersion={workOrderData?.versions?.length + 1 || 1}
+          handleClose={() => {
+            setShowDrawing(false);
           }}
-          fullWidth
-          fullScreen
-          TransitionComponent={CustomDialogTransition}
-        >
-          <CustomDialogHeader
-            onClose={() => {
-              setShowDrawing(false)
-            }}
-            showRequiredLabel={false}
-            title={`Drawing`}
-          ></CustomDialogHeader>
-          <CustomDialogContent>
-            <Diagram
-              resource={'workOrder'}
-              referenceId={workOrderData?._id}
-              currentVersion={(workOrderData?.versions?.length + 1) || 1} />
-          </CustomDialogContent>
-        </Dialog>
-      }
+        />
+      )}
     </>
   );
 };

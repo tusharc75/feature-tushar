@@ -35,9 +35,9 @@ import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
+  
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = 'rental_management_serialized_asset';
-  const history = useHistory();
 
   const [deleting, setDeleting] = useState(false);
   const [isAdding, setAdding] = useState(false);
@@ -60,7 +60,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
+  const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -74,7 +74,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   };
 
   const fetchFields = async () => {
-    setNextStep(false);
     var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     data?.forEach((e) => {
       e.isColumnEditable = false;
@@ -267,7 +266,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
     fetchData();
-    setNextStep(true);
   };
 
   const checkProductInside = (item, material) => {
@@ -288,11 +286,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   };
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
-
     setNextStep(false);
     setNextStepToolTip(null);
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     try {
       var data: any = [];
       var transferAssets: any = [];
@@ -424,7 +421,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         setNextStep(true);
         setNextStepToolTip(null);
       }
-
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -535,7 +531,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       _subRow.assetAssignedQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.realAssetQty : 0;
+      _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' || _subRow.type === 'service' ? _subRow.qty * parent.realAssetQty : 0;
       _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
       // _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : true;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
@@ -605,7 +601,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   };
 
   const handleAddSerializedAsset = (assets, withTransfer = false) => {
-    setNextStep(false);
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
     flatArray = uniqBy(flatArray, '_id');
@@ -641,18 +636,15 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             type: 'success',
             message: data.message
           });
-          setNextStep(true);
         })
         .catch((error) => {
           setAdding(false);
           toastConfig.setToastConfig(error);
-          setNextStep(true);
         });
     }
   };
 
   const handleRemoveInventory = async () => {
-    setNextStep(false);
     if (deleteData.length >= 1) {
       if (isOffline) {
         setDeleting(true);
@@ -673,13 +665,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             fetchData();
             setDeleteData(null);
             setShowConfirmBox(false);
-            setNextStep(true);
           })
           .catch((error) => {
             setDeleting(false);
             toastConfig.setToastConfig(error);
             setDeleteData(null);
-            setNextStep(true);
           });
       }
     }
@@ -833,7 +823,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             >
               {permissions?.bulkAssetCreation?.isCreate && (
                 <MenuItem
-                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true)?.length === 0}
+                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
                   onClick={() => {
                     setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'bulkAssetCreation' }));
                     closeActions();
@@ -855,7 +845,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               )}
               {permissions?.sublease?.isCreate && (
                 <MenuItem
-                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true)?.length === 0}
+                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
                   onClick={() => {
                     setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
                     closeActions();
@@ -1074,7 +1064,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             });
           }}
           refrenceData={{
-            products: [...showOrderDialog?.products?.filter((e) => e.serialized === true)],
+            products: [...showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)],
             wellName: rentalManagementData?.wellName?.optionValue,
             wellNumber: rentalManagementData?.wellNumber
               ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
@@ -1132,7 +1122,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           }}
           referenceType="rentalJob"
           referenceId={rentalManagementData._id}
-          referenceData={{ ...rentalManagementData, material: [...showOrderDialog?.products?.filter((e) => e.serialized === true)] }}
+          referenceData={{ ...rentalManagementData, material: [...showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)] }}
         />
       )}
     </Fragment>

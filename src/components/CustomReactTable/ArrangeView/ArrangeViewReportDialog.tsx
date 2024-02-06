@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { Dispatch, useEffect } from 'react';
 import {
   makeStyles,
   Theme,
@@ -31,6 +31,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { TActios, TInitialState } from '../hooks/useTableReducer';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -50,12 +51,11 @@ interface ArrangeColumnsProps {
   columns: any[];
   updateGridHiddenColumns: any;
   renderedFrom: string;
-  setHiddenColumns?: any;
   getToggleHideAllColumnsProps?: any;
-  setColumnOrder?: any;
   selectedReportView: object | any;
   setSelectedReportView: any;
-  dispatch: any;
+  dispatch: Dispatch<TActios>;
+  state: TInitialState;
 }
 
 const ItemTypes = {
@@ -63,18 +63,8 @@ const ItemTypes = {
 };
 
 const ReportArrangeView = (props: ArrangeColumnsProps) => {
-  const {
-    onClose,
-    columns,
-    updateGridHiddenColumns,
-    renderedFrom,
-    setHiddenColumns,
-    getToggleHideAllColumnsProps,
-    setColumnOrder,
-    selectedReportView,
-    setSelectedReportView,
-    dispatch
-  } = props;
+  const { onClose, columns, renderedFrom, selectedReportView, setSelectedReportView, dispatch, state } = props;
+
   const classes = useStyles();
   const [sortedColumns, setSortedColumns] = React.useState([]);
   const [searchedColumns, setSearchedColumns] = React.useState([]);
@@ -91,27 +81,29 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
   React.useEffect(() => {
     try {
       if (!selectedReportView) {
-        var updatedCols = columns.map((col) => ({
+        const updatedCols = columns.map((col) => ({
           ...col,
           isVisible: col?.show === false ? false : true
         }));
         setSortedColumns(updatedCols);
-      }
-      else {
-        let savedColumns = selectedReportView.columnState
-        var updatedCols = columns.map((col) => ({
+      } else {
+        let savedColumns = selectedReportView.columnState;
+        let updatedCols = columns.map((col) => ({
           ...col,
-          isVisible: (savedColumns?.find((column) => column.accessor === col.accessor))?.isVisible
+          isVisible: savedColumns?.find((column) => column.accessor === col.accessor)?.isVisible
         }));
+
         if (savedColumns) {
-          const colOrder = savedColumns.map((m) => m.accessor)
+          const colOrder = savedColumns.map((m) => m.accessor);
           const actionCol = updatedCols.find((d) => d.accessor === 'action');
           const expanderCol = updatedCols.find((d) => d.accessor === 'expander');
           const selectionCol = updatedCols.find((d) => d.accessor === 'selection');
           updatedCols = [
             ...(expanderCol ? [expanderCol] : []),
             ...(selectionCol ? [selectionCol] : []),
-            ...updatedCols.filter((d) => !['expander', 'selection', 'action']?.includes(d.accessor)).sort((a, b) => colOrder.findIndex((d) => d === a.accessor) - colOrder.findIndex((d) => d === b.accessor)),
+            ...updatedCols
+              .filter((d) => !['expander', 'selection', 'action']?.includes(d.accessor))
+              .sort((a, b) => colOrder.findIndex((d) => d === a.accessor) - colOrder.findIndex((d) => d === b.accessor)),
             ...(actionCol ? [actionCol] : [])
           ];
         }
@@ -160,16 +152,22 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
       });
       dataToStore.push(object);
     });
-    setColumnOrder([...sortedColumns.map((m) => m.accessor)]);
-    setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.accessor));
-    const newColState = sortedColumns?.map(({ accessor, isVisible }) => ({ accessor, isVisible }))
-    dispatch({ type: 'updateColumnState', colState: newColState })
-    saveColumnSettings(sortedColumns)
+    // setColumnOrder([...sortedColumns.map((m) => m.accessor)]);
+    // setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.accessor));
+    const newColState = sortedColumns?.map(({ accessor, isVisible }) => ({ accessor, isVisible }));
+    dispatch({ type: 'updateColumnState', colState: newColState });
+
+    saveColumnSettings(sortedColumns);
   };
 
   const saveColumnSettings = (columnState: any) => {
-
-    const newColState = columnState?.map(({ accessor, isVisible }) => ({ accessor, isVisible }))
+    const newColState = columnState?.map(({ accessor, isVisible }) => ({ accessor, isVisible }));
+    const visibleColumns = {};
+    for (const col of newColState) {
+      visibleColumns[col.accessor] = col.isVisible;
+    }
+    dispatch({ type: 'setColumnOrder', columnOrder: newColState.map((col) => col.accessor) });
+    dispatch({ type: 'setVisibleColumns', visibleColumns: visibleColumns });
     if (selectedReportView) {
       setSubmitting(true);
       axiosInstance()
@@ -244,6 +242,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
     });
     setSearchedColumns(matchedColumns);
   }, [searchVal]);
+
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet)}>
       <CustomDialogHeader
@@ -308,13 +307,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
             <ListItem disableGutters>
               <ListItemText primary="All Columns" />
               <ListItemSecondaryAction>
-                {setHiddenColumns ? (
-                  <Switch size="small" checked={allChecked} onChange={handleToggleAll} />
-                ) : getToggleHideAllColumnsProps ? (
-                  <Switch size="small" {...getToggleHideAllColumnsProps()} />
-                ) : (
-                  ''
-                )}
+                <Switch size="small" checked={allChecked} onChange={handleToggleAll} />
               </ListItemSecondaryAction>
             </ListItem>
           )}
@@ -342,7 +335,13 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
               (column, index) =>
                 column?.accessor !== 'selection' &&
                 column?.accessor !== 'expander' && (
-                  <ListItem key={`${column.accessor}-${index}`} divider disableGutters disabled={column.disabled} className={column.sticky ? 'd-none' : ''}>
+                  <ListItem
+                    key={`${column.accessor}-${index}`}
+                    divider
+                    disableGutters
+                    disabled={column.disabled}
+                    className={column.sticky ? 'd-none' : ''}
+                  >
                     <ListItemText id="switch-list-column" primary={column.Header} />
                     <ListItemSecondaryAction>
                       {column.sticky ? (

@@ -1,33 +1,33 @@
-import { useContext, useEffect, useState } from 'react';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore, Warning } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { useHistory, Link } from 'react-router-dom';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { useContext, useEffect, useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import routes from 'src/components/Helpers/Routes';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import { useData } from 'src/StateProvider/Provider';
-import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid, rentalManagement, serializedAsset, sidebarResource } from 'src/constants/helpers';
-import CustomContainer from 'src/components/CustomContainer';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import { Button, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
-import { AddOutlined, ExpandMore, Warning } from '@material-ui/icons';
-import axiosInstance from 'src/axios/axiosInstance';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import styles from '../Leads/Header.module.scss';
-import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
-import ManageRentalManagementDialog from './ManageRental';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import HideWhenOffline from 'src/components/HideWhenOffline';
+import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid, rentalManagement, serializedAsset, sidebarResource } from 'src/constants/helpers';
+import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ManageRentalManagementDialog from './ManageRental';
+import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 let searchTimeout;
 
@@ -35,6 +35,9 @@ const RentalManagement = () => {
   const renderedFrom = camelCase(routes?.rentalManagement.title);
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
 
   const types = [
     {
@@ -46,6 +49,7 @@ const RentalManagement = () => {
       value: 2
     }
   ];
+
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
 
@@ -53,12 +57,7 @@ const RentalManagement = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
-
   const [renderCount, setRenderCount] = useState(0);
-  const [locationKeys, setLocationKeys] = useState([]);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [columns, setColumns] = useState(null);
   const [showManageRentalManagementDialog, setShowManageRentalManagementDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -71,7 +70,6 @@ const RentalManagement = () => {
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     setUpindexDB();
@@ -105,26 +103,6 @@ const RentalManagement = () => {
       Cell: ({ row }) => <div>{row?.original?.subleaseAssets ? 'Yes' : 'No'}</div>
     }
   ];
-
-  useEffect(() => {
-    return history.listen((location) => {
-      const { type }: any = queryString.parse(history.location.search);
-      if (history.action === 'PUSH') {
-        setLocationKeys([location.key]);
-      }
-      if (history.action === 'POP') {
-        if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys);
-          // Handle forward event
-          setSelectedType(type ? parseInt(type) : 1);
-        } else {
-          setLocationKeys((keys) => [location.key, ...keys]);
-          // Handle back event
-          setSelectedType(type ? parseInt(type) : 1);
-        }
-      }
-    });
-  }, [locationKeys]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -307,7 +285,6 @@ const RentalManagement = () => {
       data.push(element._id);
     });
     await rentalJobOfflineUpdate(data);
-    closeActions();
     axiosInstance()
       .get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`)
       .then(({ data: { data } }) => {
@@ -340,7 +317,6 @@ const RentalManagement = () => {
   const handleRemoveoffline = async () => {
     await clearAll(objectStore.rentalManagement);
     await clearAll(objectStore.deliveryTicket);
-    closeActions();
   };
 
   const handleSingleDelete = async () => {
@@ -413,19 +389,62 @@ const RentalManagement = () => {
     }
   };
 
-  const onTypeChange = (event, type) => {
-    dispatch({ type: 'pageChange', page: 0 });
-    const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
-    history.push(`?type=${value}`);
+  const LeftSideButtons = () => {
+    return (
+      <>
+        {permissions?.planning?.isRead && (
+          <ToggleButtonGroup size="small" className="align-items-center">
+            <ToggleButton
+              onClick={() => {
+                history.push({
+                  pathname: routes.planning.path,
+                  state: 'Rental Job'
+                });
+              }}
+            >
+              <span>{`Planned Rental`}</span>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        )}
+        {permissions?.planningView?.isRead && (
+          <ToggleButtonGroup size="small" className="align-items-center">
+            <ToggleButton
+              onClick={() => {
+                history.push({
+                  pathname: routes.planningView.path,
+                  state: {
+                    resource: sidebarResource?.rentalManagement
+                  }
+                });
+              }}
+            >
+              <span>{`Calendar`}</span>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        )}
+      </>
+    );
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <>
+        {selectedRecords?.length > 0 && (
+          <MenuItem
+            disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+            onClick={() => {
+              showConfirmBox(null);
+            }}
+          >
+            {`Delete (${selectedRecords?.length})`}
+          </MenuItem>
+        )}
+        <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
+          Add Offline
+        </MenuItem>
+        <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
+      </>
+    );
   };
 
   return (
@@ -450,116 +469,21 @@ const RentalManagement = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex flex-wrap align-items-center gap-2 w-full'}>
-              <HideWhenOffline>
-                <ToggleButtonGroup size="small" className="align-items-center" value={types[selectedType - 1].key} exclusive onChange={onTypeChange}>
-                  {types.map((k, index) => {
-                    return (
-                      <ToggleButton value={k.key} key={index}>
-                        {k.key}
-                      </ToggleButton>
-                    );
-                  })}
-                </ToggleButtonGroup>
-
-                {permissions?.planning?.isRead && (
-                  <ToggleButtonGroup size="small" className="align-items-center">
-                    <ToggleButton
-                      onClick={() => {
-                        history.push({
-                          pathname: routes.planning.path,
-                          state: 'Rental Job'
-                        });
-                      }}
-                    >
-                      <span>{`Planned Rental`}</span>
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                )}
-                {permissions?.planningView?.isRead && (
-                  <ToggleButtonGroup size="small" className="align-items-center">
-                    <ToggleButton
-                      onClick={() => {
-                        history.push({
-                          pathname: routes.planningView.path,
-                          state: {
-                            resource: sidebarResource?.rentalManagement
-                          }
-                        });
-                      }}
-                    >
-                      <span>{`Calendar`}</span>
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                )}
-              </HideWhenOffline>
-            </div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <HideWhenOffline>
-                <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
-              </HideWhenOffline>
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <HideWhenOffline>
-                  {permissions?.rentalManagement?.isCreate && permissions?.rentalManagement?.isUpdate && (
-                    <Button
-                      variant={'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setShowManageRentalManagementDialog({ open: true, isClone: false, idToClone: null });
-                      }}
-                      className={'no-shadow'}
-                      startIcon={<AddOutlined />}
-                    >
-                      Add
-                    </Button>
-                  )}
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    className={`new-dropdown-v1`}
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    {selectedRecords?.length > 0 && (
-                      <MenuItem
-                        disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                        onClick={() => {
-                          closeActions();
-                          showConfirmBox(null);
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    )}
-                    <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-                      Add Offline
-                    </MenuItem>
-                    <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
-                  </Menu>
-                </HideWhenOffline>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={() => dispatch({ type: 'pageChange', page: 0 })}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContents={<LeftSideButtons />}
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={true}
+          actionMenuItems={<ActionMenuItems />}
+          isAddButtonVisible={permissions?.rentalManagement?.isCreate && permissions?.rentalManagement?.isUpdate}
+          addButtonOnclick={() => {
+            setShowManageRentalManagementDialog({ open: true, isClone: false, idToClone: null });
+          }}
+        />
 
         {columns ? (
           <CustomReactTable
@@ -572,6 +496,7 @@ const RentalManagement = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.rentalManagement}
+            exportTable={true}
           />
         ) : (
           <Box p={2} height={500}>

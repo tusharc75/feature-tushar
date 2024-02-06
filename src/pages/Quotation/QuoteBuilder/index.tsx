@@ -39,10 +39,8 @@ const QuoteBuilder = ({
 
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
 
   const [columns, setColumns] = useState(null);
-  const [allColumn, setAllColumn] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -50,7 +48,7 @@ const QuoteBuilder = ({
 
   useEffect(() => {
     if (versionData) {
-      fetchProductInventory();
+      fetchData();
     }
   }, [versionData]);
 
@@ -63,11 +61,7 @@ const QuoteBuilder = ({
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
+    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, quotationData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -84,7 +78,27 @@ const QuoteBuilder = ({
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <div>
+              <p className="text-truncate">
+                {row.original.type === 'serializedAsset' ? 'Asset' : `${capitalize(row.original.type)} `}
+                {row.original['type'] === 'product'
+                  ? row.original?.productDetail?.serializedProduct
+                    ? '(Serialized)'
+                    : '(Non-Serialized)'
+                  : row.original?.type === 'package'
+                    ? row.original?.packageDetail.packageType === 'Product'
+                      ? '(Product)'
+                      : '(Service)'
+                    : row.original.type === 'service'
+                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                      : ''}
+              </p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'detail',
@@ -152,10 +166,9 @@ const QuoteBuilder = ({
     ];
     column = [...column, ...newColumns];
     setColumns(column);
-    setAllColumn(column.map((d) => d.Header));
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
@@ -385,7 +398,7 @@ const QuoteBuilder = ({
             columns={columns}
             state={state}
             dispatch={dispatch}
-            refreshGrid={fetchProductInventory}
+            refreshGrid={fetchData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             renderedFrom={renderedFrom}
             hideSelection={true}

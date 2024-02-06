@@ -266,7 +266,7 @@ export default function ManageAttachment({
                               margin="dense"
                             />
                           )}
-                          disabled={defaultAttachmentType === '' ? false : true}
+                          disabled={defaultAttachmentType === '' ? !canEdit : true}
                           getOptionLabel={(option) => option}
                           getOptionSelected={(option: any, value: any) => option === value}
                           onChange={(e, val) => {
@@ -306,6 +306,7 @@ export default function ManageAttachment({
                                 <CustomButton
                                   variant="contained"
                                   color="primary"
+                                  disabled={!canEdit}
                                   onClick={() => setDocumentScanDialog(true)}>
                                   Scan Document
                                 </CustomButton>

@@ -196,7 +196,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             deliveryTicketList?.map((obj) => {
                 if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
                     rows.map((d, index) => {
-                        if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
+                        if (obj?.assets?.some((p) => d?._id === p?.asset)) {
                             rows[index][`LoadingTicket`] = obj?.ticketName;
                             rows[index][`LoadingTicketId`] = obj?._id;
                             rows[index][`LoadingTicketStatus`] = obj?.status;
@@ -208,7 +208,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
                 deliveryTicketList?.map((obj) => {
                     if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving) {
                         rows.map((d, index) => {
-                            if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
+                            if (obj?.assets?.some((p) => d?._id === p?.asset)) {
                                 rows[index][`ReceivingTicket`] = obj?.ticketName;
                                 rows[index][`ReceivingTicketId`] = obj?._id;
                                 rows[index][`ReceivingTicketStatus`] = obj?.status;
@@ -431,7 +431,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
                     referenceType={DELIVERY_TICKET_REFERENCE_TYPE.sublease}
                     referenceData={showTicketDialog.data}
                     onClose={() => setShowTicketDialog({ open: false, data: {} })}
-                    productInventory={selectedRecords}
+                    assets={selectedRecords}
                     products={[]}
                     onSuccess={() => {
                         setShowTicketDialog({ open: false, data: {} });

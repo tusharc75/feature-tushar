@@ -61,10 +61,6 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     }
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, fieldTicketData?.currency);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-    }
     let column: any = [
       {
         accessor: 'index',
@@ -192,7 +188,6 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       parent.detail = `${parent?.serviceDetail?.serviceName}`;
       parent.description = `${parent?.serviceDetail?.serviceDescription || ''}`;
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
-      parent.qtyDisplay = parent.qty;
       parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
     });
@@ -263,6 +258,9 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       element.estimateJobDuration = 1;
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
+      }
+      if (calValues && calValues['finalQty']) {
+        element.finalQty = calValues['finalQty'];
       }
       if (taxCodeData) {
         element.taxCode = taxCodeData?.optionValue;
@@ -360,8 +358,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (inputField.hasOwnProperty('qtyDisplay')) {
-      if (parseInt(inputField?.qtyDisplay) === 0) {
+    if (inputField.hasOwnProperty('qty')) {
+      if (parseInt(inputField?.qty) === 0) {
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
@@ -369,7 +367,6 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         });
         return;
       }
-      inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);

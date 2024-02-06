@@ -109,7 +109,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
         'Asset Number': data['Asset Number']
       }))
     ];
-    const header = ['Sr No.', 'Name', 'Asset Number'];
+    const header = ['Sr No.', 'Name', 'Serial Number'];
 
     const ws = utils.json_to_sheet(json_data);
     if (header.length) {
@@ -147,6 +147,13 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
           state?.map((s, i) => {
             const foundRows = option?.find((p) => p['srno'] === s['srno']);
             if (foundRows) {
+              if(foundRows?.assetNumber===s['Asset Number']){
+                setToastConfig({
+                  open: true,
+                  message: 'One or more serial numbers are same!',
+                  type: 'error'
+                });
+              }
               return {
                 ...s,
                 ['Asset Number']: foundRows?.assetNumber
@@ -167,7 +174,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
     if (duplicates.length) {
       setToastConfig({
         open: true,
-        message: 'One or more asset numbers are same!',
+        message: 'One or more serial numbers are same!',
         type: 'error'
       });
       return false;

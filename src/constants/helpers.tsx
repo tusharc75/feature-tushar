@@ -354,7 +354,9 @@ export const sidebarResource = {
   flash: 'Flash',
   rentalManagementInvoice: 'Rental Management Invoice',
   creditMemo: 'Credit Memo',
-  outboundMessage: 'Outbound Message'
+  outboundMessage: 'Outbound Message',
+  payrollPolicy: 'Payroll Policy',
+  triggerNotificationMaster: 'Trigger Notification Master'
 };
 
 export const primaryFields = {
@@ -491,7 +493,11 @@ export const RESOURCE_LABEL = {
   accountsReceivable: 'Accounts Receivable',
   creditMemo: 'Credit Memo',
   generateInvoice: 'Generate Invoice',
-  repairOrderInvoice: 'Repair Order Invoice'
+  repairOrderInvoice: 'Repair Order Invoice',
+  payrollPolicy: 'Payroll Policy',
+  triggerNotificationMaster: 'Trigger Notification Master',
+  triggerNotificationHistory: 'Trigger Notification History',
+  userAttendance: 'User Attendance',
 };
 
 export const CHILD_RESOURCE = {
@@ -526,6 +532,9 @@ export const CHILD_RESOURCE = {
   serializedAssetsCertification: 'Serialized Assets Certificate',
   invoiceCreditMemo: 'Invoice Credit Memo',
   workOrderProduct: 'Work Order Product',
+  payrollHoliday: 'Payroll Holiday',
+  payrollPayTypes: 'Payroll Pay Types',
+  payrollPaidTimeOff: 'Payroll Paid Time Off'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -886,7 +895,7 @@ export const profileMenuItems = {
   securityPrivacy: 5
 };
 
-export const SCHEDULE_FREQUENCY = ['Daily', 'Weekly', 'Monthly'];
+export const SCHEDULE_FREQUENCY = ['Hourly', 'Daily', 'Weekly', 'Monthly'];
 export const FREQUENCY_WEEKS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
@@ -1017,15 +1026,13 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
     } else if (key.type === 'dateTime') {
       if (isClone) {
         obj[key.fieldName] = new Date();
-      }
-      else if (dataObj[key.fieldName]) {
+      } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       }
     } else if (key.type === 'date') {
       if (isClone) {
         obj[key.fieldName] = new Date();
-      }
-      else if (dataObj[key.fieldName]) {
+      } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       }
     } else if (key.type === 'lookUpDisplay') {
@@ -1073,7 +1080,9 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'multiSelect') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
-      schema[input.fieldName] = input.required ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable() : number().nullable();
+      schema[input.fieldName] = input.required
+        ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
+        : number().nullable();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail
@@ -1986,7 +1995,8 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   return: 'Return',
   consumed: 'Consumed',
   standBy: 'Stand By',
-  standByNotChargeable: 'Stand By-Not Chargeable'
+  standByNotChargeable: 'Stand By-Not Chargeable',
+  delivered: 'Delivered',
 } as const;
 
 export const REPAIR_JOB_STATUS = {
@@ -2082,7 +2092,7 @@ export const SUPPORT_TICKET_STATUS = {
   inProgress: 'In-Progress',
   approvalPending: 'Approval Pending',
   completed: 'Completed'
-} as const
+} as const;
 
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
@@ -2394,6 +2404,12 @@ export const REPORT_LIST = [
     type: 'workOrderService'
   },
   {
+    title: 'Work Order Technician Work Hours',
+    permission: 'workOrder',
+    key: 'standardReport',
+    type: 'workOrderTechnicianWorkHours'
+  },
+  {
     title: 'User Session',
     permission: 'user',
     key: 'standardReport',
@@ -2518,8 +2534,8 @@ export const COLOUR_MASTER = {
     borderColor: '#db765c'
   },
   replaceAssetColor: {
-    background: '#FFFF99',
-    borderColor: '#FFFF99'
+    background: 'var(--replaceAsset-bg)',
+    borderColor: 'var(--replaceAsset-bg)'
   }
 };
 
@@ -2558,7 +2574,7 @@ export const WORKORDER_SERVICE_STATUS = {
   completed: 'Completed',
   failed: 'Failed',
   skipped: 'Skipped',
-  inProgressByOther: 'In-Progress By Other',
+  inProgressByOther: 'In-Progress By Other'
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
@@ -2653,12 +2669,10 @@ export const PRODUCTION_ORDER_STATUS = {
 export const WORK_ORDER_STATUS = {
   new: 'New',
   preWork: 'Pre-Work In-Progress',
-  // buildingQuote: 'Building Quote',
-  // waitingQuote: 'Waiting On Quote',
-  // quoteAccepted: 'Quote Accepted',
-  // quoteRejected: 'Quote Rejected',
   postWork: 'Post-Work In-Progress',
   inProgress: 'In-Progress',
+  onHold: 'On-hold',
+  deleted: 'Deleted',
   completed: 'Completed'
 };
 
@@ -2873,3 +2887,22 @@ export const FILE_PROCESS_STATUS = {
   processing: 'Processing',
   completed: 'Completed'
 } as const;
+
+export const convertBlobToBase64 = async (blobUrl) => {
+  const img = new Image();
+  img.crossOrigin = 'Anonymous';
+  return new Promise((resolve, reject) => {
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const dataURL = canvas.toDataURL('image/png');
+      canvas.remove();
+      resolve(dataURL);
+    };
+    img.onerror = () => reject('Error in converting blob to base64');
+    img.src = blobUrl;
+  });
+};
