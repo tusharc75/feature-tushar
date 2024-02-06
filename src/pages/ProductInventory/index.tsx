@@ -1,5 +1,4 @@
-import { Box, Button, Checkbox, Chip, FormControlLabel, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Box, Checkbox, Chip, FormControlLabel, IconButton, MenuItem, TextField } from '@material-ui/core';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import HistoryIcon from '@material-ui/icons/History';
 import InfoIcon from '@material-ui/icons/Info';
@@ -19,7 +18,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { TOOLTIP_MESSAGE, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import AddRemoveDialog from './AddRemove';
@@ -59,15 +58,6 @@ const InventoryProduct = () => {
     product: history.location?.state?.product,
     productName: history.location?.state?.productName
   });
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   useEffect(() => {
     fetchGridColumns();
@@ -471,6 +461,28 @@ const InventoryProduct = () => {
     }
   };
 
+  const RightSideContents = () => {
+    return (
+      <>
+        {user?.role?.selectedEntity?.policy?.isProductInventorySettings ? (
+          <HtmlTooltip title={plantId === 'All' ? 'Select Plant' : 'Setting'}>
+            <span>
+              <IconButton
+                size="small"
+                disabled={plantId !== 'All' ? false : true}
+                onClick={() => {
+                  setSettingDialogOpen(true);
+                }}
+              >
+                <SettingsIcon color={plantId === 'All' ? 'disabled' : 'primary'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        ) : null}
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -494,175 +506,36 @@ const InventoryProduct = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
-            <div className={'flex  align-items-center gap-2 w-full'}>
-              <Autocomplete
-                style={{ minWidth: '200px', flexGrow: 1 }}
-                className="md:max-w-[250px]"
-                options={plantOptions}
-                getOptionLabel={(option: any) => option.optionLabel}
-                disableClearable
-                getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={
-                  plantOptions.filter((data) => data.optionValue === plantId).length
-                    ? plantOptions.filter((data) => data.optionValue === plantId)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  if (val !== null) {
-                    setPlantId(val && val.optionValue ? val.optionValue : '');
-                    setStorageLocationId(null);
-                  }
-                }}
-                size="small"
-                renderInput={(params) => (
-                  <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                )}
-              />
-              {user?.user?.brandPolicy?.storageLocation && (
-                <Autocomplete
-                  style={{ minWidth: '200px', flexGrow: 1 }}
-                  className="md:max-w-[250px]"
-                  options={storageLocationOptions.filter((item) => item.warehouse === plantId)}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
-                  value={
-                    storageLocationOptions.filter((data) => data.optionValue === storageLocationId).length
-                      ? storageLocationOptions.filter((data) => data.optionValue === storageLocationId)[0]
-                      : ''
-                  }
-                  onChange={(e, val) => {
-                    setStorageLocationId(val?.optionValue);
-                  }}
-                  size="small"
-                  renderInput={(params) => (
-                    <TextField {...params} margin="none" size="small" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
-                  )}
-                />
-              )}
-              {showExpenseItem && (
-                <FormControlLabel
-                  style={{ margin: 0 }}
-                  control={
-                    <Checkbox
-                      checked={expenseItemValue}
-                      onChange={(e) => {
-                        setExpenseItemValue(e.target.checked);
-                      }}
-                      name="expenseItem"
-                      color="primary"
-                    />
-                  }
-                  label="Expense Item"
-                />
-              )}
-              {fromProductMaster?.product && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Product : ${fromProductMaster?.productName}`}
-                  onDelete={() => {
-                    setFromProductMaster(null);
-                  }}
-                />
-              )}
-            </div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                  disabled={selectedRecords?.length && plantId !== 'All' ? false : true}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={permissions?.productInventory?.isCreate ? false : true}
-                    onClick={() => {
-                      closeActions();
-                      setInventory({ open: true, product: selectedRecords, type: 'add' });
-                    }}
-                  >
-                    Add
-                  </MenuItem>
-                  <MenuItem
-                    disabled={permissions?.productInventory?.isUpdate ? false : true}
-                    onClick={() => {
-                      closeActions();
-                      setInventory({ open: true, product: selectedRecords, type: 'remove' });
-                    }}
-                  >
-                    Remove
-                  </MenuItem>
-                  <MenuItem
-                    disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
-                    style={{ display: 'none' }}
-                    onClick={() => {
-                      closeActions();
-                      checkReport();
-                    }}
-                  >
-                    Check Report
-                  </MenuItem>
-                  <MenuItem
-                    disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
-                    style={{ display: 'none' }}
-                    onClick={() => {
-                      closeActions();
-                      handleRemap();
-                    }}
-                  >
-                    Remap
-                  </MenuItem>
-                  <MenuItem
-                    disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
-                    style={{ display: 'none' }}
-                    onClick={() => {
-                      closeActions();
-                      handleRemapPurchaseOrder();
-                    }}
-                  >
-                    Remap Purchase Order
-                  </MenuItem>
-                </Menu>
-                {user?.role?.selectedEntity?.policy?.isProductInventorySettings && (
-                  <HtmlTooltip title={plantId === 'All' ? 'Select Plant' : 'Setting'}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        disabled={plantId !== 'All' ? false : true}
-                        onClick={() => {
-                          setSettingDialogOpen(true);
-                        }}
-                      >
-                        <SettingsIcon color={plantId === 'All' ? 'disabled' : 'primary'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          leftSideContents={
+            <LeftSideContents
+              {...{
+                plantOptions,
+                plantId,
+                setPlantId,
+                setStorageLocationId,
+                user,
+                storageLocationOptions,
+                storageLocationId,
+                showExpenseItem,
+                expenseItemValue,
+                setExpenseItemValue,
+                fromProductMaster,
+                setFromProductMaster
+              }}
+            />
+          }
+          searchValue={search}
+          onSearch={handleSearch}
+          rightSideContents={<RightSideContents />}
+          isActionButtonVisible
+          actionButtonProps={{ disabled: selectedRecords?.length && plantId !== 'All' ? false : true }}
+          actionMenuItems={
+            <ActionMenuItems {...{ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }} />
+          }
+          isAddButtonVisible={false}
+        />
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -754,3 +627,142 @@ const InventoryProduct = () => {
 };
 
 export default InventoryProduct;
+
+const LeftSideContents = ({
+  plantOptions,
+  plantId,
+  setPlantId,
+  setStorageLocationId,
+  user,
+  storageLocationOptions,
+  storageLocationId,
+  showExpenseItem,
+  expenseItemValue,
+  setExpenseItemValue,
+  fromProductMaster,
+  setFromProductMaster
+}) => {
+  return (
+    <>
+      <Autocomplete
+        style={{ minWidth: '200px', flexGrow: 1 }}
+        className="md:max-w-[250px]"
+        options={plantOptions}
+        getOptionLabel={(option: any) => option.optionLabel}
+        disableClearable
+        getOptionSelected={(option: any, val) => option.optionValue === val}
+        value={
+          plantOptions.filter((data) => data.optionValue === plantId).length ? plantOptions.filter((data) => data.optionValue === plantId)[0] : ''
+        }
+        onChange={(e, val) => {
+          if (val !== null) {
+            setPlantId(val && val.optionValue ? val.optionValue : '');
+            setStorageLocationId(null);
+          }
+        }}
+        size="small"
+        renderInput={(params) => (
+          <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+        )}
+      />
+      {user?.user?.brandPolicy?.storageLocation && (
+        <Autocomplete
+          style={{ minWidth: '200px', flexGrow: 1 }}
+          className="md:max-w-[250px]"
+          options={storageLocationOptions.filter((item) => item.warehouse === plantId)}
+          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+          getOptionSelected={(option: any, val) => option.optionValue === val}
+          value={
+            storageLocationOptions.filter((data) => data.optionValue === storageLocationId).length
+              ? storageLocationOptions.filter((data) => data.optionValue === storageLocationId)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            setStorageLocationId(val?.optionValue);
+          }}
+          size="small"
+          renderInput={(params) => (
+            <TextField {...params} margin="none" size="small" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+          )}
+        />
+      )}
+      {showExpenseItem && (
+        <FormControlLabel
+          style={{ margin: 0 }}
+          control={
+            <Checkbox
+              checked={expenseItemValue}
+              onChange={(e) => {
+                setExpenseItemValue(e.target.checked);
+              }}
+              name="expenseItem"
+              color="primary"
+            />
+          }
+          label="Expense Item"
+        />
+      )}
+      {fromProductMaster?.product && (
+        <Chip
+          className="ml-3"
+          color="primary"
+          label={`Product : ${fromProductMaster?.productName}`}
+          onDelete={() => {
+            setFromProductMaster(null);
+          }}
+        />
+      )}
+    </>
+  );
+};
+
+
+const ActionMenuItems = ({permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder}) => {
+  return (
+    <>
+      <MenuItem
+        disabled={permissions?.productInventory?.isCreate ? false : true}
+        onClick={() => {
+          setInventory({ open: true, product: selectedRecords, type: 'add' });
+        }}
+      >
+        Add
+      </MenuItem>
+      <MenuItem
+        disabled={permissions?.productInventory?.isUpdate ? false : true}
+        onClick={() => {
+          setInventory({ open: true, product: selectedRecords, type: 'remove' });
+        }}
+      >
+        Remove
+      </MenuItem>
+      <MenuItem
+        disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+        style={{ display: 'none' }}
+        onClick={() => {
+          checkReport();
+        }}
+      >
+        Check Report
+      </MenuItem>
+      <MenuItem
+        disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+        style={{ display: 'none' }}
+        onClick={() => {
+          handleRemap();
+        }}
+      >
+        Remap
+      </MenuItem>
+      <MenuItem
+        disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+        style={{ display: 'none' }}
+        onClick={() => {
+          handleRemapPurchaseOrder();
+        }}
+      >
+        Remap Purchase Order
+      </MenuItem>
+    </>
+  );
+};

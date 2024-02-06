@@ -337,7 +337,7 @@ const PurchaseOrder = () => {
             setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.purchaseOrder?.isCreate}
-          synchronizeType
+          // synchronizeType
           setQueryString={false}
         />
         
