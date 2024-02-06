@@ -1,18 +1,16 @@
-import { Box, Button, Chip, Menu, MenuItem } from '@material-ui/core';
+import { Box, Chip, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import { useHistory } from 'react-router-dom';
+import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { cloneDisable, deleteDisable, entityDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -26,10 +24,7 @@ import routes from '../../components/Helpers/Routes';
 import { customerAccount, gridLoadingTimeout, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
 import CreateProjectSales from './CreateProjectSales';
 
-
-
 const ProjectSales: FC = () => {
-
   const types = [
     {
       key: `My ${routes.projectSales.title}`,
@@ -40,7 +35,6 @@ const ProjectSales: FC = () => {
       value: 2
     }
   ];
-
 
   const renderedFrom = camelCase(routes?.projectSales.title);
   const { state, dispatch } = useTableReducer();
@@ -66,9 +60,7 @@ const ProjectSales: FC = () => {
     referenceName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
-  const [anchorEl, setAnchorEl] = useState(null);
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
-    state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   useEffect(() => {
     fetchGridColumns();
@@ -96,7 +88,7 @@ const ProjectSales: FC = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.projectSales?.isCreate ? "Clone" : cloneDisable}>
+        <HtmlTooltip title={permissions?.projectSales?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               disabled={permissions?.projectSales?.isCreate ? false : true}
@@ -110,7 +102,7 @@ const ProjectSales: FC = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
@@ -125,7 +117,9 @@ const ProjectSales: FC = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={(permissions?.projectSales?.isUpdate && row?.original?.isTeamMember) || row?.original?.isManager ? "Entity" : entityDisable}>
+        <HtmlTooltip
+          title={(permissions?.projectSales?.isUpdate && row?.original?.isTeamMember) || row?.original?.isManager ? 'Entity' : entityDisable}
+        >
           <span>
             <IconButton
               disabled={(permissions?.projectSales?.isUpdate && row?.original?.isTeamMember) || row?.original?.isManager ? false : true}
@@ -147,7 +141,10 @@ const ProjectSales: FC = () => {
                 }
               }}
             >
-              <AiOutlineDeploymentUnit fontSize="15" color={(permissions?.projectSales?.isUpdate && row?.original?.isTeamMember) || row?.original?.isManager ? 'primary' : 'disabled'} />
+              <AiOutlineDeploymentUnit
+                fontSize="15"
+                color={(permissions?.projectSales?.isUpdate && row?.original?.isTeamMember) || row?.original?.isManager ? 'primary' : 'disabled'}
+              />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -236,7 +233,6 @@ const ProjectSales: FC = () => {
         toastConfig.setToastConfig(err);
         dispatch({ type: 'loading', loading: false });
       });
-
   };
 
   const handleProjectFilter = (filterValues) => {
@@ -280,7 +276,6 @@ const ProjectSales: FC = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-
   const handleClose = () => {
     setIsOpen({ open: false, isClone: false, idToClone: null });
   };
@@ -291,12 +286,48 @@ const ProjectSales: FC = () => {
     }
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+          onClick={() => {
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords.length})`}
+        </MenuItem>
+        {permissions?.projectSales?.isUpdate && (
+          <MenuItem
+            disabled={selectedRecords.length === 0}
+            onClick={() => {
+              if (selectedRecords.some((d) => d.isUpdate === false)) {
+                setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+              } else {
+                if (selectedRecords.length) {
+                  let entities = [];
+                  selectedRecords.map((current) => {
+                    if (current?.entity) {
+                      if (current?.entityId) {
+                        entities.push(current?.entityId);
+                      }
+                      if (current?.restentity) {
+                        let restEntities = current?.restentity.map((o) => o.optionValue);
+                        entities = [...entities, ...restEntities];
+                      }
+                    }
+                  });
+                  setEntities([...entities]);
+                }
+                setShowEntityDialog(true);
+              }
+            }}
+          >
+            Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+          </MenuItem>
+        )}
+      </>
+    );
   };
 
   return (
@@ -320,126 +351,27 @@ const ProjectSales: FC = () => {
           additionalParams={getQueryString(true)}
         />
       </div>
-      <div className="main-container">
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'d-flex flex-wrap align-items-center gap-2'}>
-              <div className={`flex flex-wrap items-center gap-2 `}>
-                {types && (
-                  <ToggleButtonGroup
-                    size="small"
-                    className="ml-2"
-                    value={types[selectedType - 1].key}
-                    exclusive
-                    onChange={handleFilter}
-                  >
-                    {types.map((k, index) => {
-                      return (
-                        <ToggleButton value={k.key} key={index}>
-                          {k.key}
-                        </ToggleButton>
-                      );
-                    })}
-                  </ToggleButtonGroup>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                width="242px"
-                size="small"
-                value={search}
-                style={isMobile ? { flex: 1 } : {}}
-              />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.projectSales?.isCreate && (
-                  <Button
-                    onClick={() => {
-                      setIsOpen({ open: true, isClone: false, idToClone: null });
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={`no-shadow`}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                <HtmlTooltip title="Please select some project sales">
-                  <span>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                  </span>
-                </HtmlTooltip>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                    onClick={() => {
-                      closeActions();
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords.length})`}
-                  </MenuItem>
-                  {permissions?.projectSales?.isUpdate && (
-                    <MenuItem
-                      disabled={selectedRecords.length === 0}
-                      onClick={() => {
-                        if (selectedRecords.some((d) => d.isUpdate === false)) {
-                          closeActions();
-                          setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                        } else {
-                          closeActions();
-                          if (selectedRecords.length) {
-                            let entities = [];
-                            selectedRecords.map((current) => {
-                              if (current?.entity) {
-                                if (current?.entityId) {
-                                  entities.push(current?.entityId);
-                                }
-                                if (current?.restentity) {
-                                  let restEntities = current?.restentity.map((o) => o.optionValue);
-                                  entities = [...entities, ...restEntities];
-                                }
-                              }
-                            });
-                            setEntities([...entities]);
-                          }
-                          setShowEntityDialog(true);
-                        }
-                      }}
-                    >
-                      Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                    </MenuItem>
-                  )}
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+      <CustomContainer>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={handleFilter}
+          selectedType={selectedType}
+          setSelectedType={setselectedType}
+          // leftSideContents
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          actionMenuItems={<ActionMenuItems/>}
+          // addButtonProps
+          addButtonOnclick={() => {
+            setIsOpen({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.projectSales?.isCreate}
+          synchronizeType
+        />
+       
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -457,7 +389,7 @@ const ProjectSales: FC = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-      </div>
+      </CustomContainer>
 
       {showDeleteWarningConfirmBox?.show ? (
         <MessageDialog
@@ -474,8 +406,9 @@ const ProjectSales: FC = () => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.projectSales?.title?.toLowerCase()}${selectedRecords.length ? "s" : ""} ${deleteRecord?._id ? deleteRecord?.projectName : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.projectSales?.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
+            deleteRecord?._id ? deleteRecord?.projectName : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

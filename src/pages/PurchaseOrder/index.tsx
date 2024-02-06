@@ -1,26 +1,24 @@
-import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
+import { Box, Chip, MenuItem, TextField } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
@@ -46,7 +44,6 @@ const PurchaseOrder = () => {
   const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
@@ -213,7 +210,6 @@ const PurchaseOrder = () => {
         fetchPurchaseOrder();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -222,7 +218,6 @@ const PurchaseOrder = () => {
 
   const handlePurchaseOrderTypeSel = (filterValues) => {
     dispatch({ type: 'pageChange', page: 0 });
-    setSelectedType(filterValues);
     if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
     } else {
@@ -240,13 +235,6 @@ const PurchaseOrder = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   const updateQueryParams = () => {
     const queryParams = new URLSearchParams(history.location.search);
@@ -258,6 +246,56 @@ const PurchaseOrder = () => {
       search: queryParams.toString()
     });
     fetchPurchaseOrder();
+  };
+
+  const LeftSideContents = () => {
+    return (
+      <>
+        <Autocomplete
+          style={{ minWidth: '200px', flexGrow: 1 }}
+          className="md:max-w-[250px]"
+          options={warehouseOptions}
+          getOptionLabel={(option: any) => option.optionLabel}
+          getOptionSelected={(option: any, val) => option.optionValue === val}
+          value={
+            warehouseOptions.filter((data) => data.optionValue === warehouse).length
+              ? warehouseOptions.filter((data) => data.optionValue === warehouse)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            dispatch({ type: 'selection', selectedRecords: [] });
+            setWarehouse(val && val.optionValue ? val.optionValue : '');
+          }}
+          renderInput={(params) => <TextField {...params} margin="none" size="small" name="plant" label="Plant" variant="outlined" fullWidth />}
+        />
+        {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
+        {fromSalesOrder && (
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`Sales Order : ${fromSalesOrder?.salesOrderNo}`}
+            onDelete={() => {
+              setFromSalesOrder(null);
+            }}
+          />
+        )}
+      </>
+    );
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+          onClick={() => {
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords.length})`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
@@ -281,117 +319,28 @@ const PurchaseOrder = () => {
           additionalParams={getQueryString(true)}
         />
       </div>
-      <div className="main-container">
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'d-flex flex-wrap align-items-center gap-2'}>
-              <div className={`flex flex-wrap items-center gap-2 `}>
-                {PurchaseOrderType && (
-                  <ToggleButtonGroup size="small" className="ml-2" value={PurchaseOrderType[selectedType - 1].key} exclusive onChange={handleFilter}>
-                    {PurchaseOrderType.map((k, index) => {
-                      return (
-                        <ToggleButton value={k.key} key={index}>
-                          {k.key}
-                        </ToggleButton>
-                      );
-                    })}
-                  </ToggleButtonGroup>
-                )}
-              </div>
-              <Autocomplete
-                style={{ minWidth: '200px', flexGrow: 1 }}
-                className="md:max-w-[250px]"
-                options={warehouseOptions}
-                getOptionLabel={(option: any) => option.optionLabel}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={
-                  warehouseOptions.filter((data) => data.optionValue === warehouse).length
-                    ? warehouseOptions.filter((data) => data.optionValue === warehouse)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  dispatch({ type: 'selection', selectedRecords: [] });
-                  setWarehouse(val && val.optionValue ? val.optionValue : '');
-                }}
-                renderInput={(params) => <TextField {...params} margin="none" size="small" name="plant" label="Plant" variant="outlined" fullWidth />}
-              />
-              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
-              {fromSalesOrder && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Sales Order : ${fromSalesOrder?.salesOrderNo}`}
-                  onDelete={() => {
-                    setFromSalesOrder(null);
-                  }}
-                />
-              )}
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                width="242px"
-                size="small"
-                value={search}
-                style={isMobile ? { flex: 1 } : {}}
-              />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.purchaseOrder?.isCreate && (
-                  <Button
-                    onClick={() => {
-                      setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null });
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={`no-shadow`}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                <HtmlTooltip title="Please select some purchase orders">
-                  <span>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                  </span>
-                </HtmlTooltip>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                    onClick={() => {
-                      closeActions();
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords.length})`}
-                  </MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+      <CustomContainer>
+        <ListingPageHeader
+          toggleButtonList={PurchaseOrderType}
+          onToggle={handleFilter}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContents={<LeftSideContents />}
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+          // addButtonProps
+          addButtonOnclick={() => {
+            setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.purchaseOrder?.isCreate}
+          // synchronizeType
+          setQueryString={false}
+        />
+        
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -410,7 +359,7 @@ const PurchaseOrder = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-      </div>
+      </CustomContainer>
       {showManagePurchaseOrderDialog.open && (
         <ManagePurchaseOrder
           isClone={showManagePurchaseOrderDialog.isClone}
