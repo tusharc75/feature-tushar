@@ -23,6 +23,8 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferInventory } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageTransferInventory from './ManageTransferInventory';
+import CustomContainer from 'src/components/CustomContainer';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 const TransferInventory = () => {
   const types = [
@@ -201,9 +203,6 @@ const TransferInventory = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
-    history.push(`?type=${value}`);
   };
 
   return (
@@ -227,49 +226,27 @@ const TransferInventory = () => {
           additionalParams={getQueryString(true)}
         />
       </div>
-      <div className="main-container">
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'d-flex flex-wrap align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <ToggleButtonGroup
-                  size="small"
-                  className="toggle-button-layout"
-                  value={types[selectedType - 1].key}
-                  exclusive
-                  onChange={onTypeChange}
-                >
-                  {types.map((k, index) => {
-                    return (
-                      <ToggleButton value={k.key} key={index}>
-                        {k.key}
-                      </ToggleButton>
-                    );
-                  })}
-                </ToggleButtonGroup>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} size="small" value={search} />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.transferInventory?.isCreate && (
-                  <Button
-                    onClick={() => {
-                      setShowManageTransferInventoryDialog({ open: true, isClone: false, idToClone: null });
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={`no-shadow`}
-                    startIcon={<AddIcon />}
-                  >
-                    Add
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+      <CustomContainer>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          // leftSideContents
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={false}
+          // actionButtonProps
+          // actionMenuItems
+          // addButtonProps
+          addButtonOnclick={() => {
+            setShowManageTransferInventoryDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.transferInventory?.isCreate}
+          // synchronizeType
+        />
+     
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -287,7 +264,7 @@ const TransferInventory = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-      </div>
+      </CustomContainer>
       {showManageTransferInventoryDialog.open && (
         <ManageTransferInventory
           isClone={showManageTransferInventoryDialog.isClone}
