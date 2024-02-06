@@ -122,7 +122,6 @@ const ListingPageHeader = ({
           ) : null}
           {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
             <div className="flex gap-[8px] flex-wrap items-center">
-              {rightSideContents ? rightSideContents : null}
               <HideWhenOffline>
                 {isAddButtonVisible ? (
                   <Button
@@ -170,6 +169,7 @@ const ListingPageHeader = ({
                   </>
                 ) : null}
               </HideWhenOffline>
+              {rightSideContents ? rightSideContents : null}
             </div>
           ) : null}
         </div>
