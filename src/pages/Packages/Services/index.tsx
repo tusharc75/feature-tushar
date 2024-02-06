@@ -81,7 +81,7 @@ const ServiceTable = ({ packageId, packageData }) => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
     setColumns([...defaultColumns, ...newColumns, ActionsRenderer]);
   };
 
