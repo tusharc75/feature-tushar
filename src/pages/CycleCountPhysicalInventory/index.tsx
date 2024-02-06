@@ -1,23 +1,22 @@
+import { Box, Grid, IconButton } from '@material-ui/core';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import { camelCase } from 'lodash';
 import { Fragment, useEffect, useState } from 'react';
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
+import { isMobile } from 'react-device-detect';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import routes from 'src/components/Helpers/Routes';
-import { cycleCountPhysicalInventory } from 'src/constants/helpers';
-import Products from './Products';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import { gridLoadingTimeout } from '../../constants/helpers';
-import { camelCase } from 'lodash';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { isMobile } from 'react-device-detect';
-import AddOutlined from '@material-ui/icons/AddOutlined';
-import ManageCycleCountPInventory from './ManageCycleCountPInventory';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import ListingPageHeader from 'src/components/ListingPageHeader';
+import { cycleCountPhysicalInventory, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout } from '../../constants/helpers';
+import ManageCycleCountPInventory from './ManageCycleCountPInventory';
+import Products from './Products';
 
 const CycleCountPInventory = () => {
   const renderedFrom = camelCase(`${routes.cycleCountPhysicalInventory.title}`);
@@ -128,33 +127,16 @@ const CycleCountPInventory = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[routes.cycleCountPhysicalInventory]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}></Grid>
-      </Grid>
+      </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'d-flex flex-wrap align-items-center gap-1'}></div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              {permissions?.cycleCountPhysicalInventory?.isCreate && (
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  onClick={() => setCycleCountPInventoryDialog(true)}
-                  className={`no-shadow`}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          isActionButtonVisible={false}
+          isAddButtonVisible={permissions?.cycleCountPhysicalInventory?.isCreate}
+          addButtonOnclick={() => setCycleCountPInventoryDialog(true)}
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -196,7 +178,7 @@ const CycleCountPInventory = () => {
           />
         )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 
