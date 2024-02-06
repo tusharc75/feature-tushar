@@ -286,8 +286,6 @@ const ProjectSales: FC = () => {
     }
   };
 
-
-
   const ActionMenuItems = () => {
     return (
       <>
