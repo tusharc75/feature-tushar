@@ -320,6 +320,7 @@ const Invoice = () => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.invoice?.isCreate}
+          synchronizeType
         />
         {columns ? (
           <CustomReactTable
