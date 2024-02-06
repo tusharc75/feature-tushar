@@ -496,7 +496,6 @@ const RentalManagement = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.rentalManagement}
-            exportTable={true}
           />
         ) : (
           <Box p={2} height={500}>
