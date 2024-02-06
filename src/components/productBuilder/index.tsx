@@ -89,17 +89,18 @@ const ProductBuilder = (props) => {
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
-    fetchProduct(productBuilderId);
+    fetchProduct();
   }, [productBuilderId, processStatus]);
 
-  const fetchProduct = (id) => {
+  const fetchProduct = () => {
     if (setNextStep) {
       setNextStep(false);
     }
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     setColumns(null);
     axiosInstance()
-      .get(`/productbuilder/getproduct/${id}`)
+      .get(`/productbuilder/getproduct/${productBuilderId}`)
       .then(({ data: { data } }) => {
         let columns = [];
         columns = [
@@ -113,7 +114,6 @@ const ProductBuilder = (props) => {
             Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
           }
         ];
-        let priceTemplateField = [];
         let fields = data.productFields || [];
 
         data?.productTemplate?.forEach((ele) => {
@@ -283,7 +283,7 @@ const ProductBuilder = (props) => {
     axiosInstance()
       .post(`/productbuilder/addproduct`, data)
       .then(() => {
-        fetchProduct(productBuilderId);
+        fetchProduct();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -305,7 +305,7 @@ const ProductBuilder = (props) => {
           setProductId(null);
           setIsBulkEdit(false);
           setproductDataList([]);
-          fetchProduct(productBuilderId);
+          fetchProduct();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -329,7 +329,7 @@ const ProductBuilder = (props) => {
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setAnchorEl(null);
-        fetchProduct(productBuilderId);
+        fetchProduct();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -384,7 +384,7 @@ const ProductBuilder = (props) => {
     axiosInstance()
       .post(`/productbuilder/addField`, data)
       .then(() => {
-        fetchProduct(productBuilderId);
+        fetchProduct();
         setIsAddField(false);
       })
       .catch((error) => {
@@ -462,7 +462,7 @@ const ProductBuilder = (props) => {
         axiosInstance()
           .put(`/productbuilder/updateproduct-inline`, data)
           .then(() => {
-            fetchProduct(productBuilderId);
+            fetchProduct();
           })
           .catch((error) => {
             toastConfig.setToastConfig(error);
@@ -490,8 +490,7 @@ const ProductBuilder = (props) => {
     axiosInstance()
       .post(`/quote-builder/ask-price-supplier`, data)
       .then(() => {
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchProduct(productBuilderId);
+        fetchProduct();
         toastConfig.setToastConfig({
           message: `Email has been sent to suppliers`,
           type: 'success',
@@ -516,7 +515,7 @@ const ProductBuilder = (props) => {
               refrenceId={productBuilderId}
               onSuccessfulImport={(isImportedSuccessfully) => {
                 if (isImportedSuccessfully) {
-                  fetchProduct(productBuilderId);
+                  fetchProduct();
                 }
               }}
               isExportAllOrSomeFeature={true}
@@ -525,7 +524,7 @@ const ProductBuilder = (props) => {
               ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
               inverted={true}
               onExportToExcelSuccess={() => {
-                fetchProduct(productBuilderId);
+                fetchProduct();
               }}
             />
           )}
@@ -588,8 +587,8 @@ const ProductBuilder = (props) => {
                 isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
                   ? false
                   : selectedRecords.length
-                  ? false
-                  : true
+                    ? false
+                    : true
               }
               onClick={openActions}
               endIcon={<ExpandMore />}
@@ -634,7 +633,6 @@ const ProductBuilder = (props) => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -706,7 +704,7 @@ const ProductBuilder = (props) => {
           productBuilderId={productBuilderId}
           onSuccess={() => {
             setOpenSupplierPriceDialog(false);
-            fetchProduct(productBuilderId);
+            fetchProduct();
           }}
         />
       )}
@@ -717,7 +715,7 @@ const ProductBuilder = (props) => {
           productBuilderId={productBuilderId}
           onSuccess={() => {
             setShowViewSupplierPrice(false);
-            fetchProduct(productBuilderId);
+            fetchProduct();
           }}
         />
       )}
