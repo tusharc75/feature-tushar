@@ -18,6 +18,7 @@ import { getUniqueCurrencies } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdUpdate } from 'react-icons/all';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 const useStyles = makeStyles(() => ({
   tdWidth: {
@@ -185,25 +186,24 @@ const CurrencyConverter = () => {
         <CustomBreadCrumbs routes={[routes.currencyConverter]} />
       </Grid>
       <CustomContainer styles={{ overflowY: 'auto' }}>
-        <div className="header-panel">
-          <Grid container>
-            <Grid item xs={6} md={6} sm={6} className="d-flex align-items-center gap-1"></Grid>
-            <Grid xs={6} md={6} sm={6} container justify="flex-end">
-              {currencyConverterPermissions.isUpdate && (
-                <Button
-                  onClick={handleUpdate}
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  color="primary"
-                  style={isMobile && !isTablet ? { color: 'var(--info)' } : {}}
-                >
-                  {' '}
-                  {isMobile && !isTablet ? <MdUpdate size={20} /> : 'Update'}{' '}
-                </Button>
-              )}
-            </Grid>
-          </Grid>
-        </div>
+        <ListingPageHeader
+          rightSideContents={
+            currencyConverterPermissions.isUpdate ? (
+              <Button
+                onClick={handleUpdate}
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                size="small"
+                color="primary"
+                style={isMobile && !isTablet ? { color: 'var(--info)' } : {}}
+              >
+                {' '}
+                {isMobile && !isTablet ? <MdUpdate size={20} /> : 'Update'}{' '}
+              </Button>
+            ) : null
+          }
+          isActionButtonVisible={false}
+          isAddButtonVisible={false}
+        />
         <div className="listing-grid">
           <Box p={1}>
             <Grid
