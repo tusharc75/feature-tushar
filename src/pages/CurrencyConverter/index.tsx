@@ -1,24 +1,23 @@
-import { useEffect, useState, useContext, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import { Autocomplete } from '@material-ui/lab';
 import { Box, TextField } from '@material-ui/core';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomContainer from '../../components/CustomContainer';
-import { FaWpforms } from 'react-icons/fa';
-import Chip from '@material-ui/core/Chip';
-import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
+import Chip from '@material-ui/core/Chip';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import CustomButton from '../../components/Helpers/CustomButton';
-import { getUniqueCurrencies } from '../../constants/helpers';
-import { useData } from '../../StateProvider/Provider';
+import Grid from '@material-ui/core/Grid';
+import { makeStyles } from '@material-ui/core/styles';
+import { Autocomplete } from '@material-ui/lab';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdUpdate } from 'react-icons/all';
 import ListingPageHeader from 'src/components/ListingPageHeader';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
+import CustomButton from '../../components/Helpers/CustomButton';
+import { getUniqueCurrencies } from '../../constants/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
 
 const useStyles = makeStyles(() => ({
   tdWidth: {
