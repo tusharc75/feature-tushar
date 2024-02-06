@@ -388,6 +388,7 @@ const Quotation = () => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.quotation?.isCreate}
+          synchronizeType
         />
         
         {columns ? (
