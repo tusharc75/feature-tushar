@@ -4,7 +4,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { prepareDataForGrid, packages } from 'src/constants/helpers';
+import { prepareDataForGrid, packages, sidebarResource } from 'src/constants/helpers';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { useData } from 'src/StateProvider/Provider';
@@ -79,7 +79,7 @@ const ServiceTable = ({ packageId, packageData }) => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=Service Master`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path, true);
     setColumns([...defaultColumns, ...newColumns, ActionsRenderer]);
