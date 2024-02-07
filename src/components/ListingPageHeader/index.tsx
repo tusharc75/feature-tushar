@@ -114,63 +114,65 @@ const ListingPageHeader = ({
           ) : null}
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
-        <div className="flex flex-wrap gap-[8px] justify-end">
+        <div className="flex flex-wrap gap-[8px] justify-end items-center">
           {onSearch ? (
             <HideWhenOffline>
               <SearchBox onChange={onSearch} value={searchValue} size="small" />
             </HideWhenOffline>
           ) : null}
           {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
-            <div className="flex gap-[8px] flex-wrap items-center">
-              <HideWhenOffline>
-                {isAddButtonVisible ? (
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    {...addButtonProps}
-                    onClick={(e) => {
-                      addButtonOnclick && addButtonOnclick(e);
-                    }}
-                    className={`no-shadow ${addButtonProps.className}`}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                ) : null}
-                {isActionButtonVisible ? (
-                  <>
+            <>
+              <div className="flex gap-[8px] flex-wrap items-center">
+                <HideWhenOffline>
+                  {isAddButtonVisible ? (
                     <Button
-                      variant={'outlined'}
-                      color="default"
+                      variant={'contained'}
+                      color="primary"
                       size="small"
-                      className={`new-dropdown-v1`}
-                      {...actionButtonProps}
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
+                      {...addButtonProps}
+                      onClick={(e) => {
+                        addButtonOnclick && addButtonOnclick(e);
                       }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
+                      className={`no-shadow ${addButtonProps.className}`}
+                      startIcon={<AddOutlined />}
                     >
-                      <span onClick={() => closeActions()}>{actionMenuItems}</span>
-                    </Menu>
-                  </>
-                ) : null}
-              </HideWhenOffline>
+                      Add
+                    </Button>
+                  ) : null}
+                  {isActionButtonVisible ? (
+                    <>
+                      <Button
+                        variant={'outlined'}
+                        color="default"
+                        size="small"
+                        className={`new-dropdown-v1`}
+                        {...actionButtonProps}
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        endIcon={<ExpandMore />}
+                      >
+                        Actions
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        <span onClick={() => closeActions()}>{actionMenuItems}</span>
+                      </Menu>
+                    </>
+                  ) : null}
+                </HideWhenOffline>
+              </div>
               {rightSideContents ? rightSideContents : null}
-            </div>
+            </>
           ) : null}
         </div>
       </div>

@@ -111,7 +111,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
         disableCloseOnSelect={true}
         className={`sm:max-w-[500px] sm:min-w-[200px] flex-grow`}
         size="small"
-        // fullWidth
+        fullWidth
         loading={loading}
         options={options}
         getOptionLabel={(option) => (option ? option.name : '')}
