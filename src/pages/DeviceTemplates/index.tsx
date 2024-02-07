@@ -19,6 +19,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageDeviceTemplates from './ManageDeviceTemplates';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 let searchTimeout;
 
@@ -38,7 +39,6 @@ export default function DeviceTemplates() {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false, id: null });
-  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -193,12 +193,21 @@ export default function DeviceTemplates() {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+          onClick={() => {
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
@@ -224,63 +233,25 @@ export default function DeviceTemplates() {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  variant={'contained'}
-                  disabled={!permissions?.warehouse?.isCreate}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setOpen({ open: true, isClone: false, id: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                <Button
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                  disabled={selectedRecords?.length ? false : true}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                    onClick={() => {
-                      closeActions();
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords?.length})`}
-                  </MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          // toggleButtonList
+          // onToggle
+          // selectedType
+          // setSelectedType
+          // leftSideContents
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={true}
+          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
+          actionMenuItems={<ActionMenuItems/>}
+          addButtonProps={{ disabled: !permissions?.warehouse?.isCreate }}
+          addButtonOnclick={() => {
+            setOpen({ open: true, isClone: false, id: null });
+          }}
+          isAddButtonVisible={true}
+        />
+       
 
         {columns ? (
           <CustomReactTable

@@ -72,7 +72,7 @@ const PackagesTable = ({ packageId, packageData }) => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Packages`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path);
     setColumns([...newColumns, ActionsRenderer]);
   };
 
