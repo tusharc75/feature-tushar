@@ -78,7 +78,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
           _id: element._id,
           type: element.type,
           materialId: element.materialId,
-          serializedProduct: element.serializedProduct,
+          serializedProduct: element?.row?.serializedProduct,
           qty: parseInt(element?.rejectQuantity),
           comment: element?.comment === '' ? 'Rejected' : element?.comment,
           supplierPartNumber: element?.supplierPartNumber,
@@ -113,7 +113,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
     if (values.length > 0) {
       values.map((d) => {
         let tempProduct = material.find((u) => u._id === d._id);
-        if (tempProduct && d.rejectQuantity > tempProduct.qty - (tempProduct.rejectQuantity || 0) - (tempProduct.assetQty || 0)) {
+        if (tempProduct && d.rejectQuantity > tempProduct.qty - (tempProduct.rejectQuantity || 0)) {
           errors.rejectQuantity = 'should be greater';
         }
         if (user?.user?.brandPolicy?.storageLocation) {

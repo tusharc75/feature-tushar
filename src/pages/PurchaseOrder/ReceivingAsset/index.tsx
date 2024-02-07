@@ -205,7 +205,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                 } */}
               {permissions?.purchaseOrder?.isUpdate &&
                 row?.original?.type === MATERIAL_TYPE.product &&
-                allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) &&
+                allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
                 ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                 <HtmlTooltip title="Reject">
                   <span>
@@ -394,7 +394,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
               style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
               disabled={
                 selectedRecords.length === 0 ||
-                (selectedRecords?.filter((e: any) => (e.qty - ((e?.rejectQuantity || 0) + (e?.assetQty || 0)) > 0))?.length > 0
+                (selectedRecords?.filter((e: any) => (e.qty - (e?.rejectQuantity || 0) > 0))?.length > 0
                   ? false
                   : true)
               }
@@ -482,7 +482,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           }}
           material={selectedRecords.filter((d) =>
             [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(d.type) &&
-            d.qty !== (d?.rejectQuantity || 0 + d?.assetQty || 0))}
+            d.qty !== (d?.rejectQuantity || 0))}
           purchaseOrderData={purchaseOrderData}
         />
       )}
