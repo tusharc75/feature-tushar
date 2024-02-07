@@ -1,15 +1,14 @@
-import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { CircularProgress, Grid, TextField, Typography, Chip } from '@material-ui/core';
+import { Chip, CircularProgress, Grid, TextField, Typography, ChipProps } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { startCase } from 'lodash';
-import { SearchActivity } from '../../../axios/activity';
-import { useData } from '../../../StateProvider/Provider';
-import ActivityModelHandler from '../ActivityModelHandler';
-import { isMobile, isTablet } from 'react-device-detect';
-import { get_activity_resource } from '../Helpers/utils';
-import routes from '../../Helpers/Routes';
-import { makeStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
+import React, { useEffect } from 'react';
+import { useData } from '../StateProvider/Provider';
+import { SearchActivity } from '../axios/activity';
+import routes from './Helpers/Routes';
+import ActivityModelHandler from './Activity/ActivityModelHandler';
+import { get_activity_resource } from './Activity/Helpers/utils';
 
 const useStyles = makeStyles((theme) => ({
   chipStyle: {
@@ -31,7 +30,15 @@ export const capitalize = (string) => {
   return string && typeof string === 'string' ? string?.charAt(0)?.toUpperCase() + string.slice(1) : string;
 };
 
-export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActivity = false, activityName }) => {
+type SearchFilterProps = {
+  handleChangeFilter: (value) => void;
+  filter: any[];
+  chip: ChipProps;
+  dontShowMyActivity?:boolean;
+  activityName?: string;
+} & React.HTMLAttributes<HTMLDivElement>
+
+export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActivity = false, activityName, className='w-full sm:w-[unset] sm:max-w-[500px] sm:min-w-[200px] flex-grow', ...otherProps }: SearchFilterProps) => {
   const classes = useStyles();
   const {
     state: {
@@ -104,14 +111,14 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
   };
 
   return (
-    <div className={`w-full sm:w-[unset] sm:max-w-[500px] sm:min-w-[200px] flex-grow`}>
+    <div className={`${className}`} {...otherProps}>
       <Autocomplete
         limitTags={1}
         multiple={true}
         disableCloseOnSelect={true}
         className={`sm:max-w-[500px] sm:min-w-[200px] flex-grow`}
         size="small"
-        // fullWidth
+        fullWidth
         loading={loading}
         options={options}
         getOptionLabel={(option) => (option ? option.name : '')}
@@ -121,9 +128,12 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
           setInputValue(newInputValue);
         }}
         renderTags={(value, getTagProps) =>
-          value.map((option, index) => (
+          value.map((option, index) =>{
+            const {size, ...rest} = chip;
+            return  (
             <Chip
-              size={chip?.size || 'medium'}
+              size={size ?? 'medium'}
+              {...rest}
               label={
                 option && option.type === 'my'
                   ? activityName
@@ -134,7 +144,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
               {...getTagProps({ index })}
               className={`${classes.chipStyle} `}
             />
-          ))
+          )})
         }
         renderInput={(params) => (
           <TextField
@@ -156,12 +166,14 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
         value={value}
         renderOption={(option) => {
           const index = options.findIndex((o) => o.type === option.type);
+          const {size, className, ...rest} = chip;
           return (
             <Grid container alignItems="center" spacing={3}>
               <Grid item>
                 <Chip
-                  size={chip?.size || 'medium'}
-                  className={`${classes.chipStyle}`}
+                  size={size || 'medium'}
+                  {...rest}
+                  className={`${classes.chipStyle} ${className}`}
                   label={
                     option.isAll
                       ? option.type === 'my'
@@ -192,12 +204,3 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
   );
 };
 
-SearchFilter.propTypes = {
-  handleChangeFilter: PropTypes.func.isRequired,
-  filter: PropTypes.array.isRequired,
-  chip: PropTypes.shape({
-    variant: PropTypes.string,
-    size: PropTypes.string,
-    color: PropTypes.string
-  })
-};
