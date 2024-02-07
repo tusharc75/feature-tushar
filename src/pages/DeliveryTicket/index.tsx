@@ -1,15 +1,13 @@
 import { Box, Chip, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { GiAbstract055 } from 'react-icons/gi';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import HideWhenOffline from 'src/components/HideWhenOffline';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
@@ -19,13 +17,11 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import SearchBox from '../../components/Helpers/SearchBox';
 import { DELIVERY_FROM_TO_TYPE, deliveryTicket, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import { findAll, findOne, objectStore } from '../../constants/indexdbhelper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
-import ListingPageHeader from 'src/components/ListingPageHeader';
 
 let deliveryTicketTimeout;
 
@@ -64,7 +60,6 @@ const DeliveryTicket = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -298,7 +293,6 @@ const DeliveryTicket = () => {
           fetchData();
           setIsConformDialogVisible(false);
           setDeleteRecord(null);
-          setAnchorEl(null);
           setDeleteLoading(false);
         })
         .catch((error) => {
@@ -323,14 +317,6 @@ const DeliveryTicket = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   return (
