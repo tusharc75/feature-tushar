@@ -53,14 +53,14 @@ const Activity = ({ type }) => {
         <CustomBreadCrumbs routes={[{ title: capitalize(routes[type].title) }]} />
       </div>
       <CustomContainer>
-        <ListingPageHeader
-          leftSideContents={filter ? <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} /> : null}
-          rightSideContents={filter ? <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} activityName={type} /> : null}
-          isActionButtonVisible={false}
-          isAddButtonVisible={false}
-        />
         {filter && (
           <Fragment>
+            <ListingPageHeader
+              leftSideContents={<CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />}
+              rightSideContents={<SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} activityName={type} />}
+              isActionButtonVisible={false}
+              isAddButtonVisible={false}
+            />
             {viewType === 0 && <Board type={type} filter={filter} />}
             {viewType === 1 && <Roadmap type={type} filter={filter} />}
           </Fragment>

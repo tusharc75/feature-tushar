@@ -6,6 +6,7 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
+import { SearchFilter } from 'src/components/Activity/Report/SearchFilter';
 
 type ListingPageHeaderProps = {
   toggleButtonList?: { key: string; value: number }[];
@@ -15,6 +16,8 @@ type ListingPageHeaderProps = {
   leftSideContents?: ReactNode;
   searchValue?: string;
   onSearch?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  searchFilter?: any[];
+  handleSearchFilter?: (value: any) => void;
   rightSideContents?: ReactNode;
   isActionButtonVisible: boolean;
   actionButtonProps?: ButtonProps;
@@ -38,6 +41,9 @@ const ListingPageHeader = ({
 
   searchValue,
   onSearch,
+
+  searchFilter,
+  handleSearchFilter,
 
   addButtonOnclick,
   isAddButtonVisible,
@@ -119,6 +125,9 @@ const ListingPageHeader = ({
             <HideWhenOffline>
               <SearchBox onChange={onSearch} value={searchValue} size="small" />
             </HideWhenOffline>
+          ) : null}
+          {handleSearchFilter ? (
+            <SearchFilter handleChangeFilter={handleSearchFilter} filter={searchFilter} chip={{ size: 'small' }} activityName="note" />
           ) : null}
           {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
             <>
