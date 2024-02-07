@@ -6,7 +6,7 @@ import { useData } from '../../StateProvider/Provider';
 import { GetReferenceName } from '../../axios/activity';
 import Board from '../../components/Activity/Report/Board';
 import Roadmap from '../../components/Activity/Report/Roadmap';
-import { SearchFilter } from '../../components/Activity/Report/SearchFilter';
+import { SearchFilter } from '../../components/SearchFilter';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
 import CustomTabs from '../../components/Helpers/CustomTabs';

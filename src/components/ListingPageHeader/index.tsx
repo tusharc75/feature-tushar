@@ -6,7 +6,7 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
-import { SearchFilter } from 'src/components/Activity/Report/SearchFilter';
+import { SearchFilter } from 'src/components/SearchFilter';
 
 type ListingPageHeaderProps = {
   toggleButtonList?: { key: string; value: number }[];
@@ -127,7 +127,7 @@ const ListingPageHeader = ({
             </HideWhenOffline>
           ) : null}
           {handleSearchFilter ? (
-            <SearchFilter handleChangeFilter={handleSearchFilter} filter={searchFilter} chip={{ size: 'small' }} activityName="note" />
+            <SearchFilter className='w-full sm:w-[unset] sm:max-w-[400px] sm:min-w-[200px] flex-grow' handleChangeFilter={handleSearchFilter} filter={searchFilter} chip={{ size: 'small' }} activityName="note" />
           ) : null}
           {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
             <>

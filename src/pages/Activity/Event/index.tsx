@@ -10,7 +10,7 @@ import { GetBoard, GetReferenceName } from '../../../axios/activity';
 import Layout from '../../../components/Layout';
 import CustomContainer from '../../../components/CustomContainer';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
-import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
+import { SearchFilter } from '../../../components/SearchFilter';
 import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 

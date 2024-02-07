@@ -15,7 +15,7 @@ import { GetReferenceName } from '../../../axios/activity';
 import axiosInstance from '../../../axios/axiosInstance';
 import ManageAttachment from '../../../components/Activity/Attachments/ManageAttachment';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
-import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
+import { SearchFilter } from '../../../components/SearchFilter';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
