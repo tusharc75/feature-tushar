@@ -25,6 +25,7 @@ import { findAll, findOne, objectStore } from '../../constants/indexdbhelper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 let deliveryTicketTimeout;
 
@@ -322,9 +323,6 @@ const DeliveryTicket = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
-    history.push(`?type=${value}`);
   };
 
   const openActions = (event) => {
@@ -357,70 +355,20 @@ const DeliveryTicket = () => {
 
         {/* Tables Begins Here */}
         <CustomContainer>
-          <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'d-flex align-items-center gap-1'}>
-                <div className="flex flex-wrap">
-                  <GiAbstract055 className="headerLogo" />
-                  <span className="listingHeader">{routes.deliveryTicket.title} </span>
-                  {referenceType && <Chip className="ml-3" color="primary" label={`Rental : ${referenceType}`} onDelete={updateQueryParams} />}
-                </div>
-                <HideWhenOffline>
-                  <div className={`align-items-center gap-1 layout-for-mobile `}>
-                    {types && (
-                      <ToggleButtonGroup size="small" className="ml-2" value={types[selectedType - 1].key} exclusive onChange={onTypeChange}>
-                        {types.map((k, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
-                  </div>
-                </HideWhenOffline>
-              </div>
-              <div className="flex flex-wrap gap-[8px]  justify-end">
-                <SearchBox onChange={handleSearch} size="small" value={search} />
-                {/* {deliveryPermissions?.isCreate &&
-                    <Button className={'no-shadow'}
-                      onClick={() => setShowManageDeliveryTicket(true)}
-                      variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                  } */}
-                {/* {deliveryPermissions?.isDelete &&
-                    <Button
-                      className={styles.action_submit_btn}
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                    >Actions
-                    </Button>
-                  }
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "left",
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem onClick={() => {
-                      setIsConformDialogVisible(true)
-                      closeActions()
-                    }}>Delete</MenuItem>
-                  </Menu> */}
-              </div>
-            </div>
-          </div>
+          <ListingPageHeader
+            toggleButtonList={types}
+            onToggle={onTypeChange}
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            leftSideContents={
+              referenceType ? <Chip className="ml-3" color="primary" label={`Rental : ${referenceType}`} onDelete={updateQueryParams} /> : null
+            }
+            searchValue={search}
+            onSearch={handleSearch}
+            isActionButtonVisible={false}
+            isAddButtonVisible={false}
+            synchronizeType
+          />
 
           {columns ? (
             <CustomReactTable
