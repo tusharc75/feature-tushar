@@ -41,7 +41,6 @@ const Note = () => {
   const { referenceType, referenceId } = parsed;
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isNew, setIsNew] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(null);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -201,14 +200,6 @@ const Note = () => {
       fetchData();
     }
   }, [filter]);
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   const handleClose = () => {
     setShowCreateDialog(false);

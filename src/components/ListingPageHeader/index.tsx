@@ -75,7 +75,7 @@ const ListingPageHeader = ({
 
   useEffect(() => {
     const { type }: any = queryString.parse(history.location.search);
-    if (synchronizeType) setSelectedType(type ? parseInt(type) : 1);
+    if (synchronizeType && setSelectedType) setSelectedType(type ? parseInt(type) : 1);
 
     return history.listen((location) => {
       if (history.action === 'PUSH') {
@@ -85,11 +85,11 @@ const ListingPageHeader = ({
         if (locationKeys[1] === location.key) {
           setLocationKeys(([_, ...keys]) => keys);
           // Handle forward event
-          setSelectedType(type ? parseInt(type) : 1);
+          setSelectedType && setSelectedType(type ? parseInt(type) : 1);
         } else {
           setLocationKeys((keys) => [location.key, ...keys]);
           // Handle back event
-          setSelectedType(type ? parseInt(type) : 1);
+          setSelectedType && setSelectedType(type ? parseInt(type) : 1);
         }
       }
     });
