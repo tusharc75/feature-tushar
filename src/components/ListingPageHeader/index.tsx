@@ -29,7 +29,7 @@ type ListingPageHeaderProps = {
 const ListingPageHeader = ({
   toggleButtonList,
   onToggle,
-  setQueryString=true,
+  setQueryString = true,
   selectedType,
   setSelectedType,
 
@@ -46,7 +46,7 @@ const ListingPageHeader = ({
   isActionButtonVisible,
   actionButtonProps = {},
   actionMenuItems,
-  synchronizeType=false
+  synchronizeType = false
 }: ListingPageHeaderProps) => {
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -54,7 +54,7 @@ const ListingPageHeader = ({
 
   const handleToggle = (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>, value: string) => {
     const data = toggleButtonList.find((d) => d.key === value).value;
-    if(setQueryString) history.push(`?type=${data}`);
+    if (setQueryString) history.push(`?type=${data}`);
     setSelectedType && setSelectedType(data);
     onToggle && onToggle(event, value);
   };
@@ -69,7 +69,7 @@ const ListingPageHeader = ({
 
   useEffect(() => {
     const { type }: any = queryString.parse(history.location.search);
-    if(synchronizeType) setSelectedType(type ? parseInt(type) : 1);
+    if (synchronizeType) setSelectedType(type ? parseInt(type) : 1);
 
     return history.listen((location) => {
       if (history.action === 'PUSH') {
