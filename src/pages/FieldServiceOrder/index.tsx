@@ -51,7 +51,6 @@ const ServiceOrder = () => {
 
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
 
   const { generateColumns } = useColumns();
@@ -131,7 +130,6 @@ const ServiceOrder = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
       })
       .catch((error) => {
         dispatch({ type: 'loading', loading: false });
@@ -247,14 +245,6 @@ const ServiceOrder = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const ActionMenuItems = () => {

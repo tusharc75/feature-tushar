@@ -24,6 +24,7 @@ import { PLANNING_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResourc
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManagePlanning from './ManagePlanning';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 let searchTimeout;
 
 const Planning = () => {
@@ -60,7 +61,6 @@ const Planning = () => {
   const [selectedPlanningType, setSelectedPlanningType] = useState(history.location.state);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -256,7 +256,6 @@ const Planning = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -282,19 +281,23 @@ const Planning = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
-    history.push(`?type=${value}`);
+  };
+
+  const ActionMeuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
+          onClick={() => {
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
@@ -319,114 +322,25 @@ const Planning = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
-              <ToggleButtonGroup
-                size="small"
-                className="align-items-center gap-1 "
-                value={types[selectedType - 1].key}
-                exclusive
-                onChange={onTypeChange}
-              >
-                {types.map((k, index) => {
-                  return (
-                    <ToggleButton value={k.key} key={index}>
-                      {k.key}
-                    </ToggleButton>
-                  );
-                })}
-              </ToggleButtonGroup>
-              {permissions?.planningView?.isRead && (
-                <Box ml={1}>
-                  <ToggleButtonGroup size="small">
-                    <ToggleButton
-                      onClick={() => {
-                        history.push({
-                          pathname: routes.planningView.path,
-                          state: {
-                            resource: sidebarResource?.planning
-                          }
-                        });
-                      }}
-                    >
-                      <span>{`Calendar`}</span>
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                </Box>
-              )}
-              {selectedPlanningType && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={'Type: Rental Job'}
-                  onDelete={() => {
-                    setSelectedPlanningType(null);
-                  }}
-                />
-              )}
-            </div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                {permissions?.planning?.isDelete && (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={`new-dropdown-v1`}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                      disabled={selectedRecords?.length ? false : true}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem
-                        disabled={
-                          !(
-                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                          )
-                        }
-                        onClick={() => {
-                          closeActions();
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContents={<LeftSideContents {...{ permissions, history, selectedPlanningType, setSelectedPlanningType }} />}
+          searchValue={search}
+          onSearch={handleSearch}
+          rightSideContents
+          isActionButtonVisible={permissions?.planning?.isDelete}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMeuItems />}
+          // addButtonProps
+          addButtonOnclick={() => {
+            setShowManageDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={true}
+        />
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -483,3 +397,38 @@ const Planning = () => {
 };
 
 export default Planning;
+
+const LeftSideContents = ({ permissions, history, selectedPlanningType, setSelectedPlanningType }) => {
+  return (
+    <>
+      {permissions?.planningView?.isRead && (
+        <Box ml={1}>
+          <ToggleButtonGroup size="small">
+            <ToggleButton
+              onClick={() => {
+                history.push({
+                  pathname: routes.planningView.path,
+                  state: {
+                    resource: sidebarResource?.planning
+                  }
+                });
+              }}
+            >
+              <span>{`Calendar`}</span>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+      )}
+      {selectedPlanningType && (
+        <Chip
+          className="ml-3"
+          color="primary"
+          label={'Type: Rental Job'}
+          onDelete={() => {
+            setSelectedPlanningType(null);
+          }}
+        />
+      )}
+    </>
+  );
+};
