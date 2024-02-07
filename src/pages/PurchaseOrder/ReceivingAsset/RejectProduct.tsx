@@ -91,6 +91,8 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
         qty: parseInt(values.qty),
         serialNumber: serialNumberIds?.map((item) => item?._id),
         storageLocation: user?.user?.brandPolicy?.storageLocation ? values['storageLocation'] : null,
+        serializedProduct: product?.serializedProduct || false,
+        assetQty: product?.assetQty || 0,
       }
     ];
     setLoading(true);
@@ -111,7 +113,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
-    const validateQty = product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0);
+    const validateQty = product?.qty - (product?.rejectQuantity || 0);
     if (parseInt(values?.qty) > validateQty) {
       errors['qty'] = 'Qty cannot be more than quantity';
     }
@@ -180,7 +182,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                   <ListItem key={product.materialId}>
                     <ListItemText
                       primary={product?.detail}
-                      secondary={`Quantity : ${product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0)}`}
+                      secondary={`Quantity : ${product?.qty - (product?.rejectQuantity || 0)}`}
                     />
                     <TextField
                       margin="dense"
