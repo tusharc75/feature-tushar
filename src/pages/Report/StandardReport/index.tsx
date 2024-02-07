@@ -121,6 +121,15 @@ const Report = () => {
                 })
                 columns = [...newColumns, ActionsRenderer]
             }
+            else if (type === 'in-used-serialized-asset') {
+                newColumns?.forEach((e) => {
+                    if (['rentalJob', 'customerAccount', 'billingAddress', 'shippingAddress']?.includes(e.accessor)) {
+                        e.disableFilters = true;
+                        e.disableSortBy = true;
+                    }
+                })
+                columns = [...newColumns]
+            }
             else {
                 columns = [...newColumns]
             }
