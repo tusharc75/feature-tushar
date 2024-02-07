@@ -78,12 +78,13 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
           _id: element._id,
           type: element.type,
           materialId: element.materialId,
-          serializedProduct: element.serializedProduct,
           qty: parseInt(element?.rejectQuantity),
           comment: element?.comment === '' ? 'Rejected' : element?.comment,
           supplierPartNumber: element?.supplierPartNumber,
           serialNumber: [],
-          storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null
+          storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null,
+          serializedProduct: element?.row?.serializedProduct || false,
+          assetQty: element?.row?.assetQty || 0,
         });
       }
     });
@@ -113,7 +114,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
     if (values.length > 0) {
       values.map((d) => {
         let tempProduct = material.find((u) => u._id === d._id);
-        if (tempProduct && d.rejectQuantity > tempProduct.qty - (tempProduct.rejectQuantity || 0) - (tempProduct.assetQty || 0)) {
+        if (tempProduct && d.rejectQuantity > tempProduct.qty - (tempProduct.rejectQuantity || 0)) {
           errors.rejectQuantity = 'should be greater';
         }
         if (user?.user?.brandPolicy?.storageLocation) {
@@ -182,7 +183,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({ values, setFieldValue, errors }) => (
             <>
