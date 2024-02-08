@@ -2356,6 +2356,12 @@ export const REPORT_LIST = [
     type: 'dynamic'
   },
   {
+    title: sidebarResource.invoice,
+    permission: 'invoice',
+    key: 'invoice',
+    type: 'dynamic'
+  },
+  {
     title: 'Purchase Order Details',
     permission: 'purchaseOrder',
     key: 'standardReport',
