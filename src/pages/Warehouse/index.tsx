@@ -1,5 +1,4 @@
-import { Box, Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
@@ -11,7 +10,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EntitySelectionsDialog from 'src/components/EntitySelections';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -42,7 +41,6 @@ const Warehouse = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [isAssigning, setIsAssigning] = useState(false);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
@@ -249,21 +247,12 @@ const Warehouse = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
       });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   return (
@@ -311,113 +300,18 @@ const Warehouse = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.warehouse?.isCreate && (
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
-                    onClick={() => {
-                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                    }}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-
-                <>
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    className={`new-dropdown-v1`}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                    disabled={selectedRecords?.length ? false : true}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    {permissions?.warehouse?.isDelete && (
-                      <MenuItem
-                        disabled={
-                          !(
-                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                          )
-                        }
-                        onClick={() => {
-                          closeActions();
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    )}
-                    {permissions?.warehouse?.isUpdate && (
-                      <MenuItem
-                        onClick={() => {
-                          if (selectedRecords.some((d) => d.isUpdate === false)) {
-                            closeActions();
-                            setShowUpdateWarningConfirmBox(true);
-                          } else {
-                            closeActions();
-                            if (selectedRecords.length) {
-                              let entities = [];
-                              selectedRecords.map((current) => {
-                                if (current?.entity) {
-                                  if (current?.entityId) {
-                                    entities.push(current?.entityId);
-                                  }
-                                  if (current?.restentity) {
-                                    let restEntities = current?.restentity.map((o) => o.optionValue);
-                                    entities = [...entities, ...restEntities];
-                                  }
-                                }
-                              });
-                              setEntities([...entities]);
-                            }
-                            setShowEntityDialog(true);
-                          }
-                        }}
-                      >
-                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                      </MenuItem>
-                    )}
-                    {permissions?.warehouse?.isUpdate && user?.user?.brandPolicy?.warehouseAccessByUser && (
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          setUserAssignDialog(true);
-                        }}
-                      >
-                        Assign Users &nbsp; <Chip size="small" label={selectedRecords.length} />
-                      </MenuItem>
-                    )}
-                  </Menu>
-                </>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={true}
+          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
+          actionMenuItems={<ActionMenuItems {...{permissions, selectedRecords, setShowDeleteConfirmBox, setShowUpdateWarningConfirmBox, setEntities, setShowEntityDialog, user, setUserAssignDialog}} />}
+          addButtonOnclick={() => {
+            setShowManageDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.warehouse?.isCreate}
+        />
+     
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -499,3 +393,66 @@ const Warehouse = () => {
 };
 
 export default Warehouse;
+
+const ActionMenuItems = ({
+  permissions,
+  selectedRecords,
+  setShowDeleteConfirmBox,
+  setShowUpdateWarningConfirmBox,
+  setEntities,
+  setShowEntityDialog,
+  user,
+  setUserAssignDialog
+}) => {
+  return (
+    <>
+      {permissions?.warehouse?.isDelete && (
+        <MenuItem
+          disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
+          onClick={() => {
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      )}
+      {permissions?.warehouse?.isUpdate && (
+        <MenuItem
+          onClick={() => {
+            if (selectedRecords.some((d) => d.isUpdate === false)) {
+              setShowUpdateWarningConfirmBox(true);
+            } else {
+              if (selectedRecords.length) {
+                let entities = [];
+                selectedRecords.map((current) => {
+                  if (current?.entity) {
+                    if (current?.entityId) {
+                      entities.push(current?.entityId);
+                    }
+                    if (current?.restentity) {
+                      let restEntities = current?.restentity.map((o) => o.optionValue);
+                      entities = [...entities, ...restEntities];
+                    }
+                  }
+                });
+                setEntities([...entities]);
+              }
+              setShowEntityDialog(true);
+            }
+          }}
+        >
+          Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+        </MenuItem>
+      )}
+      {permissions?.warehouse?.isUpdate && user?.user?.brandPolicy?.warehouseAccessByUser && (
+        <MenuItem
+          onClick={() => {
+            setUserAssignDialog(true);
+          }}
+        >
+          Assign Users &nbsp; <Chip size="small" label={selectedRecords.length} />
+        </MenuItem>
+      )}
+    </>
+  );
+};

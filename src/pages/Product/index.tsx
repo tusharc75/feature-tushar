@@ -386,21 +386,8 @@ const Product = () => {
         <ListingPageHeader
           leftSideContents={
             <LeftSideContent
-              {...{
-                permissions,
-                productCategoryList,
-                productCategory,
-                setProductCategory,
-                isProductTemplate,
-                productTemplateList,
-                productTemplate,
-                setProductTemplate,
-                isProductType,
-                productTypeList,
-                productType,
-                setProductType
-              }}
-            />
+              {...{permissions,productCategoryList,productCategory,setProductCategory,isProductTemplate,productTemplateList,productTemplate,setProductTemplate,isProductType,productTypeList,productType,setProductType}}
+              />
           }
           searchValue={search}
           onSearch={handleSearch}
