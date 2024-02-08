@@ -124,7 +124,6 @@ const Report = () => {
       columns.splice(1, 0, {
         accessor: 'poAmount',
         Header: 'Purchase Order Amount',
-        show: true,
         disabled: false,
         Cell: ({ row }) => (
           <>
@@ -138,8 +137,8 @@ const Report = () => {
         {
           accessor: 'totalPrice',
           Header: 'Total Price',
-          show: true,
-          disabled: false,
+          disableFilters: true,
+          disableSortBy: true,
           Cell: ({ row }) => (
             <>
               <h5 className="text-truncate">{row.original['totalPrice'] ? row.original['totalPrice'] : <NoDataCell />}</h5>
@@ -149,8 +148,8 @@ const Report = () => {
         {
           accessor: 'finalPrice',
           Header: 'Final Price',
-          show: true,
-          disabled: false,
+          disableFilters: true,
+          disableSortBy: true,
           Cell: ({ row }) => (
             <>
               <h5 className="text-truncate">{row.original['finalPrice'] ? row.original['finalPrice'] : <NoDataCell />}</h5>
@@ -158,7 +157,7 @@ const Report = () => {
           )
         }
       ]
-      columns.splice(1, 0, ...extraColumns);
+      columns = [...columns, ...extraColumns]
     }
     if (resourceStartCase === 'Work Order') {
       columns.push({
