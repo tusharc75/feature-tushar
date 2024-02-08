@@ -133,6 +133,33 @@ const Report = () => {
         )
       });
     }
+    if (resourceStartCase === 'Invoice') {
+      const extraColumns = [
+        {
+          accessor: 'totalPrice',
+          Header: 'Total Price',
+          show: true,
+          disabled: false,
+          Cell: ({ row }) => (
+            <>
+              <h5 className="text-truncate">{row.original['totalPrice'] ? row.original['totalPrice'] : <NoDataCell />}</h5>
+            </>
+          )
+        },
+        {
+          accessor: 'finalPrice',
+          Header: 'Final Price',
+          show: true,
+          disabled: false,
+          Cell: ({ row }) => (
+            <>
+              <h5 className="text-truncate">{row.original['finalPrice'] ? row.original['finalPrice'] : <NoDataCell />}</h5>
+            </>
+          )
+        }
+      ]
+      columns.splice(1, 0, ...extraColumns);
+    }
     if (resourceStartCase === 'Work Order') {
       columns.push({
         accessor: 'totalConsumablesCost',
@@ -147,8 +174,8 @@ const Report = () => {
       });
     }
     columns?.forEach((e) => {
-      e.editable = false
-    })
+      e.editable = false;
+    });
     setColumns([...columns]);
     setLoadingColumns(false);
   };
@@ -207,7 +234,7 @@ const Report = () => {
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
 
-    let api = `/report${routes[resourceCamelCase].path}${filterQuery}`;;
+    let api = `/report${routes[resourceCamelCase].path}${filterQuery}`;
     if (resourceCamelCase === 'quotes') {
       api = `/report/quote-builder/${filterQuery}`;
     } else {
