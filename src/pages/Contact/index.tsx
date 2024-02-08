@@ -1,10 +1,7 @@
-import { Box, Button, Chip, Dialog, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Box, Chip, Dialog, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
@@ -12,6 +9,7 @@ import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -25,10 +23,8 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import SearchBox from '../../components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from '../../constants/helpers';
 import WarhouseList from '../Account/Warehouse/WarhouseList';
-import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageContactDialog from './ManageContact';
@@ -56,7 +52,6 @@ export default function Contact(props) {
     account
   } = props;
   const [selectedType, setSelectedType] = useState(1);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [contactId, setContactId] = useState('');
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
@@ -381,14 +376,6 @@ export default function Contact(props) {
     setSingleContactDelete({ id: null, show: false, contactedName: '' });
   };
 
-  // ****** ACTIONS BUTTON STUFF *********
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
   const clickCreateNew = () => {
     setShowCreateContactDialog({ open: true, isClone: false, idToClone: null });
   };
@@ -428,9 +415,24 @@ export default function Contact(props) {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
-    // history.push(`?type=${value}`);
+  };
+
+  const LeftSideContents = () => {
+    return (
+      <>
+        {accountDetails.accountId ? (
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`Account: ${accountDetails.accountName}`}
+            onDelete={() => {
+              setAccountDetails({ accountId: null, accountName: null });
+              // getContacts();
+            }}
+          />
+        ) : null}
+      </>
+    );
   };
 
   return (
@@ -456,153 +458,38 @@ export default function Contact(props) {
       </div>
 
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              <div>
-                <ToggleButtonGroup
-                  size="small"
-                  className="align-items-center gap-1"
-                  value={types[selectedType - 1].key}
-                  exclusive
-                  onChange={onTypeChange}
-                >
-                  {types.map((k, index) => {
-                    return (
-                      <ToggleButton value={k.key} key={index}>
-                        {k.key}
-                      </ToggleButton>
-                    );
-                  })}
-                </ToggleButtonGroup>
-                <Grid className={styles.Related_Account}>
-                  {accountDetails.accountId && (
-                    <Chip
-                      className="ml-3"
-                      color="primary"
-                      label={`Account: ${accountDetails.accountName}`}
-                      onDelete={() => {
-                        setAccountDetails({ accountId: null, accountName: null });
-                        // getContacts();
-                      }}
-                    />
-                  )}
-                </Grid>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  disabled={!contactPermissions?.isCreate}
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  onClick={clickCreateNew}
-                  className={`no-shadow`}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-
-                {(contactPermissions?.isDelete || contactPermissions?.isUpdate) && (
-                  <>
-                    <Button
-                      disabled={selectedRecords?.length === 0}
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={`new-dropdown-v1`}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {contactPermissions?.isDelete && (
-                        <MenuItem
-                          disabled={selectedRecords?.length === 0}
-                          onClick={() => {
-                            if (selectedRecords?.some((d) => d.canDelete === false)) {
-                              closeActions();
-                              setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
-                            } else {
-                              closeActions();
-                              setShowDeleteConfirmBox(true);
-                            }
-                          }}
-                        >
-                          {`Delete (${selectedRecords?.length})`}
-                        </MenuItem>
-                      )}
-                      {user.user?.userType === userType.brandAdmin && (
-                        <MenuItem
-                          disabled={selectedRecords?.length === 0 || selectedRecords?.some((record) => record?.isUserExist)}
-                          onClick={handleAccessToPortal}
-                        >
-                          Give Access to Portal
-                        </MenuItem>
-                      )}
-                      {contactPermissions?.isUpdate && contactResource === 'customerContact' && permissions?.productInventory && (
-                        <MenuItem
-                          disabled={selectedRecords?.length === 0 || [...new Set(selectedRecords?.map((d) => d.accountNameId))].length > 1}
-                          onClick={() => {
-                            setOpenAddPlantsDialog(true);
-                            closeActions();
-                          }}
-                        >
-                          Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords?.length} />
-                        </MenuItem>
-                      )}
-                      {contactPermissions?.isUpdate && (
-                        <MenuItem
-                          disabled={selectedRecords?.length === 0}
-                          onClick={() => {
-                            if (selectedRecords?.some((d) => d.isUpdate === false)) {
-                              closeActions();
-                              setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                            } else {
-                              closeActions();
-                              if (selectedRecords?.length) {
-                                let entities = [];
-                                selectedRecords?.map((current) => {
-                                  if (current?.entityId) {
-                                    entities = [...entities, current?.entityId];
-                                  }
-                                  if (current?.restentity) {
-                                    let restEntities = current?.restentity.map((o) => o?.optionValue);
-                                    entities = [...entities, ...restEntities];
-                                  }
-                                });
-                                setEntities([...entities]);
-                              }
-                              setShowEntityDialog(true);
-                            }
-                          }}
-                        >
-                          Assign Entity &nbsp; <Chip size="small" label={selectedRecords?.length} />
-                        </MenuItem>
-                      )}
-                    </Menu>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContents={<LeftSideContents />}
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={contactPermissions?.isDelete || contactPermissions?.isUpdate}
+          actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+          actionMenuItems={
+            <ActionMenuItems
+              {...{
+                contactPermissions,
+                selectedRecords,
+                setShowDeleteWarningConfirmBox,
+                setShowDeleteConfirmBox,
+                user,
+                handleAccessToPortal,
+                contactResource,
+                permissions,
+                setOpenAddPlantsDialog,
+                setEntities,
+                setShowEntityDialog
+              }}
+            />
+          }
+          addButtonProps={{ disabled: !contactPermissions?.isCreate }}
+          addButtonOnclick={clickCreateNew}
+          isAddButtonVisible={true}
+          synchronizeType
+        />
 
         {columns ? (
           <CustomReactTable
@@ -746,3 +633,78 @@ export default function Contact(props) {
     </section>
   );
 }
+
+const ActionMenuItems = ({
+  contactPermissions,
+  selectedRecords,
+  setShowDeleteWarningConfirmBox,
+  setShowDeleteConfirmBox,
+  user,
+  handleAccessToPortal,
+  contactResource,
+  permissions,
+  setOpenAddPlantsDialog,
+  setEntities,
+  setShowEntityDialog
+}) => {
+  return (
+    <>
+      {contactPermissions?.isDelete && (
+        <MenuItem
+          disabled={selectedRecords?.length === 0}
+          onClick={() => {
+            if (selectedRecords?.some((d) => d.canDelete === false)) {
+              setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
+            } else {
+              setShowDeleteConfirmBox(true);
+            }
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      )}
+      {user.user?.userType === userType.brandAdmin && (
+        <MenuItem disabled={selectedRecords?.length === 0 || selectedRecords?.some((record) => record?.isUserExist)} onClick={handleAccessToPortal}>
+          Give Access to Portal
+        </MenuItem>
+      )}
+      {contactPermissions?.isUpdate && contactResource === 'customerContact' && permissions?.productInventory && (
+        <MenuItem
+          disabled={selectedRecords?.length === 0 || [...new Set(selectedRecords?.map((d) => d.accountNameId))].length > 1}
+          onClick={() => {
+            setOpenAddPlantsDialog(true);
+          }}
+        >
+          Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords?.length} />
+        </MenuItem>
+      )}
+      {contactPermissions?.isUpdate && (
+        <MenuItem
+          disabled={selectedRecords?.length === 0}
+          onClick={() => {
+            if (selectedRecords?.some((d) => d.isUpdate === false)) {
+              setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+            } else {
+              if (selectedRecords?.length) {
+                let entities = [];
+                selectedRecords?.map((current) => {
+                  if (current?.entityId) {
+                    entities = [...entities, current?.entityId];
+                  }
+                  if (current?.restentity) {
+                    let restEntities = current?.restentity.map((o) => o?.optionValue);
+                    entities = [...entities, ...restEntities];
+                  }
+                });
+                setEntities([...entities]);
+              }
+              setShowEntityDialog(true);
+            }
+          }}
+        >
+          Assign Entity &nbsp; <Chip size="small" label={selectedRecords?.length} />
+        </MenuItem>
+      )}
+    </>
+  );
+};
