@@ -355,7 +355,6 @@ const ReportFilters = (props: FiltersProps) => {
     }
   };
 
-  console.log(statusPeriodDate)
 
   return (
     <Container maxWidth="sm">

@@ -26,6 +26,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
 import './style.scss';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 const Opportunities = () => {
   const types = [
@@ -61,7 +62,6 @@ const Opportunities = () => {
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [columns, setColumns] = useState(null);
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [anchorEl, setAnchorEl] = useState(null);
 
   //  Grid Variables - End
   useEffect(() => {
@@ -269,12 +269,28 @@ const Opportunities = () => {
     }
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+          onClick={() => {
+            setIsConformDialogVisible(true);
+          }}
+        >
+          {`Delete (${selectedRecords.length})`}
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords.find((d) => d.canDelete === false)}
+          onClick={() => {
+            handleTransferEntityDialog();
+          }}
+        >
+          {`Transfer Entity (${selectedRecords.length})`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
@@ -299,91 +315,26 @@ const Opportunities = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'d-flex flex-wrap align-items-center gap-2'}>
-              <div className={`flex flex-wrap items-center gap-2 `}>
-                {types && (
-                  <ToggleButtonGroup size="small" className="ml-2" value={types[selectedType - 1].key} exclusive onChange={handleFilter}>
-                    {types.map((k, index) => {
-                      return (
-                        <ToggleButton value={k.key} key={index}>
-                          {k.key}
-                        </ToggleButton>
-                      );
-                    })}
-                  </ToggleButtonGroup>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} width="242px" size="small" value={search} style={isMobile ? { flex: 1 } : {}} />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.opportunity?.isCreate && (
-                  <Button
-                    onClick={() => {
-                      setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={`no-shadow`}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                <HtmlTooltip title={!selectedRecords.length ? 'Please select some opportunities' : ''}>
-                  <span>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                  </span>
-                </HtmlTooltip>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                    onClick={() => {
-                      closeActions();
-                      setIsConformDialogVisible(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords.length})`}
-                  </MenuItem>
-                  <MenuItem
-                    disabled={selectedRecords.find((d) => d.canDelete === false)}
-                    onClick={() => {
-                      closeActions();
-                      handleTransferEntityDialog();
-                    }}
-                  >
-                    {`Transfer Entity (${selectedRecords.length})`}
-                  </MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={handleFilter}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          // leftSideContents
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          actionMenuItems={<ActionMenuItems/>}
+          // addButtonProps
+          addButtonOnclick={() => {
+            setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.opportunity?.isCreate}
+          synchronizeType={true}
+        />
+    
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

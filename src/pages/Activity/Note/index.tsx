@@ -1,37 +1,33 @@
-import { useState, useEffect, useContext } from 'react';
+import { Chip, Dialog, IconButton, MenuItem, TextField } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
-import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
-import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
-import { GetReferenceName, GetNotes } from '../../../axios/activity';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import { GetNotes, GetReferenceName } from '../../../axios/activity';
 import axiosInstance from '../../../axios/axiosInstance';
 import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
+import { CreateNote } from '../../../components/Activity/Note/CreateNote';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { ExpandMore } from '@material-ui/icons';
-import { Button, Chip, Dialog, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { AddOutlined } from '@material-ui/icons';
-import { CreateNote } from '../../../components/Activity/Note/CreateNote';
 import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useData } from '../../../StateProvider/Provider';
-import styles from '../../Leads/Header.module.scss';
 
-import { displayDate } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import { Delete as DeleteIcon } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { Autocomplete } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ListingPageHeader from 'src/components/ListingPageHeader';
+import { deleteDisable } from 'src/constants/messageHelpers';
+import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { Autocomplete } from '@material-ui/lab';
-import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Delete as DeleteIcon } from '@material-ui/icons';
-import { deleteDisable } from 'src/constants/messageHelpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { camelCase } from 'lodash';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import { displayDate } from '../../../constants/helpers';
 
 const Note = () => {
   const renderedFrom = camelCase(routes?.activityNote.title);
@@ -45,7 +41,6 @@ const Note = () => {
   const { referenceType, referenceId } = parsed;
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isNew, setIsNew] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(null);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -73,7 +68,11 @@ const Note = () => {
   const fetchGridColumns = () => {
     const column = [
       {
-        accessor: 'name', Header: 'Title', show: true, disabled: true, primaryField: true,
+        accessor: 'name',
+        Header: 'Title',
+        show: true,
+        disabled: true,
+        primaryField: true,
         Cell: ({ row }) => (
           <span
             className={permissions?.note?.isUpdate ? 'link cursor-pointer' : ''}
@@ -115,11 +114,30 @@ const Note = () => {
           </>
         )
       },
-      { accessor: 'createdByDate', Header: 'Created At', filter: false, sortable: false, show: true, Cell: ({ row }) => (<span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(row.original?.createdByDate)}</span>) },
-      { accessor: 'updatedByDate', Header: 'Updated At', filter: false, sortable: false, show: true, Cell: ({ row }) => (row.original?.updatedByDate ? <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(row.original?.updatedByDate)}</span> : <NoDataCell />) }
+      {
+        accessor: 'createdByDate',
+        Header: 'Created At',
+        filter: false,
+        sortable: false,
+        show: true,
+        Cell: ({ row }) => <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(row.original?.createdByDate)}</span>
+      },
+      {
+        accessor: 'updatedByDate',
+        Header: 'Updated At',
+        filter: false,
+        sortable: false,
+        show: true,
+        Cell: ({ row }) =>
+          row.original?.updatedByDate ? (
+            <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(row.original?.updatedByDate)}</span>
+          ) : (
+            <NoDataCell />
+          )
+      }
     ];
-    setColumns([...column, ActionsRenderer])
-  }
+    setColumns([...column, ActionsRenderer]);
+  };
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -131,20 +149,16 @@ const Note = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.note?.isDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={permissions?.note?.isDelete ? 'Delete' : deleteDisable}>
           <span>
-            <IconButton
-              disabled={!permissions?.note?.isDelete}
-              size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
-              <DeleteIcon fontSize="small" color={permissions?.note?.isDelete ? "error" : "disabled"} />
+            <IconButton disabled={!permissions?.note?.isDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
+              <DeleteIcon fontSize="small" color={permissions?.note?.isDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
       </>
     )
   };
-
-
 
   useEffect(() => {
     if (referenceType) {
@@ -186,14 +200,6 @@ const Note = () => {
       fetchData();
     }
   }, [filter]);
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   const handleClose = () => {
     setShowCreateDialog(false);
@@ -243,7 +249,6 @@ const Note = () => {
 
   const UpdatedAtDateRenderer = (params) =>
     params.value ? <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(params.value)}</span> : <NoDataCell />;
-
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -326,6 +331,21 @@ const Note = () => {
     }
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={permissions?.note?.isDelete ? !selectedRecords.every((records) => records.canDelete) : true}
+          onClick={() => {
+            showConfirmBox(selectedRecords);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -333,129 +353,19 @@ const Note = () => {
       </div>
       <CustomContainer>
         {filter && (
-          <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'flex justify-between align-items-center gap-1 w-full'}>
-                <Autocomplete
-                  options={resourceOptions}
-                  getOptionLabel={(option) => option.optionLabel}
-                  className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
-                  value={resource}
-                  size="small"
-                  fullWidth
-                  onChange={(event, newValue) => {
-                    setResource(newValue);
-                    if (newValue) {
-                      //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
-                    } else {
-                      setFilter([]);
-                    }
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      fullWidth
-                      className="flex-grow md:max-w-[250px]"
-                      margin="none"
-                      size="small"
-                      {...params}
-                      label="Select Resource"
-                      variant="outlined"
-                    />
-                  )}
-                />
-                {resource && resourceData && (
-                  <Autocomplete
-                    disabled={loadingResources}
-                    options={resourceData}
-                    fullWidth
-                    className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
-                    getOptionLabel={(option: any) => option.optionLabel}
-                    getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
-                    value={selectedResourceData}
-                    onChange={(event, newValue) => {
-                      setSelectedResourceData(newValue);
-                      if (newValue?.optionValue) {
-                        setFilter((prevState) => [
-                          ...prevState,
-                          { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }
-                        ]);
-                      } else {
-                        setFilter([]);
-                      }
-                    }}
-                    size="small"
-                    renderInput={(params) => (
-                      <TextField
-                        fullWidth
-                        className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
-                        margin="none"
-                        size="small"
-                        {...params}
-                        label={`${resource.optionLabel}`}
-                        variant="outlined"
-                      />
-                    )}
-                  />
-                )}
-              </div>
-              <div className="flex flex-wrap gap-[8px] justify-end">
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
-                <div className="flex gap-[8px] flex-wrap items-center">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
-                    onClick={() => {
-                      setIsNew(true);
-                      setShowCreateDialog(true);
-                    }}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                  {permissions?.productionOrder?.isDelete && (
-                    <>
-                      <Button
-                        variant={'outlined'}
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        className={`new-dropdown-v1`}
-                        aria-controls="action-menu"
-                        endIcon={<ExpandMore />}
-                        disabled={selectedRecords?.length ? false : true}
-                      >
-                        Actions
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        <MenuItem
-                          disabled={permissions?.note?.isDelete ? !selectedRecords.every((records) => records.canDelete) : true}
-                          onClick={() => {
-                            showConfirmBox(selectedRecords);
-                            closeActions();
-                          }}
-                        >
-                          {`Delete (${selectedRecords?.length})`}
-                        </MenuItem>
-                      </Menu>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          <ListingPageHeader
+            leftSideContents={<LeftSideContents {...{ resourceOptions, resource, setResource, setFilter, resourceData, loadingResources, selectedResourceData, setSelectedResourceData}} />}
+            isActionButtonVisible={permissions?.productionOrder?.isDelete}
+            searchFilter={filter}
+            handleSearchFilter={handleChangeFilter}
+            actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+            actionMenuItems={<ActionMenuItems />}
+            addButtonOnclick={() => {
+              setIsNew(true);
+              setShowCreateDialog(true);
+            }}
+            isAddButtonVisible={true}
+          />
         )}
         {columns ? (
           <CustomReactTable
@@ -468,9 +378,11 @@ const Note = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={false}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
         {noteId !== undefined && <ActivityModelHandler activityType="note" activityId={noteId} onClose={() => setNoteId(undefined)} />}
       </CustomContainer>
       {isConfirmDialogVisible ? (
@@ -522,7 +434,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-          // noteData={noteData}
+            // noteData={noteData}
           />
         </Dialog>
       )}
@@ -531,3 +443,68 @@ const Note = () => {
 };
 
 export default Note;
+
+const LeftSideContents = ({ resourceOptions, resource, setResource, setFilter, resourceData, loadingResources, selectedResourceData, setSelectedResourceData}) => {
+  return (
+    <>
+      <Autocomplete
+        options={resourceOptions}
+        getOptionLabel={(option) => option.optionLabel}
+        className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
+        value={resource}
+        size="small"
+        fullWidth
+        onChange={(event, newValue) => {
+          setResource(newValue);
+          if (newValue) {
+            //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
+          } else {
+            setFilter([]);
+          }
+        }}
+        renderInput={(params) => (
+          <TextField
+            fullWidth
+            className="flex-grow md:max-w-[250px]"
+            margin="none"
+            size="small"
+            {...params}
+            label="Select Resource"
+            variant="outlined"
+          />
+        )}
+      />
+      {resource && resourceData && (
+        <Autocomplete
+          disabled={loadingResources}
+          options={resourceData}
+          fullWidth
+          className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+          getOptionLabel={(option: any) => option.optionLabel}
+          getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
+          value={selectedResourceData}
+          onChange={(event, newValue) => {
+            setSelectedResourceData(newValue);
+            if (newValue?.optionValue) {
+              setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
+            } else {
+              setFilter([]);
+            }
+          }}
+          size="small"
+          renderInput={(params) => (
+            <TextField
+              fullWidth
+              className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+              margin="none"
+              size="small"
+              {...params}
+              label={`${resource.optionLabel}`}
+              variant="outlined"
+            />
+          )}
+        />
+      )}
+    </>
+  );
+};

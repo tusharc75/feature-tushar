@@ -260,7 +260,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 warehouse: _inventory.inventoryDetail?.warehouse,
                 _id: _inventory.inventory,
                 isValid: _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved ? false : true,
-                canDelete: loadingTicketAssets?.find((e) => e.optionValue === _inventory.inventory) ? false : true
+                canDelete: loadingTicketAssets?.find((e) => e === _inventory.inventory) ? false : true
             });
         });
 

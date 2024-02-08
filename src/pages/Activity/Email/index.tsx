@@ -1,6 +1,6 @@
-import { Box, Button, Chip, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
+import { Box, Chip, IconButton, MenuItem, TextField } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
-import { Delete as DeleteIcon, ExpandMore } from '@material-ui/icons';
+import { Delete as DeleteIcon } from '@material-ui/icons';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { convertNodeToElement } from 'react-html-parser';
@@ -16,7 +16,6 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../../components/Helpers/MessageDialog';
 import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
 
-import { AddOutlined } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
@@ -25,7 +24,7 @@ import { ViewEmail } from 'src/components/Activity/Email/ViewEmail';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -50,7 +49,6 @@ const Email = () => {
   const { referenceType, referenceId } = parsed;
 
   const [filter, setFilter] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
@@ -98,7 +96,7 @@ const Email = () => {
     if (filter) {
       fetchData();
     }
-  }, [page, limit, filters, filter, sorting]);
+  }, [page, limit, filters, filter, sorting, search]);
 
   const fetchGridColumns = () => {
     const column = [
@@ -252,9 +250,9 @@ const Email = () => {
       });
   };
 
-  const handleChangeFilter = (value) => {
+  const handleChangeFilter = (e) => {
     if (page !== 0) dispatch({ type: 'pageChange', page: 0 });
-    setFilter(value);
+    dispatch({ type: 'search', search: e.target.value });
   };
 
   const getToEmailList = (toList) => {
@@ -293,14 +291,6 @@ const Email = () => {
       deepFilter = `${deepFilter}&search=${search}`;
     }
     return deepFilter;
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const showConfirmBox = (row) => {
@@ -366,133 +356,54 @@ const Email = () => {
     setOpenViewEmail(false);
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            showConfirmBox(null);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: routes.activityEmail.title }]} />
       </div>
-
       <CustomContainer>
         {filter && (
-          <div className="header-panel">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              <div className={'flex max-[751px]:flex-wrap align-items-center gap-2 w-full'}>
-                <Autocomplete
-                  fullWidth
-                  options={resourceOptions}
-                  getOptionLabel={(option) => option.optionLabel}
-                  value={resource}
-                  className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
-                  onChange={(event, newValue) => {
-                    setResource(newValue);
-                    if (newValue) {
-                      //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
-                    } else {
-                      setFilter([]);
-                    }
-                  }}
-                  size="small"
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
-                      margin="none"
-                      size="small"
-                      label="Select Resource"
-                      variant="outlined"
-                    />
-                  )}
-                />
-                {resource && resourceData && (
-                  <Autocomplete
-                    fullWidth
-                    disabled={loadingResources}
-                    options={resourceData}
-                    getOptionLabel={(option: any) => option.optionLabel}
-                    getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
-                    className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
-                    value={selectedResourceData}
-                    onChange={(event, newValue) => {
-                      setSelectedResourceData(newValue);
-                      if (newValue?.optionValue) {
-                        setFilter((prevState) => [
-                          ...prevState,
-                          { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }
-                        ]);
-                      } else {
-                        setFilter([]);
-                      }
-                    }}
-                    size="small"
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
-                        margin="none"
-                        size="small"
-                        label={`Select ${resource.optionLabel}`}
-                        variant="outlined"
-                      />
-                    )}
-                  />
-                )}
-              </div>
-              <div className="flex flex-wrap gap-[8px] justify-end items-center">
-                <SearchBox onChange={handleChangeFilter} value={search} size="small" />
-                <div className="flex gap-[8px] flex-wrap items-center">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
-                    onClick={() => {
-                      setOpen(true);
-                    }}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                  {permissions.email?.isDelete && (
-                    <>
-                      <Button
-                        variant={'outlined'}
-                        color="default"
-                        size="small"
-                        className={`new-dropdown-v1`}
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        endIcon={<ExpandMore />}
-                        disabled={selectedRecords?.length ? false : true}
-                      >
-                        Actions
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        <MenuItem
-                          onClick={() => {
-                            showConfirmBox(null);
-                            closeActions();
-                          }}
-                        >
-                          {`Delete (${selectedRecords?.length})`}
-                        </MenuItem>
-                      </Menu>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          <ListingPageHeader
+            leftSideContents={
+              <LeftSideContents
+                {...{
+                  resourceOptions,
+                  resource,
+                  setResource,
+                  setFilter,
+                  resourceData,
+                  loadingResources,
+                  selectedResourceData,
+                  setSelectedResourceData
+                }}
+              />
+            }
+            searchValue={search}
+            onSearch={handleChangeFilter}
+            isActionButtonVisible={permissions.email?.isDelete}
+            actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+            actionMenuItems={<ActionMenuItems />}
+            addButtonOnclick={() => {
+              setOpen(true);
+            }}
+            isAddButtonVisible={true}
+            setQueryString
+            synchronizeType
+          />
         )}
         {columns ? (
           <CustomReactTable
@@ -610,3 +521,75 @@ const Email = () => {
 };
 
 export default Email;
+
+const LeftSideContents = ({
+  resourceOptions,
+  resource,
+  setResource,
+  setFilter,
+  resourceData,
+  loadingResources,
+  selectedResourceData,
+  setSelectedResourceData
+}) => {
+  return (
+    <>
+      <Autocomplete
+        fullWidth
+        options={resourceOptions}
+        getOptionLabel={(option) => option.optionLabel}
+        value={resource}
+        className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
+        onChange={(event, newValue) => {
+          setResource(newValue);
+          if (newValue) {
+            //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
+          } else {
+            setFilter([]);
+          }
+        }}
+        size="small"
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
+            margin="none"
+            size="small"
+            label="Select Resource"
+            variant="outlined"
+          />
+        )}
+      />
+      {resource && resourceData && (
+        <Autocomplete
+          fullWidth
+          disabled={loadingResources}
+          options={resourceData}
+          getOptionLabel={(option: any) => option.optionLabel}
+          getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
+          className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+          value={selectedResourceData}
+          onChange={(event, newValue) => {
+            setSelectedResourceData(newValue);
+            if (newValue?.optionValue) {
+              setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
+            } else {
+              setFilter([]);
+            }
+          }}
+          size="small"
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+              margin="none"
+              size="small"
+              label={`Select ${resource.optionLabel}`}
+              variant="outlined"
+            />
+          )}
+        />
+      )}
+    </>
+  );
+};

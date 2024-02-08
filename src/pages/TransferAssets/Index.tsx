@@ -1,10 +1,7 @@
 import { Box, Chip } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -13,13 +10,14 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferAsset } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageTransferAsset from './ManageTransferAsset';
@@ -225,7 +223,6 @@ const TransferAsset = () => {
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
     const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
     if (referenceId && referenceType) {
       history.push(`?type=${value}&referenceType=${referenceType}&referenceId=${referenceId}`);
     } else {
@@ -254,42 +251,25 @@ const TransferAsset = () => {
           additionalParams={getQueryString(true)}
         />
       </div>
-      <div className="main-container">
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1 w-full'}>
-              <ToggleButtonGroup size="small" value={types[selectedType - 1].key} exclusive onChange={onTypeChange}>
-                {types.map((k, index) => {
-                  return (
-                    <ToggleButton value={k.key} key={index}>
-                      {k.key}
-                    </ToggleButton>
-                  );
-                })}
-              </ToggleButtonGroup>
-              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} size="small" value={search} />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.transferAsset?.isCreate && (
-                  <Button
-                    onClick={() => {
-                      setShowManageTransferAssetDialog({ open: true, isClone: false, idToClone: null });
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={'no-shadow'}
-                    startIcon={<AddIcon />}
-                  >
-                    Add
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+      <CustomContainer>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContents={
+            referenceType ? <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} /> : null
+          }
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={false}
+          addButtonOnclick={() => {
+            setShowManageTransferAssetDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.transferAsset?.isCreate}
+          setQueryString={false}
+        />
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -307,7 +287,7 @@ const TransferAsset = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-      </div>
+      </CustomContainer>
       {showManageTransferAssetDialog.open && (
         <ManageTransferAsset
           isClone={showManageTransferAssetDialog.isClone}

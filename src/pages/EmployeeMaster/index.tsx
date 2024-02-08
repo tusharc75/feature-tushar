@@ -18,6 +18,7 @@ import { employeeMaster, gridLoadingTimeout, prepareDataForGrid, sidebarResource
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 
 let searchTimeout;
 
@@ -39,7 +40,6 @@ const EmployeeMaster = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -187,7 +187,6 @@ const EmployeeMaster = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -196,12 +195,22 @@ const EmployeeMaster = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+ 
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
+          onClick={() => {
+            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
@@ -226,76 +235,25 @@ const EmployeeMaster = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.employeeMaster?.isCreate && (
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
-                    onClick={() => {
-                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                    }}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                {permissions?.employeeMaster?.isDelete && (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={`new-dropdown-v1`}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                      disabled={selectedRecords?.length ? false : true}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem
-                        disabled={
-                          !(
-                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                          )
-                        }
-                        onClick={() => {
-                          closeActions();
-                          // eslint-disable-next-line no-lone-blocks
-                          {
-                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                          }
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          // toggleButtonList
+          // onToggle
+          // selectedType
+          // setSelectedType
+          // leftSideContents
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={permissions?.employeeMaster?.isDelete}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems/>}
+          // addButtonProps
+          addButtonOnclick={() => {
+            setShowManageDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.employeeMaster?.isCreate}
+        />
+    
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
