@@ -1,12 +1,14 @@
-import { Box, Menu, MenuItem } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
+import { Box, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile } from 'react-device-detect';
+import moment from 'moment';
+import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -17,10 +19,6 @@ import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
 import { dateFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CreateNewDialog from './CreateNewDialog';
-import moment from 'moment';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CustomReactTable, { useTableReducer, gridFilterParser } from 'src/components/CustomReactTable';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ProductBuilder = () => {
   const renderedFrom = camelCase(routes?.productBuilder.title);
@@ -36,12 +34,10 @@ const ProductBuilder = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [okButtonLoading] = useState(false);
 
   const { state, dispatch } = useTableReducer();
-  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
-    state;
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const columns = [
     {
@@ -49,23 +45,26 @@ const ProductBuilder = () => {
       Header: 'Name',
       show: true,
       disabled: true,
-      Cell: ({ row }) => <Link className="link" to={`${routes.productBuilder.path}/${row?.original?.id}`}>
-        {row?.original?.name}
-      </Link>
+      Cell: ({ row }) => (
+        <Link className="link" to={`${routes.productBuilder.path}/${row?.original?.id}`}>
+          {row?.original?.name}
+        </Link>
+      )
     },
     {
       accessor: 'createdBy',
       Header: 'Created By',
       show: true,
       sortable: false,
-      Cell: ({ row }) => row.original?.createdByDate ? (
-        <h5 className="createBy" title={`${row.original?.createdByDate} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
-          {row.original?.createdByDate}
-          <span className="createdAtTime badge-date">{moment(row.original?.createdByDate)?.format(dateFormat)}</span>
-        </h5>
-      ) : (
-        <NoDataCell />
-      )
+      Cell: ({ row }) =>
+        row.original?.createdByDate ? (
+          <h5 className="createBy" title={`${row.original?.createdByDate} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
+            {row.original?.createdByDate}
+            <span className="createdAtTime badge-date">{moment(row.original?.createdByDate)?.format(dateFormat)}</span>
+          </h5>
+        ) : (
+          <NoDataCell />
+        )
     }
   ];
   //  Grid Variables - End
@@ -189,14 +188,6 @@ const ProductBuilder = () => {
     }
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const showConfirmBox = (row) => {
     if (row) {
       setShowDeleteConfirmBox(true);
@@ -213,68 +204,34 @@ const ProductBuilder = () => {
     }
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            showConfirmBox(null);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: routes.productBuilder.title }]} />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div></div>
-            <div className={'d-flex align-items-center gap-1'}>
-              <div className="flex flex-wrap gap-[8px]  justify-end w-full">
-                {permission?.isCreate && (
-                  <Button
-                    onClick={() => setIsCreate(true)}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={`no-shadow`}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                {permission?.isDelete && (
-                  <Button
-                    className={`new-dropdown-v1`}
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    disabled={selectedRecords.length > 0 ? false : true}
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
-                )}
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      showConfirmBox(null);
-                      closeActions();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          isActionButtonVisible={permission?.isDelete}
+          actionButtonProps={{ disabled: selectedRecords.length > 0 ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+          addButtonOnclick={() => setIsCreate(true)}
+          isAddButtonVisible={permission?.isCreate}
+        />
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

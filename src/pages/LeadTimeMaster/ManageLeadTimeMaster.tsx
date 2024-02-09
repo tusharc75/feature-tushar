@@ -269,7 +269,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                         borderColor="var(--common-border-color)"
                         width={'100%'}
                       >
-                        <Box p={1} bgcolor="grey.200">
+                        <Box p={1} bgcolor="var(--dark-secondary, grey.200)">
                           <Grid container xs={12}>
                             <Grid item xs={6}>
                               <Typography variant="body2">Lead Time Status</Typography>

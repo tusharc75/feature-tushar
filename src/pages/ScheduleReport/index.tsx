@@ -1,24 +1,23 @@
-import { Button, IconButton } from '@material-ui/core';
-import { isMobile } from 'react-device-detect';
+import MomentUtils from '@date-io/moment';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { camelCase, startCase } from 'lodash';
-import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import ManageScheduleReport from './ManageScheduleReport';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Box } from '@material-ui/core';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ScheduleReport = () => {
   const renderedFrom = 'schedule-report';
@@ -36,7 +35,6 @@ const ScheduleReport = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -190,7 +188,6 @@ const ScheduleReport = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -199,127 +196,83 @@ const ScheduleReport = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
-    <section className="main-container-v1">
-      <div className="headerbox-v1">
-        <CustomBreadCrumbs
-          routes={[
-            { title: 'Reports', path: '/reports' },
-            { title: 'Schedule Report', path: '' }
-          ]}
-        />
-      </div>
-      <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.scheduleReport?.isCreate && (
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
-                    onClick={() => {
-                      setShowManageDialog({ open: true, id: null });
-                    }}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                {permissions?.scheduleReport?.isDelete && (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={`new-dropdown-v1`}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                      disabled={selectedRecords?.length ? false : true}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-        {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={false}
-            showFilters={false}
-            resource={sidebarResource.scheduleReport}
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs
+            routes={[
+              { title: 'Reports', path: '/reports' },
+              { title: 'Schedule Report', path: '' }
+            ]}
           />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
+        </div>
+        <CustomContainer>
+          <ListingPageHeader
+            isActionButtonVisible={permissions?.scheduleReport?.isDelete}
+            actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
+            actionMenuItems={<ActionMenuItems/>}
+            addButtonOnclick={() => {
+              setShowManageDialog({ open: true, id: null });
+            }}
+            isAddButtonVisible={permissions?.scheduleReport?.isCreate}
+          />
+        
+          {columns ? (
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              showOnlyShowFilteredRecordSwitch={false}
+              showFilters={false}
+              resource={sidebarResource.scheduleReport}
+            />
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </CustomContainer>
+        {showDeleteConfirmBox && (
+          <ConfirmationDialog
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete ${routes?.scheduleReport?.title.toLowerCase()} ${deleteRecord?.scheduleName || ''} ?`}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
+            }}
+            okBtnLoading={isSubmitting}
+            onOk={handleDelete}
+          />
         )}
-      </CustomContainer>
-      {showDeleteConfirmBox && (
-        <ConfirmationDialog
-          open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.scheduleReport?.title.toLowerCase()} ${deleteRecord?.scheduleName || ''} ?`}
-          onClose={() => {
-            setDeleteRecord(null);
-            setShowDeleteConfirmBox(false);
-          }}
-          okBtnLoading={isSubmitting}
-          onOk={handleDelete}
-        />
-      )}
-      {showManageDialog.open && (
-        <ManageScheduleReport
-          id={showManageDialog.id}
-          handleClose={() => setShowManageDialog({ open: false, id: null })}
-          onSuccess={() => {
-            fetchData();
-            setShowManageDialog({ open: false, id: null });
-          }}
-        />
-      )}
-    </section>
+        {showManageDialog.open && (
+          <ManageScheduleReport
+            id={showManageDialog.id}
+            handleClose={() => setShowManageDialog({ open: false, id: null })}
+            onSuccess={() => {
+              fetchData();
+              setShowManageDialog({ open: false, id: null });
+            }}
+          />
+        )}
+      </section>
     </MuiPickersUtilsProvider>
   );
 };
