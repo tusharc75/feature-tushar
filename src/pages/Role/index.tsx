@@ -1,5 +1,5 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, Delete as DeleteIcon, ExpandMore } from '@material-ui/icons';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Delete as DeleteIcon } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
@@ -8,7 +8,7 @@ import CustomReactTable, { getStaticFields, useTableReducer } from 'src/componen
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -60,7 +60,6 @@ const Roles: FC = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
   const [showUpdateResourceDialog, setShowUpdateResourceDialog] = useState({ open: false, action: null });
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const columns = [
     {
@@ -315,15 +314,6 @@ const Roles: FC = () => {
     setShowUpdateResourceDialog({ open: true, action: props.action });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const disableDelete = selectedRecords.some((o) => rolePermissionArray.indexOf(o?.permission) >= 0);
 
   return (
     <>
@@ -383,102 +373,18 @@ const Roles: FC = () => {
           <CustomBreadCrumbs routes={[routes.role]} />
         </div>
         <CustomContainer>
-          <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
-              <div className="flex flex-wrap gap-[8px] justify-end">
-                <SearchBox onChange={handleSearch} value={search} size="small" />
-                <div className="flex gap-[8px] flex-wrap items-center">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
-                    disabled={!(permissions?.role?.isCreate && (selectedType === 1 || (selectedType === 2 && selectedEntity)))}
-                    onClick={() => {
-                      setIsOpen({ open: true, isClone: false, idToClone: null });
-                    }}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    className={`new-dropdown-v1`}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                    disabled={selectedRecords?.length === 0}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      disabled={!(permissions.role.isDelete && Boolean(!disableDelete))}
-                      onClick={() => {
-                        closeActions();
-                        showConfirmBox(null);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                    <MenuItem
-                      disabled={!permissions?.role?.isUpdate}
-                      onClick={() => {
-                        closeActions();
-                        userDialogOpen();
-                      }}
-                    >
-                      Assign users
-                    </MenuItem>
-                    <MenuItem
-                      disabled={
-                        permissions?.role?.isUpdate &&
-                        permissions?.role?.isDelete &&
-                        selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
-                          ? true
-                          : false
-                      }
-                      onClick={() => {
-                        closeActions();
-                        updateResourceOpen({ action: 'Assign' });
-                      }}
-                    >
-                      Assign Resource
-                    </MenuItem>
-                    <MenuItem
-                      disabled={
-                        permissions?.role?.isUpdate &&
-                        permissions?.role?.isDelete &&
-                        selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
-                          ? true
-                          : false
-                      }
-                      onClick={() => {
-                        closeActions();
-                        updateResourceOpen({ action: 'Remove' });
-                      }}
-                    >
-                      Remove Resource
-                    </MenuItem>
-                  </Menu>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ListingPageHeader
+            searchValue={search}
+            onSearch={handleSearch}
+            isActionButtonVisible={true}
+            actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+            actionMenuItems={<ActionMenuItems {...{ selectedRecords, showConfirmBox, permissions, userDialogOpen, updateResourceOpen }} />}
+            addButtonProps={{ disabled: !(permissions?.role?.isCreate && (selectedType === 1 || (selectedType === 2 && selectedEntity))) }}
+            addButtonOnclick={() => {
+              setIsOpen({ open: true, isClone: false, idToClone: null });
+            }}
+            isAddButtonVisible={true}
+          />
 
           {columns ? (
             <CustomReactTable
@@ -523,3 +429,55 @@ const Roles: FC = () => {
 };
 
 export default Roles;
+
+const ActionMenuItems = ({ selectedRecords, showConfirmBox, permissions, userDialogOpen, updateResourceOpen }) => {
+  const disableDelete = selectedRecords.some((o) => rolePermissionArray.indexOf(o?.permission) >= 0);
+  return (
+    <>
+      <MenuItem
+        disabled={!(permissions.role.isDelete && Boolean(!disableDelete))}
+        onClick={() => {
+          showConfirmBox(null);
+        }}
+      >
+        Delete
+      </MenuItem>
+      <MenuItem
+        disabled={!permissions?.role?.isUpdate}
+        onClick={() => {
+          userDialogOpen();
+        }}
+      >
+        Assign users
+      </MenuItem>
+      <MenuItem
+        disabled={
+          permissions?.role?.isUpdate &&
+          permissions?.role?.isDelete &&
+          selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+            ? true
+            : false
+        }
+        onClick={() => {
+          updateResourceOpen({ action: 'Assign' });
+        }}
+      >
+        Assign Resource
+      </MenuItem>
+      <MenuItem
+        disabled={
+          permissions?.role?.isUpdate &&
+          permissions?.role?.isDelete &&
+          selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+            ? true
+            : false
+        }
+        onClick={() => {
+          updateResourceOpen({ action: 'Remove' });
+        }}
+      >
+        Remove Resource
+      </MenuItem>
+    </>
+  );
+};

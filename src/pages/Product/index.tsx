@@ -1,19 +1,18 @@
-import { Box, Menu, MenuItem } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
+import { Box, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { RiBillLine } from 'react-icons/ri';
 import { useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { childDisable, cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -22,7 +21,6 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
-import SearchBox from '../../components/Helpers/SearchBox';
 import CreateProduct from '../../components/Product/CreateProduct';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
 import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
@@ -39,7 +37,6 @@ const Product = () => {
   const [isClone, setIsClone] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [isSubmitting, setSubmitting] = useState(false);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [columns, setColumns] = useState(null);
@@ -114,7 +111,12 @@ const Product = () => {
         } else {
           setIsProductType(false);
         }
-        const newColumns = generateColumns(renderedFrom, data?.filter(d => !ignoreField.includes(d?.fieldData.fieldName)), routes.productDetail.path, true);
+        const newColumns = generateColumns(
+          renderedFrom,
+          data?.filter((d) => !ignoreField.includes(d?.fieldData.fieldName)),
+          routes.productDetail.path,
+          true
+        );
         setProductColumns([...newColumns]);
       });
   };
@@ -212,7 +214,6 @@ const Product = () => {
       });
   };
 
-
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     if (selectedEntity) {
@@ -276,7 +277,6 @@ const Product = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -287,13 +287,7 @@ const Product = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   const handleSubmit = (ids: string[]) => {
     setSubmitting(true);
@@ -358,8 +352,9 @@ const Product = () => {
             },
             {
               title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-                }`,
+              api: `${product.api}/unknown/service-master/template?export=true${
+                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+              }`,
               type: 'export'
             },
             {
@@ -374,8 +369,9 @@ const Product = () => {
             },
             {
               title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-                }`,
+              api: `${product.api}/unknown/package/template?export=true${
+                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+              }`,
               type: 'export'
             },
             {
@@ -386,156 +382,23 @@ const Product = () => {
           ]}
         />
       </div>
-      <div className="main-container">
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'d-flex flex-wrap align-items-center gap-2'}>
-              {permissions?.productCategory?.isRead && (
-                <div className="w-full md:w-auto">
-                  <Autocomplete
-                    className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
-                    options={productCategoryList}
-                    getOptionLabel={(option: any) => (option ? option.name : '')}
-                    size="small"
-                    getOptionSelected={(option: any, val) => option._id === val}
-                    value={
-                      productCategoryList.filter((data) => data._id === productCategory).length
-                        ? productCategoryList.filter((data) => data._id === productCategory)[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setProductCategory(val && val._id ? val._id : '');
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        margin="none"
-                        size="small"
-                        name="productCategory"
-                        label="Product Category"
-                        variant="outlined"
-                        fullWidth
-                      />
-                    )}
-                  />
-                </div>
-              )}
-
-              {isProductTemplate && (
-                <Autocomplete
-                  className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
-                  options={productTemplateList}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
-                  value={
-                    productTemplateList.filter((data) => data.optionValue === productTemplate).length
-                      ? productTemplateList.filter((data) => data.optionValue === productTemplate)[0]
-                      : ''
-                  }
-                  onChange={(e, val) => {
-                    setProductTemplate(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} margin="none" size="small" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
-                  )}
-                />
-              )}
-              {isProductType && (
-                <Autocomplete
-                  className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
-                  options={productTypeList}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
-                  value={
-                    productTypeList.filter((data) => data.optionValue === productType).length
-                      ? productTypeList.filter((data) => data.optionValue === productType)[0]
-                      : ''
-                  }
-                  onChange={(e, val) => {
-                    setProductType(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} margin="none" size={'small'} name="productType" label="Product Type" variant="outlined" fullWidth />
-                  )}
-                />
-              )}
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                width="242px"
-                size="small"
-                value={search}
-                style={isMobile ? { flex: 1 } : {}}
+      <CustomContainer>
+        <ListingPageHeader
+          leftSideContents={
+            <LeftSideContent
+              {...{permissions,productCategoryList,productCategory,setProductCategory,isProductTemplate,productTemplateList,productTemplate,setProductTemplate,isProductType,productTypeList,productType,setProductType}}
               />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.product?.isCreate && (
-                  <Button
-                    onClick={() => {
-                      setOpen(true);
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={`no-shadow`}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                <HtmlTooltip title="Please select some products">
-                  <span>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                  </span>
-                </HtmlTooltip>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                    onClick={() => {
-                      closeActions();
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords.length})`}
-                  </MenuItem>
-                  {permissions?.repairType?.isRead && (
-                    <MenuItem
-                      disabled={!permissions?.product.isUpdate && !permissions?.hasOwnProperty('repairType')}
-                      onClick={() => {
-                        setOpenAddDialog(true);
-                        closeActions();
-                      }}
-                    >
-                      {`Assign ${routes?.repairType?.title} (${selectedRecords.length})`}
-                    </MenuItem>
-                  )}
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+          }
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          actionMenuItems={<ActionMenuItems {...{ permissions, selectedRecords, setOpenAddDialog, setShowDeleteConfirmBox }} />}
+          addButtonOnclick={() => {
+            setOpen(true);
+          }}
+          isAddButtonVisible={permissions?.product?.isCreate}
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -553,7 +416,7 @@ const Product = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-      </div>
+      </CustomContainer>
       {open && (
         <CreateProduct
           isClone={isClone}
@@ -596,3 +459,108 @@ const Product = () => {
 };
 
 export default Product;
+
+const LeftSideContent = ({
+  permissions,
+  productCategoryList,
+  productCategory,
+  setProductCategory,
+  isProductTemplate,
+  productTemplateList,
+  productTemplate,
+  setProductTemplate,
+  isProductType,
+  productTypeList,
+  productType,
+  setProductType
+}) => {
+  return (
+    <>
+      {permissions?.productCategory?.isRead ? (
+        <div className="w-full md:w-auto">
+          <Autocomplete
+            className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
+            options={productCategoryList}
+            getOptionLabel={(option: any) => (option ? option.name : '')}
+            size="small"
+            getOptionSelected={(option: any, val) => option._id === val}
+            value={
+              productCategoryList.filter((data) => data._id === productCategory).length
+                ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                : ''
+            }
+            onChange={(e, val) => {
+              setProductCategory(val && val._id ? val._id : '');
+            }}
+            renderInput={(params) => (
+              <TextField {...params} margin="none" size="small" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+            )}
+          />
+        </div>
+      ) : null}
+      {isProductTemplate && (
+        <Autocomplete
+          className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
+          options={productTemplateList}
+          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+          getOptionSelected={(option: any, val) => option.optionValue === val}
+          value={
+            productTemplateList.filter((data) => data.optionValue === productTemplate).length
+              ? productTemplateList.filter((data) => data.optionValue === productTemplate)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            setProductTemplate(val && val.optionValue ? val.optionValue : '');
+          }}
+          renderInput={(params) => (
+            <TextField {...params} margin="none" size="small" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
+          )}
+        />
+      )}
+      {isProductType && (
+        <Autocomplete
+          className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
+          options={productTypeList}
+          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+          getOptionSelected={(option: any, val) => option.optionValue === val}
+          value={
+            productTypeList.filter((data) => data.optionValue === productType).length
+              ? productTypeList.filter((data) => data.optionValue === productType)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            setProductType(val && val.optionValue ? val.optionValue : '');
+          }}
+          renderInput={(params) => (
+            <TextField {...params} margin="none" size={'small'} name="productType" label="Product Type" variant="outlined" fullWidth />
+          )}
+        />
+      )}
+    </>
+  );
+};
+
+const ActionMenuItems = ({ permissions, selectedRecords, setOpenAddDialog, setShowDeleteConfirmBox }) => {
+  return (
+    <>
+      <MenuItem
+        disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+        onClick={() => {
+          setShowDeleteConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords.length})`}
+      </MenuItem>
+      {permissions?.repairType?.isRead && (
+        <MenuItem
+          disabled={!permissions?.product.isUpdate && !permissions?.hasOwnProperty('repairType')}
+          onClick={() => {
+            setOpenAddDialog(true);
+          }}
+        >
+          {`Assign ${routes?.repairType?.title} (${selectedRecords.length})`}
+        </MenuItem>
+      )}
+    </>
+  );
+};
