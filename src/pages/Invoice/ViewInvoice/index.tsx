@@ -276,7 +276,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     axiosInstance()
       .patch(api, {
         invoice: invoiceData?._id,
-        comments: data,
+        comment: data,
         ...(resource === sidebarResource.fieldTicket && {
           resource: sidebarResource.fieldTicket
         })
