@@ -315,7 +315,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
         hideDuration: null,
         open: true,
         type: 'info',
-        message: `Uploading ${module}, Please wait...`
+        message: `Uploading, Please wait...`
       });
       const file = event.target.files[0];
 
