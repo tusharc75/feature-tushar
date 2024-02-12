@@ -12,7 +12,7 @@ import moment from 'moment';
 import { dateTimeFormat24Hours } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 
-const downloadIconHTML = `<div>
+const downloadIconHTML = `<div title="Download">
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" strokeLinejoin="round" class="ico-download">
 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
 <polyline points="7 10 12 15 17 10"></polyline>
