@@ -885,7 +885,7 @@ export default function AccountDetailPage(props) {
                 <div className="single-form-v1">
                   <div className="form-head-v1 relative">
                     <h3 className="form-label-style-v1">Related Contacts & Leads</h3>
-                    {permissions[contactResource].isCreate && (
+                    {permissions[contactResource]?.isCreate && (
                       <span style={{ position: 'absolute', right: 15 }}>
                         <HtmlTooltip title={`Add ${routes[contactResource]?.title || ''}`} placement="top">
                           <IconButton
