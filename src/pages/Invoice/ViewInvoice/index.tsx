@@ -5,7 +5,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Grid, Dialog, IconButton, Tabs, Tab } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -112,11 +112,11 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                   <IconButton
                     size="small"
                     onClick={() => {
-                      if (row.original.type === 'service') {
+                      if (row.original.type === MATERIAL_TYPE.service) {
                         window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      } else if (row.original.type === 'product') {
+                      } else if (row.original.type === MATERIAL_TYPE.product) {
                         window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      } else if (row.original.type === 'serializedAsset') {
+                      } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                         window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                       } else {
                         window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -162,22 +162,22 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'product'
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
         ? parent.productDetail?.productName
-        : parent.type === 'package'
+        : parent.type === MATERIAL_TYPE.package
           ? parent.packageDetail?.packageName
-          : parent.type === 'serializedAsset'
+          : parent.type === MATERIAL_TYPE.serializedAsset
             ? parent.serializedAssetDetail?.assetNumber
             : parent.serviceDetail?.serviceName
         }`;
       parent.description =
-        parent.type === 'service'
+        parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
+          : parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
+            : parent.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
+              : parent.type === MATERIAL_TYPE.serializedAsset
                 ? parent.serializedAssetDetail?.product?.productDescription || ''
                 : '';
       parent.subRows = generateNestedData(data.material, parent);
@@ -201,22 +201,22 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === 'product'
+      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
         ? _subRow?.productDetail?.productName
-        : _subRow?.type === 'package'
+        : _subRow?.type === MATERIAL_TYPE.package
           ? _subRow?.packageDetail?.packageName
-          : _subRow?.type === 'serializedAsset'
+          : _subRow?.type === MATERIAL_TYPE.serializedAsset
             ? _subRow?.serializedAssetDetail?.assetNumber
             : _subRow?.serviceDetail?.serviceName
         }`;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
-              : _subRow.type === 'serializedAsset'
+              : _subRow.type === MATERIAL_TYPE.serializedAsset
                 ? _subRow.serializedAssetDetail?.product?.productDescription || ''
                 : '';
       _subRow.subRows = generateNestedData(material, _subRow);

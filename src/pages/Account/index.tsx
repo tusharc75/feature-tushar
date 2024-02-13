@@ -1,15 +1,12 @@
-import { Box, Button, Chip, IconButton, Menu, MenuItem, MenuList } from '@material-ui/core';
+import { Box, Button, Chip, IconButton, MenuItem, MenuList } from '@material-ui/core';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import CancelIcon from '@material-ui/icons/Cancel';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
@@ -19,6 +16,7 @@ import { HiBadgeCheck } from 'react-icons/hi';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ListingPageHeader from 'src/components/ListingPageHeader';
 import { cloneDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -33,13 +31,11 @@ import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import SearchBox from '../../components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageAccountDialog from './ManageAccount/index';
 import WarhouseList from './Warehouse/WarhouseList';
-import accountClass from './account.module.scss';
 
 const options = ['All', 'Approved', 'Disapproved'];
 
@@ -71,7 +67,6 @@ export default function Account(props) {
   let { type }: any = queryString.parse(history.location.search);
 
   const [cloneId, setCloneId] = useState('');
-  const [anchorEl, setAnchorEl] = useState(null);
   const [menuType, setMenuType] = useState(options[0]);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
@@ -102,9 +97,8 @@ export default function Account(props) {
     approveAccount: false
   });
 
-  const [open, setOpen] = React.useState(false);
   const [entities, setEntities] = useState([]);
-  const anchorRef = React.useRef<HTMLDivElement>(null);
+
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [accountNameForClone, setAccountNameForClone] = useState('');
   const [columns, setColumns] = useState(null);
@@ -356,24 +350,6 @@ export default function Account(props) {
     setMenuType(options[selectedOption]);
   };
 
-  const handleMenuItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
-    setSelectedIndex(index);
-    menuOptionSelection(index);
-    setOpen(false);
-  };
-
-  const handleToggle = () => {
-    setOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleClose = (event: React.MouseEvent<Document, MouseEvent>) => {
-    if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
-      return;
-    }
-
-    setOpen(false);
-  };
-
   const fetchAccounts = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
@@ -416,15 +392,6 @@ export default function Account(props) {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  // ****** ACTIONS BUTTON STUFF *********
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const clickCreateNew = () => {
@@ -519,9 +486,6 @@ export default function Account(props) {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
-    history.push(`?type=${value}`);
   };
 
   const approveDisapproveAccounts = () => {
@@ -600,203 +564,37 @@ export default function Account(props) {
         />
       </div>
       <CustomContainer>
-        <div className={`${accountClass['account_header_inner_container']}`}>
-          <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'flex justify-between align-items-center gap-1 w-full'}>
-                <div>
-                  <ToggleButtonGroup
-                    size="small"
-                    className="align-items-center gap-1"
-                    value={types[selectedType - 1].key}
-                    exclusive
-                    onChange={onTypeChange}
-                  >
-                    {types.map((k, index) => {
-                      return (
-                        <ToggleButton value={k.key} key={index}>
-                          {k.key}
-                        </ToggleButton>
-                      );
-                    })}
-                  </ToggleButtonGroup>
-                  <ButtonGroup
-                    id="approveDisapprove"
-                    size="small"
-                    className={'accountActions'}
-                    variant="outlined"
-                    color="primary"
-                    ref={anchorRef}
-                    aria-label="small outlined button group"
-                  >
-                    <Button style={{ marginLeft: '10px' }}>{options[selectedIndex]}</Button>
-                    <Button
-                      color="primary"
-                      size="small"
-                      aria-controls={open ? 'split-button-menu' : undefined}
-                      aria-expanded={open ? 'true' : undefined}
-                      aria-label="select merge strategy"
-                      aria-haspopup="menu"
-                      onClick={handleToggle}
-                      className="all-button"
-                    >
-                      <ArrowDropDownIcon className="all-button-sub-icon" />
-                    </Button>
-                  </ButtonGroup>
-                  <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
-                    {({ TransitionProps, placement }) => (
-                      <Grow
-                        {...TransitionProps}
-                        style={{
-                          transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
-                        }}
-                      >
-                        <Paper>
-                          <ClickAwayListener onClickAway={handleClose}>
-                            <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
-                              {options.map((option, index) => (
-                                <MenuItem key={option} selected={index === selectedIndex} onClick={(event) => handleMenuItemClick(event, index)}>
-                                  {option}
-                                </MenuItem>
-                              ))}
-                            </MenuList>
-                          </ClickAwayListener>
-                        </Paper>
-                      </Grow>
-                    )}
-                  </Popper>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-[8px]  justify-end">
-                <SearchBox onChange={handleSearch} value={search} size="small" />
-                <div className="flex gap-[8px] flex-wrap items-center">
-                  <Button
-                    disabled={!accountPermissions.isCreate}
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
-                    onClick={clickCreateNew}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    disabled={selectedRecords?.length === 0}
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    className={`new-dropdown-v1`}
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    {accountPermissions?.isUpdate && accountPermissions?.approveAccount && (
-                      <MenuItem
-                        disabled={selectedRecords?.filter((d) => !d.approved).length === 0}
-                        onClick={() => {
-                          closeActions();
-                          setMultipleApproveDisapproveAccount({
-                            show: true,
-                            approved: true,
-                            selectedRecords: selectedRecords?.filter((d) => !d.approved).length
-                          });
-                        }}
-                      >
-                        Approve Accounts &nbsp; <Chip size="small" label={selectedRecords?.filter((d) => !d.approved).length} />
-                      </MenuItem>
-                    )}
-                    {accountPermissions?.isUpdate && accountPermissions?.approveAccount && (
-                      <MenuItem
-                        disabled={selectedRecords?.filter((d) => d.approved).length === 0}
-                        onClick={() => {
-                          closeActions();
-                          setMultipleApproveDisapproveAccount({
-                            show: true,
-                            approved: false,
-                            selectedRecords: selectedRecords?.filter((d) => d.approved).length
-                          });
-                        }}
-                      >
-                        Disapprove Accounts &nbsp; <Chip size="small" label={selectedRecords?.filter((d) => d.approved).length} />
-                      </MenuItem>
-                    )}
-                    {accountPermissions?.isDelete && (
-                      <MenuItem
-                        disabled={selectedRecords?.length === 0}
-                        onClick={() => {
-                          if (selectedRecords?.some((d) => d.canDelete === false)) {
-                            closeActions();
-                            setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
-                          } else {
-                            closeActions();
-                            setShowDeleteConfirmBox(true);
-                          }
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    )}
-                    {accountPermissions?.isUpdate && accountResource === 'customerAccount' && permissions?.productInventory && (
-                      <MenuItem
-                        disabled={selectedRecords?.length === 0}
-                        onClick={() => {
-                          setOpenAddPlantsDialog(true);
-                          closeActions();
-                        }}
-                      >
-                        Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords?.length} />
-                      </MenuItem>
-                    )}
-                    {accountPermissions?.isUpdate && (
-                      <MenuItem
-                        disabled={selectedRecords?.length === 0}
-                        onClick={() => {
-                          if (selectedRecords?.some((d) => d?.isAllowedToUpdate === false)) {
-                            closeActions();
-                            setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                          } else {
-                            closeActions();
-                            if (selectedRecords?.length) {
-                              let entities = [];
-                              selectedRecords?.map((current) => {
-                                if (current?.entityId) {
-                                  entities = [...entities, current?.entityId];
-                                }
-                                if (current?.restentity) {
-                                  let restEntities = current?.restentity.map((o) => o.optionValue);
-                                  entities = [...entities, ...restEntities];
-                                }
-                              });
-                              setEntities([...entities]);
-                            }
-                            setShowEntityDialog(true);
-                          }
-                        }}
-                      >
-                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords?.length} />
-                      </MenuItem>
-                    )}
-                  </Menu>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContents={<LeftSideContents {...{ selectedIndex, setSelectedIndex, menuOptionSelection }} />}
+          searchValue={search}
+          onSearch={handleSearch}
+          rightSideContents
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+          actionMenuItems={
+            <ActionMenuItems
+              {...{
+                accountPermissions,
+                selectedRecords,
+                setMultipleApproveDisapproveAccount,
+                setShowDeleteWarningConfirmBox,
+                setShowDeleteConfirmBox,
+                accountResource,
+                permissions,
+                setOpenAddPlantsDialog,
+                setEntities,
+                setShowEntityDialog
+              }}
+            />
+          }
+          addButtonProps={{ disabled: !accountPermissions.isCreate }}
+          addButtonOnclick={clickCreateNew}
+          isAddButtonVisible={true}
+        />
 
         {columns ? (
           <CustomReactTable
@@ -943,3 +741,173 @@ export default function Account(props) {
     </section>
   );
 }
+
+const LeftSideContents = ({ selectedIndex, setSelectedIndex, menuOptionSelection }) => {
+  const anchorRef = React.useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+
+  const handleToggle = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleMenuItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
+    setSelectedIndex(index);
+    menuOptionSelection(index);
+    setOpen(false);
+  };
+
+  const handleClose = (event: React.MouseEvent<Document, MouseEvent>) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
+      return;
+    }
+    setOpen(false);
+  };
+
+  return (
+    <>
+      <ButtonGroup
+        id="approveDisapprove"
+        size="small"
+        className={'accountActions'}
+        variant="outlined"
+        color="primary"
+        ref={anchorRef}
+        aria-label="small outlined button group"
+      >
+        <Button style={{ marginLeft: '10px' }}>{options[selectedIndex]}</Button>
+        <Button
+          color="primary"
+          size="small"
+          aria-controls={open ? 'split-button-menu' : undefined}
+          aria-expanded={open ? 'true' : undefined}
+          aria-label="select merge strategy"
+          aria-haspopup="menu"
+          onClick={handleToggle}
+          className="all-button"
+        >
+          <ArrowDropDownIcon className="all-button-sub-icon" />
+        </Button>
+      </ButtonGroup>
+      <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
+        {({ TransitionProps, placement }) => (
+          <Grow
+            {...TransitionProps}
+            style={{
+              transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
+            }}
+          >
+            <Paper>
+              <ClickAwayListener onClickAway={handleClose}>
+                <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
+                  {options.map((option, index) => (
+                    <MenuItem key={option} selected={index === selectedIndex} onClick={(event) => handleMenuItemClick(event, index)}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              </ClickAwayListener>
+            </Paper>
+          </Grow>
+        )}
+      </Popper>
+    </>
+  );
+};
+
+const ActionMenuItems = ({
+  accountPermissions,
+  selectedRecords,
+  setMultipleApproveDisapproveAccount,
+  setShowDeleteWarningConfirmBox,
+  setShowDeleteConfirmBox,
+  accountResource,
+  permissions,
+  setOpenAddPlantsDialog,
+  setEntities,
+  setShowEntityDialog
+}) => {
+  return (
+    <>
+      {accountPermissions?.isUpdate && accountPermissions?.approveAccount && (
+        <MenuItem
+          disabled={selectedRecords?.filter((d) => !d.approved).length === 0}
+          onClick={() => {
+            setMultipleApproveDisapproveAccount({
+              show: true,
+              approved: true,
+              selectedRecords: selectedRecords?.filter((d) => !d.approved).length
+            });
+          }}
+        >
+          Approve Accounts &nbsp; <Chip size="small" label={selectedRecords?.filter((d) => !d.approved).length} />
+        </MenuItem>
+      )}
+      {accountPermissions?.isUpdate && accountPermissions?.approveAccount && (
+        <MenuItem
+          disabled={selectedRecords?.filter((d) => d.approved).length === 0}
+          onClick={() => {
+            setMultipleApproveDisapproveAccount({
+              show: true,
+              approved: false,
+              selectedRecords: selectedRecords?.filter((d) => d.approved).length
+            });
+          }}
+        >
+          Disapprove Accounts &nbsp; <Chip size="small" label={selectedRecords?.filter((d) => d.approved).length} />
+        </MenuItem>
+      )}
+      {accountPermissions?.isDelete && (
+        <MenuItem
+          disabled={selectedRecords?.length === 0}
+          onClick={() => {
+            if (selectedRecords?.some((d) => d.canDelete === false)) {
+              setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
+            } else {
+              setShowDeleteConfirmBox(true);
+            }
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      )}
+      {accountPermissions?.isUpdate && accountResource === 'customerAccount' && permissions?.productInventory && (
+        <MenuItem
+          disabled={selectedRecords?.length === 0}
+          onClick={() => {
+            setOpenAddPlantsDialog(true);
+          }}
+        >
+          Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords?.length} />
+        </MenuItem>
+      )}
+      {accountPermissions?.isUpdate && (
+        <MenuItem
+          disabled={selectedRecords?.length === 0}
+          onClick={() => {
+            if (selectedRecords?.some((d) => d?.isAllowedToUpdate === false)) {
+              setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+            } else {
+              if (selectedRecords?.length) {
+                let entities = [];
+                selectedRecords?.map((current) => {
+                  if (current?.entityId) {
+                    entities = [...entities, current?.entityId];
+                  }
+                  if (current?.restentity) {
+                    let restEntities = current?.restentity.map((o) => o.optionValue);
+                    entities = [...entities, ...restEntities];
+                  }
+                });
+                setEntities([...entities]);
+              }
+              setShowEntityDialog(true);
+            }
+          }}
+        >
+          Assign Entity &nbsp; <Chip size="small" label={selectedRecords?.length} />
+        </MenuItem>
+      )}
+    </>
+  );
+};
+
