@@ -1,33 +1,31 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, MenuItem, Menu } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import { useData } from 'src/StateProvider/Provider';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { purchaseOrder, sidebarResource } from 'src/constants/helpers';
-import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
-import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { ExpandMore } from '@material-ui/icons';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { fetch_po_cost_fields, fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
-import InventoryStatesDialog from './InventoryStatesDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import CostDialog from './CostDialog';
-import ServiceDialog from './ServiceDialog';
-import AddIcon from '@material-ui/icons/Add';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { isEmpty, map, uniq } from 'lodash';
-import EditIcon from '@material-ui/icons/Edit';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { fetchTaxRate } from './helper';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { purchaseOrder, sidebarResource } from 'src/constants/helpers';
+import { fetch_po_cost_fields, fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
+import CostDialog from './CostDialog';
+import InventoryStatesDialog from './InventoryStatesDialog';
+import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
+import ServiceDialog from './ServiceDialog';
+import { fetchTaxRate } from './helper';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -46,8 +44,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
+
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [columns, setColumns] = useState(null);
   const [productFields, setProductFields] = useState([]);
@@ -320,8 +317,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         item.type === 'Product'
           ? item?.productDetail?.productDescription
           : item.type === 'Service'
-            ? item?.serviceDetail?.serviceDescription
-            : item?.description;
+          ? item?.serviceDetail?.serviceDescription
+          : item?.description;
       res.materialId = item.type === 'Product' ? item?.productDetail?._id : item.type === 'Service' ? item?.serviceDetail?._id : item?._id;
       res.productNumber = item.productDetail?.productNumber;
       res.serializedProduct = item.productDetail?.serializedProduct;
@@ -360,22 +357,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     checkReceivedProduct(data);
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
-  };
-
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
   };
 
   const handleAddProduct = async (rows) => {
@@ -600,155 +581,126 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     }
   };
 
+  const AddButtonMenuItems = () => {
+    return (
+      <>
+        {permissions?.product?.isRead && (
+          <MenuItem
+            onClick={() => {
+              setAddProductDialog(true);
+            }}
+          >
+            Add Existing Products
+          </MenuItem>
+        )}
+        {permissions?.serviceMaster?.isRead && user?.user?.brandPolicy?.purchaseOrderAddService && (
+          <MenuItem
+            onClick={() => {
+              setAddServiceDialog(true);
+            }}
+          >
+            Add Existing Services
+          </MenuItem>
+        )}
+        <MenuItem
+          onClick={() => {
+            setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
+          }}
+        >
+          Add Manual Entry
+        </MenuItem>
+      </>
+    );
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={
+            selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
+            uniq(
+              map(
+                selectedRecords?.filter((e) => !e.hideSelection),
+                'type'
+              )
+            )?.length === 1
+              ? false
+              : true
+          }
+          onClick={() => {
+            setIsBulkEdit(true);
+            const typeUniq: any = uniq(
+              map(
+                selectedRecords?.filter((e) => !e.hideSelection),
+                'type'
+              )
+            );
+            if (typeUniq[0] === 'Product') {
+              setShowProductDialog({ open: true, data: null, showSaveAndNext: false });
+            } else if (typeUniq[0] === 'Service') {
+              setShowServiceDialog({ open: true, data: null, showSaveAndNext: false });
+            } else {
+              setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
+            }
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
+        {permissions?.purchaseOrder?.isDelete && (
+          <MenuItem
+            onClick={() => {
+              setShowDeleteConfirmBox(true);
+              setDeletePurchaseOrderItem(selectedRecords?.filter((e) => !e.hideSelection));
+            }}
+          >
+            Delete
+          </MenuItem>
+        )}
+      </>
+    );
+  };
+
+  const previewDownloadProps = {
+    fileName: `${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`,
+    resource: sidebarResource.purchaseOrder,
+    referenceId: purchaseOrderData?._id,
+    columns: columns?.map((e) => {
+      return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor };
+    }),
+    isSendEmail: true,
+    button1Title: 'Ordered',
+    button2Title: 'Received',
+    defaultColumns: [
+      'index',
+      'type',
+      'detail',
+      'description',
+      'qty',
+      `price_${purchaseOrderData?.currency?.toLowerCase()}`,
+      `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
+      `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
+      `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
+    ]
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" alignItems="center">
-            <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              {permissions?.product?.isRead && (
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions();
-                    setAddProductDialog(true);
-                  }}
-                >
-                  Add Existing Products
-                </MenuItem>
-              )}
-              {permissions?.serviceMaster?.isRead && user?.user?.brandPolicy?.purchaseOrderAddService && (
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions();
-                    setAddServiceDialog(true);
-                  }}
-                >
-                  Add Existing Services
-                </MenuItem>
-              )}
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
-                }}
-              >
-                Add Manual Entry
-              </MenuItem>
-            </Menu>
-          </Box>
-          <div className="d-flex gap-2">
-            <PreviewDownload
-              fileName={`${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`}
-              resource={sidebarResource.purchaseOrder}
-              referenceId={purchaseOrderData?._id}
-              columns={columns?.map((e) => {
-                return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor };
-              })}
-              isSendEmail={true}
-              button1Title="Ordered"
-              button2Title="Received"
-              defaultColumns={[
-                'index',
-                'type',
-                'detail',
-                'description',
-                'qty',
-                `price_${purchaseOrderData?.currency?.toLowerCase()}`,
-                `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
-                `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
-                `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
-              ]}
-            />
-            <HtmlTooltip title="Please select some product">
-              <Button
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={openActions}
-                disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length ? false : true}
-                aria-controls="action-menu"
-                className="new-dropdown-v1"
-              >
-                {'Actions'}
-                <ExpandMore fontSize="small" />
-              </Button>
-            </HtmlTooltip>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                disabled={
-                  selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
-                    uniq(
-                      map(
-                        selectedRecords?.filter((e) => !e.hideSelection),
-                        'type'
-                      )
-                    )?.length === 1
-                    ? false
-                    : true
-                }
-                onClick={() => {
-                  closeActions();
-                  setIsBulkEdit(true);
-                  const typeUniq: any = uniq(
-                    map(
-                      selectedRecords?.filter((e) => !e.hideSelection),
-                      'type'
-                    )
-                  );
-                  if (typeUniq[0] === 'Product') {
-                    setShowProductDialog({ open: true, data: null, showSaveAndNext: false });
-                  } else if (typeUniq[0] === 'Service') {
-                    setShowServiceDialog({ open: true, data: null, showSaveAndNext: false });
-                  } else {
-                    setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
-                  }
-                }}
-              >
-                Bulk Edit
-              </MenuItem>
-              {permissions?.purchaseOrder?.isDelete && (
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setShowDeleteConfirmBox(true);
-                    setDeletePurchaseOrderItem(selectedRecords?.filter((e) => !e.hideSelection));
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              )}
-            </Menu>
-          </div>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={<AddButtonMenuItems />}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={<ActionMenuItems />}
+            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length ? false : true }}
+            previewDownloadProps={previewDownloadProps}
+            hasXpadding={true}
+          />
+        </>
       )}
       {columns ? (
-        <Box zIndex={5} >
+        <Box zIndex={5}>
           <CustomReactTable
             height={'calc(100vh - 393px)'}
             columns={columns}
@@ -776,21 +728,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           extraDeepFilter={
             purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false
               ? [
-                {
-                  field: 'expenseItem',
-                  term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
-                }
-              ]
+                  {
+                    field: 'expenseItem',
+                    term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
+                  }
+                ]
               : []
           }
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                {
-                  field: 'chartOfAccount',
-                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                }
-              ]
+                  {
+                    field: 'chartOfAccount',
+                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                  }
+                ]
               : []
           }
           isSubmitting={isAddingProducts}
@@ -851,11 +803,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                {
-                  field: 'chartOfAccount',
-                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                }
-              ]
+                  {
+                    field: 'chartOfAccount',
+                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                  }
+                ]
               : []
           }
         />
