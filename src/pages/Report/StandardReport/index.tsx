@@ -117,6 +117,9 @@ const Report = () => {
             });
             if (type === 'inventory-evaluation') {
                 newColumns?.forEach((e) => {
+                    if (e.accessor === 'productName') {
+                        e.cell = ({ row }) => ProductRenderer(row)
+                    }
                     if (!['productName', 'productDescription', 'productNumber', 'productCategory', 'totalQty',
                         'averagePrice', 'totalPrice', 'margin']?.includes(e.accessor)) {
                         e.show = false;
@@ -216,7 +219,7 @@ const Report = () => {
     const ProductRenderer = (row) => {
         return (
             <div>{row?.original?.productName ? (
-                <Link className="link" title={row?.original?.productName} to={`${routes.productDetail.path}/${row?.original?.productId}`} target="_blank">
+                <Link className="link" title={row?.original?.productName} to={`${routes.productDetail.path}/${row?.original?.productId || row?.original?._id}`} target="_blank">
                     {row?.original?.productName}
                 </Link>
             ) : <NoDataCell />}</div>
@@ -484,7 +487,7 @@ const Report = () => {
                             field: key,
                             term: selectedData[key].value ? 'Yes' : 'No'
                         });
-                    } else if(selectedData[key].type === 'singleLine') {
+                    } else if (selectedData[key].type === 'singleLine') {
                         deepFilter.push({
                             field: key,
                             term: selectedData[key].value
