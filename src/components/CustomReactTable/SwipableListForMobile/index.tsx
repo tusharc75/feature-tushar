@@ -499,8 +499,7 @@ const RenderFooter = ({ table }) => {
             </Button>
             <Collapse in={isFooterExpanded} timeout="auto">
               <div
-                className={`grid grid-cols-[5fr_3fr] gap-2 font-semibold text-[12px] text-black px-2 dark:text-gray-300 justify-between [border-top:1px_solid_var(--common-border-color)]
-                  ${isFooterExpanded ? 'py-2 ' : ''}
+                className={`grid grid-cols-[5fr_3fr] py-2 gap-2 font-semibold text-[12px] text-black px-2 dark:text-gray-300 justify-between [border-top:1px_solid_var(--common-border-color)]
                 `}
               >
                 {group?.headers?.map((column) => {
