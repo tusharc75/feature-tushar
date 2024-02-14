@@ -14,7 +14,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -105,8 +105,6 @@ const IrtTicket = () => {
     }
     return deepFilter;
   };
-
-
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -211,13 +209,13 @@ const IrtTicket = () => {
 
   const ActionMenuItems = () => {
     return (
-        <MenuItem
-          onClick={() => {
-            showConfirmBox();
-          }}
-        >
-          {`Delete (${selectedRecords?.length})`}
-        </MenuItem>
+      <MenuItem
+        onClick={() => {
+          showConfirmBox();
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
     );
   };
 
@@ -254,7 +252,7 @@ const IrtTicket = () => {
           // rightSideContents
           isActionButtonVisible={permissions?.irtTicket?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={<ActionMenuItems/>}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
             setIrtTicketId(null);

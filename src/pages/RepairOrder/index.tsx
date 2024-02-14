@@ -23,7 +23,7 @@ import { gridLoadingTimeout, prepareDataForGrid, repairOrder, sidebarResource } 
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRepairOrder from './ManageRepairOrder';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -65,7 +65,6 @@ const RepairOrder = () => {
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
-  
 
   useEffect(() => {
     fetchGridColumns();

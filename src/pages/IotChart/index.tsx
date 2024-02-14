@@ -14,7 +14,7 @@ import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { serializedAsset } from '../../constants/helpers';
 import cardStyle from '../ReportMaster/index.module.scss';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 function IotChart() {
   const toastConfig = useContext(CustomToastContext);

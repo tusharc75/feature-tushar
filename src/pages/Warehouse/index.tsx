@@ -10,7 +10,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EntitySelectionsDialog from 'src/components/EntitySelections';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -304,14 +304,27 @@ const Warehouse = () => {
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={true}
-          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
-          actionMenuItems={<ActionMenuItems {...{permissions, selectedRecords, setShowDeleteConfirmBox, setShowUpdateWarningConfirmBox, setEntities, setShowEntityDialog, user, setUserAssignDialog}} />}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={
+            <ActionMenuItems
+              {...{
+                permissions,
+                selectedRecords,
+                setShowDeleteConfirmBox,
+                setShowUpdateWarningConfirmBox,
+                setEntities,
+                setShowEntityDialog,
+                user,
+                setUserAssignDialog
+              }}
+            />
+          }
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.warehouse?.isCreate}
         />
-     
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

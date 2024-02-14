@@ -12,7 +12,7 @@ import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { convertInventory, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import InventoryToAsset from './InventoryToAsset';
 
@@ -67,7 +67,6 @@ const ConvertInventory = () => {
         }
       });
   };
-
 
   useEffect(() => {
     fetchGridColumns();
@@ -238,11 +237,11 @@ const ConvertInventory = () => {
           onSearch={handleSearch}
           // rightSideContents
           isActionButtonVisible={permissions?.inventoryToAsset?.isUpdate}
-          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
-          actionMenuItems={<ActionMenuItems/>}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           isAddButtonVisible={false}
         />
-        
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

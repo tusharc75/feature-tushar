@@ -19,7 +19,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageDeviceTemplates from './ManageDeviceTemplates';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -193,8 +193,6 @@ export default function DeviceTemplates() {
       });
   };
 
-
-
   const ActionMenuItems = () => {
     return (
       <>
@@ -243,15 +241,14 @@ export default function DeviceTemplates() {
           onSearch={handleSearch}
           // rightSideContents
           isActionButtonVisible={true}
-          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
-          actionMenuItems={<ActionMenuItems/>}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           addButtonProps={{ disabled: !permissions?.warehouse?.isCreate }}
           addButtonOnclick={() => {
             setOpen({ open: true, isClone: false, id: null });
           }}
           isAddButtonVisible={true}
         />
-       
 
         {columns ? (
           <CustomReactTable
