@@ -151,7 +151,7 @@ const ReportFilters = (props: FiltersProps) => {
       .filter(
         (d: any) =>
           d.isRead &&
-          (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect' || d.fieldData.type === 'date' || d.fieldData.type === 'checkBox')
+          (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect' || d.fieldData.type === 'date' || d.fieldData.type === 'checkBox' || (d.fieldData.type === "singleLine" && d?.fieldData?.resource === "Product"))
       )
       .map((d: any) => {
         if (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect') {
