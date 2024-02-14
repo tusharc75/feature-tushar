@@ -44,8 +44,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
+
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [columns, setColumns] = useState(null);
   const [productFields, setProductFields] = useState([]);
@@ -360,22 +359,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     dispatch({ type: 'loading', loading: false });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
-  };
-
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
-  };
-
   const handleAddProduct = async (rows) => {
     setAddingProducts(true);
     const tax: any = {};
@@ -604,7 +587,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         {permissions?.product?.isRead && (
           <MenuItem
             onClick={() => {
-              closeAddActions();
               setAddProductDialog(true);
             }}
           >
@@ -614,7 +596,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         {permissions?.serviceMaster?.isRead && user?.user?.brandPolicy?.purchaseOrderAddService && (
           <MenuItem
             onClick={() => {
-              closeAddActions();
               setAddServiceDialog(true);
             }}
           >
@@ -623,7 +604,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         )}
         <MenuItem
           onClick={() => {
-            closeAddActions();
             setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
           }}
         >
@@ -649,7 +629,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               : true
           }
           onClick={() => {
-            closeActions();
             setIsBulkEdit(true);
             const typeUniq: any = uniq(
               map(
@@ -671,7 +650,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         {permissions?.purchaseOrder?.isDelete && (
           <MenuItem
             onClick={() => {
-              closeActions();
               setShowDeleteConfirmBox(true);
               setDeletePurchaseOrderItem(selectedRecords?.filter((e) => !e.hideSelection));
             }}
@@ -681,6 +659,29 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         )}
       </>
     );
+  };
+
+  const previewDownloadProps = {
+    fileName: `${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`,
+    resource: sidebarResource.purchaseOrder,
+    referenceId: purchaseOrderData?._id,
+    columns: columns?.map((e) => {
+      return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor };
+    }),
+    isSendEmail: true,
+    button1Title: 'Ordered',
+    button2Title: 'Received',
+    defaultColumns: [
+      'index',
+      'type',
+      'detail',
+      'description',
+      'qty',
+      `price_${purchaseOrderData?.currency?.toLowerCase()}`,
+      `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
+      `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
+      `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
+    ]
   };
 
   return (
@@ -693,28 +694,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             isActionButtonVisible={true}
             actionButtonMenuItems={<ActionMenuItems />}
             actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length ? false : true }}
-            previewDownloadProps={{
-              fileName: `${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`,
-              resource: sidebarResource.purchaseOrder,
-              referenceId: purchaseOrderData?._id,
-              columns: columns?.map((e) => {
-                return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor };
-              }),
-              isSendEmail: true,
-              button1Title: 'Ordered',
-              button2Title: 'Received',
-              defaultColumns: [
-                'index',
-                'type',
-                'detail',
-                'description',
-                'qty',
-                `price_${purchaseOrderData?.currency?.toLowerCase()}`,
-                `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
-                `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
-                `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
-              ]
-            }}
+            previewDownloadProps={previewDownloadProps}
             hasXpadding={true}
           />
         </>
