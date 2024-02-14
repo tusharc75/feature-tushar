@@ -244,7 +244,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                 )}
           </div>
         </div>
-        {dataRows?.length > 0 && footerRowFound > 0 && isClientSideGrid && (
+        {/* {dataRows?.length > 0 && footerRowFound > 0 && isClientSideGrid && (
           <>
             {table?.getFooterGroups().map((group, index) => {
               const indexCol = group?.headers?.find((g) => g.id === 'index');
@@ -270,7 +270,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
               );
             })}
           </>
-        )}
+        )} */}
       </div>
     </>
   );
