@@ -484,6 +484,11 @@ const Report = () => {
                             field: key,
                             term: selectedData[key].value ? 'Yes' : 'No'
                         });
+                    } else if(selectedData[key].type === 'singleLine') {
+                        deepFilter.push({
+                            field: key,
+                            term: selectedData[key].value
+                        });
                     } else {
                         deepFilter.push({
                             field: key,
