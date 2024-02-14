@@ -10,7 +10,7 @@ import { SearchFilter } from 'src/components/SearchFilter';
 
 type ListingPageHeaderProps = {
   toggleButtonList?: { key: string; value: number }[];
-  onToggle?: (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>, value: number) => void;
+  onToggle?: (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>, value: string) => void;
   selectedType?: number;
   setSelectedType?: (value: number) => void;
   leftSideContents?: ReactNode;

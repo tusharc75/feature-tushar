@@ -1,6 +1,7 @@
-import { CircularProgress, Collapse, IconButton } from '@material-ui/core';
-import { Check, Edit, Error } from '@material-ui/icons';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import { Button, CircularProgress, Collapse, IconButton } from '@material-ui/core';
+import { renderToString } from 'react-dom/server';
+import { Check, Edit, Error, ExpandMore } from '@material-ui/icons';
+import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import { TInitialState } from '../hooks/useTableReducer';
 import HtmlTooltip from '../../CustomTooltipTitle';
@@ -244,34 +245,65 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                 )}
           </div>
         </div>
-        {dataRows?.length > 0 && footerRowFound > 0 && isClientSideGrid && (
-          <>
-            {table?.getFooterGroups().map((group, index) => {
-              const indexCol = group?.headers?.find((g) => g.id === 'index');
-              return (
-                <div
-                  key={index}
-                  className="flex flex-wrap gap-2 justify-between [border-top:1px_solid_var(--common-border-color)] pt-1 items-center mt-4 px-2"
-                >
-                  <h6 className="text-[14px]">
-                    {indexCol.isPlaceholder ? null : flexRender(indexCol.column.columnDef.footer, indexCol.getContext())}
-                  </h6>
-
-                  {group?.headers?.map((column) => {
-                    if (!column.column.columnDef.footer || column.id === 'index') return null;
-                    return (
-                      <div key={column.id} className="text-truncate font-weight-bold text-black flex flex-col items-center">
-                        <span>{column.isPlaceholder ? null : flexRender(column.column.columnDef.header, column.getContext())}</span>
-                        <span>{column.isPlaceholder ? null : flexRender(column.column.columnDef.footer, column.getContext())}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </>
-        )}
+        {dataRows?.length > 0 && footerRowFound > 0 && isClientSideGrid && <RenderFooter table={table} />}
       </div>
+    </>
+  );
+};
+
+const RenderFooter = ({ table }) => {
+  const [isFooterExpanded, setIsFooterExpanded] = useState(false);
+
+  const toggleFooter = () => {
+    setIsFooterExpanded((prev) => !prev);
+  };
+
+  return (
+    <>
+      {table?.getFooterGroups().map((group, index) => {
+        const indexCol = group?.headers?.find((g) => g.id === 'index');
+        return (
+          <div key={index} className="[border:1px_solid_var(--common-border-color)] rounded-md items-center mt-4 ">
+            <Button
+              fullWidth
+              onClick={toggleFooter}
+              endIcon={<ExpandMore className={`${isFooterExpanded ? '[transform:rotate(180deg)]' : ''} transition-all duration-200`} />}
+              aria-expanded={isFooterExpanded}
+              aria-label="show more"
+              className="[&_.MuiButton-label]:flex [&_.MuiButton-label]:justify-between [&_.MuiButton-label]:font-bold"
+            >
+              <span>{indexCol.isPlaceholder ? null : flexRender(indexCol.column.columnDef.footer, indexCol.getContext())}</span>
+            </Button>
+            <Collapse in={isFooterExpanded} timeout="auto">
+              <div
+                className={`grid grid-cols-[5fr_3fr] gap-2 font-semibold text-[12px] text-black px-2 dark:text-gray-300 justify-between [border-top:1px_solid_var(--common-border-color)]
+                  ${isFooterExpanded ? 'py-2 ' : ''}
+                `}
+              >
+                {group?.headers?.map((column) => {
+                  if (!column.column.columnDef.footer || column.id === 'index') return null;
+                  return (
+                    <Fragment key={column.id}>
+                      <span
+                        className="text-truncate"
+                        title={column.isPlaceholder ? null : renderToString(<>{flexRender(column.column.columnDef.header, column.getContext())}</>)}
+                      >
+                        {column.isPlaceholder ? null : flexRender(column.column.columnDef.header, column.getContext())}
+                      </span>
+                      <span
+                        className="text-truncate font-normal text-right"
+                        title={column.isPlaceholder ? null : renderToString(<>{flexRender(column.column.columnDef.footer, column.getContext())}</>)}
+                      >
+                        {column.isPlaceholder ? null : flexRender(column.column.columnDef.footer, column.getContext())}
+                      </span>
+                    </Fragment>
+                  );
+                })}
+              </div>
+            </Collapse>
+          </div>
+        );
+      })}
     </>
   );
 };
