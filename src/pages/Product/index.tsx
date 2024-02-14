@@ -12,7 +12,7 @@ import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicD
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { childDisable, cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -287,8 +287,6 @@ const Product = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-
-
   const handleSubmit = (ids: string[]) => {
     setSubmitting(true);
     axiosInstance()
@@ -386,8 +384,21 @@ const Product = () => {
         <ListingPageHeader
           leftSideContents={
             <LeftSideContent
-              {...{permissions,productCategoryList,productCategory,setProductCategory,isProductTemplate,productTemplateList,productTemplate,setProductTemplate,isProductType,productTypeList,productType,setProductType}}
-              />
+              {...{
+                permissions,
+                productCategoryList,
+                productCategory,
+                setProductCategory,
+                isProductTemplate,
+                productTemplateList,
+                productTemplate,
+                setProductTemplate,
+                isProductType,
+                productTypeList,
+                productType,
+                setProductType
+              }}
+            />
           }
           searchValue={search}
           onSearch={handleSearch}

@@ -21,7 +21,7 @@ import { WORK_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResou
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkOrder from './ManageWorkOrder';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -223,7 +223,6 @@ const WorkOrder = () => {
         });
     }
   };
-
 
   const ActionMenuItems = () => {
     return (

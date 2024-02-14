@@ -18,7 +18,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
@@ -235,7 +235,6 @@ const PurchaseOrder = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-
   const updateQueryParams = () => {
     const queryParams = new URLSearchParams(history.location.search);
     queryParams.delete('referenceId');
@@ -340,7 +339,7 @@ const PurchaseOrder = () => {
           // synchronizeType
           setQueryString={false}
         />
-        
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

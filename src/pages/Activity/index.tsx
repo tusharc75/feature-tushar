@@ -1,16 +1,16 @@
 import queryString from 'query-string';
 import { Fragment, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { useData } from '../../StateProvider/Provider';
 import { GetReferenceName } from '../../axios/activity';
 import Board from '../../components/Activity/Report/Board';
 import Roadmap from '../../components/Activity/Report/Roadmap';
-import { SearchFilter } from '../../components/SearchFilter';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
 import CustomTabs from '../../components/Helpers/CustomTabs';
 import routes from '../../components/Helpers/Routes';
+import { SearchFilter } from '../../components/SearchFilter';
 import './style.scss';
 
 const capitalize = (string) => {

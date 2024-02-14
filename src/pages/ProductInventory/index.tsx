@@ -18,7 +18,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { TOOLTIP_MESSAGE, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import AddRemoveDialog from './AddRemove';
@@ -716,8 +716,7 @@ const LeftSideContents = ({
   );
 };
 
-
-const ActionMenuItems = ({permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder}) => {
+const ActionMenuItems = ({ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }) => {
   return (
     <>
       <MenuItem
