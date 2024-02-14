@@ -28,6 +28,7 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import PreviewDownload from 'src/components/PreviewDownload';
 import { fetchTaxRate } from './helper';
 import { isMobile, isTablet } from 'react-device-detect';
+import { DetailsPageHeader, DetailsPageHeder } from 'src/components/PageHeaders';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -320,8 +321,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         item.type === 'Product'
           ? item?.productDetail?.productDescription
           : item.type === 'Service'
-            ? item?.serviceDetail?.serviceDescription
-            : item?.description;
+          ? item?.serviceDetail?.serviceDescription
+          : item?.description;
       res.materialId = item.type === 'Product' ? item?.productDetail?._id : item.type === 'Service' ? item?.serviceDetail?._id : item?._id;
       res.productNumber = item.productDetail?.productNumber;
       res.serializedProduct = item.productDetail?.serializedProduct;
@@ -600,69 +601,112 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     }
   };
 
+  const AddButtonMenuItems = () => {
+    return (
+      <>
+        {permissions?.product?.isRead && (
+          <MenuItem
+            onClick={() => {
+              closeAddActions();
+              setAddProductDialog(true);
+            }}
+          >
+            Add Existing Products
+          </MenuItem>
+        )}
+        {permissions?.serviceMaster?.isRead && user?.user?.brandPolicy?.purchaseOrderAddService && (
+          <MenuItem
+            onClick={() => {
+              closeAddActions();
+              setAddServiceDialog(true);
+            }}
+          >
+            Add Existing Services
+          </MenuItem>
+        )}
+        <MenuItem
+          onClick={() => {
+            closeAddActions();
+            setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
+          }}
+        >
+          Add Manual Entry
+        </MenuItem>
+      </>
+    );
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={
+            selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
+            uniq(
+              map(
+                selectedRecords?.filter((e) => !e.hideSelection),
+                'type'
+              )
+            )?.length === 1
+              ? false
+              : true
+          }
+          onClick={() => {
+            closeActions();
+            setIsBulkEdit(true);
+            const typeUniq: any = uniq(
+              map(
+                selectedRecords?.filter((e) => !e.hideSelection),
+                'type'
+              )
+            );
+            if (typeUniq[0] === 'Product') {
+              setShowProductDialog({ open: true, data: null, showSaveAndNext: false });
+            } else if (typeUniq[0] === 'Service') {
+              setShowServiceDialog({ open: true, data: null, showSaveAndNext: false });
+            } else {
+              setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
+            }
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
+        {permissions?.purchaseOrder?.isDelete && (
+          <MenuItem
+            onClick={() => {
+              closeActions();
+              setShowDeleteConfirmBox(true);
+              setDeletePurchaseOrderItem(selectedRecords?.filter((e) => !e.hideSelection));
+            }}
+          >
+            Delete
+          </MenuItem>
+        )}
+      </>
+    );
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" alignItems="center">
-            <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              {permissions?.product?.isRead && (
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions();
-                    setAddProductDialog(true);
-                  }}
-                >
-                  Add Existing Products
-                </MenuItem>
-              )}
-              {permissions?.serviceMaster?.isRead && user?.user?.brandPolicy?.purchaseOrderAddService && (
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions();
-                    setAddServiceDialog(true);
-                  }}
-                >
-                  Add Existing Services
-                </MenuItem>
-              )}
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
-                }}
-              >
-                Add Manual Entry
-              </MenuItem>
-            </Menu>
-          </Box>
-          <div className="d-flex gap-2">
-            <PreviewDownload
-              fileName={`${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`}
-              resource={sidebarResource.purchaseOrder}
-              referenceId={purchaseOrderData?._id}
-              columns={columns?.map((e) => {
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={<AddButtonMenuItems />}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={<ActionMenuItems />}
+            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length ? false : true }}
+            previewDownloadProps={{
+              fileName: `${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`,
+              resource: sidebarResource.purchaseOrder,
+              referenceId: purchaseOrderData?._id,
+              columns: columns?.map((e) => {
                 return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor };
-              })}
-              isSendEmail={true}
-              button1Title="Ordered"
-              button2Title="Received"
-              defaultColumns={[
+              }),
+              isSendEmail: true,
+              button1Title: 'Ordered',
+              button2Title: 'Received',
+              defaultColumns: [
                 'index',
                 'type',
                 'detail',
@@ -672,83 +716,14 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
                 `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
                 `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
-              ]}
-            />
-            <HtmlTooltip title="Please select some product">
-              <Button
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={openActions}
-                disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length ? false : true}
-                aria-controls="action-menu"
-                className="new-dropdown-v1"
-              >
-                {'Actions'}
-                <ExpandMore fontSize="small" />
-              </Button>
-            </HtmlTooltip>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                disabled={
-                  selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
-                    uniq(
-                      map(
-                        selectedRecords?.filter((e) => !e.hideSelection),
-                        'type'
-                      )
-                    )?.length === 1
-                    ? false
-                    : true
-                }
-                onClick={() => {
-                  closeActions();
-                  setIsBulkEdit(true);
-                  const typeUniq: any = uniq(
-                    map(
-                      selectedRecords?.filter((e) => !e.hideSelection),
-                      'type'
-                    )
-                  );
-                  if (typeUniq[0] === 'Product') {
-                    setShowProductDialog({ open: true, data: null, showSaveAndNext: false });
-                  } else if (typeUniq[0] === 'Service') {
-                    setShowServiceDialog({ open: true, data: null, showSaveAndNext: false });
-                  } else {
-                    setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
-                  }
-                }}
-              >
-                Bulk Edit
-              </MenuItem>
-              {permissions?.purchaseOrder?.isDelete && (
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setShowDeleteConfirmBox(true);
-                    setDeletePurchaseOrderItem(selectedRecords?.filter((e) => !e.hideSelection));
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              )}
-            </Menu>
-          </div>
-        </Box>
+              ]
+            }}
+            hasXpadding={true}
+          />
+        </>
       )}
       {columns ? (
-        <Box zIndex={5} >
+        <Box zIndex={5}>
           <CustomReactTable
             height={'calc(100vh - 393px)'}
             columns={columns}
@@ -776,21 +751,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           extraDeepFilter={
             purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false
               ? [
-                {
-                  field: 'expenseItem',
-                  term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
-                }
-              ]
+                  {
+                    field: 'expenseItem',
+                    term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
+                  }
+                ]
               : []
           }
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                {
-                  field: 'chartOfAccount',
-                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                }
-              ]
+                  {
+                    field: 'chartOfAccount',
+                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                  }
+                ]
               : []
           }
           isSubmitting={isAddingProducts}
@@ -851,11 +826,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                {
-                  field: 'chartOfAccount',
-                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                }
-              ]
+                  {
+                    field: 'chartOfAccount',
+                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                  }
+                ]
               : []
           }
         />
