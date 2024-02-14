@@ -265,7 +265,7 @@ const PurchaseOrder = () => {
             dispatch({ type: 'selection', selectedRecords: [] });
             setWarehouse(val && val.optionValue ? val.optionValue : '');
           }}
-          renderInput={(params) => <TextField {...params} margin="none" size="small" name="plant" label="Plant" variant="outlined" fullWidth />}
+          renderInput={(params) => <TextField {...params} margin="none" size="small" name="plant" label={`${routes.warehouse.title}`} variant="outlined" fullWidth />}
         />
         {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
         {fromSalesOrder && (

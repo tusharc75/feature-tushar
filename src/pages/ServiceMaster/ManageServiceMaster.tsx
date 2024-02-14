@@ -50,6 +50,7 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
               if (isClone) {
                 const { _id, createdBy, updatedBy, serviceMaster, ...rest } = data;
                 rest['status'] = 'New';
+                rest['serviceName'] = '';
                 setInitialData({
                   fields: fieldsDataForCreate,
                   values: getObjKeysWithValues(rest, fieldsDataForCreate)
