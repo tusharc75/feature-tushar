@@ -26,7 +26,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
 import './style.scss';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 const Opportunities = () => {
   const types = [
@@ -269,7 +269,6 @@ const Opportunities = () => {
     }
   };
 
-
   const ActionMenuItems = () => {
     return (
       <>
@@ -326,7 +325,7 @@ const Opportunities = () => {
           // rightSideContents
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
-          actionMenuItems={<ActionMenuItems/>}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
             setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
@@ -334,7 +333,7 @@ const Opportunities = () => {
           isAddButtonVisible={permissions?.opportunity?.isCreate}
           synchronizeType={true}
         />
-    
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

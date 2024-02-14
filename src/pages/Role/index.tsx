@@ -8,7 +8,7 @@ import CustomReactTable, { getStaticFields, useTableReducer } from 'src/componen
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -313,7 +313,6 @@ const Roles: FC = () => {
   const updateResourceOpen = (props: any) => {
     setShowUpdateResourceDialog({ open: true, action: props.action });
   };
-
 
   return (
     <>
