@@ -9,7 +9,7 @@ import { Autocomplete } from '@material-ui/lab';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdUpdate } from 'react-icons/all';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';

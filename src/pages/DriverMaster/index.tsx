@@ -19,7 +19,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageDriverMaster from './ManageDriverMaster';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 const DriverMaster = () => {
   const renderedFrom = camelCase(routes?.driverMaster.title);
@@ -250,7 +250,7 @@ const DriverMaster = () => {
           // rightSideContents
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={<ActionMenuItems/>}
+          actionMenuItems={<ActionMenuItems />}
           addButtonProps={{ disabled: !permissions?.driverMaster?.isCreate }}
           addButtonOnclick={() => {
             setDriverMasterId(null);
@@ -258,7 +258,7 @@ const DriverMaster = () => {
           }}
           isAddButtonVisible={true}
         />
-      
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

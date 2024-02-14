@@ -6,7 +6,7 @@ import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cageManagement } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';

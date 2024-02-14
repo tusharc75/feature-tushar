@@ -22,7 +22,7 @@ import { findAll, findOne, insertUpdate, objectStore } from '../../constants/ind
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageRepairJob from './ManageRepairJob';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let repairJobTimeout;
 

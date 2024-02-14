@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -194,7 +194,6 @@ const MarketSegment = () => {
       });
   };
 
-
   const ActionMenuItems = () => {
     return (
       <>
@@ -237,8 +236,8 @@ const MarketSegment = () => {
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={permissions?.marketSegment?.isDelete}
-          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
-          actionMenuItems={<ActionMenuItems/>}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
