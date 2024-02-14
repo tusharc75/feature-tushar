@@ -263,21 +263,21 @@ const RenderFooter = ({ table }) => {
       {table?.getFooterGroups().map((group, index) => {
         const indexCol = group?.headers?.find((g) => g.id === 'index');
         return (
-          <div key={index} className="[border:1px_solid_var(--common-border-color)] rounded-md p-1 items-center mt-4 ">
+          <div key={index} className="[border:1px_solid_var(--common-border-color)] rounded-md items-center mt-4 ">
             <Button
               fullWidth
               onClick={toggleFooter}
               endIcon={<ExpandMore className={`${isFooterExpanded ? '[transform:rotate(180deg)]' : ''} transition-all duration-200`} />}
               aria-expanded={isFooterExpanded}
               aria-label="show more"
-              className="[&_.MuiButton-label]:flex [&_.MuiButton-label]:justify-between"
+              className="[&_.MuiButton-label]:flex [&_.MuiButton-label]:justify-between [&_.MuiButton-label]:font-bold"
             >
               <span>{indexCol.isPlaceholder ? null : flexRender(indexCol.column.columnDef.footer, indexCol.getContext())}</span>
             </Button>
             <Collapse in={isFooterExpanded} timeout="auto">
               <div
-                className={`grid grid-cols-[5fr_3fr] gap-2 p-3 mx-2 rounded-md shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] font-semibold text-[12px] text-black dark:text-gray-300 justify-between [border:1px_solid_var(--common-border-color)]
-                  ${isFooterExpanded ? 'mt-2' : ''}
+                className={`grid grid-cols-[5fr_3fr] gap-2 font-semibold text-[12px] text-black px-2 dark:text-gray-300 justify-between [border-top:1px_solid_var(--common-border-color)]
+                  ${isFooterExpanded ? 'py-2 ' : ''}
                 `}
               >
                 {group?.headers?.map((column) => {
