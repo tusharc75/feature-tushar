@@ -269,17 +269,11 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   };
 
   const handleCancelInvoice = async (data) => {
-    let api = `${routes?.generateInvoice.path}/invoice/cancle`;
-    if (resource === sidebarResource.fieldTicket) {
-      api = `${routes?.generateInvoice.path}/cancel`;
-    }
     axiosInstance()
-      .patch(api, {
+      .patch(`${routes?.generateInvoice.path}/cancel`, {
         invoice: invoiceData?._id,
         comment: data,
-        ...(resource === sidebarResource.fieldTicket && {
-          resource: sidebarResource.fieldTicket
-        })
+        resource: resource
       })
       .then(({ data }) => {
         onSuccess();
@@ -361,7 +355,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
               <div className="ml-auto">
                 {dataRows &&
                   dataRows?.length > 0 &&
-                  resource === sidebarResource.fieldTicket &&
+                  [sidebarResource.fieldTicket, sidebarResource.repairOrder]?.includes(resource) &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
                     <DeleteButton mode="light" text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
                   )}
