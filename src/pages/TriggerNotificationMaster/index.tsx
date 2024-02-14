@@ -12,7 +12,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -193,8 +193,6 @@ const TriggerNotificationMaster = () => {
       });
   };
 
- 
-
   const ActionMenuItems = () => {
     return (
       <>
@@ -220,8 +218,8 @@ const TriggerNotificationMaster = () => {
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={permissions?.triggerNotificationMaster?.isDelete}
-          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
-          actionMenuItems={<ActionMenuItems/>}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}

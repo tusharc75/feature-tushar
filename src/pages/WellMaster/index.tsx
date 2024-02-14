@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -234,15 +234,15 @@ const WellMaster = () => {
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={permissions?.wellMaster?.isDelete }
-          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
+          isActionButtonVisible={permissions?.wellMaster?.isDelete}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.wellMaster?.isCreate}
         />
-       
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

@@ -21,7 +21,7 @@ import { customerAccount, gridLoadingTimeout, invoice, prepareDataForGrid, sideb
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let invoiceTimeout;
 
@@ -253,8 +253,6 @@ const Invoice = () => {
     dispatch({ type: 'pageChange', page: 0 });
   };
 
-
-
   const ActionMenuItems = () => {
     return (
       <>
@@ -313,8 +311,8 @@ const Invoice = () => {
           onSearch={handleSearch}
           // rightSideContents
           isActionButtonVisible={permissions?.invoice?.isDelete}
-          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
-          actionMenuItems={<ActionMenuItems/>}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });

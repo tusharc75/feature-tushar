@@ -1,13 +1,12 @@
-import { Button, Chip, IconButton, Menu, MenuItem, MenuList, Popover, TextField } from '@material-ui/core';
+import { Chip, IconButton, MenuItem, MenuList, Popover, TextField } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import Dialog from '@material-ui/core/Dialog';
-import { AddOutlined, Delete as DeleteIcon, ExpandMore } from '@material-ui/icons';
+import { AddOutlined, Delete as DeleteIcon } from '@material-ui/icons';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { Autocomplete } from '@material-ui/lab';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiOutlinePaperClip } from 'react-icons/ai';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -15,7 +14,6 @@ import { GetReferenceName } from '../../../axios/activity';
 import axiosInstance from '../../../axios/axiosInstance';
 import ManageAttachment from '../../../components/Activity/Attachments/ManageAttachment';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
-import { SearchFilter } from '../../../components/SearchFilter';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -35,7 +33,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 export default function Attachment() {
   const history = useHistory();
@@ -657,7 +655,20 @@ export default function Attachment() {
       <CustomContainer>
         {filter && (
           <ListingPageHeader
-            leftSideContents={<LeftSideContents {...{resourceOptions, resource, setResource, setFilter, resourceData, loadingResources, selectedResourceData, setSelectedResourceData}} />}
+            leftSideContents={
+              <LeftSideContents
+                {...{
+                  resourceOptions,
+                  resource,
+                  setResource,
+                  setFilter,
+                  resourceData,
+                  loadingResources,
+                  selectedResourceData,
+                  setSelectedResourceData
+                }}
+              />
+            }
             searchFilter={filter}
             handleSearchFilter={handleChangeFilter}
             isActionButtonVisible={true}
@@ -667,7 +678,7 @@ export default function Attachment() {
             isAddButtonVisible={true}
           />
         )}
-     
+
         <Box zIndex={5} width={'100%'}>
           {column ? (
             <CustomReactTable

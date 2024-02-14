@@ -8,7 +8,7 @@ import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -252,8 +252,6 @@ const QuotePdfTemplate = () => {
     }
   };
 
-  
-
   const ActionMenuItems = () => {
     return (
       <>
@@ -287,12 +285,12 @@ const QuotePdfTemplate = () => {
           // rightSideContents
           isActionButtonVisible={permissions?.quotePdfTemplate?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={<ActionMenuItems/>}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => CreateNew('0', false)}
           isAddButtonVisible={permissions?.quotePdfTemplate?.isCreate}
         />
-    
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

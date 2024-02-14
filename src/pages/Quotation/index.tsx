@@ -31,7 +31,7 @@ import {
   supplierAccount
 } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let quotationTimeout;
 
@@ -313,7 +313,6 @@ const Quotation = () => {
     dispatch({ type: 'pageChange', page: 0 });
   };
 
-
   const LeftSideContent = () => {
     return (
       <>
@@ -381,8 +380,8 @@ const Quotation = () => {
           onSearch={handleSearch}
           // rightSideContents
           isActionButtonVisible={permissions?.quotation?.isDelete}
-          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
-          actionMenuItems={<ActionMenuItems/>}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
@@ -390,7 +389,7 @@ const Quotation = () => {
           isAddButtonVisible={permissions?.quotation?.isCreate}
           synchronizeType
         />
-        
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

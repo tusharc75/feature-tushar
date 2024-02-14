@@ -19,7 +19,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import ManageIotDataPoints from './ManageIotDataPoints';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -112,8 +112,6 @@ const IotDataPoints = () => {
 
     return deepFilter;
   };
-
- 
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
@@ -261,14 +259,14 @@ const IotDataPoints = () => {
           // rightSideContents
           isActionButtonVisible={permissions?.iotDataPoints?.isDelete}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
-          actionMenuItems={<ActionMenuItems/>}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.iotDataPoints?.isCreate}
         />
-       
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

@@ -20,7 +20,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageDeviceTemplateAlert from './ManageDeviceTemplateAlert';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 export default function DeviceTemplatesAlerts() {
   const renderedFrom = camelCase(routes?.deviceTemplateAlert.title);
@@ -188,8 +188,6 @@ export default function DeviceTemplatesAlerts() {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-
-
   const handleDelete = () => {
     let ids = [];
     if (deleteRecord) {
@@ -265,14 +263,13 @@ export default function DeviceTemplatesAlerts() {
           rightSideContents
           isActionButtonVisible
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={<ActionMenuItems/>}
+          actionMenuItems={<ActionMenuItems />}
           addButtonProps={{ disabled: !permissions?.deviceTemplateAlert?.isCreate }}
           addButtonOnclick={() => {
             setOpen({ open: true, isClone: false, id: null });
           }}
           isAddButtonVisible={true}
         />
-     
 
         {columns ? (
           <CustomReactTable

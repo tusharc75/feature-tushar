@@ -21,7 +21,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CardView from './CardView';
 import ManageTrailerMaster from './ManageTrailerMaster';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -274,15 +274,15 @@ const TrailerMaster = () => {
           onSearch={handleSearch}
           // rightSideContents
           isActionButtonVisible={permissions?.trailerMaster?.isDelete}
-          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
-          actionMenuItems={<ActionMenuItems/>}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.trailerMaster?.isCreate}
         />
-     
+
         {viewType === 1 && (
           <CardView
             data={cardViewData}

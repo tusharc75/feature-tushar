@@ -18,7 +18,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManagePayrollPolicy from './ManagePayrollPolicy';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -195,7 +195,6 @@ const PayrollPolicy = () => {
       });
   };
 
-
   const ActionMenuItems = () => {
     return (
       <>
@@ -228,14 +227,14 @@ const PayrollPolicy = () => {
           // rightSideContents
           isActionButtonVisible={permissions?.payrollPolicy?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={<ActionMenuItems/>}
+          actionMenuItems={<ActionMenuItems />}
           addButtonProps={{ disabled: !permissions?.payrollPolicy.isCreate }}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={true}
         />
-     
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

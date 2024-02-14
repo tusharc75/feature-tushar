@@ -21,7 +21,7 @@ import { camelCase } from 'lodash';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -354,7 +354,20 @@ const Note = () => {
       <CustomContainer>
         {filter && (
           <ListingPageHeader
-            leftSideContents={<LeftSideContents {...{ resourceOptions, resource, setResource, setFilter, resourceData, loadingResources, selectedResourceData, setSelectedResourceData}} />}
+            leftSideContents={
+              <LeftSideContents
+                {...{
+                  resourceOptions,
+                  resource,
+                  setResource,
+                  setFilter,
+                  resourceData,
+                  loadingResources,
+                  selectedResourceData,
+                  setSelectedResourceData
+                }}
+              />
+            }
             isActionButtonVisible={permissions?.productionOrder?.isDelete}
             searchFilter={filter}
             handleSearchFilter={handleChangeFilter}
@@ -444,7 +457,16 @@ const Note = () => {
 
 export default Note;
 
-const LeftSideContents = ({ resourceOptions, resource, setResource, setFilter, resourceData, loadingResources, selectedResourceData, setSelectedResourceData}) => {
+const LeftSideContents = ({
+  resourceOptions,
+  resource,
+  setResource,
+  setFilter,
+  resourceData,
+  loadingResources,
+  selectedResourceData,
+  setSelectedResourceData
+}) => {
   return (
     <>
       <Autocomplete

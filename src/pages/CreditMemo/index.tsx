@@ -17,7 +17,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../c
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageCreditMemo from './ManageCreditMemo';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
