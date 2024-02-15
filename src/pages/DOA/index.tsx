@@ -1,8 +1,6 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import { camelCase, isEmpty } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
-import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -10,42 +8,49 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import routes from '../../components/Helpers/Routes';
-import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const DOARequest = () => {
-
   const renderedFrom = camelCase(routes?.DOARequest.title);
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
-  const [isOpenDialog, setisOpenDialog] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
 
   const { state, dispatch } = useTableReducer();
 
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+
+  const [renderCount, setRenderCount] = useState(0);
 
   const columns: any = [
     {
-      accessor: 'name',
+      accessor: 'DOAName',
       Header: 'Name',
       show: true,
       disabled: true,
-      Cell: ({ row }) => (<Link
-        className="link"
-        to={row?.original?.quotation && !isEmpty(row?.original?.quotation) ? `/doa-request/quotation/${row?.original?.id}` : `/doa-request/${row?.original?.id}`}
-        title={row?.original?.name}
-      >
-        {row?.original?.name}
-      </Link>)
+      Cell: ({ row }) => (
+        <div>
+          <Link
+            className="link"
+            to={
+              row?.original?.quotation && !isEmpty(row?.original?.quotation)
+                ? `/doa-request/quotation/${row?.original?._id}`
+                : `/doa-request/${row?.original?._id}`
+            }
+            title={row?.original?.DOAName}
+          >
+            {row?.original?.DOAName}
+          </Link>
+        </div>
+      )
     },
     {
-      accessor: 'quotedBy',
+      accessor: 'QuotedBy',
       Header: 'Quoted By',
       show: true,
       disabled: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.quotedBy ? (
             <Link className="link" to={`/user/detail/${row?.original?.quoteById}`} title={row?.original?.quotedBy}>
               {row?.original?.quotedBy}
@@ -53,7 +58,7 @@ const DOARequest = () => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     {
@@ -61,7 +66,7 @@ const DOARequest = () => {
       Header: 'Requested By',
       show: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.requestedBy ? (
             <Link className="link" to={`/user/detail/${row?.original?.requestedById}`} title={row?.original?.requestedBy}>
               {row?.original?.requestedBy}
@@ -69,7 +74,7 @@ const DOARequest = () => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     {
@@ -82,43 +87,28 @@ const DOARequest = () => {
         </div>
       )
     }
-  ]
-
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClickOpen = () => {
-    setSortOpen(true);
-  };
-
-  const handleClickClose = () => {
-    setSortOpen(false);
-  };
-
-  const handleFilterClose = () => {
-    setisOpenDialog(false);
-  };
+  ];
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (renderCount > 0) {
+      fetchData();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
     axiosInstance()
-      .get(`/doa-request`)
-      .then(({ data: { data } }) => {
+      .get(`/doa-request${queryString}`)
+      .then(({ data: { data, count } }) => {
         let rows = data.map((doa) => ({
           ...doa,
-          _id: doa.id,
-          name: doa.DOAName,
-          quotedBy: doa.QuotedBy.firstName,
-          quoteById: doa.QuotedBy.id,
-          requestedBy: doa.RequestedBy.firstName,
-          requestedById: doa.RequestedBy.id
+          quotedBy: doa?.QuotedBy?.optionLabel,
+          quoteById: doa?.QuotedBy?.optionValue,
+          requestedBy: doa?.RequestedBy?.optionLabel,
+          requestedById: doa?.RequestedBy?.optionValue
         }));
-        dispatch({ type: 'initialize', data: rows, count: data.length });
+        dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -127,6 +117,34 @@ const DOARequest = () => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
       });
+  };
+
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+
+    if (showFilteredRecordsOnly) {
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
+    }
+    return deepFilter;
   };
 
   return (
@@ -143,8 +161,6 @@ const DOARequest = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
             resource={sidebarResource.DOARequest}
           />
         ) : (
