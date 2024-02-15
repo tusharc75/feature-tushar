@@ -465,6 +465,7 @@ const ReportFilters = (props: FiltersProps) => {
                         required={false}
                         fullWidth
                         size="small"
+                        fromFilter={true}
                       />
                     </div>
                   )}
