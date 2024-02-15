@@ -352,7 +352,7 @@ export const CreateEmail = ({
   };
 
   const handleDeleteQuoteBuilderOtherAttachment = (name) => {
-    setQuoteBuilderOtherAttachments(quoteBuilderOtherAttachments.filter((o) => o?.name !== name?.name));
+    setQuoteBuilderOtherAttachments(quoteBuilderOtherAttachments.filter((o) => o?.name !== (name?.name || name) ));
   };
 
   const classes = useStyles();

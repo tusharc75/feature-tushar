@@ -88,13 +88,13 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
   };
   // DOWNLOAD ATTACHMENT
   const downloadFile = (event, file) => {
-    // if (event) {
-    //   toastConfig.setToastConfig({
-    //     open: true,
-    //     type: 'info',
-    //     message: `Downloading, Please wait...`
-    //   });
-    // }
+    if (event) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'info',
+        message: `Downloading, Please wait...`
+      });
+    }
     setIsDownloading(true);
     setDownloadProgress(0);
 
