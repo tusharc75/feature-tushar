@@ -387,7 +387,23 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                           grid: {
                             color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                           }
-                        }
+                        },
+                        ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') &&
+                        {
+                          y1: {
+                            position: 'right',
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                            },
+                            ticks: {
+                              max: 100,
+                              min: 0,
+                              callback: function (value) {
+                                return value + '%';
+                              },
+                            }
+                          }
+                        })
                       },
                       ...(chart.stack &&
                         !chartData.datasets.some((d) => d.stack === 'stacked') && {
