@@ -1,4 +1,4 @@
-import { Box, Chip, Grid, IconButton, TextField } from '@material-ui/core';
+import { Box, Chip, Grid, IconButton, ListSubheader, TextField, makeStyles, useMediaQuery, useTheme } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import React, { Fragment, useEffect } from 'react';
@@ -28,6 +28,78 @@ import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageDynamicForm from 'src/pages/DynamicForm/ManageDynamicForm';
 import routes from 'src/components/Helpers/Routes';
+import { ListChildComponentProps, VariableSizeList } from 'react-window';
+
+function renderRow(props: ListChildComponentProps) {
+  const { data, index, style } = props;
+  return React.cloneElement(data[index], {
+    style: {
+      ...style
+    }
+  });
+}
+
+const OuterElementContext = React.createContext({});
+
+const OuterElementType = React.forwardRef<HTMLDivElement>((props, ref) => {
+  const outerProps = React.useContext(OuterElementContext);
+  return <div ref={ref} {...props} {...outerProps} />;
+});
+
+function useResetCache(data: any) {
+  const ref = React.useRef<VariableSizeList>(null);
+  useEffect(() => {
+    if (ref.current != null) {
+      ref.current.resetAfterIndex(0, true);
+    }
+  }, [data]);
+  return ref;
+}
+
+const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxComponent(props, ref) {
+  const { children, ...other } = props;
+  const itemData = React.Children.toArray(children);
+  const theme = useTheme();
+  const smUp = useMediaQuery(theme.breakpoints.up('sm'), { noSsr: true });
+  const itemSize = smUp ? 36 : 48;
+
+  const getChildSize = (child: React.ReactNode) => {
+    const childrenLength = React.isValidElement(child) ? child?.props?.children?.length : 0;
+    if (childrenLength > itemSize) {
+      return Math.floor(childrenLength / itemSize) * itemSize;
+    }
+    return itemSize;
+  };
+
+  const getHeight = () => {
+    if (itemData?.length > 8) {
+      return 8 * itemSize;
+    }
+    return itemData.map(getChildSize).reduce((a, b) => a + b, 0) + 20;
+  };
+
+  const gridRef = useResetCache(itemData?.length);
+
+  return (
+    <div ref={ref}>
+      <OuterElementContext.Provider value={other}>
+        <VariableSizeList
+          itemData={itemData}
+          height={getHeight()}
+          width="100%"
+          ref={gridRef}
+          outerElementType={OuterElementType}
+          innerElementType="ul"
+          itemSize={(index) => getChildSize(itemData[index])}
+          overscanCount={5}
+          itemCount={itemData?.length}
+        >
+          {renderRow}
+        </VariableSizeList>
+      </OuterElementContext.Provider>
+    </div>
+  );
+});
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
   const lookupDependentOn = fieldData?.lookupDependentOn;
@@ -345,8 +417,8 @@ function Dropdown({
                     : []),
                   ...dropdownOptions(option, values, fields, fieldData)
                 ]}
-
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                ListboxComponent={ListboxComponent as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
                 value={
                   values[name]
                     ? [...dropdownOptions(option, values, fields, fieldData)].filter((data: any) => values[name].includes(data.optionValue))
@@ -402,12 +474,14 @@ function Dropdown({
                 )}
               />
             ) : (
+             
               <Autocomplete
                 {...rest}
                 disabled={fieldData?.isUneditable || rest?.disabled}
                 options={dropdownOptions(option, values, fields, fieldData, newAddressOptionList) || []}
                 getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                 getOptionSelected={(option: any, val) => option.optionValue === val}
+                ListboxComponent={ListboxComponent as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
                 value={
                   [...dropdownOptions(option, values, fields, fieldData, newAddressOptionList)].find(
                     (data: any) => data.optionValue === values[name]
