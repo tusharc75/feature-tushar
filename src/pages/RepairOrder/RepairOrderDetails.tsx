@@ -17,7 +17,7 @@ import {
   REPAIR_ORDER_STATUS,
   repairOrderSteps,
   REPAIR_ORDER_TYPE,
-  QUOTATION_STATUS,
+  QUOTATION_STATUS
 } from 'src/constants/helpers';
 import ManageRepairOrder from './ManageRepairOrder';
 import queryString from 'query-string';
@@ -199,8 +199,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -258,26 +258,28 @@ const RepairOrderDetails = () => {
           <Box className="control-buttons-v1 ">
             {repairOrderData ? (
               <>
-                {permissions?.repairOrder?.isUpdate && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) &&
-                  <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${routes.repairOrder.title}`}  >
+                {permissions?.repairOrder?.isUpdate && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
+                  <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${routes.repairOrder.title}`}>
                     <span>
                       <Button
                         variant={'contained'}
                         className={'btn-outline-v1'}
-                        onClick={() => updateOrderStatus(repairOrderData?.invoice?.optionValue ? REPAIR_ORDER_STATUS.invoiced : REPAIR_ORDER_STATUS.readyToInvoice)}
+                        onClick={() =>
+                          updateOrderStatus(repairOrderData?.invoice?.optionValue ? REPAIR_ORDER_STATUS.invoiced : REPAIR_ORDER_STATUS.readyToInvoice)
+                        }
                         disabled={permissions?.repairOrder?.isUpdate && allowedToEdit ? false : true}
                       >
                         {'Reopen'}
                       </Button>
                     </span>
-                  </HtmlTooltip>}
+                  </HtmlTooltip>
+                )}
                 {permissions?.repairOrder?.isUpdate && allowedToEdit && repairOrderData?.canComplete && (
                   <ButtonWithPulse
                     variant={'outlined'}
                     color="default"
                     size="small"
                     onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
-
                     className={'btn-outline-v1'}
                   >
                     Complete
@@ -442,10 +444,10 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
-                      ? false
-                      : allowedToEdit
+                        quotationVersionData?.status
+                      )
+                    ? false
+                    : allowedToEdit
                 }
                 isPostWorkService={Boolean(currentStep === 3)}
                 setCurrentStep={setCurrentStep}

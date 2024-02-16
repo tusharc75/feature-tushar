@@ -38,6 +38,7 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
@@ -69,7 +70,6 @@ const WorkOrder = ({
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
@@ -541,35 +541,37 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productName
           : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent?.serializedAssetDetail?.assetNumber
-            : parent?.packageDetail?.packageName
-        }`;
+          ? parent?.serializedAssetDetail?.assetNumber
+          : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === MATERIAL_TYPE.serializedAsset
-                ? parent?.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === MATERIAL_TYPE.serializedAsset
+          ? parent?.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail?.status
-        : parent.type === MATERIAL_TYPE.product
+      parent.status = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.status
+          : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.status
           : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
       parent.hideSelection = false;
@@ -622,18 +624,18 @@ const WorkOrder = ({
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.serializedAsset
-              ? _subRow?.serializedAsset?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
+          ? _subRow?.serializedAsset?.assetNumber
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -718,14 +720,6 @@ const WorkOrder = ({
     }
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
     rows?.forEach((e: any) => {
       delete e.name;
@@ -774,8 +768,8 @@ const WorkOrder = ({
     const workOrderId: any = [];
     const asset = records?.filter((s) => s.type === MATERIAL_TYPE.serializedAsset);
     if (asset?.length > 0) {
-      asset?.forEach(_asset => {
-        workOrderId.push(_asset?.workOrder?._id)
+      asset?.forEach((_asset) => {
+        workOrderId.push(_asset?.workOrder?._id);
       });
       rows?.forEach((e) => {
         data.push({
@@ -789,7 +783,7 @@ const WorkOrder = ({
       });
     } else {
       const services = records?.filter((s) => s.type === MATERIAL_TYPE.service);
-      workOrderId.push(services[0]?.workOrder?._id)
+      workOrderId.push(services[0]?.workOrder?._id);
       services?.forEach((s) => {
         rows?.forEach((e) => {
           data.push({
@@ -840,151 +834,128 @@ const WorkOrder = ({
     }
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddServicesDialog({ open: true, new: false });
+          }}
+        >
+          Add Existing Services
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAddServicesDialog({ open: true, new: true });
+          }}
+        >
+          Add New Service
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
+          onClick={() => {
+            setUserAssignDialog(true);
+          }}
+        >
+          Assign Technician
+        </MenuItem>
+        {allowedToEdit && permissions?.workStations?.isRead && (
+          <MenuItem
+            disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
+            onClick={() => {
+              setWorkStationAssignDialog(true);
+            }}
+          >
+            Assign Work Station
+          </MenuItem>
+        )}
+        {!user?.brandPolicy?.workOrderConsumableHide && (
+          <MenuItem
+            disabled={
+              selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
+                ? // checkUniqWorkOrder()
+                  false
+                : true
+            }
+            onClick={() => {
+              var ids = [];
+              if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                const asset = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset);
+                ids = flattenArray(dataRows)
+                  ?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)
+                  ?.map((e) => e.materialId);
+              } else {
+                const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
+                ids = flattenArray(dataRows)
+                  ?.filter((e) => serviceIds?.includes(e?.parentId))
+                  ?.map((e) => e.materialId);
+              }
+              setConsumablesDialog({ open: true, ids: ids, data: null });
+            }}
+          >
+            Add Products/Consumables
+          </MenuItem>
+        )}
+        <MenuItem
+          onClick={() => {
+            setArrangeView(true);
+          }}
+          disabled={checkUniqWorkOrder() && selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length ? false : true}
+        >
+          Arrange Services
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAutoCompleteData(selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset));
+            setCompleteConfirmBox(true);
+          }}
+          disabled={
+            selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
+            selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
+              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
+              ? false
+              : true
+          }
+        >
+          Auto Complete Work Order(s)
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setIsBulkEdit(true);
+            setUpdateDialog({
+              open: true,
+              data: selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
+            });
+          }}
+          disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 ? false : true}
+        >
+          Bulk Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
+            setShowConfirmBox(true);
+          }}
+          disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
-      <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
-        {allowedToEdit && (
-          <Box display="flex" gridColumnGap={5}>
-            <Button
-              variant="outlined"
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              disabled={selectedRecords?.length === 0}
-              endIcon={<ExpandMore />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorActionEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorActionEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setAddServicesDialog({ open: true, new: false });
-                }}
-              >
-                Add Existing Services
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setAddServicesDialog({ open: true, new: true });
-                }}
-              >
-                Add New Service
-              </MenuItem>
-              <MenuItem
-                disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
-                onClick={() => {
-                  closeActions();
-                  setUserAssignDialog(true);
-                }}
-              >
-                Assign Technician
-              </MenuItem>
-              {allowedToEdit && permissions?.workStations?.isRead && (
-                <MenuItem
-                  disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
-                  onClick={() => {
-                    closeActions();
-                    setWorkStationAssignDialog(true);
-                  }}
-                >
-                  Assign Work Station
-                </MenuItem>
-              )}
-              {!user?.brandPolicy?.workOrderConsumableHide && (
-                <MenuItem
-                  disabled={
-                    selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 
-                      // checkUniqWorkOrder()
-                      ? false
-                      : true
-                  }
-                  onClick={() => {
-                    var ids = [];
-                    if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                      const asset = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset);
-                      ids = flattenArray(dataRows)
-                        ?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)
-                        ?.map((e) => e.materialId);
-                    } else {
-                      const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
-                      ids = flattenArray(dataRows)
-                        ?.filter((e) => serviceIds?.includes(e?.parentId))
-                        ?.map((e) => e.materialId);
-                    }
-                    closeActions();
-                    setConsumablesDialog({ open: true, ids: ids, data: null });
-                  }}
-                >
-                  Add Products/Consumables
-                </MenuItem>
-              )}
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setArrangeView(true);
-                }}
-                disabled={checkUniqWorkOrder() && selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length ? false : true}
-              >
-                Arrange Services
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setAutoCompleteData(selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset));
-                  setCompleteConfirmBox(true);
-                  closeActions();
-                }}
-                disabled={
-                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-                    selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
-                    selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
-                    ? false
-                    : true
-                }
-              >
-                Auto Complete Work Order(s)
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setIsBulkEdit(true);
-                  setUpdateDialog({
-                    open: true,
-                    data: selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
-                  });
-                  closeActions();
-                }}
-                disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 ? false : true}
-              >
-                Bulk Edit
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
-                  setShowConfirmBox(true);
-                  closeActions();
-                }}
-                disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
-              >
-                Delete
-              </MenuItem>
-            </Menu>
-          </Box>
-        )}
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        // addButtonMenuItems
+        // addButtonProps
+        isActionButtonVisible={allowedToEdit}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+        hasXpadding
+      />
+
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           {columns ? (

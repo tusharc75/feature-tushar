@@ -1,24 +1,23 @@
-import { Box, Button, IconButton, Menu, MenuItem, Tab, Tabs } from '@material-ui/core';
+import { Box, IconButton, MenuItem, Tab, Tabs } from '@material-ui/core';
+import { Info } from '@material-ui/icons';
+import DescriptionIcon from '@material-ui/icons/Description';
 import { camelCase } from 'lodash';
-import { useHistory } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { WORKORDER_SERVICE_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
-import { Link } from 'react-router-dom';
-import DescriptionIcon from '@material-ui/icons/Description';
-import VisibilityIcon from '@material-ui/icons/Visibility';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
-import { ExpandMore, Info } from '@material-ui/icons';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import TechnicianDialog from '../TechnicianDialog';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const GridView = ({ serviceStatus, filterQuery, permissions }) => {
   const renderedFrom = camelCase(routes?.workOrderTechnician.title);
@@ -35,7 +34,6 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
   const { page, limit, sorting, selectedRecords, filters } = state;
 
   const [tabValue, setTabValue] = useState('');
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [columns, setColumns] = useState(null);
@@ -48,7 +46,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
 
   useEffect(() => {
     fetchGridColumns();
-  }, [])
+  }, []);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: string) => {
     setTabValue(newValue);
@@ -104,8 +102,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
         Header: 'Work Order Number',
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => (row.original['workOrderNumber'] ?
-          <h5 className=" text-truncate">{row.original.workOrderNumber}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (row.original['workOrderNumber'] ? <h5 className=" text-truncate">{row.original.workOrderNumber}</h5> : <NoDataCell />)
       },
       {
         accessor: 'assignedWorkStations',
@@ -115,9 +112,9 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
         Cell: ({ row }) =>
           row.original['assignedWorkStations'] ? <h5 className="text-truncate">{row.original.assignedWorkStations}</h5> : <NoDataCell />
       }
-    ]
+    ];
     const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2), ActionsRenderer];
-    setColumns(finalColumns)
+    setColumns(finalColumns);
   };
 
   const ActionsRenderer = {
@@ -147,7 +144,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
         )}
       </>
     )
-  }
+  };
 
   useEffect(() => {
     if (tabValue) {
@@ -164,13 +161,13 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterQuery?.filterById?.length) {
       filterQuery?.filterById?.forEach((e) => {
-        filterByIds.push(e)
-      })
+        filterByIds.push(e);
+      });
     }
     if (filterQuery?.deepFilter?.length) {
       filterQuery?.deepFilter?.forEach((e) => {
-        deepFilters.push(e)
-      })
+        deepFilters.push(e);
+      });
     }
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -197,7 +194,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
           finalObject['serviceId'] = u?.service?._id;
           finalObject['serviceStatus'] = u?.status;
           finalObject['workOrderId'] = u?.workOrderDetail?._id;
-          const matchedTempMaterial = workOrderDetailData?.tempMaterial?.find(t => t?.materialId === u?.service?._id);
+          const matchedTempMaterial = workOrderDetailData?.tempMaterial?.find((t) => t?.materialId === u?.service?._id);
           finalObject['uniqueId'] = matchedTempMaterial?._id;
           delete workOrderDetailData?._id;
           delete workOrderDetailData?.id;
@@ -215,37 +212,55 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
   const handleCompleteService = () => {
     setIsSubmitting(true);
-    const data = selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.map((_s) => ({
-      workOrder: _s?.workOrderId,
-      service: _s?.materialId,
-      uniqueId: _s?._id,
-      status: WORKORDER_SERVICE_STATUS.completed
-    }))
-    axiosInstance().put(`${workOrder.api}/service/work-orders-services-status`, data).then(({ data }) => {
-      setIsSubmitting(false);
-      setShowServiceCompleteConfirmBox(false);
-      dispatch({ type: 'selection', selectedRecords: [] });
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data?.message
+    const data = selectedRecords
+      ?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)
+      ?.map((_s) => ({
+        workOrder: _s?.workOrderId,
+        service: _s?.materialId,
+        uniqueId: _s?._id,
+        status: WORKORDER_SERVICE_STATUS.completed
+      }));
+    axiosInstance()
+      .put(`${workOrder.api}/service/work-orders-services-status`, data)
+      .then(({ data }) => {
+        setIsSubmitting(false);
+        setShowServiceCompleteConfirmBox(false);
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig(error);
-    })
-  }
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setShowServiceCompleteConfirmBox(true);
+          }}
+          disabled={
+            selectedRecords?.length &&
+            selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+              ? false
+              : true
+          }
+        >
+          Complete Service(s)
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <>
       {serviceStatus?.length ? (
@@ -264,6 +279,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
             {serviceStatus?.map((status, i) => {
               return (
                 <Tab
+                  key={status}
                   label={<div className="tab-font">{status}</div>}
                   value={status}
                   aria-controls={`a11y-tabpanel-${i}`}
@@ -273,53 +289,30 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
               );
             })}
           </Tabs>
-          <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
-            <ImportExportMenu
-              permissions={permissions}
-              module={sidebarResource.workOrderTechnician}
-              api={`work-order-technician`}
-              afterImportCompleted={() => {
-                fetchData();
-              }}
-              disabled={selectedRecords.length!==1}
-              additionalParams={`${selectedRecords[0]?.repairOrderId ? `repairOrder=${selectedRecords[0]?.repairOrderId}` : `productionOrder=${selectedRecords[0]?.productionOrderId}`}&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
-            />
-            <Button
-              variant="outlined"
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              disabled={tabValue !== WORKORDER_SERVICE_STATUS.pending || selectedRecords?.length === 0}
-              endIcon={<ExpandMore />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorActionEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorActionEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  setShowServiceCompleteConfirmBox(true);
-                  closeActions();
+          <DetailsPageHeader
+            isAddButtonVisible={false}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: tabValue !== WORKORDER_SERVICE_STATUS.pending || selectedRecords?.length === 0 }}
+            rightSideContents={
+              <ImportExportMenu
+                permissions={permissions}
+                module={sidebarResource.workOrderTechnician}
+                api={`work-order-technician`}
+                afterImportCompleted={() => {
+                  fetchData();
                 }}
-                disabled={selectedRecords?.length &&
-                  selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length ? false : true}
-              >
-                Complete Service(s)
-              </MenuItem>
-            </Menu>
-          </Box>
+                disabled={selectedRecords.length !== 1}
+                additionalParams={`${
+                  selectedRecords[0]?.repairOrderId
+                    ? `repairOrder=${selectedRecords[0]?.repairOrderId}`
+                    : `productionOrder=${selectedRecords[0]?.productionOrderId}`
+                }&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
+              />
+            }
+            hasXpadding
+          />
+
           {columns ? (
             <CustomReactTable
               height={'calc(100vh - 300px)'}
