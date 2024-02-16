@@ -3,14 +3,19 @@ import React, { ReactNode, useState } from 'react';
 import type { PreviewDownloadProps } from './PreviewDownload';
 import { Add, ExpandMore } from '@material-ui/icons';
 import PreviewDownload from './PreviewDownload';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+
+type ButtonPropsWithTooltip = {
+  tooltip?: string;
+} & ButtonProps;
 
 type DetailsPageHeaderProps = {
   isAddButtonVisible: boolean;
   addButtonMenuItems?: ReactNode;
-  addButtonProps?: ButtonProps;
+  addButtonProps?: ButtonPropsWithTooltip;
   isActionButtonVisible: boolean;
   actionButtonMenuItems?: ReactNode;
-  actionButtonProps?: ButtonProps;
+  actionButtonProps?: ButtonPropsWithTooltip;
   previewDownloadProps?: PreviewDownloadProps | undefined | null;
   leftSideContents?: ReactNode;
   rightSideContents?: ReactNode;
@@ -47,24 +52,31 @@ const DetailsPageHeader = ({
     setAddAnchorEl(null);
   };
 
+  const { tooltip: actionButtonTooltip, ...restOfActionButtonProps } = actionButtonProps || {};
+  const { tooltip: addButtonTooltip, ...restOfAddButtonProps } = addButtonProps || {};
+
   return (
     <div className={`flex details-page-header flex-wrap justify-between items-center gap-2 py-2 ${hasXpadding ? 'px-2' : ''}`}>
       <div className="flex flex-wrap gap-2 items-center">
         {isAddButtonVisible ? (
           <>
-            <Button
-              variant={isMobile ? 'text' : 'outlined'}
-              color="primary"
-              size="small"
-              startIcon={isMobile ? null : <Add />}
-              onClick={openAddActions}
-              {...addButtonProps}
-              aria-controls="add-menu"
-              className={`${isMobile ? 'btn-outline-v1  with-border' : ''}`}
-              endIcon={isMobile ? null : <ExpandMore fontSize="small" />}
-            >
-              {isMobile ? <Add /> : 'Add'}
-            </Button>
+            <HtmlTooltip title={addButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
+              <span>
+                <Button
+                  variant={isMobile ? 'text' : 'outlined'}
+                  color="primary"
+                  size="small"
+                  startIcon={isMobile ? null : <Add />}
+                  onClick={openAddActions}
+                  {...restOfAddButtonProps}
+                  aria-controls="add-menu"
+                  className={`${isMobile ? 'btn-outline-v1  with-border' : ''}`}
+                  endIcon={isMobile ? null : <ExpandMore fontSize="small" />}
+                >
+                  {isMobile ? <Add /> : 'Add'}
+                </Button>
+              </span>
+            </HtmlTooltip>
             <Menu
               anchorEl={addAnchorEl}
               keepMounted
@@ -88,18 +100,22 @@ const DetailsPageHeader = ({
         {rightSideContents}
         {isActionButtonVisible ? (
           <>
-            <Button
-              variant={'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              className="new-dropdown-v1"
-              {...actionButtonProps}
-            >
-              {'Actions'}
-              <ExpandMore fontSize="small" />
-            </Button>
+            <HtmlTooltip title={actionButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
+              <span>
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  className="new-dropdown-v1"
+                  {...restOfActionButtonProps}
+                >
+                  {'Actions'}
+                  <ExpandMore fontSize="small" />
+                </Button>
+              </span>
+            </HtmlTooltip>
             <Menu
               anchorEl={actionAnchorEl}
               keepMounted
