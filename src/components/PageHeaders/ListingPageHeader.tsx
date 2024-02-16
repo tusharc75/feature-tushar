@@ -120,9 +120,9 @@ const ListingPageHeader = ({
     });
   }, [locationKeys]);
 
-  const renderButtonText = ({ text, icon, loading }) => {
+  const renderButtonText = ({ text, icon, loading, iconText = '' }) => {
     if (isMobile) {
-      return <>{loading ? <CircularProgress size={20} /> : icon}</>;
+      return <>{loading ? <CircularProgress size={20} /> : iconText ? iconText : icon}</>;
     } else {
       return <>{loading ? <CircularProgress size={20} /> : text}</>;
     }
@@ -183,10 +183,15 @@ const ListingPageHeader = ({
                         onClick={(e) => {
                           addButtonOnclick && addButtonOnclick(e);
                         }}
-                        className={`no-shadow ${addButtonLoading ? '' : 'max-[600px]:[max-width:36px_!important]'}`}
+                        className={`no-shadow ${addButtonLoading ? '' : 'max-[600px]:[max-width:36px_!important]'} min-h-[32px]`}
                         startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
                       >
-                        {renderButtonText({ text: `Add ${addButtonText}`, icon: <AddOutlined />, loading: addButtonLoading })}
+                        {renderButtonText({
+                          text: `Add ${addButtonText}`,
+                          icon: <AddOutlined />,
+                          loading: addButtonLoading,
+                          iconText: addButtonText
+                        })}
                       </Button>
                     </HtmlTooltip>
                   ) : null}
