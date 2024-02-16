@@ -13,6 +13,7 @@ import CustomTabs, { CustomTab } from '../CustomTabs';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import SearchBox from '../Helpers/SearchBox';
+import { ListingPageHeader } from '../PageHeaders';
 
 let searchTimeout;
 
@@ -213,27 +214,17 @@ const AssignServiceDialog = ({
         onClose={handleClose}
       />
       <CustomDialogContent>
-        <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} className={styles.filter_side}>
-              <Box className={styles.filter_side_header} component="div">
-                <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
-                <Button
-                  disabled={isSubmitting || selectedRecords?.length === 0}
-                  onClick={() => {
-                    onSuccess(selectedRecords);
-                  }}
-                  color="primary"
-                  size="small"
-                  variant="contained"
-                  endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
-                >
-                  Add {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </div>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={false}
+          addButtonProps={{ disabled: isSubmitting || selectedRecords?.length === 0, loading: isSubmitting, iconsEnabled: false }}
+          addButtonOnclick={() => {
+            onSuccess(selectedRecords);
+          }}
+          isAddButtonVisible={true}
+          setQueryString={false}
+        />
         {pricingCondition && (
           <Box>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
