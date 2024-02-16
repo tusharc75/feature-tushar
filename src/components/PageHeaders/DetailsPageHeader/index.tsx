@@ -34,26 +34,34 @@ const DetailsPageHeader = ({
   rightSideContents,
   hasXpadding = true
 }: DetailsPageHeaderProps) => {
+  const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
+  const { tooltip: addButtonTooltip, onClick: addButtonOnClick, ...restOfAddButtonProps } = addButtonProps || {};
+
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const isMobile = useMediaQuery('(max-width:600px)');
 
-  const openActions = (event) => {
-    setActionAnchorEl(event.currentTarget);
+  const ActionClick = (event) => {
+    if (typeof actionButtonOnClick === 'function') {
+      actionButtonOnClick(event);
+    } else {
+      setActionAnchorEl(event.currentTarget);
+    }
   };
-  const closeActions = () => {
+  const closeActionMenu = () => {
     setActionAnchorEl(null);
   };
 
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
+  const AddClick = (event) => {
+    if (typeof addButtonOnClick === 'function') {
+      addButtonOnClick(event);
+    } else {
+      setAddAnchorEl(event.currentTarget);
+    }
   };
-  const closeAddActions = () => {
+  const closeAddMenu = () => {
     setAddAnchorEl(null);
   };
-
-  const { tooltip: actionButtonTooltip, ...restOfActionButtonProps } = actionButtonProps || {};
-  const { tooltip: addButtonTooltip, ...restOfAddButtonProps } = addButtonProps || {};
 
   return (
     <div className={`flex details-page-header flex-wrap justify-between items-center gap-2 py-2 ${hasXpadding ? 'px-2' : ''}`}>
@@ -67,11 +75,11 @@ const DetailsPageHeader = ({
                   color="primary"
                   size="small"
                   startIcon={isMobile ? null : <Add />}
-                  onClick={openAddActions}
+                  onClick={AddClick}
                   {...restOfAddButtonProps}
                   aria-controls="add-menu"
                   className={`${isMobile ? 'btn-outline-v1  with-border' : ''}`}
-                  endIcon={isMobile ? null : <ExpandMore fontSize="small" />}
+                  endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
                 >
                   {isMobile ? <Add /> : 'Add'}
                 </Button>
@@ -87,9 +95,9 @@ const DetailsPageHeader = ({
               }}
               id="add-menu"
               open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
+              onClose={closeAddMenu}
             >
-              <span onClick={closeAddActions}>{addButtonMenuItems}</span>
+              <span onClick={closeAddMenu}>{addButtonMenuItems}</span>
             </Menu>
           </>
         ) : null}
@@ -106,7 +114,7 @@ const DetailsPageHeader = ({
                   variant={'outlined'}
                   color="default"
                   size="small"
-                  onClick={openActions}
+                  onClick={ActionClick}
                   aria-controls="action-menu"
                   className="new-dropdown-v1"
                   {...restOfActionButtonProps}
@@ -126,9 +134,9 @@ const DetailsPageHeader = ({
               }}
               id="add-menu"
               open={Boolean(actionAnchorEl)}
-              onClose={closeActions}
+              onClose={closeActionMenu}
             >
-              <span onClick={() => closeActions()}>{actionButtonMenuItems}</span>
+              <span onClick={() => closeActionMenu()}>{actionButtonMenuItems}</span>
             </Menu>
           </>
         ) : null}
