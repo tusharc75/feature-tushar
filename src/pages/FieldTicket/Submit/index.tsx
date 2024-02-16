@@ -1,23 +1,22 @@
 import { Box, Button, IconButton } from '@material-ui/core';
+import HistoryIcon from '@material-ui/icons/History';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import CommentDialog from 'src/components/CommentDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { fetch_field_ticket_material_fields } from '../helper';
-import { FIELD_TICKET_STATUS, fieldTicket, sidebarResource } from 'src/constants/helpers';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { camelCase, set, startCase } from 'lodash';
-import ManageSubmit from './ManageSubmit';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CommentDialog from 'src/components/CommentDialog';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import HistoryIcon from '@material-ui/icons/History';
-import ViewLogs from './ViewLogs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { FIELD_TICKET_STATUS, fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { fetch_field_ticket_material_fields } from '../helper';
+import ManageSubmit from './ManageSubmit';
+import ViewLogs from './ViewLogs';
 
 const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Submit`;
