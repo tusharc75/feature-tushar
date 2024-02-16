@@ -149,7 +149,7 @@ const ListingPageHeader = ({
                       onClick={(e) => {
                         addButtonOnclick && addButtonOnclick(e);
                       }}
-                      className={`no-shadow ${addButtonProps.className} max-[600px]:[max-width:36px_!important]`}
+                      className={`no-shadow max-[600px]:[max-width:36px_!important]`}
                       startIcon={isMobile ? null : <AddOutlined />}
                     >
                       {isMobile ? <AddOutlined /> : 'Add'}
