@@ -149,7 +149,7 @@ const ListingPageHeader = ({
                       onClick={(e) => {
                         addButtonOnclick && addButtonOnclick(e);
                       }}
-                      className={`no-shadow ${addButtonProps.className}`}
+                      className={`no-shadow ${addButtonProps.className} max-[600px]:[max-width:36px_!important]`}
                       startIcon={isMobile ? null : <AddOutlined />}
                     >
                       {isMobile ? <AddOutlined /> : 'Add'}
@@ -161,7 +161,7 @@ const ListingPageHeader = ({
                         variant={'outlined'}
                         color="default"
                         size="small"
-                        className={`new-dropdown-v1 min-h-[32px]`}
+                        className={`new-dropdown-v1 min-h-[32px] max-[600px]:[border:0px_!important]`}
                         {...actionButtonProps}
                         onClick={openActions}
                         aria-controls="action-menu"
