@@ -465,7 +465,7 @@ const Quotation = ({
     if (quotationData) {
       const data: any = {};
       data.conditionType = [PRICING_SETUP_TYPE.price];
-      const material: any = []
+      const material: any = [];
       arr?.forEach((ele) => {
         const obj = {
           materialId: ele?.materialId,
@@ -473,16 +473,15 @@ const Quotation = ({
           qty: ele?.qty,
           pricingMethod: ele?.pricingMethod,
           currency: quotationData?.currency
-        }
+        };
         if (isArray(ele?.unit)) {
           ele?.unit?.forEach((e) => {
-            material.push({ ...obj, unit: e })
-          })
+            material.push({ ...obj, unit: e });
+          });
+        } else {
+          material.push({ ...obj, unit: ele?.unit });
         }
-        else {
-          material.push({ ...obj, unit: ele?.unit })
-        }
-      })
+      });
       data.material = material;
       data.supplier = [];
       data.customer = [quotationData?.customerAccount?.optionValue];

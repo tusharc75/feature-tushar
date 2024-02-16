@@ -11,7 +11,7 @@ type DetailsPageHeaderProps = {
   isActionButtonVisible: boolean;
   actionButtonMenuItems?: ReactNode;
   actionButtonProps?: ButtonProps;
-  previewDownloadProps?: PreviewDownloadProps | undefined;
+  previewDownloadProps?: PreviewDownloadProps | undefined | null;
   leftSideContents?: ReactNode;
   rightSideContents?: ReactNode;
   hasXpadding?: boolean;
@@ -48,7 +48,7 @@ const DetailsPageHeader = ({
   };
 
   return (
-    <div className={`flex flex-wrap justify-between items-center gap-2 py-2 ${hasXpadding ? 'px-2' : ''}`}>
+    <div className={`flex details-page-header flex-wrap justify-between items-center gap-2 py-2 ${hasXpadding ? 'px-2' : ''}`}>
       <div className="flex flex-wrap gap-2 items-center">
         {isAddButtonVisible ? (
           <>

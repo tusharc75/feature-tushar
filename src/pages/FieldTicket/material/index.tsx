@@ -1,33 +1,31 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiChevronDown } from 'react-icons/bi';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import routes from 'src/components/Helpers/Routes';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import MaterialQtyDialog from './MaterialQtyDialog';
-import { fetch_field_ticket_material_fields } from '../helper';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
-import Consumables from './Consumables';
 import { FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
-import EditIcon from '@material-ui/icons/Edit';
-import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
-import { useData } from 'src/StateProvider/Provider';
-import { camelCase, isEmpty } from 'lodash';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import { fetch_field_ticket_material_fields } from '../helper';
+import Consumables from './Consumables';
+import MaterialQtyDialog from './MaterialQtyDialog';
 
 const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeStatus }) => {
-
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -40,7 +38,6 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -222,24 +219,15 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     }
   }, [columns]);
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleAdd = async (rows) => {
     setIsSubmitting(true);
     var taxCodeData: any = null;
     if (fieldTicketData?.taxCode) {
       const {
         data: { data }
-      } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.service}`);
+      } = await axiosInstance().get(
+        `${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.service}`
+      );
       if (data?.length) {
         taxCodeData = data[0];
       }
@@ -274,8 +262,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         material,
         priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue)
       );
-    }
-    else {
+    } else {
       AddMaterial(material, null);
     }
   };
@@ -373,115 +360,76 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     handleSaveData(rows);
   };
 
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
+  const AddButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setServiceDialog({ open: true, type: 'service' });
+          }}
+        >
+          Add Existing Service
+        </MenuItem>
+        {permissions?.serviceMaster?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              setServiceDialog({ open: true, type: 'newService' });
+            }}
+          >
+            Add New Service
+          </MenuItem>
+        )}
+      </>
+    );
   };
 
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
+  const ActionButtonMenuItms = () => {
+    return (
+      <>
+        <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+          <MenuItem
+            onClick={() => {
+              setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
+              setIsBulkEdit(true);
+            }}
+          >
+            Bulk Edit
+          </MenuItem>
+        </HtmlTooltip>
+        <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
+          <MenuItem
+            disabled={isDeleting}
+            onClick={() => {
+              setDeleteData(
+                selectedRecords?.map((d) => {
+                  return {
+                    id: d?._id,
+                    service: d?.materialId
+                  };
+                })
+              );
+            }}
+          >
+            Delete
+          </MenuItem>
+        </HtmlTooltip>
+      </>
+    );
   };
 
   return (
     <>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  setServiceDialog({ open: true, type: 'service' });
-                  closeAddActions();
-                }}
-              >
-                Add Existing Service
-              </MenuItem>
-              {permissions?.serviceMaster?.isCreate && (
-                <MenuItem
-                  onClick={() => {
-                    setServiceDialog({ open: true, type: 'newService' });
-                    closeAddActions();
-                  }}
-                >
-                  Add New Service
-                </MenuItem>
-              )}
-            </Menu>
-          </Box>
-          <Box display="flex" ml={1}>
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              id="demo-positioned-button"
-              onClick={handleClick}
-              disabled={!Boolean(selectedRecords?.length)}
-              endIcon={<BiChevronDown />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              open={open}
-              onClose={handleClose}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-            >
-              <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-                <MenuItem
-                  onClick={() => {
-                    setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
-                    setIsBulkEdit(true);
-                    handleClose();
-                  }}
-                >
-                  Bulk Edit
-                </MenuItem>
-              </HtmlTooltip>
-              <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
-                <MenuItem
-                  disabled={isDeleting}
-                  onClick={() => {
-                    setDeleteData(
-                      selectedRecords?.map((d) => {
-                        return {
-                          id: d?._id,
-                          service: d?.materialId
-                        };
-                      })
-                    );
-                    handleClose();
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </HtmlTooltip>
-            </Menu>
-          </Box>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={<AddButtonMenuItems />}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={<ActionButtonMenuItms />}
+            actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+            hasXpadding
+          />
+        </>
       )}
       {columns ? (
         <Box zIndex={5} width={'100%'}>

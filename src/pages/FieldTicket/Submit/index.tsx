@@ -1,25 +1,24 @@
 import { Box, Button, IconButton } from '@material-ui/core';
+import HistoryIcon from '@material-ui/icons/History';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import CommentDialog from 'src/components/CommentDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { fetch_field_ticket_material_fields } from '../helper';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FIELD_TICKET_STATUS, fieldTicket, sidebarResource } from 'src/constants/helpers';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { camelCase, set, startCase } from 'lodash';
+import { fetch_field_ticket_material_fields } from '../helper';
 import ManageSubmit from './ManageSubmit';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CommentDialog from 'src/components/CommentDialog';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import HistoryIcon from '@material-ui/icons/History';
 import ViewLogs from './ViewLogs';
 
 const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) => {
-
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Submit`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -154,59 +153,68 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
       });
   };
 
+  const previewDownloadProps = {
+    fileName: `${routes.fieldTicket.title}-${fieldTicketData?.fieldTicketNumber}`,
+    hideDetailButton: true,
+    resource: sidebarResource.fieldTicket,
+    referenceId: fieldTicketData?._id,
+    columns: columns,
+    isSendEmail: true,
+    defaultColumns: [
+      'type',
+      'detail',
+      'estimateStartDate',
+      'estimateEndDate',
+      'pricingMethod',
+      'qty',
+      `price_${fieldTicketData?.currency?.toLowerCase()}`,
+      `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
+    ]
+  };
+
+  const RightSideContents = () => {
+    return (
+      <>
+        {allowedToEdit && (
+          <Fragment>
+            {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  setSubmitDialog(true);
+                }}
+              >
+                Submit
+              </Button>
+            )}
+            {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && (
+              <Button variant="contained" color="primary" size="small" onClick={() => setCommentDialog(true)}>
+                Re-Open
+              </Button>
+            )}
+          </Fragment>
+        )}
+        <HtmlTooltip title="View Logs">
+          <IconButton size="small" aria-label="Delete" onClick={() => setViewLogsDialog(true)}>
+            <HistoryIcon />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+    );
+  };
+
   return (
     <>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center">
-          <PreviewDownload
-            fileName={`${routes.fieldTicket.title}-${fieldTicketData?.fieldTicketNumber}`}
-            hideDetailButton={true}
-            resource={sidebarResource.fieldTicket}
-            referenceId={fieldTicketData?._id}
-            columns={columns}
-            isSendEmail={true}
-            defaultColumns={[
-              'type',
-              'detail',
-              'estimateStartDate',
-              'estimateEndDate',
-              'pricingMethod',
-              'qty',
-              `price_${fieldTicketData?.currency?.toLowerCase()}`,
-              `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
-            ]}
-          />
-        </Box>
-        <Box display="flex">
-          {allowedToEdit && (
-            <Fragment>
-              {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    setSubmitDialog(true);
-                  }}
-                >
-                  Submit
-                </Button>
-              )}
-              {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && (
-                <Button variant="contained" color="primary" size="small" onClick={() => setCommentDialog(true)}>
-                  Re-Open
-                </Button>
-              )}
-            </Fragment>
-          )}
-          <Box ml={1}></Box>
-          <HtmlTooltip title="View Logs">
-            <IconButton size="small" aria-label="Delete" onClick={() => setViewLogsDialog(true)}>
-              <HistoryIcon />
-            </IconButton>
-          </HtmlTooltip>
-        </Box>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={false}
+        previewDownloadProps={previewDownloadProps}
+        rightSideContents={<RightSideContents />}
+        hasXpadding
+      />
+
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
