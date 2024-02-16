@@ -11,7 +11,7 @@ type DetailsPageHeaderProps = {
   isActionButtonVisible: boolean;
   actionButtonMenuItems?: ReactNode;
   actionButtonProps?: ButtonProps;
-  previewDownloadProps?: PreviewDownloadProps | undefined;
+  previewDownloadProps?: PreviewDownloadProps | undefined | null;
   leftSideContents?: ReactNode;
   rightSideContents?: ReactNode;
   hasXpadding?: boolean;
