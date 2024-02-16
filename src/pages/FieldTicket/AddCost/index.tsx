@@ -1,31 +1,27 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import AddIcon from '@material-ui/icons/Add';
-import { Fragment, useContext, useEffect, useState } from 'react';
-import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, fieldTicket } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import { flattenArray } from 'src/constants/columns';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import AddCostDialog from './AddCostDialog';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { Box, Grid, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { camelCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { flattenArray } from 'src/constants/columns';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { CHILD_RESOURCE, fieldTicket } from 'src/constants/helpers';
+import AddCostDialog from './AddCostDialog';
 
 const AddCost = ({ fieldTicketData, setNextStep, allowedToEdit }) => {
-
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Cost`;
 
   const toastConfig = useContext(CustomToastContext);
-
-  const [anchorEl, setAnchorEl] = useState(null);
   const {
     state: { permissions }
   }: any = useData();
@@ -74,7 +70,7 @@ const AddCost = ({ fieldTicketData, setNextStep, allowedToEdit }) => {
           canDrag: false,
           Cell: ({ row }) => (
             <Grid container spacing={1}>
-              <HtmlTooltip title='Edit'>
+              <HtmlTooltip title="Edit">
                 <IconButton
                   size="small"
                   aria-label="Details"
@@ -85,7 +81,7 @@ const AddCost = ({ fieldTicketData, setNextStep, allowedToEdit }) => {
                   <EditIcon fontSize="small" color="primary" />
                 </IconButton>
               </HtmlTooltip>
-              <HtmlTooltip title='Delete'>
+              <HtmlTooltip title="Delete">
                 <IconButton
                   size="small"
                   aria-label="Details"
@@ -125,14 +121,6 @@ const AddCost = ({ fieldTicketData, setNextStep, allowedToEdit }) => {
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const handleDelete = () => {
@@ -194,62 +182,45 @@ const AddCost = ({ fieldTicketData, setNextStep, allowedToEdit }) => {
       });
   };
 
+  const AddButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem onClick={() => setAddDialog({ open: true, data: null })}>Add Manual Entry</MenuItem>
+      </>
+    );
+  };
+
+  const ActionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={!(selectedRecords?.length > 0 && selectedRecords?.length)}
+          onClick={() => {
+            if (selectedRecords.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            }
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" alignItems="center">
-            <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              startIcon={<AddIcon />}
-              onClick={() => setAddDialog({ open: true, data: null })}
-              aria-controls="add-menu"
-            >
-              {'Add Manual Entry'}
-            </Button>
-          </Box>
-          <Box display="flex">
-            <Button
-              disabled={selectedRecords.length ? false : true}
-              variant={'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              endIcon={<ExpandMore />}
-              className="new-dropdown-v1"
-            >
-              {'Actions'}
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                disabled={!(selectedRecords?.length > 0 && selectedRecords?.length)}
-                onClick={() => {
-                  closeActions();
-                  if (selectedRecords.length === 1) {
-                    setDeleteRecord(selectedRecords[0]);
-                  }
-                  setShowDeleteConfirmBox(true);
-                }}
-              >
-                Delete
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={<AddButtonMenuItems />}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={<ActionButtonMenuItems />}
+            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            hasXpadding
+          />
+        </>
       )}
       {columns ? (
         <Box p="6px" zIndex={5} width={'100%'}>

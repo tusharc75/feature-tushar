@@ -1,36 +1,27 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { IconButton, MenuItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import routes from 'src/components/Helpers/Routes';
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerializedAsset';
-import {
-  sidebarResource,
-  ASSET_STATUS,
-  CHILD_RESOURCE,
-  REPAIR_JOB_STATUS,
-  repairJob,
-} from 'src/constants/helpers';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useData } from 'src/StateProvider/Provider';
-import { flattenArray } from 'src/constants/columns';
-import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import ManageAssetDialog from './ManageAssetDialog';
 import { Edit } from '@material-ui/icons';
-import Tooltip from 'src/components/CustomTooltipTitle';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import Tooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { flattenArray } from 'src/constants/columns';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { ASSET_STATUS, CHILD_RESOURCE, REPAIR_JOB_STATUS, repairJob, sidebarResource } from 'src/constants/helpers';
+import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerializedAsset';
+import ManageAssetDialog from './ManageAssetDialog';
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen }) => {
-
-  const [anchorElAction, setAnchorElAction] = useState(null);
   const toastConfig = useContext(CustomToastContext);
 
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
@@ -42,7 +33,13 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
   const {
     state: { user, permissions }
   }: any = useData();
-  const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
+  const [showEditAssetDialog, setShowEditAssetDialog] = useState({
+    open: false,
+    isBulkedit: false,
+    data: null,
+    selectedRecords: [],
+    showSaveAndNext: false
+  });
 
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
   const [isRateRequired, setIsRateRequired] = useState(false);
@@ -60,16 +57,8 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
     fetchRecords();
   }, [columns]);
 
-  const handleClickAction = (event) => {
-    setAnchorElAction(event.currentTarget);
-  };
-
-  const handleCloseAction = () => {
-    setAnchorElAction(null);
-  };
-
   const fetchFields = async () => {
-    setColumns(null)
+    setColumns(null);
     const fieldResponce = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`);
     const repairJobAssetFields = fieldResponce?.data?.data;
 
@@ -91,7 +80,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       ]
     });
 
-    let fields = CURReplaceByCurrencySingle(repairJobAssetFields, repairJobData?.currency || "USD");
+    let fields = CURReplaceByCurrencySingle(repairJobAssetFields, repairJobData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(fields)));
 
     const assetField = data?.find((e) => e.resource === sidebarResource.serializedAsset)?.fieldNames || [];
@@ -103,13 +92,13 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
         accessor: 'index',
         Header: 'Index',
         width: 100,
-        disableFilters : false,
+        disableFilters: false,
         sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
-      },
+      }
     ];
     assetField?.forEach((ele) => {
       if (ele?.fieldName === 'assetNumber') {
@@ -122,33 +111,42 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
             <>
               {row.original.assetNumber ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  {allowedToEdit ?
+                  {allowedToEdit ? (
                     <p
                       className="link text-truncate"
-                      onClick={() => setShowEditAssetDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false })}
-                    >{row.original.assetNumber}</p>
-                    :
+                      onClick={() =>
+                        setShowEditAssetDialog({
+                          open: true,
+                          isBulkedit: false,
+                          data: row?.original,
+                          selectedRecords: [],
+                          showSaveAndNext:
+                            row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                        })
+                      }
+                    >
+                      {row.original.assetNumber}
+                    </p>
+                  ) : (
                     <p className="text-truncate">{row.original.assetNumber}</p>
-                  }
+                  )}
                   <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
-                        window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`)
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
                       }}
                     >
                       <OpenInNewIcon fontSize="small" color="primary" />
                     </IconButton>
                   </Box>
                 </div>
-              ) :
-                (
-                  <NoDataCell />
-                )
-              }
+              ) : (
+                <NoDataCell />
+              )}
             </>
           )
-        })
+        });
       }
       if (ele?.fieldName === 'serialNumber') {
         coloum.push({
@@ -166,9 +164,8 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
                 <NoDataCell />
               )}
             </>
-
           )
-        })
+        });
       }
     });
     productField?.forEach((ele) => {
@@ -188,7 +185,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
             )}
           </>
         )
-      })
+      });
     });
     coloum.push({
       accessor: 'status',
@@ -200,7 +197,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
           <p className="text-truncate">{row.original.status}</p>
         </div>
       )
-    })
+    });
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
@@ -211,21 +208,22 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row }) =>
+      Cell: ({ row }) => (
         <div className="d-flex gap-1">
-          {<Tooltip title={permissions?.repairJob?.isUpdate ? 'Edit' : 'You are not permitted to edit'}>
-            <IconButton
-              disabled={!permissions?.repairJob?.isUpdate}
-              color="primary"
-              size="small"
-              onClick={() => {
-                setShowEditAssetDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: false })
-              }
-              }
-            >
-              <Edit />
-            </IconButton>
-          </Tooltip>}
+          {
+            <Tooltip title={permissions?.repairJob?.isUpdate ? 'Edit' : 'You are not permitted to edit'}>
+              <IconButton
+                disabled={!permissions?.repairJob?.isUpdate}
+                color="primary"
+                size="small"
+                onClick={() => {
+                  setShowEditAssetDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: false });
+                }}
+              >
+                <Edit />
+              </IconButton>
+            </Tooltip>
+          }
           {row?.original?.status === ASSET_STATUS.reserved && (
             <GridDeleteIcon
               hasDeletePermission={permissions?.repairJob?.isUpdate}
@@ -238,24 +236,24 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
             />
           )}
         </div>
+      )
     });
-    setColumns(coloum)
+    setColumns(coloum);
   };
 
   const fetchRecords = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
     setNextStep(false);
     var data: any = [];
-    const response = await axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`)
+    const response = await axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`);
     data = response?.data?.data;
     data.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.productName = parent.product?.optionLabel
-      parent.productDescription = parent?.productDetail?.productDescription
-      parent.productCategory = parent?.productCategory?.optionLabel
+      parent.productName = parent.product?.optionLabel;
+      parent.productDescription = parent?.productDetail?.productDescription;
+      parent.productCategory = parent?.productCategory?.optionLabel;
       parent.isValid = parent['finalPrice_' + repairJobData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = parent.status === ASSET_STATUS.lost;
     });
@@ -292,14 +290,15 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
 
   const handleAdd = async (rows) => {
     setIsAdding(true);
-    axiosInstance().post(`${repairJob.api}/${repairJobData._id}/assets`, {
-      assets: rows.map((m) => {
-        return {
-          _id: m._id ?? m.id,
-          currentStatus: m?.status,
-        };
+    axiosInstance()
+      .post(`${repairJob.api}/${repairJobData._id}/assets`, {
+        assets: rows.map((m) => {
+          return {
+            _id: m._id ?? m.id,
+            currentStatus: m?.status
+          };
+        })
       })
-    })
       .then(({ data }) => {
         setAddSerializedAssetDialog(false);
         if (repairJobData.status === REPAIR_JOB_STATUS.new) {
@@ -317,7 +316,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
         setIsAdding(false);
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
@@ -361,86 +360,71 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
     handleSaveData(rows);
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddSerializedAssetDialog(true);
+          }}
+        >
+          Add Existing {routes.serializedAsset.title}
+        </MenuItem>
+      </>
+    );
+  };
+
+  const actionButtonMenuitems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.length === 0}
+          onClick={() => {
+            setShowEditAssetDialog({ open: true, isBulkedit: true, data: null, selectedRecords: selectedRecords, showSaveAndNext: false });
+          }}
+        >
+          {'Bulk Edit'}
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords.length === 0 || selectedRecords.some((s) => s.status !== ASSET_STATUS.reserved)}
+          onClick={() => {
+            setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: selectedRecords.map((m) => m._id) });
+          }}
+        >
+          {'Delete'}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
       {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
-        <Box display="flex" justifyContent="space-between" flexWrap={'wrap'} gridGap={1} m={1}>
-          <Box display="flex" flexWrap={'wrap'}>
-            <Button
-              variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-              color="primary"
-              type="button"
-              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-              size="small"
-              onClick={() => {
-                setAddSerializedAssetDialog(true);
-              }}
-            >
-              {`Add Existing  ${routes.serializedAsset.title}`}
-            </Button>
-          </Box>
-          <Box display="flex" gridGap={2} >
-            <Button
-              variant={'outlined'}
-              color="primary"
-              disabled={selectedRecords.length === 0}
-              size="small"
-              onClick={handleClickAction}
-              endIcon={<ArrowDropDownIcon />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorElAction}
-              keepMounted
-              open={Boolean(anchorElAction)}
-              onClose={handleCloseAction}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-            >
-              <MenuItem
-                disabled={selectedRecords.length === 0}
-                onClick={() => {
-                  setShowEditAssetDialog({ open: true, isBulkedit: true, data: null, selectedRecords: selectedRecords, showSaveAndNext: false });
-                }}
-              >
-                {'Bulk Edit'}
-              </MenuItem>
-              <MenuItem
-                disabled={selectedRecords.length === 0 || selectedRecords.some((s) => s.status !== ASSET_STATUS.reserved)}
-                onClick={() => {
-                  setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: selectedRecords.map((m) => m._id) });
-                }}
-              >
-                {'Delete'}
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuitems()}
+            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            hasXpadding
+          />
+        </>
       )}
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
-            state = {state}
-            dispatch = {dispatch}
+            state={state}
+            dispatch={dispatch}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
             onSaveEdit={onSaveInlineEdit}
-            refreshGrid = {fetchRecords}
+            refreshGrid={fetchRecords}
           />
         </Box>
       ) : (
@@ -452,7 +436,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
         <AddSerializedAsset
           referenceType="Repair Job"
           addSerializedAsset={(rows) => {
-            handleAdd(rows)
+            handleAdd(rows);
           }}
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog(false);
