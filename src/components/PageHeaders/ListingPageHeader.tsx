@@ -161,7 +161,7 @@ const ListingPageHeader = ({
                         variant={'outlined'}
                         color="default"
                         size="small"
-                        className={`new-dropdown-v1 min-h-[32px] max-[600px]:[border:0px_!important]`}
+                        className={`new-dropdown-v1 min-h-[32px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
                         {...actionButtonProps}
                         onClick={openActions}
                         aria-controls="action-menu"
