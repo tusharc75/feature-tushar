@@ -328,6 +328,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             billingAddress: serviceOrderData?.billingAddress?.optionValue || '',
             shippingAddress: serviceOrderData?.shippingAddress?.optionValue || '',
             taxCode: serviceOrderData?.taxCode?.optionValue || '',
+            pricingCondition: serviceOrderData?.pricingCondition?.optionValue || '',
             collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || []
           }}
           onSuccess={() => {

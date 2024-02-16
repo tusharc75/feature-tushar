@@ -395,9 +395,9 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                             grid: {
                               color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                             },
+                            max: 100,
+                            min: 0,
                             ticks: {
-                              max: 100,
-                              min: 0,
                               callback: function (value) {
                                 return value + '%';
                               },

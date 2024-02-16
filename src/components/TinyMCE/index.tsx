@@ -167,7 +167,8 @@ export default function TinyMCE(props) {
               if (isValidHeight()) {
                 editorRef.current.execCommand('mceInsertContent', false, data);
               }
-            } else editorRef.current.execCommand('mceInsertContent', false, data);
+            }
+            else editorRef.current.execCommand('mceInsertContent', false, data);
           }
         }
         //data.fileUrl data.fileName
@@ -216,21 +217,22 @@ export default function TinyMCE(props) {
   };
 
   const isValidHeight = () => {
-    const contentDiv = document.getElementById('contentDiv');
-    let content = editorRef.current.getContent();
-    contentDiv.innerHTML = content;
-    let contentHeight = contentDiv.offsetHeight;
-    let validHeight = height ? height / 2.5 : 106;
+    return true;
+    // const contentDiv = document.getElementById('contentDiv');
+    // let content = editorRef.current.getContent();
+    // contentDiv.innerHTML = content;
+    // let contentHeight = contentDiv.offsetHeight;
+    // let validHeight = height ? height / 2.5 : 106;
 
-    if (contentHeight < validHeight) {
-      setPrevData(content);
-      contentDiv.innerHTML = '';
-      return true;
-    } else {
-      editorRef.current.setContent(prevData);
-      contentDiv.innerHTML = '';
-      return false;
-    }
+    // if (contentHeight < validHeight) {
+    //   setPrevData(content);
+    //   contentDiv.innerHTML = '';
+    //   return true;
+    // } else {
+    //   editorRef.current.setContent(prevData);
+    //   contentDiv.innerHTML = '';
+    //   return false;
+    // }
   };
 
   const handleSubmit = () => {
