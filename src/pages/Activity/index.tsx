@@ -1,38 +1,23 @@
-import { useState, useEffect, Fragment } from 'react';
-import { Box, Grid, makeStyles, Paper } from '@material-ui/core';
-import CustomTabs from '../../components/Helpers/CustomTabs';
+import queryString from 'query-string';
+import { Fragment, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { ListingPageHeader } from 'src/components/PageHeaders';
+import { useData } from '../../StateProvider/Provider';
+import { GetReferenceName } from '../../axios/activity';
 import Board from '../../components/Activity/Report/Board';
 import Roadmap from '../../components/Activity/Report/Roadmap';
-import { SearchFilter } from '../../components/Activity/Report/SearchFilter';
-import { useHistory } from 'react-router-dom';
-import queryString from 'query-string';
-import { GetReferenceName } from '../../axios/activity';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
+import CustomTabs from '../../components/Helpers/CustomTabs';
 import routes from '../../components/Helpers/Routes';
-import { useData } from '../../StateProvider/Provider';
+import { SearchFilter } from '../../components/SearchFilter';
 import './style.scss';
-import { isMobile } from 'react-device-detect';
 
 const capitalize = (string) => {
   return string?.charAt(0)?.toUpperCase() + string?.slice(1);
 };
 
-const useStyles = makeStyles((theme) => ({
-  activityContainer: {
-    padding: '0 0px 10px'
-  },
-  activityHeader: {
-    margin: '6px 0px',
-    borderRadius: '6px',
-    '& .MuiGrid-spacing-xs-1': {
-      width: 'calc(100% + 14px)'
-    }
-  }
-}));
-
 const Activity = ({ type }) => {
-  const classes = useStyles();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId } = parsed;
@@ -70,12 +55,12 @@ const Activity = ({ type }) => {
       <CustomContainer>
         {filter && (
           <Fragment>
-            <div className="flex flex-wrap justify-between items-start content-start gap-2 mb-[16px]">
-              <Box display="flex" justifyContent="center">
-                <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
-              </Box>
-              <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} activityName={type} />
-            </div>
+            <ListingPageHeader
+              leftSideContents={<CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />}
+              rightSideContents={<SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} activityName={type} />}
+              isActionButtonVisible={false}
+              isAddButtonVisible={false}
+            />
             {viewType === 0 && <Board type={type} filter={filter} />}
             {viewType === 1 && <Roadmap type={type} filter={filter} />}
           </Fragment>

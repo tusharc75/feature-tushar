@@ -151,7 +151,7 @@ const ReportFilters = (props: FiltersProps) => {
       .filter(
         (d: any) =>
           d.isRead &&
-          (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect' || d.fieldData.type === 'date' || d.fieldData.type === 'checkBox')
+          (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect' || d.fieldData.type === 'date' || d.fieldData.type === 'checkBox' || d.fieldData.type === "singleLine")
       )
       .map((d: any) => {
         if (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect') {
@@ -178,6 +178,9 @@ const ReportFilters = (props: FiltersProps) => {
       fieldProps.lookup = resourceOptions[name].lookup;
     } else if (type === 'checkBox') {
       fieldProps.type = 'checkBox';
+      fieldProps.lookup = false;
+    } else if(type === 'singleLine'){
+      fieldProps.type = 'singleLine';
       fieldProps.lookup = false;
     } else {
       fieldProps.type = 'date';
@@ -462,6 +465,7 @@ const ReportFilters = (props: FiltersProps) => {
                         required={false}
                         fullWidth
                         size="small"
+                        fromFilter={true}
                       />
                     </div>
                   )}

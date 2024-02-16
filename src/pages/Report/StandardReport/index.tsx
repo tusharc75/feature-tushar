@@ -110,10 +110,16 @@ const Report = () => {
                 if (type === "number-of-assets-by-status" && (o?.accessor === 'productName' || o?.accessor === 'product')) {
                     o.cell = ({ row }) => ProductRenderer(row)
                 }
+                if (o?.accessor === "serviceName") {
+                    o.cell = ({ row }) => ServiceRenderer(row)
+                }
                 o.editable = false
             });
             if (type === 'inventory-evaluation') {
                 newColumns?.forEach((e) => {
+                    if (e.accessor === 'productName') {
+                        e.cell = ({ row }) => ProductRenderer(row)
+                    }
                     if (!['productName', 'productDescription', 'productNumber', 'productCategory', 'totalQty',
                         'averagePrice', 'totalPrice', 'margin']?.includes(e.accessor)) {
                         e.show = false;
@@ -213,8 +219,18 @@ const Report = () => {
     const ProductRenderer = (row) => {
         return (
             <div>{row?.original?.productName ? (
-                <Link className="link" title={row?.original?.productName} to={`${routes.productDetail.path}/${row?.original?.productId}`} target="_blank">
+                <Link className="link" title={row?.original?.productName} to={`${routes.productDetail.path}/${row?.original?.productId || row?.original?._id}`} target="_blank">
                     {row?.original?.productName}
+                </Link>
+            ) : <NoDataCell />}</div>
+        )
+    }
+
+    const ServiceRenderer = (row) => {
+        return (
+            <div>{row?.original?.serviceName ? (
+                <Link className="link" title={row?.original?.serviceName} to={`${routes.serviceMasterDetail.path}/${row?.original?.serviceId}`} target="_blank">
+                    {row?.original?.serviceName}
                 </Link>
             ) : <NoDataCell />}</div>
         )
@@ -470,6 +486,11 @@ const Report = () => {
                         deepFilter.push({
                             field: key,
                             term: selectedData[key].value ? 'Yes' : 'No'
+                        });
+                    } else if (selectedData[key].type === 'singleLine') {
+                        deepFilter.push({
+                            field: key,
+                            term: selectedData[key].value
                         });
                     } else {
                         deepFilter.push({

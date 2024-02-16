@@ -6,14 +6,11 @@ import { BsFilter, BsFillPinFill } from 'react-icons/bs';
 import { FiMaximize2 } from 'react-icons/fi';
 import { Skeleton } from '@material-ui/lab';
 import { TbPinnedOff } from 'react-icons/tb';
-
-import styles from '../KpiDashboard/dashboard.module.scss';
 import FiltersDropdown from './FiltersDropdown';
 import axiosInstance from 'src/axios/axiosInstance';
 import ExportDropdown from './ExportDropdown';
 import TableView from './TableView';
 import { GlobalFiltersType } from './GlobalFilter';
-
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -24,6 +21,7 @@ import getStaticData from './getStaticData';
 import StaticCards from './StaticCards';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useAppTheme } from 'src/constants/AppConfig';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 export interface ChartDataType extends IFormDataType {
   _id: any;
@@ -313,6 +311,18 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                     </HtmlTooltip>
                   )
                 ) : null}
+                <HtmlTooltip title='Refresh'>
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                      fetchData()
+                    }}
+                    style={{ marginRight: 10 }}
+                  >
+                    <RefreshIcon style={{ fontSize: '20px' }} />
+                  </IconButton>
+                </HtmlTooltip>
                 {setSelectedChart && (
                   <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
                     <FiMaximize2 fontSize="16px" />
@@ -377,25 +387,41 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                           grid: {
                             color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                           }
-                        }
-                      },
-                      ...(chart.stack &&
-                        !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                          scales: {
-                            x: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
+                        },
+                        ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') &&
+                        {
+                          y1: {
+                            position: 'right',
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                             },
-                            y: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
+                            max: 100,
+                            min: 0,
+                            ticks: {
+                              callback: function (value) {
+                                return value + '%';
+                              },
                             }
                           }
                         })
+                      },
+                      ...(chart.stack &&
+                        !chartData.datasets.some((d) => d.stack === 'stacked') && {
+                        scales: {
+                          x: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                            }
+                          },
+                          y: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                            }
+                          }
+                        }
+                      })
                     }}
                   />
                 </>

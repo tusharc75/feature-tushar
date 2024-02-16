@@ -18,7 +18,7 @@ import { flash, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageFlash from './ManageFlash';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -235,8 +235,6 @@ const Flash = () => {
       });
   };
 
-
-
   const ActionMenuItems = () => {
     return (
       <>
@@ -323,7 +321,7 @@ const Flash = () => {
           // rightSideContents
           isActionButtonVisible={permissions?.flash?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={<ActionMenuItems/>}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });

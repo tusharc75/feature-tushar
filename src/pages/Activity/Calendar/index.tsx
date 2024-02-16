@@ -13,7 +13,7 @@ import { GetBoard, GetReferenceName } from '../../../axios/activity';
 import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
 import { CreateCase } from '../../../components/Activity/Case/CreateCase';
 import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
-import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
+import { SearchFilter } from '../../../components/SearchFilter';
 import { CreateTask } from '../../../components/Activity/Task/CreateTask';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';

@@ -90,7 +90,7 @@ export interface IFormDataType {
   kpi: KPIListType;
   statusOptions?: { optionValue: string; optionLabel: string }[];
   currency?: boolean;
-  stack?:boolean
+  stack?: boolean
 }
 
 export const defaultFormConfigs: IFormDataType = {
@@ -107,7 +107,8 @@ export const defaultFormConfigs: IFormDataType = {
   currency: false
 };
 
-export const RentalJobsRevenueFrequency = [
-  { optionLabel: 'Month', optionValue: 'month' },
-  { optionLabel: 'Days', optionValue: 'day' }
+export const frequencyData = [
+  { optionLabel: 'Monthly', optionValue: 'month' },
+  { optionLabel: 'Weekly', optionValue: 'week' },
+  { optionLabel: 'Daily', optionValue: 'day' }
 ];

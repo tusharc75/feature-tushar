@@ -18,7 +18,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../c
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageContactUs from './ManageContactUs';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -194,8 +194,6 @@ const ContactUs = () => {
         setIsSubmitting(false);
       });
   };
-
-
 
   const ActionMenuItems = () => {
     return (

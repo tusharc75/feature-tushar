@@ -1,22 +1,19 @@
-import React, { useEffect, useState, useContext } from 'react';
-import Grid from '@material-ui/core/Grid';
-import { Link } from 'react-router-dom';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomContainer from '../../components/CustomContainer';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { gridLoadingTimeout } from '../../constants/helpers';
-import { isMobile } from 'react-device-detect';
 import { Box, Button } from '@material-ui/core';
-import styles from './Header.module.scss';
-import ArrangeView from './ArrangeView';
+import { useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { ListingPageHeader } from 'src/components/PageHeaders';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
+import { gridLoadingTimeout } from '../../constants/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ArrangeView from './ArrangeView';
 
 const FormBuilder = () => {
-  
   const renderedFrom = 'form-builder';
   const toastConfig = useContext(CustomToastContext);
   const [arrangeViewOpen, setArrangeViewOpen] = useState(false);
@@ -28,20 +25,19 @@ const FormBuilder = () => {
     fetchGridColumns();
   }, []);
 
-  
-
   const fetchGridColumns = () => {
     const columns = [
       {
         accessor: 'resourceLabel',
         Header: 'Resource Label',
         width: 120,
-        Cell: ({ row }) =>
+        Cell: ({ row }) => (
           <div>
             <Link className="text-truncate link" to={'/form-builder/' + row?.original?.resource}>
               {row?.original?.resourceLabel || row?.original?.resource}
             </Link>
           </div>
+        )
       },
       {
         accessor: 'homePageLabel',
@@ -60,7 +56,7 @@ const FormBuilder = () => {
         Header: 'Resource',
         width: 120,
         Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row?.original?.resource}</p> : <NoDataCell />)
-      },
+      }
     ];
     setColumns(columns);
   };
@@ -94,29 +90,29 @@ const FormBuilder = () => {
       });
   };
 
+  const RightSideContents = () => {
+    return (
+      <>
+        <Button
+          variant="outlined"
+          className={'btn-outline-v1'}
+          onClick={() => {
+            setArrangeViewOpen(true);
+          }}
+        >
+          Change Resource Order
+        </Button>
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.formBuilder]} />
       </div>
       <CustomContainer>
-        <Grid className={styles.filter_side_container} container>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
-          <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
-            <Grid style={{ display: 'flex', gap: '5px' }}>
-              <Button
-                variant="outlined"
-                size="small"
-                className={'btn-outline-v1'}
-                onClick={() => {
-                  setArrangeViewOpen(true);
-                }}
-              >
-                Change Resource Order
-              </Button>
-            </Grid>
-          </Grid>
-        </Grid>
+        <ListingPageHeader rightSideContents={<RightSideContents />} isActionButtonVisible={false} isAddButtonVisible={false} />
         {arrangeViewOpen && <ArrangeView open={arrangeViewOpen} close={closeHandler} resourceData={resource} />}
         {columns ? (
           <CustomReactTable

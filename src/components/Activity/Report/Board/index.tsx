@@ -153,7 +153,7 @@ const Board = ({ type, filter }) => {
 
   return (
     <>
-      <Box className="grid grid-cols-1 md:grid-cols-2 gap-2 pb-[18px]">
+      <Box className="grid grid-cols-1 md:grid-cols-2 gap-2 pb-[18px] max-w-[1008px]">
         <Autocomplete
           fullWidth
           options={resourceOptions}

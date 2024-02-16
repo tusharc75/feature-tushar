@@ -251,8 +251,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.systemGeneratedPrefix = values.systemGeneratedPrefix;
             }
             ele.isColumnEditable = values?.isColumnEditable || false;
-            ele.stopHideColumn = values?.stopHideColumn || false
+            ele.stopHideColumn = values?.stopHideColumn || false;
             ele.isHideColumnSum = values?.isHideColumnSum || false;
+            ele.showInPdf = values?.showInPdf || false;
 
             if (values?.hasOwnProperty('isWarningTooltip')) {
               ele.isWarningTooltip = values.isWarningTooltip;
@@ -1191,6 +1192,19 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         />
                       }
                       label="Hidden Field"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="showInPdf"
+                          checked={values['showInPdf']}
+                          onChange={(e) => {
+                            setFieldValue('showInPdf', e.target.checked);
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Show In Pdf"
                     />
                     {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && (
                       <FormControlLabel

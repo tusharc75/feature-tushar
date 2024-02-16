@@ -3,7 +3,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import axios from 'axios';
 import { backendApi } from '../../config';
 import { Box, Button, Divider, makeStyles } from '@material-ui/core';
-import { downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { sortBy } from 'lodash';
 import DetailsPage from 'src/components/Shared/DetailsPage';
@@ -153,19 +153,19 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
           };
           res.index = index + 1;
           res.detail =
-            item?.type === 'product'
+            item?.type === MATERIAL_TYPE.product
               ? item?.productDetail?.productName
-              : item?.type === 'service'
+              : item?.type === MATERIAL_TYPE.service
               ? item?.serviceDetail?.serviceName
-              : item?.type === 'package'
+              : item?.type === MATERIAL_TYPE.package
               ? item?.packageDetail?.packageName
               : '';
           res.description =
-            item?.type === 'product'
+            item?.type === MATERIAL_TYPE.product
               ? item?.productDetail?.productDescription
-              : item?.type === 'service'
+              : item?.type === MATERIAL_TYPE.service
               ? item?.serviceDetail?.serviceDescription
-              : item?.type === 'package'
+              : item?.type === MATERIAL_TYPE.package
               ? item?.packageDetail?.packageDescription
               : '';
           res.subRows = generateNestedData(data?.materials, res);
@@ -315,7 +315,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
         hideDuration: null,
         open: true,
         type: 'info',
-        message: `Uploading ${module}, Please wait...`
+        message: `Uploading, Please wait...`
       });
       const file = event.target.files[0];
 
