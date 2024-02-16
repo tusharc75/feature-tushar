@@ -17,9 +17,9 @@ import CommentDialog from 'src/components/CommentDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import ViewLogs from './ViewLogs';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) => {
-
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Submit`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -154,59 +154,68 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
       });
   };
 
+  const previewDownloadProps = {
+    fileName: `${routes.fieldTicket.title}-${fieldTicketData?.fieldTicketNumber}`,
+    hideDetailButton: true,
+    resource: sidebarResource.fieldTicket,
+    referenceId: fieldTicketData?._id,
+    columns: columns,
+    isSendEmail: true,
+    defaultColumns: [
+      'type',
+      'detail',
+      'estimateStartDate',
+      'estimateEndDate',
+      'pricingMethod',
+      'qty',
+      `price_${fieldTicketData?.currency?.toLowerCase()}`,
+      `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
+    ]
+  };
+
+  const RightSideContents = () => {
+    return (
+      <>
+        {allowedToEdit && (
+          <Fragment>
+            {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  setSubmitDialog(true);
+                }}
+              >
+                Submit
+              </Button>
+            )}
+            {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && (
+              <Button variant="contained" color="primary" size="small" onClick={() => setCommentDialog(true)}>
+                Re-Open
+              </Button>
+            )}
+          </Fragment>
+        )}
+        <HtmlTooltip title="View Logs">
+          <IconButton size="small" aria-label="Delete" onClick={() => setViewLogsDialog(true)}>
+            <HistoryIcon />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+    );
+  };
+
   return (
     <>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center">
-          <PreviewDownload
-            fileName={`${routes.fieldTicket.title}-${fieldTicketData?.fieldTicketNumber}`}
-            hideDetailButton={true}
-            resource={sidebarResource.fieldTicket}
-            referenceId={fieldTicketData?._id}
-            columns={columns}
-            isSendEmail={true}
-            defaultColumns={[
-              'type',
-              'detail',
-              'estimateStartDate',
-              'estimateEndDate',
-              'pricingMethod',
-              'qty',
-              `price_${fieldTicketData?.currency?.toLowerCase()}`,
-              `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
-            ]}
-          />
-        </Box>
-        <Box display="flex">
-          {allowedToEdit && (
-            <Fragment>
-              {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    setSubmitDialog(true);
-                  }}
-                >
-                  Submit
-                </Button>
-              )}
-              {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && (
-                <Button variant="contained" color="primary" size="small" onClick={() => setCommentDialog(true)}>
-                  Re-Open
-                </Button>
-              )}
-            </Fragment>
-          )}
-          <Box ml={1}></Box>
-          <HtmlTooltip title="View Logs">
-            <IconButton size="small" aria-label="Delete" onClick={() => setViewLogsDialog(true)}>
-              <HistoryIcon />
-            </IconButton>
-          </HtmlTooltip>
-        </Box>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={false}
+        previewDownloadProps={previewDownloadProps}
+        rightSideContents={<RightSideContents />}
+        hasXpadding
+      />
+
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
