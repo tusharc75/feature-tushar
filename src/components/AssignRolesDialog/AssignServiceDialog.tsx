@@ -218,7 +218,12 @@ const AssignServiceDialog = ({
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={false}
-          addButtonProps={{ disabled: isSubmitting || selectedRecords?.length === 0, loading: isSubmitting, iconsEnabled: false }}
+          addButtonProps={{
+            disabled: isSubmitting || selectedRecords?.length === 0,
+            loading: isSubmitting,
+            iconsEnabled: false,
+            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+          }}
           addButtonOnclick={() => {
             onSuccess(selectedRecords);
           }}

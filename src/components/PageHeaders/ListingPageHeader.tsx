@@ -13,6 +13,7 @@ type ButtonPropsWithExtraData = {
   tooltip?: string;
   loading?: boolean;
   iconsEnabled?: boolean;
+  text?: string;
 } & ButtonProps;
 
 type ListingPageHeaderProps = {
@@ -27,7 +28,7 @@ type ListingPageHeaderProps = {
   handleSearchFilter?: (value: any) => void;
   rightSideContents?: ReactNode;
   isActionButtonVisible: boolean;
-  actionButtonProps?: ButtonPropsWithExtraData;
+  actionButtonProps?: Omit<ButtonPropsWithExtraData, 'text'>;
   actionMenuItems?: ReactNode;
   addButtonProps?: ButtonPropsWithExtraData;
   addButtonOnclick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -78,6 +79,7 @@ const ListingPageHeader = ({
     loading: addButtonLoading,
     disabled: addButtonDisabled,
     iconsEnabled: addButtonIconsEnabled = true,
+    text: addButtonText = '',
     ...restOfAddButtonProps
   } = addButtonProps;
 
@@ -184,7 +186,7 @@ const ListingPageHeader = ({
                         className={`no-shadow ${addButtonLoading ? '' : 'max-[600px]:[max-width:36px_!important]'}`}
                         startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
                       >
-                        {renderButtonText({ text: 'Add', icon: <AddOutlined />, loading: addButtonLoading })}
+                        {renderButtonText({ text: `Add ${addButtonText}`, icon: <AddOutlined />, loading: addButtonLoading })}
                       </Button>
                     </HtmlTooltip>
                   ) : null}
