@@ -1,26 +1,23 @@
+import { IconButton, MenuItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useContext } from 'react';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
-import axiosInstance from 'src/axios/axiosInstance';
-import { fieldTicket, prepareDataForGrid } from 'src/constants/helpers';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { useData } from 'src/StateProvider/Provider';
-import { BiChevronDown } from 'react-icons/bi';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
-import { displayDate } from 'src/constants/helpers';
-import { Add } from '@material-ui/icons';
 import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { displayDate, fieldTicket, prepareDataForGrid } from 'src/constants/helpers';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import routes from '../../../components/Helpers/Routes';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
-
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Technicians`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -28,8 +25,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [technicianDialog, setTechnicianDialog] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
 
   const {
     state: { user }
@@ -173,14 +168,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
       });
   };
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleDelete = async (rows) => {
     setIsDeleting(true);
     axiosInstance()
@@ -231,64 +218,43 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
       });
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
+          <MenuItem
+            disabled={isDeleting}
+            onClick={() => {
+              setDeleteData(
+                selectedRecords?.map((d) => {
+                  return {
+                    id: d?._id
+                  };
+                })
+              );
+            }}
+          >
+            Delete
+          </MenuItem>
+        </HtmlTooltip>
+      </>
+    );
+  };
+
   return (
     <>
       <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
         {allowedToEdit && (
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-              <Button variant="outlined" color="primary" size="small" startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
-                Add
-              </Button>
-            </Box>
-            <Box display="flex" ml={1}>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                id="demo-positioned-button"
-                onClick={handleClick}
-                disabled={!Boolean(selectedRecords?.length)}
-                endIcon={<BiChevronDown />}
-                className="new-dropdown-v1"
-              >
-                Actions
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                open={open}
-                onClose={handleClose}
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-              >
-                <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
-                  <MenuItem
-                    disabled={isDeleting}
-                    onClick={() => {
-                      setDeleteData(
-                        selectedRecords?.map((d) => {
-                          return {
-                            id: d?._id
-                          };
-                        })
-                      );
-                      handleClose();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </HtmlTooltip>
-              </Menu>
-            </Box>
-          </Box>
+          <>
+            <DetailsPageHeader
+              isAddButtonVisible={true}
+              addButtonProps={{ onClick: () => setTechnicianDialog(true) }}
+              isActionButtonVisible={true}
+              actionButtonMenuItems={actionButtonMenuItems()}
+              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+              hasXpadding
+            />
+          </>
         )}
         <Grid container spacing={2}>
           <Grid item xs={12} md={12} sm={12}>
