@@ -139,7 +139,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                               </h4>
                             )}
                             <div className="icon-layout  d-flex align-items-center gap-2">
-                              {actionField && actionField?.cell({ row, table })}
+                              {actionField && actionField?.cell?.({ row, table })}
                               {otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE && (
                                 <IconButton
                                   size="small"
@@ -309,7 +309,7 @@ const RenderSubCard = ({
               </h4>
             )}
             <div className="icon-layout  d-flex align-items-center gap-2">
-              {actionField && actionField?.cell({ row, table })}
+              {actionField && actionField?.cell?.({ row, table })}
               {otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE && (
                 <IconButton
                   size="small"

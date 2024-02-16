@@ -139,7 +139,7 @@ const SerializedAsset = ({
             accessor: 'remainingJobDays',
             Header: 'Remaining Job Days',
             show: true,
-            Cell: ({ row }) => <div>{(row.original?.remainingJobDays ? row.original?.remainingJobDays : <NoDataCell />)}</div>
+            Cell: ({ row }) => <div>{row.original?.remainingJobDays ? row.original?.remainingJobDays : <NoDataCell />}</div>
           }
         ];
         setColumns([...newColumns.slice(0, 1), ...extraColoums, ...newColumns.slice(1), ...getStaticFields()]);
@@ -289,9 +289,9 @@ const SerializedAsset = ({
               </Fragment>
             )} */}
             {selectedRecords.length > 0 &&
-              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-              checkUniqWarehouse() &&
-              currentStep === 1 ? (
+            selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+            checkUniqWarehouse() &&
+            currentStep === 1 ? (
               <Fragment>
                 <Tooltip title="Send to Supplier">
                   <Button
