@@ -1,5 +1,5 @@
-import { Button, ButtonProps, Menu } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Button, ButtonProps, Menu, useMediaQuery } from '@material-ui/core';
+import { AddOutlined, ExpandMore, TouchApp } from '@material-ui/icons';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import queryString from 'query-string';
 import React, { ReactNode, useEffect, useState } from 'react';
@@ -54,6 +54,7 @@ const ListingPageHeader = ({
   actionMenuItems,
   synchronizeType = false
 }: ListingPageHeaderProps) => {
+  const isMobile = useMediaQuery('(max-width:600px)');
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const [locationKeys, setLocationKeys] = useState([]);
@@ -127,7 +128,13 @@ const ListingPageHeader = ({
             </HideWhenOffline>
           ) : null}
           {handleSearchFilter ? (
-            <SearchFilter className='w-full sm:w-[unset] sm:max-w-[400px] sm:min-w-[200px] flex-grow' handleChangeFilter={handleSearchFilter} filter={searchFilter} chip={{ size: 'small' }} activityName="note" />
+            <SearchFilter
+              className="w-full sm:w-[unset] sm:max-w-[400px] sm:min-w-[200px] flex-grow"
+              handleChangeFilter={handleSearchFilter}
+              filter={searchFilter}
+              chip={{ size: 'small' }}
+              activityName="note"
+            />
           ) : null}
           {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
             <>
@@ -142,10 +149,10 @@ const ListingPageHeader = ({
                       onClick={(e) => {
                         addButtonOnclick && addButtonOnclick(e);
                       }}
-                      className={`no-shadow ${addButtonProps.className}`}
-                      startIcon={<AddOutlined />}
+                      className={`no-shadow max-[600px]:[max-width:36px_!important]`}
+                      startIcon={isMobile ? null : <AddOutlined />}
                     >
-                      Add
+                      {isMobile ? <AddOutlined /> : 'Add'}
                     </Button>
                   ) : null}
                   {isActionButtonVisible ? (
@@ -154,13 +161,13 @@ const ListingPageHeader = ({
                         variant={'outlined'}
                         color="default"
                         size="small"
-                        className={`new-dropdown-v1`}
+                        className={`new-dropdown-v1 min-h-[32px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
                         {...actionButtonProps}
                         onClick={openActions}
                         aria-controls="action-menu"
-                        endIcon={<ExpandMore />}
+                        endIcon={isMobile ? null : <ExpandMore />}
                       >
-                        Actions
+                        {isMobile ? <TouchApp /> : 'Actions'}
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
