@@ -179,7 +179,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
             <SerializedAssetAvailableIllustration />
             <Typography style={{ fontSize: '16px', fontWeight: '500', marginTop: '20px', lineHeight: '1.8' }}>
               {routes.serializedAsset.title} are available for all the products.
-              <br /> job can be fulfilled.
+              <br /> Job can be fulfilled.
             </Typography>
           </div>
         ) : (

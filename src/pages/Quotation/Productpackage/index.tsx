@@ -907,7 +907,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 Add Existing Packages
               </MenuItem>
             )}
-            <MenuItem
+            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null: <MenuItem
               onClick={() => {
                 setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
                 setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
@@ -915,6 +915,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
             >
               Add Existing Services
             </MenuItem>
+            }
           </MenuList>
         </Popover>
       )}

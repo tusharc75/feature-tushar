@@ -726,7 +726,7 @@ export const SerializedAssetAvailableIllustration: React.FC<svgInterface> = ({ w
       fill="none"
       viewBox="0 0 155 119"
     >
-      <path fill="#fff" d="M0 0H155V118.642H0z"></path>
+      <path fill="transparent" d="M0 0H155V118.642H0z"></path>
       <path fill="url(#pattern0)" d="M0 0H155V118.642H0z"></path>
       <defs>
         <pattern id="pattern0" width="1" height="1" patternContentUnits="objectBoundingBox">

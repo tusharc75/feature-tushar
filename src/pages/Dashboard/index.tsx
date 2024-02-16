@@ -16,7 +16,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { ChartDataType } from './ChartTypes';
 import AssetStats from '../KpiDashboard/AssetDashboard/AssetStats';
 import FullScreenChart from './FullScreenChart';
-import { periodOption, RentalJobsRevenueFrequency } from '../DashboardBuilder/builderHelpers';
+import { periodOption, frequencyData } from '../DashboardBuilder/builderHelpers';
 
 const DashbaordNew = () => {
   const {
@@ -86,7 +86,7 @@ const DashbaordNew = () => {
             businessUnit: businessUnitOptions,
             service: data['Service Master'],
             competencies: data['Competencies'],
-            frequency: RentalJobsRevenueFrequency
+            frequency: frequencyData
           });
         });
       } catch (error) {

@@ -1,34 +1,33 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, CircularProgress, MenuItem, Menu } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
+import { Box, Button, CircularProgress, IconButton, MenuItem } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { sublease, pricingCondition, SUBLEASE_TYPE, SUBLEASE_STATUS, PRICING_SETUP_TYPE } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import QtyDialog from './QtyDialog';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
+import EditIcon from '@material-ui/icons/Edit';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { isArray } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
-import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
-import { ExpandMore } from '@material-ui/icons';
-import { flattenArray } from 'src/constants/columns';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import EditIcon from '@material-ui/icons/Edit';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { isArray } from 'lodash';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { flattenArray } from 'src/constants/columns';
+import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
+import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
+import { PRICING_SETUP_TYPE, SUBLEASE_STATUS, SUBLEASE_TYPE, pricingCondition, sublease } from '../../../constants/helpers';
+import QtyDialog from './QtyDialog';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -52,10 +51,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -73,7 +69,15 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         e.isColumnEditable = false;
       }
     });
-    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, subleaseData?.currency);
+    const newColumns = generateColumns(
+      renderedFrom,
+      data?.map((e) => {
+        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
+      }),
+      null,
+      false,
+      subleaseData?.currency
+    );
     let coloum: any = [
       {
         accessor: 'index',
@@ -187,7 +191,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               setDeleteData(obj);
             }}
           >
-            <DeleteIcon fontSize="small" color={row.original.canDelete ? "error" : "disabled"} />
+            <DeleteIcon fontSize="small" color={row.original.canDelete ? 'error' : 'disabled'} />
           </IconButton>
         </>
       )
@@ -199,7 +203,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
-    setNextStepToolTip(null)
+    setNextStepToolTip(null);
     var data: any = [];
     var inventory: any = [];
     const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`);
@@ -213,8 +217,10 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       parent.description = parent.type === 'product' ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? parent?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === parent.materialId).length :
-        inventory?.filter((e) => e._id === parent._id).length
+      parent.assetQty =
+        subleaseData.type === SUBLEASE_TYPE.vendor
+          ? parent?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === parent.materialId).length
+          : inventory?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : false;
       parent.canDelete = parent.assetQty === 0 && allowedToEdit ? true : false;
       if (parent.type === 'package') {
@@ -226,11 +232,13 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           _subRow.description = _subRow.productDetail?.productDescription;
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-          _subRow.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? _subRow?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === _subRow.materialId).length :
-            inventory?.filter((e) => e._id === _subRow._id).length
+          _subRow.assetQty =
+            subleaseData.type === SUBLEASE_TYPE.vendor
+              ? _subRow?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === _subRow.materialId).length
+              : inventory?.filter((e) => e._id === _subRow._id).length;
           _subRow.canDelete = _subRow.assetQty === 0 && allowedToEdit ? true : false;
           if (!_subRow.canDelete) {
-            parent.canDelete = false
+            parent.canDelete = false;
           }
           _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
           assetQty += _subRow.assetQty;
@@ -247,19 +255,16 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
       setNextStepToolTip(subleaseMessage.addProductPackage);
-    }
-    else {
+    } else {
       if (subleaseData?.type === SUBLEASE_TYPE.vendor) {
         if (isIssued) {
           setNextStep(true);
           setNextStepToolTip(null);
-        }
-        else {
+        } else {
           setNextStep(false);
           setNextStepToolTip(subleaseMessage.startSublease);
         }
-      }
-      else {
+      } else {
         setNextStep(true);
         setNextStepToolTip(null);
       }
@@ -346,7 +351,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       .then(() => {
         setDeleting(false);
         fetchProductInventory();
-        setAnchorEl(null);
         setDeleteData(null);
       })
       .catch((error) => {
@@ -379,7 +383,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     if (subleaseData) {
       const data: any = {};
       data.conditionType = [PRICING_SETUP_TYPE.rent];
-      const material: any = []
+      const material: any = [];
       arr?.forEach((ele) => {
         const obj = {
           materialId: ele?.materialId,
@@ -387,16 +391,15 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           qty: ele?.qty,
           pricingMethod: ele?.pricingMethod,
           currency: subleaseData?.currency
-        }
+        };
         if (isArray(ele?.unit)) {
           ele?.unit?.forEach((e) => {
-            material.push({ ...obj, unit: e })
-          })
+            material.push({ ...obj, unit: e });
+          });
+        } else {
+          material.push({ ...obj, unit: ele?.unit });
         }
-        else {
-          material.push({ ...obj, unit: ele?.unit })
-        }
-      })
+      });
       data.material = material;
       data.supplier = [subleaseData?.supplierAccount?.optionValue];
       data.customer = [];
@@ -412,13 +415,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           });
       });
     }
-  };
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
@@ -439,145 +435,109 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     handleSaveData(rows);
   };
 
-
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
+  const addButtonMenuitems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
+          }}
+        >
+          Add Existing Products
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+          }}
+        >
+          Add Existing Packages
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
+  const rightSideContents = () => {
+    return (
+      <>
+        {material?.length &&
+        dataRows?.length &&
+        !isIssued &&
+        !dataRows?.some((f) => !f.isValid) &&
+        subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Start Sublease'}>
+            <Button
+              variant={'contained'}
+              color="primary"
+              size="small"
+              onClick={() => {
+                issueSublease();
+              }}
+              disabled={isIssueing || !allowedToEdit}
+              endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
+            >
+              {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
+            </Button>
+          </HtmlTooltip>
+        ) : null}
+      </>
+    );
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          color="primary"
+          disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
+          onClick={() => {
+            setIsProductEdit({ open: true, isBulkedit: true });
+          }}
+        >
+          {'Bulk Edit'}
+        </MenuItem>
+        <MenuItem
+          color="primary"
+          disabled={selectedRecords?.length && selectedRecords.every((e) => e.canDelete) ? false : true}
+          onClick={() => {
+            const dataToDelete =
+              selectedRecords &&
+              selectedRecords
+                .filter((e) => !e.hideSelection)
+                .map((rec: any) => {
+                  const obj: any = {};
+                  obj.id = rec._id;
+                  obj.type = rec?.type;
+                  obj.materialId = rec?.materialId;
+                  return obj;
+                });
+            setDeleteData(dataToDelete);
+          }}
+        >
+          {'Delete'}
+        </MenuItem>
+      </>
+    );
+  };
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ''}>
-            <div>
-              <Button
-                variant={'outlined'}
-                color="primary"
-                size="small"
-                startIcon={<Add />}
-                disabled={!allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && subleaseData.status === SUBLEASE_STATUS.issued)}
-                onClick={openAddActions}
-                aria-controls="add-menu">
-                {'Add'}
-                <ExpandMore fontSize="small" />
-              </Button>
-            </div>
-          </HtmlTooltip>
-          <Menu
-            anchorEl={addAnchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="add-menu"
-            open={Boolean(addAnchorEl)}
-            onClose={closeAddActions}
-          >
-            <MenuItem
-              onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                closeAddActions();
-              }}
-            >
-              Add Existing Products
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-              }}
-            >
-              Add Existing Packages
-            </MenuItem>
-          </Menu>
-        </Box>
-        <Box display="flex">
-          {material?.length && dataRows?.length && !isIssued && !dataRows?.some((f) => !f.isValid) && subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
-            <Box ml={1}>
-              <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Start Sublease'}>
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    issueSublease();
-                  }}
-                  disabled={isIssueing || !allowedToEdit}
-                  endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
-                >
-                  {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
-                </Button>
-              </HtmlTooltip>
-            </Box>
-          ) : null}
-          <Box ml={1}>
-            <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Actions'}>
-              <Button
-                disabled={selectedRecords?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true}
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={openActions}
-                className={` new-dropdown-v1`}
-                aria-controls="action-menu"
-                endIcon={<ExpandMore />}
-              >
-                Actions
-              </Button>
-            </HtmlTooltip>
-          </Box>
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorEl)}
-            onClose={closeActions}
-          >
-            <MenuItem
-              color="primary"
-              disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
-              onClick={() => {
-                setAnchorEl(null);
-                setIsProductEdit({ open: true, isBulkedit: true });
-              }}
-            >
-              {'Bulk Edit'}
-            </MenuItem>
-            <MenuItem
-              color="primary"
-              disabled={selectedRecords?.length && selectedRecords.every((e) => e.canDelete) ? false : true}
-              onClick={() => {
-                const dataToDelete =
-                  selectedRecords &&
-                  selectedRecords
-                    .filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                setDeleteData(dataToDelete);
-              }}
-            >
-              {'Delete'}
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonMenuItems={addButtonMenuitems()}
+        addButtonProps={{
+          tooltip: !allowedToEdit ? ownerAndColaborator : '',
+          disabled: !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && subleaseData.status === SUBLEASE_STATUS.issued)
+        }}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{
+          tooltip: !allowedToEdit ? ownerAndColaborator : 'Actions',
+          disabled: selectedRecords?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true
+        }}
+        rightSideContents={rightSideContents()}
+        hasXpadding
+      />
+
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -599,62 +559,53 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      )
-      }
-      {
-        deleteData && (
-          <ConfirmationDialog
-            open={true}
-            message={`Are you sure you want to delete the record(s)?`}
-            onClose={() => setDeleteData(null)}
-            onOk={() => handleDelete(deleteData)}
-            okBtnLoading={isDeleting}
-          />
-        )
-      }
-      {
-        isProductEdit.open && (
-          <QtyDialog
-            calculatePrice={calculatePrice}
-            onClose={() => {
-              setIsProductEdit({ open: false, isBulkedit: false });
-              setRecordToUpdate(null);
-            }}
-            isBulkedit={isProductEdit.isBulkedit}
-            handleSaveData={handleSaveData}
-            subleaseData={subleaseData}
-            rowData={recordToUpdate}
-            material={material}
-            selectedProducts={selectedRecords}
-            loading={isUpdating}
-          />
-        )
-      }
-      {
-        addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
-          <AssignProductDialog
-            handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
-            onSuccess={(products) => {
-              handleAdd(products);
-            }}
-            serialized={true}
-            isSubmitting={isSubmitting}
-          />
-        )
-      }
-      {
-        addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
-          <AssignPackageDialog
-            handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
-            onSuccess={(rows) => {
-              handleAdd(rows);
-            }}
-            packageType={'product'}
-            isSubmitting={isSubmitting}
-          />
-        )
-      }
-    </Fragment >
+      )}
+      {deleteData && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to delete the record(s)?`}
+          onClose={() => setDeleteData(null)}
+          onOk={() => handleDelete(deleteData)}
+          okBtnLoading={isDeleting}
+        />
+      )}
+      {isProductEdit.open && (
+        <QtyDialog
+          calculatePrice={calculatePrice}
+          onClose={() => {
+            setIsProductEdit({ open: false, isBulkedit: false });
+            setRecordToUpdate(null);
+          }}
+          isBulkedit={isProductEdit.isBulkedit}
+          handleSaveData={handleSaveData}
+          subleaseData={subleaseData}
+          rowData={recordToUpdate}
+          material={material}
+          selectedProducts={selectedRecords}
+          loading={isUpdating}
+        />
+      )}
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+        <AssignProductDialog
+          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          onSuccess={(products) => {
+            handleAdd(products);
+          }}
+          serialized={true}
+          isSubmitting={isSubmitting}
+        />
+      )}
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
+        <AssignPackageDialog
+          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          onSuccess={(rows) => {
+            handleAdd(rows);
+          }}
+          packageType={'product'}
+          isSubmitting={isSubmitting}
+        />
+      )}
+    </Fragment>
   );
 };
 

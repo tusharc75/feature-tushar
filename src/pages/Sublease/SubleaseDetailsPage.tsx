@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Tab, Tabs, } from '@material-ui/core';
+import { Grid, Box, Button, Tab, Tabs } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
@@ -9,7 +9,16 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { sublease, SUBLEASE_STATUS, sublease_Vendor_Steps, sublease_InterCompany_Steps, ACTIVITY_RESOURCE, SUBLEASE_TYPE, DELIVERY_TICKET_TYPE, sidebarResource } from '../../constants/helpers';
+import {
+  sublease,
+  SUBLEASE_STATUS,
+  sublease_Vendor_Steps,
+  sublease_InterCompany_Steps,
+  ACTIVITY_RESOURCE,
+  SUBLEASE_TYPE,
+  DELIVERY_TICKET_TYPE,
+  sidebarResource
+} from '../../constants/helpers';
 import ManageSublease from './ManageSublease';
 import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -60,7 +69,6 @@ const SubleaseDetailsPage = () => {
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
 
-
   function a11yProps(index: any) {
     return {
       id: `main-tab-${index}`,
@@ -82,9 +90,8 @@ const SubleaseDetailsPage = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {
-      })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const updateStatus = (status) => {
@@ -95,8 +102,8 @@ const SubleaseDetailsPage = () => {
       .then(({ data }) => {
         fetchData();
       })
-      .catch((error) => { });
-  }
+      .catch((error) => {});
+  };
 
   useEffect(() => {
     if (parsed) {
@@ -163,7 +170,7 @@ const SubleaseDetailsPage = () => {
       .put(`${sublease.api}/remove`, { ids: [] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.sublease.path}`)
+        history.push(`${routes.sublease.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -179,21 +186,28 @@ const SubleaseDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.sublease?.isUpdate && allowedToEdit &&
-              [SUBLEASE_STATUS.readyToInvoice, SUBLEASE_STATUS.invoiced, SUBLEASE_STATUS.completed].includes(subleaseData?.status) &&
-              (<ButtonWithPulse
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={() => updateStatus(SUBLEASE_STATUS.closed)}
-                className={'btn-outline-v1'}
-              >
-                Close
-              </ButtonWithPulse>)}
             {permissions?.sublease?.isUpdate &&
-              ![SUBLEASE_STATUS.closed, SUBLEASE_STATUS.completed].includes(subleaseData?.status) && allowedToEdit && (
+              allowedToEdit &&
+              [SUBLEASE_STATUS.readyToInvoice, SUBLEASE_STATUS.invoiced, SUBLEASE_STATUS.completed].includes(subleaseData?.status) && (
+                <ButtonWithPulse
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={() => updateStatus(SUBLEASE_STATUS.closed)}
+                  className={'btn-outline-v1'}
+                >
+                  Close
+                </ButtonWithPulse>
+              )}
+            {permissions?.sublease?.isUpdate &&
+              ![SUBLEASE_STATUS.closed, SUBLEASE_STATUS.completed].includes(subleaseData?.status) &&
+              allowedToEdit && (
                 <>
-                  <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={() => setOpenUpdateDialog(true)} className={'btn-outline-v1'}>
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    onClick={() => setOpenUpdateDialog(true)}
+                    className={'btn-outline-v1'}
+                  >
                     {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                   </Button>
                 </>
@@ -256,9 +270,14 @@ const SubleaseDetailsPage = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {subleaseData && fields.length ? (
-              <DetailsPage data={subleaseData} fields={
-                subleaseData?.type === SUBLEASE_TYPE.interCompany ? fields?.filter((e) => e?.fieldData?.fieldName !== 'warehouse') :
-                  fields?.filter((e) => !['fromWarehouse', 'toWarehouse']?.includes(e?.fieldData?.fieldName))} />
+              <DetailsPage
+                data={subleaseData}
+                fields={
+                  subleaseData?.type === SUBLEASE_TYPE.interCompany
+                    ? fields?.filter((e) => e?.fieldData?.fieldName !== 'warehouse')
+                    : fields?.filter((e) => !['fromWarehouse', 'toWarehouse']?.includes(e?.fieldData?.fieldName))
+                }
+              />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -294,6 +313,7 @@ const SubleaseDetailsPage = () => {
                       stepFullScreen={stepFullScreen}
                     />
                   )}
+
                   {['End Sublease', 'Start Sublease'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
                     <SubleaseAsset
                       fetchData={fetchData}
@@ -348,7 +368,8 @@ const SubleaseDetailsPage = () => {
                       stepFullScreen={stepFullScreen}
                       statusNames={statusOptions}
                       updateStatus={updateStatus}
-                    />)}
+                    />
+                  )}
                 </ContentFullScreen>
               </Grid>
             ) : (
@@ -372,11 +393,7 @@ const SubleaseDetailsPage = () => {
         <TabPanel value={tabValue} index={3}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {subleaseData ? (
-              <Invoices
-                resourceId={id}
-                resource={sidebarResource.sublease}
-                invoiceFieldName='sublease'
-              />
+              <Invoices resourceId={id} resource={sidebarResource.sublease} invoiceFieldName="sublease" />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />

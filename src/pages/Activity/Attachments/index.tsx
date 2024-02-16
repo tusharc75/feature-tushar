@@ -1,13 +1,12 @@
-import { Button, Chip, IconButton, Menu, MenuItem, MenuList, Popover, TextField } from '@material-ui/core';
+import { Chip, IconButton, MenuItem, MenuList, Popover, TextField } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import Dialog from '@material-ui/core/Dialog';
-import { AddOutlined, Delete as DeleteIcon, ExpandMore } from '@material-ui/icons';
+import { AddOutlined, Delete as DeleteIcon } from '@material-ui/icons';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { Autocomplete } from '@material-ui/lab';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiOutlinePaperClip } from 'react-icons/ai';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -15,7 +14,6 @@ import { GetReferenceName } from '../../../axios/activity';
 import axiosInstance from '../../../axios/axiosInstance';
 import ManageAttachment from '../../../components/Activity/Attachments/ManageAttachment';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
-import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -35,13 +33,13 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 export default function Attachment() {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId } = parsed;
 
-  const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(null);
   const [open, setOpen] = useState({ open: false, type: null, parentFolder: null, parentResource: null });
   const [attachmentData, setAttachmentData] = useState(null);
@@ -625,12 +623,19 @@ export default function Attachment() {
         });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={permissions.attachment.isDelete ? !selectedRecords.every((records) => records.canEdit) : true}
+          onClick={() => {
+            showConfirmBox(null);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
   return (
@@ -649,126 +654,31 @@ export default function Attachment() {
       </div>
       <CustomContainer>
         {filter && (
-          <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-[4fr_3fr] gap-4">
-              <div className={'d-flex flex-wrap items-start gap-2 content-start'}>
-                <AiOutlinePaperClip className="headerLogo" />
-                <span className="listingHeader">{routes.attachment.title} </span>
-                <Autocomplete
-                  limitTags={1}
-                  options={resourceOptions}
-                  getOptionLabel={(option) => option.optionLabel}
-                  className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
-                  fullWidth
-                  value={resource}
-                  onChange={(event, newValue) => {
-                    setResource(newValue);
-                    if (newValue) {
-                      //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
-                    } else {
-                      setFilter([]);
-                    }
-                  }}
-                  size="small"
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      fullWidth
-                      className="flex-grow md:max-w-[250px]"
-                      margin="none"
-                      size="small"
-                      label="Select Resource"
-                      variant="outlined"
-                    />
-                  )}
-                />
-                {resource && resourceData && (
-                  <Autocomplete
-                    limitTags={1}
-                    disabled={loadingResources}
-                    options={resourceData}
-                    className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
-                    getOptionLabel={(option: any) => option.optionLabel}
-                    getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
-                    value={selectedResourceData}
-                    onChange={(event, newValue) => {
-                      setSelectedResourceData(newValue);
-                      if (newValue?.optionValue) {
-                        setFilter((prevState) => [
-                          ...prevState,
-                          { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }
-                        ]);
-                      } else {
-                        setFilter([]);
-                      }
-                    }}
-                    size="small"
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        fullWidth
-                        className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
-                        margin="none"
-                        size="small"
-                        label={`Select ${resource.optionLabel}`}
-                        variant="outlined"
-                      />
-                    )}
-                  />
-                )}
-              </div>
-              <div className="flex flex-wrap gap-[8px]  justify-end items-start">
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="attachment" />
-                <div className="flex gap-[8px] flex-wrap items-center">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null })}
-                    className={`no-shadow`}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    disabled={selectedRecords.length > 0 ? false : true}
-                    className={`new-dropdown-v1`}
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      disabled={permissions.attachment.isDelete ? !selectedRecords.every((records) => records.canEdit) : true}
-                      onClick={() => {
-                        showConfirmBox(null);
-                        closeActions();
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ListingPageHeader
+            leftSideContents={
+              <LeftSideContents
+                {...{
+                  resourceOptions,
+                  resource,
+                  setResource,
+                  setFilter,
+                  resourceData,
+                  loadingResources,
+                  selectedResourceData,
+                  setSelectedResourceData
+                }}
+              />
+            }
+            searchFilter={filter}
+            handleSearchFilter={handleChangeFilter}
+            isActionButtonVisible={true}
+            actionButtonProps={{ disabled: selectedRecords.length > 0 ? false : true }}
+            actionMenuItems={<ActionMenuItems />}
+            addButtonOnclick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null })}
+            isAddButtonVisible={true}
+          />
         )}
+
         <Box zIndex={5} width={'100%'}>
           {column ? (
             <CustomReactTable
@@ -942,3 +852,78 @@ export default function Attachment() {
     </section>
   );
 }
+
+const LeftSideContents = ({
+  resourceOptions,
+  resource,
+  setResource,
+  setFilter,
+  resourceData,
+  loadingResources,
+  selectedResourceData,
+  setSelectedResourceData
+}) => {
+  return (
+    <>
+      <Autocomplete
+        limitTags={1}
+        options={resourceOptions}
+        getOptionLabel={(option) => option.optionLabel}
+        className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
+        fullWidth
+        value={resource}
+        onChange={(event, newValue) => {
+          setResource(newValue);
+          if (newValue) {
+            //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
+          } else {
+            setFilter([]);
+          }
+        }}
+        size="small"
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            fullWidth
+            className="flex-grow md:max-w-[250px]"
+            margin="none"
+            size="small"
+            label="Select Resource"
+            variant="outlined"
+          />
+        )}
+      />
+      {resource && resourceData && (
+        <Autocomplete
+          limitTags={1}
+          disabled={loadingResources}
+          options={resourceData}
+          className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+          getOptionLabel={(option: any) => option.optionLabel}
+          getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
+          value={selectedResourceData}
+          onChange={(event, newValue) => {
+            setSelectedResourceData(newValue);
+            if (newValue?.optionValue) {
+              setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
+            } else {
+              setFilter([]);
+            }
+          }}
+          size="small"
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              fullWidth
+              className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+              margin="none"
+              size="small"
+              label={`Select ${resource.optionLabel}`}
+              variant="outlined"
+            />
+          )}
+        />
+      )}
+    </>
+  );
+};

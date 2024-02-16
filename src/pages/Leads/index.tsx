@@ -1,17 +1,14 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { SiConvertio } from 'react-icons/si';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -57,7 +54,6 @@ const Leads = () => {
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({
     open: false,
     id: null,
@@ -379,12 +375,63 @@ const Leads = () => {
     }
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.every((e) => e.canDelete && !e.convertedToOpportunity) ? false : true}
+          onClick={() => {
+            setIsConformDialogVisible(true);
+          }}
+        >
+          {`Delete (${selectedRecords.length})`}
+        </MenuItem>
+        {permissions['customerAccount'].isCreate && permissions['customerContact'].isCreate && permissions['opportunity'].isCreate && (
+          <MenuItem
+            disabled={selectedRecords.length === 0}
+            onClick={() => {
+              if (selectedRecords.some((d) => d.convertedToOpportunity)) {
+                setMessageDialog({
+                  open: true,
+                  message: `You are trying to convert already converted lead, Please unselect those records and try again.`
+                });
+              } else if (selectedRecords.some((d) => !d[processFieldName] || d[processFieldName].toLowerCase() !== 'qualified')) {
+                setMessageDialog({
+                  open: true,
+                  message: `You have selected lead(s) which are not qualified yet to be converted into opportunity`
+                });
+              } else {
+                if (selectedRecords.some((d) => d.isAllowedToUpdate === false)) {
+                  setMessageDialog({
+                    open: true,
+                    message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.`
+                  });
+                } else {
+                  setConvertLeadToOpportunityConfirmationDialog({
+                    open: true,
+                    id: null,
+                    leadName: null,
+                    message: `Are you sure you want to convert selected leads to opportunity?`
+                  });
+                }
+              }
+            }}
+          >
+            {`Convert To Opportunity (${selectedRecords.length})`}
+          </MenuItem>
+        )}
+        {permissions?.lead?.isUpdate && (
+          <MenuItem
+            onClick={() => {
+              handleTransferEntityDialog();
+            }}
+            disabled={selectedRecords.length === 0 || selectedRecords.some((d) => d.ownerId !== user?.user?._id)}
+          >
+            {`Transfer Entity (${selectedRecords.length})`}
+          </MenuItem>
+        )}
+      </>
+    );
   };
 
   return (
@@ -409,128 +456,26 @@ const Leads = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'d-flex flex-wrap align-items-center gap-2'}>
-              <div className={`flex flex-wrap items-center gap-2 `}>
-                {LeadTypes && (
-                  <ToggleButtonGroup size="small" className="ml-2" value={LeadTypes[selectedType - 1].key} exclusive onChange={handleFilter}>
-                    {LeadTypes.map((k, index) => {
-                      return (
-                        <ToggleButton value={k.key} key={index}>
-                          {k.key}
-                        </ToggleButton>
-                      );
-                    })}
-                  </ToggleButtonGroup>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} width="242px" size="small" value={search} style={isMobile ? { flex: 1 } : {}} />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.lead?.isCreate && (
-                  <Button
-                    onClick={() => {
-                      setIsOpen({ open: true, isClone: false, idToClone: null });
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={`no-shadow`}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                <HtmlTooltip title={!selectedRecords.length ? 'Please select some leads' : ''}>
-                  <span>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                  </span>
-                </HtmlTooltip>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete && !e.convertedToOpportunity) ? false : true}
-                    onClick={() => {
-                      closeActions();
-                      setIsConformDialogVisible(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords.length})`}
-                  </MenuItem>
-                  {permissions['customerAccount'].isCreate && permissions['customerContact'].isCreate && permissions['opportunity'].isCreate && (
-                    <MenuItem
-                      disabled={selectedRecords.length === 0}
-                      onClick={() => {
-                        closeActions();
-                        if (selectedRecords.some((d) => d.convertedToOpportunity)) {
-                          setMessageDialog({
-                            open: true,
-                            message: `You are trying to convert already converted lead, Please unselect those records and try again.`
-                          });
-                        } else if (selectedRecords.some((d) => !d[processFieldName] || d[processFieldName].toLowerCase() !== 'qualified')) {
-                          setMessageDialog({
-                            open: true,
-                            message: `You have selected lead(s) which are not qualified yet to be converted into opportunity`
-                          });
-                        } else {
-                          if (selectedRecords.some((d) => d.isAllowedToUpdate === false)) {
-                            setMessageDialog({
-                              open: true,
-                              message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.`
-                            });
-                          } else {
-                            setConvertLeadToOpportunityConfirmationDialog({
-                              open: true,
-                              id: null,
-                              leadName: null,
-                              message: `Are you sure you want to convert selected leads to opportunity?`
-                            });
-                          }
-                        }
-                      }}
-                    >
-                      {`Convert To Opportunity (${selectedRecords.length})`}
-                    </MenuItem>
-                  )}
-                  {permissions?.lead?.isUpdate && (
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        handleTransferEntityDialog();
-                      }}
-                      disabled={selectedRecords.length === 0 || selectedRecords.some((d) => d.ownerId !== user?.user?._id)}
-                    >
-                      {`Transfer Entity (${selectedRecords.length})`}
-                    </MenuItem>
-                  )}
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={LeadTypes}
+          onToggle={handleFilter}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          // leftSideContents
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+          // addButtonProps
+          addButtonOnclick={() => {
+            setIsOpen({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.lead?.isCreat}
+          synchronizeType
+        />
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

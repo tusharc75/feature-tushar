@@ -25,7 +25,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
+const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, onlyAssetNumber = false }) => {
 
     const { setToastConfig } = useContext(CustomToastContext);
 
@@ -38,7 +38,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
         axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
             .then(({ data: { data } }) => {
                 const assetNumberType = data.find((d) => d?.fieldData?.fieldName === "assetNumberType")?.fieldData;
-                if (assetNumberType) {
+                if (assetNumberType && !onlyAssetNumber) {
                     setAssetNumberTypeField(assetNumberType);
                 }
                 const productsData = products.flatMap((product, index) =>
@@ -46,7 +46,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
                         id: product?.id,
                         index: `${index + 1}.${index2 + 1}`,
                         productName: product?.productName,
-                        assetNumberType: assetNumberType ? ASSET_NUMBER_TYPE.auto : ASSET_NUMBER_TYPE.manual,
+                        assetNumberType: assetNumberType && !onlyAssetNumber ? ASSET_NUMBER_TYPE.auto : ASSET_NUMBER_TYPE.manual,
                         assetNumber: ''
                     }))
                 );

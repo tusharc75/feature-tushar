@@ -1,30 +1,29 @@
+import { Button, Grid, IconButton } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useContext } from 'react';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Button, Grid, IconButton, useTheme } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { dateFormat, purchaseOrder, PURCHASE_ORDER_STATUS, prepareDataForGrid, formatAmountWithCurrency, sidebarResource, MATERIAL_TYPE } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import { isMobile, isTablet } from 'react-device-detect';
-import routes from 'src/components/Helpers/Routes';
-import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import RejectProduct from './RejectProduct';
+import { Cancel } from '@material-ui/icons';
 import HistoryIcon from '@material-ui/icons/History';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
+import { startCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { MATERIAL_TYPE, PURCHASE_ORDER_STATUS, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
+import History from 'src/pages/ProductInventory/LedgerHistory';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
+import AssetQtyDialog from './AssetQtyDialog';
+import Logs from './Logs';
 import Receive from './Receive';
 import Reject from './Reject';
-import Logs from './Logs';
-import History from 'src/pages/ProductInventory/LedgerHistory';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import PreviewDownload from 'src/components/PreviewDownload';
-import AssetQtyDialog from './AssetQtyDialog';
-import { startCase } from 'lodash';
-import { Cancel } from '@material-ui/icons';
-
+import RejectProduct from './RejectProduct';
 
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,7 +43,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
   const [inventoryHistory, setInventoryHistory] = useState([]);
 
   const [columns, setColumns] = useState(null);
-  const [addAssetDialog, setAddAssetDialog] = useState({ open: false, product: null })
+  const [addAssetDialog, setAddAssetDialog] = useState({ open: false, product: null });
 
   useEffect(() => {
     fetchColumns();
@@ -80,7 +79,15 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       disabled: true,
       sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => {
-        return row.original['type'] ? <p className="text-truncate">{startCase(row.original.type)}</p> : <NoDataCell />;
+        return row.original['type'] ? (
+          <div>
+            <p className="text-truncate" title={startCase(row.original.type)}>
+              {startCase(row.original.type)}
+            </p>
+          </div>
+        ) : (
+          <NoDataCell />
+        );
       }
     });
     column.push({
@@ -92,22 +99,22 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate">{row.original.detail}</p>
-          {[MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.serializedAsset].includes(row.original.type) && <IconButton
-            size="small"
-            onClick={() => {
-              if (row.original.type === MATERIAL_TYPE.product) {
-                window.open(`${routes.productDetail.path}/${row.original.materialId}`)
-              }
-              else if (row.original.type === MATERIAL_TYPE.service) {
-                window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`)
-              }
-              else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
-                window.open(`${routes.serializedAssetDetail.path}/${row.original.assetId}`)
-              }
-            }}
-          >
-            <OpenInNewIcon fontSize="small" color="primary" />
-          </IconButton>}
+          {[MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.serializedAsset].includes(row.original.type) && (
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === MATERIAL_TYPE.product) {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === MATERIAL_TYPE.service) {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.assetId}`);
+                }
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color="primary" />
+            </IconButton>
+          )}
         </div>
       )
     });
@@ -134,7 +141,11 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           Header: e?.fieldData?.fieldLabel,
           width: 200,
           Cell: ({ row }) =>
-            row.original.type === MATERIAL_TYPE.product ? <p className="text-truncate">{row.original.serializedProduct ? 'Yes' : 'No'}</p> : <NoDataCell />
+            row.original.type === MATERIAL_TYPE.product ? (
+              <p className="text-truncate">{row.original.serializedProduct ? 'Yes' : 'No'}</p>
+            ) : (
+              <NoDataCell />
+            )
         });
       }
       if (e?.fieldData?.fieldName === 'productCategory') {
@@ -142,7 +153,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           accessor: 'productCategory',
           Header: e?.fieldData?.fieldLabel,
           width: 200,
-          Cell: ({ row }) => (row.original.type === MATERIAL_TYPE.product ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />)
+          Cell: ({ row }) =>
+            row.original.type === MATERIAL_TYPE.product ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />
         });
       }
     });
@@ -152,7 +164,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       e.isColumnEditable = false;
     });
     const newColumns = generateColumns(renderedFrom, fields, null, false, purchaseOrderData?.currency);
-    column = [...column, ...newColumns]
+    column = [...column, ...newColumns];
     column.push({
       accessor: 'assetQty',
       Header: 'Received Assets',
@@ -160,7 +172,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       Cell: ({ row }) => (row.original['assetQty'] ? <p>{row.original['assetQty']}</p> : <NoDataCell />),
       Footer: (info) => {
         let rows = info.table.getExpandedRowModel().rows;
-        return rows?.filter((f) => f.original.hasOwnProperty('assetQty') && !isNaN(f.original['assetQty']))
+        return rows
+          ?.filter((f) => f.original.hasOwnProperty('assetQty') && !isNaN(f.original['assetQty']))
           .reduce((sum, row) => row.original['assetQty'] + sum, 0);
       }
     });
@@ -171,7 +184,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       Cell: ({ row }) => (row.original['inventoryQty'] ? <p>{row.original['inventoryQty']}</p> : <NoDataCell />),
       Footer: (info) => {
         let rows = info.table.getExpandedRowModel().rows;
-        return rows?.filter((f) => f.original.hasOwnProperty('inventoryQty') && !isNaN(f.original['inventoryQty']))
+        return rows
+          ?.filter((f) => f.original.hasOwnProperty('inventoryQty') && !isNaN(f.original['inventoryQty']))
           .reduce((sum, row) => row.original['inventoryQty'] + sum, 0);
       }
     });
@@ -187,7 +201,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           disableFilters: true,
           disableSortBy: true,
           canDrag: false,
-          Cell: ({ row }) =>
+          Cell: ({ row }) => (
             <>
               {/* {permissions?.serializedAsset?.isCreate &&
                   row?.original?.serializedProduct && (row.original?.qty - (row.original?.actualReceived || 0) - (row?.original?.assetQty || 0)) > 0 &&
@@ -204,9 +218,10 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                   </HtmlTooltip>
                 } */}
               {permissions?.purchaseOrder?.isUpdate &&
-                row?.original?.type === MATERIAL_TYPE.product &&
-                allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) &&
-                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+              row?.original?.type === MATERIAL_TYPE.product &&
+              allowedToEdit &&
+              row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
+              ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                 <HtmlTooltip title="Reject">
                   <span>
                     <IconButton
@@ -220,9 +235,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                     </IconButton>
                   </span>
                 </HtmlTooltip>
-              ) : null
-              }
-              {row?.original?.type === MATERIAL_TYPE.product &&
+              ) : null}
+              {row?.original?.type === MATERIAL_TYPE.product && (
                 <HtmlTooltip title="History">
                   <span>
                     <IconButton
@@ -241,8 +255,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                     </IconButton>
                   </span>
                 </HtmlTooltip>
-              }
-              {row?.original?.type !== MATERIAL_TYPE.serializedAsset &&
+              )}
+              {row?.original?.type !== MATERIAL_TYPE.serializedAsset && (
                 <HtmlTooltip title="Logs">
                   <span>
                     <IconButton
@@ -256,8 +270,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                     </IconButton>
                   </span>
                 </HtmlTooltip>
-              }
+              )}
             </>
+          )
         }
       ]
     ]);
@@ -277,7 +292,6 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       const serviceResponse: any = await axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`);
       const costResponce: any = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData._id}`);
 
-
       let rows = result?.data?.data?.map((item, index) => {
         let finalObject = prepareDataForGrid(item);
         finalObject['isChecked'] = selectedRecords.some((s) => s._id === item._id);
@@ -291,7 +305,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           description: item?.productDetail?.productDescription,
           productNumber: item?.productDetail?.productNumber,
           serializedProduct: item?.productDetail?.serializedProduct,
-          productCategory: item.productDetail?.productCategory?.optionLabel,
+          productCategory: item.productDetail?.productCategory?.optionLabel
         };
 
         res.subRows = [];
@@ -336,7 +350,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           });
         }
         res['assetQty'] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length;
-        res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length : 0;
+        res['inventoryQty'] = item?.actualReceived
+          ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
+          : 0;
         return res;
       });
 
@@ -345,15 +361,15 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           ele.detail = ele?.serviceDetail?.serviceName;
           ele.description = ele?.serviceDescription?.serviceDescription;
           ele.materialId = ele?.serviceDetail?._id;
-          rows.push({ ...ele, index: rows?.length + 1, type: MATERIAL_TYPE.service })
-        })
+          rows.push({ ...ele, index: rows?.length + 1, type: MATERIAL_TYPE.service });
+        });
       }
       if (costResponce?.data?.data?.length) {
         costResponce?.data?.data?.forEach((ele) => {
           ele.detail = ele?.description;
           ele.materialId = ele?._id;
-          rows.push({ ...ele, index: rows?.length + 1, type: MATERIAL_TYPE.manualEntry })
-        })
+          rows.push({ ...ele, index: rows?.length + 1, type: MATERIAL_TYPE.manualEntry });
+        });
       }
 
       checkReceivedProduct(rows);
@@ -364,70 +380,74 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     }
   };
 
+  const LeftSideContents = () => {
+    return (
+      <>
+        {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
+          <Button
+            variant={'contained'}
+            color="primary"
+            size="small"
+            disabled={
+              selectedRecords.length === 0 || (selectedRecords?.filter((e: any) => e.qty - (e?.actualReceived || 0) > 0).length > 0 ? false : true)
+            }
+            onClick={() => {
+              setReceiveDialog(true);
+            }}
+          >
+            Receive
+          </Button>
+        )}
+        {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
+          <Button
+            variant={'contained'}
+            color="primary"
+            size="small"
+            disabled={
+              selectedRecords.length === 0 || (selectedRecords?.filter((e: any) => e.qty - (e?.rejectQuantity || 0) > 0)?.length > 0 ? false : true)
+            }
+            onClick={() => {
+              setRejectDialog(true);
+            }}
+          >
+            Reject
+          </Button>
+        )}
+      </>
+    );
+  };
+
+  const previewDownloadProps = {
+    fileName: `${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`,
+    resource: sidebarResource.purchaseOrder,
+    referenceId: purchaseOrderData?._id,
+    columns: columns,
+    isSendEmail: true,
+    button1Title: 'Ordered',
+    button2Title: 'Received',
+    defaultColumns: [
+      'index',
+      'type',
+      'detail',
+      'description',
+      'qty',
+      `price_${purchaseOrderData?.currency?.toLowerCase()}`,
+      `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
+      `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
+      `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
+    ]
+  };
+
   return (
     <>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex">
-          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-              disabled={
-                selectedRecords.length === 0 ||
-                (selectedRecords?.filter((e: any) => e.qty - (e?.actualReceived || 0) > 0).length > 0 ? false : true)
-              }
-              onClick={() => {
-                setReceiveDialog(true);
-              }}
-            >
-              Receive
-            </Button>
-          )}
-          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && (
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              className="ml-2"
-              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-              disabled={
-                selectedRecords.length === 0 ||
-                (selectedRecords?.filter((e: any) => (e.qty - ((e?.rejectQuantity || 0) + (e?.assetQty || 0)) > 0))?.length > 0
-                  ? false
-                  : true)
-              }
-              onClick={() => {
-                setRejectDialog(true);
-              }}
-            >
-              Reject
-            </Button>
-          )}
-        </Box>
-        <div className="d-flex gap-2">
-          <PreviewDownload
-            fileName={`${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`}
-            resource={sidebarResource.purchaseOrder}
-            referenceId={purchaseOrderData?._id}
-            columns={columns}
-            isSendEmail={true}
-            button1Title='Ordered'
-            button2Title='Received'
-            defaultColumns={[
-              'index',
-              'type',
-              'detail',
-              'description',
-              'qty',
-              `price_${purchaseOrderData?.currency?.toLowerCase()}`,
-              `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
-              `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
-              `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
-            ]} />
-        </div>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={false}
+        previewDownloadProps={previewDownloadProps}
+        leftSideContents={<LeftSideContents />}
+        hasXpadding={true}
+      />
+
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <Box zIndex={5} width={'100%'}>
@@ -480,9 +500,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             setRejectDialog(false);
             fetchProduct();
           }}
-          material={selectedRecords.filter((d) =>
-            [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(d.type) &&
-            d.qty !== (d?.rejectQuantity || 0 + d?.assetQty || 0))}
+          material={selectedRecords.filter(
+            (d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(d.type) && d.qty !== (d?.rejectQuantity || 0)
+          )}
           purchaseOrderData={purchaseOrderData}
         />
       )}

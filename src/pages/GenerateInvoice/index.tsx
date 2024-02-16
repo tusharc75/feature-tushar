@@ -19,7 +19,7 @@ import ViewInvoice from '../Invoice/ViewInvoice';
 import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
 import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 const GENERATE_RESOURCE = [
   {

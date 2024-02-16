@@ -103,6 +103,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
       link.href = `data:application/${file?.contentType};base64,${file?.base64}`;
       link.download = `${file?.name}${file?.extension}`;
       link.click();
+      setIsDownloading(false);
     } else if (file.url) {
       axiosInstance()
         .get(`user/download?fileName=${file.url}`, {

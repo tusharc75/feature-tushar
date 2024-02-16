@@ -19,6 +19,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import ManageIotDataPoints from './ManageIotDataPoints';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -31,7 +32,6 @@ const IotDataPoints = () => {
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
@@ -113,14 +113,6 @@ const IotDataPoints = () => {
     return deepFilter;
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -196,7 +188,6 @@ const IotDataPoints = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -223,6 +214,20 @@ const IotDataPoints = () => {
     }, millisec);
   }, [search]);
 
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            showConfirmBox();
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -243,67 +248,25 @@ const IotDataPoints = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}></div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} size="small" value={search} />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.iotDataPoints?.isCreate && (
-                  <Button
-                    className={`no-shadow`}
-                    onClick={() => {
-                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                {permissions?.iotDataPoints?.isDelete && (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          showConfirmBox();
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          // toggleButtonList
+          // onToggle
+          // selectedType
+          // setSelectedType
+          // leftSideContents
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={permissions?.iotDataPoints?.isDelete}
+          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+          // addButtonProps
+          addButtonOnclick={() => {
+            setShowManageDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.iotDataPoints?.isCreate}
+        />
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

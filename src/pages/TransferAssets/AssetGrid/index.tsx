@@ -1,26 +1,26 @@
-import { useState, useEffect, Fragment, FC, useContext } from 'react';
-import { Button, Box, IconButton } from '@material-ui/core';
-import routes from 'src/components/Helpers/Routes';
-import { isMobile, isTablet } from 'react-device-detect';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Delete } from '@material-ui/icons';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
-  prepareDataForGrid,
-  deliveryTicket,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
-  transferAsset,
+  TRANSFER_ASSET_STATUS,
+  deliveryTicket,
+  prepareDataForGrid,
   serializedAsset,
-  TRANSFER_ASSET_STATUS
+  transferAsset
 } from 'src/constants/helpers';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Delete } from '@material-ui/icons';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 interface AssetsGridProps {
   permissions?: any;
@@ -118,8 +118,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
               ) : (
                 <NoDataCell />
               );
-          }
-          else if (o.accessor === 'product') {
+          } else if (o.accessor === 'product') {
             o.cell = ({ row }) =>
               row?.original?.product ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -224,39 +223,52 @@ const AssetsGrid: FC<AssetsGridProps> = ({
     }
   };
 
+  const AddButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={!permissions?.transferAsset?.isUpdate}
+          onClick={() => {
+            setAddSerializedAssetDialog(true);
+          }}
+        >
+          Add Existing {routes.serializedAsset.title}
+        </MenuItem>
+      </>
+    );
+  };
+
+  const ActionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.length === 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0}
+          onClick={() => {
+            setShowConfirmBox(true);
+            setRemoveData(selectedRecords.map((asset: any) => asset?._id));
+          }}
+        >
+          Remove Assets
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1} mx={1}>
-          {permissions?.transferAsset?.isUpdate && (
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-              onClick={() => {
-                setAddSerializedAssetDialog(true);
-              }}
-            >
-              {`Add Existing ${routes.serializedAsset.title}`}
-            </Button>
-          )}
-          {permissions?.transferAsset?.isUpdate && (
-            <Button
-              variant={isMobile ? 'outlined' : 'contained'}
-              size="small"
-              color="primary"
-              style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
-              disabled={selectedRecords.length === 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0}
-              onClick={() => {
-                setShowConfirmBox(true);
-                setRemoveData(selectedRecords.map((asset: any) => asset?._id));
-              }}
-            >
-              {isMobile && !isTablet ? 'Remove' : 'Remove Assets'}
-            </Button>
-          )}
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={<AddButtonMenuItems />}
+            isActionButtonVisible={permissions?.transferAsset?.isUpdate}
+            actionButtonMenuItems={<ActionButtonMenuItems />}
+            actionButtonProps={{
+              disabled: selectedRecords.length === 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0
+            }}
+            hasXpadding={true}
+          />
+        </>
       )}
       <Box mt={1}>
         {columns ? (
@@ -321,7 +333,11 @@ const AssetsGrid: FC<AssetsGridProps> = ({
         <ConfirmationDialog
           okBtnLoading={isRemovingAssets}
           open={showConfirmBox}
-          message={transferAssetData?.rentalJob ? 'Are you sure you want to remove asset(s)?. In order to free the assets, please remove from the rental job as well.' : `Are you sure you want to remove asset(s)?`}
+          message={
+            transferAssetData?.rentalJob
+              ? 'Are you sure you want to remove asset(s)?. In order to free the assets, please remove from the rental job as well.'
+              : `Are you sure you want to remove asset(s)?`
+          }
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -31,7 +31,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CardView from './CardView';
 import ManageJobDialog from './ManageJobDialog';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let jobTimeout;
 
@@ -276,8 +276,6 @@ const Job = () => {
       });
   };
 
-
-
   const LeftSideContent = () => {
     return (
       <>
@@ -370,15 +368,15 @@ const Job = () => {
           onSearch={handleSearch}
           // rightSideContents
           isActionButtonVisible={permissions?.job?.isDelete}
-          actionButtonProps={{disabled: selectedRecords?.length ? false : true}}
-          actionMenuItems={<ActionMenuItems/>}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
             setShowManageJobDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={true}
         />
-   
+
         {viewType === 1 && (
           <CardView
             jobs={dataRows}

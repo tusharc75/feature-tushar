@@ -1,5 +1,4 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem, TextField, Tooltip } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Box, IconButton, MenuItem, TextField, Tooltip } from '@material-ui/core';
 import CachedIcon from '@material-ui/icons/Cached';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
@@ -9,10 +8,11 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { convertInventory, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import InventoryToAsset from './InventoryToAsset';
 
@@ -35,7 +35,6 @@ const ConvertInventory = () => {
   }: any = useData();
 
   const { generateColumns } = useColumns();
-  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -67,14 +66,6 @@ const ConvertInventory = () => {
           setStorageLocationOptions(data[sidebarResource.storageLocation]);
         }
       });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   useEffect(() => {
@@ -211,111 +202,46 @@ const ConvertInventory = () => {
     )
   };
 
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setInventory({
+              open: true,
+              product: selectedRecords
+            });
+          }}
+        >
+          Convert
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <div>
           <CustomBreadCrumbs routes={[routes.inventoryToAsset]} />
-        </Grid>
-      </Grid>
-      <div className="main-container">
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
-            <div className={'d-flex flex-wrap align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                {/* <SiConvertio size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.inventoryToAsset?.title} </span> */}
-              </div>
-              <Autocomplete
-                style={{ minWidth: '200px', flexGrow: 1 }}
-                className="md:max-w-[250px]"
-                options={warehouseOptions}
-                getOptionLabel={(option: any) => option.optionLabel}
-                disableClearable
-                getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={
-                  warehouseOptions.filter((data) => data.optionValue === warehouseId).length
-                    ? warehouseOptions.filter((data) => data.optionValue === warehouseId)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  if (val !== null) {
-                    setWarehouseId(val && val.optionValue ? val.optionValue : '');
-                    setStorageLocationId(null);
-                  }
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                )}
-              />
-              {user?.user?.brandPolicy?.storageLocation && (
-                <Autocomplete
-                  style={{ minWidth: '200px', flexGrow: 1 }}
-                  className="md:max-w-[250px]"
-                  options={storageLocationOptions.filter((item) => item.warehouse === warehouseId)}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
-                  value={
-                    storageLocationOptions.filter((data) => data.optionValue === storageLocationId).length
-                      ? storageLocationOptions.filter((data) => data.optionValue === storageLocationId)[0]
-                      : ''
-                  }
-                  onChange={(e, val) => {
-                    setStorageLocationId(val?.optionValue);
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} margin="none" size="small" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
-                  )}
-                />
-              )}
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} size="small" value={search} />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.inventoryToAsset?.isUpdate ? (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={`new-dropdown-v1`}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                      disabled={selectedRecords?.length ? false : true}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          setInventory({
-                            open: true,
-                            product: selectedRecords
-                          });
-                        }}
-                      >
-                        Convert
-                      </MenuItem>
-                    </Menu>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </div>
         </div>
+      </div>
+      <CustomContainer>
+        <ListingPageHeader
+          leftSideContents={
+            <LeftSideContents
+              {...{ warehouseOptions, warehouseId, setWarehouseId, setStorageLocationId, user, storageLocationOptions, storageLocationId }}
+            />
+          }
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={permissions?.inventoryToAsset?.isUpdate}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+          isAddButtonVisible={false}
+        />
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -345,9 +271,66 @@ const ConvertInventory = () => {
             storageLocation={storageLocationId}
           />
         )}
-      </div>
-    </Fragment>
+      </CustomContainer>
+    </section>
   );
 };
 
 export default ConvertInventory;
+
+const LeftSideContents = ({
+  warehouseOptions,
+  warehouseId,
+  setWarehouseId,
+  setStorageLocationId,
+  user,
+  storageLocationOptions,
+  storageLocationId
+}) => {
+  return (
+    <>
+      <Autocomplete
+        style={{ minWidth: '200px', flexGrow: 1 }}
+        className="md:max-w-[250px]"
+        options={warehouseOptions}
+        getOptionLabel={(option: any) => option.optionLabel}
+        disableClearable
+        getOptionSelected={(option: any, val) => option.optionValue === val}
+        value={
+          warehouseOptions.filter((data) => data.optionValue === warehouseId).length
+            ? warehouseOptions.filter((data) => data.optionValue === warehouseId)[0]
+            : ''
+        }
+        onChange={(e, val) => {
+          if (val !== null) {
+            setWarehouseId(val && val.optionValue ? val.optionValue : '');
+            setStorageLocationId(null);
+          }
+        }}
+        renderInput={(params) => (
+          <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+        )}
+      />
+      {user?.user?.brandPolicy?.storageLocation && (
+        <Autocomplete
+          style={{ minWidth: '200px', flexGrow: 1 }}
+          className="md:max-w-[250px]"
+          options={storageLocationOptions.filter((item) => item.warehouse === warehouseId)}
+          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+          getOptionSelected={(option: any, val) => option.optionValue === val}
+          value={
+            storageLocationOptions.filter((data) => data.optionValue === storageLocationId).length
+              ? storageLocationOptions.filter((data) => data.optionValue === storageLocationId)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            setStorageLocationId(val?.optionValue);
+          }}
+          renderInput={(params) => (
+            <TextField {...params} margin="none" size="small" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+          )}
+        />
+      )}
+    </>
+  );
+};

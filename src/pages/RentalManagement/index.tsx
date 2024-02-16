@@ -27,7 +27,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -496,7 +496,6 @@ const RentalManagement = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.rentalManagement}
-            exportTable={true}
           />
         ) : (
           <Box p={2} height={500}>

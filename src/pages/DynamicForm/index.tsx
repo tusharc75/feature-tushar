@@ -18,7 +18,7 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageDynamicForm from './ManageDynamicForm';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -210,8 +210,6 @@ const DynamicForm = () => {
         setIsSubmitting(false);
       });
   };
-
-
 
   const ActionMenuItems = () => {
     return (
