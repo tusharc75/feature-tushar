@@ -119,7 +119,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                       }}
                     >
                       <div className={`flex gap-2 items-center`}>
-                        {expander && expanderCol && flexRender(expanderCell.column.columnDef.cell, expanderCell.getContext())}
+                        {expander && expanderCol && flexRender(expanderCell.column.columnDef.cell, expanderCell?.getContext())}
                         {allowSelection && !row.original.hideSelection && (
                           <div>
                             <IndeterminateCheckbox
@@ -289,7 +289,7 @@ const RenderSubCard = ({
       }}
     >
       <div className={`flex gap-2 items-center`}>
-        {expander && expanderCol && flexRender(expanderCell.column.columnDef.cell, expanderCell.getContext())}
+        {expander && expanderCol && flexRender(expanderCell?.column?.columnDef?.cell, expanderCell?.getContext())}
         {allowSelection && !row.original.hideSelection && (
           <div>
             <IndeterminateCheckbox
@@ -458,7 +458,7 @@ const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue
         <CellShell>
           <div className="w-full">
             <div className=" [border-bottom:1px_dashed_#8a8a8a] [display:flex_!important] gap-[20px] justify-end ml-auto cursor-pointer max-w-[max-content]">
-              <p>{flexRender(cell.column.columnDef.cell, cell.getContext())}</p>
+              <p>{flexRender(cell.column.columnDef.cell, cell?.getContext())}</p>
               <span>
                 <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
               </span>
@@ -467,7 +467,7 @@ const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue
         </CellShell>
       );
     default:
-      return <CellShell>{flexRender(cell.column.columnDef.cell, cell.getContext())}</CellShell>;
+      return <CellShell>{flexRender(cell.column.columnDef.cell, cell?.getContext())}</CellShell>;
   }
 };
 
@@ -495,7 +495,7 @@ const RenderFooter = ({ table }) => {
               aria-label="show more"
               className="[&_.MuiButton-label]:flex [&_.MuiButton-label]:justify-between [&_.MuiButton-label]:font-bold"
             >
-              <span>{indexCol.isPlaceholder ? null : flexRender(indexCol.column.columnDef.footer, indexCol.getContext())}</span>
+              <span>{indexCol?.isPlaceholder ? null : flexRender(indexCol?.column?.columnDef.footer, indexCol?.getContext())}</span>
             </Button>
             <Collapse in={isFooterExpanded} timeout="auto">
               <div
@@ -503,14 +503,14 @@ const RenderFooter = ({ table }) => {
                 `}
               >
                 {group?.headers?.map((column) => {
-                  if (!column.column.columnDef.footer || column.id === 'index') return null;
+                  if (!column?.column?.columnDef.footer || column.id === 'index') return null;
                   return (
                     <Fragment key={column.id}>
                       <span className="text-truncate">
-                        {column.isPlaceholder ? null : flexRender(column.column.columnDef.header, column.getContext())}
+                        {column?.isPlaceholder ? null : flexRender(column?.column?.columnDef.header, column?.getContext())}
                       </span>
                       <span className="text-truncate font-normal text-right">
-                        {column.isPlaceholder ? null : flexRender(column.column.columnDef.footer, column.getContext())}
+                        {column?.isPlaceholder ? null : flexRender(column?.column?.columnDef.footer, column?.getContext())}
                       </span>
                     </Fragment>
                   );

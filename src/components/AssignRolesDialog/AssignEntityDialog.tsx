@@ -25,6 +25,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import SearchBox from '../Helpers/SearchBox';
 import Loader from '../Loader';
+import { ListingPageHeader } from '../PageHeaders';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -311,6 +312,38 @@ const AssignEntityDialog = ({
     }
   }
 
+  const leftSideContents = () => {
+    return (
+      <>
+        <FormControl component="fieldset">
+          <FormControlLabel
+            value="top"
+            style={{ marginLeft: 0 }}
+            control={
+              <Checkbox
+                edge="start"
+                onChange={(e) => {
+                  if (activeStep === 0 && !regionalRole) {
+                    data.forEach((d) => (d.isChecked = e.target.checked));
+                    setSelectedData(data.filter((r) => r.isChecked).map((obj) => obj._id));
+                  } else {
+                    role.forEach((d) => (d.isChecked = e.target.checked));
+                    setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
+                  }
+                }}
+                checked={activeStep === 0 && !regionalRole ? data.every((x) => x.isChecked) : role.every((x) => x.isChecked)}
+                inputProps={{
+                  'aria-labelledby': `checkbox-list-label-select-all`
+                }}
+              />
+            }
+            label="Select all "
+          />
+        </FormControl>
+      </>
+    );
+  };
+
   return (
     // <Dialog
     //   fullWidth
@@ -330,38 +363,16 @@ const AssignEntityDialog = ({
               <Loader text={`Loading ${startCase(type)}`} />
             ) : dataConst.length ? (
               <>
-                <Grid container>
-                  <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
-                    <FormControl component="fieldset">
-                      <FormControlLabel
-                        value="top"
-                        style={{ marginLeft: 0 }}
-                        control={
-                          <Checkbox
-                            edge="start"
-                            onChange={(e) => {
-                              if (activeStep === 0 && !regionalRole) {
-                                data.forEach((d) => (d.isChecked = e.target.checked));
-                                setSelectedData(data.filter((r) => r.isChecked).map((obj) => obj._id));
-                              } else {
-                                role.forEach((d) => (d.isChecked = e.target.checked));
-                                setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
-                              }
-                            }}
-                            checked={activeStep === 0 && !regionalRole ? data.every((x) => x.isChecked) : role.every((x) => x.isChecked)}
-                            inputProps={{
-                              'aria-labelledby': `checkbox-list-label-select-all`
-                            }}
-                          />
-                        }
-                        label="Select all "
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} md={6} sm={6} container justify="flex-end">
-                    <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-                  </Grid>
-                </Grid>
+                <ListingPageHeader
+                  leftSideContents={leftSideContents()}
+                  isActionButtonVisible={false}
+                  isAddButtonVisible={false}
+                  setQueryString={false}
+                  synchronizeType={false}
+                  searchValue={search}
+                  onSearch={handleSearch}
+                />
+
                 <div className="grid gap-[20px] mt-3">
                   {steps.map((label, index) => (
                     <div key={label} className="relative">
