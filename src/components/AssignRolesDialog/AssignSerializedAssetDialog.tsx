@@ -1,16 +1,15 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset, sidebarResource } from 'src/constants/helpers';
-import styles from 'src/pages/Leads/Header.module.scss';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
-import SearchBox from '../Helpers/SearchBox';
+import { ListingPageHeader } from '../PageHeaders';
 
 let searchTimeout;
 
@@ -192,6 +191,64 @@ const AssignSerializedAssetDialog = ({
     setProducts(tempProducts);
   }, [selectedRecords]);
 
+  const handleAdd = () => {
+    if (selectedProducts?.length) {
+      const data = [];
+      selectedProducts?.forEach((ele) => {
+        let qty = ele.qty;
+        while (qty) {
+          const result = selectedRecords?.filter((f) => f.productId === ele.product && !f.isCounted);
+          if (result.length) {
+            data.push({ ...ele, asset: result[0]._id });
+            result[0].isCounted = true;
+          }
+          qty--;
+        }
+      });
+      handleSucess(data);
+    } else {
+      handleSucess(selectedRecords);
+    }
+  };
+
+  const leftSideContents = () => {
+    return (
+      <>
+        <Box style={{ display: 'inline' }}>
+          {products.length > 0
+            ? products?.map((d) => (
+                <Box
+                  m={0.5}
+                  p={1}
+                  border={1}
+                  className={`cursor-pointer rounded-sm ${
+                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                  }`}
+                  borderColor="var(--common-border-color)"
+                  onClick={() => {
+                    if (selectedProduct === d.id) {
+                      setSelectedProduct(null);
+                    } else {
+                      setSelectedProduct(d.id);
+                    }
+                  }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {d?.qty < 0 ? (
+                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                  ) : d?.qty === 0 ? (
+                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                  ) : (
+                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                  )}
+                </Box>
+              ))
+            : null}
+        </Box>
+      </>
+    );
+  };
+
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader
@@ -201,81 +258,26 @@ const AssignSerializedAssetDialog = ({
         onClose={handleClose}
       />
       <CustomDialogContent>
-        <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} className="d-flex align-items-center gap-1">
-              <Box style={{ display: 'inline' }}>
-                {products.length > 0
-                  ? products?.map((d) => (
-                      <Box
-                        m={0.5}
-                        p={1}
-                        border={1}
-                        className={`cursor-pointer rounded-sm ${
-                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
-                        }`}
-                        borderColor="var(--common-border-color)"
-                        onClick={() => {
-                          if (selectedProduct === d.id) {
-                            setSelectedProduct(null);
-                          } else {
-                            setSelectedProduct(d.id);
-                          }
-                        }}
-                        style={{ display: 'inline-block' }}
-                      >
-                        {d?.qty < 0 ? (
-                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                        ) : d?.qty === 0 ? (
-                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                        ) : (
-                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                        )}
-                      </Box>
-                    ))
-                  : null}
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6} className={styles.filter_side}>
-              <Box className={styles.filter_side_header} component="div">
-                <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
-                <Button
-                  disabled={isAssigning || disableSaveButton || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0)}
-                  onClick={() => {
-                    if (selectedProducts?.length) {
-                      const data = [];
-                      selectedProducts?.forEach((ele) => {
-                        let qty = ele.qty;
-                        while (qty) {
-                          const result = selectedRecords?.filter((f) => f.productId === ele.product && !f.isCounted);
-                          if (result.length) {
-                            data.push({ ...ele, asset: result[0]._id });
-                            result[0].isCounted = true;
-                          }
-                          qty--;
-                        }
-                      });
-                      handleSucess(data);
-                    } else {
-                      handleSucess(selectedRecords);
-                    }
-                  }}
-                  color="primary"
-                  size="small"
-                  variant="contained"
-                  endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
-                >
-                  Add {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
-                </Button>
-              </Box>
-            </Grid>
-            {products.length > 0 && products.some((s) => s.qty < 0) ? (
-              <div className="text-error font-weight-bold">You have selected more assets than required</div>
-            ) : (
-              ''
-            )}
-          </Grid>
-        </div>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={false}
+          leftSideContents={leftSideContents()}
+          addButtonProps={{
+            iconsEnabled: false,
+            disabled: isAssigning || disableSaveButton || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0),
+            loading: isAssigning,
+            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+          }}
+          addButtonOnclick={handleAdd}
+          isAddButtonVisible
+          setQueryString={false}
+          synchronizeType={false}
+        />
+
+        {products.length > 0 && products.some((s) => s.qty < 0) ? (
+          <div className="text-error font-weight-bold">You have selected more assets than required</div>
+        ) : null}
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
