@@ -99,6 +99,7 @@ const AssignOpportunityDialog = ({ opportunityDialogOpen, onSuccess, handleClose
         <FormControl component="fieldset">
           <FormControlLabel
             value="top"
+            className="m-0"
             control={
               <Checkbox
                 edge="start"
