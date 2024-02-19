@@ -1,35 +1,33 @@
-import { Button, Grid, makeStyles, Tooltip, Dialog, Typography, MenuItem } from '@material-ui/core';
-import { useEffect, useMemo, useState } from 'react';
-import { useContext } from 'react';
-import { useHistory } from 'react-router-dom';
-import { BiLayerPlus, BiMailSend } from 'react-icons/bi';
+import { Button, Dialog, Grid, MenuItem, Tooltip, Typography } from '@material-ui/core';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AiFillEdit } from 'react-icons/ai';
+import { BiMailSend } from 'react-icons/bi';
 import { GiVintageRobot } from 'react-icons/gi';
-import { AiFillEdit, AiFillPlusCircle } from 'react-icons/ai';
+import { useHistory } from 'react-router-dom';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import { stepIconInterface } from 'src/components/Steps/icons';
+import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../../StateProvider/Provider';
+import PerformanceTuningImg from '../../../../assets/PerformanceTuning.png';
 import axiosInstance from '../../../../axios/axiosInstance';
+import CustomDialogContent from '../../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
+import MessageDialog from '../../../../components/Helpers/MessageDialog';
 import Loader from '../../../../components/Loader';
 import ProductBuilder from '../../../../components/productBuilder';
 import {
-  currencyCodeToSymbol,
   CustomDialogTransition,
+  QUOTE_PROCESS_STATUS,
+  currencyCodeToSymbol,
   customerAccount,
   customerContact,
   formatAmountWithCurrency,
-  QUOTE_PROCESS_STATUS,
   quoteBuilder,
   sidebarResource
 } from '../../../../constants/helpers';
-import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
-import Steps from './Steps';
-import CustomDialogContent from '../../../../components/CustomDialog/CustomDialogContent';
-import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
-import { isMobile, isTablet } from 'react-device-detect';
-import PerformanceTuningImg from '../../../../assets/PerformanceTuning.png';
-import MessageDialog from '../../../../components/Helpers/MessageDialog';
-import { useData } from '../../../../StateProvider/Provider';
 import DOAReasonDialog from '../../../DOA/DOAReasonDialog';
-import ContentFullScreen from 'src/components/ContentFullScreen';
-import { stepIconInterface } from 'src/components/Steps/icons';
-import PreviewDownload from 'src/components/PreviewDownload';
+import Steps from './Steps';
 
 interface StepInterface extends stepIconInterface {
   key: string;

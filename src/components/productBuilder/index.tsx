@@ -1,38 +1,35 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
+import { MenuItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
-import CreateProduct from '../Product/CreateProduct';
-import AddExistingProduct from './AddExistingProduct';
+import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import ProductDialog from './ProductDialog';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Dialog, TextField } from '@material-ui/core';
-import { AddField } from '../FormBuilder/AddField';
-import ConfirmationDialog from '../Helpers/ConfirmationDialog';
-import Button from '@material-ui/core/Button';
-import ImportExportLinks from '../Product/ImportExportLinks';
-import { sortBy, uniq, map, camelCase } from 'lodash';
-import BulkEditDialog from './BulkEditDialog';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { handleAutoCalculation, extractFields } from '../../constants/formulaUtility';
-import { QUOTE_PROCESS_STATUS, gridLoadingTimeout, sidebarResource, supplierContact } from '../../constants/helpers';
-import routes from '../../components/Helpers/Routes';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import { camelCase, map, sortBy, uniq } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiTwotoneEdit } from 'react-icons/ai';
-import { prepareDataForGrid } from '../../constants/helpers';
-import SupplierAskPrice from './SupplierAskPrice';
-import AskSupplierPriceDialog from './AskSupplierPriceDialog';
-import { useData } from './../../StateProvider/Provider';
-import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
-import HtmlTooltip from '../CustomTooltipTitle';
-import CommonSkeleton from '../Helpers/CommonSkeleton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import routes from '../../components/Helpers/Routes';
+import { extractFields, handleAutoCalculation } from '../../constants/formulaUtility';
+import { QUOTE_PROCESS_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, supplierContact } from '../../constants/helpers';
 import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTable';
+import HtmlTooltip from '../CustomTooltipTitle';
+import { AddField } from '../FormBuilder/AddField';
+import CommonSkeleton from '../Helpers/CommonSkeleton';
+import ConfirmationDialog from '../Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from '../PageHeaders';
+import CreateProduct from '../Product/CreateProduct';
+import ImportExportLinks from '../Product/ImportExportLinks';
+import { useData } from './../../StateProvider/Provider';
+import AddExistingProduct from './AddExistingProduct';
+import AskSupplierPriceDialog from './AskSupplierPriceDialog';
+import BulkEditDialog from './BulkEditDialog';
+import ProductDialog from './ProductDialog';
+import SupplierAskPrice from './SupplierAskPrice';
+import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -550,6 +547,7 @@ const ProductBuilder = (props) => {
               onExportToExcelSuccess={() => {
                 fetchProduct();
               }}
+              small={true}
             />
           )}
           {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
