@@ -180,7 +180,7 @@ const ProductDetailsPage = () => {
       .put(`${product.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.product.path}`)
+        history.push(`${routes.product.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -361,6 +361,7 @@ const ProductDetailsPage = () => {
         </Tabs>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
+            {console.log(tabValue)}
             {tabValue === 0 && (
               <Box>
                 {loading || !productFields.length ? (
@@ -477,21 +478,21 @@ const ProductDetailsPage = () => {
                                 <Box className="form-head-v1" display="flex" justifyContent="space-between" alignItems="center">
                                   <Typography variant="subtitle2">{routes?.serializedAsset?.title}</Typography>
                                   <Box>
-                                  {permissions?.serializedAsset?.isCreate && (
-                                    <IconButton
-                                      title={`Create ${routes.serializedAsset.title}`}
-                                      color="primary"
-                                      size="small"
-                                      onClick={() => {
-                                        setOpenProductInventoryDialog(true);
-                                      }}
-                                    >
-                                      <ControlPoint fontSize="small" />
+                                    {permissions?.serializedAsset?.isCreate && (
+                                      <IconButton
+                                        title={`Create ${routes.serializedAsset.title}`}
+                                        color="primary"
+                                        size="small"
+                                        onClick={() => {
+                                          setOpenProductInventoryDialog(true);
+                                        }}
+                                      >
+                                        <ControlPoint fontSize="small" />
+                                      </IconButton>
+                                    )}
+                                    <IconButton size="small" onClick={getWarehouses}>
+                                      <RefreshIcon fontSize="small" />
                                     </IconButton>
-                                  )}
-                                  <IconButton size="small" onClick={getWarehouses}>
-                                    <RefreshIcon fontSize="small" />
-                                  </IconButton>
                                   </Box>
                                 </Box>
 
