@@ -136,6 +136,15 @@ const Report = () => {
                 })
                 columns = [...newColumns]
             }
+            else if (type === 'purchase-order-details') {
+                newColumns?.forEach((e) => {
+                    if (['productId', 'productNumber', 'productDescription', 'serviceName', 'serviceDescription', 'description']?.includes(e.accessor)) {
+                        e.disableFilters = true;
+                        e.disableSortBy = true;
+                    }
+                })
+                columns = [...newColumns]
+            }
             else {
                 columns = [...newColumns]
             }

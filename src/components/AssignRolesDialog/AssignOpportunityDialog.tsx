@@ -21,6 +21,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import SearchBox from '../Helpers/SearchBox';
 import Loader from '../Loader';
+import { ListingPageHeader } from '../PageHeaders';
 const AssignOpportunityDialog = ({ opportunityDialogOpen, onSuccess, handleCloseDialog, assignedOpportunity, accountId, contactId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [opportunities, setOpportunities] = useState([]);
@@ -92,6 +93,33 @@ const AssignOpportunityDialog = ({ opportunityDialogOpen, onSuccess, handleClose
     setOpportunities(result);
   };
 
+  const leftSideContents = () => {
+    return (
+      <>
+        <FormControl component="fieldset">
+          <FormControlLabel
+            value="top"
+            className="m-0"
+            control={
+              <Checkbox
+                edge="start"
+                onChange={(e) => {
+                  opportunities.forEach((opportunity) => (opportunity.isChecked = e.target.checked));
+                  setSelectedOpportunities(opportunities.filter((r) => r.isChecked).map((obj) => obj._id));
+                }}
+                checked={opportunities.every((x) => x.isChecked)}
+                inputProps={{
+                  'aria-labelledby': `checkbox-list-label-select-all`
+                }}
+              />
+            }
+            label="Select All"
+          />
+        </FormControl>
+      </>
+    );
+  };
+
   return (
     <Dialog fullWidth maxWidth="xs" open={opportunityDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title="Assign Opportunities" />
@@ -100,32 +128,16 @@ const AssignOpportunityDialog = ({ opportunityDialogOpen, onSuccess, handleClose
           <Loader text="Loading Opportunities" />
         ) : opportunitiesConst.length ? (
           <>
-            <Grid container>
-              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    value="top"
-                    control={
-                      <Checkbox
-                        edge="start"
-                        onChange={(e) => {
-                          opportunities.forEach((opportunity) => (opportunity.isChecked = e.target.checked));
-                          setSelectedOpportunities(opportunities.filter((r) => r.isChecked).map((obj) => obj._id));
-                        }}
-                        checked={opportunities.every((x) => x.isChecked)}
-                        inputProps={{
-                          'aria-labelledby': `checkbox-list-label-select-all`
-                        }}
-                      />
-                    }
-                    label="Select All"
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
-                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              </Grid>
-            </Grid>
+            <ListingPageHeader
+              leftSideContents={leftSideContents()}
+              isActionButtonVisible={false}
+              isAddButtonVisible={false}
+              setQueryString={false}
+              synchronizeType={false}
+              searchValue={search}
+              onSearch={handleSearch}
+            />
+
             <List style={{ padding: 0 }}>
               {opportunities.map((opportunity) => (
                 <ListItem divider key={opportunity._id}>

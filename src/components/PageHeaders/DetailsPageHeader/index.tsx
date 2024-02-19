@@ -1,7 +1,7 @@
 import { Button, ButtonProps, Menu, useMediaQuery } from '@material-ui/core';
 import React, { ReactNode, useState } from 'react';
 import type { PreviewDownloadProps } from './PreviewDownload';
-import { Add, ExpandMore } from '@material-ui/icons';
+import { Add, ExpandMore, TouchApp } from '@material-ui/icons';
 import PreviewDownload from './PreviewDownload';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
@@ -78,7 +78,7 @@ const DetailsPageHeader = ({
                   onClick={AddClick}
                   {...restOfAddButtonProps}
                   aria-controls="add-menu"
-                  className={`${isMobile ? 'btn-outline-v1  with-border' : ''}`}
+                  className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
                   endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
                 >
                   {isMobile ? <Add /> : 'Add'}
@@ -116,11 +116,16 @@ const DetailsPageHeader = ({
                   size="small"
                   onClick={ActionClick}
                   aria-controls="action-menu"
-                  className="new-dropdown-v1"
+                  className="new-dropdown-v1 min-h-[30px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]"
                   {...restOfActionButtonProps}
                 >
-                  {'Actions'}
-                  <ExpandMore fontSize="small" />
+                  {isMobile ? (
+                    <TouchApp />
+                  ) : (
+                    <>
+                      Actions <ExpandMore fontSize="small" />
+                    </>
+                  )}
                 </Button>
               </span>
             </HtmlTooltip>

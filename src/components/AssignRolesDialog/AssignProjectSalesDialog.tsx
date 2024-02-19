@@ -5,7 +5,6 @@ import {
   Dialog,
   FormControl,
   FormControlLabel,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -21,8 +20,8 @@ import { customerAccount, customerContact, opportunity, quoteBuilder } from '../
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import SearchBox from '../Helpers/SearchBox';
 import Loader from '../Loader';
+import { ListingPageHeader } from '../PageHeaders';
 const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleCloseDialog, assignedProjectSales, type }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -127,6 +126,32 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
     setProjectSales(result);
   };
 
+  const leftSideContents = () => {
+    return (
+      <>
+        <FormControl component="fieldset">
+          <FormControlLabel
+            value="top"
+            control={
+              <Checkbox
+                // edge="start"
+                onChange={(e) => {
+                  projectSales.forEach((project) => (project.isChecked = e.target.checked));
+                  setSelectedProjectSales(projectSales.filter((r) => r.isChecked).map((obj) => obj._id));
+                }}
+                checked={projectSales.every((x) => x.isChecked)}
+                inputProps={{
+                  'aria-labelledby': `checkbox-list-label-select-all`
+                }}
+              />
+            }
+            label="Select All"
+          />
+        </FormControl>
+      </>
+    );
+  };
+
   return (
     <Dialog fullWidth maxWidth="xs" open={projectSalesDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title="Assign Project List" />
@@ -135,32 +160,16 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
           <Loader text="Loading Project List" />
         ) : projectSalesConst.length ? (
           <>
-            <Grid container>
-              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-2">
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    value="top"
-                    control={
-                      <Checkbox
-                        // edge="start"
-                        onChange={(e) => {
-                          projectSales.forEach((project) => (project.isChecked = e.target.checked));
-                          setSelectedProjectSales(projectSales.filter((r) => r.isChecked).map((obj) => obj._id));
-                        }}
-                        checked={projectSales.every((x) => x.isChecked)}
-                        inputProps={{
-                          'aria-labelledby': `checkbox-list-label-select-all`
-                        }}
-                      />
-                    }
-                    label="Select All"
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
-                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              </Grid>
-            </Grid>
+            <ListingPageHeader
+              leftSideContents={leftSideContents()}
+              searchValue={search}
+              onSearch={handleSearch}
+              isActionButtonVisible={false}
+              isAddButtonVisible={false}
+              setQueryString={false}
+              synchronizeType={false}
+            />
+
             <List style={{ padding: 0 }}>
               {projectSales.map((projectSale) => (
                 <ListItem divider key={projectSale._id}>

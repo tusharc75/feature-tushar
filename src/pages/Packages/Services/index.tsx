@@ -1,20 +1,20 @@
-import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Menu, MenuItem } from '@material-ui/core';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import { prepareDataForGrid, packages, sidebarResource } from 'src/constants/helpers';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { useData } from 'src/StateProvider/Provider';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { Box, Button, MenuItem } from '@material-ui/core';
 import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 import { GrDrag } from 'react-icons/gr';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
 const ServiceTable = ({ packageId, packageData }) => {
   const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_${packageData?.packageType || 'product'}`;
@@ -31,7 +31,6 @@ const ServiceTable = ({ packageId, packageData }) => {
   const { state, dispatch } = useTableReducer();
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const { dataRows, selectedRecords } = state;
 
   useEffect(() => {
@@ -68,14 +67,16 @@ const ServiceTable = ({ packageId, packageData }) => {
       });
   };
 
-  const defaultColumns = [{
-    accessor: 'order',
-    Header: 'Sequence',
-    show: true,
-    filter: false,
-    sortable: false,
-    Cell: ({ row }) => (row.original?.order ? <div>{row?.original?.order}</div> : <NoDataCell />)
-  }];
+  const defaultColumns = [
+    {
+      accessor: 'order',
+      Header: 'Sequence',
+      show: true,
+      filter: false,
+      sortable: false,
+      Cell: ({ row }) => (row.original?.order ? <div>{row?.original?.order}</div> : <NoDataCell />)
+    }
+  ];
 
   const fetchGridColumns = async () => {
     let data;
@@ -151,14 +152,6 @@ const ServiceTable = ({ packageId, packageData }) => {
       });
   };
 
-  const handleClick = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorActionEl(null);
-  };
-
   const handleAdd = async (rows) => {
     setIsAssigning(true);
     axiosInstance()
@@ -183,78 +176,65 @@ const ServiceTable = ({ packageId, packageData }) => {
       });
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>Add Services</MenuItem>
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.length === 0 || isRemovingServices}
+          onClick={() => {
+            setShowServiceConfirmBox(true);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        <ImportExportMenu
+          permissions={permissions?.packages}
+          module="services"
+          api={`${packages.api}/${packageId}/services`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          ids={[]}
+          additionalParams={`refrenceId=${packageId}`}
+        />
+        {permissions?.packages?.isUpdate ? (
+          <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+            <GrDrag fontSize="small" color="primary" className="mr-1" />
+            Arrange
+          </Button>
+        ) : null}
+      </>
+    );
+  };
+
   return (
     <Box>
-      <Box mb={1} mt={1} display="flex" justifyContent="space-between">
-        <Box display="flex">
-          {permissions?.packages?.isUpdate && (
-            <Button variant="contained" color="primary" size="small" onClick={() => setShowServiceAssignDialog(true)}>
-              {`Add Services`}
-            </Button>
-          )}
-        </Box>
-        <Box display="flex" style={{ marginLeft: 'auto' }}>
-          {permissions?.packages?.isUpdate && (
-            <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-                <GrDrag fontSize="small" color="primary" className="mr-1" />
-                Arrange
-              </Button>
-              <Box ml={1} />
-              <Button
-                variant={'outlined'}
-                color="primary"
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                disabled={selectedRecords.length === 0 || isRemovingServices}
-                size="small"
-                onClick={handleClick}
-                endIcon={<ArrowDropDownIcon />}
-                className="new-dropdown-v1"
-              >
-                {'Actions'}
-              </Button>
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                open={Boolean(anchorActionEl)}
-                onClose={handleClose}
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-              >
-                <MenuItem
-                  disabled={selectedRecords.length === 0 || isRemovingServices}
-                  onClick={() => {
-                    setShowServiceConfirmBox(true);
-                    handleClose();
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </Menu>
-            </Box>
-          )}
-          <Box ml={1} />
-          <ImportExportMenu
-            permissions={permissions?.packages}
-            module="services"
-            api={`${packages.api}/${packageId}/services`}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
-          />
-        </Box>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={permissions?.packages?.isUpdate}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={permissions?.packages?.isUpdate}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingServices }}
+        rightSideContents={rightSideContents()}
+        hasXpadding
+      />
+
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 393px)'}
@@ -266,9 +246,11 @@ const ServiceTable = ({ packageId, packageData }) => {
           refreshGrid={fetchData}
           onSaveEdit={handleUpdateQuantity}
         />
-      ) : <Box p={2} height={500}>
-        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-      </Box>}
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
       {showServiceAssignDialog && (
         <AssignServiceDialog
           handleClose={() => setShowServiceAssignDialog(false)}
