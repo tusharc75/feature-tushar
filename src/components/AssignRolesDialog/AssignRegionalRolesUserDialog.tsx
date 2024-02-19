@@ -25,6 +25,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import SearchBox from '../Helpers/SearchBox';
 import Loader from '../Loader';
+import { ListingPageHeader } from '../PageHeaders';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -185,6 +186,37 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
     }
   }
 
+  const leftSideContents = () => {
+    return (
+      <>
+        <FormControl component="fieldset">
+          <FormControlLabel
+            value="top"
+            control={
+              <Checkbox
+                edge="start"
+                onChange={(e) => {
+                  if (activeStep === 0) {
+                    user.forEach((d) => (d.isChecked = e.target.checked));
+                    setSelectedUser(user.filter((r) => r.isChecked).map((obj) => obj._id));
+                  } else {
+                    entity.forEach((d) => (d.isChecked = e.target.checked));
+                    setSelectedEntity(entity.filter((r) => r.isChecked).map((obj) => obj._id));
+                  }
+                }}
+                checked={activeStep === 0 ? user.every((x) => x.isChecked) : entity.every((x) => x.isChecked)}
+                inputProps={{
+                  'aria-labelledby': `checkbox-list-label-select-all`
+                }}
+              />
+            }
+            label="Select all "
+          />
+        </FormControl>
+      </>
+    );
+  };
+
   return (
     <Dialog fullWidth maxWidth="sm" open={entitiesDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title={`Assign  User`} />
@@ -193,37 +225,15 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
           <Loader text={`Loading User`} />
         ) : userConst.length ? (
           <>
-            <Grid container>
-              <Grid item xs={12} md={6} sm={6}>
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    value="top"
-                    control={
-                      <Checkbox
-                        edge="start"
-                        onChange={(e) => {
-                          if (activeStep === 0) {
-                            user.forEach((d) => (d.isChecked = e.target.checked));
-                            setSelectedUser(user.filter((r) => r.isChecked).map((obj) => obj._id));
-                          } else {
-                            entity.forEach((d) => (d.isChecked = e.target.checked));
-                            setSelectedEntity(entity.filter((r) => r.isChecked).map((obj) => obj._id));
-                          }
-                        }}
-                        checked={activeStep === 0 ? user.every((x) => x.isChecked) : entity.every((x) => x.isChecked)}
-                        inputProps={{
-                          'aria-labelledby': `checkbox-list-label-select-all`
-                        }}
-                      />
-                    }
-                    label="Select all "
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
-                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              </Grid>
-            </Grid>
+            <ListingPageHeader
+              leftSideContents={leftSideContents()}
+              searchValue={search}
+              onSearch={handleSearch}
+              isActionButtonVisible={false}
+              isAddButtonVisible={false}
+              setQueryString={false}
+              synchronizeType={false}
+            />
             <Stepper activeStep={activeStep} orientation="vertical">
               {steps.map((label, index) => (
                 <Step key={label}>
