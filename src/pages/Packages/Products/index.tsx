@@ -1,24 +1,24 @@
-import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import { packages } from 'src/constants/helpers';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import { useData } from 'src/StateProvider/Provider';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { camelCase, startCase } from 'lodash';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase, startCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
+import { packages } from 'src/constants/helpers';
 
 const Products = ({ packageId, packageData }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
@@ -32,7 +32,6 @@ const Products = ({ packageId, packageData }) => {
   const [showProductConfirmBox, setShowProductConfirmBox] = useState({ open: false, data: null });
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
   const [isRemovingProducts, setRemovingProducts] = useState(false);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const [assignAssetDialog, setAssignAssetDialog] = useState({ open: false, products: [] });
   const [isAssetAdding, setIsAssetAdding] = useState(false);
@@ -132,12 +131,12 @@ const Products = ({ packageId, packageData }) => {
             <div className="d-flex gap-2 align-items-center">
               <p className="text-truncate">{row.original.detail}</p>
               <IconButton
-                size='small'
+                size="small"
                 onClick={() => {
                   if (row?.original?.type === 'product') {
                     window.open(`${routes.productDetail.path}/${row.original._id}`);
                   } else {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`)
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
                   }
                 }}
               >
@@ -236,14 +235,6 @@ const Products = ({ packageId, packageData }) => {
     }
   };
 
-  const handleClick = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorActionEl(null);
-  };
-
   const removeProducts = () => {
     setRemovingProducts(true);
     const allRecords = [...showProductConfirmBox?.data];
@@ -315,7 +306,7 @@ const Products = ({ packageId, packageData }) => {
   };
 
   const handleAdd = async (rows) => {
-    setSubmitting(true)
+    setSubmitting(true);
     axiosInstance()
       .post(`${packages.api}/material`, {
         ids: [packageId],
@@ -329,13 +320,13 @@ const Products = ({ packageId, packageData }) => {
           message: data.message
         });
         setShowProductAssignDialog(false);
-        setSubmitting(false)
+        setSubmitting(false);
       })
       .catch((err) => {
         setToastConfig(err);
-        setSubmitting(false)
+        setSubmitting(false);
       });
-  }
+  };
 
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
@@ -343,86 +334,75 @@ const Products = ({ packageId, packageData }) => {
     return flatArray.length === 0;
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem onClick={() => setShowProductAssignDialog(true)}>Add Products</MenuItem>
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={disableAssignSerializedAssets()}
+          onClick={() => {
+            const products = [];
+            selectedRecords
+              .filter((i) => i.type === 'product' && i.serializedProduct)
+              ?.forEach((e) => {
+                if (e?.qty - e?.assetQty > 0) {
+                  products.push({ _id: e._id, product: e._id, qty: e?.qty - e?.assetQty, productName: e?.detail });
+                }
+              });
+            setAssignAssetDialog({ open: true, products: products });
+          }}
+        >
+          {`Assign ${routes.serializedAsset.title}`}
+        </MenuItem>
+        <MenuItem
+          disabled={permissions?.packages?.isUpdate && (selectedRecords.length === 0 || isRemovingProducts)}
+          onClick={() => {
+            setShowProductConfirmBox({ open: true, data: selectedRecords });
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        <ImportExportMenu
+          permissions={permissions?.packages}
+          module="products"
+          api={`${packages.api}/${packageId}/products`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          ids={[]}
+          additionalParams={`refrenceId=${packageId}`}
+        />
+      </>
+    );
+  };
+
   return (
-    <Box>
-      <Box mb={2} mt={1} display="flex" justifyContent="space-between">
-        <Box display="flex">
-          {permissions?.packages?.isUpdate && (
-            <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
-              {`Add Products`}
-            </Button>
-          )}
-        </Box>
-        <Box display="flex">
-          <Button
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
-            disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
-            size="small"
-            onClick={handleClick}
-            endIcon={<ArrowDropDownIcon />}
-            className="new-dropdown-v1"
-          >
-            {'Actions'}
-          </Button>
-          <Menu
-            anchorEl={anchorActionEl}
-            keepMounted
-            open={Boolean(anchorActionEl)}
-            onClose={handleClose}
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right'
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right'
-            }}
-          >
-            <MenuItem
-              disabled={disableAssignSerializedAssets()}
-              onClick={() => {
-                const products = [];
-                selectedRecords
-                  .filter((i) => i.type === 'product' && i.serializedProduct)
-                  ?.forEach((e) => {
-                    if (e?.qty - e?.assetQty > 0) {
-                      products.push({ _id: e._id, product: e._id, qty: e?.qty - e?.assetQty, productName: e?.detail });
-                    }
-                  });
-                setAssignAssetDialog({ open: true, products: products });
-                handleClose();
-              }}
-            >
-              {`Assign ${routes.serializedAsset.title}`}
-            </MenuItem>
-            <MenuItem
-              disabled={permissions?.packages?.isUpdate && (selectedRecords.length === 0 || isRemovingProducts)}
-              onClick={() => {
-                setShowProductConfirmBox({ open: true, data: selectedRecords });
-                handleClose();
-              }}
-            >
-              Delete
-            </MenuItem>
-          </Menu>
-          <Box ml={1} />
-          <ImportExportMenu
-            permissions={permissions?.packages}
-            module="products"
-            api={`${packages.api}/${packageId}/products`}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
-          />
-        </Box>
-      </Box>
+    <>
+      <DetailsPageHeader
+        isAddButtonVisible={permissions?.packages?.isUpdate}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
+        rightSideContents={rightSideContents()}
+        hasXpadding
+      />
+
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 393px)'}
@@ -474,7 +454,7 @@ const Products = ({ packageId, packageData }) => {
           selectedProducts={assignAssetDialog.products}
         />
       )}
-    </Box>
+    </>
   );
 };
 
