@@ -600,7 +600,6 @@ const QuotationDetails = () => {
             )}
           </Box>
         </TabPanel>
-        {console.log(stepNames[currentStep])}
         <TabPanel value={tabValue} index={1} style={{ position: 'relative' }}>
           {stepNames[currentStep] === 'DOA' && quotationData && (
             <Box
