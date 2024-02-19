@@ -1,23 +1,22 @@
-import { useState, useEffect, useContext } from 'react';
-import { Box, Grid, IconButton, Menu, MenuItem, Button } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, prepareDataForGrid } from 'src/constants/helpers';
-import { camelCase } from 'lodash';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { useData } from '../../../StateProvider/Provider';
-import { gridLoadingTimeout } from 'src/constants/helpers';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { ExpandMore } from '@material-ui/icons';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import ManagePayType from './ManagePayType';
-import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
-import FileCopyIcon from '@material-ui/icons/FileCopy'
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
+import { useData } from '../../../StateProvider/Provider';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import ManagePayType from './ManagePayType';
 
 const PayTypes = ({ payrollPolicyId }) => {
   const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_payTypes`;
@@ -31,7 +30,6 @@ const PayTypes = ({ payrollPolicyId }) => {
 
   const [payTypeDialog, setPayTypeDialog] = useState({ open: false, data: null, isClone: false });
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [columns, setColumns] = useState([]);
   const { generateColumns } = useColumns();
@@ -147,85 +145,68 @@ const PayTypes = ({ payrollPolicyId }) => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setPayTypeDialog({ open: true, data: null, isClone: false });
+          }}
+        >
+          Add Pay Type
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorActionEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        <ImportExportMenu
+          permissions={permissions?.payrollPolicy}
+          module="pay-types"
+          api={`${routes.payrollPolicy.path}/pay-types`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords.length}
+          ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
+          additionalParams={`payrollPolicy=${payrollPolicyId}`}
+        />
+      </>
+    );
   };
 
   return (
     <>
       {permissions?.payrollPolicy?.isUpdate && (
-        <Box p={1}>
-          <Grid container>
-            <Grid item xs={3} md={3} sm={3}>
-              <Button
-                size="small"
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  setPayTypeDialog({ open: true, data: null, isClone: false });
-                }}
-              >
-                Add Pay Type
-              </Button>
-            </Grid>
-            <Grid item xs={9} md={9} sm={9}>
-              <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-                <Box ml={1} />
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length === 0}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorActionEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorActionEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-                <Box ml={1} />
-                <ImportExportMenu
-                  permissions={permissions?.payrollPolicy}
-                  module="pay-types"
-                  api={`${routes.payrollPolicy.path}/pay-types`}
-                  afterImportCompleted={() => {
-                    fetchData();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={selectedRecords.length}
-                  ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
-                  additionalParams={`payrollPolicy=${payrollPolicyId}`}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            rightSideContents={rightSideContents()}
+            hasXpadding={false}
+          />
+        </>
       )}
       {columns ? (
         <CustomReactTable

@@ -180,7 +180,7 @@ const ProductDetailsPage = () => {
       .put(`${product.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.product.path}`)
+        history.push(`${routes.product.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -477,21 +477,21 @@ const ProductDetailsPage = () => {
                                 <Box className="form-head-v1" display="flex" justifyContent="space-between" alignItems="center">
                                   <Typography variant="subtitle2">{routes?.serializedAsset?.title}</Typography>
                                   <Box>
-                                  {permissions?.serializedAsset?.isCreate && (
-                                    <IconButton
-                                      title={`Create ${routes.serializedAsset.title}`}
-                                      color="primary"
-                                      size="small"
-                                      onClick={() => {
-                                        setOpenProductInventoryDialog(true);
-                                      }}
-                                    >
-                                      <ControlPoint fontSize="small" />
+                                    {permissions?.serializedAsset?.isCreate && (
+                                      <IconButton
+                                        title={`Create ${routes.serializedAsset.title}`}
+                                        color="primary"
+                                        size="small"
+                                        onClick={() => {
+                                          setOpenProductInventoryDialog(true);
+                                        }}
+                                      >
+                                        <ControlPoint fontSize="small" />
+                                      </IconButton>
+                                    )}
+                                    <IconButton size="small" onClick={getWarehouses}>
+                                      <RefreshIcon fontSize="small" />
                                     </IconButton>
-                                  )}
-                                  <IconButton size="small" onClick={getWarehouses}>
-                                    <RefreshIcon fontSize="small" />
-                                  </IconButton>
                                   </Box>
                                 </Box>
 

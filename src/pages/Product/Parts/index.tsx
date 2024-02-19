@@ -1,25 +1,24 @@
-import { useState, useEffect, useContext } from 'react';
-import { Box, Button, Menu, MenuItem } from '@material-ui/core';
-import { product } from '../../../constants/helpers';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
+import { Box, Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { Delete, ExpandMore } from '@material-ui/icons';
-import { IconButton, Tooltip } from '@material-ui/core';
-import { useData } from '../../../StateProvider/Provider';
-import AssignProductDialog from '../../../components/AssignRolesDialog/AssignProductDialog';
-import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
-import { isMobile, isTablet } from 'react-device-detect';
-import { flattenArray } from 'src/constants/columns';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { flattenArray } from 'src/constants/columns';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import AssignProductDialog from '../../../components/AssignRolesDialog/AssignProductDialog';
+import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
+import routes from '../../../components/Helpers/Routes';
+import { product } from '../../../constants/helpers';
 
 function Parts({ id }) {
-
   const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
   const {
     state: { permissions }
@@ -33,7 +32,6 @@ function Parts({ id }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [isSubmitting, setSubmitting] = useState(false);
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -55,11 +53,11 @@ function Parts({ id }) {
         index: index + 1,
         ...i,
         ...i?.childProductDetail
-      }
-    })
+      };
+    });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
-  }
+  };
 
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get('/field?resource=Product&view=true');
@@ -71,43 +69,55 @@ function Parts({ id }) {
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       }
-    ]
+    ];
 
-    fields?.filter((e) => ['productName']?.includes(e.fieldName))?.forEach((ele) => {
-      if (ele?.fieldName === 'productName') {
-        coloum.push({
-          accessor: 'productName',
-          Header: ele?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p className="text-truncate">{row.original.productName}</p>
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row.original._id}`)
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
-            </div>
-          )
-        })
+    fields
+      ?.filter((e) => ['productName']?.includes(e.fieldName))
+      ?.forEach((ele) => {
+        if (ele?.fieldName === 'productName') {
+          coloum.push({
+            accessor: 'productName',
+            Header: ele?.fieldLabel,
+            width: 200,
+            Cell: ({ row }) => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <p className="text-truncate">{row.original.productName}</p>
+                <Box ml={1}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row.original._id}`);
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </Box>
+              </div>
+            )
+          });
+        }
+      });
+    const newColumns = generateColumns(
+      renderedFrom,
+      fields?.filter((e) => ['productDescription', 'productNumber', 'productCategory', 'productCategory']?.includes(e?.fieldName)),
+      null,
+      false,
+      'USD'
+    );
+
+    coloum = [
+      ...coloum,
+      ...newColumns,
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        width: 150,
+        editable: permissions?.product?.isUpdate ? true : false,
+        Cell: ({ row }) => (row.original?.qty ? <p>{row.original?.qty}</p> : <NoDataCell />)
       }
-    })
-    const newColumns = generateColumns(renderedFrom, fields?.filter((e) => ['productDescription', 'productNumber', 'productCategory', 'productCategory']?.includes(e?.fieldName)), null, false, 'USD');
-
-    coloum = [...coloum, ...newColumns, {
-      accessor: 'qty',
-      Header: 'Qty',
-      width: 150,
-      editable: permissions?.product?.isUpdate ? true : false,
-      Cell: ({ row }) => (row.original?.qty ? <p>{row.original?.qty}</p> : <NoDataCell />)
-    }];
+    ];
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
@@ -130,12 +140,11 @@ function Parts({ id }) {
                 <Delete fontSize="small" color="error" />
               </IconButton>
             </Tooltip>
-          )
-          }
+          )}
         </>
       )
-    })
-    setColumns(coloum)
+    });
+    setColumns(coloum);
     fetchBOMData();
   };
 
@@ -177,14 +186,6 @@ function Parts({ id }) {
     }
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const handleSaveData = async (row: any) => {
     axiosInstance()
       .put(`${product.api}/${id}/bom/${row._id}`, { qty: row.qty })
@@ -206,16 +207,17 @@ function Parts({ id }) {
     if (rowData && parseInt(inputField['qty']) > 0) {
       handleSaveData({ _id: rowData._id, qty: parseInt(inputField['qty']) });
     }
-  }
+  };
 
   const handleAdd = async (rows) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const dataObj = rows
       .filter((d) => d.qty > 0)
       .map((d) => {
         return { childProduct: d.id, qty: Number(d.qty) };
       });
-    await axiosInstance().post(`/product/${id}/bom`, dataObj)
+    await axiosInstance()
+      .post(`/product/${id}/bom`, dataObj)
       .then(({ data }) => {
         if (permissions?.serializedAsset) fetchBOMData();
         setToastConfig({
@@ -224,67 +226,64 @@ function Parts({ id }) {
           message: data.message
         });
         setOpenAssignProductDialog(false);
-        setSubmitting(false)
+        setSubmitting(false);
       })
       .catch((error) => {
         setToastConfig(error);
-        setSubmitting(false)
+        setSubmitting(false);
       });
+  };
+
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem onClick={() => setOpenAssignProductDialog(true)}>Add Products</MenuItem>
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}>
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        <ImportExportMenu
+          permissions={permissions?.product}
+          module="products"
+          api={`${product.api}/unknown/bom`}
+          afterImportCompleted={() => {
+            fetchBOMData();
+          }}
+          isExportAllOrSomeFeature={true}
+          ids={[]}
+          additionalParams={`productId=${id}`}
+        />
+      </>
+    );
   };
 
   return (
     <div>
       {hasPermissions && (
-        <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
-          <Button variant="contained" color="primary" size="small" onClick={() => setOpenAssignProductDialog(true)}>
-            Add Products
-          </Button>
-          <Box display={'flex'}>
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              disabled={selectedRecords.length ? false : true}
-              aria-controls="action-menu"
-              style={{ marginLeft: '0.6rem' }}
-              endIcon={<ExpandMore />}
-              className="new-dropdown-v1"
-            >
-              {isMobile && !isTablet ? '' : 'Actions'}
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowConfirmBox({ open: true, data: selectedRecords })}>
-                Delete
-              </MenuItem>
-            </Menu>
-            <Box ml={1} />
-            <Box display="flex" style={{ marginLeft: 'auto' }}>
-              <ImportExportMenu
-                permissions={permissions?.product}
-                module="products"
-                api={`${product.api}/unknown/bom`}
-                afterImportCompleted={() => {
-                  fetchBOMData();
-                }}
-                isExportAllOrSomeFeature={true}
-                ids={[]}
-                additionalParams={`productId=${id}`}
-              />
-            </Box>
-          </Box>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            rightSideContents={rightSideContents()}
+            hasXpadding={false}
+          />
+        </>
       )}
       {columns ? (
         <Box zIndex={5} width={'100%'}>

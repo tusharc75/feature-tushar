@@ -1,22 +1,20 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { gridLoadingTimeout, product, packages } from 'src/constants/helpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { useData } from 'src/StateProvider/Provider';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { HiBadgeCheck } from 'react-icons/hi';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { FcApproval } from 'react-icons/fc';
+import { HiBadgeCheck } from 'react-icons/hi';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
-import { ExpandMore } from '@material-ui/icons';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { gridLoadingTimeout, packages, prepareDataForGrid, product } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
 const ServicePackage = ({ renderedFrom, productId }) => {
@@ -30,7 +28,6 @@ const ServicePackage = ({ renderedFrom, productId }) => {
   const [isDeleting, setDeleting] = useState(false);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const {
     state: { permissions }
@@ -142,7 +139,6 @@ const ServicePackage = ({ renderedFrom, productId }) => {
       ids = selectedRecords.map((d) => d._id);
     }
     setDeleting(true);
-    closeActions();
     axiosInstance()
       .put(`${product.api}/${productId}/package/remove`, { ids: ids })
       .then(() => {
@@ -185,69 +181,55 @@ const ServicePackage = ({ renderedFrom, productId }) => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem onClick={() => setOpenAddDialog(true)}>Add Service Packages</MenuItem>
+      </>
+    );
+  };
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const rightSideContents = () => {
+    return (
+      <>
+        <ImportExportMenu
+          permissions={permissions?.packages}
+          module="packages"
+          api={`${product.api}/unknown/package`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          ids={[]}
+          additionalParams={`productId=${productId}`}
+        />
+      </>
+    );
   };
 
   return (
     <Fragment>
       {permissions?.product?.isUpdate && (
-        <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
-          <Button variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
-            Add Service Packages
-          </Button>
-          <Box display={'flex'}>
-            <Box>
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="default"
-                size="small"
-                onClick={openActions}
-                disabled={selectedRecords.length ? false : true}
-                aria-controls="action-menu"
-                style={{ marginLeft: '0.6rem' }}
-                endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
-              >
-                {isMobile && !isTablet ? '' : 'Actions'}
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
-                  Delete
-                </MenuItem>
-              </Menu>
-            </Box>
-            <Box ml={1}></Box>
-            <Box display="flex" style={{ marginLeft: 'auto' }}>
-              <ImportExportMenu
-                permissions={permissions?.packages}
-                module="packages"
-                api={`${product.api}/unknown/package`}
-                afterImportCompleted={() => {
-                  fetchData();
-                }}
-                isExportAllOrSomeFeature={true}
-                ids={[]}
-                additionalParams={`productId=${productId}`}
-              />
-            </Box>
-          </Box>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            rightSideContents={rightSideContents()}
+            hasXpadding={false}
+          />
+        </>
       )}
       {columns ? (
         <CustomReactTable

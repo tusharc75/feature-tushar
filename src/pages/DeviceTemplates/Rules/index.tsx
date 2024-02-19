@@ -1,23 +1,23 @@
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
-import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { useData } from 'src/StateProvider/Provider';
-import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
-import { camelCase } from 'lodash';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ExpandMore } from '@material-ui/icons';
-import ManageRules from './ManageRules';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
 import moment from 'moment';
-import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { dateFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
+import ManageRules from './ManageRules';
 
 export default function Rules({ deviceTemplate }) {
   const renderedFrom = `${camelCase(routes?.deviceTemplateAlert.title)}_rules`;
@@ -31,7 +31,6 @@ export default function Rules({ deviceTemplate }) {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false, id: null });
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -204,70 +203,46 @@ export default function Rules({ deviceTemplate }) {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setOpen({ open: true, isClone: false, id: null });
+          }}
+        >
+          Add
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorActionEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <Fragment>
-      <Box p={1} pb={2}>
-        <Grid container>
-          <Grid item xs={3} md={3} sm={3}>
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                setOpen({ open: true, isClone: false, id: null });
-              }}
-            >
-              Add
-            </Button>
-          </Grid>
-          <Grid item xs={9} md={9} sm={9}>
-            <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedRecords.length === 0}
-                endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
-              >
-                Actions
-              </Button>
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorActionEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                    setShowDeleteConfirmBox(true);
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </Menu>
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+        hasXpadding={false}
+      />
+
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 200px)'}

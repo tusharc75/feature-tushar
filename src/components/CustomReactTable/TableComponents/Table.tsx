@@ -43,7 +43,7 @@ const TableComponent = ({
   height,
   virtualization = false
 }: TTableProps) => {
-  const { filters: customFilters,  initialDataLoaded }: TInitialState = state;
+  const { filters: customFilters, initialDataLoaded }: TInitialState = state;
   const columns = table.getAllColumns();
   const { columnVisibility } = table.getState();
 
@@ -277,7 +277,7 @@ const TableComponent = ({
                             }}
                             key={header.id}
                           >
-                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
+                            {header?.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
                           </th>
                         );
                       })}

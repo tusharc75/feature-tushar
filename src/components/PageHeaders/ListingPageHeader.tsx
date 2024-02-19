@@ -1,4 +1,4 @@
-import { Button, ButtonProps, Menu, useMediaQuery } from '@material-ui/core';
+import { Button, ButtonProps, CircularProgress, Menu, useMediaQuery } from '@material-ui/core';
 import { AddOutlined, ExpandMore, TouchApp } from '@material-ui/icons';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import queryString from 'query-string';
@@ -7,6 +7,14 @@ import { useHistory } from 'react-router-dom';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
 import { SearchFilter } from 'src/components/SearchFilter';
+import HtmlTooltip from '../CustomTooltipTitle';
+
+type ButtonPropsWithExtraData = {
+  tooltip?: string;
+  loading?: boolean;
+  iconsEnabled?: boolean;
+  text?: string;
+} & ButtonProps;
 
 type ListingPageHeaderProps = {
   toggleButtonList?: { key: string; value: number }[];
@@ -20,9 +28,9 @@ type ListingPageHeaderProps = {
   handleSearchFilter?: (value: any) => void;
   rightSideContents?: ReactNode;
   isActionButtonVisible: boolean;
-  actionButtonProps?: ButtonProps;
+  actionButtonProps?: Omit<ButtonPropsWithExtraData, 'text'>;
   actionMenuItems?: ReactNode;
-  addButtonProps?: ButtonProps;
+  addButtonProps?: ButtonPropsWithExtraData;
   addButtonOnclick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   isAddButtonVisible: boolean;
   setQueryString?: boolean;
@@ -58,6 +66,22 @@ const ListingPageHeader = ({
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const [locationKeys, setLocationKeys] = useState([]);
+
+  const {
+    tooltip: actionButtonTooltip,
+    loading: actionButtonLoading,
+    disabled: actionButtonDisabled,
+    iconsEnabled: actionButtonIconsEnabled = true,
+    ...restOfActionButtonProps
+  } = actionButtonProps;
+  const {
+    tooltip: addButtonTooltip,
+    loading: addButtonLoading,
+    disabled: addButtonDisabled,
+    iconsEnabled: addButtonIconsEnabled = true,
+    text: addButtonText = '',
+    ...restOfAddButtonProps
+  } = addButtonProps;
 
   const handleToggle = (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>, value: string) => {
     const data = toggleButtonList.find((d) => d.key === value).value;
@@ -95,6 +119,14 @@ const ListingPageHeader = ({
       }
     });
   }, [locationKeys]);
+
+  const renderButtonText = ({ text, icon, loading, iconText = '' }) => {
+    if (isMobile) {
+      return <>{loading ? <CircularProgress size={20} /> : iconText ? iconText : icon}</>;
+    } else {
+      return <>{loading ? <CircularProgress size={20} /> : text}</>;
+    }
+  };
 
   return (
     <div className="header-panel listing-head">
@@ -141,34 +173,47 @@ const ListingPageHeader = ({
               <div className="flex gap-[8px] flex-wrap items-center">
                 <HideWhenOffline>
                   {isAddButtonVisible ? (
-                    <Button
-                      variant={'contained'}
-                      color="primary"
-                      size="small"
-                      {...addButtonProps}
-                      onClick={(e) => {
-                        addButtonOnclick && addButtonOnclick(e);
-                      }}
-                      className={`no-shadow max-[600px]:[max-width:36px_!important]`}
-                      startIcon={isMobile ? null : <AddOutlined />}
-                    >
-                      {isMobile ? <AddOutlined /> : 'Add'}
-                    </Button>
+                    <HtmlTooltip title={addButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
+                      <Button
+                        variant={'contained'}
+                        color="primary"
+                        size="small"
+                        disabled={addButtonLoading || addButtonDisabled}
+                        {...restOfAddButtonProps}
+                        onClick={(e) => {
+                          addButtonOnclick && addButtonOnclick(e);
+                        }}
+                        className={`no-shadow ${addButtonLoading ? '' : 'max-[600px]:[max-width:36px_!important]'} min-h-[32px]`}
+                        startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
+                      >
+                        {renderButtonText({
+                          text: `Add ${addButtonText}`,
+                          icon: <AddOutlined />,
+                          loading: addButtonLoading,
+                          iconText: addButtonText
+                        })}
+                      </Button>
+                    </HtmlTooltip>
                   ) : null}
                   {isActionButtonVisible ? (
                     <>
-                      <Button
-                        variant={'outlined'}
-                        color="default"
-                        size="small"
-                        className={`new-dropdown-v1 min-h-[32px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
-                        {...actionButtonProps}
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        endIcon={isMobile ? null : <ExpandMore />}
-                      >
-                        {isMobile ? <TouchApp /> : 'Actions'}
-                      </Button>
+                      <HtmlTooltip title={actionButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
+                        <span>
+                          <Button
+                            variant={'outlined'}
+                            color="default"
+                            size="small"
+                            className={`new-dropdown-v1 min-h-[32px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
+                            disabled={actionButtonLoading || actionButtonDisabled}
+                            {...restOfActionButtonProps}
+                            onClick={openActions}
+                            aria-controls="action-menu"
+                            endIcon={isMobile ? null : actionButtonIconsEnabled ? <ExpandMore /> : null}
+                          >
+                            {renderButtonText({ text: 'Actions', icon: <TouchApp />, loading: actionButtonLoading })}
+                          </Button>
+                        </span>
+                      </HtmlTooltip>
                       <Menu
                         anchorEl={anchorEl}
                         keepMounted
