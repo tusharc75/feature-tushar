@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog } from '@material-ui/core';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -6,12 +6,11 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import styles from 'src/pages/Leads/Header.module.scss';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
-import SearchBox from '../Helpers/SearchBox';
+import { ListingPageHeader } from '../PageHeaders';
 
 let searchTimeout;
 
@@ -171,27 +170,22 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title={`Assign ${routes.packages.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent>
-        <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} className={styles.filter_side}>
-              <Box className={styles.filter_side_header} component="div">
-                <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
-                <Button
-                  disabled={isSubmitting || selectedRecords?.length === 0}
-                  onClick={() => {
-                    onSuccess(selectedRecords);
-                  }}
-                  color="primary"
-                  size="small"
-                  variant="contained"
-                  endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
-                >
-                  Add {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </div>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={false}
+          addButtonProps={{
+            disabled: isSubmitting || selectedRecords?.length === 0,
+            loading: isSubmitting,
+            iconsEnabled: false,
+            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+          }}
+          addButtonOnclick={() => {
+            onSuccess(selectedRecords);
+          }}
+          isAddButtonVisible={true}
+          setQueryString={false}
+        />
 
         {columns ? (
           <CustomReactTable
