@@ -15,6 +15,7 @@ import { AiFillEdit } from 'react-icons/ai';
 import { useHistory } from 'react-router-dom';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const QuoteBuilder = ({
   quotationData,
@@ -369,28 +370,36 @@ const QuoteBuilder = ({
           )}
         {currentStep === 'Quote Approval' && (
           <>
-            <Button
-              variant="contained"
-              size="small"
-              color="primary"
-              disabled={sentToCustomer}
-              onClick={() => {
-                handleSendToCustomer(false);
-              }}
-            >
-              {`Process ${routes.quotation.title}`}
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              color="primary"
-              disabled={sentToCustomer}
-              onClick={() => {
-                handleSendToCustomer(true);
-              }}
-            >
-              Send to Customer
-            </Button>
+            <HtmlTooltip placement="top" arrow enterTouchDelay={0} title={`Process ${routes.quotation.title}`}>
+              <span>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  disabled={sentToCustomer}
+                  onClick={() => {
+                    handleSendToCustomer(false);
+                  }}
+                >
+                  {`Process ${routes.quotation.title}`}
+                </Button>
+              </span>
+            </HtmlTooltip>
+            <HtmlTooltip placement="top" arrow enterTouchDelay={0} title={`Send to Customer`}>
+              <span>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  disabled={sentToCustomer}
+                  onClick={() => {
+                    handleSendToCustomer(true);
+                  }}
+                >
+                  Send to Customer
+                </Button>
+              </span>
+            </HtmlTooltip>
           </>
         )}
         {currentStep === 'DOA' && DOAData?.length === 0 && (
