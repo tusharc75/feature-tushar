@@ -195,6 +195,7 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
             control={
               <Checkbox
                 edge="start"
+                className="m-0"
                 onChange={(e) => {
                   if (activeStep === 0) {
                     user.forEach((d) => (d.isChecked = e.target.checked));
