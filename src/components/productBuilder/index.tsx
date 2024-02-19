@@ -32,6 +32,7 @@ import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTable';
+import { DetailsPageHeader } from '../PageHeaders';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -54,7 +55,12 @@ const ProductBuilder = (props) => {
     fullScreen = false,
     quoteData = null,
     processStatus,
-    setNextStep
+    setNextStep,
+    isAddButtonVisible,
+    addButtonMenuItems,
+    previewDownloadProps,
+    leftSideContents,
+    rightSideContents
   } = props;
 
   const renderedFrom = `${camelCase(`${routes?.quote.title}_Product`)}`;
@@ -65,7 +71,6 @@ const ProductBuilder = (props) => {
   const [productId, setProductId] = useState(null);
   const [productDataList, setproductDataList] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [isAddField, setIsAddField] = useState(false);
   const [showCloseConfirmBox, setShowCloseConfirmBox] = useState(false);
   const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
@@ -328,20 +333,11 @@ const ProductBuilder = (props) => {
       .then(() => {
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         fetchProduct();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const handleOpenAddField = () => {
@@ -503,10 +499,38 @@ const ProductBuilder = (props) => {
       });
   };
 
-  return (
-    <Box pt={0}>
-      {Editable && (
-        <div className="d-flex align-items gap-2 justify-end ml-auto">
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        {stage === 'cost' && permissions?.isUpdate && (
+          <MenuItem onClick={handelOpenBulkEdit} disabled={checkUniqTemplate()}>
+            {isMobile && !isTablet ? '' : 'Bulk Edit'}
+          </MenuItem>
+        )}
+        <MenuItem disabled={selectedRecords.length ? false : true} onClick={() => setShowDeleteConfirmBox(true)}>
+          Delete
+        </MenuItem>
+        <MenuItem disabled={selectedRecords.length ? false : true} onClick={handleOpenAddField}>
+          Add Field
+        </MenuItem>
+        {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
+          <MenuItem
+            onClick={() => {
+              setShowViewSupplierPrice(true);
+            }}
+          >
+            View Supplier Quote
+          </MenuItem>
+        )}
+      </>
+    );
+  };
+
+  const updatedRightSideContents = () => {
+    if (Editable)
+      return (
+        <>
+          {rightSideContents()}
           {permissions?.isUpdate && (
             <ImportExportLinks
               permissions={permissions}
@@ -565,69 +589,32 @@ const ProductBuilder = (props) => {
               Ask Supplier to Quote
             </Button>
           )}
-          {stage === 'cost' && permissions?.isUpdate && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              startIcon={<AiTwotoneEdit />}
-              onClick={handelOpenBulkEdit}
-              disabled={checkUniqTemplate()}
-              aria-controls="action-menu"
-            >
-              {isMobile && !isTablet ? '' : 'Bulk Edit'}
-            </Button>
-          )}
-          {permissions?.isUpdate && (
-            <Button
-              size="small"
-              color="primary"
-              className="float-right new-dropdown-v1"
-              disabled={
-                isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
-                  ? false
-                  : selectedRecords.length
-                    ? false
-                    : true
-              }
-              onClick={openActions}
-              endIcon={<ExpandMore />}
-              aria-controls="action-menu"
-            >
-              Actions
-            </Button>
-          )}
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorEl)}
-            onClose={closeActions}
-          >
-            <MenuItem disabled={selectedRecords.length ? false : true} onClick={() => setShowDeleteConfirmBox(true)}>
-              Delete
-            </MenuItem>
-            <MenuItem disabled={selectedRecords.length ? false : true} onClick={handleOpenAddField}>
-              Add Field
-            </MenuItem>
-            {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setShowViewSupplierPrice(true);
-                }}
-              >
-                View Supplier Quote
-              </MenuItem>
-            )}
-          </Menu>
-        </div>
-      )}
+        </>
+      );
+    return rightSideContents();
+  };
+
+  return (
+    <Box pt={0}>
+      <DetailsPageHeader
+        isAddButtonVisible={isAddButtonVisible}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={Editable && permissions?.isUpdate}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{
+          disabled:
+            isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
+              ? false
+              : selectedRecords.length
+              ? false
+              : true
+        }}
+        previewDownloadProps={previewDownloadProps}
+        leftSideContents={leftSideContents()}
+        rightSideContents={updatedRightSideContents()}
+        hasXpadding
+      />
+
       <Box mt={1}>
         {columns ? (
           <CustomReactTable
