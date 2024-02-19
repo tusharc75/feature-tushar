@@ -1,17 +1,18 @@
-import React from 'react';
-import { Box, Button, IconButton } from '@material-ui/core';
-import AddConfigurationDialog from './AddConfigurationDialog';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, product } from '../../../constants/helpers';
-import CarouselDialog from '../../../components/CarouselDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import { Delete, Edit } from '@material-ui/icons';
+import React from 'react';
+import { useData } from 'src/StateProvider/Provider';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import CarouselDialog from '../../../components/CarouselDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider'
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from '../../../components/Helpers/Routes';
+import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
+import AddConfigurationDialog from './AddConfigurationDialog';
 
 interface ConfigProps {
   productFields: any[];
@@ -22,9 +23,11 @@ interface ConfigProps {
 
 const ProductConfiguration = (props: ConfigProps) => {
   const initialRender = React.useRef(true);
-  const { state: { permissions } }: any = useData();
+  const {
+    state: { permissions }
+  }: any = useData();
   const { productData, id, renderedFrom } = props;
-  const { setToastConfig } = React.useContext(CustomToastContext)
+  const { setToastConfig } = React.useContext(CustomToastContext);
   const [specFields, setSpecFields] = React.useState([]);
   const [configData, setConfigData] = React.useState([]);
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -68,22 +71,23 @@ const ProductConfiguration = (props: ConfigProps) => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-         <IconButton size="small" color="inherit" onClick={() => editData(row?.original)}>
-        <Edit fontSize="small" />
-      </IconButton>
-      <IconButton
-        size="small"
-        color="inherit"
-        onClick={() => {
-          setShowConfirmBox({
-            open: true,
-            ids: [row?.original?.id]
-          });
-        }}
-      >
-        <Delete color="error" fontSize="small" />
-      </IconButton>
-      </>)
+        <IconButton size="small" color="inherit" onClick={() => editData(row?.original)}>
+          <Edit fontSize="small" />
+        </IconButton>
+        <IconButton
+          size="small"
+          color="inherit"
+          onClick={() => {
+            setShowConfirmBox({
+              open: true,
+              ids: [row?.original?.id]
+            });
+          }}
+        >
+          <Delete color="error" fontSize="small" />
+        </IconButton>
+      </>
+    )
   };
 
   const editData = (data) => {
@@ -130,7 +134,7 @@ const ProductConfiguration = (props: ConfigProps) => {
         }, gridLoadingTimeout);
       })
       .catch((err) => {
-        setToastConfig(err)
+        setToastConfig(err);
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -157,47 +161,62 @@ const ProductConfiguration = (props: ConfigProps) => {
           ids: []
         });
         setRemoving(false);
-        setToastConfig(err)
+        setToastConfig(err);
       });
+  };
+
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem onClick={() => setOpenDialog(true)}>Add Images</MenuItem>
+      </>
+    );
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        <DeleteButton
+          onClick={() => {
+            setShowConfirmBox({
+              open: true,
+              ids: selectedRecords.map((s) => s.id)
+            });
+          }}
+          size="small"
+          disabled={selectedRecords.length === 0}
+          disableElevation
+          text={'Delete'}
+        />
+      </>
+    );
   };
 
   return (
     <Box>
-      {permissions?.product?.isUpdate &&
-        <Box p={1} pt={2} pb={2} display="flex" justifyContent="space-between">
-          <Button
-            onClick={() => setOpenDialog(true)}
-            size="small"
-            variant="contained"
-            color="primary" disableElevation>
-            Add Images
-          </Button>
-          <DeleteButton
-            onClick={() => {
-              setShowConfirmBox({
-                open: true,
-                ids: selectedRecords.map((s) => s.id)
-              });
-            }}
-            size="small"
-            disabled={selectedRecords.length === 0}
-            disableElevation
-            text={'Delete'}
+      {permissions?.product?.isUpdate && (
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={false}
+            rightSideContents={rightSideContents()}
+            hasXpadding={false}
           />
-        </Box>
-      }
+        </>
+      )}
       <Box>
-      {columns ? (
+        {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            refreshGrid={()=>{}}
-            isClientSideGrid = {true}
-            hideAction = {!(permissions?.product)}
-            hideSelection = {!(permissions?.product?.isUpdate)}
+            refreshGrid={() => {}}
+            isClientSideGrid={true}
+            hideAction={!permissions?.product}
+            hideSelection={!permissions?.product?.isUpdate}
           />
         ) : (
           <Box p={2} height={500}>

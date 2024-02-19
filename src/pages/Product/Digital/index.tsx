@@ -1,18 +1,18 @@
-import { useState, useEffect, useContext } from 'react';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { Box, Grid, IconButton, Menu, MenuItem, Button } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { useData } from '../../../StateProvider/Provider';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { ExpandMore } from '@material-ui/icons';
-import MangageDigitalDialog from './MangageDigitalDialog';
-import routes from 'src/components/Helpers/Routes';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { useData } from '../../../StateProvider/Provider';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import MangageDigitalDialog from './MangageDigitalDialog';
 
 const Digital = ({ renderedFrom, productId }) => {
   const [digitalDialog, setDigitalDialog] = useState({ open: false, digitalId: '' });
@@ -24,9 +24,8 @@ const Digital = ({ renderedFrom, productId }) => {
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
   const toastConfig = useContext(CustomToastContext);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [columns, setColumns] = useState([]);
-  
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -162,70 +161,47 @@ const Digital = ({ renderedFrom, productId }) => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setDigitalDialog({ open: true, digitalId: '' });
+          }}
+        >
+          Add File/Key
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorActionEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <>
       {permissions?.product?.isUpdate && (
-        <Box p={1}>
-          <Grid container>
-            <Grid item xs={6} md={6} sm={6}>
-              <Button
-                size="small"
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  setDigitalDialog({ open: true, digitalId: '' });
-                }}
-              >
-                Add File/Key
-              </Button>
-            </Grid>
-            <Grid item xs={6} md={6} sm={6}>
-              <Box display={'flex'} justifyContent={'flex-end'}>
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length === 0}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorActionEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorActionEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            hasXpadding={false}
+          />
+        </>
       )}
       {columns ? (
         <CustomReactTable
