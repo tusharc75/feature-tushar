@@ -240,7 +240,7 @@ export default function Rules({ deviceTemplate }) {
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-        hasXpadding
+        hasXpadding={false}
       />
 
       {columns ? (

@@ -277,7 +277,7 @@ export default function Alerts({ deviceTemplate }) {
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 }}
         rightSideContents={rightSideContents()}
-        hasXpadding
+        hasXpadding={false}
       />
 
       {columns ? (
