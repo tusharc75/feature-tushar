@@ -161,6 +161,7 @@
     "sourceMapBuild": "node --max_old_space_size=4096 ./node_modules/vite/bin/vite build",
     "test": "vite test",
     "commit": "cz",
+    "commitAll": "git add . && npm run commit",
     "release": "standard-version",
     "prepare": "husky install",
     "analyze": "yarn winBuild && source-map-explorer 'build/static/js/*.js'",
