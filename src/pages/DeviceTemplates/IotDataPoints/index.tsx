@@ -1,22 +1,22 @@
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import { camelCase } from 'lodash';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import EditIcon from '@material-ui/icons/Edit';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ManageIotDataPoints from 'src/pages/IotDataPoints/ManageIotDataPoints';
-import { ExpandMore } from '@material-ui/icons';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
+import ManageIotDataPoints from 'src/pages/IotDataPoints/ManageIotDataPoints';
 
 let searchTimeout;
 
@@ -35,7 +35,6 @@ export default function IotDataPoints({ deviceTemplate }) {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false, id: null });
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -220,84 +219,64 @@ export default function IotDataPoints({ deviceTemplate }) {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setOpen({ open: true, isClone: false, id: null });
+          }}
+        >
+          Add
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorActionEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+  const rightSideContents = () => {
+    return (
+      <>
+        <ImportExportMenu
+          permissions={permissions?.iotDataPoints}
+          module="Data Points"
+          api={`${routes?.iotDataPoints?.path}`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          // isExportAllOrSomeFeature={true}
+          ids={[]}
+          additionalParams={`deviceTemplate=${deviceTemplate}`}
+        />
+      </>
+    );
   };
 
   return (
     <Fragment>
-      <Box p={1} pb={2}>
-        <Grid container>
-          <Grid item xs={3} md={3} sm={3}>
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                setOpen({ open: true, isClone: false, id: null });
-              }}
-            >
-              Add
-            </Button>
-          </Grid>
-          <Grid item xs={9} md={9} sm={9}>
-            <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedRecords.length === 0}
-                endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
-              >
-                Actions
-              </Button>
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorActionEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    {
-                      selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                    }
-                    setShowDeleteConfirmBox(true);
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </Menu>
-              <Box ml={1} />
-              <ImportExportMenu
-                permissions={permissions?.iotDataPoints}
-                module="Data Points"
-                api={`${routes?.iotDataPoints?.path}`}
-                afterImportCompleted={() => {
-                  fetchData();
-                }}
-                // isExportAllOrSomeFeature={true}
-                ids={[]}
-                additionalParams={`deviceTemplate=${deviceTemplate}`}
-              />
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+        rightSideContents={rightSideContents()}
+        hasXpadding
+      />
+
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 200px)'}
