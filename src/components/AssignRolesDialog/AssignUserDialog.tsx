@@ -1,25 +1,12 @@
-import {
-  Button,
-  Checkbox,
-  CircularProgress,
-  Dialog,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Typography
-} from '@material-ui/core';
+import { Button, Checkbox, CircularProgress, Dialog, FormControl, FormControlLabel, Typography } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import SearchBox from '../Helpers/SearchBox';
 import Loader from '../Loader';
+import { ListingPageHeader } from '../PageHeaders';
 
 const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleIds, assignedUsers, selectedEntity }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -85,6 +72,33 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
     setUsers(result);
   };
 
+  const leftSideContents = () => {
+    return (
+      <>
+        <FormControl component="fieldset">
+          <FormControlLabel
+            value="top"
+            className="m-0"
+            control={
+              <Checkbox
+                edge="start"
+                onChange={(e) => {
+                  users.forEach((user) => (user.isChecked = e.target.checked));
+                  setSelectedUsers(users.filter((r) => r.isChecked).map((obj) => obj._id));
+                }}
+                checked={users.every((x) => x.isChecked)}
+                inputProps={{
+                  'aria-labelledby': `checkbox-list-label-select-all`
+                }}
+              />
+            }
+            label="Select all users"
+          />
+        </FormControl>
+      </>
+    );
+  };
+
   return (
     <Dialog fullWidth maxWidth="xs" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title="Assign Users" />
@@ -93,56 +107,15 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
           <Loader text="Loading Users" />
         ) : usersConst.length ? (
           <>
-            <List style={{ padding: 0 }}>
-              <ListItem divider>
-                <Grid container>
-                  <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
-                    <FormControl component="fieldset">
-                      <FormControlLabel
-                        value="top"
-                        className="m-0"
-                        control={
-                          <Checkbox
-                            edge="start"
-                            onChange={(e) => {
-                              users.forEach((user) => (user.isChecked = e.target.checked));
-                              setSelectedUsers(users.filter((r) => r.isChecked).map((obj) => obj._id));
-                            }}
-                            checked={users.every((x) => x.isChecked)}
-                            inputProps={{
-                              'aria-labelledby': `checkbox-list-label-select-all`
-                            }}
-                          />
-                        }
-                        label="Select all users"
-                      />
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
-                    <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-                  </Grid>
-                </Grid>
-              </ListItem>
-
-              {users.map((user) => (
-                <ListItem divider key={user._id}>
-                  <ListItemIcon>
-                    <Checkbox
-                      edge="start"
-                      onChange={(e) => {
-                        user.isChecked = e.target.checked;
-                        setSelectedUsers(users.filter((r) => r.isChecked).map((obj) => obj._id));
-                      }}
-                      checked={user.isChecked}
-                      inputProps={{
-                        'aria-labelledby': `checkbox-list-label-${user._id}`
-                      }}
-                    />
-                  </ListItemIcon>
-                  <ListItemText primary={user.concatedName} secondary={user.email} />
-                </ListItem>
-              ))}
-            </List>
+            <ListingPageHeader
+              leftSideContents={leftSideContents()}
+              searchValue={search}
+              onSearch={handleSearch}
+              isActionButtonVisible={false}
+              isAddButtonVisible={false}
+              setQueryString={false}
+              synchronizeType={false}
+            />
           </>
         ) : (
           <Typography>All Users has been assigned</Typography>

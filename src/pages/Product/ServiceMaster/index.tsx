@@ -1,30 +1,29 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { product, serviceMaster } from 'src/constants/helpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { useData } from 'src/StateProvider/Provider';
+import DeleteIcon from '@material-ui/icons/Delete';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory, Link } from 'react-router-dom';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { HiBadgeCheck } from 'react-icons/hi';
 import { FcApproval } from 'react-icons/fc';
 import { GrDrag } from 'react-icons/gr';
-import ArrangeView from 'src/components/Helpers/ArrangeView';
-import { ExpandMore } from '@material-ui/icons';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import { HiBadgeCheck } from 'react-icons/hi';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { flattenArray } from 'src/constants/columns';
-import AssignStepDialog from './AssignStepDialog/Index';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { flattenArray } from 'src/constants/columns';
+import { product, serviceMaster } from 'src/constants/helpers';
+import AssignStepDialog from './AssignStepDialog/Index';
 
 interface Props {
   renderedFrom: string;
@@ -42,7 +41,6 @@ const ServiceMaster = (props: Props) => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [isAssigning, setIsAssigning] = useState(false);
   const [orignalData, setOrignalData] = useState([]);
 
@@ -109,12 +107,12 @@ const ServiceMaster = (props: Props) => {
             <div className="d-flex gap-2 align-items-center">
               <p className="text-truncate">{row.original.detail}</p>
               <IconButton
-                size='small'
+                size="small"
                 onClick={() => {
                   if (row?.original?.type === 'Product') {
                     window.open(`${routes.productDetail.path}/${row.original?.product}`);
                   } else {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`)
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`);
                   }
                 }}
               >
@@ -257,7 +255,6 @@ const ServiceMaster = (props: Props) => {
                 onClick={() => {
                   setDeleteRecord(row.original);
                   setShowDeleteConfirmBox(true);
-                  closeActions();
                 }}
               >
                 <DeleteIcon color="error" />
@@ -326,7 +323,6 @@ const ServiceMaster = (props: Props) => {
         });
       }
       setDeleting(true);
-      closeActions();
       if (serviceIds.length > 0) {
         await axiosInstance().put(`${routes.product.path}/${id}/service-master/remove`, { ids: serviceIds });
       }
@@ -399,14 +395,6 @@ const ServiceMaster = (props: Props) => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const handleAssignConsumable = (data: any) => {
     axiosInstance()
       .post(`${routes.product.path}/${id}/service-master/consumables`, data)
@@ -450,8 +438,7 @@ const ServiceMaster = (props: Props) => {
         type: 'warning',
         message: 'The default service quantity is set to 1 and cannot be changed.'
       });
-    }
-    else if (updatedData.type === 'Product') {
+    } else if (updatedData.type === 'Product') {
       const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
       if (rowData && parseInt(inputField['qty'])) {
         handleSaveData({ _id: rowData._id, qty: parseInt(inputField['qty']) });
@@ -459,91 +446,84 @@ const ServiceMaster = (props: Props) => {
     }
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem onClick={() => setOpenAddDialog(true)}>Add Services</MenuItem>
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
+          Delete
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.filter((p) => p.type === 'Service')?.length > 0 ? false : true}
+          onClick={() => {
+            handleUpdate({
+              ids: selectedRecords?.filter((p) => p.type === 'Service')?.map((d) => d._id),
+              default: true
+            });
+          }}
+        >
+          Set Default
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.filter((p) => p.type === 'Service')?.length > 0 ? false : true}
+          onClick={() => {
+            handleUpdate({
+              ids: selectedRecords?.filter((p) => p.type === 'Service')?.map((d) => d._id),
+              default: false
+            });
+          }}
+        >
+          Remove Default
+        </MenuItem>
+      </>
+    );
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        {dataRows?.length ? (
+          <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+            <GrDrag fontSize="small" color="primary" className="mr-1" />
+            Arrange
+          </Button>
+        ) : null}
+        <ImportExportMenu
+          permissions={permissions?.packages}
+          module="products"
+          api={`${product.api}/unknown/service-master`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          ids={[]}
+          additionalParams={`productId=${id}`}
+        />
+      </>
+    );
+  };
+
   return (
     <Fragment>
       {permissions?.product?.isUpdate && (
-        <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
-          <Button variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
-            Add Services
-          </Button>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Box ml={1} />
-            {dataRows?.length ? (
-              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-                <GrDrag fontSize="small" color="primary" className="mr-1" />
-                Arrange
-              </Button>
-            ) : null}
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              disabled={selectedRecords.length ? false : true}
-              aria-controls="action-menu"
-              style={{ marginLeft: '0.6rem' }}
-              endIcon={<ExpandMore />}
-              className="new-dropdown-v1"
-            >
-              {isMobile && !isTablet ? '' : 'Actions'}
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
-                Delete
-              </MenuItem>
-              <MenuItem
-                disabled={selectedRecords?.filter((p) => p.type === 'Service')?.length > 0 ? false : true}
-                onClick={() => {
-                  handleUpdate({
-                    ids: selectedRecords?.filter((p) => p.type === 'Service')?.map((d) => d._id),
-                    default: true
-                  });
-                  closeActions();
-                }}
-              >
-                Set Default
-              </MenuItem>
-              <MenuItem
-                disabled={selectedRecords?.filter((p) => p.type === 'Service')?.length > 0 ? false : true}
-                onClick={() => {
-                  handleUpdate({
-                    ids: selectedRecords?.filter((p) => p.type === 'Service')?.map((d) => d._id),
-                    default: false
-                  });
-                  closeActions();
-                }}
-              >
-                Remove Default
-              </MenuItem>
-            </Menu>
-
-            <Box ml={1} />
-            <Box display="flex" style={{ marginLeft: 'auto' }}>
-              <ImportExportMenu
-                permissions={permissions?.packages}
-                module="products"
-                api={`${product.api}/unknown/service-master`}
-                afterImportCompleted={() => {
-                  fetchData();
-                }}
-                isExportAllOrSomeFeature={true}
-                ids={[]}
-                additionalParams={`productId=${id}`}
-              />
-            </Box>
-          </div>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            rightSideContents={rightSideContents()}
+            hasXpadding={false}
+          />
+        </>
       )}
       {columns ? (
         <CustomReactTable
@@ -577,11 +557,11 @@ const ServiceMaster = (props: Props) => {
       {openAddDialog && (
         <AssignServiceDialog
           onSuccess={(services) => {
-            const ids = services?.map((i) => i?._id)
+            const ids = services?.map((i) => i?._id);
             handleSubmit(ids);
           }}
           handleClose={() => {
-            setOpenAddDialog(false)
+            setOpenAddDialog(false);
           }}
           isSubmitting={isSubmitting}
           hideQty={true}

@@ -1,20 +1,20 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import routes from 'src/components/Helpers/Routes';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import ManagePaidTimeOff from './ManagePaidTimeOff';
-import axiosInstance from 'src/axios/axiosInstance';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import ManagePaidTimeOff from './ManagePaidTimeOff';
 
 const PaidTimeOff = ({ payrollPolicyData }) => {
   const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_paidTimeOff`;
@@ -30,7 +30,6 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
 
   const [columns, setColumns] = useState(null);
   const [managePaidTimeOff, setManagePaidTimeOff] = useState({ open: false, id: null });
-  const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
 
@@ -127,92 +126,73 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
         fetchData();
         setShowConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setManagePaidTimeOff({ open: true, id: null });
+          }}
+        >
+          Add Paid Time Off
+        </MenuItem>
+      </>
+    );
+  };
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setShowConfirmBox(true);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const rightSideContents = () => {
+    return (
+      <>
+        <ImportExportMenu
+          permissions={permissions?.payrollPolicy}
+          module="paid-time-off"
+          api={`${routes.payrollPolicy.path}/paid-time-off/${payrollPolicyData?._id}`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords.length}
+          ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
+          additionalParams={`payrollPolicyId=${payrollPolicyData?._id}`}
+        />
+      </>
+    );
   };
 
   return (
     <>
       {permissions?.payrollPolicy?.isUpdate && (
-        <Box p={1}>
-          <Grid container>
-            <Grid item xs={3} md={3} sm={3}>
-              <Button
-                size="small"
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  setManagePaidTimeOff({ open: true, id: null });
-                }}
-              >
-                Add Paid Time Off
-              </Button>
-            </Grid>
-            <Grid item xs={9} md={9} sm={9}>
-              <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-                <Box ml={1} />
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length === 0}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      setShowConfirmBox(true);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-                <Box ml={1} />
-                <ImportExportMenu
-                  permissions={permissions?.payrollPolicy}
-                  module="paid-time-off"
-                  api={`${routes.payrollPolicy.path}/paid-time-off/${payrollPolicyData?._id}`}
-                  afterImportCompleted={() => {
-                    fetchData();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={selectedRecords.length}
-                  ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
-                  additionalParams={`payrollPolicyId=${payrollPolicyData?._id}`}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            rightSideContents={rightSideContents()}
+            hasXpadding={false}
+          />
+        </>
       )}
 
       {columns ? (
