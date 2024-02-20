@@ -313,7 +313,6 @@ const SubleaseDetailsPage = () => {
                       stepFullScreen={stepFullScreen}
                     />
                   )}
-                  {console.log(subleaseStepsNames[currentStep])}
                   {['End Sublease', 'Start Sublease'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
                     <SubleaseAsset
                       fetchData={fetchData}
