@@ -395,6 +395,7 @@ export const RESOURCE_LABEL = {
   projectSales: 'Project Sales',
   productBuilder: 'Price Builder',
   formBuilder: 'Form Builder',
+  forms: 'Forms',
   currencyConverter: 'Currency Converter',
   quoteBuilder: 'Quotes',
   PNQBuilder: 'PNQ Builder',
