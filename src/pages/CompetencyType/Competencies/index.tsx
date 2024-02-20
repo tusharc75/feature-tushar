@@ -1,18 +1,18 @@
-import { Fragment, useState, useEffect, useContext } from 'react';
-import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import routes from 'src/components/Helpers/Routes';
-import { useData } from 'src/StateProvider/Provider';
-import { camelCase } from 'lodash';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import { camelCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
 
 const Competencies = ({ competencyType }) => {
@@ -20,14 +20,13 @@ const Competencies = ({ competencyType }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, id: null });
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const { state, dispatch } = useTableReducer();
-  const {page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
 
@@ -119,7 +118,7 @@ const Competencies = ({ competencyType }) => {
     }
     axiosInstance()
       .put(`${routes.competencies.path}/remove`, { ids: ids })
-      .then(({data}) => {
+      .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
@@ -129,7 +128,6 @@ const Competencies = ({ competencyType }) => {
           message: data?.message
         });
         setDeleteRecord(null);
-        setAnchorActionEl(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -178,91 +176,53 @@ const Competencies = ({ competencyType }) => {
     )
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            if (selectedRecords.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            }
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <Fragment>
-      <Box p={1} pb={2}>
-        <Grid container>
-          <Grid item xs={3} md={3} sm={3}>
-            {permissions?.competencies?.isCreate && (
-              <Button
-                size="small"
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  setOpenDialog({ open: true, id: null });
-                }}
-              >
-                Add
-              </Button>
-            )}
-          </Grid>
-          <Grid item xs={9} md={9} sm={9}>
-            <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-              {permissions?.competencies?.isDelete && (
-                <>
-                  <Button
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    disabled={selectedRecords.length === 0}
-                    endIcon={<ExpandMore />}
-                    className="new-dropdown-v1"
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorActionEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorActionEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        if (selectedRecords.length === 1) {
-                          setDeleteRecord(selectedRecords[0]);
-                        }
-                        setShowDeleteConfirmBox(true);
-                      }}
-                    >
-                      {`Delete (${selectedRecords?.length})`}
-                    </MenuItem>
-                  </Menu>
-                </>
-              )}
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={permissions?.competencies?.isCreate}
+        addButtonProps={{
+          onClick: () => {
+            setOpenDialog({ open: true, id: null });
+          }
+        }}
+        isActionButtonVisible={permissions?.competencies?.isDelete}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+        hasXpadding={false}
+      />
+
       {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            resource={sidebarResource.competencies}
-          />
-        ) : <Box p={2} height={500}>
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchData}
+          resource={sidebarResource.competencies}
+        />
+      ) : (
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        </Box>
+      )}
       {openDialog.open && (
         <ManageCompetencies
           id={openDialog.id}
