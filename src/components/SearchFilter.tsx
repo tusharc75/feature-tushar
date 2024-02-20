@@ -33,7 +33,7 @@ export const capitalize = (string) => {
 type SearchFilterProps = {
   handleChangeFilter: (value) => void;
   filter: any[];
-  chip: ChipProps;
+  chip?: ChipProps;
   dontShowMyActivity?: boolean;
   activityName?: string;
 } & React.HTMLAttributes<HTMLDivElement>;
