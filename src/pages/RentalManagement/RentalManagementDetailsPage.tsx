@@ -154,7 +154,10 @@ const RentalManagementDetailsPage = () => {
 
   const checkProgressiveBilling = () => {
     if (user?.user?.brandPolicy?.rentalProgressiveBilling) {
-      axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
+      axiosInstance()
+        .get(
+          `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+        )
         .then(({ data: { data } }) => {
           if (data.length > 0) {
             setDisplayProgressiveBillingTab(true);
@@ -212,7 +215,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -306,7 +309,7 @@ const RentalManagementDetailsPage = () => {
       .put(`${rentalManagement.api}/remove`, { ids: [rentalManagementData._id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.rentalManagement.path}`)
+        history.push(`${routes.rentalManagement.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -334,8 +337,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -436,7 +439,8 @@ const RentalManagementDetailsPage = () => {
                   >
                     {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
                   </Button>
-                  {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) && versionNotClonned &&
+                  {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) &&
+                    versionNotClonned &&
                     rentalManagementData?.addQuotationStep && (
                       <Button
                         disabled={!versionNotClonned}
@@ -481,7 +485,8 @@ const RentalManagementDetailsPage = () => {
                       Re-Open
                     </Button>
                   )}
-                  {permissions?.rentalManagement?.isUpdate && !isOffline &&
+                  {permissions?.rentalManagement?.isUpdate &&
+                    !isOffline &&
                     ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) &&
                     !(
                       [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
@@ -495,7 +500,8 @@ const RentalManagementDetailsPage = () => {
                               disabled={allowedToEdit ? false : true}
                               variant={isMobile && !isTablet ? 'text' : 'contained'}
                               className={'btn-outline-v1'}
-                              onClick={handleOpenUpdateDialog}>
+                              onClick={handleOpenUpdateDialog}
+                            >
                               {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                             </Button>
                           </span>
@@ -613,12 +619,17 @@ const RentalManagementDetailsPage = () => {
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
-                  quotationApproved={quotationData && [
-                    QUOTATION_STATUS.acceptByCustomer,
-                    QUOTATION_STATUS.rejectByCustomer,
-                    QUOTATION_STATUS.sentToCustomer,
-                    QUOTATION_STATUS.waitingForSupplierPrice
-                  ].includes(quotationData?.versions[currentVersion]?.status) ? true : false}
+                  quotationApproved={
+                    quotationData &&
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      ? true
+                      : false
+                  }
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Add Services' && rentalManagementData && (
@@ -629,12 +640,17 @@ const RentalManagementDetailsPage = () => {
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
-                  quotationApproved={quotationData && [
-                    QUOTATION_STATUS.acceptByCustomer,
-                    QUOTATION_STATUS.rejectByCustomer,
-                    QUOTATION_STATUS.sentToCustomer,
-                    QUOTATION_STATUS.waitingForSupplierPrice
-                  ].includes(quotationData?.versions[currentVersion]?.status) ? true : false}
+                  quotationApproved={
+                    quotationData &&
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      ? true
+                      : false
+                  }
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Add-on' && rentalManagementData && (
@@ -644,12 +660,17 @@ const RentalManagementDetailsPage = () => {
                   renderedFrom={`${renderedFrom}_grid-2`}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
-                  quotationApproved={quotationData && [
-                    QUOTATION_STATUS.acceptByCustomer,
-                    QUOTATION_STATUS.rejectByCustomer,
-                    QUOTATION_STATUS.sentToCustomer,
-                    QUOTATION_STATUS.waitingForSupplierPrice
-                  ].includes(quotationData?.versions[currentVersion]?.status) ? true : false}
+                  quotationApproved={
+                    quotationData &&
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      ? true
+                      : false
+                  }
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Quotation' && rentalManagementData && (
@@ -718,11 +739,7 @@ const RentalManagementDetailsPage = () => {
           <TabPanel value={tabValue} index={2}>
             <Box>
               {displayProgressiveBillingTab ? (
-                <ProgressiveBilling
-                  rentalId={id}
-                  rentalManagementData={rentalManagementData}
-                  allowCreateInvoice={true}
-                />
+                <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={true} />
               ) : (
                 <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
               )}
