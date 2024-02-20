@@ -31,7 +31,7 @@ const ScreenOrientationOverlay: FC<ScreenOrientationOverlayProps> = ({ displayOn
   const { landscape, portrait } = useDeviceOrientation();
 
   const shouldDisplay = useMemo(() => {
-    if (device === 'mobile' && isMobile) {
+    if (device === 'mobile' && isMobile && !isTablet) {
       if (displayOn === 'landscape' && landscape) return true;
       if (displayOn === 'portrait' && portrait) return true;
       return false;

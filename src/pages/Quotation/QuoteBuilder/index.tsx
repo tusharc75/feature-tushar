@@ -1,20 +1,21 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Button, IconButton, Tooltip, useMediaQuery } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { prepareDataForGrid, quotation } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import SendEmail from '../SendEmail';
-import { capitalize, } from 'lodash';
+import { capitalize } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { useData } from 'src/StateProvider/Provider';
 import { AiFillEdit } from 'react-icons/ai';
 import { useHistory } from 'react-router-dom';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const QuoteBuilder = ({
   quotationData,
@@ -30,6 +31,7 @@ const QuoteBuilder = ({
   renderedFrom,
   DOAData = []
 }) => {
+  const isMobile = useMediaQuery('(max-width:600px)');
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -61,7 +63,15 @@ const QuoteBuilder = ({
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, quotationData?.currency);
+    const newColumns = generateColumns(
+      renderedFrom,
+      data?.map((e) => {
+        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
+      }),
+      null,
+      false,
+      quotationData?.currency
+    );
     let column: any = [
       {
         accessor: 'index',
@@ -76,7 +86,7 @@ const QuoteBuilder = ({
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile || isTablet ? 'none' : 'left',
+        sticky: isMobile ? 'none' : 'left',
         width: 100,
         Cell: ({ row }) =>
           row.original['type'] ? (
@@ -88,12 +98,12 @@ const QuoteBuilder = ({
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                    ? row.original?.packageDetail.packageType === 'Product'
-                      ? '(Product)'
-                      : '(Service)'
-                    : row.original.type === 'service'
-                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                      : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                  : ''}
               </p>
             </div>
           ) : (
@@ -122,13 +132,14 @@ const QuoteBuilder = ({
                   size="small"
                   onClick={() => {
                     window.open(
-                      `${row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === 'product'
+                      `${
+                        row.original.type === 'serializedAsset'
+                          ? routes.serializedAssetDetail.path
+                          : row.original.type === 'product'
                           ? routes.productDetail.path
                           : row.original.type === 'package'
-                            ? routes.packagesDetail.path
-                            : routes.serviceMasterDetail.path
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
                       }/${row.original.materialId}`
                     );
                   }}
@@ -142,18 +153,19 @@ const QuoteBuilder = ({
       },
       ...(permissions?.leadTimeMaster
         ? [
-          {
-            accessor: 'leadTime',
-            Header: 'Lead Time (Days)',
-            Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
-            Footer: (info) => {
-              let rows = info.table.getExpandedRowModel().rows;
-              const total = rows?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-              return <>{total}</>;
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
+              Footer: (info) => {
+                let rows = info.table.getExpandedRowModel().rows;
+                const total = rows
+                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'description',
@@ -182,22 +194,23 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
@@ -259,22 +272,23 @@ const QuoteBuilder = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -320,79 +334,94 @@ const QuoteBuilder = ({
       });
   };
 
-  return (
-    <Fragment>
-      <Box m={1} mb={0} className="flex justify-between flex-wrap gap-2">
-        <Box className="flex md:w-[unset] w-full">
-          <SendEmail
-            quotationData={quotationData}
-            versionId={versionData?._id}
-            currentVersion={version}
-            columns={columns}
-            hideSummary={true}
-            hideVersions={true}
-          />
-          <Box ml={1} />
-          {permissions?.quotation?.isUpdate &&
-            (user?.user?._id === quotationData?.owner?.optionValue ||
-              quotationData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
-              <Tooltip title="Edit PDF Template">
-                <Button
-                  onClick={() => {
-                    quotationData?.pdfTemplate?.optionValue &&
-                      history.push(
-                        `/quote-pdf-template/detail/${quotationData?.pdfTemplate?.optionValue}?quotation=${quotationData?._id}&version=${versionData?.version}`,
-                        '_blank'
-                      );
-                  }}
-                  variant="outlined"
-                  size="small"
-                  className="mr-1"
-                  startIcon={isMobile && !isTablet ? '' : <AiFillEdit />}
-                  color="primary"
-                >
-                  {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
-                  {isMobile && !isTablet ? '' : 'PDF Template'}
-                </Button>
-              </Tooltip>
-            )}
-        </Box>
+  const sendEmailProps = {
+    quotationData: quotationData,
+    versionId: versionData?._id,
+    currentVersion: version,
+    columns: columns,
+    hideSummary: true,
+    hideVersions: true
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        {permissions?.quotation?.isUpdate &&
+          (user?.user?._id === quotationData?.owner?.optionValue || quotationData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
+            <Tooltip title="Edit PDF Template">
+              <Button
+                onClick={() => {
+                  quotationData?.pdfTemplate?.optionValue &&
+                    history.push(
+                      `/quote-pdf-template/detail/${quotationData?.pdfTemplate?.optionValue}?quotation=${quotationData?._id}&version=${versionData?.version}`,
+                      '_blank'
+                    );
+                }}
+                variant="outlined"
+                size="small"
+                className="mr-1"
+                startIcon={isMobile ? '' : <AiFillEdit />}
+                color="primary"
+              >
+                {isMobile ? <AiFillEdit size={20} /> : ''}
+                {isMobile ? '' : 'PDF Template'}
+              </Button>
+            </Tooltip>
+          )}
         {currentStep === 'Quote Approval' && (
-          <Box className="flex gap-2 ml-auto">
-            <Button
-              variant="contained"
-              size="small"
-              color="primary"
-              disabled={sentToCustomer}
-              onClick={() => {
-                handleSendToCustomer(false);
-              }}
-            >
-              {`Process ${routes.quotation.title}`}
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              color="primary"
-              disabled={sentToCustomer}
-              onClick={() => {
-                handleSendToCustomer(true);
-              }}
-            >
-              Send to Customer
-            </Button>
-          </Box>
+          <>
+            <HtmlTooltip placement="top" arrow enterTouchDelay={0} title={`Process ${routes.quotation.title}`}>
+              <span>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  disabled={sentToCustomer}
+                  onClick={() => {
+                    handleSendToCustomer(false);
+                  }}
+                >
+                  {`Process ${routes.quotation.title}`}
+                </Button>
+              </span>
+            </HtmlTooltip>
+            <HtmlTooltip placement="top" arrow enterTouchDelay={0} title={`Send to Customer`}>
+              <span>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  disabled={sentToCustomer}
+                  onClick={() => {
+                    handleSendToCustomer(true);
+                  }}
+                >
+                  Send to Customer
+                </Button>
+              </span>
+            </HtmlTooltip>
+          </>
         )}
         {currentStep === 'DOA' && DOAData?.length === 0 && (
-          <Box display="flex">
-            <Button variant="contained" size="small" color="primary" onClick={handleSendForDOA}>
-              Send for DOA
-            </Button>
-          </Box>
+          <Button variant="contained" size="small" color="primary" onClick={handleSendForDOA}>
+            Send for DOA
+          </Button>
         )}
-      </Box>
+      </>
+    );
+  };
+
+  return (
+    <Fragment>
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={false}
+        sendEmailProps={sendEmailProps}
+        rightSideContents={rightSideContents()}
+        hasXpadding
+      />
       {columns ? (
-        <Box zIndex={5} >
+        <Box zIndex={5}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}

@@ -1,30 +1,30 @@
+import { IconButton, MenuItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useContext, Fragment } from 'react';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import {
-  deliveryTicket,
-  DELIVERY_TICKET_STATUS,
-  DELIVERY_TICKET_TYPE,
-  DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_FROM_TO_TYPE,
-  productionOrder,
-  CHILD_RESOURCE,
-  MATERIAL_TYPE
-} from '../../../constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
-import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { uniq, map, startCase } from 'lodash';
-import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { map, startCase, uniq } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import {
+  CHILD_RESOURCE,
+  DELIVERY_FROM_TO_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_STATUS,
+  DELIVERY_TICKET_TYPE,
+  MATERIAL_TYPE,
+  deliveryTicket,
+  productionOrder
+} from '../../../constants/helpers';
+import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 
 const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -32,7 +32,6 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
   const { page, limit, filters, sorting, selectedRecords } = state;
 
   const [columns, setColumns] = useState(null);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const { generateColumns } = useColumns();
 
@@ -210,14 +209,6 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
     setColumns(coloum);
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
   const handleDeliveryTicketDialog = () => {
     if (selectedRecords?.length) {
       const data = {};
@@ -265,64 +256,44 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
     }
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            handleDeliveryTicketDialog();
+          }}
+          disabled={selectedRecords?.length === 0 || selectedRecords?.some((f) => f.hasOwnProperty('loadingTicketId'))}
+        >
+          Create Loading Ticket
+        </MenuItem>
+        <MenuItem
+          disabled={
+            selectedRecords?.length === 0 ||
+            selectedRecords?.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords?.length
+          }
+          onClick={() => {
+            handelProcessTickets();
+          }}
+        >
+          Delivered to Customer
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <>
-      <Box display="flex" justifyContent="flex-end" pt={1}>
-        <Box display="flex" alignItems="center" gridGap={8}>
-          {allowedToEdit && (
-            <Fragment>
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedRecords?.length === 0}
-                endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
-              >
-                Actions
-              </Button>
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorActionEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    handleDeliveryTicketDialog();
-                  }}
-                  disabled={selectedRecords?.length === 0 || selectedRecords?.some((f) => f.hasOwnProperty('loadingTicketId'))}
-                >
-                  Create Loading Ticket
-                </MenuItem>
-                <MenuItem
-                  disabled={
-                    selectedRecords?.length === 0 ||
-                    selectedRecords?.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                    selectedRecords?.length
-                  }
-                  onClick={() => {
-                    handelProcessTickets();
-                    closeActions();
-                  }}
-                >
-                  Delivered to Customer
-                </MenuItem>
-              </Menu>
-              <Box mx={1} />
-            </Fragment>
-          )}
-        </Box>
-      </Box>
+      {allowedToEdit && (
+        <DetailsPageHeader
+          isAddButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+          hasXpadding
+        />
+      )}
+
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ? (
           <Box zIndex={5} width={'100%'}>
