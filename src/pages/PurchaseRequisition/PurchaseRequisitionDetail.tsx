@@ -1,28 +1,26 @@
 import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Skeleton } from '@material-ui/lab';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManagePurchaseRequisition from './ManagePurchaseRequisition';
-import TabPanel from '../../components/TabPanel';
-import Material from './Material';
+import { Edit } from '@material-ui/icons';
 import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
-
-
+import ManagePurchaseRequisition from './ManagePurchaseRequisition';
+import Material from './Material';
 
 const PurchaseRequisitionDetail = () => {
   const renderedFrom = camelCase(routes?.purchaseRequisition.title);
@@ -50,7 +48,6 @@ const PurchaseRequisitionDetail = () => {
       fetchData();
     }
   }, [id]);
-
 
   const fetchFields = async () => {
     axiosInstance()
@@ -95,7 +92,7 @@ const PurchaseRequisitionDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.purchaseRequisition.path}`)
+          history.push(`${routes.purchaseRequisition.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -118,32 +115,32 @@ const PurchaseRequisitionDetail = () => {
   };
 
   const handleManagePuchhaseOrderDialog = () => {
-    const products = purchaseRequisitionData?.material?.filter((item: any) => item?.type == "product")
-    const services = purchaseRequisitionData?.material?.filter((item: any) => item?.type == "service")
-    setOrderDialog({ open: true, products: products, services: services })
-  }
+    const products = purchaseRequisitionData?.material?.filter((item: any) => item?.type == 'product');
+    const services = purchaseRequisitionData?.material?.filter((item: any) => item?.type == 'service');
+    setOrderDialog({ open: true, products: products, services: services });
+  };
 
   const handleConvertSuccess = (data: any) => {
     setOrderDialog({ open: false, products: [], services: [] });
     axiosInstance()
-        .put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, { 
-          _id: id,
-           purchaseOrder: data?._id,
-           status: 'Converted'
-          })
-        .then(({ data }) => {
-          fetchData()
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `${sidebarResource.purchaseOrder} has been created successfully`
-          });
-        })
-        .catch((err) => {
-          fetchData()
-          // setShowConfirmBox(false);
+      .put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
+        _id: id,
+        purchaseOrder: data?._id,
+        status: 'Converted'
+      })
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `${sidebarResource.purchaseOrder} has been created successfully`
         });
-  }
+      })
+      .catch((err) => {
+        fetchData();
+        // setShowConfirmBox(false);
+      });
+  };
 
   return (
     <Box className="main-container-v1">
@@ -164,22 +161,18 @@ const PurchaseRequisitionDetail = () => {
                 {purchaseRequisitionData?.status === 'Converted' ? 'Converted' : 'Convert'}
               </Button>
               {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
               {permissions?.purchaseRequisition?.isDelete && allowedToDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
-              <ActivityButton 
-                referenceId={purchaseRequisitionData?._id} 
-                resource={ACTIVITY_RESOURCE.purchaseRequisition} 
+              <ActivityButton
+                referenceId={purchaseRequisitionData?._id}
+                resource={ACTIVITY_RESOURCE.purchaseRequisition}
                 resourceLabel={purchaseRequisitionData?.purchaseRequisitionNumber}
-                />
+              />
             </>
           </Box>
         </Box>
@@ -200,8 +193,8 @@ const PurchaseRequisitionDetail = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-              <FaWpforms className="mr-1" fontSize="inherit" /> Header
-            </div>
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
             }
             value={0}
             aria-controls="a11y-tabpanel-0"
@@ -211,8 +204,8 @@ const PurchaseRequisitionDetail = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-            </div>
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
             }
             value={1}
             aria-controls="a11y-tabpanel-1"
@@ -229,15 +222,11 @@ const PurchaseRequisitionDetail = () => {
               <DetailsPage data={purchaseRequisitionData} fields={fields} />
             )}
           </Box>
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            { purchaseRequisitionData && (
-                <Material 
-                renderedFrom={`${renderedFrom}_grid-1`}
-                allowedToEdit={allowedToEdit}
-                purchaseRequisitionData={purchaseRequisitionData}
-                />
-            )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          {purchaseRequisitionData && (
+            <Material renderedFrom={`${renderedFrom}_grid-1`} allowedToEdit={allowedToEdit} purchaseRequisitionData={purchaseRequisitionData} />
+          )}
         </TabPanel>
       </Box>
       {showOrderDialog.open && (
@@ -246,16 +235,14 @@ const PurchaseRequisitionDetail = () => {
           purchaseOrderId={null}
           onClose={() => setOrderDialog((prevState) => ({ ...prevState, open: false }))}
           onSuccess={(data: any) => {
-            handleConvertSuccess(data)
+            handleConvertSuccess(data);
           }}
-          products={showOrderDialog?.products
-            ?.map((e) => {
-              return { product: e._id, unit: e.unit, qty: e.qty };
-            })}
-          services={showOrderDialog?.services
-            ?.map((e) => {
-              return { service: e._id, unit: e.unit, qty: e.qty };
-            })}
+          products={showOrderDialog?.products?.map((e) => {
+            return { product: e._id, unit: e.unit, qty: e.qty };
+          })}
+          services={showOrderDialog?.services?.map((e) => {
+            return { service: e._id, unit: e.unit, qty: e.qty };
+          })}
           currency={purchaseRequisitionData.currency}
           warehouseId={purchaseRequisitionData?.warehouse?.optionValue}
         />

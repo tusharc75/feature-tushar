@@ -25,9 +25,9 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import { ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem } from '@material-ui/core';
 import { map, uniq } from 'lodash';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, canLoad, canReceive, stepFullScreen }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -43,11 +43,9 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
   const [interPlantTransfer, setInterPlantTransfer] = useState(false);
   const [showConfirmInterPlantTransfer, setShowConfirmInterPlantTransfer] = useState(false);
   const [loadingInterPlantTransfer, setLoadingInterPlantTransfer] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
-
 
   useEffect(() => {
     fetchFields();
@@ -83,32 +81,48 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           Header: e?.fieldLabel,
           show: true,
           disabled: true,
-          Cell: ({ row }) => (<div>
-            <p className="link text-truncate" title={row.original?.productName} onClick={() => window.open(`${routes.productDetail.path}/${row.original?.productId}`)}>
-              {row.original?.productName}
-            </p>
-          </div>)
+          Cell: ({ row }) => (
+            <div>
+              <p
+                className="link text-truncate"
+                title={row.original?.productName}
+                onClick={() => window.open(`${routes.productDetail.path}/${row.original?.productId}`)}
+              >
+                {row.original?.productName}
+              </p>
+            </div>
+          )
         });
       } else if (e?.fieldName === 'serializedProduct') {
         column.push({
-          accessor: 'serializedProductShow', Header: e?.fieldLabel, show: true,
+          accessor: 'serializedProductShow',
+          Header: e?.fieldLabel,
+          show: true,
           Cell: ({ row }) => (row.original?.serializedProductShow ? <div>{row.original?.serializedProductShow}</div> : <NoDataCell />)
         });
       } else {
         column.push({
-          accessor: e?.fieldName, Header: e?.fieldLabel, show: true,
+          accessor: e?.fieldName,
+          Header: e?.fieldLabel,
+          show: true,
           Cell: ({ row }) => (row.original[e?.fieldName] ? <div>{row.original[e?.fieldName]}</div> : <NoDataCell />)
         });
       }
     });
     const extracolumns = [
       {
-        accessor: 'qty', Header: 'Qty', show: true, disabled: true,
+        accessor: 'qty',
+        Header: 'Qty',
+        show: true,
+        disabled: true,
         Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
       },
       {
-        accessor: 'serialNumber', Header: 'Serial Number', show: true,
-        Cell: ({ row }) => (row.original?.serialNumber?.length ? <div>{row.original?.serialNumber?.map((e) => e.serialNumber)?.toString()}</div> : <NoDataCell />)
+        accessor: 'serialNumber',
+        Header: 'Serial Number',
+        show: true,
+        Cell: ({ row }) =>
+          row.original?.serialNumber?.length ? <div>{row.original?.serialNumber?.map((e) => e.serialNumber)?.toString()}</div> : <NoDataCell />
       },
       {
         accessor: 'loadingTicket',
@@ -128,7 +142,9 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           )
       },
       {
-        accessor: 'status', Header: 'Status', show: true,
+        accessor: 'status',
+        Header: 'Status',
+        show: true,
         Cell: ({ row }) => (row.original?.status ? <div>{row.original?.status}</div> : <NoDataCell />)
       }
     ];
@@ -246,12 +262,13 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
 
   const handleInterPlantTransfer = () => {
     setLoadingInterPlantTransfer(true);
-    axiosInstance().put(
-      `${routes.transferInventory.path}/${transferInventoryData._id}/transfer-inter-plant`,
-      dataRows?.map((e) => {
-        return { product: e.productId, qty: e.qty };
-      })
-    )
+    axiosInstance()
+      .put(
+        `${routes.transferInventory.path}/${transferInventoryData._id}/transfer-inter-plant`,
+        dataRows?.map((e) => {
+          return { product: e.productId, qty: e.qty };
+        })
+      )
       .then(({ data: { data } }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -267,21 +284,19 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const handelCancelDeliveredTicket = () => {
     setOkBtnLoading(true);
-    const loadingTicketId = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
+    const loadingTicketId = uniq(
+      map(
+        selectedRecords?.filter((e) => e?.loadingTicketId),
+        'loadingTicketId'
+      )
+    );
     if (loadingTicketId.length) {
       let data = {};
       data['_ids'] = loadingTicketId;
-      axiosInstance().post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
+      axiosInstance()
+        .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
           setOkBtnLoading(false);
           setShowConformationCancleTicket(false);
@@ -299,102 +314,84 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
     }
   };
 
-
-  return (
-    <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <PreviewDownload
-          fileName={`${routes.transferInventory.title}-${transferInventoryData?.transferNumber}`}
-          hideDetailButton={true}
-          resource={sidebarResource.transferInventory}
-          referenceId={transferInventoryData?._id}
-          columns={columns?.filter((e) => ['productName', 'productNumber', 'productDescription', 'productDescription', 'qty']?.includes(e.accessor))}
-        />
-        <Box display="flex">
-          {transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered &&
-            <Button
-              variant={'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              className={`new-dropdown-v1`}
-              aria-controls="action-menu"
-              endIcon={<ExpandMore />}
-              disabled={selectedRecords?.length ? false : true}
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        {interPlantTransfer ? (
+          allowedToEdit &&
+          canReceive && (
+            <MenuItem
+              onClick={() => {
+                setShowConfirmInterPlantTransfer(true);
+              }}
             >
-              Actions
-            </Button>
-          }
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorEl)}
-            onClose={closeActions}
-          >
-            {interPlantTransfer ? (
-              allowedToEdit && canReceive && (
+              {`Receive`}
+            </MenuItem>
+          )
+        ) : (
+          <>
+            {allowedToEdit && canLoad && (
+              <MenuItem
+                disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
+                onClick={() => {
+                  handleLoadingTicketDialog();
+                }}
+              >
+                {`Create Loading Ticket`}
+              </MenuItem>
+            )}
+            {canReceive && (
+              <>
                 <MenuItem
                   onClick={() => {
-                    closeActions()
-                    setShowConfirmInterPlantTransfer(true);
+                    setShowConfirmBoxReceive(true);
                   }}
+                  disabled={
+                    selectedRecords.length === 0 ||
+                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+                  }
                 >
                   {`Receive`}
                 </MenuItem>
-              )
-            ) : (
-              <>
-                {allowedToEdit && canLoad && (
-                  <MenuItem
-                    disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
-                    onClick={() => {
-                      closeActions()
-                      handleLoadingTicketDialog()
-                    }}
-                  >
-                    {`Create Loading Ticket`}
-                  </MenuItem>
-                )}
-                {canReceive && (
-                  <>
-                    <MenuItem
-                      onClick={() => {
-                        closeActions()
-                        setShowConfirmBoxReceive(true);
-                      }}
-                      disabled={
-                        selectedRecords.length === 0 ||
-                        selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
-                      }
-                    >
-                      {`Receive`}
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        closeActions()
-                        setShowConformationCancleTicket(true);
-                      }}
-                      disabled={selectedRecords.length &&
-                        selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length ? false : true
-                      }
-                    >
-                      Cancel Delivered Loading Ticket(s)
-                    </MenuItem>
-                  </>
-                )}
+                <MenuItem
+                  onClick={() => {
+                    setShowConformationCancleTicket(true);
+                  }}
+                  disabled={
+                    selectedRecords.length &&
+                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length
+                      ? false
+                      : true
+                  }
+                >
+                  Cancel Delivered Loading Ticket(s)
+                </MenuItem>
               </>
             )}
-          </Menu>
-        </Box>
+          </>
+        )}
+      </>
+    );
+  };
 
-      </Box>
-      <Box>
+  const previewDownloadProps = {
+    fileName: `${routes.transferInventory.title}-${transferInventoryData?.transferNumber}`,
+    hideDetailButton: true,
+    resource: sidebarResource.transferInventory,
+    referenceId: transferInventoryData?._id,
+    columns: columns?.filter((e) => ['productName', 'productNumber', 'productDescription', 'productDescription', 'qty']?.includes(e.accessor))
+  };
+
+  return (
+    <Fragment>
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered}
+        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        previewDownloadProps={previewDownloadProps}
+      />
+      <>
         {columns ? (
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
@@ -412,7 +409,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-      </Box>
+      </>
       {showTicketDialog.open && (
         <ManageDeliveryTicket
           ticketType={DELIVERY_TICKET_TYPE.loading}

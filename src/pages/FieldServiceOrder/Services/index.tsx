@@ -1,30 +1,28 @@
-import React from 'react';
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
+import { Box, Grid, IconButton, MenuItem } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { fieldServiceOrder } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiChevronDown } from 'react-icons/bi';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { startCase } from 'lodash';
-import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import ServiceOrderQty from './ServiceOrderQty';
+import { startCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import { flattenArray } from 'src/constants/columns';
-import AddIcon from '@material-ui/icons/Add';
-import { ExpandMore } from '@material-ui/icons';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import { fieldServiceOrder } from '../../../constants/helpers';
+import ServiceOrderQty from './ServiceOrderQty';
 
 const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -38,7 +36,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const [isDeleting, setDeleting] = useState(false);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -202,16 +199,16 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent?.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent?.packageDetail?.packageName;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.canDelete = technician.some((d) => d._id === parent._id) ? false : true;
       parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate;
       parent.estimateEndDate = parent.estimateEndDate ? parent.estimateEndDate : serviceOrderData?.estimateEndDate;
@@ -234,16 +231,16 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.canDelete = technician.some((d) => d.service.optionValue === _subRow._id) ? false : true;
       _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate;
       _subRow.estimateEndDate = _subRow.estimateEndDate ? _subRow.estimateEndDate : serviceOrderData?.estimateEndDate;
@@ -327,17 +324,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       });
   };
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleDeleteMultiple = () => {
     const obj: any = [];
     const dataToDelete = selectedRecords?.length && selectedRecords?.filter((e) => e.canDelete);
@@ -357,103 +343,68 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     handleSaveData(rows);
   };
 
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
+          }}
+        >
+          Add Services
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+          }}
+        >
+          Add Service Packages
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={isDeleting}
+          onClick={() => {
+            handleDeleteMultiple();
+          }}
+        >
+          Delete
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setIsProductEdit({
+              open: true,
+              data: selectedRecords?.filter((e) => !e.hideSelection),
+              bulkedit: true,
+              showSaveAndNext: false
+            });
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <Fragment>
       <Grid container spacing={2}>
         {allowedToEdit && (
-          <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" m={1} mb={0}>
-              <Box display="flex">
-                <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
-                  {'Add'}
-                  <ExpandMore fontSize="small" />
-                </Button>
-                <Menu
-                  anchorEl={addAnchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="add-menu"
-                  open={Boolean(addAnchorEl)}
-                  onClose={closeAddActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      closeAddActions();
-                      setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-                    }}
-                  >
-                    Add Services
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      closeAddActions();
-                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                    }}
-                  >
-                    Add Service Packages
-                  </MenuItem>
-                </Menu>
-              </Box>
-              <Box display="flex">
-                <Button
-                  variant={'outlined'}
-                  color="primary"
-                  size="small"
-                  onClick={handleClick}
-                  disabled={!Boolean(selectedRecords?.length && selectedRecords?.filter((e) => e.canDelete).length)}
-                  endIcon={<BiChevronDown />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={open}
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  onClose={handleClose}
-                >
-                  <MenuItem
-                    disabled={isDeleting}
-                    onClick={() => {
-                      handleDeleteMultiple();
-                      handleClose();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      setIsProductEdit({
-                        open: true,
-                        data: selectedRecords?.filter((e) => !e.hideSelection),
-                        bulkedit: true,
-                        showSaveAndNext: false
-                      });
-                      handleClose();
-                    }}
-                  >
-                    Bulk Edit
-                  </MenuItem>
-                </Menu>
-              </Box>
-            </Box>
-          </Grid>
+          <>
+            <DetailsPageHeader
+              isAddButtonVisible={true}
+              addButtonMenuItems={addButtonMenuItems()}
+              isActionButtonVisible={true}
+              actionButtonMenuItems={actionButtonMenuItems()}
+              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length && selectedRecords?.filter((e) => e.canDelete).length) }}
+              hasXpadding
+            />
+          </>
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns ? (

@@ -1,25 +1,25 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tabs, Tab } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, serviceMaster } from '../../constants/helpers';
-import ManageServiceMaster from './ManageServiceMaster';
-import { BiEdit } from 'react-icons/bi';
-import { isMobile, isTablet } from 'react-device-detect';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import LeadTimeMaster from '../../components/LeadTime';
-import Steps from './Steps';
-import Product from './Product';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import routes from '../../components/Helpers/Routes';
+import LeadTimeMaster from '../../components/LeadTime';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { ACTIVITY_RESOURCE, serviceMaster } from '../../constants/helpers';
 import ConfigureFields from './Fields';
+import ManageServiceMaster from './ManageServiceMaster';
+import Product from './Product';
+import Steps from './Steps';
 
 const ServiceMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -71,7 +71,7 @@ const ServiceMasterDetailsPage = () => {
       .put(`${serviceMaster.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.serviceMaster.path}`)
+        history.push(`${routes.serviceMaster.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -115,17 +115,17 @@ const ServiceMasterDetailsPage = () => {
                       setOpenUpdateDialog(true);
                     }}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             )}
-            <ActivityButton 
-              referenceId={serviceMasterDetailData?._id} 
-              resource={ACTIVITY_RESOURCE.serviceMaster} 
+            <ActivityButton
+              referenceId={serviceMasterDetailData?._id}
+              resource={ACTIVITY_RESOURCE.serviceMaster}
               resourceLabel={serviceMasterDetailData?.serviceName}
-              />
+            />
           </Box>
         </Box>
       </Box>
@@ -210,7 +210,7 @@ const ServiceMasterDetailsPage = () => {
           }}
           handleSucess={() => {
             setOpenConfigureFields(false);
-            fetchData()
+            fetchData();
           }}
         />
       )}

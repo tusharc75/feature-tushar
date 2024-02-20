@@ -1,24 +1,25 @@
 import { Box, Button, Grid, Menu, MenuItem, Tab, Tabs } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageTruckMaster from './ManageTruckMaster';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
-import TabPanel from '../../components/TabPanel';
-import { FaWpforms } from 'react-icons/fa';
+import { Edit } from '@material-ui/icons';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from 'react-icons/fa';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import routes from 'src/components/Helpers/Routes';
+import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
 import History from './History';
+import ManageTruckMaster from './ManageTruckMaster';
 
 const TruckMasterDetail = () => {
   const { id } = useParams();
@@ -75,7 +76,6 @@ const TruckMasterDetail = () => {
       toastConfig.setToastConfig(error);
     }
   };
- 
 
   const handleDelete = () => {
     if (id) {
@@ -89,7 +89,7 @@ const TruckMasterDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.truckMaster.path}`)
+          history.push(`${routes.truckMaster.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -196,15 +196,11 @@ const TruckMasterDetail = () => {
             </Menu>
             {permissions?.truckMaster?.isUpdate && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
             {permissions?.truckMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton 
-              referenceId={truckMasterData?._id} 
-              resource={ACTIVITY_RESOURCE.truckMaster}
-              resourceLabel={truckMasterData?.truckName}
-              />
+            <ActivityButton referenceId={truckMasterData?._id} resource={ACTIVITY_RESOURCE.truckMaster} resourceLabel={truckMasterData?.truckName} />
           </Box>
         </Box>
       </Box>

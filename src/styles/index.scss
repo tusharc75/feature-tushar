@@ -856,7 +856,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .main-container {
-  min-height: calc(100vh - 99px);
+  min-height: max(600px, calc(100vh - 99px));
   position: relative;
   overflow: auto;
   z-index: 1;

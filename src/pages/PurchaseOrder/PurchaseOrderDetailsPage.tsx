@@ -17,7 +17,7 @@ import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import Product from './Product';
 import ReceivingAsset from './ReceivingAsset';
-import {  RiFlowChart } from 'react-icons/all';
+import { RiFlowChart } from 'react-icons/all';
 import Steps, { getIndex } from 'src/components/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from '../../components/ContentFullScreen';
@@ -139,7 +139,7 @@ const PurchaseOrderDetailsPage = () => {
       .put(`${purchaseOrder.api}/remove`, { ids: [] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.purchaseOrder.path}`)
+        history.push(`${routes.purchaseOrder.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -223,43 +223,6 @@ const PurchaseOrderDetailsPage = () => {
                   <Button variant={'contained'} className={'btn-outline-v1'} onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}>
                     Close
                   </Button>
-                  {/* <Button
-                    variant={'outlined'}
-                    color="primary"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    {'Change Status'}
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    {statusOptions?.map((o, index) => {
-                      return (
-                        <MenuItem
-                          disabled={index <= statusOptions?.findIndex((d) => d.optionLabel === purchaseOrderData?.status)}
-                          onClick={() => {
-                            closeActions();
-                            handleStatusChange(o);
-                          }}
-                          value={o}
-                        >
-                          {o?.optionLabel}
-                        </MenuItem>
-                      );
-                    })}
-                  </Menu> */}
                 </Fragment>
               )}
             {purchaseOrderData?.deleted ? null : ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ? (
@@ -316,7 +279,7 @@ const PurchaseOrderDetailsPage = () => {
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Invoice
             </CustomTab>
           )}
-          {purchaseOrderData?.deleted && (isMobile && !isTablet) ? null : (
+          {purchaseOrderData?.deleted && isMobile && !isTablet ? null : (
             <CustomTab className={'tabLayout'} index={2} {...a11yProps(2)}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>

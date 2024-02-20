@@ -1,25 +1,23 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Typography, Tab, Tabs } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, productAuction } from '../../constants/helpers';
-import ManageProductAuction from './ManageProductAuction';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import Products from '../Packages/Products';
+import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import { camelCase } from 'lodash';
-import BidsPage from './Bids';
-import { Skeleton } from '@material-ui/lab';
+import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { ACTIVITY_RESOURCE, productAuction } from '../../constants/helpers';
+import BidsPage from './Bids';
+import ManageProductAuction from './ManageProductAuction';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -84,7 +82,9 @@ const ProductAuctionDetailsPage = () => {
       .get(`${productAuction.api}/${id}`)
       .then(({ data: { data } }) => {
         setProductAuctionData(data);
-        {data?.bids && setBids(data?.bids)}
+        {
+          data?.bids && setBids(data?.bids);
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -96,7 +96,7 @@ const ProductAuctionDetailsPage = () => {
       .put(`${productAuction.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.productAuction.path}`)
+        history.push(`${routes.productAuction.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -122,16 +122,16 @@ const ProductAuctionDetailsPage = () => {
                   }}
                   className={`btn-outline-v1`}
                 >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
               {permissions?.productAuction?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
-            <ActivityButton 
-              referenceId={productAuctionData?._id} 
-              resource={ACTIVITY_RESOURCE.productAuction} 
+            <ActivityButton
+              referenceId={productAuctionData?._id}
+              resource={ACTIVITY_RESOURCE.productAuction}
               resourceLabel={productAuctionData?.auctionNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>

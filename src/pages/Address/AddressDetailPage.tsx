@@ -1,19 +1,18 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
+import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
 
 const AddressDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -70,7 +69,7 @@ const AddressDetailPage = () => {
           .then(({ data }) => {
             setShowConfirmBox(false);
 
-            history.push(`${routes.address.path}`)
+            history.push(`${routes.address.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);
@@ -118,35 +117,31 @@ const AddressDetailPage = () => {
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
-                <>
-                  {permissions?.address?.isUpdate && (
-                    <Button 
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className="btn-outline-v1" 
-                    onClick={handleOpenUpdateDialog}
-                    >
-                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                  )}
-                  {permissions?.address?.isDelete && (
-                    <span title={id ? "Primarily selected address can't be deleted" : 'Permanently delete this address'}>
-                      <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                    </span>
-                  )}
-                </>
+              <>
+                {permissions?.address?.isUpdate && (
+                  <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
+                  </Button>
+                )}
+                {permissions?.address?.isDelete && (
+                  <span title={id ? "Primarily selected address can't be deleted" : 'Permanently delete this address'}>
+                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                  </span>
+                )}
+              </>
             </Box>
           </Box>
         </Box>
         <Box className="detail-container-v1">
-              <Box>
-                {loading || !addressFields.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <DetailsPage data={addressData} fields={addressFields} />
-                )}
-              </Box>
+          <Box>
+            {loading || !addressFields.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={addressData} fields={addressFields} />
+            )}
+          </Box>
         </Box>
       </Box>
     </>

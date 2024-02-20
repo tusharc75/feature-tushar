@@ -1,6 +1,5 @@
 import React from 'react';
-import { Button, ButtonProps } from '@material-ui/core';
-import { isMobile, isTablet } from 'react-device-detect';
+import { Button, ButtonProps, useMediaQuery } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 export type DeleteButtonProps = {
@@ -9,9 +8,11 @@ export type DeleteButtonProps = {
 } & ButtonProps;
 
 function DeleteButton({ text, onClick, children, mode = 'dark', ...rest }: DeleteButtonProps) {
+  const isMobile = useMediaQuery('(max-width:600px)');
+
   return (
-    <Button className={`btn-outline-red-v1 ${mode}`} variant={isMobile && !isTablet ? 'text' : 'contained'} size="small" onClick={onClick} {...rest}>
-      {children ? children : isMobile && !isTablet ? <DeleteIcon style={{ fontSize: 18 }} /> : text}
+    <Button className={`btn-outline-red-v1 ${mode}`} variant={isMobile ? 'text' : 'contained'} size="small" onClick={onClick} {...rest}>
+      {children ? children : isMobile ? <DeleteIcon style={{ fontSize: 18 }} /> : text}
     </Button>
   );
 }
