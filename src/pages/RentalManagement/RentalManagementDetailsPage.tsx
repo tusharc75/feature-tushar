@@ -673,6 +673,7 @@ const RentalManagementDetailsPage = () => {
                   }
                 />
               )}
+
               {rentalSteps[currentStep]?.name === 'Quotation' && rentalManagementData && (
                 <Quotation
                   rentalManagementData={rentalManagementData}

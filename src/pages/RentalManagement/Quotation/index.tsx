@@ -433,6 +433,12 @@ const RenderQuotationMessage = ({ quotationData, currentVersion, isMobile }) => 
   return (
     <>
       <Box display="flex" sx={{ flexBasis: isMobile ? '100%' : '', justifyContent: 'center' }}>
+        <div className="d-flex align-items-center justify-content-center m-1 text-center">
+          <FcClock size={25} />
+          <Typography style={{ color: '#00acc1', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+            Quotation has been sent to customer
+          </Typography>
+        </div>
         {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
           <div className="d-flex align-items-center justify-content-center m-1 text-center">
             <FcClock size={25} />
