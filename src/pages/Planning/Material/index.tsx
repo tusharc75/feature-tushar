@@ -1,31 +1,30 @@
-import { Box, Button, IconButton, Grid, Menu, MenuItem } from '@material-ui/core';
-import { Add, ExpandMore } from '@material-ui/icons';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Add } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import axiosInstance from 'src/axios/axiosInstance';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import routes from 'src/components/Helpers/Routes';
-import { flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import axiosInstance from 'src/axios/axiosInstance';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import AddIcon from '@material-ui/icons/Add';
-import MaterialDialog from './materialDialog';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
-import PreviewDownload from 'src/components/PreviewDownload';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import MaterialDialog from './materialDialog';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData }) => {
   const {
@@ -41,12 +40,10 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
 
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
 
-  const [anchorEl, setAnchorEl] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
 
   const { state, dispatch } = useTableReducer();
@@ -90,12 +87,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail?.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === MATERIAL_TYPE.service
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail?.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === MATERIAL_TYPE.service
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </Box>
           </div>
         )
@@ -235,14 +232,14 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.type === MATERIAL_TYPE.package
-            ? parent.packageDetail?.packageName
-            : parent.serviceDetail?.serviceName;
+          ? parent.packageDetail?.packageName
+          : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
           : parent.type === MATERIAL_TYPE.package
-            ? parent?.packageDetail?.packageDescription
-            : parent?.serviceDetail?.serviceDescription;
+          ? parent?.packageDetail?.packageDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === MATERIAL_TYPE.serializedAsset)?.length;
       parent.hideSelection = false;
@@ -270,18 +267,18 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.assetDetail.assetNumber
-              : _subRow.serviceDetail?.serviceName;
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.assetDetail.assetNumber
+          : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow.type === 'serializedAsset'
-              ? parent.description
-              : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === 'serializedAsset'
+          ? parent.description
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
       _subRow.hideSelection = false;
@@ -318,7 +315,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           message: data.message
         });
         fetchData();
-        fetchPlanningData()
+        fetchPlanningData();
         setIsAdding(false);
       })
       .catch((error) => {
@@ -369,7 +366,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           message: data.message
         });
         fetchData();
-        fetchPlanningData()
+        fetchPlanningData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -377,22 +374,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
-  };
-
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
@@ -408,133 +389,97 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     return flatArray.length === 0;
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddDialog({ open: true, type: 'product', parentId: null });
+          }}
+        >
+          Add Existing Products
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAddDialog({ open: true, type: 'service', parentId: null });
+          }}
+        >
+          Add Existing Services
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAddDialog({ open: true, type: 'package', parentId: null });
+          }}
+        >
+          Add Existing Packages
+        </MenuItem>
+      </>
+    );
+  };
+
+  const previewDownloadProps = {
+    fileName: `${routes.planning.title}-${planningData?.planningNumber}`,
+    resource: sidebarResource.planning,
+    referenceId: planningData._id,
+    columns: columns,
+    isSendEmail: true
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        {planningData.type === 'Rental Job' && (
+          <MenuItem
+            disabled={disableAssignSerializedAssets()}
+            onClick={() => {
+              setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct));
+              setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
+            }}
+          >
+            Assign Serialized Asset
+          </MenuItem>
+        )}
+        <MenuItem
+          onClick={() => {
+            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            const dataToDelete = selectedRecords
+              ?.filter((e) => !e.hideSelection)
+              .map((rec: any) => {
+                const obj: any = {};
+                obj.id = rec._id;
+                obj.type = rec?.type;
+                obj.materialId = rec?.materialId;
+                return obj;
+              });
+            setDeleteData(dataToDelete);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center">
-          {allowedToEdit && (
-            <>
-              <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
-                {'Add'}
-                <ExpandMore fontSize="small" />
-              </Button>
-              <Menu
-                anchorEl={addAnchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="add-menu"
-                open={Boolean(addAnchorEl)}
-                onClose={closeAddActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions();
-                    setAddDialog({ open: true, type: 'product', parentId: null });
-                  }}
-                >
-                  Add Existing Products
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions();
-                    setAddDialog({ open: true, type: 'service', parentId: null });
-                  }}
-                >
-                  Add Existing Services
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions();
-                    setAddDialog({ open: true, type: 'package', parentId: null });
-                  }}
-                >
-                  Add Existing Packages
-                </MenuItem>
-              </Menu>
-            </>
-          )}
-        </Box>
-        <Box display="flex">
-          <PreviewDownload
-            fileName={`${routes.planning.title}-${planningData?.planningNumber}`}
-            resource={sidebarResource.planning}
-            referenceId={planningData._id}
-            columns={columns}
-            isSendEmail={true}
-          />
-          <Box mr={1} />
-          {allowedToEdit && (
-            <>
-              <Button
-                disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
-                variant={isMobile ? 'text' : 'outlined'}
-                color="default"
-                size="small"
-                onClick={openActions}
-                className="new-dropdown-v1"
-                aria-controls="action-menu"
-                endIcon={<ExpandMore />}
-              >
-                Actions
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                {planningData.type === 'Rental Job' && (
-                  <MenuItem
-                    disabled={disableAssignSerializedAssets()}
-                    onClick={() => {
-                      closeActions();
-                      setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct));
-                      setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
-                    }}
-                  >
-                    Assign Serialized Asset
-                  </MenuItem>
-                )}
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
-                  }}
-                >
-                  Bulk Edit
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    const dataToDelete = selectedRecords
-                      ?.filter((e) => !e.hideSelection)
-                      .map((rec: any) => {
-                        const obj: any = {};
-                        obj.id = rec._id;
-                        obj.type = rec?.type;
-                        obj.materialId = rec?.materialId;
-                        return obj;
-                      });
-                    setDeleteData(dataToDelete);
-                    closeActions();
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </Menu>
-            </>
-          )}
-        </Box>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={allowedToEdit}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={allowedToEdit}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+        previewDownloadProps={previewDownloadProps}
+        leftSideContents
+        rightSideContents
+        hasXpadding={false}
+      />
+
       {columns && dataRows ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
