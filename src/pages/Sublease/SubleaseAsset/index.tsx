@@ -254,40 +254,6 @@ const SerializedAsset = ({
         )}
         {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
           <Fragment>
-            {/* {currentStep === 1 && (
-              <Fragment>
-                <Tooltip title="Transfer to Plant">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      const data = {};
-                      data['ticketName'] = subleaseData.subleaseName;
-                      data['referenceId'] = subleaseData._id;
-                      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.supplier;
-                      data['pickupFrom'] = subleaseData?.supplierAccount?.optionValue;
-                      data['pickupFromAddress'] = subleaseData?.shippingAddress?.optionValue;
-                      data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-                      data['isPickupFromDisable'] = true;
-                      setShowTicketDialog({ open: true, data: data });
-                    }}
-                    disabled={
-                      selectedRecords.length === 0 ||
-                      selectedRecords.some(
-                        (f) =>
-                          f.hasOwnProperty('warehouse') ||
-                          f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount ||
-                          [ASSET_STATUS.reserved].includes(f.status)
-                      )
-                    }
-                  >
-                    Receiving to Plant
-                  </Button>
-                </Tooltip>
-                <Box mx={1} />
-              </Fragment>
-            )} */}
             {selectedRecords.length > 0 &&
             selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
             checkUniqWarehouse() &&
