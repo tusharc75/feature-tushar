@@ -46,9 +46,7 @@ export const updateGridHiddenColumns = ({
 }) => {
   if (timeout) clearTimeout(timeout);
   timeout = setTimeout(function () {
-    let data = localStorage.getItem('gridMetaData');
-    let request = data === 'undefined' ? {} : { ...JSON.parse(data) };
-
+    let request = getGridMetaDataFromLocalStorage();
     if (request[renderedFrom]) {
       request[renderedFrom].order = columnOrder.length > 0 ? columnOrder : request[renderedFrom].order;
       request[renderedFrom].hide = hiddenColumns.length > 0 ? hiddenColumns : request[renderedFrom].hide;
@@ -83,24 +81,28 @@ const fetchGridMetaData = (user) => {
     });
 };
 
-export const getDataFromLocalStorage = () => {
+export const getGridMetaDataFromLocalStorage = () => {
   try {
     const data = localStorage.getItem('gridMetaData');
-    return data && data !== 'undefined' ? JSON.parse(data) : false;
+    if (data && data !== 'undefined') {
+      return JSON.parse(data)
+    }
+    else {
+      return {}
+    }
   } catch (ex) {
-    return false;
+    return {};
   }
 };
 
 export const getTableDataFromLocalStorage = (renderedFrom: string): { hide?: string[]; order?: string[] } | false => {
-  const data = getDataFromLocalStorage();
-  if (!data) return false;
-  return data[renderedFrom] || false;
+  const data = getGridMetaDataFromLocalStorage();
+  return data[renderedFrom] || null;
 };
 
 export const returnHiddenCols = (renderedFrom, hideAction) => {
-  const gridMetaData = getDataFromLocalStorage();
-  const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
+  const gridMetaData = getGridMetaDataFromLocalStorage();
+  const hiddenCols = gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide ? gridMetaData[renderedFrom]?.hide : [];
   if (hideAction) {
     hiddenCols.push('action');
   }

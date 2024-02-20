@@ -8,7 +8,7 @@ import HtmlTooltip from '../../CustomTooltipTitle';
 import ArrangeViewDialog from './ArrangeViewDialog';
 import ArrangeViewReportDialog from './ArrangeViewReportDialog';
 import { TInitialState } from '../hooks/useTableReducer';
-import { getTableDataFromLocalStorage, getStickyColumnNames } from '../utils';
+import { getTableDataFromLocalStorage, getStickyColumnNames, getGridMetaDataFromLocalStorage } from '../utils';
 
 let timeout;
 
@@ -70,8 +70,7 @@ const ArrangeView = ({
   const updateGridHiddenColumns = (hiddenColumns = [], columnOrder = []) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(function () {
-      let data = localStorage.getItem('gridMetaData');
-      let request = data === 'undefined' ? {} : { ...JSON.parse(data) };
+      let request = getGridMetaDataFromLocalStorage();
       if (request[renderedFrom]) {
         request[renderedFrom].order = columnOrder;
         request[renderedFrom].hide = hiddenColumns;
