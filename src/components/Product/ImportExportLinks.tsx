@@ -47,7 +47,8 @@ export default function ImportExportLinks({
   total = 0,
   additionalParams = null,
   extraImportExportLinks = [],
-  inverted = false
+  inverted = false,
+  small = false
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -335,7 +336,11 @@ export default function ImportExportLinks({
   };
 
   return (
-    <div className={`${module !== 'builder' ? classes.root : classes.custom_root} ${inverted ? 'inverted' : ''}`}>
+    <div
+      className={`${module !== 'builder' ? classes.root : classes.custom_root} ${small ? '[padding-right:0_!important]' : ''} ${
+        inverted ? 'inverted' : ''
+      }`}
+    >
       <div className={classes.linksContainer}>
         {permissions?.isCreate && (
           <label
@@ -349,7 +354,7 @@ export default function ImportExportLinks({
               }
             }}
             htmlFor={api === 'product' ? '' : 'importFromExcel'}
-            className={` new-headerbox-button-v1`}
+            className={` new-headerbox-button-v1 ${small ? 'small' : ''}`}
           >
             Import from Excel
             <ImportIcon />
@@ -363,7 +368,7 @@ export default function ImportExportLinks({
               exportToExcel();
             }
           }}
-          className={` new-headerbox-button-v1`}
+          className={` new-headerbox-button-v1 ${small ? 'small' : ''}`}
         >
           Export to Excel
           {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? ' (All)' : ` (${recordsToExport})`) : null}
@@ -377,7 +382,7 @@ export default function ImportExportLinks({
               setIsSelection(true);
             }
           }}
-          className={` new-headerbox-button-v1`}
+          className={` new-headerbox-button-v1 ${small ? 'small' : ''}`}
         >
           Download Template
           <DownloadIcon />

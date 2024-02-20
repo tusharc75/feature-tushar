@@ -4,6 +4,7 @@ import type { PreviewDownloadProps } from './PreviewDownload';
 import { Add, ExpandMore, TouchApp } from '@material-ui/icons';
 import PreviewDownload from './PreviewDownload';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import SendEmail, { SendEmailProps } from './sendEmail';
 
 type ButtonPropsWithTooltip = {
   tooltip?: string;
@@ -20,6 +21,7 @@ type DetailsPageHeaderProps = {
   leftSideContents?: ReactNode;
   rightSideContents?: ReactNode;
   hasXpadding?: boolean;
+  sendEmailProps?: SendEmailProps;
 };
 
 const DetailsPageHeader = ({
@@ -32,6 +34,7 @@ const DetailsPageHeader = ({
   previewDownloadProps,
   leftSideContents,
   rightSideContents,
+  sendEmailProps,
   hasXpadding = true
 }: DetailsPageHeaderProps) => {
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
@@ -105,6 +108,7 @@ const DetailsPageHeader = ({
       </div>
       <div className="flex flex-wrap gap-2 items-center ml-auto">
         {previewDownloadProps ? <PreviewDownload {...previewDownloadProps} /> : null}
+        {sendEmailProps ? <SendEmail {...sendEmailProps} /> : null}
         {rightSideContents}
         {isActionButtonVisible ? (
           <>
