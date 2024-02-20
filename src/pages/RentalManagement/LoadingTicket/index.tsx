@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField, Tooltip } from '@material-ui/core';
+import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField, Tooltip, useMediaQuery } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
@@ -9,7 +9,6 @@ import InfoIcon from '@material-ui/icons/Info';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { groupBy, isEqual, map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { Link } from 'react-router-dom';
@@ -80,7 +79,7 @@ const LoadingTicket = ({
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
-
+  const isMobile = useMediaQuery('(max-width:600px)');
   const {
     state: { user }
   }: any = useData();
@@ -942,17 +941,22 @@ const LoadingTicket = ({
   const rightSideContents = () => {
     return (
       <>
-        <Button
-          onClick={getPreview}
-          variant={isMobile && !isTablet ? 'text' : 'outlined'}
-          color="primary"
-          type="button"
-          size="small"
-          disabled={downlodingFile || isOffline || uniqueLoadingTicket.length === 0}
-          startIcon={<AiFillFilePdf />}
-        >
-          {downlodingFile ? 'Please wait...' : 'Preview'}
-        </Button>
+        <HtmlTooltip title={'Preview PDF'} placement="top" arrow enterTouchDelay={0}>
+          <span>
+            <Button
+              onClick={getPreview}
+              variant={isMobile ? 'text' : 'outlined'}
+              className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
+              color="primary"
+              type="button"
+              size="small"
+              disabled={downlodingFile || isOffline || uniqueLoadingTicket.length === 0}
+              startIcon={isMobile ? null : <AiFillFilePdf />}
+            >
+              {isMobile ? downlodingFile ? <CircularProgress size={20} /> : <AiFillFilePdf /> : downlodingFile ? 'Please wait...' : 'Preview PDF'}
+            </Button>
+          </span>
+        </HtmlTooltip>
         {allowedToEdit && (
           <Button
             variant={'outlined'}
@@ -983,13 +987,13 @@ const LoadingTicket = ({
                   onClick={() => {
                     setShowRemoveTicketDialog(true);
                   }}
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                  variant={isMobile ? 'text' : 'outlined'}
                   color="primary"
                   size="small"
-                  style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
+                  style={isMobile ? { color: 'var(--danger-light)' } : {}}
                   disabled={selectedRecords.length === 0 || currentStep === 4 || selectedRecords.some((f) => !f.hasOwnProperty('loadingTicketId'))}
                 >
-                  {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Loading Ticket'}
+                  {isMobile ? <IoRemoveCircleOutline size={22} /> : 'Remove Loading Ticket'}
                 </Button>
               </Tooltip>
             ) : null}
@@ -999,11 +1003,11 @@ const LoadingTicket = ({
                   onClick={() => {
                     setOpenDeliveryTicketDialog(true);
                   }}
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  variant={isMobile ? 'text' : 'contained'}
                   color="primary"
                   size="small"
                 >
-                  {isMobile && !isTablet ? <AddBoxRoundedIcon /> : 'Process Loading Ticket'}
+                  {isMobile ? <AddBoxRoundedIcon /> : 'Process Loading Ticket'}
                 </Button>
               </Tooltip>
             )}
