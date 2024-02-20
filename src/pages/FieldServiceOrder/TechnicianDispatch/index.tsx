@@ -1,22 +1,21 @@
-import React from 'react';
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { dateTimeFormat, fieldServiceOrder } from '../../../constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiChevronDown } from 'react-icons/bi';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SendIcon from '@material-ui/icons/Send';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import DispatchMaterial from './DispatchMaterial';
 import moment from 'moment';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import { dateTimeFormat, fieldServiceOrder } from '../../../constants/helpers';
+import DispatchMaterial from './DispatchMaterial';
 
 const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -242,103 +241,73 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
       });
   };
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords?.filter((e) => e.status === 'Assigned')?.length === selectedRecords?.length ? false : true}
+          onClick={() => {
+            const obj: any = selectedRecords.map((ele) => {
+              return {
+                _id: ele?._id,
+                technician: ele?.technician?._id,
+                material: ele?.material?.map((e) => {
+                  return { _id: e._id, type: 'product', product: e.materialId };
+                })
+              };
+            });
+            handleDispatch(obj);
+          }}
+        >
+          Dispatched
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.filter((e) => e.status === 'Dispatched')?.length === selectedRecords?.length ? false : true}
+          onClick={() => {
+            const obj: any = selectedRecords.map((ele) => {
+              return { _id: ele?._id, technician: ele?.technician?._id };
+            });
+            handleCompleted(obj);
+          }}
+        >
+          Completed
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <Fragment>
-      <Grid container spacing={2}>
-        {allowedToEdit && (
-          <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" m={1} mb={0}>
-              <Box display="flex"></Box>
-              <Box display="flex">
-                <Button
-                  variant={'outlined'}
-                  color="primary"
-                  size="small"
-                  onClick={handleClick}
-                  disabled={!Boolean(selectedRecords && selectedRecords.length)}
-                  endIcon={<BiChevronDown />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={open}
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  onClose={handleClose}
-                >
-                  <MenuItem
-                    disabled={selectedRecords?.filter((e) => e.status === 'Assigned')?.length === selectedRecords?.length ? false : true}
-                    onClick={() => {
-                      const obj: any = selectedRecords.map((ele) => {
-                        return {
-                          _id: ele?._id,
-                          technician: ele?.technician?._id,
-                          material: ele?.material?.map((e) => {
-                            return { _id: e._id, type: 'product', product: e.materialId };
-                          })
-                        };
-                      });
-                      handleDispatch(obj);
-                      handleClose();
-                    }}
-                  >
-                    Dispatched
-                  </MenuItem>
-                  <MenuItem
-                    disabled={selectedRecords?.filter((e) => e.status === 'Dispatched')?.length === selectedRecords?.length ? false : true}
-                    onClick={() => {
-                      const obj: any = selectedRecords.map((ele) => {
-                        return { _id: ele?._id, technician: ele?.technician?._id };
-                      });
-                      handleCompleted(obj);
-                      handleClose();
-                    }}
-                  >
-                    Completed
-                  </MenuItem>
-                </Menu>
-              </Box>
-            </Box>
-          </Grid>
+      {allowedToEdit && (
+        <DetailsPageHeader
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.length) }}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          isAddButtonVisible={false}
+          hasXpadding
+        />
+      )}
+      <>
+        {columns ? (
+          <Box zIndex={5}>
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              refreshGrid={fetchData}
+              hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+            />
+          </Box>
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
-        <Grid item xs={12} md={12} sm={12}>
-          {columns ? (
-            <Box zIndex={5} >
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                refreshGrid={fetchData}
-                hideSelection={!allowedToEdit}
-                hideAction={!allowedToEdit}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-              />
-            </Box>
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </Grid>
-      </Grid>
+      </>
       {showDispatchMaterial.open && (
         <DispatchMaterial
           handleClose={() => {
