@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { purchaseOrder, gridLoadingTimeout, dateTimeFormat } from '../../../constants/helpers';
@@ -12,6 +12,7 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -133,23 +134,24 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     }
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddOpen({ open: true, invoiceData: null });
+          }}
+        >
+          Add Invoice
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex">
-            <Button
-              color="primary"
-              size="small"
-              variant="contained"
-              onClick={() => {
-                setAddOpen({ open: true, invoiceData: null });
-              }}
-            >
-              Add Invoice
-            </Button>
-          </Box>
-        </Box>
+        <DetailsPageHeader isAddButtonVisible={true} addButtonMenuItems={addButtonMenuItems()} isActionButtonVisible={false} hasXpadding={false} />
       )}
       <Box>
         {columns ? (

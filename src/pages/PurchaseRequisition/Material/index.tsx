@@ -1,28 +1,26 @@
-import { Box, Button, IconButton, makeStyles, Grid, Menu, MenuItem } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import routes from 'src/components/Helpers/Routes';
-import { flattenArray } from 'src/constants/columns';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import AddIcon from '@material-ui/icons/Add';
-import MaterialDialog from './materialDialog';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import PreviewDownload from 'src/components/PreviewDownload';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import MaterialDialog from './materialDialog';
 
 const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
   const {
@@ -38,11 +36,9 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
 
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
 
-  const [anchorEl, setAnchorEl] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
 
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -50,7 +46,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
   const { dataRows, selectedRecords } = state;
 
   const { generateColumns } = useColumns();
-
 
   useEffect(() => {
     fetchFields();
@@ -101,7 +96,8 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext:
+                      row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -139,7 +135,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       }
-
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
@@ -167,7 +162,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
             size="small"
             aria-label="Details"
             disabled={!allowedToEdit}
-
             onClick={() => {
               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
               setDeleteData(obj);
@@ -203,7 +197,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     dispatch({ type: 'loading', loading: false });
   };
 
-
   const onMaterialEdit = (row, rows) => {
     setMaterialEdit({
       open: true,
@@ -214,7 +207,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
   };
 
   const handleAdd = async (rows) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -235,10 +228,10 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
           message: data.message
         });
         fetchData();
-        setSubmitting(false)
+        setSubmitting(false);
       })
       .catch((error) => {
-        setSubmitting(false)
+        setSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -294,22 +287,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
-  };
-
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
-  };
-
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
@@ -317,106 +294,80 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     handleSaveData(rows);
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddDialog({ open: true, type: 'product', parentId: null });
+          }}
+        >
+          Add Existing Products
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAddDialog({ open: true, type: 'service', parentId: null });
+          }}
+        >
+          Add Existing Services
+        </MenuItem>
+      </>
+    );
+  };
+
+  const previewDownloadProps = {
+    fileName: `${routes.purchaseRequisition.title}-${purchaseRequisitionData?.purchaseRequisitionNumber}`,
+    resource: sidebarResource.purchaseRequisition,
+    referenceId: purchaseRequisitionData?._id,
+    columns: columns
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            const dataToDelete = selectedRecords
+              ?.filter((e) => !e.hideSelection)
+              .map((rec: any) => {
+                const obj: any = {};
+                obj.id = rec._id;
+                obj.type = rec?.type;
+                obj.materialId = rec?.materialId;
+                return obj;
+              });
+            setDeleteData(dataToDelete);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" alignItems="center">
-            <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'product', parentId: null });
-                }}
-              >
-                Add Existing Products
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'service', parentId: null });
-                }}
-              >
-                Add Existing Services
-              </MenuItem>
-            </Menu>
-          </Box>
-          <Box display="flex">
-            <PreviewDownload
-              fileName={`${routes.purchaseRequisition.title}-${purchaseRequisitionData?.purchaseRequisitionNumber}`}
-              resource={sidebarResource.purchaseRequisition}
-              referenceId={purchaseRequisitionData?._id}
-              columns={columns} />
-            <Box ml={1} />
-            <Button
-              disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
-              variant={isMobile ? 'text' : 'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              className="new-dropdown-v1"
-            >
-              {isMobile ? '' : 'Actions'} <ExpandMore />
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
-                }}
-              >
-                Bulk Edit
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  const dataToDelete = selectedRecords
-                    ?.filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                  setDeleteData(dataToDelete);
-                  closeActions();
-                }}
-              >
-                Delete
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
+        <DetailsPageHeader
+          isAddButtonVisible={true}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+          previewDownloadProps={previewDownloadProps}
+          hasXpadding={false}
+        />
       )}
+
       {columns ? (
-        <Box zIndex={5} >
+        <Box zIndex={5}>
           <CustomReactTable
             height={'calc(100vh - 300px)'}
             columns={columns}
