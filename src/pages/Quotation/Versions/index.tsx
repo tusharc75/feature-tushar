@@ -43,6 +43,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
       accessor: 'version',
       Header: 'Version',
       width: 200,
+      primaryField: true,
       Cell: ({ row }) => {
         return row.original?.version ? (
           referenceType === 'rentalJob' || referenceType === 'repairOrder' ? (
@@ -98,7 +99,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
         return row.original?.comment ? <p className="text-truncate">{row.original.comment}</p> : <NoDataCell />;
       }
     });
-    columns = [...columns,  ActionsRenderer];
+    columns = [...columns, ActionsRenderer];
     setColumns(columns);
   };
 
@@ -178,22 +179,22 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
         showRequiredLabel={false}
       />
       <CustomDialogContent>
-      {columns ? (
+        {columns ? (
           <CustomReactTable
-              height={fullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              isClientSideGrid = {true}
-              hideSelection={true}
-            />
-      ) : (
-        <Box height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+            height={fullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            isClientSideGrid={true}
+            hideSelection={true}
+          />
+        ) : (
+          <Box height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomDialogContent>
       {showManageQuotationDialog.open && (
         <ManageQuotationDialog
