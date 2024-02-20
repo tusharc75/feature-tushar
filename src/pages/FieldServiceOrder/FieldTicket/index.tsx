@@ -1,22 +1,22 @@
-import { Fragment, useState, useEffect, useContext } from 'react';
-import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
-import axiosInstance from 'src/axios/axiosInstance';
-import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import routes from 'src/components/Helpers/Routes';
-import { useData } from 'src/StateProvider/Provider';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import DeleteIcon from '@material-ui/icons/Delete';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 
 const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, handleChangeStatus }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,7 +26,6 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
   const { generateColumns } = useColumns();
 
   const [openDialog, setOpenDialog] = useState({ open: false, isClone: false, id: null });
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const {
@@ -46,7 +45,6 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
     axiosInstance()
       .get(`/field?resource=${sidebarResource.fieldTicket}`)
       .then(({ data: { data } }) => {
-
         const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
         newColumns?.forEach((o) => {
           if (o.accessor === 'fieldTicketNumber') {
@@ -161,7 +159,6 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorActionEl(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -228,74 +225,47 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
     )
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setOpenDialog({ open: true, isClone: false, id: null });
+          }}
+        >
+          {`Create ${routes.fieldTicket.title}`}
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorActionEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={!selectedRecords?.every((s) => s.canDelete)}
+          onClick={() => {
+            setShowDeleteConfirmBox(true);
+            setDeleteRecord(selectedRecords.map((d) => d._id));
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <Fragment>
-      <Box p={1} pb={2}>
-        <Grid container>
-          <Grid item xs={3} md={3} sm={3}>
-            {allowedToEdit && (
-              <Button
-                size="small"
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  setOpenDialog({ open: true, isClone: false, id: null });
-                }}
-                startIcon={<AddOutlined />}
-              >
-                {`Create ${routes.fieldTicket.title}`}
-              </Button>
-            )}
-          </Grid>
-          <Grid item xs={9} md={9} sm={9}>
-            <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedRecords.length === 0}
-                endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
-              >
-                Actions
-              </Button>
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorActionEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  disabled={!selectedRecords?.every((s) => s.canDelete)}
-                  onClick={() => {
-                    closeActions();
-                    setShowDeleteConfirmBox(true);
-                    setDeleteRecord(selectedRecords.map((d) => d._id));
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </Menu>
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={allowedToEdit}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+        hasXpadding
+      />
+
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 393px)'}

@@ -771,7 +771,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     return (
       <>
         <Autocomplete
-          className="max-w-[300px] min-w-[200px] md:min-w-[250px] lg:min-w-[300px]"
+          className="max-w-[400px] flex-grow min-w-[200px]"
           options={serviceOptions}
           getOptionLabel={(option) => option?.optionLabel || ''}
           size="small"

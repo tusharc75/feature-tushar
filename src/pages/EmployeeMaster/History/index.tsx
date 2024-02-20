@@ -12,6 +12,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import { Autocomplete } from '@material-ui/lab';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const TECHNICIAN_RESOURCE = [
   {
@@ -209,21 +210,12 @@ const History = ({ id }) => {
 
   return (
     <Box>
-      <div className={'flex justify-between align-items-center gap-1 w-full'}>
-        <Autocomplete
-          id="employeemaster-history"
-          style={{ width: '300px' }}
-          options={resourceList?.map((item) => item)}
-          renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
-          getOptionLabel={(option) => option?.title}
-          onChange={(e, val) => {
-            setSelectedResource(val);
-            dispatch({ type: 'pageChange', page: 0 });
-          }}
-          disableClearable={true}
-          value={selectedResource}
-        />
-      </div>
+      <DetailsPageHeader
+        isActionButtonVisible={false}
+        isAddButtonVisible={false}
+        leftSideContents={<LeftSideContents {...{ setSelectedResource, dispatch, selectedResource, resourceList }} />}
+        hasXpadding={false}
+      />
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 200px)'}
@@ -244,3 +236,24 @@ const History = ({ id }) => {
 };
 
 export default History;
+
+const LeftSideContents = ({ setSelectedResource, dispatch, selectedResource, resourceList }) => {
+  return (
+    <>
+      <Autocomplete
+        id="employeemaster-history"
+        className="max-w-[400px]"
+        fullWidth
+        options={resourceList?.map((item) => item)}
+        renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" fullWidth margin="none" size="small" required={true} />}
+        getOptionLabel={(option) => option?.title}
+        onChange={(e, val) => {
+          setSelectedResource(val);
+          dispatch({ type: 'pageChange', page: 0 });
+        }}
+        disableClearable={true}
+        value={selectedResource}
+      />
+    </>
+  );
+};

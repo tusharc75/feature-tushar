@@ -1,14 +1,15 @@
-import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useContext } from 'react';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { Grid } from '@material-ui/core';
+import Box from '@material-ui/core/Box/Box';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset } from 'src/constants/helpers';
 
 const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -105,36 +106,47 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
       }
     ];
     try {
-      await axiosInstance().post(`${routes.serializedAsset.path}/update-assets`, value).then(() => {
-        fetchData();
-      });
+      await axiosInstance()
+        .post(`${routes.serializedAsset.path}/update-assets`, value)
+        .then(() => {
+          fetchData();
+        });
     } catch (err) {
       toastConfig.setToastConfig(err);
     }
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        <ImportExportLinks
+          permissions={permissions?.packages}
+          module={routes.serializedAsset.title}
+          api={`${serializedAsset.api}/custom-template`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
+          onExportToExcelSuccess={() => {
+            fetchData();
+          }}
+          isDownloadExcel={false}
+          isBackgroundWhite={true}
+          additionalParams={`&filterById=${JSON.stringify([{ field: 'bulkAssetCreation', term: bulkAssetCreationData?._id }])}`}
+          small
+        />
+      </>
+    );
   };
 
   return (
     <>
       <Box display="flex" justifyContent="flex-end" m={1} alignItems="center">
         {allowedToEdit && (
-          <ImportExportLinks
-            permissions={permissions?.packages}
-            module={routes.serializedAsset.title}
-            api={`${serializedAsset.api}/custom-template`}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords?.length}
-            ids={selectedRecords?.map((obj) => obj._id)}
-            onExportToExcelSuccess={() => {
-              fetchData();
-            }}
-            isDownloadExcel={false}
-            isBackgroundWhite={true}
-            additionalParams={`&filterById=${JSON.stringify([{ field: 'bulkAssetCreation', term: bulkAssetCreationData?._id }])}`}
-          />
+          <DetailsPageHeader isActionButtonVisible={false} isAddButtonVisible={false} rightSideContents={rightSideContents()} hasXpadding />
         )}
       </Box>
       <Grid item xs={12} md={12} sm={12}>

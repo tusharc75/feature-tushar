@@ -188,7 +188,8 @@ const TableComponent = ({
         style={{
           display: 'block',
           overflow: loading ? 'hidden' : 'auto',
-          height: height ?? '100%'
+          height: height ?? '100%',
+          minHeight: 500
         }}
         className="border z-10 bg-[var(--dark-primary,_white)] isolate"
         ref={virtualization ? parentRef : undefined}

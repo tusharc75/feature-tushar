@@ -68,7 +68,7 @@ const DetailsPageHeader = ({
 
   return (
     <div className={`flex details-page-header flex-wrap justify-between items-center gap-2 py-2 ${hasXpadding ? 'px-2' : ''}`}>
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center flex-grow">
         {isAddButtonVisible ? (
           <>
             <HtmlTooltip title={addButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
@@ -139,7 +139,11 @@ const DetailsPageHeader = ({
               getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
-                horizontal: 'left'
+                horizontal: 'right'
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right'
               }}
               id="add-menu"
               open={Boolean(actionAnchorEl)}

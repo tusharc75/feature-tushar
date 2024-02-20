@@ -1,19 +1,19 @@
 import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageChartOfAccount from './ManageChartOfAccount';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import ManageChartOfAccount from './ManageChartOfAccount';
 
 const ChartOfAccountDetail = () => {
   const { id } = useParams();
@@ -74,7 +74,7 @@ const ChartOfAccountDetail = () => {
               type: 'success',
               message: data?.message
             });
-            history.push(`${routes.chartOfAccount.path}`)
+            history.push(`${routes.chartOfAccount.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);
@@ -97,7 +97,6 @@ const ChartOfAccountDetail = () => {
     setTabValue(newValue);
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -108,12 +107,8 @@ const ChartOfAccountDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.chartOfAccount?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
               {permissions?.chartOfAccount?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
@@ -122,7 +117,7 @@ const ChartOfAccountDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-      <Tabs
+        <Tabs
           className="new-tab-container-v1"
           value={tabValue}
           onChange={handleMainTabChange}
@@ -133,19 +128,19 @@ const ChartOfAccountDetail = () => {
             }
           }}
         >
-           <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          </Tabs>
-          {tabValue === 0 && (
-              <Box>
-                {loading || !fields?.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <DetailsPage data={chartOfAccountData} fields={fields} />
-                )}
-              </Box>
-          )}
+          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+        </Tabs>
+        {tabValue === 0 && (
+          <Box>
+            {loading || !fields?.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={chartOfAccountData} fields={fields} />
+            )}
+          </Box>
+        )}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
