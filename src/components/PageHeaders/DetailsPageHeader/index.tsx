@@ -4,6 +4,7 @@ import type { PreviewDownloadProps } from './PreviewDownload';
 import { Add, ExpandMore, TouchApp } from '@material-ui/icons';
 import PreviewDownload from './PreviewDownload';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import SendEmail, { SendEmailProps } from './sendEmail';
 
 type ButtonPropsWithTooltip = {
   tooltip?: string;
@@ -20,6 +21,7 @@ type DetailsPageHeaderProps = {
   leftSideContents?: ReactNode;
   rightSideContents?: ReactNode;
   hasXpadding?: boolean;
+  sendEmailProps?: SendEmailProps;
 };
 
 const DetailsPageHeader = ({
@@ -32,6 +34,7 @@ const DetailsPageHeader = ({
   previewDownloadProps,
   leftSideContents,
   rightSideContents,
+  sendEmailProps,
   hasXpadding = true
 }: DetailsPageHeaderProps) => {
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
@@ -65,7 +68,7 @@ const DetailsPageHeader = ({
 
   return (
     <div className={`flex details-page-header flex-wrap justify-between items-center gap-2 py-2 ${hasXpadding ? 'px-2' : ''}`}>
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center flex-grow">
         {isAddButtonVisible ? (
           <>
             <HtmlTooltip title={addButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
@@ -105,6 +108,7 @@ const DetailsPageHeader = ({
       </div>
       <div className="flex flex-wrap gap-2 items-center ml-auto">
         {previewDownloadProps ? <PreviewDownload {...previewDownloadProps} /> : null}
+        {sendEmailProps ? <SendEmail {...sendEmailProps} /> : null}
         {rightSideContents}
         {isActionButtonVisible ? (
           <>
@@ -135,7 +139,11 @@ const DetailsPageHeader = ({
               getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
-                horizontal: 'left'
+                horizontal: 'right'
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right'
               }}
               id="add-menu"
               open={Boolean(actionAnchorEl)}

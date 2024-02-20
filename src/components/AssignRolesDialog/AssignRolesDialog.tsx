@@ -4,7 +4,6 @@ import {
   CircularProgress,
   FormControl,
   FormControlLabel,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -18,8 +17,8 @@ import { roleTypes } from '../../constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import SearchBox from '../Helpers/SearchBox';
 import Loader from '../Loader';
+import { ListingPageHeader } from '../PageHeaders';
 
 const AssignRolesDialog = ({ rolesDialogOpen, onSuccess, handleCloseDialog, userIds, assignedRoles, isRenderedFromUserSetUp = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -97,6 +96,33 @@ const AssignRolesDialog = ({ rolesDialogOpen, onSuccess, handleCloseDialog, user
     setRoles(result);
   };
 
+  const leftSideContents = () => {
+    return (
+      <>
+        <FormControl component="fieldset">
+          <FormControlLabel
+            value="top"
+            className="m-0"
+            control={
+              <Checkbox
+                // edge="start"
+                onChange={(e) => {
+                  roles.forEach((data) => (data.isChecked = e.target.checked));
+                  setSelectedRoles(roles.filter((r) => r.isChecked).map((obj) => obj._id));
+                }}
+                checked={roles.every((x) => x.isChecked)}
+                inputProps={{
+                  'aria-labelledby': `checkbox-list-label-select-all`
+                }}
+              />
+            }
+            label="Select All"
+          />
+        </FormControl>
+      </>
+    );
+  };
+
   return (
     // <Dialog
     //   fullWidth
@@ -112,32 +138,15 @@ const AssignRolesDialog = ({ rolesDialogOpen, onSuccess, handleCloseDialog, user
           <Loader text="Loading Roles" />
         ) : rolesConst.length ? (
           <>
-            <Grid container>
-              <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-2">
-                <FormControl component="fieldset">
-                  <FormControlLabel
-                    value="top"
-                    control={
-                      <Checkbox
-                        // edge="start"
-                        onChange={(e) => {
-                          roles.forEach((data) => (data.isChecked = e.target.checked));
-                          setSelectedRoles(roles.filter((r) => r.isChecked).map((obj) => obj._id));
-                        }}
-                        checked={roles.every((x) => x.isChecked)}
-                        inputProps={{
-                          'aria-labelledby': `checkbox-list-label-select-all`
-                        }}
-                      />
-                    }
-                    label="Select All"
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6} sm={6} container justify="flex-end">
-                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              </Grid>
-            </Grid>
+            <ListingPageHeader
+              leftSideContents={leftSideContents()}
+              searchValue={search}
+              onSearch={handleSearch}
+              isActionButtonVisible={false}
+              isAddButtonVisible={false}
+              setQueryString={false}
+              synchronizeType={false}
+            />
             <List style={{ padding: 0 }}>
               {roles.map((role) => (
                 <ListItem divider key={role._id}>

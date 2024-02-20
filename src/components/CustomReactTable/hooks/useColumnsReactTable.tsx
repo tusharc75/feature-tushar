@@ -13,6 +13,7 @@ import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { isArray, isObject } from 'lodash';
 import InfoIcon from '@material-ui/icons/Info';
+import { getGridMetaDataFromLocalStorage } from '../utils';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -81,18 +82,16 @@ export const getStaticFields = () => {
 };
 
 export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
-  let data = localStorage.getItem('gridMetaData');
-  let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-  if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+  let gridMetaData = getGridMetaDataFromLocalStorage();
+  if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
     return gridMetaData[renderedFrom]?.hide?.indexOf(fieldName) >= 0 ? false : true;
   }
   return true;
 };
 
 export const checkStaticField = (renderedFrom, fieldData) => {
-  let data = localStorage.getItem('gridMetaData');
-  let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-  if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+  let gridMetaData = getGridMetaDataFromLocalStorage();
+  if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
     return {
       ...fieldData,
       show: gridMetaData[renderedFrom]?.hide?.indexOf(fieldData?.field) >= 0 ? false : true
@@ -134,11 +133,7 @@ export default function useColumns() {
     if (!currency) {
       currency = user?.user?.brandCurrency || 'USD';
     }
-    let data = localStorage.getItem('gridMetaData');
-    let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-    if (!gridMetaData) {
-      gridMetaData = {};
-    }
+    let gridMetaData = getGridMetaDataFromLocalStorage()
     let updatedTitle = camelCase(renderedFrom);
     const column = [];
 
@@ -153,7 +148,7 @@ export default function useColumns() {
         width: 200,
         type: field?.type,
         Header: headerName[field?.fieldName] ?? field?.fieldLabel,
-        show: gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
+        show: gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
         primaryField: field?.primaryField ?? false,
         decimalPlaces: field?.decimalPlaces || 0
       };
@@ -286,8 +281,8 @@ export default function useColumns() {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
               : isObject(original?.[field?.fieldName])
-              ? original?.[field?.fieldName]?.optionLabel
-              : original?.[field?.fieldName];
+                ? original?.[field?.fieldName]?.optionLabel
+                : original?.[field?.fieldName];
           },
           cell: ({ row }) => <DropdownCell permissions={permissions} permissionForLinks={permissionForLinks} field={field} original={row?.original} />
         });

@@ -1,38 +1,36 @@
-import React from 'react';
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, ListItemText, Tooltip, TextField } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
+import { Box, IconButton, MenuItem, TextField } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { MATERIAL_TYPE, rentalManagement } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { objectStore, findOne } from '../../../constants/indexdbhelper';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiChevronDown } from 'react-icons/bi';
-import { calculatePrice, calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
-import { startCase } from 'lodash';
+import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { Autocomplete } from '@material-ui/lab';
+import { startCase } from 'lodash';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
-import { ExpandMore } from '@material-ui/icons';
+import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
-import EditIcon from '@material-ui/icons/Edit';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import { calculatePrice, calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
+import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
+import { MATERIAL_TYPE, rentalManagement } from '../../../constants/helpers';
+import { findOne, objectStore } from '../../../constants/indexdbhelper';
+import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import Technicians from './Technicians';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { Autocomplete } from '@material-ui/lab';
-import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -53,7 +51,6 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
 
   const [tabValue, setTabValue] = useState(0);
   const [serviceOption, setServiceOption] = useState(null);
@@ -64,7 +61,6 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
-
 
   useEffect(() => {
     fetchFields();
@@ -84,13 +80,21 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
 
   const createColumns = () => {
     setColumns(null);
-    const data = [...allFields]
+    const data = [...allFields];
     if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
     }
-    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, rentalManagementData?.currency);
+    const newColumns = generateColumns(
+      renderedFrom,
+      data?.map((e) => {
+        return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
+      }),
+      null,
+      false,
+      rentalManagementData?.currency
+    );
     let column: any = [
       {
         accessor: 'index',
@@ -118,12 +122,12 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -226,8 +230,11 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
             </HtmlTooltip>
             {allowedToEdit || !quotationApproved ? (
               row.original.hideSelection ? (
-                <HtmlTooltip title={row.original.assetQty ? 'Asset is already assigned' :
-                  row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''}>
+                <HtmlTooltip
+                  title={
+                    row.original.assetQty ? 'Asset is already assigned' : row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''
+                  }
+                >
                   <span>
                     <IconButton size="small" aria-label="Details" disabled={true}>
                       <DeleteIcon fontSize="small" color={'disabled'} />
@@ -259,11 +266,11 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       }
     });
     setColumns(column);
-  }
+  };
 
   const fetchData = async () => {
     setNextStep(false);
-    setNextStepToolTip(null)
+    setNextStepToolTip(null);
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     try {
@@ -294,21 +301,21 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent.type === 'service'
-              ? parent?.serviceDetail?.serviceName
-              : parent?.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent?.packageDetail?.packageName;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-              ? parent?.productDetail?.productDescription || ''
-              : parent.type === 'package'
-                ? parent?.packageDetail?.packageDescription || ''
-                : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.qtyDisplay = parent.qty;
         parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
         if (!parent.isValid) {
-          nextStepMessage = rentalManagementMessage.validPrice
+          nextStepMessage = rentalManagementMessage.validPrice;
         }
         parent.assetQty = parent.serializedProduct
           ? inventory?.filter((e) => e._id === parent._id).length
@@ -316,16 +323,16 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
         parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent, isPriceRequired);
         if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
-          nextStepMessage = rentalManagementMessage.addServiceInPackage
+          nextStepMessage = rentalManagementMessage.addServiceInPackage;
         }
       });
 
       if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
         setNextStep(false);
-        setNextStepToolTip(nextStepMessage)
+        setNextStepToolTip(nextStepMessage);
       } else {
         setNextStep(true);
-        setNextStepToolTip(null)
+        setNextStepToolTip(null);
       }
       if (rows?.length === 0) {
         setNextStep(true);
@@ -333,14 +340,16 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
       dispatch({ type: 'loading', loading: false });
 
-      setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
-      ...rows?.map((s) => {
-        return {
-          optionLabel: s?.detail,
-          optionValue: s?.materialId,
-          _id: s?._id
-        };
-      })]);
+      setServiceOption([
+        { optionLabel: 'All', optionValue: 'All' },
+        ...rows?.map((s) => {
+          return {
+            optionLabel: s?.detail,
+            optionValue: s?.materialId,
+            _id: s?._id
+          };
+        })
+      ]);
       if (selectedServiceOption?.optionValue !== 'All' && !rows?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
         setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
       }
@@ -357,16 +366,16 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -495,17 +504,6 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
     setIsBulkEdit(false);
   };
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleDeleteMultiple = () => {
     const obj: any = [];
     const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
@@ -528,137 +526,101 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
     handleSaveData(rows);
   };
 
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        {permissions?.serviceMaster?.isRead && (
+          <MenuItem
+            onClick={() => {
+              setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
+            }}
+          >
+            Add Existing Services
+          </MenuItem>
+        )}
+        {permissions?.packages?.isRead && (
+          <MenuItem
+            onClick={() => {
+              setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+            }}
+          >
+            {`Add Existing Service Packages`}
+          </MenuItem>
+        )}
+        <MenuItem
+          onClick={() => {
+            setAddExistingProductDialog({ open: true, type: 'newService', parentId: null });
+          }}
+        >
+          Add New Service
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
+          }}
+        >
+          {`Add New Service Package`}
+        </MenuItem>
+      </>
+    );
   };
-
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
-  };
-
-
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <HtmlTooltip
+          title={Boolean(selectedRecords && selectedRecords.length) ? 'Bulk edit selected records' : 'Select records to edit'}
+          enterTouchDelay={0}
+          arrow
+          placement="top"
+        >
+          <MenuItem
+            onClick={() => {
+              setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+              setIsBulkEdit(true);
+            }}
+          >
+            Bulk Edit
+          </MenuItem>
+        </HtmlTooltip>
+        <HtmlTooltip
+          title={Boolean(selectedRecords && selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}
+          enterTouchDelay={0}
+          arrow
+          placement="top"
+        >
+          <MenuItem
+            disabled={isDeleting}
+            onClick={() => {
+              handleDeleteMultiple();
+            }}
+          >
+            Delete
+          </MenuItem>
+        </HtmlTooltip>
+      </>
+    );
+  };
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``}>
-            <span>
-              <Button
-                variant={'outlined'}
-                color="primary"
-                size="small"
-                startIcon={<Add />}
-                onClick={openAddActions}
-                disabled={!allowedToEdit || quotationApproved}
-                aria-controls="add-menu">
-                {'Add'}
-                <ExpandMore fontSize="small" />
-              </Button>
-            </span>
-          </HtmlTooltip>
-          <Menu
-            anchorEl={addAnchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="add-menu"
-            open={Boolean(addAnchorEl)}
-            onClose={closeAddActions}
-          >
-            {permissions?.serviceMaster?.isRead && (
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-                }}
-              >
-                Add Existing Services
-              </MenuItem>
-            )}
-            {permissions?.packages?.isRead && (
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                }}
-              >
-                {`Add Existing Service Packages`}
-              </MenuItem>
-            )}
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddExistingProductDialog({ open: true, type: 'newService', parentId: null });
-              }}
-            >
-              Add New Service
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
-              }}
-            >
-              {`Add New Service Package`}
-            </MenuItem>
-          </Menu>
-        </Box>
-        <Box display="flex" ml={1}>
-          <Button
-            variant={'outlined'}
-            color="primary"
-            size="small"
-            onClick={handleClick}
-            disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
-            endIcon={<BiChevronDown />}
-            className="new-dropdown-v1"
-          >
-            Actions
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            onClose={handleClose}
-          >
-            <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-              <MenuItem
-                onClick={() => {
-                  setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
-                  setIsBulkEdit(true);
-                  handleClose();
-                }}
-              >
-                Bulk Edit
-              </MenuItem>
-            </HtmlTooltip>
-            <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
-              <MenuItem
-                disabled={isDeleting}
-                onClick={() => {
-                  handleDeleteMultiple();
-                  handleClose();
-                }}
-              >
-                Delete
-              </MenuItem>
-            </HtmlTooltip>
-          </Menu>
-        </Box>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonMenuItems={addButtonMenuItems()}
+        addButtonProps={{
+          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``,
+          disabled: !allowedToEdit || quotationApproved
+        }}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
+        hasXpadding
+      />
+
       {columns ? (
         <CustomReactTable
           height={'300px'}
@@ -695,9 +657,9 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
               onChange={(_, val) => {
                 let value = val;
                 if (!val) {
-                  value = { optionLabel: 'All', optionValue: 'All' }
+                  value = { optionLabel: 'All', optionValue: 'All' };
                 }
-                setSelectedServiceOption(value)
+                setSelectedServiceOption(value);
               }}
               renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
             />
@@ -711,7 +673,8 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
                 allowedToEdit={allowedToEdit}
                 rentalManagementData={rentalManagementData}
                 selectedService={selectedServiceOption}
-                services={serviceOption} />
+                services={serviceOption}
+              />
             </TabPanel>
           </Box>
         </div>

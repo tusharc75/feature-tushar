@@ -316,13 +316,13 @@ const Steps = ({
           ? stepSubmitedData?.find((s) => s.stepId === ele?._id)?.status !== WORKORDER_SERVICE_STEP_STATUS.start
             ? false
             : ele?.fields?.some((_f) => _f?.required)
-            ? ele?.fields
+              ? ele?.fields
                 ?.filter((_f) => _f?.required)
                 ?.map((f) => f?.fieldName)
                 ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
-              ? true
-              : false
-            : true
+                ? true
+                : false
+              : true
           : ele.isAllowToPerform;
       });
     }
@@ -453,7 +453,7 @@ const Steps = ({
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: tempServiceData,
-          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate) : getObjKeys('', fieldsDataForCreate)
+          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, false, true) : getObjKeys('', fieldsDataForCreate)
         };
       }
     } else {
@@ -1197,7 +1197,7 @@ const Steps = ({
                                   disabled={!allowedToEdit}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
+                                    if (selectedService.status === WORKORDER_SERVICE_STATUS.pending || selectedService.status === WORKORDER_SERVICE_STATUS.completed) {
                                       updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
                                     }
                                     handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step, stepData);

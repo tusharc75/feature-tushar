@@ -1,21 +1,21 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Tabs, Tab } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ManageWarehouse from './ManageWarehouse';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import { BiEdit } from 'react-icons/bi';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { ACTIVITY_RESOURCE, warehouse } from 'src/constants/helpers';
+import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import ManageWarehouse from './ManageWarehouse';
 import StorageLocation from './StorageLocation';
 import Users from './Users';
 
@@ -77,7 +77,7 @@ const WarehouseDetailsPage = () => {
           .then(({ data }) => {
             setShowConfirmBox(false);
 
-            history.push(`${routes.warehouse.path}`)
+            history.push(`${routes.warehouse.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);
@@ -100,7 +100,6 @@ const WarehouseDetailsPage = () => {
     setTabValue(newValue);
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -118,7 +117,7 @@ const WarehouseDetailsPage = () => {
                     className={'btn-outline-v1'}
                     onClick={handleOpenUpdateDialog}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.warehouse?.isDelete && (
@@ -130,11 +129,7 @@ const WarehouseDetailsPage = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton 
-              referenceId={warehouseData?._id} 
-              resource={ACTIVITY_RESOURCE.warehouse} 
-              resourceLabel={warehouseData?.warehouseName}
-              />
+            <ActivityButton referenceId={warehouseData?._id} resource={ACTIVITY_RESOURCE.warehouse} resourceLabel={warehouseData?.warehouseName} />
           </Box>
         </Box>
       </Box>
@@ -151,7 +146,7 @@ const WarehouseDetailsPage = () => {
           }}
         >
           <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          {(permissions?.storageLocation?.isRead && user?.user?.brandPolicy?.storageLocation) && (
+          {permissions?.storageLocation?.isRead && user?.user?.brandPolicy?.storageLocation && (
             <Tab
               label={<div className="tab-font">{routes.storageLocation.title}</div>}
               value={1}
@@ -160,13 +155,9 @@ const WarehouseDetailsPage = () => {
               className={'tabLayout'}
             />
           )}
-          {user?.user?.brandPolicy?.warehouseAccessByUser &&
-            <Tab
-              label={<div className="tab-font">Users</div>}
-              value={2}
-              aria-controls="a11y-tabpanel-2"
-              id="a11y-tab-2" className={'tabLayout'} />
-          }
+          {user?.user?.brandPolicy?.warehouseAccessByUser && (
+            <Tab label={<div className="tab-font">Users</div>} value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className={'tabLayout'} />
+          )}
         </Tabs>
         {tabValue === 0 && (
           <Box>

@@ -326,17 +326,17 @@ const QuotationDetails = () => {
       .put(`${quotation.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.quotation.path}`)
+        history.push(`${routes.quotation.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setShowConfirmBox(false);
       });
   };
-  
+
   const handleConvert = () => {
     axiosInstance()
-    .post(`${quotation.api}/convert`,{quotationId:quotationData._id, versionId:currVersionId})
+      .post(`${quotation.api}/convert`, { quotationId: quotationData._id, versionId: currVersionId })
       .then(({ data: { data } }) => {
         fetchQuotationData();
         setConvertConfirmBox(false);
@@ -507,7 +507,7 @@ const QuotationDetails = () => {
                         closeActionsAction();
                       }}
                     >
-                      <CachedIcon fontSize='small' className="mr-2" />
+                      <CachedIcon fontSize="small" className="mr-2" />
                       Convert to {quotationData?.type || ''}
                     </MenuItem>
                   )}
@@ -615,10 +615,10 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-              <Box className={`md:-mt-[35px] md:static max-w-max ml-auto absolute right-0 pt-[5px]`}>
-                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-              </Box>
-            )}
+            <Box className={`md:-mt-[35px] md:static max-w-max ml-auto absolute right-0 pt-[5px]`}>
+              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+            </Box>
+          )}
           <div>
             <Steps
               isNextStep={false}
@@ -635,8 +635,8 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
-                    setCustomerAcceptable(true);
-                  }
+                      setCustomerAcceptable(true);
+                    }
                   : null
               }
             />

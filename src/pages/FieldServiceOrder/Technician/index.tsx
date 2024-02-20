@@ -1,23 +1,22 @@
-import React from 'react';
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
+import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { SERVICE_ORDER_STATUS, fieldServiceOrder } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiChevronDown } from 'react-icons/bi';
-import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { startCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import { SERVICE_ORDER_STATUS, fieldServiceOrder } from '../../../constants/helpers';
 
 const Technician = ({
   serviceOrderData,
@@ -273,96 +272,74 @@ const Technician = ({
     setDeleteData(obj);
   };
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+  const rightSideContents = () => {
+    return (
+      <>
+        <Button
+          variant="contained"
+          color="primary"
+          type="button"
+          size="small"
+          disabled={selectedRecords?.length === 1 ? false : true}
+          onClick={() => {
+            setAddEmployeeMasterDialog({ open: true, data: selectedRecords[0] });
+          }}
+        >
+          {`Assign Technician`}
+        </Button>
+      </>
+    );
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={isDeleting}
+          onClick={() => {
+            handleDeleteMultiple();
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <Fragment>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={12} sm={12}>
-          <Box display="flex" justifyContent="space-between" m={1} mb={0}>
-            <Box display="flex"></Box>
-            {allowedToEdit && (
-              <Box display="flex">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  type="button"
-                  size="small"
-                  disabled={selectedRecords?.length === 1 ? false : true}
-                  onClick={() => {
-                    setAddEmployeeMasterDialog({ open: true, data: selectedRecords[0] });
-                  }}
-                >
-                  {`Assign Technician`}
-                </Button>
-                <Box mx={isMobile ? 0.5 : 1} />
-                <Button
-                  variant={'outlined'}
-                  color="primary"
-                  size="small"
-                  onClick={handleClick}
-                  disabled={!Boolean(selectedRecords?.length && selectedRecords?.filter((e) => e.type === 'technician').length)}
-                  endIcon={<BiChevronDown />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={open}
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  onClose={handleClose}
-                >
-                  <MenuItem
-                    disabled={isDeleting}
-                    onClick={() => {
-                      handleDeleteMultiple();
-                      handleClose();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </Box>
-            )}
+      {allowedToEdit && (
+        <DetailsPageHeader
+          isAddButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: !Boolean(selectedRecords?.length && selectedRecords?.filter((e) => e.type === 'technician').length) }}
+          rightSideContents={rightSideContents()}
+          hasXpadding
+        />
+      )}
+      <>
+        {columns ? (
+          <Box zIndex={5}>
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              refreshGrid={fetchData}
+              hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              expander={true}
+            />
           </Box>
-        </Grid>
-        <Grid item xs={12} md={12} sm={12}>
-          {columns ? (
-            <Box zIndex={5}>
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                refreshGrid={fetchData}
-                hideSelection={!allowedToEdit}
-                hideAction={!allowedToEdit}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-                expander={true}
-              />
-            </Box>
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </Grid>
-      </Grid>
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </>
       {deleteData && (
         <ConfirmationDialog
           open={true}

@@ -36,7 +36,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => { },
+  onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -45,7 +45,8 @@ export default function ImportExportLinks({
   extraImportExportLinks = [],
   title = '',
   headers = null,
-  hideDefaultImportExport = false
+  hideDefaultImportExport = false,
+  small = false
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -137,7 +138,7 @@ export default function ImportExportLinks({
 
     if (additionalParams) {
       if (exportApi?.includes('?') && additionalParams?.includes('?')) {
-        additionalParams = additionalParams?.replace(`?`, `&`)
+        additionalParams = additionalParams?.replace(`?`, `&`);
       }
       exportApi = `${exportApi}${additionalParams}`;
     }
@@ -385,7 +386,7 @@ export default function ImportExportLinks({
                     handleOpenMenu(e, 'import');
                   }
                 }}
-                className={`new-headerbox-button-v1`}
+                className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
               >
                 {/* {extraImportExportLinks.length > 0 || ImportInput} */}
                 <span>Import from Excel</span>
@@ -402,7 +403,7 @@ export default function ImportExportLinks({
                 exportToExcel();
               }
             }}
-            className={`new-headerbox-button-v1`}
+            className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
           >
             <span>
               Export to Excel{' '}
@@ -421,7 +422,7 @@ export default function ImportExportLinks({
                     downloadTemplate();
                   }
                 }}
-                className={`new-headerbox-button-v1`}
+                className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
               >
                 <span>Download Template</span>
                 <DownloadIcon />

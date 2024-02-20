@@ -1,23 +1,21 @@
-import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useContext, Fragment } from 'react';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import Grid from '@material-ui/core/Grid/Grid';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from '../../../constants/helpers';
-import axiosInstance from '../../../axios/axiosInstance';
-import { isMobile, isTablet } from 'react-device-detect';
-import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
-import { camelCase, startCase } from 'lodash';
-import PreviewDownload from 'src/components/PreviewDownload';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { IconButton } from '@material-ui/core';
+import Box from '@material-ui/core/Box/Box';
+import Grid from '@material-ui/core/Grid/Grid';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import routes from 'src/components/Helpers/Routes';
+import { camelCase, startCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
+import { INVOICE_STATUS, invoice, sidebarResource } from '../../../constants/helpers';
 
 const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
-
-
   const renderedFrom = `${camelCase(routes?.invoice.title)}_Invoice`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -27,7 +25,10 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
   const { generateColumns } = useColumns();
 
   useEffect(() => {
-    if (statusOptions.findIndex((d) => d.optionLabel === INVOICE_STATUS.readyToInvoice) > statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)) {
+    if (
+      statusOptions.findIndex((d) => d.optionLabel === INVOICE_STATUS.readyToInvoice) >
+      statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)
+    ) {
       handleChangeStatus(INVOICE_STATUS.readyToInvoice);
     }
   }, []);
@@ -76,7 +77,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
               <div className="d-flex gap-2 align-items-center">
                 <p className="text-truncate">{row.original.detail}</p>
                 <IconButton
-                  size='small'
+                  size="small"
                   onClick={() => {
                     if (row.original.type === 'service') {
                       window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
@@ -103,7 +104,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
           Cell: ({ row }) => {
             return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
           }
-        },
+        }
       ];
       coloum = [...coloum, ...newColumns];
       setColumns(coloum);
@@ -114,7 +115,6 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
   };
 
   const fetchData = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -129,18 +129,18 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'package'
-            ? parent.packageDetail?.packageName
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail?.assetNumber
-              : parent.serviceDetail?.serviceName;
+          ? parent.packageDetail?.packageName
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription
-            : parent.type === 'serializedAsset'
-              ? parent?.serializedAssetDetail?.product?.productDescription
-              : parent?.serviceDetail?.serviceDescription;
+          ? parent?.packageDetail?.packageDescription
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.product?.productDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -156,50 +156,50 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.serializedAssetDetail.assetNumber
-              : _subRow.serviceDetail?.serviceName;
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail.assetNumber
+          : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow.type === 'serializedAsset'
-              ? parent.description
-              : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === 'serializedAsset'
+          ? parent.description
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
   };
 
+  const previewDownloadProps = {
+    fileName: `${routes.invoice.title}-${invoiceData?.invoiceNumber}`,
+    resource: sidebarResource.invoice,
+    referenceId: invoiceData?._id,
+    columns: columns,
+    isSendEmail: true,
+    defaultColumns: [
+      'type',
+      'detail',
+      'fieldTicket',
+      'qty',
+      'unit',
+      'pricingMethod',
+      'actualStartDate',
+      'actualEndDate',
+      `price_${invoiceData?.currency?.toLowerCase()}`,
+      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+      `taxPercentage`,
+      `tax_${invoiceData?.currency?.toLowerCase()}`,
+      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+    ]
+  };
+
   return (
     <Fragment>
-      <Box p={2}>
-        <PreviewDownload
-          fileName={`${routes.invoice.title}-${invoiceData?.invoiceNumber}`}
-          resource={sidebarResource.invoice}
-          referenceId={invoiceData?._id}
-          columns={columns}
-          isSendEmail={true}
-          defaultColumns={[
-            'type',
-            'detail',
-            'fieldTicket',
-            'qty',
-            'unit',
-            'pricingMethod',
-            'actualStartDate',
-            'actualEndDate',
-            `price_${invoiceData?.currency?.toLowerCase()}`,
-            `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
-            `taxPercentage`,
-            `tax_${invoiceData?.currency?.toLowerCase()}`,
-            `finalPrice_${invoiceData?.currency?.toLowerCase()}`
-          ]}
-        />
-      </Box>
+      <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} previewDownloadProps={previewDownloadProps} hasXpadding />
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <Box zIndex={5}>

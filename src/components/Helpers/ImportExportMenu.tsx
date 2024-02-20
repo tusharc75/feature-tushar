@@ -1,9 +1,11 @@
 import React, { useContext, useState } from 'react';
-import { Menu, MenuItem, Button } from '@material-ui/core';
+import { Menu, MenuItem, Button, useMediaQuery } from '@material-ui/core';
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { MdImportExport } from 'react-icons/md';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const ImportExportMenu = ({
   ids = [],
@@ -15,14 +17,14 @@ const ImportExportMenu = ({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => { },
+  onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
   title = '',
   ...others
 }) => {
-
+  const isMobile = useMediaQuery('(max-width:600px)');
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -78,7 +80,7 @@ const ImportExportMenu = ({
             });
             afterImportCompleted();
           }
-          handleClose()
+          handleClose();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -166,18 +168,30 @@ const ImportExportMenu = ({
 
   return (
     <>
-      <Button
-        onClick={(e) => handleClick(e)}
-        endIcon={<ArrowDropDownIcon />}
-        variant={'outlined'}
-        color="primary"
-        aria-controls="simple-menu"
-        aria-haspopup="true"
-        size="small"
-        {...others}
-      >
-        {`Import/Export ${title}`}
-      </Button>
+      <HtmlTooltip title={<>Import/Export {title}</>} placement="top" arrow enterTouchDelay={0}>
+        <span>
+          <Button
+            onClick={(e) => handleClick(e)}
+            endIcon={<ArrowDropDownIcon />}
+            variant={'outlined'}
+            color="primary"
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            className="min-h-[32px]"
+            size="small"
+            {...others}
+          >
+            {isMobile ? (
+              <>
+                <MdImportExport size={20} />
+                {` ${title}`}
+              </>
+            ) : (
+              <>Import/Export {title}</>
+            )}
+          </Button>
+        </span>
+      </HtmlTooltip>
       <Menu
         id="import-export-links"
         anchorEl={anchorEl}
@@ -194,23 +208,24 @@ const ImportExportMenu = ({
         }}
       >
         {permissions?.isCreate && !onlyExport && (
-          <MenuItem  >
-            <label htmlFor="importFromExcelMenu" style={{ cursor: "pointer" }}>
+          <MenuItem>
+            <label htmlFor="importFromExcelMenu" style={{ cursor: 'pointer' }}>
               {ImportInput}
               Import from Excel
             </label>
           </MenuItem>
         )}
-        {permissions?.isRead &&
+        {permissions?.isRead && (
           <MenuItem
             onClick={() => {
               exportToExcel();
               handleClose();
             }}
           >
-            Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
+            Export to Excel{' '}
+            {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
           </MenuItem>
-        }
+        )}
         {isDownloadExcel && !onlyExport && (
           <MenuItem
             onClick={() => {

@@ -1,30 +1,30 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Tabs, Tab } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
 import { camelCase } from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
+import { BiPackage } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu, BiPackage } from 'react-icons/bi';
+import { useHistory, useParams } from 'react-router-dom';
 
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-import { useData } from 'src/StateProvider/Provider';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { Edit } from '@material-ui/icons';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdMiscellaneousServices } from 'react-icons/md';
+import { RiShoppingBag3Fill } from 'react-icons/ri';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, packages } from 'src/constants/helpers';
-import ManagePackageDialog from './ManagePackageDialog';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
+import routes from 'src/components/Helpers/Routes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import { ACTIVITY_RESOURCE, packages } from 'src/constants/helpers';
+import LeadTimeMaster from '../../components/LeadTime';
+import ManagePackageDialog from './ManagePackageDialog';
+import Packages from './Packages';
 import Products from './Products';
 import Services from './Services';
-import Packages from './Packages';
-import LeadTimeMaster from '../../components/LeadTime';
-import { RiShoppingBag3Fill } from 'react-icons/ri';
-import { MdMiscellaneousServices } from 'react-icons/md';
-import { isMobile, isTablet } from 'react-device-detect';
-import ActivityButton from 'src/components/Activity/ActivityButton';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -121,7 +121,7 @@ const PackageDetails = () => {
       .put(`${packages.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.packages.path}`)
+        history.push(`${routes.packages.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -146,7 +146,7 @@ const PackageDetails = () => {
                     size="small"
                     onClick={handleOpenUpdateDialog}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.packages?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
@@ -154,11 +154,7 @@ const PackageDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton 
-              referenceId={packageData?._id} 
-              resource={ACTIVITY_RESOURCE.packages} 
-              resourceLabel={packageData?.packageName}
-              />
+            <ActivityButton referenceId={packageData?._id} resource={ACTIVITY_RESOURCE.packages} resourceLabel={packageData?.packageName} />
           </Box>
         </Box>
       </Box>

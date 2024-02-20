@@ -856,7 +856,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .main-container {
-  min-height: calc(100vh - 99px);
+  min-height: max(600px, calc(100vh - 99px));
   position: relative;
   overflow: auto;
   z-index: 1;
@@ -2747,6 +2747,9 @@ svg.MuiSvgIcon-root {
   font-size: 12px;
   line-height: 117%;
   padding: var(--padding, 7px 10px);
+  &.small {
+    padding: 7px 10px;
+  }
   background: #ffffff;
   border: 1px solid #e2e2e2;
   box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);

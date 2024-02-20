@@ -1116,7 +1116,7 @@ function App() {
             <PrivateRoute exact path={`${routes.triggerNotificationHistory.path}`}>
               <TriggerNotificationHistory />
             </PrivateRoute>
-            <PrivateRoute exact  path={routes.userAttendance.path}>
+            <PrivateRoute exact path={routes.userAttendance.path}>
               <UserAttendance />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
@@ -1131,6 +1131,7 @@ function App() {
             <Route path="*" component={NotFound} />
           </Switch>
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
+          <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
         </ErrorBoundaryComponent>
       </AnimatePresence>
       {toast?.toastConfig?.open &&

@@ -1,23 +1,21 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, Typography, IconButton } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { QUOTATION_STATUS } from '../../../constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
+import { Box, Button, IconButton, Typography, useMediaQuery } from '@material-ui/core';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase, orderBy, startCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 import { useData } from 'src/StateProvider/Provider';
-import { quotation } from '../../../constants/helpers';
-import Versions from 'src/pages/Quotation/Versions';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
-import { camelCase, orderBy, startCase } from 'lodash';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import SendEmail from 'src/pages/Quotation/SendEmail';
+import Versions from 'src/pages/Quotation/Versions';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import { QUOTATION_STATUS, quotation } from '../../../constants/helpers';
 
 const Quotation = ({
   rentalManagementData,
@@ -31,7 +29,7 @@ const Quotation = ({
   setCurrentVersion
 }) => {
   const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_quotation`;
-
+  const isMobile = useMediaQuery('(max-width:600px)');
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -94,7 +92,7 @@ const Quotation = ({
         Header: 'Type',
         disableFilters: true,
         disabled: true,
-        sticky: isMobile || isTablet ? 'none' : 'left',
+        sticky: isMobile ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (
@@ -105,12 +103,12 @@ const Quotation = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -122,7 +120,7 @@ const Quotation = ({
         minWidth: 300,
         width: 300,
         disabled: true,
-        sticky: isMobile || isTablet ? 'none' : 'left',
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p title={row.original.detail}>{row.original.detail}</p>
@@ -170,22 +168,23 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow?.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow?.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName
-        }`;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = parent?.qty * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -231,24 +230,25 @@ const Quotation = ({
     const rows = [...rowsMaterial, ...additionalCostData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.type === 'package'
-              ? parent.packageDetail?.packageName
-              : parent.detail
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.type === 'package'
+          ? parent.packageDetail?.packageName
+          : parent.detail
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent?.description;
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent?.description;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -294,176 +294,78 @@ const Quotation = ({
       });
   };
 
-  return (
-    <Fragment>
-      <Box
-        display="flex"
-        mx={1}
-        my={1}
-        // mb={2}
-        sx={{ flexWrap: isMobile ? 'wrap' : 'no-wrap', justifyContent: isMobile ? 'center' : 'space-between' }}
-        style={{ gap: '8px' }}
-      >
-        <Box display="flex">
-          <SendEmail
-            quotationData={quotationData}
-            versionId={quotationData?.versions[currentVersion]?._id}
-            currentVersion={currentVersion}
-            columns={columns}
-            setShowAllVersionStatus={setShowAllVersionStatus}
-            setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
-          />
-        </Box>
-        {isMobile ? (
+  const rightSideContents = () => {
+    return (
+      <>
+        {allowedToEdit && (
           <>
-            <Box display="flex">
-              {allowedToEdit && (
-                <div>
-                  {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                    quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
-                    <Button
-                      disabled={material
-                        .filter((e) => e.parentId === null)
-                        .some(
-                          (d) =>
-                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-                        )}
-                      onClick={handleSendToCustomer}
-                      variant="contained"
-                      size="small"
-                      color="primary"
-                    >
-                      Process Quotation
-                    </Button>
-                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                    <Button
-                      onClick={() => {
-                        setCustomerAcceptable(true);
-                      }}
-                      variant="contained"
-                      size="small"
-                      color="primary"
-                    >
-                      Accept / Reject
-                    </Button>
-                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                    <Button
-                      onClick={() => {
-                        cloneVersion();
-                      }}
-                      variant="contained"
-                      size="small"
-                      color="primary"
-                    >
-                      {`Clone Version-${currentVersion}`}
-                    </Button>
-                  ) : null}
-                </div>
-              )}
-            </Box>
-            <Box display="flex" sx={{ flexBasis: isMobile ? '100%' : '', justifyContent: isMobile ? 'center' : '' }}>
-              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
-                  <FcClock size={25} />
-                  <Typography style={{ color: '#00acc1', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
-                    Quotation has been sent to customer
-                  </Typography>
-                </div>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
-                  <FcOk size={25} />
-                  <Typography style={{ color: '#28a745', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
-                    Quotation has been accepted by customer
-                  </Typography>
-                </div>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
-                  <FcCancel size={25} />
-                  <Typography style={{ color: '#dc3545', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
-                    Quotation has been rejected by customer
-                  </Typography>
-                </div>
-              ) : null}
-            </Box>
-          </>
-        ) : (
-          <>
-            <Box display="flex" sx={{ flexBasis: isMobile ? '100%' : '', justifyContent: isMobile ? 'center' : '' }}>
-              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
-                  <FcClock size={25} />
-                  <Typography style={{ color: '#00acc1', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
-                    Quotation has been sent to customer
-                  </Typography>
-                </div>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
-                  <FcOk size={25} />
-                  <Typography style={{ color: '#28a745', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
-                    Quotation has been accepted by customer
-                  </Typography>
-                </div>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
-                  <FcCancel size={25} />
-                  <Typography style={{ color: '#dc3545', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
-                    Quotation has been rejected by customer
-                  </Typography>
-                </div>
-              ) : null}
-            </Box>
-            <Box display="flex">
-              {allowedToEdit && (
-                <div>
-                  {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                    quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
-                    <Button
-                      disabled={material
-                        .filter((e) => e.parentId === null)
-                        .some(
-                          (d) =>
-                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-                        )}
-                      onClick={handleSendToCustomer}
-                      variant="contained"
-                      size="small"
-                      color="primary"
-                    >
-                      Process Quotation
-                    </Button>
-                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                    <Button
-                      onClick={() => {
-                        setCustomerAcceptable(true);
-                      }}
-                      variant="contained"
-                      size="small"
-                      color="primary"
-                    >
-                      Accept / Reject
-                    </Button>
-                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                    <Button
-                      onClick={() => {
-                        cloneVersion();
-                      }}
-                      variant="contained"
-                      size="small"
-                      color="primary"
-                    >
-                      {`Clone Version-${currentVersion}`}
-                    </Button>
-                  ) : null}
-                </div>
-              )}
-            </Box>
+            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+            quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+              <Button
+                disabled={material
+                  .filter((e) => e.parentId === null)
+                  .some(
+                    (d) =>
+                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+                  )}
+                onClick={handleSendToCustomer}
+                variant="contained"
+                size="small"
+                color="primary"
+              >
+                Process Quotation
+              </Button>
+            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+              <Button
+                onClick={() => {
+                  setCustomerAcceptable(true);
+                }}
+                variant="contained"
+                size="small"
+                color="primary"
+              >
+                Accept / Reject
+              </Button>
+            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+              <Button
+                onClick={() => {
+                  cloneVersion();
+                }}
+                variant="contained"
+                size="small"
+                color="primary"
+              >
+                {`Clone Version-${currentVersion}`}
+              </Button>
+            ) : null}
           </>
         )}
-      </Box>
+      </>
+    );
+  };
+
+  const sendEmailProps = {
+    quotationData: quotationData,
+    versionId: quotationData?.versions[currentVersion]?._id,
+    currentVersion: currentVersion,
+    columns: columns,
+    setShowAllVersionStatus: setShowAllVersionStatus,
+    setShowQuotationSummaryDialog: setShowQuotationSummaryDialog
+  };
+
+  return (
+    <Fragment>
+      <RenderQuotationMessage {...{ quotationData, currentVersion, isMobile }} />
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={false}
+        rightSideContents={rightSideContents()}
+        hasXpadding
+        sendEmailProps={sendEmailProps}
+      />
+
       {columns ? (
         <Box zIndex={5}>
           <CustomReactTable
@@ -526,3 +428,40 @@ const Quotation = ({
 };
 
 export default Quotation;
+
+const RenderQuotationMessage = ({ quotationData, currentVersion, isMobile }) => {
+  return (
+    <>
+      <Box display="flex" sx={{ flexBasis: isMobile ? '100%' : '', justifyContent: 'center' }}>
+        <div className="d-flex align-items-center justify-content-center m-1 text-center">
+          <FcClock size={25} />
+          <Typography style={{ color: '#00acc1', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+            Quotation has been sent to customer
+          </Typography>
+        </div>
+        {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+          <div className="d-flex align-items-center justify-content-center m-1 text-center">
+            <FcClock size={25} />
+            <Typography style={{ color: '#00acc1', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+              Quotation has been sent to customer
+            </Typography>
+          </div>
+        ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+          <div className="d-flex align-items-center justify-content-center m-1 text-center">
+            <FcOk size={25} />
+            <Typography style={{ color: '#28a745', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+              Quotation has been accepted by customer
+            </Typography>
+          </div>
+        ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+          <div className="d-flex align-items-center justify-content-center m-1 text-center">
+            <FcCancel size={25} />
+            <Typography style={{ color: '#dc3545', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+              Quotation has been rejected by customer
+            </Typography>
+          </div>
+        ) : null}
+      </Box>
+    </>
+  );
+};

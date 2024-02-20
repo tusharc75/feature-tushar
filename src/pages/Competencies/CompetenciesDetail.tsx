@@ -1,17 +1,17 @@
-import { Box, Button, Grid, } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageCompetencies from './ManageCompetencies';
 
 const CompetenciesDetail = () => {
@@ -34,7 +34,6 @@ const CompetenciesDetail = () => {
       fetchData();
     }
   }, [id]);
-
 
   const fetchFields = async () => {
     axiosInstance()
@@ -73,7 +72,7 @@ const CompetenciesDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.competencies.path}`)
+          history.push(`${routes.competencies.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -91,7 +90,6 @@ const CompetenciesDetail = () => {
     setOpenUpdateDialog(false);
   };
 
- 
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -101,32 +99,26 @@ const CompetenciesDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.competencies?.isUpdate  && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              {permissions?.competencies?.isUpdate && (
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.competencies?.isDelete  && (
-                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-              )}
+              {permissions?.competencies?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
-      <Box>
-            {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={competenciesData} fields={fields} />
-            )}
-          </Box>
+        <Box>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={competenciesData} fields={fields} />
+          )}
+        </Box>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

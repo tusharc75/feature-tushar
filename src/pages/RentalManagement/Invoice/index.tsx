@@ -1,23 +1,22 @@
+import { IconButton } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useContext, Fragment } from 'react';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import Grid from '@material-ui/core/Grid/Grid';
-import { Button, IconButton } from '@material-ui/core';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { rentalManagement, RENTAL_STATUS, sidebarResource } from '../../../constants/helpers';
-import { useData } from '../../../StateProvider/Provider';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { objectStore, findOne } from '../../../constants/indexdbhelper';
-import AdditionalCostDialog from '../AdditionalCost/AdditionalCostDialog';
-import { fetch_rental_product_fields, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import PreviewDownload from 'src/components/PreviewDownload';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { isMobile, isTablet } from 'react-device-detect';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import routes from '../../../components/Helpers/Routes';
+import { fetch_rental_cost_fields, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { RENTAL_STATUS, rentalManagement, sidebarResource } from '../../../constants/helpers';
+import { findOne, objectStore } from '../../../constants/indexdbhelper';
+import AdditionalCostDialog from '../AdditionalCost/AdditionalCostDialog';
 
 const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFullScreen, allowedToEdit, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -88,12 +87,12 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                    ? row.original?.packageDetail.packageType === 'Product'
-                      ? '(Product)'
-                      : '(Service)'
-                    : row.original.type === 'service'
-                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                      : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                  : ''}
               </p>
             ) : (
               <NoDataCell />
@@ -181,10 +180,10 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
             item.type === 'product'
               ? item.productDetail?.productName
               : item.type === 'service'
-                ? item.serviceDetail?.serviceName
-                : item.type === 'package'
-                  ? item.packageDetail?.packageName
-                  : '';
+              ? item.serviceDetail?.serviceName
+              : item.type === 'package'
+              ? item.packageDetail?.packageName
+              : '';
           item.type = item.type;
           combinedData.push(item);
         }
@@ -203,20 +202,20 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
           parent.type === 'Add On'
             ? parent.detail
             : parent.type === 'product'
-              ? parent?.productDetail?.productName
-              : parent.type === 'service'
-                ? parent?.serviceDetail?.serviceName
-                : parent.packageDetail?.packageName;
+            ? parent?.productDetail?.productName
+            : parent.type === 'service'
+            ? parent?.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName;
         parent.description =
           parent?.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent?.type === 'product'
-              ? parent?.productDetail?.productDescription || ''
-              : parent?.type === 'package'
-                ? parent?.packageDetail?.packageDescription || ''
-                : parent.type === 'Add On'
-                  ? parent.description
-                  : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent?.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : parent.type === 'Add On'
+            ? parent.description
+            : '';
         parent.qty = parent.qty;
         parent.subRows = generateNestedData(material, inventory, parent);
       });
@@ -253,21 +252,21 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow?.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow?.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow?.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow?.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.qty = `${parent.qty * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
       subRows.push(_subRow);
     });
-    
+
     return subRows;
   };
 
@@ -283,73 +282,61 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
       });
   };
 
+  const previewDownloadProps = {
+    fileName: `${routes.rentalManagement.title}-${rentalManagementData?.rentalJobName}`,
+    resource: sidebarResource.rentalManagement,
+    referenceId: rentalManagementData._id,
+    columns: columns,
+    isSendEmail: true,
+    defaultColumns: [
+      'index',
+      'type',
+      'detail',
+      'description',
+      'qty',
+      'unit',
+      'inUseDays',
+      'standByDays',
+      'standByDaysNotChargeable',
+      `price_${rentalManagementData?.currency?.toLowerCase()}`,
+      `totalPrice_${rentalManagementData?.currency?.toLowerCase()}`,
+      `finalPrice_${rentalManagementData?.currency?.toLowerCase()}`
+    ]
+  };
   return (
     <>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center" gridGap={'8px'}>
-          {!isOffline && ![RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData.status) && allowedToEdit && (
-            <Fragment>
-              <Button
-                variant="outlined"
-                className="btn-outline-v1"
-                size="small"
-                disabled={isOffline}
-                onClick={() => {
-                  setShowCostDialog(true);
-                }}
-              >
-                Add
-              </Button>
-            </Fragment>
-          )}
-          <PreviewDownload
-            fileName={`${routes.rentalManagement.title}-${rentalManagementData?.rentalJobName}`}
-            resource={sidebarResource.rentalManagement}
-            referenceId={rentalManagementData._id}
+      <DetailsPageHeader
+        isActionButtonVisible={false}
+        isAddButtonVisible={!isOffline && ![RENTAL_STATUS.invoiced, RENTAL_STATUS.closed].includes(rentalManagementData.status) && allowedToEdit}
+        addButtonProps={{
+          onClick: () => {
+            setShowCostDialog(true);
+          }
+        }}
+        previewDownloadProps={previewDownloadProps}
+      />
+
+      {columns ? (
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
-            isSendEmail={true}
-            defaultColumns={[
-              'index',
-              'type',
-              'detail',
-              'description',
-              'qty',
-              'unit',
-              'inUseDays',
-              'standByDays',
-              'standByDaysNotChargeable',
-              `price_${rentalManagementData?.currency?.toLowerCase()}`,
-              `totalPrice_${rentalManagementData?.currency?.toLowerCase()}`,
-              `finalPrice_${rentalManagementData?.currency?.toLowerCase()}`
-            ]}
+            state={state}
+            dispatch={dispatch}
+            setWholeRowsCellColor={() => {}}
+            refreshGrid={fetchData}
+            hideSelection={true}
+            hideAction={true}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            expander={true}
           />
         </Box>
-      </Box>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={12} sm={12}>
-          {columns ? (
-            <Box zIndex={5} width={'100%'} >
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                setWholeRowsCellColor={() => { }}
-                refreshGrid={fetchData}
-                hideSelection={true}
-                hideAction={true}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-                expander={true}
-              />
-            </Box>
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </Grid>
-      </Grid>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
       {showCostDialog && (
         <AdditionalCostDialog
           onClose={() => {
