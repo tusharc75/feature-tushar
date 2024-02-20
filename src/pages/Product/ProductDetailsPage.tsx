@@ -361,6 +361,7 @@ const ProductDetailsPage = () => {
         </Tabs>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
+            {console.log(tabValue)}
             {tabValue === 0 && (
               <Box>
                 {loading || !productFields.length ? (
