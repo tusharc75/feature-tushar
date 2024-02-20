@@ -139,7 +139,11 @@ const DetailsPageHeader = ({
               getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: 'bottom',
-                horizontal: 'left'
+                horizontal: 'right'
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right'
               }}
               id="add-menu"
               open={Boolean(actionAnchorEl)}
