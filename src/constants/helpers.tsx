@@ -968,7 +968,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
   return obj;
 };
 
-export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false) => {
+export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, defaultCurrentDate: boolean = false) => {
   const obj = {};
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
@@ -1028,12 +1028,16 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
+      } else if (defaultCurrentDate) {
+        obj[key.fieldName] = new Date();
       }
     } else if (key.type === 'date') {
       if (isClone) {
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
+      } else if (defaultCurrentDate) {
+        obj[key.fieldName] = new Date();
       }
     } else if (key.type === 'lookUpDisplay') {
     } else {
