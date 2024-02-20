@@ -1,20 +1,18 @@
 import { Box, Button, Grid } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageDynamicForm from './ManageDynamicForm';
-import { camelCase, startCase } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
+import { camelCase, startCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import ManageDynamicForm from './ManageDynamicForm';
 
 const DynamicFormDetail = () => {
   const { route, id } = useParams();

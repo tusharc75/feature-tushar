@@ -1,42 +1,36 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, useMediaQuery, Tab, Tabs, Menu, MenuItem } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-  fieldServiceOrder,
-  ACTIVITY_RESOURCE,
-  serviceOrderSteps,
-  SERVICE_ORDER_STATUS,
-  sidebarResource,
-} from '../../constants/helpers';
-import queryString from 'query-string';
-import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import { RiFlowChart } from 'react-icons/ri';
-import TabPanel from '../../components/TabPanel';
-import { isMobile, isTablet } from 'react-device-detect';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { camelCase } from 'lodash';
-import ManageServiceOrderDialog from './ManageServiceOrder';
-import Steps from 'src/components/Steps';
+import queryString from 'query-string';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from 'react-icons/fa';
+import { RiFlowChart } from 'react-icons/ri';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import Services from './Services';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import Steps from 'src/components/Steps';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
+import { ACTIVITY_RESOURCE, SERVICE_ORDER_STATUS, fieldServiceOrder, serviceOrderSteps, sidebarResource } from '../../constants/helpers';
+import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
+import FieldTicket from './FieldTicket';
+import ManageServiceOrderDialog from './ManageServiceOrder';
 import Products from './Products';
+import ServiceOrderViews from './RoadMapViews';
+import Services from './Services';
 import Technician from './Technician';
 import TechnicianDispatch from './TechnicianDispatch';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ServiceOrderViews from './RoadMapViews';
-import FieldTicket from './FieldTicket';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
-import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -126,7 +120,12 @@ const ServiceOrderDetailsPage = () => {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
-      setAllowedToDelete(permissions?.fieldServiceOrder?.isDelete && data.owner.optionValue === user?.user?._id && data.canDelete && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
+      setAllowedToDelete(
+        permissions?.fieldServiceOrder?.isDelete &&
+          data.owner.optionValue === user?.user?._id &&
+          data.canDelete &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+      );
       setServiceOrderData(data);
       setCurrentStep(steps.map((s) => s.name).indexOf(data?.processStatus) !== -1 ? steps.map((s) => s.name).indexOf(data?.processStatus) : 0);
     } catch (error) {
@@ -141,7 +140,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const getServiceOrderFields = async () => {
@@ -175,7 +174,7 @@ const ServiceOrderDetailsPage = () => {
       .put(`${fieldServiceOrder.api}/remove`, { ids: [serviceOrderData._id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.fieldServiceOrder.path}`)
+        history.push(`${routes.fieldServiceOrder.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -214,7 +213,7 @@ const ServiceOrderDetailsPage = () => {
                 color="default"
                 size="small"
                 onClick={() => {
-                  setShowClosedConfirmBox(true)
+                  setShowClosedConfirmBox(true);
                 }}
                 className={'btn-outline-v1'}
               >
@@ -229,13 +228,10 @@ const ServiceOrderDetailsPage = () => {
                 disabled={!allowedToEdit}
                 onClick={handleOpenUpdateDialog}
               >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             </Fragment>
-            <DeleteButton
-              text="Delete"
-              disabled={!allowedToDelete}
-              onClick={() => setShowConfirmBox(true)} />
+            <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
             <ActivityButton
               referenceId={serviceOrderData?._id}
               resource={ACTIVITY_RESOURCE.fieldServiceOrder}
@@ -315,7 +311,8 @@ const ServiceOrderDetailsPage = () => {
                 setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-0`}
                 allowedToEdit={allowedToEdit}
-                handleChangeStatus={handleChangeStatus} />
+                handleChangeStatus={handleChangeStatus}
+              />
             )}
             {steps[currentStep]?.name === serviceOrderSteps[1]?.name && serviceOrderData && (
               <Services
@@ -366,11 +363,7 @@ const ServiceOrderDetailsPage = () => {
               />
             )}
             {steps[currentStep]?.name === serviceOrderSteps[6]?.name && serviceOrderData && (
-              <Invoices
-                resourceId={serviceOrderData?._id}
-                resource={sidebarResource.fieldTicket}
-                invoiceFieldName='fieldServiceOrder'
-              />
+              <Invoices resourceId={serviceOrderData?._id} resource={sidebarResource.fieldTicket} invoiceFieldName="fieldServiceOrder" />
             )}
           </ContentFullScreen>
         </TabPanel>
@@ -396,7 +389,7 @@ const ServiceOrderDetailsPage = () => {
             setShowClosedConfirmBox(false);
           }}
           onOk={() => {
-            handleChangeStatus(SERVICE_ORDER_STATUS.closed)
+            handleChangeStatus(SERVICE_ORDER_STATUS.closed);
           }}
         />
       )}

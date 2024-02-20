@@ -1,17 +1,18 @@
-import { Box, Button, Grid, Menu, MenuItem, Tab, Tabs } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -22,12 +23,11 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import Steps, { getIndex } from 'src/components/Steps';
 import TabPanel from 'src/components/TabPanel';
 import { ACTIVITY_RESOURCE, PRODUCTION_ORDER_STATUS, productionOrder, productionOrderSteps, sidebarResource } from 'src/constants/helpers';
+import Invoice from './Invoice';
+import LoadingTicket from './LoadingTicket';
 import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
-import LoadingTicket from './LoadingTicket';
-import Invoice from './Invoice';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 function a11yProps(index: any) {
   return {
@@ -117,7 +117,7 @@ const ProductionOrderDetails = () => {
     axiosInstance()
       .get(`${routes.productionOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        const tempStepList = productionOrderSteps.filter((o) => o.name !== 'Loading Ticket')
+        const tempStepList = productionOrderSteps.filter((o) => o.name !== 'Loading Ticket');
         setProductionOrderProcessSteps(tempStepList);
         if (data?.status === PRODUCTION_ORDER_STATUS.completed) {
           setCurrentStep(tempStepList?.length - 1);
@@ -167,7 +167,7 @@ const ProductionOrderDetails = () => {
       .then(({ data }) => {
         fetchProductionOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const updateOrderStatus = (status) => {
@@ -220,7 +220,7 @@ const ProductionOrderDetails = () => {
                     size="small"
                     onClick={() => setOpenUpdateDialog(true)}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.productionOrder?.isDelete && allowedToDelete && productionOrderData?.canDelete && (
@@ -292,20 +292,20 @@ const ProductionOrderDetails = () => {
             handleNext={
               productionOrderProcessStepsNames[currentStep] === 'Add'
                 ? () => {
-                  axiosInstance()
-                    .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
-                    .then(({ data: { data } }) => {
-                      if (data) {
-                        setCurrentStep((prevStep) => {
-                          const newStep = prevStep + 1;
-                          return newStep;
-                        });
-                      }
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                    });
-                }
+                    axiosInstance()
+                      .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
+                      .then(({ data: { data } }) => {
+                        if (data) {
+                          setCurrentStep((prevStep) => {
+                            const newStep = prevStep + 1;
+                            return newStep;
+                          });
+                        }
+                      })
+                      .catch((err) => {
+                        toastConfig.setToastConfig(err);
+                      });
+                  }
                 : null
             }
           />

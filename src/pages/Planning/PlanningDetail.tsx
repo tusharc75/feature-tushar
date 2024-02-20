@@ -1,24 +1,25 @@
 import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import TabPanel from '../../components/TabPanel';
-import Material from './Material';
+import { Edit } from '@material-ui/icons';
 import { camelCase } from 'lodash';
-import ManagePlanning from './ManagePlanning';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import { ACTIVITY_RESOURCE, PLANNING_STATUS } from 'src/constants/helpers';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import routes from 'src/components/Helpers/Routes';
+import { ACTIVITY_RESOURCE, PLANNING_STATUS } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
+import ManagePlanning from './ManagePlanning';
+import Material from './Material';
 
 const PlanningDetail = () => {
   const renderedFrom = camelCase(routes?.planning.title);
@@ -26,7 +27,9 @@ const PlanningDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { state: { permissions, user } }: any = useData();
+  const {
+    state: { permissions, user }
+  }: any = useData();
 
   const [planningData, setPlanningData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -90,7 +93,7 @@ const PlanningDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.planning.path}`)
+          history.push(`${routes.planning.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -142,28 +145,22 @@ const PlanningDetail = () => {
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   className="btn-outline-v1"
-                  onClick={() => { setShowConverConfirmBox(true) }}
+                  onClick={() => {
+                    setShowConverConfirmBox(true);
+                  }}
                 >
                   {'Convert'}
                 </Button>
               )}
               {permissions?.planning?.isUpdate && allowedToEdit && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
               {permissions?.planning?.isDelete && allowedToDelete && planningData?.canDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
-              <ActivityButton
-                referenceId={planningData?._id}
-                resource={ACTIVITY_RESOURCE.planning}
-                resourceLabel={planningData?.planningNumber}
-              />
+              <ActivityButton referenceId={planningData?._id} resource={ACTIVITY_RESOURCE.planning} resourceLabel={planningData?.planningNumber} />
             </>
           </Box>
         </Box>
@@ -239,7 +236,9 @@ const PlanningDetail = () => {
         <ConfirmationDialog
           open={true}
           message={`Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
-          onClose={() => { setShowConverConfirmBox(false) }}
+          onClose={() => {
+            setShowConverConfirmBox(false);
+          }}
           onOk={handleConvert}
         />
       )}

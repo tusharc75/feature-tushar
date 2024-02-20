@@ -1,21 +1,21 @@
-import { Box, Button, Grid, Menu, MenuItem, Paper, Tab, Tabs, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageCompetencyType from './ManageCompetencyType';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
 import Competencies from './Competencies';
+import ManageCompetencyType from './ManageCompetencyType';
 
 const CompetencyMasterDetail = () => {
   const { id } = useParams();
@@ -77,7 +77,7 @@ const CompetencyMasterDetail = () => {
               type: 'success',
               message: data?.message
             });
-            history.push(`${routes.competencyType.path}`)
+            history.push(`${routes.competencyType.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);
@@ -100,7 +100,6 @@ const CompetencyMasterDetail = () => {
     setTabValue(newValue);
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -111,26 +110,22 @@ const CompetencyMasterDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.competencyType?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
               {permissions?.competencyType?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
-            <ActivityButton 
-              referenceId={competencyMasterData?._id} 
-              resource={ACTIVITY_RESOURCE.competencyType} 
+            <ActivityButton
+              referenceId={competencyMasterData?._id}
+              resource={ACTIVITY_RESOURCE.competencyType}
               resourceLabel={competencyMasterData?.competencyType}
-              />
+            />
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
-      <Tabs
+        <Tabs
           className="new-tab-container-v1"
           value={tabValue}
           onChange={handleMainTabChange}
@@ -141,7 +136,7 @@ const CompetencyMasterDetail = () => {
             }
           }}
         >
-           <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
           {permissions?.competencies?.isRead && (
             <Tab
               label={<div className="tab-font">{routes?.competencies.title}</div>}
@@ -151,20 +146,19 @@ const CompetencyMasterDetail = () => {
               className={'tabLayout'}
             />
           )}
-          </Tabs>
-          {tabValue === 0 && (
-              <Box>
-                {loading || !fields?.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <DetailsPage data={competencyMasterData} fields={fields} />
-                )}
-              </Box>
-          )}
-          {tabValue === 1 && <Competencies competencyType={id} />}
-        
+        </Tabs>
+        {tabValue === 0 && (
+          <Box>
+            {loading || !fields?.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={competencyMasterData} fields={fields} />
+            )}
+          </Box>
+        )}
+        {tabValue === 1 && <Competencies competencyType={id} />}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

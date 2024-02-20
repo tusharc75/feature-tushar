@@ -1,8 +1,8 @@
 import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -138,7 +138,7 @@ const LeadTimeMasterDetails = () => {
                   size="small"
                   onClick={handleOpenUpdateDialog}
                 >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
               {permissions?.leadTimeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

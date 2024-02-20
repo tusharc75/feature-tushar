@@ -1,21 +1,20 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, sidebarResource } from '../../constants/helpers';
-import { BiEdit } from 'react-icons/bi';
+import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import { Skeleton } from '@material-ui/lab';
-import ManageMarketSegmentDialog from './ManageMarketSegmentDialog';
+import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { ACTIVITY_RESOURCE, sidebarResource } from '../../constants/helpers';
+import ManageMarketSegmentDialog from './ManageMarketSegmentDialog';
 
 const MarketSegmentDetail = () => {
   const { id } = useParams();
@@ -76,7 +75,7 @@ const MarketSegmentDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.marketSegment.path}`)
+          history.push(`${routes.marketSegment.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -102,24 +101,20 @@ const MarketSegmentDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.marketSegment?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    className={'btn-outline-v1'}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.marketSegment?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
-              <ActivityButton 
-                referenceId={marketSegmentData?._id} 
-                resource={ACTIVITY_RESOURCE.marketSegment} 
-                resourceLabel={marketSegmentData?.name}
-                />
+            <>
+              {permissions?.marketSegment?.isUpdate && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  size="small"
+                  onClick={handleOpenUpdateDialog}
+                  className={'btn-outline-v1'}
+                >
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.marketSegment?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </>
+            <ActivityButton referenceId={marketSegmentData?._id} resource={ACTIVITY_RESOURCE.marketSegment} resourceLabel={marketSegmentData?.name} />
           </Box>
         </Box>
       </Box>

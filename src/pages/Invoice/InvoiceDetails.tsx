@@ -1,36 +1,36 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Tabs, Tab, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { invoice, invoiceProcessSteps, ACTIVITY_RESOURCE, INVOICE_STATUS, CHILD_RESOURCE, sidebarResource } from '../../constants/helpers';
-import ManageInvoiceDialog from './ManageInvoiceDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import TabPanel from '../../components/TabPanel';
-import queryString from 'query-string';
-import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import Steps, { getIndex } from 'src/components/Steps';
-import Material from './Material';
-import AdditionalCost from './AdditionalCost';
-import Invoice from './Invoice';
-import { isMobile, isTablet } from 'react-device-detect';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GrStatusInfo, VscVersions } from 'react-icons/all';
 import { camelCase } from 'lodash';
-import ContentFullScreen from 'src/components/ContentFullScreen';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import Versions from 'src/components/Versions';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import queryString from 'query-string';
+import React, { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { VscVersions } from 'react-icons/all';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from 'react-icons/fa';
 import { IoMdDownload } from 'react-icons/io';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import Steps, { getIndex } from 'src/components/Steps';
+import Versions from 'src/components/Versions';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, INVOICE_STATUS, invoice, invoiceProcessSteps, sidebarResource } from '../../constants/helpers';
+import AdditionalCost from './AdditionalCost';
 import CreditMemo from './CreditMemo';
+import Invoice from './Invoice';
+import ManageInvoiceDialog from './ManageInvoiceDialog';
+import Material from './Material';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -59,7 +59,6 @@ const InvoiceDetails = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [versionDialog, setVersionDialog] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
 
@@ -95,7 +94,7 @@ const InvoiceDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -124,8 +123,7 @@ const InvoiceDetails = () => {
       data = response?.data?.data;
       if ([INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(data?.status)) {
         setCurrentStep(invoiceProcessSteps?.length - 1);
-      }
-      else {
+      } else {
         setCurrentStep(getIndex(data?.processStatus, invoiceProcessSteps));
       }
       setHeadingLabel(data.invoiceNumber);
@@ -172,7 +170,7 @@ const InvoiceDetails = () => {
         const link = document.createElement('a');
         link.href = url;
 
-        const filename = response.headers["content-disposition"].split("filename=")[1];
+        const filename = response.headers['content-disposition'].split('filename=')[1];
         link.setAttribute('download', filename);
 
         document.body.appendChild(link);
@@ -190,7 +188,7 @@ const InvoiceDetails = () => {
       .patch(`${invoice.api}/status/${invoiceData._id}`, { status: status })
       .then(({ data: { data } }) => {
         fetchInvoiceData();
-        setShowClosedConfirmBox(false)
+        setShowClosedConfirmBox(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -225,22 +223,23 @@ const InvoiceDetails = () => {
                 >
                   {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
                 </Button>
-                {invoiceData?.versions?.length &&
+                {invoiceData?.versions?.length && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="primary"
                     size="small"
                     className={'btn-outline-v1'}
                     onClick={() => {
-                      setVersionDialog(true)
+                      setVersionDialog(true);
                     }}
                     style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                     startIcon={isMobile && !isTablet ? null : <VscVersions />}
                   >
                     {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
                   </Button>
-                }
-                {permissions?.invoice?.isUpdate && allowedToEdit &&
+                )}
+                {permissions?.invoice?.isUpdate &&
+                  allowedToEdit &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -248,7 +247,7 @@ const InvoiceDetails = () => {
                       size="small"
                       onClick={handleOpenUpdateDialog}
                     >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
                     </Button>
                   )}
                 {permissions?.invoice?.isDelete && invoiceData?.canDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
@@ -258,7 +257,7 @@ const InvoiceDetails = () => {
                     color="default"
                     size="small"
                     onClick={() => {
-                      setShowClosedConfirmBox(true)
+                      setShowClosedConfirmBox(true);
                     }}
                     className={'btn-outline-v1'}
                   >
@@ -269,11 +268,7 @@ const InvoiceDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton
-              referenceId={invoiceData?._id}
-              resource={ACTIVITY_RESOURCE.invoice}
-              resourceLabel={invoiceData?.invoiceNumber}
-            />
+            <ActivityButton referenceId={invoiceData?._id} resource={ACTIVITY_RESOURCE.invoice} resourceLabel={invoiceData?.invoiceNumber} />
           </Box>
         </Box>
       </Box>
@@ -307,7 +302,7 @@ const InvoiceDetails = () => {
             }
             {...a11yProps(1)}
           />
-          {permissions?.creditMemo?.isRead &&
+          {permissions?.creditMemo?.isRead && (
             <Tab
               className={'tabLayout'}
               label={
@@ -317,7 +312,7 @@ const InvoiceDetails = () => {
               }
               {...a11yProps(2)}
             />
-          }
+          )}
         </Tabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -334,46 +329,46 @@ const InvoiceDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-        <Grid item xs={12} sm={12} md={12} lg={12}> 
-          {invoiceData ? (
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-              <Steps
-                isNextStep={false}
-                nextStep={nextStep}
-                steps={invoiceProcessSteps}
-                currentStep={currentStep}
-                setCurrentStep={setCurrentStep}
-                isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
-              />
-              <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                {currentStep === 0 && invoiceData && (
-                  <Material
-                    invoiceData={invoiceData}
-                    fetchInvoiceData={fetchInvoiceData}
-                    setNextStep={setNextStep}
-                    stepFullScreen={stepFullScreen}
-                    allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}
-                  />
-                )}
-                {currentStep === 1 && invoiceData && (
-                  <AdditionalCost invoiceData={invoiceData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
-                )}
-                {currentStep === 2 && invoiceData && (
-                  <Invoice
-                    invoiceData={invoiceData}
-                    setNextStep={setNextStep}
-                    handleChangeStatus={handleChangeStatus}
-                    stepFullScreen={stepFullScreen}
-                    statusOptions={statusOptions}
-                  />
-                )}
-              </ContentFullScreen>
-            </Grid>
-          ) : (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
-          )}
+          <Grid item xs={12} sm={12} md={12} lg={12}>
+            {invoiceData ? (
+              <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Steps
+                  isNextStep={false}
+                  nextStep={nextStep}
+                  steps={invoiceProcessSteps}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
+                />
+                <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                  {currentStep === 0 && invoiceData && (
+                    <Material
+                      invoiceData={invoiceData}
+                      fetchInvoiceData={fetchInvoiceData}
+                      setNextStep={setNextStep}
+                      stepFullScreen={stepFullScreen}
+                      allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}
+                    />
+                  )}
+                  {currentStep === 1 && invoiceData && (
+                    <AdditionalCost invoiceData={invoiceData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
+                  )}
+                  {currentStep === 2 && invoiceData && (
+                    <Invoice
+                      invoiceData={invoiceData}
+                      setNextStep={setNextStep}
+                      handleChangeStatus={handleChangeStatus}
+                      stepFullScreen={stepFullScreen}
+                      statusOptions={statusOptions}
+                    />
+                  )}
+                </ContentFullScreen>
+              </Grid>
+            ) : (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            )}
           </Grid>
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
@@ -401,7 +396,7 @@ const InvoiceDetails = () => {
             setShowClosedConfirmBox(false);
           }}
           onOk={() => {
-            handleChangeStatus(INVOICE_STATUS.closed)
+            handleChangeStatus(INVOICE_STATUS.closed);
           }}
         />
       )}
@@ -430,7 +425,7 @@ const InvoiceDetails = () => {
           versions={invoiceData?.versions}
           renderedFrom={`${renderedFrom}_versions`}
           handleClose={() => {
-            setVersionDialog(false)
+            setVersionDialog(false);
           }}
         />
       )}

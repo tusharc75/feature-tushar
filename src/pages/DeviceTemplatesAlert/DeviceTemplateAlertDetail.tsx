@@ -1,19 +1,19 @@
-import { Box, Button, Grid, } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageDeviceTemplateAlert from './ManageDeviceTemplateAlert';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import ManageDeviceTemplateAlert from './ManageDeviceTemplateAlert';
 
 const DeviceTemplateAlertDetail = () => {
   const { id } = useParams();
@@ -35,7 +35,6 @@ const DeviceTemplateAlertDetail = () => {
       fetchData();
     }
   }, [id]);
-
 
   const fetchFields = async () => {
     axiosInstance()
@@ -74,7 +73,7 @@ const DeviceTemplateAlertDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.deviceTemplateAlert.path}`)
+          history.push(`${routes.deviceTemplateAlert.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -92,7 +91,6 @@ const DeviceTemplateAlertDetail = () => {
     setOpenUpdateDialog(false);
   };
 
- 
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -102,37 +100,33 @@ const DeviceTemplateAlertDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.deviceTemplateAlert?.isUpdate  && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              {permissions?.deviceTemplateAlert?.isUpdate && (
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.iotDataPoints?.isDelete  && (
-                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-              )}
+              {permissions?.iotDataPoints?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
-      <Box>
-            {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={deviceTemplateAlertData} fields={fields} />
-            )}
-          </Box>
+        <Box>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={deviceTemplateAlertData} fields={fields} />
+          )}
+        </Box>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.deviceTemplateAlert?.title?.toLowerCase()} ${deviceTemplateAlertData?.alertNumber || ''} ?`}
+          message={`Are you sure you want to delete ${routes?.deviceTemplateAlert?.title?.toLowerCase()} ${
+            deviceTemplateAlertData?.alertNumber || ''
+          } ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

@@ -1,18 +1,18 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { sidebarResource } from '../../constants/helpers';
-import { BiEdit } from 'react-icons/bi';
+import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { sidebarResource } from '../../constants/helpers';
 import ManageWellNumber from './ManageWellNumber';
 
 const WellNumberDetail = () => {
@@ -59,7 +59,7 @@ const WellNumberDetail = () => {
       .put(`${routes.wellNumber.path}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.wellNumber.path}`)
+        history.push(`${routes.wellNumber.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -82,7 +82,7 @@ const WellNumberDetail = () => {
                 }}
                 className={'btn-outline-v1'}
               >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
             {permissions?.wellNumber?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

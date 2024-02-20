@@ -1,22 +1,22 @@
-import { useContext, useEffect, useState } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
 import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { useData } from 'src/StateProvider/Provider';
-import routes from 'src/components/Helpers/Routes';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import ManageDeviceTemplates from './ManageDeviceTemplates';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import routes from 'src/components/Helpers/Routes';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import IotDataPoints from './IotDataPoints';
-import Rules from './Rules';
 import Alerts from './Alerts';
+import IotDataPoints from './IotDataPoints';
+import ManageDeviceTemplates from './ManageDeviceTemplates';
+import Rules from './Rules';
 
 export default function DeviceTemplatesDetails() {
   const toastConfig = useContext(CustomToastContext);
@@ -78,7 +78,7 @@ export default function DeviceTemplatesDetails() {
           .put(`${routes.deviceTemplates.path}/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
-            history.push(`${routes.deviceTemplates.path}`)
+            history.push(`${routes.deviceTemplates.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);
@@ -108,7 +108,7 @@ export default function DeviceTemplatesDetails() {
                       setOpenUpdateDialog(true);
                     }}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.warehouse?.isDelete && (
