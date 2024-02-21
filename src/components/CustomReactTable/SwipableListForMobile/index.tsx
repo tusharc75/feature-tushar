@@ -1,14 +1,15 @@
-import { Button, CircularProgress, Collapse, IconButton } from '@material-ui/core';
-import { Edit, Error, ExpandMore } from '@material-ui/icons';
-import { flexRender } from '@tanstack/react-table';
-import React, { FC, Fragment, useMemo, useState } from 'react';
+import { CircularProgress, Collapse, IconButton } from '@material-ui/core';
+import { Error } from '@material-ui/icons';
+import { Row, flexRender } from '@tanstack/react-table';
+import React, { FC, useMemo } from 'react';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
-import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperComponents';
-import { TInitialState } from '../hooks/useTableReducer';
-import { getCellValue, handleCellClick, handleKeyDown } from '../utils';
+import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
+import RenderCellWithHeader from './RenderCellWithHeader';
+import RenderFooter from './RenderFooter';
+import RenderSubCard from './RenderSubCard';
 import type { TSwipableListInputProps } from './types';
 
-const DEFAULT_DATA_ROWS_VISIBLE = 3; // This number will change how many rows will be visible by default
+export const DEFAULT_DATA_ROWS_VISIBLE = 3; // This number will change how many rows will be visible by default
 
 const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   table,
@@ -107,6 +108,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                   if (expander && expanderCol) {
                     expanderCell = row.getVisibleCells()[0];
                   }
+
                   return (
                     <div
                       className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
@@ -172,7 +174,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                             );
                           })}
                         </div>
-                        <Collapse in={compareCollapse(row.original._id)}>
+                        <Collapse in={compareCollapse(row.original._id)} unmountOnExit>
                           <div className="grid gap-2 w-full">
                             {collapsibleFields.map((field) => {
                               return (
@@ -198,31 +200,29 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                               return (
                                 <RenderSubCard
                                   key={row?.original?._id || index}
-                                  {...{
-                                    table,
-                                    depth: 1,
-                                    dispatch,
-                                    allowSelection,
-                                    dataRows: row.subRows || [],
-                                    renderedFrom,
-                                    expander,
-                                    backgroundColorClass,
-                                    otherFieldsLength,
-                                    handleCollapse,
-                                    expanderCol,
-                                    index,
-                                    actionField,
-                                    primaryField,
-                                    compareCollapse,
-                                    defaultDisplay,
-                                    collapsibleFields,
-                                    IndeterminateCheckbox,
-                                    row,
-                                    submitInput,
-                                    cellValue,
-                                    setCellValue,
-                                    state
-                                  }}
+                                  depth={1}
+                                  dataRows={row.subRows || []}
+                                  table={table}
+                                  dispatch={dispatch}
+                                  allowSelection={allowSelection}
+                                  renderedFrom={renderedFrom}
+                                  expander={expander}
+                                  backgroundColorClass={backgroundColorClass}
+                                  otherFieldsLength={otherFieldsLength}
+                                  handleCollapse={handleCollapse}
+                                  expanderCol={expanderCol}
+                                  index={index}
+                                  actionField={actionField}
+                                  primaryField={primaryField}
+                                  compareCollapse={compareCollapse}
+                                  defaultDisplay={defaultDisplay}
+                                  collapsibleFields={collapsibleFields}
+                                  IndeterminateCheckbox={IndeterminateCheckbox}
+                                  row={row}
+                                  submitInput={submitInput}
+                                  cellValue={cellValue}
+                                  setCellValue={setCellValue}
+                                  state={state}
                                 />
                               );
                             })}
@@ -248,278 +248,5 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   );
 };
 
-const RenderSubCard = ({
-  table,
-  dispatch,
-  allowSelection,
-  renderedFrom,
-  expander,
-  backgroundColorClass,
-  otherFieldsLength,
-  handleCollapse,
-  expanderCol,
-  index,
-  actionField,
-  primaryField,
-  compareCollapse,
-  defaultDisplay,
-  collapsibleFields,
-  IndeterminateCheckbox,
-  row,
-  depth = 1,
-  submitInput,
-  cellValue,
-  setCellValue,
-  state
-}: any) => {
-  if (row.depth !== depth) return null;
-  let expanderCell = null;
-  if (expander && expanderCol) {
-    expanderCell = row.getVisibleCells()[0];
-  }
-  return (
-    <div
-      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
-        backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
-      }`}
-      key={row.original._id}
-      style={{
-        border: '1px solid var(--common-border-color)',
-        cursor: otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE ? 'pointer' : 'auto'
-      }}
-    >
-      <div className={`flex gap-2 items-center`}>
-        {expander && expanderCol && flexRender(expanderCell?.column?.columnDef?.cell, expanderCell?.getContext())}
-        {allowSelection && !row.original.hideSelection && (
-          <div>
-            <IndeterminateCheckbox
-              {...{
-                checked: row.getIsSelected(),
-                indeterminate: row.getIsSomeSelected(),
-                onChange: row.getToggleSelectedHandler()
-              }}
-            />
-          </div>
-        )}
-        <div className="flex-grow">
-          <div className="flex gap-2 justify-between items-center">
-            {primaryField && (
-              <h4 className="quote-name line-clamp-1 [&>*]:line-clamp-1 [&>*]:[font-weight:700_!important] [&>*]:[white-space:unset_!important]">
-                {primaryField.cell({ row })}
-              </h4>
-            )}
-            <div className="icon-layout  d-flex align-items-center gap-2">
-              {actionField && actionField?.cell?.({ row, table })}
-              {otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE && (
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCollapse(row.original._id);
-                  }}
-                >
-                  {compareCollapse(row.original._id) ? <BsChevronContract /> : <BsChevronExpand />}
-                </IconButton>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="px-2 mt-2 pt-2 grid gap-2" style={{ borderTop: '1px dashed var(--common-border-color)' }}>
-        <div className="grid gap-2 w-full">
-          {defaultDisplay.map((field) => {
-            return (
-              <RenderCellWithHeader
-                key={field.id}
-                field={field}
-                row={row}
-                submitInput={submitInput}
-                cellValue={cellValue}
-                setCellValue={setCellValue}
-                state={state}
-                dispatch={dispatch}
-              />
-            );
-          })}
-        </div>
-        <Collapse in={compareCollapse(row.original._id)}>
-          <div className="grid gap-2 w-full">
-            {collapsibleFields.map((field) => {
-              return (
-                <RenderCellWithHeader
-                  key={field.id}
-                  field={field}
-                  row={row}
-                  submitInput={submitInput}
-                  cellValue={cellValue}
-                  setCellValue={setCellValue}
-                  state={state}
-                  dispatch={dispatch}
-                />
-              );
-            })}
-          </div>
-        </Collapse>
-      </div>
-      {expander && (
-        <Collapse in={row.getIsExpanded()}>
-          <div className="mt-3">
-            {row.subRows?.map((row, index) => {
-              return (
-                <RenderSubCard
-                  key={row?.original?._id || index}
-                  {...{
-                    table,
-                    depth: depth + 1,
-                    dispatch,
-                    allowSelection,
-                    dataRows: row.subRows || [],
-                    renderedFrom,
-                    expander,
-                    backgroundColorClass,
-                    otherFieldsLength,
-                    handleCollapse,
-                    expanderCol,
-                    index,
-                    actionField,
-                    primaryField,
-                    compareCollapse,
-                    defaultDisplay,
-                    collapsibleFields,
-                    IndeterminateCheckbox,
-                    row,
-                    submitInput,
-                    cellValue,
-                    setCellValue,
-                    state
-                  }}
-                />
-              );
-            })}
-          </div>
-        </Collapse>
-      )}
-    </div>
-  );
-};
-
-const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue, state, dispatch }: any) => {
-  const { currentEditingCellPosition }: TInitialState = state;
-  const cell = row.getVisibleCells().find((cell: any) => cell?.column?.id === field?.id);
-  if (!cell) return null;
-  const columnDef: TColType = cell.column.columnDef as TColType;
-
-  const resetField = () => {
-    dispatch({
-      type: 'currentEditingCellPosition',
-      cellPosition: null
-    });
-  };
-
-  const CellShell = ({ children }) => {
-    return (
-      <h6 className=" text-[12px] grid grid-cols-[5fr_6fr] justify-between gap-2 max-w-full">
-        <span className="">{field.header}: </span>
-        <span
-          onKeyDown={(e) => {
-            handleKeyDown({ e, currentEditingCellPosition, submitInput });
-          }}
-          onClick={() => {
-            handleCellClick({ cell, dispatch, row, setCellValue });
-          }}
-          className={`text-[12px_!important] text-right [&>*]:text-right [&>*]:justify-end line-clamp-1 break-all [&>*]:[flex-wrap:wrap] [&>*]:[font-weight:500_!important] [&>*]:[font-size:12px_!important] [&>*]:line-clamp-1 [&>*]:[white-space:unset_!important] [&>div]:[flex-wrap:wrap_!important]`}
-        >
-          {children}
-        </span>
-      </h6>
-    );
-  };
-
-  switch (true) {
-    case !['selection'].includes(cell?.column.id) &&
-      currentEditingCellPosition?.rowId === row.original._id &&
-      currentEditingCellPosition?.columnName === cell?.column.id:
-      return (
-        <CellShell>
-          <div className="w-full">
-            <input
-              title={`Edit-${cell.id}`}
-              autoFocus
-              onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
-              value={cellValue}
-              className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
-              onChange={(e) => setCellValue(e.target.value)}
-            />
-          </div>
-        </CellShell>
-      );
-    case columnDef?.editable:
-      return (
-        <CellShell>
-          <div className="w-full">
-            <div className=" [border-bottom:1px_dashed_#8a8a8a] [display:flex_!important] gap-[20px] justify-end ml-auto cursor-pointer max-w-[max-content]">
-              <p>{flexRender(cell.column.columnDef.cell, cell?.getContext())}</p>
-              <span>
-                <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
-              </span>
-            </div>
-          </div>
-        </CellShell>
-      );
-    default:
-      return <CellShell>{flexRender(cell.column.columnDef.cell, cell?.getContext())}</CellShell>;
-  }
-};
-
 export type { TSwipableListInputProps };
 export default SwipableListForMobile;
-
-const RenderFooter = ({ table }) => {
-  const [isFooterExpanded, setIsFooterExpanded] = useState(false);
-
-  const toggleFooter = () => {
-    setIsFooterExpanded((prev) => !prev);
-  };
-
-  return (
-    <>
-      {table?.getFooterGroups().map((group, index) => {
-        const indexCol = group?.headers?.find((g) => g.id === 'index');
-        return (
-          <div key={index} className="[border:1px_solid_var(--common-border-color)] rounded-md items-center mt-4 ">
-            <Button
-              fullWidth
-              onClick={toggleFooter}
-              endIcon={<ExpandMore className={`${isFooterExpanded ? '[transform:rotate(180deg)]' : ''} transition-all duration-200`} />}
-              aria-expanded={isFooterExpanded}
-              aria-label="show more"
-              className="[&_.MuiButton-label]:flex [&_.MuiButton-label]:justify-between [&_.MuiButton-label]:font-bold"
-            >
-              <span>{indexCol?.isPlaceholder ? null : flexRender(indexCol?.column?.columnDef.footer, indexCol?.getContext())}</span>
-            </Button>
-            <Collapse in={isFooterExpanded} timeout="auto">
-              <div
-                className={`grid grid-cols-[5fr_3fr] py-2 gap-2 font-semibold text-[12px] text-black px-2 dark:text-gray-300 justify-between [border-top:1px_solid_var(--common-border-color)]
-                `}
-              >
-                {group?.headers?.map((column) => {
-                  if (!column?.column?.columnDef.footer || column.id === 'index') return null;
-                  return (
-                    <Fragment key={column.id}>
-                      <span className="text-truncate">
-                        {column?.isPlaceholder ? null : flexRender(column?.column?.columnDef.header, column?.getContext())}
-                      </span>
-                      <span className="text-truncate font-normal text-right">
-                        {column?.isPlaceholder ? null : flexRender(column?.column?.columnDef.footer, column?.getContext())}
-                      </span>
-                    </Fragment>
-                  );
-                })}
-              </div>
-            </Collapse>
-          </div>
-        );
-      })}
-    </>
-  );
-};
