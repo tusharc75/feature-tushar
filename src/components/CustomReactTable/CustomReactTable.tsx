@@ -288,7 +288,7 @@ const CustomReactTable = ({
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 
   const paginationLimit = useMemo(() => {
-    if (!expander) return limit;
+    if (!expander || isMobileView) return limit;
     if (isAllRowsExpanded) {
       if (isClientSideGrid) return table.getRowModel().flatRows.length;
       else return table.getExpandedRowModel().flatRows.length;
@@ -305,7 +305,7 @@ const CustomReactTable = ({
     };
     let length = getRowCount(table.getExpandedRowModel().rows, limit);
     return Math.max(length, limit);
-  }, [table, limit, expandedRefChanged, isAllRowsExpanded, isClientSideGrid, expander]);
+  }, [table, limit, expandedRefChanged, isAllRowsExpanded, isClientSideGrid, expander, isMobileView]);
 
   useEffect(() => {
     table.setPageSize(paginationLimit);
