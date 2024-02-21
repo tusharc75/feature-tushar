@@ -8,6 +8,7 @@ import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
 import { SearchFilter } from 'src/components/SearchFilter';
 import HtmlTooltip from '../CustomTooltipTitle';
+import { FaCircleChevronDown } from 'react-icons/fa6';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -122,9 +123,22 @@ const ListingPageHeader = ({
 
   const renderButtonText = ({ text, icon, loading, iconText = '' }) => {
     if (isMobile) {
-      return <>{loading ? <CircularProgress size={20} /> : iconText ? iconText : icon}</>;
+      return (
+        <>
+          <CircularProgress size={20} className={`${loading ? '' : 'sr-only'} `} />
+          <span className={`${loading ? 'sr-only' : ''} flex items-center`}>
+            <span className="[&>svg]:[font-size:20px_!important] max-h-[20px]">{icon}</span>
+            <span className="text-[13px]">{iconText}</span>
+          </span>
+        </>
+      );
     } else {
-      return <>{loading ? <CircularProgress size={20} /> : text}</>;
+      return (
+        <>
+          <CircularProgress size={20} className={`${loading ? '' : 'sr-only'}`} />
+          <span className={`${loading ? 'sr-only' : ''}`}>{text}</span>
+        </>
+      );
     }
   };
 
@@ -183,7 +197,7 @@ const ListingPageHeader = ({
                         onClick={(e) => {
                           addButtonOnclick && addButtonOnclick(e);
                         }}
-                        className={`no-shadow ${addButtonLoading ? '' : 'max-[600px]:[max-width:36px_!important]'} min-h-[32px]`}
+                        className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px]`}
                         startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
                       >
                         {renderButtonText({
@@ -210,7 +224,7 @@ const ListingPageHeader = ({
                             aria-controls="action-menu"
                             endIcon={isMobile ? null : actionButtonIconsEnabled ? <ExpandMore /> : null}
                           >
-                            {renderButtonText({ text: 'Actions', icon: <TouchApp />, loading: actionButtonLoading })}
+                            {renderButtonText({ text: 'Actions', icon: <FaCircleChevronDown size={20} />, loading: actionButtonLoading })}
                           </Button>
                         </span>
                       </HtmlTooltip>

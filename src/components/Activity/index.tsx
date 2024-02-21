@@ -1,44 +1,42 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
-import { makeStyles, Dialog, Typography, IconButton, Grid, Box, Button } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Box, Button, Dialog, Grid, IconButton, Typography, makeStyles } from '@material-ui/core';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { BiTask } from 'react-icons/bi';
-import { VscCalendar } from 'react-icons/vsc';
 import { BsBriefcase } from 'react-icons/bs';
 import { GoNote } from 'react-icons/go';
 import { HiOutlineMail } from 'react-icons/hi';
-import BiMailSend from 'react-icons/bi';
+import { VscCalendar } from 'react-icons/vsc';
 
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
-import { AiOutlinePaperClip, AiOutlineHistory } from 'react-icons/ai';
-import { Task } from './Task';
-import { CreateTask } from './Task/CreateTask';
-import { Event } from './Event';
-import { CreateEvent } from './Event/CreateEvent';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AiOutlinePaperClip } from 'react-icons/ai';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from './../../StateProvider/Provider';
+import axiosInstance from './../../axios/axiosInstance';
+import { CustomDialogTransition } from './../../constants/helpers';
+import ManageAttachment from './Attachments/ManageAttachment';
+import Attachments from './Attachments/index';
 import { Case } from './Case';
 import { CreateCase } from './Case/CreateCase';
-import { Note } from './Note';
-import { CreateNote } from './Note/CreateNote';
+import Chatter from './Chatter';
 import { Email } from './Email';
 import { CreateEmail } from './Email/CreateEmail';
-import Attachments from './Attachments/index';
-import axiosInstance from './../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ManageAttachment from './Attachments/ManageAttachment';
-import Chatter from './Chatter';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from './../../constants/helpers';
+import { Event } from './Event';
+import { CreateEvent } from './Event/CreateEvent';
 import HistoryDialog from './History/index';
-import { useData } from './../../StateProvider/Provider';
+import { Note } from './Note';
+import { CreateNote } from './Note/CreateNote';
+import { Task } from './Task';
+import { CreateTask } from './Task/CreateTask';
 
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CloseIcon from '@material-ui/icons/Close';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import MailIcon from '@material-ui/icons/Mail';
-import HtmlTooltip from '../CustomTooltipTitle';
-import { camelCase, isEmpty } from 'lodash';
-import routes from '../Helpers/Routes';
+import { isEmpty } from 'lodash';
 import { CollaborateIcon } from 'src/assets/svg/svgIcons';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const useStyles = makeStyles(() => ({
   activityBox: {

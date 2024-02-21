@@ -21,7 +21,7 @@ import queryString from 'query-string';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import ReactDOM from 'react-dom';
-import { IoArrowDownCircleSharp } from 'react-icons/all';
+import { IoArrowDownCircleSharp } from 'react-icons/io5';
 import { BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { GiReceiveMoney } from 'react-icons/gi';
@@ -521,7 +521,6 @@ export default function QuoteDetail() {
   };
 
   const handleVersionUpdate = (versionStatus, selectedTermsAndConditions) => {
-
     let body = {
       status: versionStatus,
       TNC: selectedTermsAndConditions
@@ -682,10 +681,12 @@ export default function QuoteDetail() {
                   onClose={closeActions}
                 >
                   {allowedToEdit && (
-                    <MenuItem onClick={() => {
-                      closeActions()
-                      handleOpenUpdateDialog()
-                    }}>
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        handleOpenUpdateDialog();
+                      }}
+                    >
                       <div className="flex gap-3 items-center">
                         <HiPencil />
                         <Typography variant="inherit">Edit Quote</Typography>
@@ -694,8 +695,8 @@ export default function QuoteDetail() {
                   )}
                   <MenuItem
                     onClick={() => {
-                      closeActions()
-                      cloneVersion()
+                      closeActions();
+                      cloneVersion();
                     }}
                     disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
                   >
@@ -710,9 +711,10 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={quoteReOpening}
                       onClick={() => {
-                        closeActions()
-                        setReopenReasonDialog(true)
-                      }}>
+                        closeActions();
+                        setReopenReasonDialog(true);
+                      }}
+                    >
                       <div className="flex gap-3 items-center">
                         <VscIssueReopened />
                         <Typography variant="inherit">Re-Open</Typography>
@@ -722,7 +724,7 @@ export default function QuoteDetail() {
                   {allowedToEdit && ifQuoteApproved.approved && (
                     <MenuItem
                       onClick={() => {
-                        closeActions()
+                        closeActions();
                         setOpenUpdateDialog(true);
                       }}
                     >
@@ -734,11 +736,16 @@ export default function QuoteDetail() {
                   )}
                   {currentVersion !== 1 && ifQuoteApproved.approved === false && (
                     <MenuItem
-                      disabled={allowedToEdit && !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
-                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted') ? false : true}
+                      disabled={
+                        allowedToEdit &&
+                        !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
+                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                          ? false
+                          : true
+                      }
                       onClick={() => {
-                        closeActions()
-                        deleteVersion()
+                        closeActions();
+                        deleteVersion();
                       }}
                     >
                       <div className="flex gap-3 items-center">
@@ -752,11 +759,12 @@ export default function QuoteDetail() {
                     quoteData?.owner.optionValue &&
                     user?.user?._id &&
                     quoteData.owner.optionValue === user.user._id && (
-                      <MenuItem onClick={() => {
-                        closeActions()
-                        setShowConfirmBox(true)
-                      }
-                      }>
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          setShowConfirmBox(true);
+                        }}
+                      >
                         <div className="flex gap-3 items-center">
                           <MdDelete />
                           <Typography variant="inherit">Delete Quote</Typography>
@@ -912,8 +920,7 @@ export default function QuoteDetail() {
           cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
           doaCollaboratorResources={user.user?.doa?.map((obj) => obj.user)}
         />
-      )
-      }
+      )}
       {reopenReasonDialog && (
         <div className={classes.reasonDialog}>
           <Dialog
@@ -951,8 +958,7 @@ export default function QuoteDetail() {
             </DialogActions>
           </Dialog>
         </div>
-      )
-      }
+      )}
       {showQuoteStatusChangeDialog && (
         <DOAReasonDialog
           reasonDialogOpen={showQuoteStatusChangeDialog}
@@ -973,6 +979,6 @@ export default function QuoteDetail() {
           handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
         />
       )}
-    </Box >
+    </Box>
   );
 }
