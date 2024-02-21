@@ -56,14 +56,23 @@ const Fields = ({ id, fetchData, formsData }) => {
     setSection(data);
   };
 
+  const removeExtraField = () => {
+    let data = [...section];
+    data.forEach((row) => {
+      row.field = row.field.filter((i) => i._id);
+    });
+    setSection(data);
+  };
+
   const handleSave = () => {
     setIsSubmitting(true);
+
+    const data = [...section];
     const field: any = [];
 
     let order = 0;
-    section?.forEach((_section, i) => {
+    data?.forEach((_section, i) => {
       _section?.field?.forEach((_field) => {
-        delete _field._id;
         field.push({
           ..._field,
           fieldName: fieldLabelToFieldName(_field?.fieldLabel),
@@ -117,7 +126,15 @@ const Fields = ({ id, fetchData, formsData }) => {
               </Box>
               <Grid container spacing={1} className={styles.form_grid_box}>
                 {Object.keys(FieldList).map((type, index) => {
-                  return <DragMaster key={index} type="field" label={FieldList[type].label} name={FieldList[type].type} />;
+                  return (
+                    <DragMaster
+                      key={index}
+                      type="field"
+                      label={FieldList[type].label}
+                      name={FieldList[type].type}
+                      removeExtraField={removeExtraField}
+                    />
+                  );
                 })}
               </Grid>
             </Box>
