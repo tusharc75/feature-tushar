@@ -204,7 +204,6 @@ const Steps = ({
   workOrderData,
   selectedService,
   allowedToEdit,
-  setDisableCompleteFail,
   fetchService,
   resource,
   stepSubmitedData,
@@ -344,8 +343,6 @@ const Steps = ({
       );
 
       const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), serviceDetail?.steps?.map((d) => d._id).sort());
-
-      setDisableCompleteFail(!allStepsDone);
       setIsAllStepDone(allStepsDone);
 
       if (
@@ -1456,9 +1453,7 @@ const Steps = ({
                     }}
                     disabled={
                       allowedToEdit &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        ) && !selectedStep?.stepData
+                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status)
                         ? false
                         : true
                     }
