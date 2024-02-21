@@ -4,7 +4,7 @@ import CustomReactTable, { checkStaticField, getStaticFields, useColumns, useTab
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, Dialog } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, gridLoadingTimeout, deliveryTicket, rentalManagement, ASSET_STATUS } from '../../../constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, deliveryTicket, rentalManagement, ASSET_STATUS, DELIVERY_TICKET_STATUS } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -87,6 +87,8 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     }
   };
 
+  console.log(productInventory)
+
   const calculateNestedQty = (material, parent) => {
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
     childProduct?.forEach((child) => {
@@ -154,7 +156,9 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       tempInitialData['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
       tempInitialData['deliveryTo'] = rentalData?.deliveryTo;
       tempInitialData['deliveryToAddress'] = rentalData?.deliveryToAddress;
-      tempInitialData['wellName'] = referenceData?.wellName?.optionValue;
+      if (referenceData?.wellName?.optionValue) {
+        tempInitialData['wellName'] = referenceData?.wellName?.optionValue;
+      }
       if (referenceData?.wellNumber) {
         if (referenceData?.wellNumber?.optionValue) {
           tempInitialData['wellNumber'] = referenceData?.wellNumber?.optionValue;
@@ -162,25 +166,23 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
           tempInitialData['wellNumber'] = referenceData?.wellNumber?.map((e) => e?.optionValue);
         }
       }
-      tempInitialData['afeNumber'] = referenceData?.afeNumber;
+      if (referenceData?.afeNumber) {
+        tempInitialData['afeNumber'] = referenceData?.afeNumber;
+      }
       if (referenceData?.processor?.optionValue) {
         tempInitialData['deliveryPerson'] = referenceData?.processor?.optionValue;
       }
-      tempInitialData['productInventory'] = productInventory?.filter((e) => e.type === 'Asset')?.map((d) => d?._id);
+      tempInitialData['assets'] = productInventory?.filter((e) => e.type === 'Asset')?.map((d) => { return { asset: d._id, uniqueId: d?.uniqueId } });
       tempInitialData['products'] = [];
-      productInventory
-        ?.filter((e) => e.type === 'Product')
-        ?.forEach((ele) => {
-          tempInitialData['products'].push({ product: ele._id, qty: ele.qty });
-        });
-      axiosInstance()
-        .post(`${deliveryTicket.api}`, tempInitialData)
-        .then(({ data }) => {
-          handleCreateLoadingTicketAddAsstes(data?.data, rentalData._id, assetsAdd);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
+      productInventory?.filter((e) => e.type === 'Product')?.forEach((ele) => {
+        tempInitialData['products'].push({ product: ele._id, qty: ele.qty });
+      });
+      tempInitialData['status'] = DELIVERY_TICKET_STATUS.delivered;
+      axiosInstance().post(`${deliveryTicket.api}`, tempInitialData).then(({ data }) => {
+        handleCreateLoadingTicketAddAsstes(data?.data, rentalData._id, assetsAdd);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
 
       // const data = {}
       // data["ticketName"] = referenceData.rentalJobName;
@@ -209,19 +211,16 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     deliveryTicketData._id = data._id;
     deliveryTicketData.rentalJob = rentalJob;
     deliveryTicketData.ticketType = DELIVERY_TICKET_TYPE.loading;
-    axiosInstance()
-      .post(`${rentalManagement.api}/${rentalJob}/inventory`, { products: assets })
-      .then(({ data }) => {
-        axiosInstance()
-          .post(`${deliveryTicket.api}/auto-create-ticket`, deliveryTicketData)
-          .then(({ data }) => {
-            setShowTicketDialog({ open: false, ticketType: '', data: {}, rentalJob: null });
-            onSuccess();
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
-      })
+    axiosInstance().post(`${rentalManagement.api}/${rentalJob}/inventory`, { products: assets }).then(({ data }) => {
+      axiosInstance().post(`${deliveryTicket.api}/auto-create-ticket`, deliveryTicketData)
+        .then(({ data }) => {
+          setShowTicketDialog({ open: false, ticketType: '', data: {}, rentalJob: null });
+          onSuccess();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
