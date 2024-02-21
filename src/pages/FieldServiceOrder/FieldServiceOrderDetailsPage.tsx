@@ -61,7 +61,7 @@ const ServiceOrderDetailsPage = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
 
-  const [steps, setSteps] = useState([]);
+  const [steps, setSteps] = useState(serviceOrderSteps);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
 
   useEffect(() => {
@@ -122,12 +122,16 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-          data.owner.optionValue === user?.user?._id &&
-          data.canDelete &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        data.owner.optionValue === user?.user?._id &&
+        data.canDelete &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setServiceOrderData(data);
-      setCurrentStep(steps.map((s) => s.name).indexOf(data?.processStatus) !== -1 ? steps.map((s) => s.name).indexOf(data?.processStatus) : 0);
+      if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
+        setCurrentStep(steps?.length - 1);
+      } else {
+        setCurrentStep(steps.map((s) => s.name).indexOf(data?.processStatus) !== -1 ? steps.map((s) => s.name).indexOf(data?.processStatus) : 0);
+      }
     } catch (error) {
       setLoadingDetails(false);
       toastConfig.setToastConfig(error);
@@ -140,7 +144,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {
@@ -153,13 +157,6 @@ const ServiceOrderDetailsPage = () => {
         }
       });
       setServiceOrderFields(response?.data?.data.field);
-
-      const policy = response?.data?.data?.policy;
-      if (policy.stepper?.length) {
-        setSteps(serviceOrderSteps?.filter((step) => policy?.stepper?.includes(step?.name)));
-      } else {
-        setSteps(serviceOrderSteps?.filter((step) => step?.name !== 'Field Ticket Invoice'));
-      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -305,7 +302,7 @@ const ServiceOrderDetailsPage = () => {
             setStepFullScreen={() => setStepFullScreen(true)}
           />
           <ContentFullScreen title={steps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {steps[currentStep]?.name === serviceOrderSteps[0]?.name && serviceOrderData && (
+            {steps[currentStep]?.name === steps[0]?.name && serviceOrderData && (
               <FieldTicket
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -314,7 +311,7 @@ const ServiceOrderDetailsPage = () => {
                 handleChangeStatus={handleChangeStatus}
               />
             )}
-            {steps[currentStep]?.name === serviceOrderSteps[1]?.name && serviceOrderData && (
+            {/* {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
               <Services
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -323,7 +320,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-            {steps[currentStep]?.name === serviceOrderSteps[2]?.name && serviceOrderData && (
+            {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && (
               <Products
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -332,7 +329,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-            {steps[currentStep]?.name === serviceOrderSteps[3]?.name && serviceOrderData && (
+            {steps[currentStep]?.name === steps[3]?.name && serviceOrderData && (
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -341,7 +338,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-            {steps[currentStep]?.name === serviceOrderSteps[4]?.name && serviceOrderData && (
+            {steps[currentStep]?.name === steps[4]?.name && serviceOrderData && (
               <TechnicianDispatch
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -350,7 +347,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-            {steps[currentStep]?.name === serviceOrderSteps[5]?.name && serviceOrderData && (
+            {steps[currentStep]?.name === steps[5]?.name && serviceOrderData && (
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -361,8 +358,8 @@ const ServiceOrderDetailsPage = () => {
                 updateStatus={handleChangeStatus}
                 statusOptions={statusOptions}
               />
-            )}
-            {steps[currentStep]?.name === serviceOrderSteps[6]?.name && serviceOrderData && (
+            )} */}
+            {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
               <Invoices resourceId={serviceOrderData?._id} resource={sidebarResource.fieldTicket} invoiceFieldName="fieldServiceOrder" />
             )}
           </ContentFullScreen>

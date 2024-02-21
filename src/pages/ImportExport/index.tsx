@@ -5,7 +5,7 @@ import { Box, Grid, Button, CircularProgress, Typography, IconButton } from '@ma
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import axiosInstance from '../../axios/axiosInstance';
-import { AiOutlineExport, AiOutlineImport } from 'react-icons/all';
+import { AiOutlineExport, AiOutlineImport } from 'react-icons/ai';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { dateTimeFormat, downloadExcel, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomContainer from 'src/components/CustomContainer';
@@ -429,15 +429,15 @@ const ImportExport = () => {
         </Grid>
 
         <Box>
-        <CustomReactTable
+          <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={'import-export'}
             refreshGrid={fetchLogs}
-            isClientSideGrid = {true}
-            hideSelection = {true}
+            isClientSideGrid={true}
+            hideSelection={true}
           />
           {customImportDialog && (
             <CustomImport
