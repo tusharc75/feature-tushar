@@ -17,9 +17,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 
-
 const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId }) => {
-
   let renderedFrom = 'ViewQuotationSupplierPrice';
   const toastConfig = useContext(CustomToastContext);
 
@@ -247,75 +245,74 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
   return (
     <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
       <CustomDialogHeader title={`View ${type} Quote`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
-      <div className='m-2 md:m-3'>
+      <div className="m-2 md:m-3">
         {productDataList && productDataList.length !== 0 && !isLoading ? (
           productDataList.map((data) => {
             return (
-              <Accordion expanded={Boolean(expandSupplierGrid === data?._id)} onChange={() => (expandSupplierGrid === data?._id ? setExpandSupplierGrid(null) : setExpandSupplierGrid(data?._id))}>
-                  <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-                      <div className='flex flex-wrap gap-[5px] items-center'>
-                        <Box>
-                          <IconButton
-                            size="small"
-                          >
-                            {expandSupplierGrid === data?._id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                          </IconButton>
-                        </Box>
-                        <div className='flex items-center gap-[5px]'>
-                        <Box className='min-w-0 line-clamp-1' title={data?.status ? data?.status : ''}>
-                          <Typography variant="subtitle2">{data?.status && `Status : ${data?.status}, `}</Typography>
-                        </Box>
-                        <Box className='min-w-0  line-clamp-1' title={data?.requestDate ? moment(data?.requestDate).format(dateTimeFormat) : ''}>
-                          <Typography variant="subtitle2">
-                            {data?.requestDate && `Request Date : ${moment(data?.requestDate).format(dateTimeFormat)} `}
-                          </Typography>
-                        </Box>
-                        </div>
-                      </div>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {expandSupplierGrid === data?._id && (
-                      <>
-                        {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
-                          <Grid item xs={12} sm={12} md={12} container justify="flex-end">
-                            <Box ml={1} mt={1}>
-                              <Button
-                                size="small"
-                                color="primary"
-                                onClick={() => {
-                                  handleAccept(data?._id);
-                                }}
-                                variant="contained"
-                              >
-                                Accept
-                              </Button>
-                            </Box>
-                            <Box ml={1} mt={1}>
-                              <DeleteButton
-                                id="detailDeleteButton"
-                                text={'Reject'}
-                                onClick={() => {
-                                  setResponse({ open: true, type: 'Reject', id: data?._id });
-                                }}
-                              />
-                            </Box>
-                          </Grid>
-                        )}
-                        <CustomReactTable
-                          height={'calc(100vh - 393px)'}
-                          columns={fetchColumns(data?._id)}
-                          state={{ ...state, dataRows: dataRows?.filter((d) => d?.uniqueId === data?._id) }}
-                          dispatch={dispatch}
-                          renderedFrom={renderedFrom}
-                          refreshGrid={fetchProductGridData}
-                          isClientSideGrid={true}
-                          hideAction={true}
-                          hideSelection={true}
-                          expander={true}
-                        />
-                      </>
-                    )}
-                  </AccordionDetails>
+              <Accordion
+                expanded={Boolean(expandSupplierGrid === data?._id)}
+                onChange={() => (expandSupplierGrid === data?._id ? setExpandSupplierGrid(null) : setExpandSupplierGrid(data?._id))}
+              >
+                <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+                  <div className="flex  gap-[5px] items-center">
+                    <Box>
+                      <IconButton size="small">{expandSupplierGrid === data?._id ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+                    </Box>
+                    <div className="flex items-center gap-[5px]">
+                      <Box className="min-w-0 line-clamp-1" title={data?.status ? data?.status : ''}>
+                        <Typography variant="subtitle2">{data?.status && `Status : ${data?.status}, `}</Typography>
+                      </Box>
+                      <Box className="min-w-0  line-clamp-1" title={data?.requestDate ? moment(data?.requestDate).format(dateTimeFormat) : ''}>
+                        <Typography variant="subtitle2">
+                          {data?.requestDate && `Request Date : ${moment(data?.requestDate).format(dateTimeFormat)} `}
+                        </Typography>
+                      </Box>
+                    </div>
+                  </div>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {expandSupplierGrid === data?._id && (
+                    <>
+                      {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
+                        <Grid item xs={12} sm={12} md={12} container justify="flex-end">
+                          <Box ml={1} mt={1}>
+                            <Button
+                              size="small"
+                              color="primary"
+                              onClick={() => {
+                                handleAccept(data?._id);
+                              }}
+                              variant="contained"
+                            >
+                              Accept
+                            </Button>
+                          </Box>
+                          <Box ml={1} mt={1}>
+                            <DeleteButton
+                              id="detailDeleteButton"
+                              text={'Reject'}
+                              onClick={() => {
+                                setResponse({ open: true, type: 'Reject', id: data?._id });
+                              }}
+                            />
+                          </Box>
+                        </Grid>
+                      )}
+                      <CustomReactTable
+                        height={'calc(100vh - 393px)'}
+                        columns={fetchColumns(data?._id)}
+                        state={{ ...state, dataRows: dataRows?.filter((d) => d?.uniqueId === data?._id) }}
+                        dispatch={dispatch}
+                        renderedFrom={renderedFrom}
+                        refreshGrid={fetchProductGridData}
+                        isClientSideGrid={true}
+                        hideAction={true}
+                        hideSelection={true}
+                        expander={true}
+                      />
+                    </>
+                  )}
+                </AccordionDetails>
               </Accordion>
             );
           })
