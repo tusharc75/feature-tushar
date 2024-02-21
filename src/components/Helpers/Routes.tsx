@@ -160,6 +160,14 @@ const routes = {
     title: 'Resource',
     path: '/:resource'
   },
+  forms: {
+    title: storedRoutes && storedRoutes.forms && storedRoutes.forms.title ? storedRoutes.forms?.title : RESOURCE_LABEL.forms,
+    path: '/forms'
+  },
+  formsDetail: {
+    title: storedRoutes && storedRoutes.forms && storedRoutes.forms.title ? storedRoutes.forms?.title : RESOURCE_LABEL.forms,
+    path: '/forms/detail'
+  },
   termsAndConditions: {
     title:
       storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title

@@ -82,6 +82,7 @@ const CustomReactTable = ({
   const [expandedRefChanged, setExpandedRefChanged] = useState(0);
 
   function toggleExpandChange() {
+    if (isMobileView) return;
     setExpandedRefChanged((prev) => {
       return prev === 10 ? 0 : (prev += 1);
     });

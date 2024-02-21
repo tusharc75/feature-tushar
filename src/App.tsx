@@ -251,6 +251,8 @@ import TriggerNotificationMaster from './pages/TriggerNotificationMaster';
 import TriggerNotificationMasterDetail from './pages/TriggerNotificationMaster/TriggerNotificationMasterDetail';
 import TriggerNotificationHistory from './pages/TriggerNotificationHistory';
 import UserAttendance from './pages/UserAttendance';
+import Forms from './pages/Forms';
+import CreateForm from './pages/Forms/CreateForm';
 
 var notificationInterval: any = null;
 
@@ -585,6 +587,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.formBuilder.path}>
               <FormBuilder />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.forms.path}>
+              <Forms />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.formsDetail.path + '/:id'}>
+              <CreateForm />
             </PrivateRoute>
             <PrivateRoute exact path={routes.zone.path}>
               <Zone />
