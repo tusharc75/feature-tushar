@@ -436,6 +436,10 @@ const AddSerializedAsset = ({
             obj.product = e.materialId;
             obj.asset = result[0]._id;
             obj.rentalJob = result[0].loadingTicket?.rentalJob?.optionValue;
+            const rentalAsset = result[0].loadingTicket?.assets?.find((ele) => ele.asset === result[0]._id)
+            if (rentalAsset) {
+              obj.uniqueId = rentalAsset?.uniqueId;
+            }
             assetsAdd.push(obj);
             result[0].isCounted = true;
           }
