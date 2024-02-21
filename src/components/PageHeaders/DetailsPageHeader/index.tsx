@@ -5,6 +5,8 @@ import { Add, ExpandMore, TouchApp } from '@material-ui/icons';
 import PreviewDownload from './PreviewDownload';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SendEmail, { SendEmailProps } from './sendEmail';
+// import { MdExpandCircleDown } from 'react-icons/md';
+import { FaCircleChevronDown } from 'react-icons/fa6';
 
 type ButtonPropsWithTooltip = {
   tooltip?: string;
@@ -123,13 +125,10 @@ const DetailsPageHeader = ({
                   className="new-dropdown-v1 min-h-[30px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]"
                   {...restOfActionButtonProps}
                 >
-                  {isMobile ? (
-                    <TouchApp />
-                  ) : (
-                    <>
-                      Actions <ExpandMore fontSize="small" />
-                    </>
-                  )}
+                  <FaCircleChevronDown size={20} className="max-[600px]:not-sr-only sr-only" />
+                  <span className="max-[600px]:sr-only not-sr-only flex">
+                    Actions <ExpandMore fontSize="small" />
+                  </span>
                 </Button>
               </span>
             </HtmlTooltip>

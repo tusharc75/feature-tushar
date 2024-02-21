@@ -2,7 +2,7 @@ import { Box, Button, Chip, Dialog, IconButton, Menu, MenuItem, Tooltip, Typogra
 import { AddOutlined, Delete as DeleteIcon, ExpandMore } from '@material-ui/icons';
 import { camelCase, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
-import { FaUserAltSlash, FaUserCheck } from 'react-icons/all';
+import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

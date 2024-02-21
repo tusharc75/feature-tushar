@@ -1,34 +1,25 @@
-import { AiFillAccountBook } from 'react-icons/ai';
-import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
 import DashboardIcons from 'src/assets/dashboard_images/icons';
 import {
-  ProductSetup,
-  ServiceManagementIcon,
-  RentalOperationManagementIcon,
-  ServiceOperationManagementIcon,
-  PurchasingManagementIcon,
-  FieldServiceOperationIcon,
-  FleetManagementIcon,
   CollaborationToolsIcon,
   CustomForms,
+  FieldServiceOperationIcon,
+  FleetManagementIcon,
+  ForeCastingAndPlanning,
   IOT,
-  ForeCastingAndPlanning
+  ProductSetup,
+  PurchasingManagementIcon,
+  RentalOperationManagementIcon,
+  ServiceManagementIcon,
+  ServiceOperationManagementIcon
 } from 'src/assets/sidebar_assets/icons';
 
-import {
-  BiCog,
-  BiCart,
-  FaRegUserCircle,
-  FaReact,
-  FaRegRegistered,
-  FaRegUser,
-  MdOutlineDynamicForm,
-  RiShieldUserLine,
-  SiCivicrm,
-  AiOutlineDatabase,
-  HiOutlineWrenchScrewdriver,
-  MdOutlineEventAvailable
-} from 'react-icons/all';
+import { AiOutlineDatabase } from 'react-icons/ai';
+import { BiCart, BiCog } from 'react-icons/bi';
+import { FaReact, FaRegRegistered, FaRegUser, FaRegUserCircle } from 'react-icons/fa';
+import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
+import { MdOutlineDynamicForm, MdOutlineEventAvailable } from 'react-icons/md';
+import { RiShieldUserLine } from 'react-icons/ri';
+import { SiCivicrm } from 'react-icons/si';
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
 export const groupByKey = (arr = [], keyGetter) => {

@@ -20,13 +20,17 @@ import {
 } from '@material-ui/core';
 import { ControlPoint, Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import queryString from 'query-string';
 import { startCase } from 'lodash';
+import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiReset, RiSettingsFill } from 'react-icons/all';
+import { BiReset } from 'react-icons/bi';
 import { FcFlowChart } from 'react-icons/fc';
+import { RiSettingsFill } from 'react-icons/ri';
 import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -59,15 +63,12 @@ import {
 import AccountAccordionDetail from './AccountAccordionInDetail';
 import AssignedEntities from './AssignedEntities';
 import ContactAccordionInDetailPage from './ContactAccordionInDetailPage';
+import GenerateAutoPassword from './GenerateAutoPassword';
 import LeadAccordionInUserDetailPage from './LeadAccordionInUserDetailPage';
 import ManageUserDialog from './ManageUserDialog';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
-import UserSetupDialog from './UserSetupDialog';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import UserSession from './UserSession';
-import GenerateAutoPassword from './GenerateAutoPassword';
+import UserSetupDialog from './UserSetupDialog';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -261,7 +262,6 @@ const UserDetailsPage = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
 
   const fetchUserRelatedDetail = () => {
     // setUserRelatedLoading(true);
@@ -539,16 +539,11 @@ const UserDetailsPage = () => {
                     <CustomTab index={0} value={0} className={'tabLayout'} label={'Details'} {...a11yProps(0)} />
                     <CustomTab index={1} value={1} className={'tabLayout'} label={'Org Chart'} {...a11yProps(1)} />
                     {userData?.proxyDOA?.optionValue && (
-                      <CustomTab index={2} value={2} className={'tabLayout'} label={'DOA Proxy'} {...a11yProps(2)} 
-                      />
+                      <CustomTab index={2} value={2} className={'tabLayout'} label={'DOA Proxy'} {...a11yProps(2)} />
                     )}
-                    <CustomTab index={3} value={3} className={'tabLayout'} label={'User Session'} {...a11yProps(3)}
-                    />
-                    <CustomTab index={4} value={4} className={'tabLayout'} label={'Assigned Entity'} {...a11yProps(4)}
-                    />
-                    <CustomTab
-                      index={5} value={5} className={'tabLayout'} label={'Approval Process'} {...a11yProps(5)}
-                    />
+                    <CustomTab index={3} value={3} className={'tabLayout'} label={'User Session'} {...a11yProps(3)} />
+                    <CustomTab index={4} value={4} className={'tabLayout'} label={'Assigned Entity'} {...a11yProps(4)} />
+                    <CustomTab index={5} value={5} className={'tabLayout'} label={'Approval Process'} {...a11yProps(5)} />
                   </CustomTabs>
 
                   <TabPanel value={tabValue} index={0}>
@@ -615,7 +610,7 @@ const UserDetailsPage = () => {
                     </TabPanel>
                   )}
                   <TabPanel value={tabValue} index={3}>
-                    <UserSession id = {id} />
+                    <UserSession id={id} />
                   </TabPanel>
                   <TabPanel value={tabValue} index={4}>
                     <Grid container spacing={2}>

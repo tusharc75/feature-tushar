@@ -5,7 +5,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { VscVersions } from 'react-icons/all';
+import { VscVersions } from 'react-icons/vsc';
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { IoMdDownload } from 'react-icons/io';
