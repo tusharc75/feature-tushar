@@ -9,7 +9,7 @@ const style = {
   marginTop: '8px'
 };
 
-export const DragMaster = ({ name, type, label }) => {
+export const DragMaster = ({ name, type, label, removeExtraField }) => {
   const item = { name, type, label };
 
   const [{ isDragging }, drag] = useDrag({
@@ -17,11 +17,11 @@ export const DragMaster = ({ name, type, label }) => {
     type: type,
     end(item, monitor) {
       const dropResult = monitor.getDropResult();
-      // if (!dropResult) {
-      //   // if (item.type === 'field') {
-      //   //   removeExtraField();
-      //   // }
-      // }
+      if (!dropResult) {
+        if (item.type === 'field') {
+          removeExtraField();
+        }
+      }
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
@@ -47,4 +47,5 @@ DragMaster.propTypes = {
   name: PropTypes.string,
   type: PropTypes.string,
   label: PropTypes.string,
+  removeExtraField: PropTypes.any
 };
