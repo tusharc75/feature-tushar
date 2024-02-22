@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Grid, Button, Menu, MenuItem } from '@material-ui/core';
+import { Box, Grid, Button, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
 import { serviceMaster } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -17,8 +17,10 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 function Product({ id }) {
+  const isMobile = useMediaQuery('(max-width:600px)');
   const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_product`;
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -226,7 +228,7 @@ function Product({ id }) {
     };
     axiosInstance()
       .put(`${serviceMaster.api}/product/${id}/qty`, dToUpdate)
-      .then(({data}) => {
+      .then(({ data }) => {
         setToastConfig({
           open: true,
           message: data.message,
@@ -268,76 +270,58 @@ function Product({ id }) {
       });
   };
 
+  const rightSideContents = () => {
+    return (
+      <>
+        {isMobile ? null : (
+          <ImportExportMenu
+            permissions={permissions?.packages}
+            module="products"
+            api={`${serviceMaster.api}/product/${id}`}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={selectedRecords.length}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
+            additionalParams={`serviceId=${id}`}
+          />
+        )}
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setShowConfirmBox({ open: true, data: selectedRecords });
+            closeActions();
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <div>
       {permissions?.serviceMaster?.isUpdate && (
-        <Box p={1}>
-          <Grid container>
-            <Grid item xs={6} md={6} sm={6}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => {
-                  setOpenAssignProductDialog(true);
-                }}
-              >
-                Add
-              </Button>
-            </Grid>
-            <Grid item xs={6} md={6} sm={6}>
-              <Box display={'flex'} justifyContent={'flex-end'}>
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length === 0}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorActionEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorActionEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      setShowConfirmBox({ open: true, data: selectedRecords });
-                      closeActions();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-                <Box ml={1} />
-                <ImportExportMenu
-                  permissions={permissions?.packages}
-                  module="products"
-                  api={`${serviceMaster.api}/product/${id}`}
-                  afterImportCompleted={() => {
-                    fetchData();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={selectedRecords.length}
-                  recordsToExport={selectedRecords.length}
-                  ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
-                  additionalParams={`serviceId=${id}`}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible
+            addButtonMenuItems
+            addButtonProps={{ onClick: () => setOpenAssignProductDialog(true) }}
+            isActionButtonVisible
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            rightSideContents={rightSideContents()}
+            hasXpadding={false}
+          />
+        </>
       )}
       {columns ? (
         <CustomReactTable

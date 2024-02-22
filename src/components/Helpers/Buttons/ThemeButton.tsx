@@ -4,21 +4,21 @@ import { FaMobileButton } from 'react-icons/fa6';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 type SimpleButton = {
-  borderColor: 'none';
+  borderColor?: 'none';
   iconForMobile: ReactNode;
   variant: 'contained';
   tooltip?: string;
 } & Omit<ButtonProps, 'variant'>;
 
 type OutlinedButtonProps = {
-  borderColor: 'default';
+  borderColor?: 'default';
   iconForMobile: ReactNode;
   hasMobileBorder?: boolean;
   tooltip?: string;
 } & ButtonProps;
 
 type RedOutlineProps = {
-  borderColor: 'red';
+  borderColor?: 'red';
   iconForMobile: ReactNode;
   hasMobileBorder?: boolean;
   mode?: 'dark' | 'light';
