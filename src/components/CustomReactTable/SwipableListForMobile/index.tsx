@@ -136,7 +136,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                         <div className="flex-grow">
                           <div className="flex gap-2 justify-between items-center">
                             {primaryField && (
-                              <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*]:[white-space:unset_!important]">
+                              <h4 className="quote-name line-clamp-1 [&_*]:line-clamp-1 [&>*]:[font-weight:700_!important] [&_*]:[white-space:unset_!important]">
                                 {primaryField.cell({ row })}
                               </h4>
                             )}

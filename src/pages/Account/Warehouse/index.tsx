@@ -13,7 +13,7 @@ import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialo
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import routes from './../../../components/Helpers/Routes';
 import WarhouseList from './WarhouseList';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 const Warehouse = ({ reference, api, id, accountId = '' }) => {
   const renderedFrom = camelCase(routes?.warehouse.title);

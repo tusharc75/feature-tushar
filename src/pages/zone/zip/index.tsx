@@ -4,6 +4,7 @@ import React from 'react';
 import { MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { read, utils, writeFile } from 'xlsx';
@@ -11,7 +12,6 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import CarouselDialog from '../../../components/CarouselDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import DeleteButton from '../../../components/Helpers/DeleteButton';
 import routes from '../../../components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import CreateZip from '../CreateZip';
