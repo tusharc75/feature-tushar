@@ -61,9 +61,11 @@ const ThemeButton = ({ borderColor = 'default', iconForMobile = <FaMobileButton 
 
   return (
     <HtmlTooltip title={tooltip} placement="top" arrow enterTouchDelay={0}>
-      <Button size="small" {...rest} {...getButtonProps}>
-        {isMobile ? (iconForMobile ? iconForMobile : children) : children}
-      </Button>
+      <span>
+        <Button size="small" {...rest} {...getButtonProps}>
+          {isMobile ? (iconForMobile ? iconForMobile : children) : children}
+        </Button>
+      </span>
     </HtmlTooltip>
   );
 };

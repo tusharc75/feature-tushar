@@ -279,16 +279,13 @@ const WorkOrderDetails = () => {
                         <span></span>
                         <span></span>
                       </span>
-                      <HtmlTooltip title="Complete Work Order" placement="top" arrow>
-                        <Button
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          size="small"
-                          onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
-                          className={'btn-outline-v1 '}
-                        >
-                          {isMobile && !isTablet ? <CloseIcon /> : 'Close'}
-                        </Button>
-                      </HtmlTooltip>
+                      <ThemeButton
+                        onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
+                        iconForMobile={<CloseIcon />}
+                        tooltip="Complete Work Order"
+                      >
+                        Close
+                      </ThemeButton>
                     </div>
                   )}
                 {permissions?.workOrder?.isUpdate &&
