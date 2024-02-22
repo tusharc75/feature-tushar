@@ -253,7 +253,6 @@ import TriggerNotificationHistory from './pages/TriggerNotificationHistory';
 import UserAttendance from './pages/UserAttendance';
 
 import DataList from './pages/DataList';
-import DataListItems from './pages/DataList/DataListItems';
 import DataListDetail from './pages/DataList/dataListdetail';
 
 import Forms from './pages/Forms';
