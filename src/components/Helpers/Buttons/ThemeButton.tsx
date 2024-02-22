@@ -1,5 +1,5 @@
 import React, { ReactNode, useMemo } from 'react';
-import { Button, ButtonProps, useMediaQuery } from '@material-ui/core';
+import { Button, ButtonProps, CircularProgress, useMediaQuery } from '@material-ui/core';
 import { FaMobileButton } from 'react-icons/fa6';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
@@ -7,6 +7,7 @@ type SimpleButton = {
   borderColor?: 'none';
   iconForMobile: ReactNode | boolean;
   tooltip?: string;
+  isLoading?: boolean;
 } & Omit<ButtonProps, 'variant'>;
 
 type OutlinedButtonProps = {
@@ -14,6 +15,7 @@ type OutlinedButtonProps = {
   iconForMobile: ReactNode | boolean;
   hasMobileBorder?: boolean;
   tooltip?: string;
+  isLoading?: boolean;
 } & ButtonProps;
 
 type RedOutlineProps = {
@@ -22,16 +24,25 @@ type RedOutlineProps = {
   hasMobileBorder?: boolean;
   mode?: 'dark' | 'light';
   tooltip?: string;
+  isLoading?: boolean;
 } & ButtonProps;
 
 type ButtonType = OutlinedButtonProps | RedOutlineProps | SimpleButton;
 
-const ThemeButton = ({ borderColor = 'default', iconForMobile = <FaMobileButton size={18} />, children, tooltip = '', ...rest }: ButtonType) => {
+const ThemeButton = ({
+  borderColor = 'default',
+  iconForMobile = <FaMobileButton size={18} />,
+  children,
+  tooltip = '',
+  isLoading,
+  disabled,
+  ...rest
+}: ButtonType) => {
   const isMobile = useMediaQuery('(max-width:600px)');
 
   const getButtonProps = useMemo(() => {
     const buttonProps: Pick<ButtonProps, 'className' | 'variant'> = {
-      className: `${iconForMobile ? 'max-[600px]:[max-width:36px_!important] max-[600px]:[height:32px_!important]' : ''} no-shadow`,
+      className: `${iconForMobile ? 'max-[600px]:[max-width:36px_!important] max-[600px]:[height:32px_!important]' : ''} no-shadow min-h-[32px]`,
       variant: 'contained'
     };
 
@@ -62,8 +73,8 @@ const ThemeButton = ({ borderColor = 'default', iconForMobile = <FaMobileButton 
   return (
     <HtmlTooltip title={tooltip} placement="top" arrow enterTouchDelay={0}>
       <span>
-        <Button size="small" {...rest} {...getButtonProps}>
-          {isMobile ? (iconForMobile ? iconForMobile : children) : children}
+        <Button size="small" disabled={disabled || isLoading} {...rest} {...getButtonProps}>
+          {isLoading ? <CircularProgress size={22} color="inherit" /> : isMobile ? iconForMobile ? iconForMobile : children : children}
         </Button>
       </span>
     </HtmlTooltip>
