@@ -22,7 +22,7 @@ import {
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
 import View from './View';
@@ -262,16 +262,13 @@ const WorkOrderDetails = () => {
                       </Button>
                     </HtmlTooltip>
                   ) : [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status) ? (
-                    <HtmlTooltip title={`Change Status ${WORK_ORDER_STATUS.onHold}`} placement="top" arrow>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        size="small"
-                        onClick={() => updateJobStatus(WORK_ORDER_STATUS.onHold)}
-                        className={'btn-outline-v1'}
-                      >
-                        {WORK_ORDER_STATUS.onHold}
-                      </Button>
-                    </HtmlTooltip>
+                    <ThemeButton
+                      iconForMobile={false}
+                      onClick={() => updateJobStatus(WORK_ORDER_STATUS.onHold)}
+                      tooltip={`Change Status ${WORK_ORDER_STATUS.onHold}`}
+                    >
+                      {WORK_ORDER_STATUS.onHold}
+                    </ThemeButton>
                   ) : null)}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
