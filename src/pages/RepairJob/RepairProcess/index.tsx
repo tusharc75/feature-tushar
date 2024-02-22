@@ -1,17 +1,17 @@
-import { useState, useEffect, Fragment, useContext, useRef } from 'react';
-import { Box, Grid, Typography, Button, Tooltip, IconButton, Menu, MenuItem, Dialog, TextField, CircularProgress } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, Typography } from '@material-ui/core';
+import moment from 'moment';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, REPAIR_PROCESS_STATUS, repairJob, dateTimeFormat } from '../../../constants/helpers';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { FcApproval, FcCancel } from 'react-icons/fc';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { FcApproval, FcCancel } from 'react-icons/fc';
-import moment from 'moment';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import DeleteButton from '../../../components/Helpers/DeleteButton';
+import CustomButton from '../../../components/Helpers/CustomButton';
+import { CustomDialogTransition, REPAIR_PROCESS_STATUS, dateTimeFormat, repairJob } from '../../../constants/helpers';
 
 const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, repairJobData }) => {
   const toastConfig = useContext(CustomToastContext);

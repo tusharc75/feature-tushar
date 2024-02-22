@@ -8,7 +8,7 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { withStyles } from '@material-ui/core/styles';
 import { Box, Button, Grid, IconButton, TextField, Typography } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import moment from 'moment';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -290,6 +290,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                           <Box ml={1} mt={1}>
                             <DeleteButton
                               id="detailDeleteButton"
+                              mode={'light'}
                               text={'Reject'}
                               onClick={() => {
                                 setResponse({ open: true, type: 'Reject', id: data?._id });

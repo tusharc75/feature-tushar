@@ -1,42 +1,31 @@
-import React, { useState, useContext, useEffect, Fragment } from 'react';
-import { Grid, Paper, Box, Button, Typography, IconButton, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Paper, Typography } from '@material-ui/core';
+import { ControlPoint } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { ControlPoint, PhotoCamera } from '@material-ui/icons';
-import { useParams, useHistory } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 
-import TeamUsers from './TeamUsers';
-import axiosInstance from '../../axios/axiosInstance';
-import { useData } from '../../StateProvider/Provider';
-import routes from '../../components/Helpers/Routes';
-import BoxWithBorder from '../../components/BoxWithBorder';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import AssignDataDialog from './AssignDataDialog';
-import CustomerAccounts from './CustomerAccounts';
-import CustomNodalStructure from '../../components/CustomNodalStructure/CustomNodalStructure';
-import {
-  customerAccount,
-  customerContact,
-  displayCardDate,
-  formatAmountWithCurrency,
-  opportunity,
-  projectSales,
-  quote
-} from '../../constants/helpers';
-import CreateProjectSales from './CreateProjectSales';
-import { isMobile, isTablet } from 'react-device-detect';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import { Edit } from '@material-ui/icons';
 import queryString from 'query-string';
-import { MdDelete, MdEdit } from 'react-icons/md';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdDelete } from 'react-icons/md';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { Edit } from '@material-ui/icons';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import BoxWithBorder from '../../components/BoxWithBorder';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CustomNodalStructure from '../../components/CustomNodalStructure/CustomNodalStructure';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { displayCardDate, formatAmountWithCurrency, projectSales } from '../../constants/helpers';
+import AssignDataDialog from './AssignDataDialog';
+import CreateProjectSales from './CreateProjectSales';
+import CustomerAccounts from './CustomerAccounts';
+import TeamUsers from './TeamUsers';
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -209,7 +198,7 @@ const ProjectSalesDetails = () => {
         .then(() => {
           setDeleting(false);
           setShowConfirmBox(false);
-          history.push(`${routes.projectSales.path}`)
+          history.push(`${routes.projectSales.path}`);
         })
         .catch(() => {
           setDeleting(false);

@@ -1,47 +1,30 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  Paper,
-  Grid,
-  CircularProgress,
-  Typography,
-  IconButton,
-  TableContainer,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  FormControlLabel,
-  Checkbox
-} from '@material-ui/core';
-import { ControlPoint, KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
+import { Box, Button, Checkbox, CircularProgress, FormControlLabel, Grid, IconButton, TextField, Typography } from '@material-ui/core';
+import { ControlPoint } from '@material-ui/icons';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { useData } from '../../StateProvider/Provider';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import RoleEngine from '../../components/Shared/RoleEngine';
-import Loader from '../../components/Loader';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import AssignedUsers from './AssignedUsers';
+import { camelCase, startCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 import { FaEye } from 'react-icons/fa';
-import BoxWithBorder from '../../components/BoxWithBorder';
-import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialog';
+import { useHistory, useParams } from 'react-router-dom';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY, SET_USER, USER_LOADING } from '../../StateProvider/actionTypes';
+import axiosInstance from '../../axios/axiosInstance';
 import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/AssignRegionalRolesUserDialog';
-import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialog';
+import BoxWithBorder from '../../components/BoxWithBorder';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import Loader from '../../components/Loader';
+import RoleEngine from '../../components/Shared/RoleEngine';
 import { PERMISSION } from '../../constants/Roles';
 import { ROLE_TIER, roleTypes, sidebarResource } from '../../constants/helpers';
-import { startCase, camelCase } from 'lodash';
-import PolicyResources from './PolicyResources';
+import AssignedUsers from './AssignedUsers';
 import DashboardResources from './DashboardResources';
 import DefaultResources from './DefaultResources';
-import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
+import PolicyResources from './PolicyResources';
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -386,7 +369,7 @@ const RoleDetailsPage = () => {
         .put(`/role/remove`, { ids: [id] })
         .then(() => {
           setShowConfirmBox(false);
-          history.push(`${routes.role.path}`)
+          history.push(`${routes.role.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
