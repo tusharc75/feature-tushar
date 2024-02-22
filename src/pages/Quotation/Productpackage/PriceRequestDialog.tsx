@@ -8,7 +8,8 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { withStyles } from '@material-ui/core/styles';
 import { Box, Button, Grid, IconButton, TextField, Typography } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { FaThumbsUp, FaThumbsDown } from 'react-icons/fa6';
 import moment from 'moment';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -274,30 +275,29 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                   {expandSupplierGrid === data?._id && (
                     <>
                       {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
-                        <Grid item xs={12} sm={12} md={12} container justify="flex-end">
-                          <Box ml={1} mt={1}>
-                            <Button
-                              size="small"
-                              color="primary"
-                              onClick={() => {
-                                handleAccept(data?._id);
-                              }}
-                              variant="contained"
-                            >
-                              Accept
-                            </Button>
-                          </Box>
-                          <Box ml={1} mt={1}>
-                            <DeleteButton
-                              id="detailDeleteButton"
-                              mode={'light'}
-                              text={'Reject'}
-                              onClick={() => {
-                                setResponse({ open: true, type: 'Reject', id: data?._id });
-                              }}
-                            />
-                          </Box>
-                        </Grid>
+                        <div className="flex flex-wrap gap-2 justify-end">
+                          <ThemeButton
+                            borderColor="default"
+                            iconForMobile={<FaThumbsUp />}
+                            onClick={() => {
+                              handleAccept(data?._id);
+                            }}
+                            tooltip="Accept"
+                          >
+                            Accept
+                          </ThemeButton>
+                          <ThemeButton
+                            borderColor="red"
+                            hasMobileBorder
+                            iconForMobile={<FaThumbsDown />}
+                            onClick={() => {
+                              setResponse({ open: true, type: 'Reject', id: data?._id });
+                            }}
+                            tooltip="Reject"
+                          >
+                            Reject
+                          </ThemeButton>
+                        </div>
                       )}
                       <CustomReactTable
                         height={'calc(100vh - 393px)'}
