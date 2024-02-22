@@ -94,7 +94,7 @@ const ServiceMasterDetailsPage = () => {
               <Skeleton variant="text" width="150px" height="32px" />
             ) : (
               <>
-                {permissions?.product?.isUpdate && (
+                {permissions?.product?.isUpdate && !isMobile && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     size="small"
