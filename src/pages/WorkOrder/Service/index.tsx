@@ -127,7 +127,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [showManagePurchaseOrder, setShowManagePurchaseOrder] = useState(false);
   const [isColapsed, setIsColapsed] = useState(resource === sidebarResource.workOrder ? false : true);
   const mobScreen = useMediaQuery('(max-width:768px)');
-  const [disableCompleteFail, setDisableCompleteFail] = useState(false);
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [comment, setComment] = useState('');
   const [bottomBarOpen, setBottomBarOpen] = useState(false);
@@ -305,6 +304,23 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         if (openCompleteDialog) {
           setOpenCompleteDialog(false);
         }
+      });
+  };
+
+  const handleCompleteService = (serviceId, uniqueId) => {
+    const data = [{
+      workOrder: workOrderId,
+      service: serviceId,
+      uniqueId: uniqueId,
+      status: WORKORDER_SERVICE_STATUS.completed
+    }];
+    axiosInstance()
+      .put(`${workOrder.api}/service/work-orders-services-status`, data)
+      .then(({ data }) => {
+        fetchServiceData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
       });
   };
 
@@ -868,7 +884,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                       workOrderData={workOrderData}
                       selectedService={selectedService}
                       allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
-                      setDisableCompleteFail={setDisableCompleteFail}
                       fetchService={fetchServiceData}
                       resource={resource}
                       stepSubmitedData={stepSubmitedData}
@@ -1225,13 +1240,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               )}
               <MenuItem
                 disabled={
-                  isAllowedToServiceEdit && !disableCompleteFail &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                      selectedService?.status)
+                  isAllowedToServiceEdit && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(
+                    selectedService?.status)
                     ? false : true
                 }
                 onClick={() => {
-                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
+                  handleCompleteService(selectedService?._id, selectedService?.uniqueId);
                   setAnchorEl(null);
                 }}
               >

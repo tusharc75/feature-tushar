@@ -133,7 +133,7 @@ export default function useColumns() {
     if (!currency) {
       currency = user?.user?.brandCurrency || 'USD';
     }
-    let gridMetaData = getGridMetaDataFromLocalStorage()
+    let gridMetaData = getGridMetaDataFromLocalStorage();
     let updatedTitle = camelCase(renderedFrom);
     const column = [];
 
@@ -148,7 +148,10 @@ export default function useColumns() {
         width: 200,
         type: field?.type,
         Header: headerName[field?.fieldName] ?? field?.fieldLabel,
-        show: gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
+        show:
+          gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide.indexOf(field?.fieldName) >= 0
+            ? false
+            : true,
         primaryField: field?.primaryField ?? false,
         decimalPlaces: field?.decimalPlaces || 0
       };
@@ -218,7 +221,7 @@ export default function useColumns() {
                 let rows = info.table.getExpandedRowModel().rows;
                 const total = rows
                   ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(fieldName) && !isNaN(f.original[fieldName]))
-                  .reduce((sum, row) => row.original[fieldName] + sum, 0);
+                  .reduce((sum, row) => Number(row.original[fieldName]) + sum, 0);
                 return (
                   <>
                     {field?.isHideColumnSum
@@ -281,8 +284,8 @@ export default function useColumns() {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
               : isObject(original?.[field?.fieldName])
-                ? original?.[field?.fieldName]?.optionLabel
-                : original?.[field?.fieldName];
+              ? original?.[field?.fieldName]?.optionLabel
+              : original?.[field?.fieldName];
           },
           cell: ({ row }) => <DropdownCell permissions={permissions} permissionForLinks={permissionForLinks} field={field} original={row?.original} />
         });
@@ -399,7 +402,7 @@ export default function useColumns() {
             let rows = info.table.getExpandedRowModel().rows;
             const total = rows
               ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))
-              .reduce((sum, row) => row.original[commonFieldData.accessor] + sum, 0);
+              .reduce((sum, row) => Number(row.original[commonFieldData.accessor]) + sum, 0);
             return <>{field?.isHideColumnSum ? '' : total}</>;
           }
         });
