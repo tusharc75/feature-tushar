@@ -62,7 +62,7 @@ const getTotalTime = (stepTimes: any) => {
       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
     }
   });
-  stepTimes.forEach((item) => { });
+  stepTimes.forEach((item) => {});
   return { shouldTimerRun, totalTimes };
 };
 
@@ -103,8 +103,17 @@ const RenderTotalTime = ({ stepTimes }: any) => {
   );
 };
 
-const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData, resource,
-  defaultSelectedService, setDefaultSelectedService, minHeightClass = null }) => {
+const Service = ({
+  workOrderId,
+  allowedToEdit,
+  workOrderData,
+  completed,
+  fetchWorkOrderData,
+  resource,
+  defaultSelectedService,
+  setDefaultSelectedService,
+  minHeightClass = null
+}) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -202,12 +211,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
             if (element?.type === MATERIAL_TYPE.service) {
               if (element.order === order || index <= pendingServiceIndex) {
                 if (!completed) {
-                  if ((allowedToEdit || (element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id)
-                    || (!element?.assignedUsers?.length &&
-                      element?.competencies?.filter(e => user?.competencies?.includes(e))?.length)))) {
+                  if (
+                    allowedToEdit ||
+                    element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) ||
+                    (!element?.assignedUsers?.length && element?.competencies?.filter((e) => user?.competencies?.includes(e))?.length)
+                  ) {
                     element.clickable = true;
-                  }
-                  else {
+                  } else {
                     element.clickable = false;
                   }
                 } else {
@@ -239,18 +249,23 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           if (defaultSelectedService) {
             setSelectedService(services?.find((e) => e?.uniqueId === defaultSelectedService) || null);
             if (setDefaultSelectedService) {
-              setDefaultSelectedService(null)
+              setDefaultSelectedService(null);
             }
-          }
-          else {
+          } else {
             setSelectedService(services[pendingServiceIndex]);
           }
         }
-
       }
       setServiceSteps(services);
-      if ((workOrderData?.canComplete && !services.filter((e) => e.type === MATERIAL_TYPE.service)?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status)))
-        || (!workOrderData?.canComplete && services.filter((e) => e.type === MATERIAL_TYPE.service)?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status)))
+      if (
+        (workOrderData?.canComplete &&
+          !services
+            .filter((e) => e.type === MATERIAL_TYPE.service)
+            ?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status))) ||
+        (!workOrderData?.canComplete &&
+          services
+            .filter((e) => e.type === MATERIAL_TYPE.service)
+            ?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status)))
       ) {
         fetchWorkOrderData();
       }
@@ -291,7 +306,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   };
 
   const updateServiceStatus = (uniqueId, status) => {
-    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status, comment })
+    axiosInstance()
+      .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status, comment })
       .then(({ data: { data } }) => {
         fetchServiceData();
         if (openCompleteDialog) {
@@ -308,12 +324,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   };
 
   const handleCompleteService = (serviceId, uniqueId) => {
-    const data = [{
-      workOrder: workOrderId,
-      service: serviceId,
-      uniqueId: uniqueId,
-      status: WORKORDER_SERVICE_STATUS.completed
-    }];
+    const data = [
+      {
+        workOrder: workOrderId,
+        service: serviceId,
+        uniqueId: uniqueId,
+        status: WORKORDER_SERVICE_STATUS.completed
+      }
+    ];
     axiosInstance()
       .put(`${workOrder.api}/service/work-orders-services-status`, data)
       .then(({ data }) => {
@@ -368,7 +386,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         if (id === selectedService?.uniqueId) {
           setSelectedService(null);
         }
-        fetchWorkOrderData()
+        fetchWorkOrderData();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -511,9 +529,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       });
   };
 
-  const isAllowedToServiceEdit = !completed &&
-    (allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id)
-      || (!selectedService?.assignedUsers?.length && selectedService?.competencies?.filter(e => user?.competencies?.includes(e))?.length))
+  const isAllowedToServiceEdit =
+    !completed &&
+    (allowedToEdit ||
+      selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) ||
+      (!selectedService?.assignedUsers?.length && selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length));
 
   const openAddServiceActions = (event) => {
     setAddServiceAnchorEl(event.currentTarget);
@@ -532,14 +552,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           message: data.message,
           severity: 'success'
         });
-        fetchServiceData()
+        fetchServiceData();
         setOpenProperties(false);
       })
       .catch((error) => {
         setOpenProperties(false);
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   return (
     <Box>
@@ -569,8 +589,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                     justifyContent: isColapsed ? 'space-around' : 'flex-end'
                   }}
                 >
-                  {!isColapsed && (
-                    resource === sidebarResource.workOrder &&
+                  {!isColapsed && resource === sidebarResource.workOrder && (
                     <>
                       <Button
                         variant={'outlined'}
@@ -755,13 +774,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             </HtmlTooltip>
                                           </Box>
                                         )}
-                                        {data?.comment &&
+                                        {data?.comment && (
                                           <Box ml={1}>
                                             <HtmlTooltip enterTouchDelay={0} title={data?.comment}>
                                               <MessageIcon style={{ fontSize: 20 }} />
                                             </HtmlTooltip>
                                           </Box>
-                                        }
+                                        )}
                                       </Box>
                                       {/* Chips */}
                                       <Box style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', flexBasis: '100%', gap: '8px' }}>
@@ -808,7 +827,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                               <MoreHorizIcon />
                                             </IconButton>
                                           </div>
-                                          {resource === sidebarResource.workOrder &&
+                                          {resource === sidebarResource.workOrder && (
                                             <div style={{ flexBasis: 'max-content' }}>
                                               <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
                                                 <IconButton
@@ -823,7 +842,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                 </IconButton>
                                               </HtmlTooltip>
                                             </div>
-                                          }
+                                          )}
                                           {/* PassFail */}
                                           <div style={{ flexBasis: '100%' }}>
                                             {data?.type === 'service' && data?.serviceStatus && (
@@ -1049,20 +1068,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
+                                                        ? '#fabebe'
+                                                        : '#FFF5DD',
                                                     color:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#048E0A'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fa0202'
-                                                          : '#FF8C21',
+                                                        ? '#fa0202'
+                                                        : '#FF8C21',
                                                     background:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
+                                                        ? '#fabebe'
+                                                        : '#FFF5DD',
                                                     fontWeight: 700
                                                   }}
                                                 />
@@ -1176,8 +1195,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               )}
               {resource === sidebarResource.workOrder && (
                 <MenuItem
-                  disabled={[WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status)
-                    && isAllowedToServiceEdit && selectedService?.clickable ? false : true}
+                  disabled={
+                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                    isAllowedToServiceEdit &&
+                    selectedService?.clickable
+                      ? false
+                      : true
+                  }
                   onClick={() => {
                     setAssignSteps(true);
                     setAnchorEl(null);
@@ -1188,7 +1212,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               )}
               {resource === sidebarResource.workOrder && (
                 <MenuItem
-                  disabled={allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
+                  disabled={
+                    allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status)
+                      ? false
+                      : true
+                  }
                   onClick={() => {
                     setSetpsInOtherServices(true);
                     setAnchorEl(null);
@@ -1220,8 +1248,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               >
                 Upload Documents
               </MenuItem>
-              {!user?.brandPolicy?.workOrderConsumableHide && (
-                resource === sidebarResource.workOrder &&
+              {!user?.brandPolicy?.workOrderConsumableHide && resource === sidebarResource.workOrder && (
                 <MenuItem
                   disabled={!isAllowedToServiceEdit}
                   onClick={() => {
@@ -1240,9 +1267,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               )}
               <MenuItem
                 disabled={
-                  isAllowedToServiceEdit && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(
-                    selectedService?.status)
-                    ? false : true
+                  isAllowedToServiceEdit && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status)
+                    ? false
+                    : true
                 }
                 onClick={() => {
                   handleCompleteService(selectedService?._id, selectedService?.uniqueId);
@@ -1252,8 +1279,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 Complete Service
               </MenuItem>
               <MenuItem
-                disabled={isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) ? false : true}
+                disabled={
+                  isAllowedToServiceEdit && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status)
+                    ? false
+                    : true
+                }
                 onClick={() => {
                   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.skipped);
                   setAnchorEl(null);
@@ -1290,14 +1320,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  setOpenProperties(true)
+                  setOpenProperties(true);
                   setAnchorEl(null);
                 }}
                 disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
               >
                 Properties
               </MenuItem>
-              {resource === sidebarResource.workOrder &&
+              {resource === sidebarResource.workOrder && (
                 <MenuItem
                   disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
                   onClick={() => {
@@ -1306,7 +1336,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   }}
                 >
                   Delete
-                </MenuItem>}
+                </MenuItem>
+              )}
             </Menu>
           )}
         </Grid>
@@ -1552,10 +1583,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         <ConfigureFields
           serviceId={selectedService?._id}
           handleClose={() => {
-            setOpenProperties(false)
+            setOpenProperties(false);
           }}
           handleSucess={(data) => {
-            handleProperties(data)
+            handleProperties(data);
           }}
           reference={'workOrder'}
           fields={selectedService?.fields || []}

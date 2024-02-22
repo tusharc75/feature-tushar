@@ -22,7 +22,7 @@ import {
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
 import View from './View';
@@ -262,16 +262,13 @@ const WorkOrderDetails = () => {
                       </Button>
                     </HtmlTooltip>
                   ) : [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status) ? (
-                    <HtmlTooltip title={`Change Status ${WORK_ORDER_STATUS.onHold}`} placement="top" arrow>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        size="small"
-                        onClick={() => updateJobStatus(WORK_ORDER_STATUS.onHold)}
-                        className={'btn-outline-v1'}
-                      >
-                        {WORK_ORDER_STATUS.onHold}
-                      </Button>
-                    </HtmlTooltip>
+                    <ThemeButton
+                      iconForMobile={false}
+                      onClick={() => updateJobStatus(WORK_ORDER_STATUS.onHold)}
+                      tooltip={`Change Status ${WORK_ORDER_STATUS.onHold}`}
+                    >
+                      {WORK_ORDER_STATUS.onHold}
+                    </ThemeButton>
                   ) : null)}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
@@ -282,41 +279,35 @@ const WorkOrderDetails = () => {
                         <span></span>
                         <span></span>
                       </span>
-                      <HtmlTooltip title="Complete Work Order" placement="top" arrow>
-                        <Button
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          size="small"
-                          onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
-                          className={'btn-outline-v1 '}
-                        >
-                          {isMobile && !isTablet ? <CloseIcon /> : 'Close'}
-                        </Button>
-                      </HtmlTooltip>
+                      <ThemeButton
+                        onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
+                        iconForMobile={<CloseIcon />}
+                        tooltip="Complete Work Order"
+                      >
+                        Close
+                      </ThemeButton>
                     </div>
                   )}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
                   workOrderData?.status !== WORK_ORDER_STATUS.completed &&
                   !workOrderData?.deleted && (
-                    <Button variant={'contained'} size="small" className={'btn-outline-v1'} onClick={openAddActions} aria-controls="add-menu">
-                      {'Create Version'}
-                      <ExpandMore fontSize="small" />
-                    </Button>
+                    <>
+                      <ThemeButton onClick={openAddActions} aria-controls="add-menu" iconForMobile={false} tooltip="Create Version">
+                        {'Create Version'}
+                        <ExpandMore fontSize="small" />
+                      </ThemeButton>
+                    </>
                   )}
                 {workOrderData?.versions?.length && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="primary"
-                    size="small"
-                    className={'btn-outline-v1'}
+                  <ThemeButton
                     onClick={() => {
                       setVersionDialog(true);
                     }}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                    iconForMobile={<VscVersions />}
                   >
-                    {isMobile && !isTablet ? <VscVersions size={20} /> : `Versions : ${workOrderData?.versions?.length + 1}`}
-                  </Button>
+                    Versions : {workOrderData?.versions?.length + 1}
+                  </ThemeButton>
                 )}
                 <Menu
                   anchorEl={addAnchorEl}
