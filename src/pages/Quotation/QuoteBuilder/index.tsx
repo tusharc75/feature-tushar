@@ -1,21 +1,20 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, Tooltip, useMediaQuery } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { prepareDataForGrid, quotation } from 'src/constants/helpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import SendEmail from '../SendEmail';
-import { capitalize } from 'lodash';
+import { Box, Button, IconButton, useMediaQuery } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { useData } from 'src/StateProvider/Provider';
+import { capitalize } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';
 import { useHistory } from 'react-router-dom';
+import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
+import { prepareDataForGrid, quotation } from 'src/constants/helpers';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import routes from '../../../components/Helpers/Routes';
 
 const QuoteBuilder = ({
   quotationData,
@@ -348,58 +347,46 @@ const QuoteBuilder = ({
       <>
         {permissions?.quotation?.isUpdate &&
           (user?.user?._id === quotationData?.owner?.optionValue || quotationData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
-            <Tooltip title="Edit PDF Template">
-              <Button
-                onClick={() => {
-                  quotationData?.pdfTemplate?.optionValue &&
-                    history.push(
-                      `/quote-pdf-template/detail/${quotationData?.pdfTemplate?.optionValue}?quotation=${quotationData?._id}&version=${versionData?.version}`,
-                      '_blank'
-                    );
-                }}
-                variant="outlined"
-                size="small"
-                className="mr-1"
-                startIcon={isMobile ? '' : <AiFillEdit />}
-                color="primary"
-              >
-                {isMobile ? <AiFillEdit size={20} /> : ''}
-                {isMobile ? '' : 'PDF Template'}
-              </Button>
-            </Tooltip>
+            <ThemeButton
+              onClick={() => {
+                quotationData?.pdfTemplate?.optionValue &&
+                  history.push(
+                    `/quote-pdf-template/detail/${quotationData?.pdfTemplate?.optionValue}?quotation=${quotationData?._id}&version=${versionData?.version}`,
+                    '_blank'
+                  );
+              }}
+              hasMobileBorder
+              iconForMobile={<AiFillEdit />}
+              tooltip="Edit PDF Template"
+            >
+              <AiFillEdit size={20} className="mr-2" /> PDF Template
+            </ThemeButton>
           )}
         {currentStep === 'Quote Approval' && (
           <>
-            <HtmlTooltip placement="top" arrow enterTouchDelay={0} title={`Process ${routes.quotation.title}`}>
-              <span>
-                <Button
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                  disabled={sentToCustomer}
-                  onClick={() => {
-                    handleSendToCustomer(false);
-                  }}
-                >
-                  {`Process ${routes.quotation.title}`}
-                </Button>
-              </span>
-            </HtmlTooltip>
-            <HtmlTooltip placement="top" arrow enterTouchDelay={0} title={`Send to Customer`}>
-              <span>
-                <Button
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                  disabled={sentToCustomer}
-                  onClick={() => {
-                    handleSendToCustomer(true);
-                  }}
-                >
-                  Send to Customer
-                </Button>
-              </span>
-            </HtmlTooltip>
+            <ThemeButton
+              iconForMobile={false}
+              hasMobileBorder
+              disabled={sentToCustomer}
+              onClick={() => {
+                handleSendToCustomer(false);
+              }}
+              tooltip={`Process ${routes.quotation.title}`}
+            >
+              {`Process ${routes.quotation.title}`}
+            </ThemeButton>
+
+            <ThemeButton
+              iconForMobile={false}
+              hasMobileBorder
+              disabled={sentToCustomer}
+              onClick={() => {
+                handleSendToCustomer(true);
+              }}
+              tooltip="Send to Customer"
+            >
+              Send to Customer
+            </ThemeButton>
           </>
         )}
         {currentStep === 'DOA' && DOAData?.length === 0 && (

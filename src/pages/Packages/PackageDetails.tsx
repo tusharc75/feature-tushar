@@ -16,7 +16,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { ACTIVITY_RESOURCE, packages } from 'src/constants/helpers';

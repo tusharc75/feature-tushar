@@ -1,27 +1,27 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Tabs, Tab } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { camelCase } from 'lodash';
+import queryString from 'query-string';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from 'react-icons/fa';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
 import { ACTIVITY_RESOURCE, demandOrder } from '../../constants/helpers';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import TabPanel from '../../components/TabPanel';
-import queryString from 'query-string';
-import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Material from './Material';
-import { camelCase } from 'lodash';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Edit } from '@material-ui/icons';
 
 const DemandOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -42,7 +42,6 @@ const DemandOrderDetails = () => {
   const [fields, setFields] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);

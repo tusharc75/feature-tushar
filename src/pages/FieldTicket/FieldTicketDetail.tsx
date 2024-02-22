@@ -15,7 +15,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
 import Versions from 'src/components/Versions';

@@ -22,7 +22,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomNodalStructure from '../../components/CustomNodalStructure/CustomNodalStructure';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
 import ProcessFlow from '../../components/ProcessFlow';

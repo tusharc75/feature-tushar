@@ -22,7 +22,7 @@ import {
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
 import View from './View';
@@ -250,7 +250,7 @@ const WorkOrderDetails = () => {
                   )}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
-                  (workOrderData?.status === WORK_ORDER_STATUS.onHold ?
+                  (workOrderData?.status === WORK_ORDER_STATUS.onHold ? (
                     <HtmlTooltip title={`Change Status ${WORK_ORDER_STATUS.inProgress}`} placement="top" arrow>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -260,19 +260,19 @@ const WorkOrderDetails = () => {
                       >
                         {WORK_ORDER_STATUS.inProgress}
                       </Button>
-                    </HtmlTooltip> :
-                    [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status) ?
-                      <HtmlTooltip title={`Change Status ${WORK_ORDER_STATUS.onHold}`} placement="top" arrow>
-                        <Button
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          size="small"
-                          onClick={() => updateJobStatus(WORK_ORDER_STATUS.onHold)}
-                          className={'btn-outline-v1'}
-                        >
-                          {WORK_ORDER_STATUS.onHold}
-                        </Button>
-                      </HtmlTooltip> : null)
-                }
+                    </HtmlTooltip>
+                  ) : [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status) ? (
+                    <HtmlTooltip title={`Change Status ${WORK_ORDER_STATUS.onHold}`} placement="top" arrow>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        size="small"
+                        onClick={() => updateJobStatus(WORK_ORDER_STATUS.onHold)}
+                        className={'btn-outline-v1'}
+                      >
+                        {WORK_ORDER_STATUS.onHold}
+                      </Button>
+                    </HtmlTooltip>
+                  ) : null)}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
                   workOrderData?.canComplete &&
@@ -294,12 +294,15 @@ const WorkOrderDetails = () => {
                       </HtmlTooltip>
                     </div>
                   )}
-                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.deleted && (
-                  <Button variant={'contained'} size="small" className={'btn-outline-v1'} onClick={openAddActions} aria-controls="add-menu">
-                    {'Create Version'}
-                    <ExpandMore fontSize="small" />
-                  </Button>
-                )}
+                {permissions?.workOrder?.isUpdate &&
+                  allowedToEdit &&
+                  workOrderData?.status !== WORK_ORDER_STATUS.completed &&
+                  !workOrderData?.deleted && (
+                    <Button variant={'contained'} size="small" className={'btn-outline-v1'} onClick={openAddActions} aria-controls="add-menu">
+                      {'Create Version'}
+                      <ExpandMore fontSize="small" />
+                    </Button>
+                  )}
                 {workOrderData?.versions?.length && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -463,7 +466,7 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} currentVersion={(workOrderData?.versions?.length + 1) || 1} />}
+          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} currentVersion={workOrderData?.versions?.length + 1 || 1} />}
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>

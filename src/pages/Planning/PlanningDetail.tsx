@@ -11,7 +11,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE, PLANNING_STATUS } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';

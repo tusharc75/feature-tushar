@@ -1,9 +1,9 @@
-import { useState, useEffect, useContext} from 'react';
+import { useState, useEffect, useContext } from 'react';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { Box, Grid, IconButton, Menu, MenuItem, Button } from '@material-ui/core';
+import { Box, Grid, IconButton, Menu, MenuItem, Button, useMediaQuery } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import StepDialog from './StepDialog';
-import {  serviceMaster } from 'src/constants/helpers';
+import { serviceMaster } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -16,12 +16,15 @@ import EditIcon from '@material-ui/icons/Edit';
 import FieldDialog from './FieldDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { Build, ExpandMore } from '@material-ui/icons';
+import { Build, ExpandMore, LowPriority } from '@material-ui/icons';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Steps = ({ serviceId }) => {
+  const isMobile = useMediaQuery('(max-width:600px)');
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -34,7 +37,6 @@ const Steps = ({ serviceId }) => {
   const [stepDialog, setStepDialog] = useState({ open: false, stepId: '' });
   const [stepFieldsDialog, setStepFieldsDialog] = useState({ open: false, stepIds: [] });
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
@@ -269,105 +271,82 @@ const Steps = ({ serviceId }) => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setStepDialog({ open: true, stepId: '' });
+          }}
+        >
+          Add Steps
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorActionEl(null);
+  const rightSideContents = () => {
+    return (
+      <>
+        {dataRows?.length ? (
+          <ThemeButton iconForMobile={<LowPriority />} onClick={() => setArrangeView(true)} tooltip="Arrange" borderColor="default">
+            <DragIndicatorIcon fontSize="small" className="mr-1 dark:text-white text-[var(--primary)]" /> Arrange
+          </ThemeButton>
+        ) : null}
+        {!isMobile ? (
+          <ImportExportMenu
+            permissions={permissions?.packages}
+            module="stpes"
+            api={`${serviceMaster.api}/steps/${serviceId}`}
+            afterImportCompleted={() => {
+              fetchStepsData();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
+            additionalParams={`serviceId=${serviceId}`}
+          />
+        ) : null}
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setStepFieldsDialog({ open: true, stepIds: selectedRecords?.map((e) => e._id) });
+          }}
+        >
+          Add Bulk Fields
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <>
       {permissions?.serviceMaster?.isUpdate && (
-        <Box p={1}>
-          <Grid container>
-            <Grid item xs={3} md={3} sm={3}>
-              <Button
-                size="small"
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  setStepDialog({ open: true, stepId: '' });
-                }}
-              >
-                Add Steps
-              </Button>
-            </Grid>
-            <Grid item xs={9} md={9} sm={9}>
-              <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-                {dataRows?.length ? (
-                  <Button
-                    variant="outlined"
-                    className="btn-outline-v1"
-                    size="small"
-                    onClick={() => setArrangeView(true)}
-                    startIcon={<DragIndicatorIcon fontSize="small" className="mr-1 dark:text-white text-[var(--primary)]" />}
-                  >
-                    Arrange
-                  </Button>
-                ) : null}
-                <Box ml={1} />
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length === 0}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorActionEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorActionEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      setStepFieldsDialog({ open: true, stepIds: selectedRecords?.map((e) => e._id) });
-                    }}
-                  >
-                    Add Bulk Fields
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-                <Box ml={1} />
-
-                <ImportExportMenu
-                  permissions={permissions?.packages}
-                  module="stpes"
-                  api={`${serviceMaster.api}/steps/${serviceId}`}
-                  afterImportCompleted={() => {
-                    fetchStepsData();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={selectedRecords.length}
-                  ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
-                  additionalParams={`serviceId=${serviceId}`}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            rightSideContents={rightSideContents()}
+            hasXpadding={false}
+          />
+        </>
       )}
       {columns ? (
         <CustomReactTable

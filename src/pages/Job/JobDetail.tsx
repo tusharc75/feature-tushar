@@ -5,7 +5,7 @@ import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
 import { useParams, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
