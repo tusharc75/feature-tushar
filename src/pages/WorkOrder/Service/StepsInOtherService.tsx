@@ -5,12 +5,13 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS, sidebarResource, workOrder } from 'src/constants/helpers';
-import { Add, DeleteOutline, FileCopyOutlined, EditOutlined, DragIndicator } from '@material-ui/icons';
+import { Add, DeleteOutline, FileCopyOutlined, EditOutlined, DragIndicator, LowPriority } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -171,10 +172,10 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
     >
       <CustomDialogHeader title={'Step Information'} onClose={onClose} showRequiredLabel={false} />
       <CustomDialogContent>
-        <Box display="flex" alignContent="center" justifyContent="space-between">
+        <Box className="flex flex-wrap gap-2 justify-between items-center">
           <Autocomplete
             id="service"
-            style={{ minWidth: '300px' }}
+            className="flex-grow min-w-[250px] min-[600px]:max-w-[300px]"
             options={serviceOptions}
             getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
             getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -184,44 +185,50 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
             }}
             disableClearable
             renderInput={(params) => (
-              <TextField {...params} margin="dense" variant="outlined" label="Select Service" placeholder="Select Service" name="service" />
+              <TextField
+                {...params}
+                margin="none"
+                size="small"
+                variant="outlined"
+                label="Select Service"
+                placeholder="Select Service"
+                name="service"
+              />
             )}
           />
-          <Box mt={1} display="flex" alignItems="center">
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
+          <Box className="flex flex-wrap gap-2 items-center ml-auto">
+            <ThemeButton
+              iconForMobile={<LowPriority />}
               disabled={
                 allowedToEdit &&
-                  selectedService &&
-                  steps?.length > 0 &&
-                  resource === sidebarResource.workOrder &&
-                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                    selectedService?.status
-                  )
+                selectedService &&
+                steps?.length > 0 &&
+                resource === sidebarResource.workOrder &&
+                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                  selectedService?.status
+                )
                   ? false
                   : true
               }
               onClick={() => setArrangeView(true)}
+              tooltip="Arrange"
             >
-              <DragIndicator className="mr-1" fontSize="small" />
+              <DragIndicator className="-ml-2" fontSize="small" />
               Arrange
-            </Button>
-            <Box ml={1}></Box>
-            <Button
+            </ThemeButton>
+            <ThemeButton
+              iconForMobile={<Add />}
               variant={'outlined'}
               color="primary"
               size="small"
-              startIcon={<Add />}
               aria-controls="add-menu"
               disabled={!selectedService}
               onClick={() => {
                 setManageStep({ open: true, clone: false, data: null });
               }}
             >
-              Add Steps
-            </Button>
+              <Add className="-ml-2" /> Add Steps
+            </ThemeButton>
           </Box>
         </Box>
         <Box mt={2}>
