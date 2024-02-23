@@ -586,6 +586,7 @@ const Service = ({
                         resource={resource}
                         stepSubmitedData={stepSubmitedData}
                         minHeightClass={minHeightClass}
+                        isMobile={mobScreen}
                       />
                     ) : (
                       <Quotation />

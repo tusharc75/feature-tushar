@@ -73,11 +73,27 @@ const ThemeButton = ({
     return buttonProps;
   }, [borderColor, isMobile, rest]);
 
+  const loader = useMemo(() => (isLoading ? <CircularProgress size={22} color="inherit" className="ml-1" /> : ''), [isLoading]);
+
   return (
     <HtmlTooltip title={tooltip} placement="top" arrow enterTouchDelay={0}>
       <span>
         <Button size="small" disabled={disabled || isLoading} {...rest} {...getButtonProps}>
-          {isLoading ? <CircularProgress size={22} color="inherit" /> : isMobile ? iconForMobile ? iconForMobile : children : children}
+          {isMobile ? (
+            iconForMobile ? (
+              <>
+                {iconForMobile} {loader}
+              </>
+            ) : (
+              <>
+                {children} {loader}
+              </>
+            )
+          ) : (
+            <>
+              {children} {loader}
+            </>
+          )}
         </Button>
       </span>
     </HtmlTooltip>
