@@ -232,18 +232,22 @@ const RenderSingleService = ({
       }}
     >
       <div className="flex items-start gap-2">
-        {data?.type === 'service' ? (
-          <div
-            className={` bg-[var(--dark-primary,_var(--primary))] text-white w-[20px] h-[20px] rounded-full text-center flex justify-center items-center text-[10px] flex-shrink-0`}
-          >
-            <span>{data?.order}</span>
-          </div>
-        ) : (
-          data?.type === 'quotation' && <FormatQuote style={{ maxWidth: '20px', marginRight: '-10px' }} />
-        )}
+        <HtmlTooltip enterTouchDelay={0} placement="top" arrow title={isMobile ? data?.serviceName : ''}>
+          {data?.type === 'service' ? (
+            <div
+              className={` bg-[var(--dark-primary,_var(--primary))] text-white w-[20px] h-[20px] rounded-full text-center flex justify-center items-center text-[10px] flex-shrink-0`}
+            >
+              <span>{data?.order}</span>
+            </div>
+          ) : (
+            data?.type === 'quotation' && <FormatQuote style={{ maxWidth: '20px', marginRight: '-10px' }} />
+          )}
+        </HtmlTooltip>
 
         <div className={`flex items-center relative gap-2 ${isColapsed ? 'hidden' : ''}`}>
-          <h6 className="text-[16px] font-semibold line-clamp-1 min-w-0">{data?.serviceName}</h6>
+          <HtmlTooltip enterTouchDelay={0} placement="top" arrow title={isMobile ? data?.serviceName : ''}>
+            <h6 className="text-[16px] font-semibold line-clamp-1 min-w-0">{data?.serviceName}</h6>
+          </HtmlTooltip>
           {user?.brandPolicy?.servicePrePost && data?.type === 'service' && (
             <>
               {data?.preWork ? (
@@ -253,7 +257,7 @@ const RenderSingleService = ({
                   </span>
                 </HtmlTooltip>
               ) : (
-                <HtmlTooltip enterTouchDelay={0} title="Post Work Service">
+                <HtmlTooltip enterTouchDelay={0} title="Post Work Service" arrow>
                   <span>
                     <PostWorkIcon style={{ verticalAlign: 'middle' }} />
                   </span>
@@ -262,21 +266,21 @@ const RenderSingleService = ({
             </>
           )}
           {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-            <HtmlTooltip enterTouchDelay={0} title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+            <HtmlTooltip arrow enterTouchDelay={0} title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
               <span>
                 <People style={{ fontSize: 20 }} />
               </span>
             </HtmlTooltip>
           )}
           {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
-            <HtmlTooltip enterTouchDelay={0} title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}>
+            <HtmlTooltip arrow enterTouchDelay={0} title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}>
               <span>
                 <WorkStations className="align-text-top" />
               </span>
             </HtmlTooltip>
           )}
           {data?.comment && (
-            <HtmlTooltip enterTouchDelay={0} title={data?.comment}>
+            <HtmlTooltip arrow enterTouchDelay={0} title={data?.comment}>
               <span>
                 <Message style={{ fontSize: 20 }} />
               </span>
@@ -315,10 +319,16 @@ const RenderSingleService = ({
                 )}
                 {/* PassFail */}
                 {data?.type === 'service' && data?.serviceStatus && (
-                  <RenderStatusIcon style={{ maxWidth: 24, height: 24, marginTop: 3 }} stepStatus={data?.serviceStatus} />
+                  <RenderStatusIcon
+                    className={`${isMobile ? 'max-w-[16px] h-[16px]' : 'max-w-[24px] h-[24px]'} flex-shrink-0 mt-[3px]`}
+                    stepStatus={data?.serviceStatus}
+                  />
                 )}
                 {data?.type === 'quotation' && quotationData && (
-                  <RenderStatusIcon style={{ maxWidth: 24, height: 24, marginTop: 3 }} stepStatus={quotationData?.status} />
+                  <RenderStatusIcon
+                    className={`${isMobile ? 'max-w-[16px] h-[16px]' : 'max-w-[24px] h-[24px]'} flex-shrink-0 mt-[3px]`}
+                    stepStatus={quotationData?.status}
+                  />
                 )}
               </div>
             )}
