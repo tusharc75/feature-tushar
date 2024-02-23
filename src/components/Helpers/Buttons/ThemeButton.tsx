@@ -27,7 +27,7 @@ type RedOutlineProps = {
   isLoading?: boolean;
 } & ButtonProps;
 
-type ButtonType = OutlinedButtonProps | RedOutlineProps | SimpleButton;
+export type ButtonType = OutlinedButtonProps | RedOutlineProps | SimpleButton;
 
 const ThemeButton = ({
   borderColor = 'default',
@@ -36,13 +36,16 @@ const ThemeButton = ({
   tooltip = '',
   isLoading,
   disabled,
+  className,
   ...rest
 }: ButtonType) => {
   const isMobile = useMediaQuery('(max-width:600px)');
 
   const getButtonProps = useMemo(() => {
     const buttonProps: Pick<ButtonProps, 'className' | 'variant'> = {
-      className: `${iconForMobile ? 'max-[600px]:[max-width:36px_!important] max-[600px]:[height:32px_!important]' : ''} no-shadow min-h-[32px]`,
+      className: `${
+        iconForMobile ? 'max-[600px]:[max-width:36px_!important] max-[600px]:[height:32px_!important]' : ''
+      } no-shadow min-h-[32px] ${className}`,
       variant: 'contained'
     };
 
