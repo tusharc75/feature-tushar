@@ -76,10 +76,16 @@ const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0 }: UseTab) => {
     init();
   }, [init, active]);
 
-  useEffect(() => {
-    window.addEventListener('resize', getTabSize);
-    return () => window.removeEventListener('resize', getTabSize);
+  const recalculateTabSize = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      getTabSize();
+    });
   }, [getTabSize]);
+
+  useEffect(() => {
+    window.addEventListener('resize', recalculateTabSize);
+    return () => window.removeEventListener('resize', recalculateTabSize);
+  }, [recalculateTabSize]);
 
   return { containerRef, activeTab, tabSize, handleNextClick, handlePrevClick, hasNextTab, hasPrevTab };
 };
