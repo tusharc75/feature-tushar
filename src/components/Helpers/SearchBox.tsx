@@ -24,7 +24,7 @@ function SearchBox({ onChange, value, size, width, placeholder, className, ...ot
 
   return (
     <>
-      <div className="relative sm:max-w-[300px] sm:min-w-[200px] flex-grow max-h-[32px]">
+      <div className="relative sm:max-w-[300px] sm:min-w-[150px] min-w-0 flex-grow max-h-[32px]">
         <FiSearch style={{ color: '#737373' }} className="absolute top-1/2 [transform:translateY(-50%)] left-[10px]" />
         <input
           title={'search'}
@@ -32,7 +32,7 @@ function SearchBox({ onChange, value, size, width, placeholder, className, ...ot
           onChange={onChangeWrapper}
           placeholder={placeholder || 'Search..'}
           type={'search'}
-          className={`${className} sm:max-w-[300px] sm:min-w-[200px] w-full flex-grow small-searchbar bg-transparent dark:bg-[var(--dark-secondary)] shadow-none [border:1px_solid_var(--common-border-color)] focus:[outline:1px_solid_var(--new-theme-color)] focus-within:[outline:1px_solid_var(--new-theme-color)] dark:text-white outline-transparent rounded-[4px] placeholder:text-[#737373] h-[32px] p-[10px_5px_10px_32px] `}
+          className={`${className} sm:max-w-[300px] sm:min-w-[150px] min-w-0 w-full flex-grow small-searchbar bg-transparent dark:bg-[var(--dark-secondary)] shadow-none [border:1px_solid_var(--common-border-color)] focus:[outline:1px_solid_var(--new-theme-color)] focus-within:[outline:1px_solid_var(--new-theme-color)] dark:text-white outline-transparent rounded-[4px] placeholder:text-[#737373] h-[32px] p-[10px_5px_10px_32px] `}
           {...otherProps}
         />
       </div>

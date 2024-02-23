@@ -73,7 +73,7 @@ const RenderService = ({
       <div className={`${isMobile ? 'p-4' : 'container-with-border p-[20px]'}`}>
         {isMobile ? (
           <>
-            <div className="flex items-center gap-[8px]">
+            <div className="grid grid-cols-[30px_1fr_30px] items-center gap-[8px] min-h-[74px]">
               <IconButton
                 disabled={!hasPrevTab}
                 onClick={() => {
