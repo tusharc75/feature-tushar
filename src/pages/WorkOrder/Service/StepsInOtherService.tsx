@@ -82,6 +82,8 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
   useEffect(() => {
     if (selectedService) {
       fetchSteps();
+    } else {
+      setSteps([]);
     }
   }, [selectedService]);
 
@@ -183,7 +185,7 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
             onChange={(e: any, value) => {
               setSelectedService(value);
             }}
-            disableClearable
+            // disableClearable
             renderInput={(params) => (
               <TextField
                 {...params}
