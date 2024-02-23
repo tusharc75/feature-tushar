@@ -121,16 +121,11 @@ const ListingPageHeader = ({
     });
   }, [locationKeys]);
 
-  const renderButtonText = ({ text, startIcon, loading, iconText = '', endIcon }) => {
+  const renderButtonText = ({ text, startIcon = null, loading, iconText = null, endIcon = null, mobileIcon = null }) => {
     if (isMobile) {
       return (
         <>
-          <span className={`${loading ? 'sr-only' : ''} flex items-center`}>
-            {startIcon && <span className="[&>*]:[font-size:20px_!important] max-h-[20px]">{startIcon}</span>}
-            {text && <span className="text-[13px]">{text}</span>}
-            {iconText && <span className="text-[13px]">{iconText}</span>}
-            {endIcon && <span className="[&>*]:[font-size:20px_!important] max-h-[20px]">{endIcon}</span>}
-          </span>
+          <span className={`${loading ? 'sr-only' : ''} flex items-center`}>{mobileIcon}</span>
           <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} `} />
         </>
       );
@@ -209,9 +204,9 @@ const ListingPageHeader = ({
                       >
                         {renderButtonText({
                           text: `Add`,
-                          startIcon: <AddOutlined />,
                           loading: addButtonLoading,
-                          iconText: addButtonText
+                          iconText: addButtonText,
+                          mobileIcon: <AddOutlined />
                         })}
                       </Button>
                     </HtmlTooltip>
@@ -231,7 +226,11 @@ const ListingPageHeader = ({
                             aria-controls="action-menu"
                             endIcon={isMobile ? null : actionButtonIconsEnabled ? <ExpandMore /> : null}
                           >
-                            {renderButtonText({ text: 'Actions', endIcon: <FaCircleChevronDown size={20} />, loading: actionButtonLoading })}
+                            {renderButtonText({
+                              text: 'Actions',
+                              loading: actionButtonLoading,
+                              mobileIcon: <FaCircleChevronDown size={20} />
+                            })}
                           </Button>
                         </span>
                       </HtmlTooltip>
