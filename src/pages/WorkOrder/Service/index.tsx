@@ -490,7 +490,7 @@ const Service = ({
       disabled: allowedToEdit && !completed ? false : true,
       children: (
         <>
-          <ExpandMore fontSize="small" /> Add
+          <ExpandMore fontSize="small" className="-ml-2" /> Add
         </>
       ),
       visible: !isColapsed && resource === sidebarResource.workOrder,
@@ -505,7 +505,7 @@ const Service = ({
       onClick: () => setArrangeView(true),
       children: (
         <>
-          <DragIndicatorIcon fontSize="small" className="mr-1" /> Arrange
+          <DragIndicatorIcon fontSize="small" className="-ml-2" /> Arrange
         </>
       ),
       visible: !isColapsed && resource === sidebarResource.workOrder && serviceSteps?.length > 0,

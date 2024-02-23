@@ -5,7 +5,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS, sidebarResource, workOrder } from 'src/constants/helpers';
-import { Add, DeleteOutline, FileCopyOutlined, EditOutlined, DragIndicator, LowPriority } from '@material-ui/icons';
+import { Add, DeleteOutline, FileCopyOutlined, EditOutlined, DragIndicator, LowPriority, Edit } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -172,7 +172,7 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
     >
       <CustomDialogHeader title={'Step Information'} onClose={onClose} showRequiredLabel={false} />
       <CustomDialogContent>
-        <Box className="flex flex-wrap gap-2 justify-between items-center">
+        <Box className="flex flex-wrap gap-2 justify-between items-center my-2">
           <Autocomplete
             id="service"
             className="flex-grow min-w-[250px] min-[600px]:max-w-[300px]"
@@ -267,7 +267,7 @@ const StepsInOtherServices = ({ workOrderId, resource, service, allowedToEdit, o
                             setManageStep({ open: true, clone: false, data: step });
                           }}
                         >
-                          <EditOutlined color="primary" style={{ fontSize: '18px' }} />
+                          <Edit color="primary" style={{ fontSize: '18px' }} />
                         </IconButton>
                       </HtmlTooltip>
 
