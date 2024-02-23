@@ -203,7 +203,7 @@ const SendOutboundMessage = () => {
               />
             </div>
             <div className="flex flex-wrap gap-[8px] justify-end align-items-center">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
                   variant={'contained'}

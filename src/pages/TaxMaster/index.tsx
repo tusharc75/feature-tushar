@@ -231,7 +231,7 @@ const TaxMaster = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.taxMaster?.isCreate && (
                   <Button

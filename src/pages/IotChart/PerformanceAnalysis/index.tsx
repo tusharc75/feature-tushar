@@ -61,7 +61,6 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
               setSearchValue(e.target.value);
             }}
             value={searchValue}
-            size="small"
           />
         </Grid>
       </Grid>

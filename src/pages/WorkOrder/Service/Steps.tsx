@@ -1,8 +1,8 @@
-import React, { Fragment, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { AiOutlinePlus } from 'react-icons/ai';
 import Button from '@material-ui/core/Button';
-import { ExpandMore, AccessTime, Info, DragIndicator, MoreHoriz, DeleteOutline, People, FileCopyOutlined, LowPriority } from '@material-ui/icons';
+import { AccessTime, Info, DragIndicator, MoreHoriz, DeleteOutline, People, FileCopyOutlined, LowPriority } from '@material-ui/icons';
 import {
   convertMsToTime,
   getChipColor,
@@ -15,12 +15,12 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS
 } from 'src/constants/helpers';
-import { Box, IconButton, Grid, Typography, Chip, Menu, MenuItem, useMediaQuery, Checkbox, CircularProgress } from '@material-ui/core';
+import { Box, IconButton, Grid, Typography, Chip, Menu, MenuItem, useMediaQuery, Checkbox } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isEmpty, isEqual, set } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
 import CompleteDialog from './CompleteDialog';
 import { useData } from 'src/StateProvider/Provider';
@@ -1495,7 +1495,7 @@ const Steps = ({
                 resource={resource}
                 handleSubmit={handleSubmit}
                 selectedService={selectedService}
-                allowedToEdit={allowedToEdit}
+                allowedToEdit={allowedToEdit && [WORKORDER_SERVICE_STEP_STATUS.start]?.includes(getFields(selectedStep)?.stepData?.status) ? true : false}
                 step={selectedStep}
                 stepData={stepState}
                 isSubmitting={isSubmitting}

@@ -170,7 +170,7 @@ const ListingPageHeader = ({
         <div className="flex flex-wrap gap-[8px] justify-end items-center">
           {onSearch ? (
             <HideWhenOffline>
-              <SearchBox onChange={onSearch} value={searchValue} size="small" />
+              <SearchBox onChange={onSearch} value={searchValue} />
             </HideWhenOffline>
           ) : null}
           {handleSearchFilter ? (

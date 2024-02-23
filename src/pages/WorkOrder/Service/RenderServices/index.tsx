@@ -212,6 +212,7 @@ const RenderSingleService = ({
 }) => {
   const style = stylesForEveryTab(selectedService, data, index);
   const stepTimes = getFieldsWithOtherDetails(data, stepSubmitedData);
+
   return (
     <div
       key={data._id}

@@ -254,7 +254,6 @@ const Pos = () => {
                     setSearchVal(e.target.value);
                   }}
                   value={searchVal}
-                  size="small"
                   width="350px"
                   style={isMobile ? { flex: 1 } : {}}
                 />

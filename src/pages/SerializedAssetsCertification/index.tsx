@@ -343,7 +343,6 @@ const SerializedAssetsCertification = () => {
               }}
               onChange={handleSearch}
               width={'150px'}
-              size="small"
               value={search}
             />
           </div>
