@@ -490,7 +490,7 @@ const Service = ({
       disabled: allowedToEdit && !completed ? false : true,
       children: (
         <>
-          <ExpandMore fontSize="small" /> Add
+          <ExpandMore fontSize="small" className="-ml-2" /> Add
         </>
       ),
       visible: !isColapsed && resource === sidebarResource.workOrder,
@@ -505,7 +505,7 @@ const Service = ({
       onClick: () => setArrangeView(true),
       children: (
         <>
-          <DragIndicatorIcon fontSize="small" className="mr-1" /> Arrange
+          <DragIndicatorIcon fontSize="small" className="-ml-2" /> Arrange
         </>
       ),
       visible: !isColapsed && resource === sidebarResource.workOrder && serviceSteps?.length > 0,
@@ -586,6 +586,7 @@ const Service = ({
                         resource={resource}
                         stepSubmitedData={stepSubmitedData}
                         minHeightClass={minHeightClass}
+                        isMobile={mobScreen}
                       />
                     ) : (
                       <Quotation />
@@ -1102,21 +1103,25 @@ const Service = ({
 
 export default Service;
 
-export const RenderStatusIcon = ({ stepStatus, style = {}, ...others }: { stepStatus: string; style?: React.CSSProperties }) => {
+type RenderStatusIconProps = {
+  stepStatus: string;
+} & React.HTMLAttributes<HTMLDivElement>;
+
+export const RenderStatusIcon = ({ stepStatus, style = {}, ...others }: RenderStatusIconProps) => {
   return (
     <>
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.passed && (
         <HtmlTooltip enterTouchDelay={0} title={stepStatus}>
-          <Box style={{ ...style, color: '#059825' }} {...others}>
+          <div style={{ ...style, color: '#059825' }} {...others}>
             <PassIcon style={{ display: 'block', width: '100%', height: '100%' }} />
-          </Box>
+          </div>
         </HtmlTooltip>
       )}
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.failed && (
         <HtmlTooltip enterTouchDelay={0} title={stepStatus}>
-          <Box style={{ ...style, color: '#EE0E06' }} {...others}>
+          <div style={{ ...style, color: '#EE0E06' }} {...others}>
             <FailIcon style={{ display: 'block', width: '100%', height: '100%' }} />
-          </Box>
+          </div>
         </HtmlTooltip>
       )}
     </>

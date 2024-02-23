@@ -121,22 +121,24 @@ const ListingPageHeader = ({
     });
   }, [locationKeys]);
 
-  const renderButtonText = ({ text, icon, loading, iconText = '' }) => {
+  const renderButtonText = ({ text, startIcon = null, loading, iconText = null, endIcon = null, mobileIcon = null }) => {
     if (isMobile) {
       return (
         <>
+          <span className={`${loading ? 'sr-only' : ''} flex items-center`}>{mobileIcon}</span>
           <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} `} />
-          <span className={`${loading ? 'sr-only' : ''} flex items-center`}>
-            <span className="[&>svg]:[font-size:20px_!important] max-h-[20px]">{icon}</span>
-            <span className="text-[13px]">{iconText}</span>
-          </span>
         </>
       );
     } else {
       return (
         <>
-          <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'}`} />
-          <span className={`${loading ? 'sr-only' : ''}`}>{text}</span>
+          <span className={` flex items-center`}>
+            {startIcon && <span className={`-ml-1 [&>*]:[font-size:20px_!important]`}>{startIcon}</span>}
+            {text && <span className={``}>{text}</span>}
+            {iconText && <span className={`${loading ? 'sr-only' : ''}`}>{iconText}</span>}
+            {endIcon && <span className={`-mr-1 [&>*]:[font-size:20px_!important]`}>{endIcon}</span>}
+          </span>
+          <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} ml-2`} />
         </>
       );
     }
@@ -201,10 +203,10 @@ const ListingPageHeader = ({
                         startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
                       >
                         {renderButtonText({
-                          text: `Add ${addButtonText}`,
-                          icon: <AddOutlined />,
+                          text: `Add`,
                           loading: addButtonLoading,
-                          iconText: addButtonText
+                          iconText: addButtonText,
+                          mobileIcon: <AddOutlined />
                         })}
                       </Button>
                     </HtmlTooltip>
@@ -224,7 +226,11 @@ const ListingPageHeader = ({
                             aria-controls="action-menu"
                             endIcon={isMobile ? null : actionButtonIconsEnabled ? <ExpandMore /> : null}
                           >
-                            {renderButtonText({ text: 'Actions', icon: <FaCircleChevronDown size={20} />, loading: actionButtonLoading })}
+                            {renderButtonText({
+                              text: 'Actions',
+                              loading: actionButtonLoading,
+                              mobileIcon: <FaCircleChevronDown size={20} />
+                            })}
                           </Button>
                         </span>
                       </HtmlTooltip>
