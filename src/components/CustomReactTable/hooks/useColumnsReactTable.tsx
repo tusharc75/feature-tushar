@@ -312,7 +312,7 @@ export default function useColumns() {
           disableSortBy: true,
           cell: ({ row }) => (
             <div>
-              <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]}>
+              <Avatar className="grid-avatar ml-auto min-[769px]:mx-auto" src={row?.original?.[field?.fieldName]}>
                 <Image style={{ fontSize: 18 }} />
               </Avatar>
             </div>
