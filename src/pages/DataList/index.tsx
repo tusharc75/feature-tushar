@@ -144,7 +144,6 @@ const DataList = () => {
           finalObject['canDelete'] = permissions?.dataLists?.isDelete;
           return finalObject;
         });
-        console.log(rows);
         dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
