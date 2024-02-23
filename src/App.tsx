@@ -251,8 +251,13 @@ import TriggerNotificationMaster from './pages/TriggerNotificationMaster';
 import TriggerNotificationMasterDetail from './pages/TriggerNotificationMaster/TriggerNotificationMasterDetail';
 import TriggerNotificationHistory from './pages/TriggerNotificationHistory';
 import UserAttendance from './pages/UserAttendance';
+
+import DataList from './pages/DataList';
+import DataListDetail from './pages/DataList/dataListdetail';
+
 import Forms from './pages/Forms';
 import CreateForm from './pages/Forms/CreateForm';
+
 
 var notificationInterval: any = null;
 
@@ -1100,6 +1105,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.subleaseInvoice.path}>
               <GenerateInvoice resourceRendered="sublease" />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.dataList.path}>
+              <DataList/>
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.dataListitems.path}/:id`}>
+              <DataListDetail/>
             </PrivateRoute>
             <PrivateRoute exact path={routes.userDownloadRequest.path}>
               <UserDownloadRequest />

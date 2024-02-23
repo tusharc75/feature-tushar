@@ -505,6 +505,8 @@ export const RESOURCE_LABEL = {
   triggerNotificationMaster: 'Trigger Notification Master',
   triggerNotificationHistory: 'Trigger Notification History',
   userAttendance: 'User Attendance',
+  dataList : 'Data List',
+  dataListitems : 'Data List Items'
 };
 
 export const CHILD_RESOURCE = {

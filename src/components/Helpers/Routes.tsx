@@ -1188,6 +1188,14 @@ const routes = {
     title: storedRoutes && storedRoutes.userAttendance && storedRoutes.userAttendance.title ? storedRoutes.userAttendance?.title : RESOURCE_LABEL.userAttendance,
     path: '/user-attendance'
   },
+  dataList: {
+    title: storedRoutes && storedRoutes.dataList && storedRoutes.dataList.title ? storedRoutes.dataList?.title : RESOURCE_LABEL.dataList,
+    path: '/data-lists'
+  },
+  dataListitems: {
+    title: storedRoutes && storedRoutes.dataListitems && storedRoutes.dataListitems.title ? storedRoutes.dataListitems?.title : RESOURCE_LABEL.dataListitems,
+    path: '/data-lists/data-list-items'
+  },
 };
 
 export default routes;
