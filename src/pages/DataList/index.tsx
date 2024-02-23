@@ -14,7 +14,6 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { editDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -65,7 +64,7 @@ const DataList = () => {
     setColumns([...columns, ActionsRenderer]);
   };
 
-  
+
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -87,7 +86,7 @@ const DataList = () => {
                 setShowManageDialog({ open: true, isEdit: true, idToEdit: row.original._id });
               }}
             >
-            <Edit style={{ width: 18, height: 18, marginLeft: 14 }} />
+              <Edit style={{ width: 18, height: 18, marginLeft: 14 }} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -222,7 +221,7 @@ const DataList = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-            isClientSideGrid = {true}
+            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={500}>
