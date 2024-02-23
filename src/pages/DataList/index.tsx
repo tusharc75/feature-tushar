@@ -1,7 +1,6 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { Link } from 'react-router-dom';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { Edit } from "@material-ui/icons";
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -10,15 +9,14 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { editDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import ManageData from './ManageData';
 
 let searchTimeout;
@@ -28,8 +26,7 @@ const DataList = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { generateColumns } = useColumns();
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
     state: { user, permissions }
@@ -37,7 +34,6 @@ const DataList = () => {
 
   const [columns, setColumns] = useState(null);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
-  const [renderCount, setRenderCount] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
 
@@ -48,45 +44,44 @@ const DataList = () => {
   const fetchGridColumns = () => {
     const columns = [
       {
-        accessor: 'Title',
+        accessor: 'title',
         Header: 'Title',
         width: 120,
         Cell: ({ row }) => (
           <div>
-            <Link className="link" to={`${routes.dataListitems.path}/${row?.original?._id}`}>
-              {row?.original?.Title}
+            <Link className="link" to={`${routes.dataList.path}/${row?.original?._id}`}>
+              {row?.original?.title}
             </Link>
           </div>
         )
-        // Cell: ({ row }) => (row?.original?.Title ? <p className="text-truncate">{row?.original?.Title}</p> : <NoDataCell />)
-      }
+      },
+      ...getStaticFields()
     ];
     setColumns([...columns, ActionsRenderer]);
   };
 
-
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
-    minWidth: 130,
-    width: 130,
+    minWidth: 70,
+    width: 70,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.payrollPolicy?.isCreate ? 'Edit' : editDisable}>
+        <HtmlTooltip title={permissions?.dataLists?.isUpdate ? 'Edit' : editDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Edit"
-              disabled={permissions?.dataLists?.isCreate ? false : true}
+              disabled={permissions?.dataLists?.isUpdate ? false : true}
               onClick={() => {
                 setShowManageDialog({ open: true, isEdit: true, idToEdit: row.original._id });
               }}
             >
-              <Edit style={{ width: 18, height: 18, marginLeft: 14 }} />
+            <Edit fontSize="small" color={row?.original?.allowedToEdit ? 'primary' : 'disabled'}  />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -111,33 +106,27 @@ const DataList = () => {
   };
 
   useEffect(() => {
-    if (renderCount > 0) {
-      let millisec = Object.keys(search).length > 0 ? 600 : 5;
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-      searchTimeout = setTimeout(() => {
-        fetchData();
-      }, millisec);
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
   }, [search]);
 
   useEffect(() => {
-    if (renderCount > 0) {
       fetchData();
-    } else {
-      setRenderCount(renderCount + 1);
-    }
   }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
-
-
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes?.dataList?.path}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data?.map((u) => {
+      .get(`${routes?.dataList?.path}${queryString}`)
+      .then(({ data: { data } }) => {
+        let count = data?.count
+        let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.dataLists?.isUpdate;
@@ -156,6 +145,31 @@ const DataList = () => {
       });
   };
 
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+    return deepFilter;
+  };
+
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -168,7 +182,7 @@ const DataList = () => {
       ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
-      .put(`${routes?.dataList?.path}/remove`, { _id: ids })
+      .put(`${routes?.dataList?.path}/remove`, { ids: ids })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
@@ -202,6 +216,7 @@ const DataList = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
+          onSearch={handleSearch}
           isActionButtonVisible={permissions?.dataLists?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
@@ -220,7 +235,6 @@ const DataList = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={500}>

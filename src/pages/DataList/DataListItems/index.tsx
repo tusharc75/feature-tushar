@@ -44,50 +44,43 @@ const DataListItems = ({dataListId}) => {
   const fetchGridColumns = () => {
     const columns = [
       {
-        accessor: 'Title',
+        accessor: 'title',
         Header: 'Title',
         width: 120,
-        Cell: ({ row }) => (row?.original?.Title ? <p className="text-truncate">{row?.original?.Title}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.title ? <p className="text-truncate">{row?.original?.title}</p> : <NoDataCell />)
       },
       {
-        accessor: 'Description',
+        accessor: 'description',
         Header: 'Description',
         width: 120,
-        Cell: ({ row }) => (row?.original?.Description ? <p className="text-truncate">{row?.original?.Description}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.description ? <p className="text-truncate">{row?.original?.description}</p> : <NoDataCell />)
       },
-      {
-        accessor: 'Order',
-        Header: 'Order',
-        width: 120,
-        Cell: ({ row }) => (row?.original?.Order ? <p className="text-truncate">{row?.original?.Order}</p> : <NoDataCell />)
-      }
     ];
     setColumns([...columns, ActionsRenderer]);
   };
-
   
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
-    minWidth: 130,
-    width: 130,
+    minWidth: 60,
+    width: 60,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.dataLists?.isCreate ? 'Edit' : editDisable}>
+        <HtmlTooltip title={permissions?.dataLists?.isUpdate ? 'Edit' : editDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Edit"
-              disabled={false}
+              disabled={!permissions?.dataLists?.isUpdate}
               onClick={() => {
                 setShowManageDialog({ open: true, isEdit: true, idToEdit: row.original._id });
               }}
             >
-               <Edit style={{ width: 18, height: 18, marginLeft: 14 }} />
+               <Edit fontSize="small" color={row?.original?.allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -112,31 +105,27 @@ const DataListItems = ({dataListId}) => {
   };
 
   useEffect(() => {
-    if (renderCount > 0) {
-      let millisec = Object.keys(search).length > 0 ? 600 : 5;
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-      searchTimeout = setTimeout(() => {
-        fetchData();
-      }, millisec);
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
   }, [search]);
 
   useEffect(() => {
-    if (renderCount > 0) {
-      fetchData();
-    } else {
-      setRenderCount(renderCount + 1);
-    }
+      fetchData(); 
   }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes?.dataListitems?.path}/${dataListId}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data?.map((u) => {
+      .get(`${routes?.dataListitems?.path}/${dataListId}${queryString}`)
+      .then(({ data: { data } }) => {
+        let count = data?.count;
+        let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.dataLists?.isUpdate;
@@ -155,6 +144,31 @@ const DataListItems = ({dataListId}) => {
       });
   };
 
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+    return deepFilter;
+  };
+
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -167,7 +181,7 @@ const DataListItems = ({dataListId}) => {
       ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
-      .put(`${routes?.dataListitems?.path}/${dataListId}/remove`, { _id: ids })
+      .put(`${routes?.dataListitems?.path}/${dataListId}/remove`, { ids: ids })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
@@ -198,6 +212,7 @@ const DataListItems = ({dataListId}) => {
     <section className="main-container-v1">
       <CustomContainer>
         <ListingPageHeader
+          onSearch={handleSearch}
           isActionButtonVisible={permissions?.dataLists?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
@@ -216,7 +231,6 @@ const DataListItems = ({dataListId}) => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-            isClientSideGrid = {true}
           />
         ) : (
           <Box p={2} height={500}>
