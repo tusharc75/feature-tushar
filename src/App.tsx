@@ -1109,7 +1109,7 @@ function App() {
             <PrivateRoute exact path={routes.dataList.path}>
               <DataList/>
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.dataListitems.path}/:id`}>
+            <PrivateRoute exact path={`${routes.dataList.path}/:id`}>
               <DataListDetail/>
             </PrivateRoute>
             <PrivateRoute exact path={routes.userDownloadRequest.path}>

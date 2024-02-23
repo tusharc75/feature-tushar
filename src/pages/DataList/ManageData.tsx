@@ -11,14 +11,12 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { useHistory } from 'react-router-dom';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
 const ManageData = ({ onClose, onSuccess, isEdit = false, id = null }) => {
-  const history = useHistory();
   const {
     state: { user }
   }: any = useData();
@@ -27,7 +25,6 @@ const ManageData = ({ onClose, onSuccess, isEdit = false, id = null }) => {
   const [loading, setLoading] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
-  const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   useEffect(() => {
@@ -41,7 +38,7 @@ const ManageData = ({ onClose, onSuccess, isEdit = false, id = null }) => {
         {
           fieldData: {
             fieldLabel: 'Title',
-            fieldName: 'Title',
+            fieldName: 'title',
             isTooltip: false,
             option: [],
             order: 1,
