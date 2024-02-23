@@ -79,7 +79,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
         data = response?.data?.data;
         try {
           insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
-        } catch (ex) {}
+        } catch (ex) { }
       }
       var columns = generateColumns(renderedFrom, data, routes.fieldTicketDetail.path);
       columns = [...columns, ...getStaticFields()];
@@ -130,7 +130,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
           }
         ]
       });
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const fetchData = async (offlineStore = false) => {
@@ -173,7 +173,6 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
               ...finalObject
             };
           });
-          console.log(data);
           dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });

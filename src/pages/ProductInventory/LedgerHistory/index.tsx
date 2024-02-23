@@ -44,6 +44,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         accessor: 'date',
         Header: 'Date',
         width: 200,
+        disabled: true,
         Cell: ({ row }) => {
           return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
         }
@@ -52,6 +53,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         accessor: 'type',
         Header: 'Type',
         width: 200,
+        disabled: true,
         Cell: ({ row }) => {
           return row.original?.type ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
         }
@@ -60,6 +62,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         accessor: 'qty',
         Header: 'Qty',
         width: 200,
+        disabled: true,
         Cell: ({ row }) => {
           return row.original?.qty ? (
             <div
@@ -70,8 +73,8 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
                       ? 'hsl(1 100% 65% / 1)'
                       : '#FFCCCB'
                     : isDarkTheme
-                    ? 'hsl(120 73% 40% / 1)'
-                    : '#90ee90'
+                      ? 'hsl(120 73% 40% / 1)'
+                      : '#90ee90'
               }}
             >
               {row?.original?.type === 'Debit' ? `-${row?.original?.qty}` : row?.original?.qty}
@@ -103,8 +106,8 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
                       ? 'hsl(1 100% 65% / 1)'
                       : '#FFCCCB'
                     : isDarkTheme
-                    ? 'hsl(120 73% 40% / 1)'
-                    : '#90ee90'
+                      ? 'hsl(120 73% 40% / 1)'
+                      : '#90ee90'
               }}
             >
               {row?.original?.type === 'Debit' ? `-${row?.original?.totalPrice}` : row?.original?.totalPrice}{' '}
@@ -118,6 +121,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         accessor: 'warehouse',
         Header: routes?.warehouse?.title,
         width: 200,
+        disabled: true,
         Cell: ({ row }) => {
           return row.original?.warehouse ? (
             <Link
@@ -134,25 +138,25 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-            {
-              accessor: 'storageLocation',
-              Header: 'Storage Location',
-              width: 200,
-              Cell: ({ row }) => {
-                return row?.original?.storageLocation ? (
-                  <Link
-                    className="link"
-                    title={row?.original?.storageLocation}
-                    to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
-                  >
-                    {row?.original?.storageLocation}
-                  </Link>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            width: 200,
+            Cell: ({ row }) => {
+              return row?.original?.storageLocation ? (
+                <Link
+                  className="link"
+                  title={row?.original?.storageLocation}
+                  to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
+                >
+                  {row?.original?.storageLocation}
+                </Link>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'supplierPartNumber',
@@ -233,16 +237,16 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
           <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ? (
               <CustomReactTable
-              height={'calc(100vh - 150px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-              refreshGrid={fetchRecords}
-              hideAction={true}
-              hideSelection={true}
-            />
+                height={'calc(100vh - 150px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+                refreshGrid={fetchRecords}
+                hideAction={true}
+                hideSelection={true}
+              />
             ) : (
               <Box p={2} height={500}>
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
