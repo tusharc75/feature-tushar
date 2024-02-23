@@ -12,7 +12,6 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomTabs, { CustomTab } from '../CustomTabs';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
-import SearchBox from '../Helpers/SearchBox';
 import { ListingPageHeader } from '../PageHeaders';
 
 let searchTimeout;

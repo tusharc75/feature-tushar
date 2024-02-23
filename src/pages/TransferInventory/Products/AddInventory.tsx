@@ -210,7 +210,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
             )}
           </div>
           <Box order={isMobile ? 1 : 2} display="flex" justifyContent={'space-between'} minWidth={isMobile ? '100%' : '300px'}>
-            <SearchBox onChange={handleSearch} width={'245px'} style={isMobile ? { flex: 1 } : {}} size="small" value={search} />
+            <SearchBox onChange={handleSearch} width={'245px'} style={isMobile ? { flex: 1 } : {}} value={search} />
             <Box mx={1} />
             <Box>
               <Button

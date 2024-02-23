@@ -20,7 +20,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
-import SearchBox from '../../components/Helpers/SearchBox';
 import {
   QUOTATION_TYPE,
   customerAccount,
