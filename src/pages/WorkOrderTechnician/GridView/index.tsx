@@ -135,7 +135,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
               aria-label="Details"
               color="primary"
               onClick={(e) => {
-                setShowDrawingDialog({ open: true, workOrder: row?.original?._id });
+                setShowDrawingDialog({ open: true, workOrder: row?.original?.workOrderId });
               }}
             >
               <DescriptionIcon fontSize="small" color={'primary'} />
