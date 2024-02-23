@@ -106,7 +106,8 @@ const RenderService = ({
                         setShowConfirmBox,
                         getFieldsWithOtherDetails,
                         data,
-                        index
+                        index,
+                        isMobile
                       }}
                     />
                   );
@@ -179,7 +180,8 @@ const RenderService = ({
                       setShowConfirmBox,
                       getFieldsWithOtherDetails,
                       data,
-                      index
+                      index,
+                      isMobile
                     }}
                   />
                 );
@@ -208,7 +210,8 @@ const RenderSingleService = ({
   setShowConfirmBox,
   getFieldsWithOtherDetails,
   data,
-  index
+  index,
+  isMobile
 }) => {
   const style = stylesForEveryTab(selectedService, data, index);
   const stepTimes = getFieldsWithOtherDetails(data, stepSubmitedData);
@@ -216,7 +219,9 @@ const RenderSingleService = ({
   return (
     <div
       key={data._id}
-      className=" duration-300 transition-all p-2 min-w-[var(--tab-size)] max-w-[var(--tab-size)]"
+      className={`duration-300 transition-all ${
+        isMobile ? 'p-2 rounded-md' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
+      } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
       style={{
         ...style
       }}
@@ -310,10 +315,10 @@ const RenderSingleService = ({
                 )}
                 {/* PassFail */}
                 {data?.type === 'service' && data?.serviceStatus && (
-                  <RenderStatusIcon style={{ maxWidth: 24, height: 24, margin: '5px 3px 0 auto' }} stepStatus={data?.serviceStatus} />
+                  <RenderStatusIcon style={{ maxWidth: 24, height: 24, marginTop: 3 }} stepStatus={data?.serviceStatus} />
                 )}
                 {data?.type === 'quotation' && quotationData && (
-                  <RenderStatusIcon style={{ maxWidth: 24, height: 24, margin: '5px 3px 0 auto' }} stepStatus={quotationData?.status} />
+                  <RenderStatusIcon style={{ maxWidth: 24, height: 24, marginTop: 3 }} stepStatus={quotationData?.status} />
                 )}
               </div>
             )}
