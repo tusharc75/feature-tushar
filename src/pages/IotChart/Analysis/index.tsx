@@ -84,7 +84,6 @@ const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: any[] 
               setSearchValue(e.target.value);
             }}
             value={searchValue}
-            size="small"
           />
         </Grid>
       </Grid>

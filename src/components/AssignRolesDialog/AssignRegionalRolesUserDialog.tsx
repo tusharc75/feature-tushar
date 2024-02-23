@@ -23,7 +23,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import SearchBox from '../Helpers/SearchBox';
 import Loader from '../Loader';
 import { ListingPageHeader } from '../PageHeaders';
 

@@ -91,7 +91,6 @@ export default function Current({ deviceTemplate, assetId }) {
                 setSearchValue(e.target.value);
               }}
               value={searchValue}
-              size="small"
             />
           </Grid>
           <Grid item>

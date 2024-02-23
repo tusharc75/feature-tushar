@@ -11,7 +11,6 @@ import CustomContainer from 'src/components/CustomContainer';
 import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import { serializedAsset } from '../../constants/helpers';
 import cardStyle from '../ReportMaster/index.module.scss';
 import { ListingPageHeader } from 'src/components/PageHeaders';

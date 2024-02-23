@@ -30,7 +30,7 @@ import Pagination from './TableComponents/Pagination';
 import TableComponent from './TableComponents/Table';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
-import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
+import { childrenProperty, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
 
 const CustomReactTable = ({
   columns,

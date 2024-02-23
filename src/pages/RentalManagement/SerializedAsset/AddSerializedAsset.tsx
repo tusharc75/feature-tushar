@@ -551,7 +551,6 @@ const AddSerializedAsset = ({
               <Grid item xs={12} md={5}>
                 <Box className="flex flex-wrap justify-end items-center gap-2">
                   <SearchBox
-                    size="small"
                     onChange={handleSearch}
                     className="small-searchbar ml-auto"
                     value={search}
