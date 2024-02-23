@@ -247,7 +247,7 @@ const SupportTicket = () => {
           permissions={{ isCreate: true, isUpdate: true, isRead: true }}
           module={routes.supportTicket.title}
           api={routes.supportTicket.path}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -280,7 +280,7 @@ const SupportTicket = () => {
               </ToggleButtonGroup>
             </div>
             <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
+              <SearchBox onChange={handleSearch} value={search} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
                   variant={'contained'}

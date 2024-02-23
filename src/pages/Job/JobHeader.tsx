@@ -144,8 +144,7 @@ function JobHeader(props) {
         {children}
       </div>
       <div className="flex flex-wrap gap-[8px]  justify-end items-start">
-        <SearchBox onChange={onSearch} value={searchVal} size="small" />
-
+        <SearchBox onChange={onSearch} value={searchVal} />
         <div className="flex gap-[8px] flex-wrap items-center">
           {permissions?.job?.isCreate && permissions?.job?.isUpdate && (
             <Button variant={'contained'} color="primary" size="small" onClick={onCreate} className={'no-shadow'} startIcon={<AddOutlined />}>
@@ -191,7 +190,6 @@ function JobHeader(props) {
           )}
         </div>
       </div>
-      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }
