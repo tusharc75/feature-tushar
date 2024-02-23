@@ -125,7 +125,7 @@ const ListingPageHeader = ({
     if (isMobile) {
       return (
         <>
-          <CircularProgress size={20} className={`${loading ? '' : 'sr-only'} `} />
+          <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} `} />
           <span className={`${loading ? 'sr-only' : ''} flex items-center`}>
             <span className="[&>svg]:[font-size:20px_!important] max-h-[20px]">{icon}</span>
             <span className="text-[13px]">{iconText}</span>
@@ -135,7 +135,7 @@ const ListingPageHeader = ({
     } else {
       return (
         <>
-          <CircularProgress size={20} className={`${loading ? '' : 'sr-only'}`} />
+          <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'}`} />
           <span className={`${loading ? 'sr-only' : ''}`}>{text}</span>
         </>
       );
