@@ -1111,14 +1111,14 @@ export const RenderStatusIcon = ({ stepStatus, style = {}, ...others }: RenderSt
   return (
     <>
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.passed && (
-        <HtmlTooltip enterTouchDelay={0} title={stepStatus}>
+        <HtmlTooltip enterTouchDelay={0} title={stepStatus} arrow>
           <div style={{ ...style, color: '#059825' }} {...others}>
             <PassIcon style={{ display: 'block', width: '100%', height: '100%' }} />
           </div>
         </HtmlTooltip>
       )}
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.failed && (
-        <HtmlTooltip enterTouchDelay={0} title={stepStatus}>
+        <HtmlTooltip enterTouchDelay={0} title={stepStatus} arrow>
           <div style={{ ...style, color: '#EE0E06' }} {...others}>
             <FailIcon style={{ display: 'block', width: '100%', height: '100%' }} />
           </div>
