@@ -235,7 +235,9 @@ const RenderSingleService = ({
         <HtmlTooltip enterTouchDelay={0} placement="top" arrow title={isMobile ? data?.serviceName : ''}>
           {data?.type === 'service' ? (
             <div
-              className={` bg-[var(--dark-primary,_var(--primary))] text-white w-[20px] h-[20px] rounded-full text-center flex justify-center items-center text-[10px] flex-shrink-0`}
+              className={`${
+                isColapsed ? 'mx-auto' : ''
+              }  transition-all duration-300 bg-[var(--dark-primary,_var(--primary))] text-white w-[20px] h-[20px] rounded-full text-center flex justify-center items-center text-[10px] flex-shrink-0`}
             >
               <span>{data?.order}</span>
             </div>
@@ -317,26 +319,13 @@ const RenderSingleService = ({
                     </IconButton>
                   </HtmlTooltip>
                 )}
-                {/* PassFail */}
-                {data?.type === 'service' && data?.serviceStatus && (
-                  <RenderStatusIcon
-                    className={`${isMobile ? 'max-w-[16px] h-[16px]' : 'max-w-[24px] h-[24px]'} flex-shrink-0 mt-[3px]`}
-                    stepStatus={data?.serviceStatus}
-                  />
-                )}
-                {data?.type === 'quotation' && quotationData && (
-                  <RenderStatusIcon
-                    className={`${isMobile ? 'max-w-[16px] h-[16px]' : 'max-w-[24px] h-[24px]'} flex-shrink-0 mt-[3px]`}
-                    stepStatus={quotationData?.status}
-                  />
-                )}
               </div>
             )}
           </>
         )}
       </div>
       {/* Chips */}
-      <div className={`flex items-center flex-wrap gap-2 basis-full w-full ml-[20px] ${isColapsed ? 'hidden' : ''}`}>
+      <div className={`flex items-center flex-wrap gap-2 basis-full w-full pl-[20px] ${isColapsed ? 'hidden' : ''}`}>
         {data?.type === 'service' && (
           <div className="ml-1">
             <Chip
@@ -356,6 +345,21 @@ const RenderSingleService = ({
         )}
 
         {user?.brandPolicy?.workOrderTimer && <RenderTotalTime stepTimes={stepTimes} />}
+        {/* PassFail */}
+        <div className="ml-auto max-w-fit">
+          {data?.type === 'service' && data?.serviceStatus && (
+            <RenderStatusIcon
+              className={`${isMobile ? 'max-w-[20px] h-[20px]' : 'max-w-[24px] h-[24px]'} flex-shrink-0 mt-[3px]`}
+              stepStatus={data?.serviceStatus}
+            />
+          )}
+          {data?.type === 'quotation' && quotationData && (
+            <RenderStatusIcon
+              className={`${isMobile ? 'max-w-[20px] h-[20px]' : 'max-w-[24px] h-[24px]'} flex-shrink-0 mt-[3px]`}
+              stepStatus={quotationData?.status}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
