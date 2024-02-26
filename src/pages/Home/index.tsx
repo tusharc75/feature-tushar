@@ -1,27 +1,20 @@
-import React, { useEffect, useState, useContext, Fragment } from 'react';
-import { Typography, List, ListItem, ListItemText, Box } from '@material-ui/core';
-import { Link, useHistory } from 'react-router-dom';
-import { useData } from '../../StateProvider/Provider';
+import { Box, Typography } from '@material-ui/core';
 import { kebabCase } from 'lodash';
+import React, { Fragment, useEffect, useState } from 'react';
+import { FiExternalLink } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import { useData } from '../../StateProvider/Provider';
+import { SVGImages } from '../../assets/dashboard_images';
 import styles from './Dashboard.module.scss';
 import './style.scss';
-import { SVGImages, IconConst } from '../../assets/dashboard_images';
-import { FiExternalLink } from 'react-icons/fi';
 
-import routes from 'src/components/Helpers/Routes';
-import { withStyles } from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
 import { HiArrowRight } from 'react-icons/hi';
-import { groupByKey, assignIconAndText } from './helpers';
-import Chart from './Chart';
-import { useAppTheme } from 'src/constants/AppConfig';
 import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import DashboardModal from 'src/components/DashboardModal';
+import routes from 'src/components/Helpers/Routes';
 import { isSectionVisible } from 'src/components/Sidebar/utils';
+import Chart from './Chart';
+import { assignIconAndText, groupByKey } from './helpers';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -29,14 +22,10 @@ export const userManual = {
 };
 
 function Dashboard() {
-  const history = useHistory();
-  const { dispatch }: any = useData();
   const {
     state: { user, selectedEntity }
   } = useData();
   const [sections, setSections] = useState([]);
-  const [search, setSearch] = useState('');
-  const [filteredData, setFilteredData] = useState([]);
   const [objBySectionName, setObjBySectionName] = useState(null);
 
   useEffect(() => {
