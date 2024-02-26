@@ -4,7 +4,7 @@ import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
-import React, { Fragment, useCallback, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CardColTimeline, { useCardReducer, datarowInterface } from 'src/components/CardColTimeline';
@@ -267,6 +267,10 @@ const WorkOrderSupervisor = () => {
     setSelectedResourceOption(null);
   };
 
+  const isFilterPresent = useMemo(() => {
+    return selectedUser || selectedService || selectedResource || selectedResourceOption;
+  }, [selectedUser, selectedService, selectedResource, selectedResourceOption]);
+
   const filters = (
     <>
       <Autocomplete
@@ -410,7 +414,21 @@ const WorkOrderSupervisor = () => {
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3 align-items-center">
                 {isMobile ? (
                   <>
-                    <div className="max-w-fit mr-auto">
+                    <div className="max-w-fit mr-auto relative">
+                      {isFilterPresent ? (
+                        <>
+                          <span
+                            className={`${
+                              isFilterPresent ? ' opacity-100' : 'opacity-0'
+                            } bg-red-500 w-[6px] h-[6px] absolute -top-[2px] -right-[2px] rounded-full z-[9] animate-ping`}
+                          ></span>
+                          <span
+                            className={`${
+                              isFilterPresent ? ' opacity-100' : 'opacity-0'
+                            } bg-red-500 w-[6px] h-[6px] absolute -top-[2px] -right-[2px] rounded-full z-10`}
+                          ></span>
+                        </>
+                      ) : null}
                       <ThemeButton startIcon={<BiFilterAlt />} iconForMobile={<BiFilterAlt />} tooltip="Apply Filters" onClick={handleClick}>
                         Filter
                       </ThemeButton>
