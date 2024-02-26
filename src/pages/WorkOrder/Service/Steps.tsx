@@ -1025,7 +1025,7 @@ const Steps = ({
                         {resource === sidebarResource.workOrderTechnician ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
                       </span>
                       <Box
-                        className="mr-auto basis-[calc(100%-56px)] sm:basis-[calc(100%-155px)] flex flex-wrap items-center justify-between gap-[8px]"
+                        className={`mr-auto basis-[calc(100%-56px)] sm:basis-[calc(100%-155px)] flex flex-wrap items-center justify-between gap-[8px]`}
                         gridGap={'8px'}
                       >
                         <Box className="flex items-center gap-2 flex-grow text-[var(--primary-text)]">
@@ -1106,23 +1106,20 @@ const Steps = ({
                             )}
                           </div>
                           {step?.assignedUsers?.length > 0 && (
-                            <Box ml={1}>
-                              <HtmlTooltip enterTouchDelay={0} title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                <People style={{ color: 'var(--primary-text)', maxWidth: '22px' }} />
-                              </HtmlTooltip>
-                            </Box>
+                            <HtmlTooltip enterTouchDelay={0} arrow title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                              <People style={{ color: 'var(--primary-text)', maxWidth: '22px' }} />
+                            </HtmlTooltip>
                           )}
                           {step?.assignedWorkStations?.length > 0 && (
-                            <Box ml={1}>
-                              <HtmlTooltip
-                                enterTouchDelay={0}
-                                title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
-                              >
-                                <span>
-                                  <WorkStations className=" align-text-top" />
-                                </span>
-                              </HtmlTooltip>
-                            </Box>
+                            <HtmlTooltip
+                              enterTouchDelay={0}
+                              title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
+                              arrow
+                            >
+                              <span>
+                                <WorkStations className=" align-text-top" />
+                              </span>
+                            </HtmlTooltip>
                           )}
                         </Box>
                         <Box style={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
