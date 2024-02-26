@@ -1,4 +1,4 @@
-import { Chip, IconButton, Typography } from '@material-ui/core';
+import { Chip, IconButton } from '@material-ui/core';
 import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@material-ui/icons';
 import React from 'react';
 import { PostWorkIcon, PreWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
@@ -76,6 +76,7 @@ const RenderService = ({
             <div className="grid grid-cols-[30px_1fr_30px] items-center gap-[8px] min-h-[74px]">
               <IconButton
                 disabled={!hasPrevTab}
+                className={`${!hasPrevTab ? 'opacity-0' : 'opacity-100'}`}
                 onClick={() => {
                   const activeTab = handlePrevClick();
                   const data = serviceSteps[activeTab];
@@ -115,6 +116,7 @@ const RenderService = ({
               </div>
               <IconButton
                 disabled={!hasNextTab}
+                className={`${!hasNextTab ? 'opacity-0' : 'opacity-100'}`}
                 onClick={() => {
                   const activeTab = handleNextClick();
                   const data = serviceSteps[activeTab];

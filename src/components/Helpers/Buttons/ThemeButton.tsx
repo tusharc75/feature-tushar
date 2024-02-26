@@ -37,6 +37,8 @@ const ThemeButton = ({
   isLoading,
   disabled,
   className,
+  startIcon,
+  endIcon,
   ...rest
 }: ButtonType) => {
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -91,7 +93,9 @@ const ThemeButton = ({
             )
           ) : (
             <>
+              {startIcon && <span className="-ml-[2px] mr-[2px]">{startIcon}</span>}
               {children} {loader}
+              {endIcon && <span className="-mr-[2px] ml-[2px]">{endIcon}</span>}
             </>
           )}
         </Button>

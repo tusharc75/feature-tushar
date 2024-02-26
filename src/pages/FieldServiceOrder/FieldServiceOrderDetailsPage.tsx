@@ -12,7 +12,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import Steps from 'src/components/Steps';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -218,15 +218,9 @@ const ServiceOrderDetailsPage = () => {
               </ButtonWithPulse>
             )}
             <Fragment>
-              <Button
-                className={'btn-outline-v1'}
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small"
-                disabled={!allowedToEdit}
-                onClick={handleOpenUpdateDialog}
-              >
-                {isMobile && !isTablet ? <Edit /> : 'Edit'}
-              </Button>
+              <ThemeButton iconForMobile={<Edit />} disabled={!allowedToEdit} onClick={handleOpenUpdateDialog}>
+                Edit
+              </ThemeButton>
             </Fragment>
             <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
             <ActivityButton

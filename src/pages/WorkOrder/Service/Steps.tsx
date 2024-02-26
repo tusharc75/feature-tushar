@@ -31,7 +31,6 @@ import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Comments from './Comments';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AssignUserDialog from './AssignUserDialog';
-import { isDesktop, isMobile, isTablet } from 'react-device-detect';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
 import { WorkStations } from 'src/assets/svg/svgIcons';
 import DiagramDialog from '../Diagram/DiagramDialog';
@@ -998,7 +997,7 @@ const Steps = ({
                 step.idx = resource === sidebarResource.workOrderTechnician ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`;
                 return (
                   <Box
-                    key={`${step._id}_${selectedService?.uniqueId}}`}
+                    key={step._id}
                     border={1}
                     borderColor={'var(--common-border-color)'}
                     className={`${classes.accordionHeading}  ${classes.white} ${
@@ -1026,16 +1025,16 @@ const Steps = ({
                         {resource === sidebarResource.workOrderTechnician ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
                       </span>
                       <Box
-                        className="mr-auto basis-[calc(100%-56px)] sm:basis-[calc(100%-155px)] flex flex-wrap items-center justify-between gap-[8px]"
+                        className={`mr-auto basis-[calc(100%-56px)] sm:basis-[calc(100%-155px)] flex flex-wrap items-center justify-between gap-[8px]`}
                         gridGap={'8px'}
                       >
                         <Box className="flex items-center gap-2 flex-grow text-[var(--primary-text)]">
                           <div className="flex items-start gap-2 w-full">
-                            <Typography className={`${classes.heading} flex-grow [word-break:break-all]`} style={{ fontWeight: '600' }}>
+                            <h6 className={`${classes.heading} flex-grow [word-break:break-all] line-clamp-1`} style={{ fontWeight: '600' }}>
                               {step.stepName}
-                            </Typography>
-                            {isMobile && !isTablet && (
-                              <div className="flex flex-wrap md:gap-2 items-center">
+                            </h6>
+                            {mobScreen && (
+                              <div className="flex flex-wrap md:gap-2 items-center min-w-fit">
                                 {stepData?.status && (
                                   <IconButton
                                     aria-label="info"
@@ -1107,23 +1106,20 @@ const Steps = ({
                             )}
                           </div>
                           {step?.assignedUsers?.length > 0 && (
-                            <Box ml={1}>
-                              <HtmlTooltip enterTouchDelay={0} title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                <People style={{ color: 'var(--primary-text)', maxWidth: '22px' }} />
-                              </HtmlTooltip>
-                            </Box>
+                            <HtmlTooltip enterTouchDelay={0} arrow title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                              <People style={{ color: 'var(--primary-text)', maxWidth: '22px' }} />
+                            </HtmlTooltip>
                           )}
                           {step?.assignedWorkStations?.length > 0 && (
-                            <Box ml={1}>
-                              <HtmlTooltip
-                                enterTouchDelay={0}
-                                title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
-                              >
-                                <span>
-                                  <WorkStations className=" align-text-top" />
-                                </span>
-                              </HtmlTooltip>
-                            </Box>
+                            <HtmlTooltip
+                              enterTouchDelay={0}
+                              title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
+                              arrow
+                            >
+                              <span>
+                                <WorkStations className=" align-text-top" />
+                              </span>
+                            </HtmlTooltip>
                           )}
                         </Box>
                         <Box style={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
@@ -1296,7 +1292,7 @@ const Steps = ({
                           )}
                         </Box>
                       </Box>
-                      {(isTablet || isDesktop) && (
+                      {!mobScreen && (
                         <div className="flex  md:gap-1 items-center">
                           {stepData?.status && (
                             <IconButton
