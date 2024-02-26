@@ -410,9 +410,11 @@ const WorkOrderSupervisor = () => {
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3 align-items-center">
                 {isMobile ? (
                   <>
-                    <ThemeButton startIcon={<BiFilterAlt />} iconForMobile={<BiFilterAlt />} tooltip="Apply Filters" onClick={handleClick}>
-                      Filter
-                    </ThemeButton>
+                    <div className="max-w-fit mr-auto">
+                      <ThemeButton startIcon={<BiFilterAlt />} iconForMobile={<BiFilterAlt />} tooltip="Apply Filters" onClick={handleClick}>
+                        Filter
+                      </ThemeButton>
+                    </div>
                     <Popover
                       id={id}
                       open={open}
