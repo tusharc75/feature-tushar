@@ -2,7 +2,7 @@ import { Button, ButtonProps, CircularProgress, Menu, useMediaQuery } from '@mat
 import { AddOutlined, ExpandMore, TouchApp } from '@material-ui/icons';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import queryString from 'query-string';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
@@ -144,6 +144,10 @@ const ListingPageHeader = ({
     }
   };
 
+  const shouldNotFlexWrap = useMemo(() => {
+    return (onSearch || handleSearchFilter) && (isAddButtonVisible || isActionButtonVisible) && !Boolean(rightSideContents);
+  }, [handleSearchFilter, isActionButtonVisible, isAddButtonVisible, onSearch, rightSideContents]);
+
   return (
     <div className="header-panel listing-head">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
@@ -169,7 +173,7 @@ const ListingPageHeader = ({
           ) : null}
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
-        <div className="flex flex-wrap gap-[8px] justify-end items-center">
+        <div className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center`}>
           {onSearch ? (
             <HideWhenOffline>
               <SearchBox onChange={onSearch} value={searchValue} />
@@ -186,7 +190,7 @@ const ListingPageHeader = ({
           ) : null}
           {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
             <>
-              <div className="flex gap-[8px] flex-wrap items-center">
+              <div className="flex gap-[8px] flex-wrap items-center min-w-fit">
                 <HideWhenOffline>
                   {isAddButtonVisible ? (
                     <HtmlTooltip title={addButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>

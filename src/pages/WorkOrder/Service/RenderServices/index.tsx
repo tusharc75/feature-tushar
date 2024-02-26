@@ -1,4 +1,4 @@
-import { Chip, IconButton, Typography } from '@material-ui/core';
+import { Chip, IconButton } from '@material-ui/core';
 import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@material-ui/icons';
 import React from 'react';
 import { PostWorkIcon, PreWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
