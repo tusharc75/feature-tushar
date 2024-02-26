@@ -40,6 +40,7 @@ import Diagram from './Diagram';
 import { ExpandMore } from '@material-ui/icons';
 import { VscVersions } from 'react-icons/vsc';
 import Versions from './Versions';
+import { IoHandRightSharp } from 'react-icons/io5';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -263,7 +264,7 @@ const WorkOrderDetails = () => {
                     </HtmlTooltip>
                   ) : [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status) ? (
                     <ThemeButton
-                      iconForMobile={false}
+                      iconForMobile={<IoHandRightSharp />}
                       onClick={() => updateJobStatus(WORK_ORDER_STATUS.onHold)}
                       tooltip={`Change Status ${WORK_ORDER_STATUS.onHold}`}
                     >
