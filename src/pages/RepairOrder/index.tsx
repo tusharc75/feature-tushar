@@ -3,7 +3,7 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { camelCase } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -18,11 +18,13 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, repairOrder, sidebarResource } from 'src/constants/helpers';
+import { dateFormat, gridLoadingTimeout, prepareDataForGrid, repairOrder, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRepairOrder from './ManageRepairOrder';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import moment from 'moment';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 let searchTimeout;
 
@@ -90,7 +92,27 @@ const RepairOrder = () => {
     const response = await axiosInstance().get(`/field?resource=Repair Order`);
     data = response?.data?.data;
     let newColumns = generateColumns(renderedFrom, data, routes.repairOrderDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    const completedByCol = {
+      id: 'completedBy',
+      accessorKey: 'completedBy',
+      accessor: 'completedBy',
+      size: 200,
+      header: 'Completed By',
+      Header: 'CompletedBy',
+      show: true,
+      minSize: 185,
+      disableFilters: true,
+      cell: ({ row }) =>
+        row?.original?.completedBy ? (
+          <h5 className="createBy" title={`${row?.original?.completedBy} • ${moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}`}>
+            {row?.original?.completedBy}
+            <span className="createdAtTime badge-date">{moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}</span>
+          </h5>
+        ) : (
+          <NoDataCell />
+        )
+    }
+    setColumns([...newColumns, ...getStaticFields(), completedByCol ,ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -189,6 +211,10 @@ const RepairOrder = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
+          if(!isEmpty(u?.completedBy)) {
+            finalObject['completedBy'] = u?.completedBy?.user?.concatedName;
+            finalObject['completedByDate'] = u?.completedBy?.date;
+          }
           finalObject['isChecked'] = false;
           finalObject['canDelete'] = permissions?.repairOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           return finalObject;
