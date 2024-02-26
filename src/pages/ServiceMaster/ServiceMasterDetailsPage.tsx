@@ -1,8 +1,8 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs, useMediaQuery } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
@@ -22,6 +22,7 @@ import Product from './Product';
 import Steps from './Steps';
 
 const ServiceMasterDetailsPage = () => {
+  const isMobile = useMediaQuery('(max-width:768px)');
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -96,7 +97,7 @@ const ServiceMasterDetailsPage = () => {
               <>
                 {permissions?.product?.isUpdate && !isMobile && (
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    variant={isMobile ? 'text' : 'contained'}
                     size="small"
                     className={'btn-outline-v1'}
                     onClick={() => {
@@ -108,14 +109,14 @@ const ServiceMasterDetailsPage = () => {
                 )}
                 {permissions?.product?.isUpdate && (
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    variant={isMobile ? 'text' : 'contained'}
                     size="small"
                     className={'btn-outline-v1'}
                     onClick={() => {
                       setOpenUpdateDialog(true);
                     }}
                   >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
+                    {isMobile ? <Edit /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
