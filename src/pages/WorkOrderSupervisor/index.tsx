@@ -451,10 +451,14 @@ const WorkOrderSupervisor = () => {
                       <div className="grid gap-3 p-5">
                         {filters}
                         <div className="flex justify-between gap-2">
-                          <ThemeButton iconForMobile={false} onClick={reset}>
-                            Clear Filters
-                          </ThemeButton>
-                          <ThemeButton iconForMobile={false} onClick={handleClose}>
+                          {isFilterPresent ? (
+                            <ThemeButton iconForMobile={false} onClick={reset}>
+                              Clear Filters
+                            </ThemeButton>
+                          ) : (
+                            <span />
+                          )}
+                          <ThemeButton iconForMobile={false} onClick={handleClose} className="ml-auto">
                             Close
                           </ThemeButton>
                         </div>
