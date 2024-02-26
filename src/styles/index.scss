@@ -4082,8 +4082,12 @@ body .btn-outline-red-v1 {
     padding: 0;
   }
   &:disabled {
-    opacity: 0.3;
+    opacity: 0.6;
     border-color: gray !important;
+    [data-mode='dark'] & {
+      opacity: 0.6;
+      border: 0 !important;
+    }
   }
   &:hover {
     background-color: rgba(0, 0, 0, 0.04) !important;
