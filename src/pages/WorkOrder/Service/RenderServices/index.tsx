@@ -76,6 +76,7 @@ const RenderService = ({
             <div className="grid grid-cols-[30px_1fr_30px] items-center gap-[8px] min-h-[74px]">
               <IconButton
                 disabled={!hasPrevTab}
+                className={`${!hasPrevTab ? 'opacity-0' : 'opacity-100'}`}
                 onClick={() => {
                   const activeTab = handlePrevClick();
                   const data = serviceSteps[activeTab];
@@ -115,6 +116,7 @@ const RenderService = ({
               </div>
               <IconButton
                 disabled={!hasNextTab}
+                className={`${!hasNextTab ? 'opacity-0' : 'opacity-100'}`}
                 onClick={() => {
                   const activeTab = handleNextClick();
                   const data = serviceSteps[activeTab];

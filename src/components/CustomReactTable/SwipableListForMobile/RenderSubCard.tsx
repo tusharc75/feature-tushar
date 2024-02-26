@@ -74,7 +74,7 @@ const RenderSubCard = ({
                     handleCollapse(row.original._id);
                   }}
                 >
-                  {compareCollapse(row.original._id) ? <BsChevronContract /> : <BsChevronExpand />}
+                  {compareCollapse(row.original._id) ? <BsChevronExpand /> : <BsChevronContract />}
                 </IconButton>
               )}
             </div>

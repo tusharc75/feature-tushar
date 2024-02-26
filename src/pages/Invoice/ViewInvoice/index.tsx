@@ -13,7 +13,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { camelCase, startCase } from 'lodash';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { IoMdDownload } from 'react-icons/io';
 import TabPanel from 'src/components/TabPanel';
 import CreditMemo from '../CreditMemo';
@@ -22,6 +22,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { Cancel, Close } from '@material-ui/icons';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -358,7 +359,9 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                   dataRows?.length > 0 &&
                   [sidebarResource.fieldTicket, sidebarResource.repairOrder]?.includes(resource) &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
-                    <DeleteButton mode="light" text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
+                    <ThemeButton iconForMobile={<Close />} tooltip="Cancel Invoice" borderColor="red" onClick={() => setCommentDialog(true)}>
+                      Cancel Invoice
+                    </ThemeButton>
                   )}
               </div>
             </div>
