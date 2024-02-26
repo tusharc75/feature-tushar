@@ -89,7 +89,7 @@ const WorkOrderTechnician = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <Box className="flex items-center flex-wrap gap-2 justify-end mb-4">
-          <Box className="flex-grow w-full min-[600px]:w-[unset]" mt={1}>
+          <Box className="flex-grow w-full min-[600px]:w-[unset] " mt={1}>
             <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterQuery} />
           </Box>
           <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} />

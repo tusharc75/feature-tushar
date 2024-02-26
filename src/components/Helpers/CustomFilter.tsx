@@ -28,7 +28,6 @@ const CustomFilter = ({ field, setFilterQuery }) => {
   const [inputValues, setInputValues] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
 
-
   const fetchOptions = useCallback(
     debounce(async (resource: string, searchKey: string = '', page: number = 0) => {
       try {
@@ -37,7 +36,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
           page = 0;
           setCurrentPage(0);
         }
-        if (page === 0) { 
+        if (page === 0) {
           setCurrentPage(0);
           setOptions([]);
         }
@@ -93,12 +92,14 @@ const CustomFilter = ({ field, setFilterQuery }) => {
           });
           const dateValue =
             fromDate && toDate
-              ? `${fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null} - ${toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
-              }`
-              : fromDate || toDate
-                ? `${fromDate ? `${moment(new Date(fromDate)).format('MM/DD/YYYY')} (From Date)` : ''} ${toDate ? `${moment(new Date(toDate)).format('MM/DD/YYYY')} (To Date)` : ''
+              ? `${fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null} - ${
+                  toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
                 }`
-                : null;
+              : fromDate || toDate
+              ? `${fromDate ? `${moment(new Date(fromDate)).format('MM/DD/YYYY')} (From Date)` : ''} ${
+                  toDate ? `${moment(new Date(toDate)).format('MM/DD/YYYY')} (To Date)` : ''
+                }`
+              : null;
           chipData.push({
             title: col?.fieldLabel,
             name: fieldName,
@@ -320,59 +321,60 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                                   betweenDate && betweenDate[`from_${field.fieldName}`]
                                     ? betweenDate[`from_${field.fieldName}`]
                                     : formValues[`from_${field.fieldName}`]
-                                      ? formValues[`from_${field.fieldName}`]
-                                      : new Date()
+                                    ? formValues[`from_${field.fieldName}`]
+                                    : new Date()
                                 }
                               />
                             </Grid>
                           </>
-                        ) :
-                          field?.type === 'dropDown' && field?.options ? (
-                            <Grid item xs={12} sm={6} md={6} key={`${i}${field?.fieldName}`}>
-                              <Autocomplete
-                                disableCloseOnSelect
-                                options={field?.options}
-                                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                                getOptionSelected={(option: any, val) => option.optionValue === val}
-                                value={!isEmpty(formValues) && formValues[field?.fieldName]}
-                                onChange={(e, val) => {
-                                  handleSelectFilter(field?.fieldName, val);
-                                }}
-                                fullWidth
-                                renderInput={(params) => (
-                                  <TextField {...params} label={field?.fieldLabel} variant="outlined" size="small" name={field?.fieldName} />
-                                )}
-                              />
-                            </Grid>
-                          ) : (
-                            <Grid item xs={12} sm={6} md={6} key={`${i}${field?.fieldName}`}>
-                              <Autocomplete
-                                multiple
-                                inputValue={inputValues[field?.fieldName] || ''}
-                                onOpen={() => {
-                                  setOptions([]);
-                                  setLoading({ loading: true, resource: field?.resource });
-                                  fetchOptions(field?.resource, '');
-                                }}
-                                onInputChange={(event, value, reason) => {
-                                  if (reason === 'input') {
-                                    setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: value }));
-                                    fetchOptions(field?.resource, value);
-                                  }
-                                }}
-                                disableCloseOnSelect
-                                options={options}
-                                fullWidth
-                                loading={loading.loading && loading.resource === field?.resource}
-                                getOptionLabel={(option: any) => option.optionLabel ?? ''}
-                                getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
-                                value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
-                                onChange={(e, val) => {
-                                  handleSelectFilter(field?.fieldName, val);
-                                  setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: '' }));
-                                }}
-                                size="small"
-                                renderInput={(params) => <TextField {...params}
+                        ) : field?.type === 'dropDown' && field?.options ? (
+                          <Grid item xs={12} sm={6} md={6} key={`${i}${field?.fieldName}`}>
+                            <Autocomplete
+                              disableCloseOnSelect
+                              options={field?.options}
+                              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                              getOptionSelected={(option: any, val) => option.optionValue === val}
+                              value={!isEmpty(formValues) && formValues[field?.fieldName]}
+                              onChange={(e, val) => {
+                                handleSelectFilter(field?.fieldName, val);
+                              }}
+                              fullWidth
+                              renderInput={(params) => (
+                                <TextField {...params} label={field?.fieldLabel} variant="outlined" size="small" name={field?.fieldName} />
+                              )}
+                            />
+                          </Grid>
+                        ) : (
+                          <Grid item xs={12} sm={6} md={6} key={`${i}${field?.fieldName}`}>
+                            <Autocomplete
+                              multiple
+                              inputValue={inputValues[field?.fieldName] || ''}
+                              onOpen={() => {
+                                setOptions([]);
+                                setLoading({ loading: true, resource: field?.resource });
+                                fetchOptions(field?.resource, '');
+                              }}
+                              onInputChange={(event, value, reason) => {
+                                if (reason === 'input') {
+                                  setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: value }));
+                                  fetchOptions(field?.resource, value);
+                                }
+                              }}
+                              disableCloseOnSelect
+                              options={options}
+                              fullWidth
+                              loading={loading.loading && loading.resource === field?.resource}
+                              getOptionLabel={(option: any) => option.optionLabel ?? ''}
+                              getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
+                              value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
+                              onChange={(e, val) => {
+                                handleSelectFilter(field?.fieldName, val);
+                                setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: '' }));
+                              }}
+                              size="small"
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
                                   label={field?.fieldLabel}
                                   variant="outlined"
                                   name={field?.fieldName}
@@ -380,23 +382,26 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                                     ...params.InputProps,
                                     endAdornment: (
                                       <>
-                                        {loading.loading && loading.resource === field?.resource ? <CircularProgress color="inherit" size={20} /> : null}
+                                        {loading.loading && loading.resource === field?.resource ? (
+                                          <CircularProgress color="inherit" size={20} />
+                                        ) : null}
                                         {params.InputProps.endAdornment}
                                       </>
                                     )
                                   }}
-                                />}
-                                ListboxProps={{
-                                  onScroll: (e) => {
-                                    if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
-                                      setLoading({ loading: true, resource: field?.resource });
-                                      fetchOptions(field?.resource, '', currentPage + 1);
-                                    }
+                                />
+                              )}
+                              ListboxProps={{
+                                onScroll: (e) => {
+                                  if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
+                                    setLoading({ loading: true, resource: field?.resource });
+                                    fetchOptions(field?.resource, '', currentPage + 1);
                                   }
-                                }}
-                              />
-                            </Grid>
-                          )}
+                                }
+                              }}
+                            />
+                          </Grid>
+                        )}
                       </>
                     );
                   })
@@ -483,7 +488,7 @@ const DisplyaFilters = (props) => {
   return (
     <div className="custom-filter">
       {chipData?.length > 0 && (
-        <div className="chip-container" style={{ paddingRight: `${55 + COUNT_PADDING}px` }}>
+        <div className="chip-container min-h-[26px]" style={{ paddingRight: `${55 + COUNT_PADDING}px` }}>
           <div className={'chip-group'} ref={containerRef}>
             {chipData?.map((filter) => (
               <Chip
