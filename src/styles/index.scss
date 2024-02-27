@@ -4082,8 +4082,12 @@ body .btn-outline-red-v1 {
     padding: 0;
   }
   &:disabled {
-    opacity: 0.3;
+    opacity: 0.6;
     border-color: gray !important;
+    [data-mode='dark'] & {
+      opacity: 0.6;
+      border: 0 !important;
+    }
   }
   &:hover {
     background-color: rgba(0, 0, 0, 0.04) !important;
@@ -4106,5 +4110,61 @@ body .btn-outline-red-v1 {
         border: 0px !important;
       }
     }
+  }
+}
+
+.vis-button {
+  background-size: 30px !important;
+  background-position: center center !important;
+  border: 1px solid var(--common-border-color);
+  transition: all 0.25s;
+  &:hover {
+    opacity: 0.8;
+  }
+}
+.vis-up {
+  background-image: url('../assets/nodeStructureIcons/up.svg') !important;
+}
+.vis-down {
+  background-image: url('../assets/nodeStructureIcons/down.svg') !important;
+}
+.vis-left {
+  background-image: url('../assets/nodeStructureIcons/left.svg') !important;
+}
+.vis-right {
+  background-image: url('../assets/nodeStructureIcons/right.svg') !important;
+}
+.vis-zoomIn {
+  background-image: url('../assets/nodeStructureIcons/plus.svg') !important;
+}
+.vis-zoomOut {
+  background-image: url('../assets/nodeStructureIcons/minus.svg') !important;
+}
+.vis-zoomExtends {
+  background-image: url('../assets/nodeStructureIcons/center.svg') !important;
+  background-size: 28px !important;
+}
+
+[data-mode='dark'] {
+  .vis-up {
+    background-image: url('../assets/nodeStructureIcons/upDark.svg') !important;
+  }
+  .vis-down {
+    background-image: url('../assets/nodeStructureIcons/downDark.svg') !important;
+  }
+  .vis-left {
+    background-image: url('../assets/nodeStructureIcons/leftDark.svg') !important;
+  }
+  .vis-right {
+    background-image: url('../assets/nodeStructureIcons/rightDark.svg') !important;
+  }
+  .vis-zoomIn {
+    background-image: url('../assets/nodeStructureIcons/plusDark.svg') !important;
+  }
+  .vis-zoomOut {
+    background-image: url('../assets/nodeStructureIcons/minusDark.svg') !important;
+  }
+  .vis-zoomExtends {
+    background-image: url('../assets/nodeStructureIcons/centerDark.svg') !important;
   }
 }

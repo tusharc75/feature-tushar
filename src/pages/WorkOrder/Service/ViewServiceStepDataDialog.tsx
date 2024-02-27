@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Dialog, TextField, Typography } from '@material-ui/core';
+import { Box, Dialog, TextField, Typography, useMediaQuery } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -7,24 +7,26 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import routes from 'src/components/Helpers/Routes';
 
 const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selectedService }) => {
-
   const renderedFrom = `${routes?.workOrder?.title}_Service_StepData`;
   const { generateColumns } = useColumns();
   const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
   const { state, dispatch } = useTableReducer();
+  const isMobile = useMediaQuery('(max-width:768px)');
 
   useEffect(() => {
     const services = [];
     servicesData?.forEach((sd) => {
-      const rows = stepsData?.filter((s) => s.uniqueId === sd.uniqueId).map((e, index) => {
-        const matchingStep = sd?.steps?.find((item) => item?._id === e?.stepId);
-        return {
-          index: index + 1,
-          stepName: matchingStep?.stepName,
-          ...e
-        };
-      });
+      const rows = stepsData
+        ?.filter((s) => s.uniqueId === sd.uniqueId)
+        .map((e, index) => {
+          const matchingStep = sd?.steps?.find((item) => item?._id === e?.stepId);
+          return {
+            index: index + 1,
+            stepName: matchingStep?.stepName,
+            ...e
+          };
+        });
       const columns = fetchGridColumns(sd?.steps);
       services.push({
         optionLabel: sd.serviceName,
@@ -39,8 +41,7 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
     if (selectedService && services?.find((e) => e.uniqueId === selectedService?.uniqueId)) {
       setSelectedServices([services?.find((e) => e.uniqueId === selectedService?.uniqueId)]);
     }
-  }, []);
-
+  }, [isMobile]);
 
   const fetchGridColumns = (steps: any) => {
     const initialColumns = [
@@ -49,16 +50,24 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
         Header: 'Index',
         width: 70,
         sticky: 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
-      },
-      {
+        primaryField: true,
+        Cell: ({ row }) => (
+          <p className="text-truncate">
+            {row.original.index} {isMobile ? `: ${row.original.stepName}` : ''}
+          </p>
+        )
+      }
+    ];
+    if (!isMobile) {
+      initialColumns.push({
         accessor: 'stepName',
         Header: 'Step Name',
         width: 100,
         sticky: 'left',
+        primaryField: false,
         Cell: ({ row }) => <p className="text-truncate">{row.original.stepName}</p>
-      }
-    ];
+      });
+    }
     const stepColumns = [];
     const stepFields = steps?.map((e) => e?.fields);
     stepFields?.forEach((step) => {
@@ -69,7 +78,6 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
       });
     });
     let newColumns = generateColumns(renderedFrom, stepColumns);
-    // setColumns([...initialColumns, ...newColumns]);
     return [...initialColumns, ...newColumns];
   };
 
@@ -80,7 +88,7 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
         <Autocomplete
           multiple
           id="service"
-          style={{ width: '50%' }}
+          className="flex-grow max-w-[500px]"
           options={[{ optionValue: 'selectAll', optionLabel: 'Select All' }, ...serviceOptions]}
           getOptionLabel={(option) => option?.optionLabel}
           value={selectedServices}
@@ -96,29 +104,31 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
             <TextField {...params} margin="dense" variant="outlined" label="Select Service" placeholder="Select Service" name="service" />
           )}
         />
-        <Box style={{ overflowY: 'auto', height: 'calc(100% - 70px)' }}>
-          {selectedServices?.filter((e) => e?.optionValue !== 'selectAll')?.map(s => (
-            (<Box mt={2}>
-              <Typography variant="h6">{s?.optionLabel}</Typography>
-              <CustomReactTable
-                key={s?.uniqueId}
-                height={s?.row?.length === 0 && 'calc(100px)'}
-                columns={s?.column}
-                state={{
-                  ...state,
-                  dataRows: s?.row || [],
-                  rowCount: s?.row?.length || 0,
-                  initialDataLoaded: true
-                }}
-                dispatch={dispatch}
-                hideSelection={true}
-                hideAction={true}
-                renderedFrom={`${renderedFrom}_${s?.uniqueId}`}
-                isClientSideGrid={true}
-                showArrangeView={false}
-              />
-            </Box>)
-          ))}
+        <Box className="pt-3 " style={{ overflowY: 'auto', height: 'calc(100% - 70px)' }}>
+          {selectedServices
+            ?.filter((e) => e?.optionValue !== 'selectAll')
+            ?.map((s) => (
+              <Box mt={2}>
+                <Typography variant="h6">{s?.optionLabel}</Typography>
+                <CustomReactTable
+                  key={s?.uniqueId}
+                  height={s?.row?.length === 0 && 'calc(100px)'}
+                  columns={s?.column}
+                  state={{
+                    ...state,
+                    dataRows: s?.row || [],
+                    rowCount: s?.row?.length || 0,
+                    initialDataLoaded: true
+                  }}
+                  dispatch={dispatch}
+                  hideSelection={true}
+                  hideAction={true}
+                  renderedFrom={`${renderedFrom}_${s?.uniqueId}`}
+                  isClientSideGrid={true}
+                  showArrangeView={false}
+                />
+              </Box>
+            ))}
         </Box>
       </CustomDialogContent>
     </Dialog>

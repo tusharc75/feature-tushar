@@ -76,6 +76,7 @@ const RenderService = ({
             <div className="grid grid-cols-[30px_1fr_30px] items-center gap-[8px] min-h-[74px]">
               <IconButton
                 disabled={!hasPrevTab}
+                className={`${!hasPrevTab ? 'opacity-0' : 'opacity-100'}`}
                 onClick={() => {
                   const activeTab = handlePrevClick();
                   const data = serviceSteps[activeTab];
@@ -115,6 +116,7 @@ const RenderService = ({
               </div>
               <IconButton
                 disabled={!hasNextTab}
+                className={`${!hasNextTab ? 'opacity-0' : 'opacity-100'}`}
                 onClick={() => {
                   const activeTab = handleNextClick();
                   const data = serviceSteps[activeTab];
@@ -277,14 +279,14 @@ const RenderSingleService = ({
           {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
             <HtmlTooltip arrow enterTouchDelay={0} title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}>
               <span>
-                <WorkStations className="align-text-top" />
+                <WorkStations className="align-text-top" size={15} />
               </span>
             </HtmlTooltip>
           )}
           {data?.comment && (
             <HtmlTooltip arrow enterTouchDelay={0} title={data?.comment}>
               <span>
-                <Message style={{ fontSize: 20 }} />
+                <Message style={{ fontSize: 18 }} />
               </span>
             </HtmlTooltip>
           )}

@@ -97,7 +97,7 @@ const CardColTimeline: React.FC<CardColInterface> = ({
           return (
             <div
               key={col}
-              className={`${styles.singleCol} snap-start min-w-[min(100%,350px)] max-w-[350px]`}
+              className={`${styles.singleCol} snap-start min-w-[min(90%,350px)] max-w-[350px]`}
               style={
                 {
                   '--bg': col === 'Pending' ? '#F8A300' : col === 'In-Progress' ? '#F16A9A' : col === 'Completed' ? '#31AC1D' : '#7F76EB',
