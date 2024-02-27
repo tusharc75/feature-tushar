@@ -28,6 +28,7 @@ import {
   ASSET_STATUS,
   COLOUR_MASTER,
   INVENTORY_HISTORY_TYPE,
+  INVENTORY_OWNER_TYPE,
   gridLoadingTimeout,
   prepareDataForGrid,
   product,
@@ -284,14 +285,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-            ![
-              ASSET_STATUS.new,
-              ASSET_STATUS.available,
-              ASSET_STATUS.lost,
-              ASSET_STATUS.customerPossession,
-              ASSET_STATUS.onPO,
-              ASSET_STATUS.scrap
-            ]?.includes(u?.status)
+              ![
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.lost,
+                ASSET_STATUS.customerPossession,
+                ASSET_STATUS.onPO,
+                ASSET_STATUS.scrap
+              ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -410,7 +411,7 @@ const SerializedAsset = () => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Status changed to ${status}`
+          message: `Status changed to ${obj?.status}`
         });
       })
       .catch((error) => {
@@ -551,9 +552,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -764,10 +764,10 @@ const ActionMenuItems = ({
               handleStatusChange(status);
             }}
             disabled={
-              selectedRecords?.filter((o) => [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(o.status)).length ===
-              selectedRecords?.length
-                ? false
-                : true
+              selectedRecords?.filter((o) => [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(o.status)
+                || (ASSET_STATUS.scrap === o.status && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand)
+              ).length === selectedRecords?.length
+                ? false : true
             }
           >
             {`Status Change - ${status}`}

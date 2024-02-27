@@ -54,13 +54,17 @@ export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) 
                 </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-                <Button color="primary" size="small"
+                <Button
+                    color="primary"
+                    size="small"
                     onClick={onClose}>Cancel</Button>
                 <Button
                     disabled={!Boolean(value)}
                     type="button"
                     color="primary"
-                    variant="contained" onClick={() => { onAddReason(value) }}>Save</Button>
+                    size='small'
+                    variant="contained"
+                    onClick={() => { onAddReason(value) }}>Save</Button>
             </CustomDialogFooter>
         </Dialog>
     );

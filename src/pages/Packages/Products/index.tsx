@@ -345,22 +345,24 @@ const Products = ({ packageId, packageData }) => {
   const actionButtonMenuItems = () => {
     return (
       <>
-        <MenuItem
-          disabled={disableAssignSerializedAssets()}
-          onClick={() => {
-            const products = [];
-            selectedRecords
-              .filter((i) => i.type === 'product' && i.serializedProduct)
-              ?.forEach((e) => {
-                if (e?.qty - e?.assetQty > 0) {
-                  products.push({ _id: e._id, product: e._id, qty: e?.qty - e?.assetQty, productName: e?.detail });
-                }
-              });
-            setAssignAssetDialog({ open: true, products: products });
-          }}
-        >
-          {`Assign ${routes.serializedAsset.title}`}
-        </MenuItem>
+        {permissions?.serializedAsset?.isRead &&
+          <MenuItem
+            disabled={disableAssignSerializedAssets()}
+            onClick={() => {
+              const products = [];
+              selectedRecords
+                .filter((i) => i.type === 'product' && i.serializedProduct)
+                ?.forEach((e) => {
+                  if (e?.qty - e?.assetQty > 0) {
+                    products.push({ _id: e._id, product: e._id, qty: e?.qty - e?.assetQty, productName: e?.detail });
+                  }
+                });
+              setAssignAssetDialog({ open: true, products: products });
+            }}
+          >
+            {`Assign ${routes.serializedAsset.title}`}
+          </MenuItem>
+        }
         <MenuItem
           disabled={permissions?.packages?.isUpdate && (selectedRecords.length === 0 || isRemovingProducts)}
           onClick={() => {
