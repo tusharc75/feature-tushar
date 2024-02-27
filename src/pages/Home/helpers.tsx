@@ -80,7 +80,7 @@ export const setDataBySectionName = (secName, index = 0) => {
       sideBarIcon = <ServiceManagementIcon size={20} />;
       break;
     }
-    case compareName(['eCommerce'], secName): {
+    case compareName(['eCommerce', 'eCommerce Operations Management'], secName): {
       text = 'Simplify your Customer Journey and Reduce Execution Time significantly';
       icon = <DashboardIcons.ECOMMERCE colors={iconColour} />;
       sideBarIcon = <BiCart size={20} />;
@@ -92,7 +92,7 @@ export const setDataBySectionName = (secName, index = 0) => {
       sideBarIcon = <ServiceManagementIcon size={20} />;
       break;
     }
-    case compareName(['Rental Operations Management'], secName): {
+    case compareName(['Rental Operations Management', 'Rental Jobs Management'], secName): {
       text = 'Fulfill Rental Orders Faster';
       icon = <DashboardIcons.ROM colors={iconColour} />;
       sideBarIcon = <RentalOperationManagementIcon size={20} />;
@@ -140,7 +140,7 @@ export const setDataBySectionName = (secName, index = 0) => {
       sideBarIcon = <MdOutlineDynamicForm size={20} />;
       break;
     }
-    case compareName(['Service Operations Management'], secName): {
+    case compareName(['Service Operations Management', 'Field Service Management'], secName): {
       text = 'Deploy, Track and Bill for field services efficiently';
       icon = <DashboardIcons.SERVICE_OPERATION_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <ServiceOperationManagementIcon size={20} />;
