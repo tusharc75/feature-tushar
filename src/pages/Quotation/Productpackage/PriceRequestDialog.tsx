@@ -259,7 +259,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                     <Box>
                       <IconButton size="small">{expandSupplierGrid === data?._id ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                     </Box>
-                    <div className="flex items-center gap-[5px]">
+                    <div className="min-[768px]:flex items-center gap-[5px]">
                       <Box className="min-w-0 line-clamp-1" title={data?.status ? data?.status : ''}>
                         <Typography variant="subtitle2">{data?.status && `Status : ${data?.status}, `}</Typography>
                       </Box>
