@@ -599,9 +599,8 @@ const Service = ({
           {mobScreen && (
             <div
               className={`
-              fixed bg-[var(--dark-primary,_#fff)] p-[10px_20px ${
-                isMobileSlideOpen ? 'bottom-0' : '-bottom-[55px]'
-              } left-0 right-0 z-[5] [border:1px_solid_var(--common-border-color)] border-b-0 transition-all duration-300`}
+              fixed bg-[var(--dark-primary,_#fff)] p-[10px_20px ${isMobileSlideOpen ? 'bottom-0' : '-bottom-[55px]'
+                } left-0 right-0 z-[5] [border:1px_solid_var(--common-border-color)] border-b-0 transition-all duration-300`}
             >
               <span className=" absolute top-0 right-0">
                 <IconButton size="small" onClick={() => setIsMobileSlideOpen((prev) => !prev)} className="p-2">
@@ -702,8 +701,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    isAllowedToServiceEdit &&
-                    selectedService?.clickable
+                      isAllowedToServiceEdit &&
+                      selectedService?.clickable
                       ? false
                       : true
                   }
@@ -771,10 +770,10 @@ const Service = ({
                 </MenuItem>
               )}
               <MenuItem
-                disabled={
-                  isAllowedToServiceEdit && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status)
-                    ? false
-                    : true
+                disabled={isAllowedToServiceEdit && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status)
+                  && selectedService?.clickable
+                  ? false
+                  : true
                 }
                 onClick={() => {
                   handleCompleteService(selectedService?._id, selectedService?.uniqueId);
@@ -784,10 +783,10 @@ const Service = ({
                 Complete Service
               </MenuItem>
               <MenuItem
-                disabled={
-                  isAllowedToServiceEdit && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status)
-                    ? false
-                    : true
+                disabled={isAllowedToServiceEdit && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status)
+                  && selectedService?.clickable
+                  ? false
+                  : true
                 }
                 onClick={() => {
                   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.skipped);
