@@ -55,8 +55,8 @@ export const setDataBySectionName = (secName, index = 0) => {
   const iconColour = colorAccessor.icon || ['#FFA800', '#E35200'];
 
   const compareName = (nameList: string[], name) => {
-    const namelistInSmallLetter = nameList.map((n) => n.toLowerCase());
-    const lowercaseName = name.toLowerCase();
+    const namelistInSmallLetter = nameList.map((n) => n.trim().toLowerCase());
+    const lowercaseName = name.toLowerCase().trim();
 
     return namelistInSmallLetter.includes(lowercaseName);
   };
@@ -69,76 +69,76 @@ export const setDataBySectionName = (secName, index = 0) => {
 
   switch (true) {
     case compareName(['CRM +', 'Sales Management'], secName): {
-      text = 'Improving Efficiency by setting targets and managing processes.';
+      text = 'Improving efficiency by setting targets and managing processes';
       icon = <DashboardIcons.CRM colors={iconColour} />;
       sideBarIcon = <SiCivicrm size={18} />;
       break;
     }
     case compareName(['Rental Jobs Management'], secName): {
-      text = 'Managing day-to-day Rental processes and assets.';
+      text = 'Managing day-to-day Rental processes and assets';
       sideBarIcon = <ServiceManagementIcon size={20} />;
       break;
     }
     case compareName(['eCommerce Operations Management'], secName): {
-      text = 'Running online business smartly.';
+      text = 'Running online business smartly';
       sideBarIcon = <ServiceManagementIcon size={20} />;
       break;
     }
     case compareName(['Production Order Management'], secName): {
-      text = 'Easy planning & maintenance of production processes.';
+      text = 'Easy planning & maintenance of production processes';
       sideBarIcon = <ServiceManagementIcon size={20} />;
       break;
     }
     case compareName(['eCommerce'], secName): {
-      text = 'Simplified eCommerce functionalities to smoothen your lives.';
+      text = 'Simplified eCommerce functionalities to smoothen your lives';
       icon = <DashboardIcons.ECOMMERCE colors={iconColour} />;
       sideBarIcon = <BiCart size={20} />;
       break;
     }
     case compareName(['Inventory Management'], secName): {
-      text = 'Improving Resource efficiency & minimizing blockage ';
+      text = 'Improving resource efficiency & minimizing blockage';
       icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <ServiceManagementIcon size={20} />;
       break;
     }
     case compareName(['Rental Operations Management'], secName): {
-      text = 'Fulfill Rental Orders Faster.';
+      text = 'Fulfill Rental Orders Faster';
       icon = <DashboardIcons.ROM colors={iconColour} />;
       sideBarIcon = <RentalOperationManagementIcon size={20} />;
       break;
     }
     case compareName(['ROM'], secName): {
-      text = 'Fulfill Rental Orders Faster.';
+      text = 'Fulfill Rental Orders Faster';
       icon = <DashboardIcons.ROM colors={iconColour} />;
       sideBarIcon = <FaRegRegistered size={20} />;
       break;
     }
     case compareName(['Field Service Operations'], secName): {
-      text = 'Fulfill Service Orders Faster.';
+      text = 'Fulfill Service Orders Faster';
       icon = <DashboardIcons.FIELD_SERVICE_OPERATION colors={iconColour} />;
       sideBarIcon = <FieldServiceOperationIcon size={20} />;
       break;
     }
     case compareName(['Repair & Maintenance Management'], secName): {
-      text = 'Helps maintaining the functionality of equipments and avoiding breakdown.';
+      text = 'Helps maintaining the functionality of equipments and avoiding breakdown';
       icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <HiOutlineWrenchScrewdriver size={18} />;
       break;
     }
     case compareName(['Admin Portal'], secName): {
-      text = 'Build your own Template, Manage Roles and Entities.';
+      text = 'Build your own Template, Manage Roles and Entities';
       icon = <DashboardIcons.ADMIN_PORTAL colors={iconColour} />;
       sideBarIcon = <RiShieldUserLine size={20} />;
       break;
     }
     case compareName(['Accounts'], secName): {
-      text = 'Customer and Supplier Account Management at your fingertips.';
+      text = 'Customer and Supplier Account Management at your fingertips';
       icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
       sideBarIcon = <FaRegUser size={20} />;
       break;
     }
     case compareName(['Product Setup'], secName): {
-      text = 'Product and Category Setup.';
+      text = 'Product and Category Setup';
       icon = <DashboardIcons.PRODUCT_SETUP colors={iconColour} />;
       sideBarIcon = <ProductSetup size={20} />;
       break;
@@ -150,19 +150,19 @@ export const setDataBySectionName = (secName, index = 0) => {
       break;
     }
     case compareName(['Service Operations Management'], secName): {
-      text = 'Optimizing Business activities.';
+      text = 'Optimizing business activities';
       icon = <DashboardIcons.SERVICE_OPERATION_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <ServiceOperationManagementIcon size={20} />;
       break;
     }
     case compareName(['Purchasing Management'], secName): {
-      text = 'Help you make smart purchasing decisions.';
+      text = 'Helping you make smart purchasing decisions';
       icon = <DashboardIcons.PURCHASING_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <PurchasingManagementIcon size={20} />;
       break;
     }
     case compareName(['Planning & Forecasting'], secName): {
-      text = 'Helps preparing for contingency & emergency plans.';
+      text = 'Helping in preparation for contingency & emergency plans';
       icon = <DashboardIcons.PLANNING_FORECASTING colors={iconColour} />;
       sideBarIcon = <MdOutlineEventAvailable size={20} />;
       break;
@@ -193,7 +193,7 @@ export const setDataBySectionName = (secName, index = 0) => {
     }
     case compareName(['Fleet Management'], secName): {
       sideBarIcon = <FleetManagementIcon size={20} />;
-      text = 'Efficiently manage your fleet remotely.';
+      text = 'Efficiently managing your fleet remotely';
       icon = <DashboardIcons.FLEET_MANAGEMENT colors={iconColour} />;
       break;
     }
