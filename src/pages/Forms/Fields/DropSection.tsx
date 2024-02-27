@@ -4,7 +4,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import update from 'immutability-helper';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { DropField } from './DropField';
-import FieldList from './FieldList';
+import FieldList, { TEXTBOX, DROPDOWN, DATE } from './FieldList';
 
 const style = {
   cursor: 'move'
@@ -33,26 +33,83 @@ const DropSection = ({
 
   const [anchorEl, setAnchorEl] = useState(null);
 
+  const returnType = (type: string) => {
+    if (type === FieldList['TEXTBOX'].type) {
+      return TEXTBOX.SINGLELINE.type;
+    }
+
+    if (type === FieldList['DROPDOWN'].type) {
+      return DROPDOWN.DROPDOWN.type;
+    }
+
+    if (type === FieldList['DATE'].type) {
+      return DATE.DATE.type;
+    }
+    return type;
+  };
+
+  const fieldLabel = (field: [], type: string) => {
+    if (type === FieldList['TEXTBOX'].type) {
+      return (
+        FieldList[type?.toUpperCase()]?.label +
+        ' ' +
+        (field.filter((i: any) =>
+          Object.keys(TEXTBOX)
+            ?.map((t) => TEXTBOX[t]?.type)
+            ?.includes(i?.type)
+        )?.length +
+          1)
+      );
+    }
+
+    if (type === FieldList['DROPDOWN'].type) {
+      return (
+        FieldList[type?.toUpperCase()]?.label +
+        ' ' +
+        (field.filter((i: any) =>
+          Object.keys(DROPDOWN)
+            ?.map((t) => DROPDOWN[t]?.type)
+            ?.includes(i?.type)
+        )?.length +
+          1)
+      );
+    }
+
+    if (type === FieldList['DATE'].type) {
+      return (
+        FieldList[type?.toUpperCase()]?.label +
+        ' ' +
+        (field.filter((i: any) =>
+          Object.keys(DATE)
+            ?.map((t) => DATE[t]?.type)
+            ?.includes(i?.type)
+        )?.length +
+          1)
+      );
+    }
+
+    return FieldList[type?.toUpperCase()]?.label + ' ' + (field.filter((i: any) => i.type === type)?.length + 1);
+  };
+
   const addField = (sectionId, type, index) => {
     let data = [...section];
     data.forEach((row) => {
       row.field = row.field.filter((i) => i._id);
       if (row.sectionId.toString() === sectionId.toString()) {
-        let count = row.field.filter((i) => i.type === type).length;
         let option = [];
         if (
           type === FieldList.DROPDOWN.type ||
-          type === FieldList.MULTISELECT.type ||
           type === FieldList.RADIO.type ||
           type === FieldList.VLOOKUPDROPDOWN.type ||
           type === FieldList.PROCESS.type
         ) {
           option = [{ optionLabel: 'Option 1', optionValue: 'Option 1' }];
         }
+
         let insert_object: any = {
           _id: parseInt((Math.random() * 100000).toString()),
-          fieldLabel: FieldList[type?.toUpperCase()]?.label + ' ' + (count + 1),
-          type: type,
+          fieldLabel: fieldLabel(row?.field || [], type),
+          type: returnType(type),
           option: option,
           required: false,
           isTooltip: false,

@@ -1,11 +1,11 @@
 .set_gridbox_layout {
-	height: calc(100vh - 200px);
+	height: calc(100vh - 220px);
 	overflow: auto;
 }
 
 @media screen and (max-width: 960px) {
 	.set_gridbox_layout {
-	  height: calc(100vh - 200px);
+	  height: calc(100vh - 220px);
 	  overflow-x: hidden;
 	}
 	.form_grid_box {

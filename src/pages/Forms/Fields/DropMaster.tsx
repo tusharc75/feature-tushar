@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import Box from '@material-ui/core/Box';
 import update from 'immutability-helper';
@@ -7,7 +7,6 @@ import styles from './fields.module.css';
 import DropSection from './DropSection';
 
 export const DropMaster = ({ section, setSection, addSection }) => {
-  console.log('section', section)
   const [sectionHoverIndex, setSectionHoverIndex] = useState(null);
   const [fieldHoverId, setFieldHoverId] = React.useState(null);
 
