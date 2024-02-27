@@ -159,7 +159,7 @@ export default function ManageAccount(props) {
                     }
                   />
                   <CustomDialogContent>
-                    <Form autoComplete="off" autoCorrect="off" noValidate>
+                    <Form autoComplete="off" autoCorrect="off" noValidate className="truncate-autocomplete">
                       {formsData &&
                         formsData
                           .filter((item) => item.name !== additionalFieldName)
