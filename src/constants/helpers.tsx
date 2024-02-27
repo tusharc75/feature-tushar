@@ -21,7 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { camelCase, isArray, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, isArray, isEmpty, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
 import { stepIconInterface } from 'src/components/Steps/icons';
 
 interface stepInterface extends stepIconInterface {
@@ -1855,6 +1855,10 @@ export const prepareDataForGrid = (data, user = {}) => {
   if (data?.updatedBy) {
     finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName;
     finalObject['updatedByDate'] = data?.updatedBy?.date;
+  }
+  if(data?.completedBy) {
+    finalObject['completedBy'] = data?.completedBy?.user?.concatedName;
+    finalObject['completedByDate'] = data?.completedBy?.date;
   }
   finalObject['id'] = data?._id;
 
