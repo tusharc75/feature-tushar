@@ -24,7 +24,7 @@ function SearchBox({ onChange, value, size, width, placeholder, className, ...ot
 
   return (
     <>
-      <div className="relative sm:max-w-[300px] sm:min-w-[150px] min-w-0 flex-grow max-h-[32px]">
+      <div className="relative sm:max-w-[300px] sm:min-w-[150px] min-w-0 flex-grow flex-shrink max-h-[32px]">
         <FiSearch style={{ color: '#737373' }} className="absolute top-1/2 [transform:translateY(-50%)] left-[10px]" />
         <input
           title={'search'}

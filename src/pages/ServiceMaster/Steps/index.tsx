@@ -24,7 +24,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Steps = ({ serviceId }) => {
-  const isMobile = useMediaQuery('(max-width:600px)');
+  const isMobile = useMediaQuery('(max-width:768px)');
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_steps`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -175,17 +175,19 @@ const Steps = ({ serviceId }) => {
             </IconButton>
           </HtmlTooltip>
 
-          <HtmlTooltip title="Add Fields">
-            <IconButton
-              aria-label="setting"
-              onClick={(e) => {
-                setStepFieldsDialog({ open: true, stepIds: [row?.original?._id] });
-              }}
-              size="small"
-            >
-              <Build color="primary" fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
+          {isMobile ? null : (
+            <HtmlTooltip title="Add Fields">
+              <IconButton
+                aria-label="setting"
+                onClick={(e) => {
+                  setStepFieldsDialog({ open: true, stepIds: [row?.original?._id] });
+                }}
+                size="small"
+              >
+                <Build color="primary" fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
 
           <HtmlTooltip title={'Delete'}>
             <IconButton
