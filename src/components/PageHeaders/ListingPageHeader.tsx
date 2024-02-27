@@ -135,7 +135,7 @@ const ListingPageHeader = ({
           <span className={` flex items-center`}>
             {startIcon && <span className={`-ml-1 [&>*]:[font-size:20px_!important]`}>{startIcon}</span>}
             {text && <span className={``}>{text}</span>}
-            {iconText && <span className={`${loading ? 'sr-only' : ''}`}>{iconText}</span>}
+            {iconText && <span className={`${loading ? 'sr-only' : 'ml-1'}`}>{iconText}</span>}
             {endIcon && <span className={`-mr-1 [&>*]:[font-size:20px_!important]`}>{endIcon}</span>}
           </span>
           <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} ml-2`} />
