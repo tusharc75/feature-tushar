@@ -78,8 +78,6 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
       });
     });
     let newColumns = generateColumns(renderedFrom, stepColumns);
-    // setColumns([...initialColumns, ...newColumns]);
-    console.log([...initialColumns, ...newColumns], isMobile);
     return [...initialColumns, ...newColumns];
   };
 
