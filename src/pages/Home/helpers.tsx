@@ -69,34 +69,25 @@ export const setDataBySectionName = (secName, index = 0) => {
 
   switch (true) {
     case compareName(['CRM +', 'Sales Management'], secName): {
-      text = 'Improving efficiency by setting targets and managing processes';
+      text = 'Create Leads, Convert Opportunities and Manage Contracts Effectively';
       icon = <DashboardIcons.CRM colors={iconColour} />;
       sideBarIcon = <SiCivicrm size={18} />;
       break;
     }
-    case compareName(['Rental Jobs Management'], secName): {
-      text = 'Managing day-to-day rental processes and assets';
-      sideBarIcon = <ServiceManagementIcon size={20} />;
-      break;
-    }
-    case compareName(['eCommerce Operations Management'], secName): {
-      text = 'Running online business smartly';
-      sideBarIcon = <ServiceManagementIcon size={20} />;
-      break;
-    }
     case compareName(['Production Order Management'], secName): {
-      text = 'Easy planning & maintenance of production processes';
+      text = 'Speed-up shop floor operations and manage technicians and parts issued effectively';
+      icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <ServiceManagementIcon size={20} />;
       break;
     }
     case compareName(['eCommerce'], secName): {
-      text = 'Simplified eCommerce functionalities to smoothen your lives';
+      text = 'Simplify your Customer Journey and Reduce Execution Time significantly';
       icon = <DashboardIcons.ECOMMERCE colors={iconColour} />;
       sideBarIcon = <BiCart size={20} />;
       break;
     }
     case compareName(['Inventory Management'], secName): {
-      text = 'Improving resource efficiency & minimizing blockage';
+      text = 'Manage Inventory Smartly';
       icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <ServiceManagementIcon size={20} />;
       break;
@@ -120,7 +111,7 @@ export const setDataBySectionName = (secName, index = 0) => {
       break;
     }
     case compareName(['Repair & Maintenance Management'], secName): {
-      text = 'Helps maintaining the functionality of equipments and avoiding breakdown';
+      text = 'Repair & Maintain your product and services at ease';
       icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <HiOutlineWrenchScrewdriver size={18} />;
       break;
@@ -149,20 +140,20 @@ export const setDataBySectionName = (secName, index = 0) => {
       sideBarIcon = <MdOutlineDynamicForm size={20} />;
       break;
     }
-    case compareName(['Service Operations Management', 'Field Service Management'], secName): {
-      text = 'Optimizing business activities';
+    case compareName(['Service Operations Management'], secName): {
+      text = 'Deploy, Track and Bill for field services efficiently';
       icon = <DashboardIcons.SERVICE_OPERATION_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <ServiceOperationManagementIcon size={20} />;
       break;
     }
     case compareName(['Purchasing Management'], secName): {
-      text = 'Helping you make smart purchasing decisions';
+      text = 'Manage working capital effectively';
       icon = <DashboardIcons.PURCHASING_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <PurchasingManagementIcon size={20} />;
       break;
     }
-    case compareName(['Planning & Forecasting'], secName): {
-      text = 'Helping in preparation for contingency & emergency plans';
+    case compareName(['Planning & Forecasting', 'Forecasting & Planning'], secName): {
+      text = 'Plan and Schedule your workforce productively';
       icon = <DashboardIcons.PLANNING_FORECASTING colors={iconColour} />;
       sideBarIcon = <MdOutlineEventAvailable size={20} />;
       break;
@@ -193,8 +184,8 @@ export const setDataBySectionName = (secName, index = 0) => {
     }
     case compareName(['Fleet Management'], secName): {
       sideBarIcon = <FleetManagementIcon size={20} />;
-      text = 'Efficiently managing your fleet remotely';
       icon = <DashboardIcons.FLEET_MANAGEMENT colors={iconColour} />;
+      text = 'Optimize and Deploy your Asset Fleet simply';
       break;
     }
     case compareName(['iot'], secName): {
@@ -212,8 +203,6 @@ export const setDataBySectionName = (secName, index = 0) => {
       icon = <DashboardIcons.FORECASTING_AND_PLANNING colors={iconColour} />;
       break;
     }
-    default:
-      break;
   }
 
   return {
