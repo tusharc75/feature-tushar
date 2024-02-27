@@ -22,6 +22,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const PurchaseOrder = () => {
   const PurchaseOrderType = [
@@ -80,7 +81,27 @@ const PurchaseOrder = () => {
       .get(`/field?resource=${sidebarResource.purchaseOrder}`)
       .then(({ data: { data } }) => {
         let newColumns = generateColumns(renderedFrom, data, routes.purchaseOrderDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+        let extraColumn = [
+          {
+            accessor: 'totalPrice',
+            Header: 'Total Price',
+            width: 150,
+            primaryField: true,
+            disabled: true,
+            Cell: ({ row }) => (
+              <>
+                {row?.original?.totalPrice ? (
+                  <h5 className="text-truncate" title={row?.original?.totalPrice}>
+                    {row?.original?.totalPrice}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
+            )
+          },
+        ]
+        setColumns([...newColumns,...extraColumn, ...getStaticFields(), ActionsRenderer]);
       });
   };
 
