@@ -329,7 +329,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
                   >
                     {row.original['workOrderStatus'] === 'Completed' ? (
-                      <CheckCircle className="[font-size:19px_!important] text-[var(--chip-color-completed)] dark:text-yellow-600" />
+                      <CheckCircle className="[font-size:19px_!important] text-[var(--chip-color-completed)] dark:text-green-400" />
                     ) : (
                       <AutoCompleteIcon size={18} />
                     )}
