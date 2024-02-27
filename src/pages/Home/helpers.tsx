@@ -149,7 +149,7 @@ export const setDataBySectionName = (secName, index = 0) => {
       sideBarIcon = <MdOutlineDynamicForm size={20} />;
       break;
     }
-    case compareName(['Service Operations Management'], secName): {
+    case compareName(['Service Operations Management', 'Field Service Management'], secName): {
       text = 'Optimizing business activities';
       icon = <DashboardIcons.SERVICE_OPERATION_MANAGEMENT colors={iconColour} />;
       sideBarIcon = <ServiceOperationManagementIcon size={20} />;
