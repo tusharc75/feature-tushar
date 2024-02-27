@@ -75,7 +75,7 @@ export const setDataBySectionName = (secName, index = 0) => {
       break;
     }
     case compareName(['Rental Jobs Management'], secName): {
-      text = 'Managing day-to-day Rental processes and assets';
+      text = 'Managing day-to-day rental processes and assets';
       sideBarIcon = <ServiceManagementIcon size={20} />;
       break;
     }
