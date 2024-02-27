@@ -199,7 +199,8 @@ const QuotationDetails = () => {
             }
             setAllowedToEdit(isAllowedToEdit);
             setCanConvert(true);
-          } else if (!quotationData?.rentalJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+          } else if (!quotationData?.rentalJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status) && 
+          quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
           } else {
             setCanConvert(false);
