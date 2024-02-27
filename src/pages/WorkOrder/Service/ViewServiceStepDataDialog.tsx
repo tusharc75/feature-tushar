@@ -90,7 +90,7 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
         <Autocomplete
           multiple
           id="service"
-          className="flex-grow max-w-[500px]"
+          className="flex-grow "
           options={[{ optionValue: 'selectAll', optionLabel: 'Select All' }, ...serviceOptions]}
           getOptionLabel={(option) => option?.optionLabel}
           value={selectedServices}
