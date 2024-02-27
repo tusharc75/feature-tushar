@@ -279,14 +279,14 @@ const RenderSingleService = ({
           {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
             <HtmlTooltip arrow enterTouchDelay={0} title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}>
               <span>
-                <WorkStations className="align-text-top" />
+                <WorkStations className="align-text-top" size={15} />
               </span>
             </HtmlTooltip>
           )}
           {data?.comment && (
             <HtmlTooltip arrow enterTouchDelay={0} title={data?.comment}>
               <span>
-                <Message style={{ fontSize: 20 }} />
+                <Message style={{ fontSize: 18 }} />
               </span>
             </HtmlTooltip>
           )}

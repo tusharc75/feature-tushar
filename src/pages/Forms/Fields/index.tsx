@@ -18,6 +18,7 @@ const Fields = ({ id, fetchData, formsData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [section, setSection] = useState(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {

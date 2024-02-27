@@ -1,0 +1,354 @@
+import { Box, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { Fragment, useEffect, useState } from 'react';
+import { MinMax } from './Field/MinMax';
+import { DecimalPlaces } from './Field/DecimalPlaces';
+import { Autocomplete } from '@material-ui/lab';
+import { Currency } from './Field/Currency';
+import FieldDependent from './Field/FieldDependent';
+import { Formula } from './Field/Formula';
+import { Converter } from './Field/Converter';
+import { MultipleFormula } from './Field/MultipleFormula';
+import { SignatureUser } from './Field/SignatureUser';
+import { getResource } from './helper';
+import { Option } from './Field/Option';
+import { Vlookup } from './Field/Vlookup';
+import LookUpDisplay from './Field/LookUpDisplay';
+
+export default function Advanced({ fields, fieldData, values, touched, errors, setFieldValue }) {
+  const [isInitialUpdated, setIsInitialUpdated] = useState({
+    MultipleFormula: false,
+    Currency: false,
+    Converter: false
+  });
+
+  const [lookupResource, setLookupResource] = useState([]);
+
+  useEffect(() => {
+    getLookupList();
+  }, []);
+
+  const getLookupList = async () => {
+    const resource = await getResource();
+    setLookupResource(resource);
+  };
+
+  return (
+    <Box p={1}>
+      {values['type'] === 'currencyAmount' && (
+        <Currency
+          values={values}
+          setFieldValue={(name, value) => {
+            if (!isInitialUpdated['Currency']) {
+              setIsInitialUpdated((prevState) => ({ ...prevState, Currency: true }));
+            }
+            setFieldValue(name, value);
+          }}
+          refrence="form-builder"
+          touched={touched}
+          errors={errors}
+        />
+      )}
+      {(values['type'] === 'decimal' ||
+        values['type'] === 'formula' ||
+        values['type'] === 'converter' ||
+        values['type'] === 'percent' ||
+        values['type'] === 'currencyAmount') && (
+        <Grid spacing={3} container>
+          {values['type'] === 'formula' && (
+            <Grid item xs={12} sm={6} md={6}>
+              <FormControl fullWidth margin="dense" variant="outlined">
+                <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                <Select
+                  labelId="demo-simple-select-outlined-label"
+                  id="demo-simple-select-outlined"
+                  value={values['returnType']}
+                  onChange={(e) => {
+                    setFieldValue('returnType', e.target.value);
+                  }}
+                  label="Return Type"
+                  name="returnType"
+                >
+                  <MenuItem value="decimal">Decimal</MenuItem>
+                  <MenuItem value="string">String</MenuItem>
+                  <MenuItem value="boolean">Boolean</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          )}
+          {(values['type'] === 'decimal' ||
+            values['type'] === 'converter' ||
+            values['type'] === 'percent' ||
+            values['type'] === 'currencyAmount' ||
+            values['returnType'] === 'decimal') && (
+            <Grid item xs={12} sm={6} md={6}>
+              <DecimalPlaces
+                values={values}
+                setFieldValue={(name, value) => {
+                  setFieldValue(name, value);
+                }}
+              />
+            </Grid>
+          )}
+        </Grid>
+      )}
+      {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
+        <Fragment>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="lookup"
+                checked={values['lookup']}
+                onChange={(e) => {
+                  const val = e.target.checked;
+                  setFieldValue('lookup', val);
+                  if (val) {
+                    setFieldValue('addAdditionalOption', false);
+                    setFieldValue('addManualOptionInExcel', false);
+                    setFieldValue('addBulkOptions', false);
+                  }
+                }}
+                color="primary"
+              />
+            }
+            label="Lookup"
+          />
+          {values['lookup'] && (
+            <Box pt={1} pb={1}>
+              <Autocomplete
+                id="lookupResource"
+                options={lookupResource}
+                getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                getOptionSelected={(option: any, val) => option.optionValue === val}
+                value={
+                  lookupResource && lookupResource?.filter((data) => data.optionValue === values['lookupResource'])?.length
+                    ? lookupResource && lookupResource?.filter((data) => data.optionValue === values['lookupResource'])[0]
+                    : ''
+                }
+                onChange={(e: any, value) => {
+                  setFieldValue('lookupResource', value && value?.optionValue ? value.optionValue : '');
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    variant="outlined"
+                    label="Lookup Resource"
+                    placeholder="Lookup Resource"
+                    name="lookupResource"
+                    required
+                    error={touched['lookupResource'] && Boolean(errors['lookupResource'])}
+                    helperText={touched['lookupResource'] && errors['lookupResource']}
+                  />
+                )}
+              />
+              <FieldDependent
+                fields={fields}
+                values={values}
+                fieldSet={(name, value) => {
+                  setFieldValue(name, value);
+                }}
+              />
+            </Box>
+          )}
+        </Fragment>
+      )}
+      {(values['type'] === 'dropDown' || values['type'] === 'multiSelect' || values['type'] === 'radio' || values['type'] === 'process') &&
+        !values['lookup'] && (
+          <Option
+            values={values}
+            setFieldValue={(name, value) => {
+              if (!isInitialUpdated['dropDown']) {
+                setIsInitialUpdated((prevState) => ({ ...prevState, dropDown: true }));
+              }
+              setFieldValue(name, value);
+            }}
+            fields={fields}
+            _id={fieldData._id}
+          />
+        )}
+      {(values['type'] === 'currencyAmount' ||
+        values['type'] === 'decimal' ||
+        values['type'] === 'percent' ||
+        values['type'] === 'date' ||
+        values['type'] === 'converter') && (
+        <>
+          <br></br>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="isFormula"
+                checked={values['isFormula']}
+                onChange={(e) => {
+                  setFieldValue('isFormula', e.target.checked);
+                  setFieldValue('inputFields', []);
+                  setFieldValue('formula', '');
+                }}
+                color="primary"
+              />
+            }
+            label="Formula"
+          />
+        </>
+      )}
+      {(values['type'] === 'formula' || values['isFormula']) && (
+        <Formula
+          fields={fields}
+          values={values}
+          setFieldValue={(name, value) => {
+            setFieldValue(name, value);
+          }}
+          _id={fieldData._id}
+          touched={touched}
+          errors={errors}
+        />
+      )}
+      {(values['type'] === 'currencyAmount' || values['type'] === 'decimal') && (
+        <Fragment>
+          <br></br>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="isConverter"
+                checked={values['isConverter']}
+                onChange={(e) => {
+                  setFieldValue('isConverter', e.target.checked);
+                  setFieldValue('units', []);
+                  setFieldValue('displayUnits', []);
+                  setFieldValue('formulaUnits', []);
+                }}
+                color="primary"
+              />
+            }
+            label="Converter"
+          />
+        </Fragment>
+      )}
+      {(values['type'] === 'converter' || values['isConverter']) && (
+        <Converter
+          fields={fields}
+          values={values}
+          setFieldValue={(name, value) => {
+            if (!isInitialUpdated['Converter']) {
+              setIsInitialUpdated((prevState) => ({ ...prevState, Converter: true }));
+            }
+            setFieldValue(name, value);
+          }}
+          touched={touched}
+          errors={errors}
+        />
+      )}
+      {(values['type'] === 'currencyAmount' || values['type'] === 'decimal' || values['type'] === 'percent' || values['type'] === 'converter') && (
+        <>
+          <br></br>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="isMulitFormula"
+                checked={values['isMulitFormula']}
+                onChange={(e) => {
+                  setFieldValue('isMulitFormula', e.target.checked);
+                  setFieldValue('formulaFields', []);
+                  setFieldValue('formulainputFields', []);
+                  setFieldValue('formulaoption', {});
+                }}
+                color="primary"
+              />
+            }
+            label="Multiple Formula"
+          />
+        </>
+      )}
+      {values['isMulitFormula'] && (
+        <MultipleFormula
+          fields={fields}
+          values={values}
+          setFieldValue={(name, value) => {
+            if (!isInitialUpdated['MultipleFormula']) {
+              setIsInitialUpdated((prevState) => ({ ...prevState, MultipleFormula: true }));
+            }
+            setFieldValue(name, value);
+          }}
+          _id={fieldData._id}
+          touched={touched}
+          errors={errors}
+        />
+      )}
+
+      {(values['type'] === 'currencyAmount' || values['type'] === 'decimal' || values['type'] === 'percent' || values['type'] === 'converter') && (
+        <>
+          <br></br>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="isVlookup"
+                checked={values['isVlookup']}
+                onChange={(e) => {
+                  setFieldValue('isVlookup', e.target.checked);
+                  setFieldValue('isDropdown', false);
+                }}
+                color="primary"
+              />
+            }
+            label="Vlookup"
+          />
+        </>
+      )}
+      {(values['isVlookup'] || values['type'] === 'vlookupDropdown') && (
+        <Vlookup
+          fields={fields}
+          values={values}
+          setFieldValue={(name, value) => {
+            setFieldValue(name, value);
+          }}
+          touched={touched}
+          errors={errors}
+          _id={fieldData._id}
+        />
+      )}
+
+      {(values['type'] === 'converter' || values['type'] === 'formula') && (
+        <>
+          <br></br>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="isDropdown"
+                checked={values['isDropdown']}
+                onChange={(e) => {
+                  setFieldValue('isDropdown', e.target.checked);
+                  setFieldValue('isVlookup', false);
+                }}
+                color="primary"
+              />
+            }
+            label="Dropdown"
+          />
+        </>
+      )}
+      {values['isDropdown'] && (
+        <Option
+          values={values}
+          setFieldValue={(name, value) => {
+            setFieldValue(name, value);
+          }}
+          fields={fields}
+          _id={fieldData._id}
+        />
+      )}
+      {fieldData.type === 'lookUpDisplay' && (
+        <Box pt={1} pb={1}>
+          <LookUpDisplay
+            fields={fields}
+            values={values}
+            fieldSet={(name, value) => {
+              setFieldValue(name, value);
+            }}
+          />
+        </Box>
+      )}
+
+      {fieldData.type === 'signature' && <SignatureUser values={values} setFieldValue={setFieldValue} />}
+      {fieldData.type === 'decimal' && <MinMax values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />}
+    </Box>
+  );
+}
