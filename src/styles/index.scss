@@ -3975,6 +3975,33 @@ $isAppliedBillDark: #234623;
   .form-types {
     .MuiChip-root.MuiAutocomplete-tag {
       max-width: 100% !important;
+      min-width: 0;
+    }
+  }
+}
+.truncate-autocomplete {
+  .form-types {
+    .MuiChip-root.MuiAutocomplete-tag {
+      max-width: 330px !important;
+
+      @media all and (max-width: 980px) {
+        max-width: 250px !important;
+      }
+      @media all and (max-width: 830px) {
+        max-width: 200px !important;
+      }
+      @media all and (max-width: 716px) {
+        max-width: 150px !important;
+      }
+      @media all and (max-width: 600px) {
+        max-width: 300px !important;
+      }
+      @media all and (max-width: 504px) {
+        max-width: 200px !important;
+      }
+      @media all and (max-width: 410px) {
+        max-width: 130px !important;
+      }
     }
   }
 }
