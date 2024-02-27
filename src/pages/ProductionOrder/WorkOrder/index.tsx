@@ -329,7 +329,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
                   >
                     {row.original['workOrderStatus'] === 'Completed' ? (
-                      <CheckCircle className="[font-size:19px_!important] text-[var(--chip-color-completed)] dark:text-[var(--dark-yellow)]" />
+                      <CheckCircle className="[font-size:19px_!important] text-[var(--chip-color-completed)] dark:text-yellow-600" />
                     ) : (
                       <AutoCompleteIcon size={18} />
                     )}
@@ -416,15 +416,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       parent.detail = parent.detail
         ? parent.detail
         : parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.packageDetail?.packageName;
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.packageDetail?.packageName;
       parent.description = parent.description
         ? parent.description
         : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription
-          : parent?.packageDetail?.packageDescription;
+        ? parent?.productDetail?.productDescription
+        : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
@@ -456,17 +456,17 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.detail = _subRow.detail
         ? _subRow.detail
         : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.packageDetail?.packageName;
+        ? _subRow?.serviceDetail?.serviceName
+        : _subRow.type === MATERIAL_TYPE.product
+        ? _subRow.productDetail?.productName
+        : _subRow.packageDetail?.packageName;
       _subRow.description = _subRow.description
         ? _subRow.description
         : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceDescription
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription
-            : _subRow?.packageDetail?.packageDescription;
+        ? _subRow?.serviceDetail?.serviceDescription
+        : _subRow.type === MATERIAL_TYPE.product
+        ? _subRow?.productDetail?.productDescription
+        : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -754,7 +754,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         }
       }
       if (!disabled) {
-        if (dataRows?.find((d) => d?._id === record?.parentId)?.subRows?.filter((s) => s?.order < record?.order)?.every((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status))
+        if (
+          dataRows
+            ?.find((d) => d?._id === record?.parentId)
+            ?.subRows?.filter((s) => s?.order < record?.order)
+            ?.every((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status))
         ) {
           data.push(record);
         }
@@ -980,12 +984,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
           open={showServiceActionConfirmBox.open}
-          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-            ? 'complete'
-            : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+          message={`Are you sure you want to ${
+            showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+              ? 'complete'
+              : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
               ? 'skip'
               : 'revert'
-            } this Service(s)`}
+          } this Service(s)`}
           onClose={() => {
             setShowServiceActionConfirmBox({ open: false, action: '' });
           }}
@@ -1173,8 +1178,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-            selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+          selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
             ? false
             : true
         }
@@ -1193,8 +1198,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
             ? false
             : true
         }
