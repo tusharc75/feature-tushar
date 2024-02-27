@@ -12,7 +12,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { getStaticFields2, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, getCompletedByField, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -90,7 +90,7 @@ const RepairOrder = () => {
     const response = await axiosInstance().get(`/field?resource=Repair Order`);
     data = response?.data?.data;
     let newColumns = generateColumns(renderedFrom, data, routes.repairOrderDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields2() ,ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(), ...getCompletedByField(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

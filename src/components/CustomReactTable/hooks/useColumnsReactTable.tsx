@@ -81,48 +81,8 @@ export const getStaticFields = () => {
   ];
 };
 
-export const getStaticFields2 = () => {
+export const getCompletedByField = () => {
   return [
-    {
-      id: 'createdBy',
-      accessorKey: 'createdBy',
-      accessor: 'createdBy',
-      size: 200,
-      header: 'Created By',
-      Header: 'Created By',
-      show: true,
-      minSize: 185,
-      disableFilters: true,
-      cell: ({ row }) =>
-        row?.original?.createdBy ? (
-          <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}`}>
-            {row?.original?.createdBy}
-            <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}</span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        )
-    },
-    {
-      id: 'updatedBy',
-      accessorKey: 'updatedBy',
-      accessor: 'updatedBy',
-      size: 200,
-      header: 'Updated By',
-      Header: 'Updated By',
-      minSize: 185,
-      show: true,
-      disableFilters: true,
-      cell: ({ row }) =>
-        row?.original?.updatedBy ? (
-          <h5 className="updateBy" title={`${row?.original?.updatedBy} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`}>
-            {row?.original?.updatedBy}
-            <span className="updatedAtTime badge-date">{moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}</span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        )
-    },
     {
       id: 'completedBy',
       accessorKey: 'completedBy',
