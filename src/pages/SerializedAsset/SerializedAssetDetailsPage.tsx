@@ -199,7 +199,8 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
-    if (o.optionValue === ASSET_STATUS.scrap || o.optionValue === ASSET_STATUS.lost) {
+    if ((o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap)
+      || o.optionValue === ASSET_STATUS.scrap || o.optionValue === ASSET_STATUS.lost) {
       setStatus(o.optionValue);
       setShowReasonDialog(true);
     } else {
@@ -254,15 +255,18 @@ const SerializedAssetDetailsPage = () => {
 
   useEffect(() => {
     if (assetDetails) {
+      let tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]
       if (assetDetails.status === ASSET_STATUS.underReview) {
-        setManualStatus([ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]);
+        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
       } else if (assetDetails.status === ASSET_STATUS.scrap) {
-        setManualStatus([ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]);
+        tempStatus = [ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
+        if (assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
+          tempStatus.push(ASSET_STATUS.available)
+        }
       } else if (assetDetails.status === ASSET_STATUS.lost) {
-        setManualStatus([ASSET_STATUS.available, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.scrap]);
-      } else {
-        setManualStatus([ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]);
+        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.scrap];
       }
+      setManualStatus(tempStatus);
     }
   }, [assetDetails]);
 

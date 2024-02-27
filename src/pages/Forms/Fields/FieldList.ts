@@ -1,47 +1,17 @@
 const FieldList = {
-  SINGLELINE: {
-    label: 'Single Line',
-    type: 'singleLine',
+  TEXTBOX: {
+    label: 'Text Box',
+    type: 'textBox',
     icon: 'fas fa-file-signature'
-  },
-  MULTILINE: {
-    label: 'Multi-Line',
-    type: 'multiLine',
-    icon: 'fas fa-text-height'
-  },
-  EMAIL: {
-    label: 'Email',
-    type: 'email',
-    icon: 'fas fa-text-height'
-  },
-  MOBILENUMBER: {
-    label: 'Mobile No',
-    type: 'mobileNumber',
-    icon: 'fas fa-text-height'
   },
   DROPDOWN: {
     label: 'Dropdown',
     type: 'dropDown',
     icon: 'far fa-calendar-check'
   },
-  MULTISELECT: {
-    label: 'Multi-Select',
-    type: 'multiSelect',
-    icon: 'far fa-calendar-check'
-  },
   DATE: {
     label: 'Date',
     type: 'date',
-    icon: 'far fa-calendar-check'
-  },
-  YEAR: {
-    label: 'Year',
-    type: 'year',
-    icon: 'far fa-calendar-check'
-  },
-  DATETIME: {
-    label: 'Date Time',
-    type: 'dateTime',
     icon: 'far fa-calendar-check'
   },
   NUMBER: {
@@ -163,6 +133,51 @@ const FieldList = {
     label: 'Look Up Display',
     type: 'lookUpDisplay',
     icon: 'far fa-calendar-check'
+  }
+};
+
+export const TEXTBOX = {
+  SINGLELINE: {
+    label: 'Single Line',
+    type: 'singleLine'
+  },
+  MULTILINE: {
+    label: 'Multi-Line',
+    type: 'multiLine'
+  },
+  EMAIL: {
+    label: 'Email',
+    type: 'email'
+  },
+  MOBILENUMBER: {
+    label: 'Mobile No',
+    type: 'mobileNumber'
+  }
+};
+
+export const DROPDOWN = {
+  DROPDOWN: {
+    label: 'Dropdown',
+    type: 'dropDown'
+  },
+  MULTISELECT: {
+    label: 'Multi-Select',
+    type: 'multiSelect'
+  }
+};
+
+export const DATE = {
+  DATE: {
+    label: 'Date',
+    type: 'date'
+  },
+  YEAR: {
+    label: 'Year',
+    type: 'year'
+  },
+  DATETIME: {
+    label: 'Date Time',
+    type: 'dateTime'
   }
 };
 

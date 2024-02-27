@@ -250,7 +250,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
           }}
           disabled={
             selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+              selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
               ? false
               : true
           }
@@ -295,6 +295,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
             actionButtonMenuItems={actionButtonMenuItems()}
             actionButtonProps={{ disabled: tabValue !== WORKORDER_SERVICE_STATUS.pending || selectedRecords?.length === 0 }}
             rightSideContents={
+              user?.user?.brandPolicy?.workOrderStepDataImport &&
               <ImportExportMenu
                 permissions={permissions}
                 module={sidebarResource.workOrderTechnician}
@@ -303,16 +304,14 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
                   fetchData();
                 }}
                 disabled={selectedRecords.length !== 1}
-                additionalParams={`${
-                  selectedRecords[0]?.repairOrderId
-                    ? `repairOrder=${selectedRecords[0]?.repairOrderId}`
-                    : `productionOrder=${selectedRecords[0]?.productionOrderId}`
-                }&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
+                additionalParams={`${selectedRecords[0]?.repairOrderId
+                  ? `repairOrder=${selectedRecords[0]?.repairOrderId}`
+                  : `productionOrder=${selectedRecords[0]?.productionOrderId}`
+                  }&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
               />
             }
             hasXpadding
           />
-
           {columns ? (
             <CustomReactTable
               height={'calc(100vh - 300px)'}

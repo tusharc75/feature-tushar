@@ -1,4 +1,3 @@
-import React from 'react';
 import { useDrag } from 'react-dnd';
 import { Box, Typography, Grid } from '@material-ui/core';
 import PropTypes from 'prop-types';

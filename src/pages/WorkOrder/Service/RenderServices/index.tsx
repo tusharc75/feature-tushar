@@ -46,6 +46,7 @@ const RenderService = ({
   servicesButtons,
   isMobile
 }: RenderServiceProps) => {
+
   const getFieldsWithOtherDetails = (step: any, stepSubmitedData) => {
     const steps = stepSubmitedData?.filter((item: any) => item?.uniqueId === step?.uniqueId);
     const stepTimes = [];
@@ -67,6 +68,7 @@ const RenderService = ({
     activeTabIndex: 0,
     gap: 8
   });
+
 
   return (
     <>
@@ -92,7 +94,7 @@ const RenderService = ({
                 {serviceSteps?.map((data, index) => {
                   return (
                     <RenderSingleService
-                      key={data._id}
+                      key={data.uniqueId}
                       {...{
                         isColapsed,
                         stylesForEveryTab,
@@ -167,7 +169,7 @@ const RenderService = ({
               {serviceSteps?.map((data, index) => {
                 return (
                   <RenderSingleService
-                    key={data._id}
+                    key={data.uniqueId}
                     {...{
                       isColapsed,
                       stylesForEveryTab,
@@ -220,10 +222,9 @@ const RenderSingleService = ({
 
   return (
     <div
-      key={data._id}
-      className={`duration-300 transition-all ${
-        isMobile ? 'p-2 rounded-md' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
-      } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
+      key={data.uniqueId}
+      className={`duration-300 transition-all ${isMobile ? 'p-2 rounded-md' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
+        } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
       style={{
         ...style
       }}
@@ -237,9 +238,8 @@ const RenderSingleService = ({
         <HtmlTooltip enterTouchDelay={0} placement="top" arrow title={isMobile ? data?.serviceName : ''}>
           {data?.type === 'service' ? (
             <div
-              className={`${
-                isColapsed ? 'mx-auto' : ''
-              }  transition-all duration-300 bg-[var(--dark-primary,_var(--primary))] text-white w-[20px] h-[20px] rounded-full text-center flex justify-center items-center text-[10px] flex-shrink-0`}
+              className={`${isColapsed ? 'mx-auto' : ''
+                }  transition-all duration-300 bg-[var(--dark-primary,_var(--primary))] text-white w-[20px] h-[20px] rounded-full text-center flex justify-center items-center text-[10px] flex-shrink-0`}
             >
               <span>{data?.order}</span>
             </div>

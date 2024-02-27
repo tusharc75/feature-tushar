@@ -77,6 +77,31 @@ export const getStaticFields = () => {
         ) : (
           <NoDataCell />
         )
+    },
+  ];
+};
+
+export const getCompletedByField = () => {
+  return [
+    {
+      id: 'completedBy',
+      accessorKey: 'completedBy',
+      accessor: 'completedBy',
+      size: 200,
+      header: 'Completed By',
+      Header: 'CompletedBy',
+      show: true,
+      minSize: 185,
+      disableFilters: true,
+      cell: ({ row }) =>
+        row?.original?.completedBy ? (
+          <h5 className="createBy" title={`${row?.original?.completedBy} • ${moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}`}>
+            {row?.original?.completedBy}
+            <span className="createdAtTime badge-date">{moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}</span>
+          </h5>
+        ) : (
+          <NoDataCell />
+        )
     }
   ];
 };
