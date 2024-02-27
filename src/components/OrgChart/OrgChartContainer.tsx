@@ -1,8 +1,7 @@
-import React, { useState, Fragment } from 'react';
+import { Box, Button } from '@material-ui/core';
+import { Fragment, useState } from 'react';
 import { generateUniqueId } from '../../constants/helpers';
 import OrgChart from './OrgChart';
-import { Autocomplete } from '@material-ui/lab';
-import { Grid, TextField, FormControl, InputLabel, Select, Button, Popover, Box, MenuItem, AppBar } from '@material-ui/core';
 // import chartService from '../services/ChartService';
 // import shortid from 'shortid';
 // import Modal from './Modal';

@@ -18,7 +18,7 @@ import {
   Typography,
   makeStyles
 } from '@material-ui/core';
-import { ControlPoint, Edit } from '@material-ui/icons';
+import { ControlPoint, Edit, VpnKey } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { startCase } from 'lodash';
 import queryString from 'query-string';
@@ -30,7 +30,7 @@ import { RiSettingsFill } from 'react-icons/ri';
 import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -69,6 +69,9 @@ import ManageUserDialog from './ManageUserDialog';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import UserSession from './UserSession';
 import UserSetupDialog from './UserSetupDialog';
+import { MdLockReset, MdOutlineLockReset } from 'react-icons/md';
+import { FaUnlock } from 'react-icons/fa';
+import { TbPasswordFingerprint } from 'react-icons/tb';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -469,36 +472,29 @@ const UserDetailsPage = () => {
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
               {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={`btn-outline-v1`} onClick={entityDialogOpen}>
-                  {isMobile && !isTablet ? <RiSettingsFill /> : 'Assign Entity/Role'}
-                </Button>
+                <ThemeButton iconForMobile={<RiSettingsFill />} tooltip="Assign Entity/Role" onClick={entityDialogOpen}>
+                  Assign Entity/Role
+                </ThemeButton>
               )}
               {user?.user?.userType === userType.brandAdmin && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className={`btn-outline-v1`}
+                <ThemeButton
+                  iconForMobile={<VpnKey />}
                   onClick={() => {
                     setGenerateAutoPassword(true);
                   }}
-                  style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
+                  tooltip="Generate Password"
                 >
-                  {isMobile && !isTablet ? <BiReset size={20} /> : 'Generate Password'}
-                </Button>
+                  Generate Password
+                </ThemeButton>
               )}
               {permissions?.user?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className={`btn-outline-v1`}
-                  onClick={handleResetPassword}
-                  style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
-                >
-                  {isMobile && !isTablet ? <BiReset size={20} /> : 'Reset Password'}
-                </Button>
+                <ThemeButton tooltip="Reset Password" iconForMobile={<MdLockReset size={50} />} onClick={handleResetPassword}>
+                  Reset Password
+                </ThemeButton>
               )}
               {permissions?.user?.isUpdate ? (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className={`btn-outline-v1`}
+                <ThemeButton
+                  iconForMobile={<Edit />}
                   onClick={handleOpenUpdateDialog}
                   disabled={
                     userData?.userType === userType.brandAdmin
@@ -508,8 +504,8 @@ const UserDetailsPage = () => {
                       : false
                   }
                 >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                  Edit
+                </ThemeButton>
               ) : null}
               {permissions?.user?.isDelete ? (
                 <DeleteButton
