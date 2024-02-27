@@ -126,14 +126,14 @@ const GridHeader = ({
           {showFilters && (
             <HtmlTooltip title="Apply Filters" placement="top" arrow>
               <Button
-                style={{ marginRight: '8px', color: '#424242' }}
-                startIcon={<BiFilterAlt />}
+                startIcon={isMobileView ? null : <BiFilterAlt />}
                 size={'small'}
-                variant="outlined"
-                className="btn-outline-v1 light "
+                variant={isMobileView ? 'text' : 'outlined'}
+                className={`btn-outline-v1 light with-border`}
                 onClick={handleFilterOpen}
               >
-                Filter
+                <span className={isMobileView ? 'sr-only' : ''}>Filter</span>
+                {isMobileView ? <BiFilterAlt /> : ''}
               </Button>
             </HtmlTooltip>
           )}

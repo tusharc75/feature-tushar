@@ -110,7 +110,23 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
+        Cell: ({ row }) =>
+          <div>
+            <p className="text-truncate">
+              {row.original.type === 'serializedAsset' ? 'Asset' : `${capitalize(row.original.type)} `}
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
+            </p>
+          </div>
       },
       {
         accessor: 'detail',
@@ -165,14 +181,13 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${
-                      row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === 'product'
+                    `${row.original.type === 'serializedAsset'
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === 'product'
                         ? routes.productDetail.path
                         : row.original.type === 'package'
-                        ? routes.packagesDetail.path
-                        : routes.serviceMasterDetail.path
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -185,19 +200,19 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       },
       ...(permissions?.leadTimeMaster
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
-              Footer: (info) => {
-                let rows = info.table.getExpandedRowModel().rows;
-                const total = rows
-                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-                return <div>{total}</div>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+            Footer: (info) => {
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows
+                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+              return <div>{total}</div>;
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'description',
@@ -281,23 +296,22 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -318,23 +332,22 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct || false;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;

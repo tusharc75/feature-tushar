@@ -10,7 +10,7 @@ import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 

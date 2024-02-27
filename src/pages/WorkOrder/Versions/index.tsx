@@ -127,7 +127,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         width: 200,
         Cell: ({ row }) =>
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
-            row?.original['assignedUsers']?.map((e, i) => {
+            <div>{row?.original['assignedUsers']?.map((e, i) => {
               return i === row?.original['assignedUsers'].length - 1 ? (
                 <a
                   className="link text-truncate [flex-grow:0_!important]"
@@ -150,7 +150,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                   &nbsp;
                 </>
               );
-            })
+            })}</div>
           ) : (
             <NoDataCell />
           )
@@ -160,7 +160,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         Header: 'Assigned Work Station',
         Cell: ({ row }) =>
           row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
-            row?.original['assignedWorkStations']?.map((e, i) => {
+            <div>{row?.original['assignedWorkStations']?.map((e, i) => {
               return i === row?.original['assignedWorkStations'].length - 1 ? (
                 <a
                   className="link text-truncate [flex-grow:0_!important]"
@@ -183,7 +183,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                   &nbsp;
                 </>
               );
-            })
+            })}</div>
           ) : (
             <NoDataCell />
           )
@@ -205,18 +205,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent?.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productName
-          : parent?.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageName
-          : '';
+            ? parent?.productDetail?.productName
+            : parent?.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageName
+              : '';
       parent.description =
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription
           : parent?.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription
-          : parent?.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription
-          : '';
+            ? parent?.productDetail?.productDescription
+            : parent?.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription
+              : '';
       parent.subRows = generateNestedData(data, parent);
     });
 
@@ -233,18 +233,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageName
-          : '';
+            ? _subRow?.productDetail?.productName
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
+              : '';
       _subRow.description =
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription
           : _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription
-          : '';
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription
+              : '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;

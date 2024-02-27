@@ -22,7 +22,7 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
 import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';

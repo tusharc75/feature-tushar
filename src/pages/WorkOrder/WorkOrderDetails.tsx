@@ -1,45 +1,45 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Divider, CircularProgress, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
+import { ExpandMore } from '@material-ui/icons';
+import EditIcon from '@material-ui/icons/Edit';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-import { useData } from 'src/StateProvider/Provider';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import {
-  workOrder,
-  sidebarResource,
-  ACTIVITY_RESOURCE,
-  WORK_ORDER_STATUS,
-  ASSET_STATUS,
-  WORK_ORDER_TYPE,
-  MATERIAL_SUB_TYPE
-} from 'src/constants/helpers';
 import queryString from 'query-string';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import ManageWorkOrder from './ManageWorkOrder';
-import Service from './Service';
-import View from './View';
-import Consumables from './Consumables';
-import ActivityButton from 'src/components/Activity/ActivityButton';
+import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import { RiFlowChart } from 'react-icons/ri';
-import PreviewDownload from 'src/components/PreviewDownload';
+import { IoHandRightSharp } from 'react-icons/io5';
+import { LuPackageCheck } from 'react-icons/lu';
+import { RiFileShredFill, RiFlowChart } from 'react-icons/ri';
+import { VscVersions } from 'react-icons/vsc';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import EditIcon from '@material-ui/icons/Edit';
-import CloseIcon from '@material-ui/icons/Close';
-import { RiFileShredFill } from 'react-icons/ri';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import routes from 'src/components/Helpers/Routes';
+import PreviewDownload from 'src/components/PreviewDownload';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import {
+  ACTIVITY_RESOURCE,
+  ASSET_STATUS,
+  MATERIAL_SUB_TYPE,
+  WORK_ORDER_STATUS,
+  WORK_ORDER_TYPE,
+  sidebarResource,
+  workOrder
+} from 'src/constants/helpers';
+import Consumables from './Consumables';
 import Diagram from './Diagram';
-import { ExpandMore } from '@material-ui/icons';
-import { VscVersions } from 'react-icons/vsc';
+import ManageWorkOrder from './ManageWorkOrder';
+import Service from './Service';
 import Versions from './Versions';
+import View from './View';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -250,7 +250,7 @@ const WorkOrderDetails = () => {
                   )}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
-                  (workOrderData?.status === WORK_ORDER_STATUS.onHold ?
+                  (workOrderData?.status === WORK_ORDER_STATUS.onHold ? (
                     <HtmlTooltip title={`Change Status ${WORK_ORDER_STATUS.inProgress}`} placement="top" arrow>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -260,19 +260,16 @@ const WorkOrderDetails = () => {
                       >
                         {WORK_ORDER_STATUS.inProgress}
                       </Button>
-                    </HtmlTooltip> :
-                    [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status) ?
-                      <HtmlTooltip title={`Change Status ${WORK_ORDER_STATUS.onHold}`} placement="top" arrow>
-                        <Button
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          size="small"
-                          onClick={() => updateJobStatus(WORK_ORDER_STATUS.onHold)}
-                          className={'btn-outline-v1'}
-                        >
-                          {WORK_ORDER_STATUS.onHold}
-                        </Button>
-                      </HtmlTooltip> : null)
-                }
+                    </HtmlTooltip>
+                  ) : [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status) ? (
+                    <ThemeButton
+                      iconForMobile={<IoHandRightSharp />}
+                      onClick={() => updateJobStatus(WORK_ORDER_STATUS.onHold)}
+                      tooltip={`Change Status ${WORK_ORDER_STATUS.onHold}`}
+                    >
+                      {WORK_ORDER_STATUS.onHold}
+                    </ThemeButton>
+                  ) : null)}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
                   workOrderData?.canComplete &&
@@ -282,38 +279,36 @@ const WorkOrderDetails = () => {
                         <span></span>
                         <span></span>
                       </span>
-                      <HtmlTooltip title="Complete Work Order" placement="top" arrow>
-                        <Button
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          size="small"
-                          onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
-                          className={'btn-outline-v1 '}
-                        >
-                          {isMobile && !isTablet ? <CloseIcon /> : 'Close'}
-                        </Button>
-                      </HtmlTooltip>
+                      <ThemeButton
+                        onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
+                        iconForMobile={<LuPackageCheck />}
+                        tooltip="Complete Work Order"
+                      >
+                        Close
+                      </ThemeButton>
                     </div>
                   )}
-                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.deleted && (
-                  <Button variant={'contained'} size="small" className={'btn-outline-v1'} onClick={openAddActions} aria-controls="add-menu">
-                    {'Create Version'}
-                    <ExpandMore fontSize="small" />
-                  </Button>
-                )}
+
+                {permissions?.workOrder?.isUpdate &&
+                  allowedToEdit &&
+                  workOrderData?.status !== WORK_ORDER_STATUS.completed &&
+                  !workOrderData?.deleted && (
+                    <>
+                      <ThemeButton onClick={openAddActions} aria-controls="add-menu" iconForMobile={false} tooltip="Create Version">
+                        {'Create Version'}
+                        <ExpandMore fontSize="small" />
+                      </ThemeButton>
+                    </>
+                  )}
                 {workOrderData?.versions?.length && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="primary"
-                    size="small"
-                    className={'btn-outline-v1'}
+                  <ThemeButton
                     onClick={() => {
                       setVersionDialog(true);
                     }}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                    iconForMobile={<VscVersions />}
                   >
-                    {isMobile && !isTablet ? <VscVersions size={20} /> : `Versions : ${workOrderData?.versions?.length + 1}`}
-                  </Button>
+                    Versions : {workOrderData?.versions?.length + 1}
+                  </ThemeButton>
                 )}
                 <Menu
                   anchorEl={addAnchorEl}
@@ -463,7 +458,7 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} currentVersion={(workOrderData?.versions?.length + 1) || 1} />}
+          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} currentVersion={workOrderData?.versions?.length + 1 || 1} />}
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>

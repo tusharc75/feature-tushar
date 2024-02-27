@@ -5,7 +5,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { asyncForEach, b64toBlob, convertBlobToBase64 } from 'src/constants/helpers';
 import { Box, Button, FormControl, Grid, Typography } from '@material-ui/core';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
   return function () {
@@ -250,7 +250,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
 
         activeObject.set({
           stroke: rgbaColor,
-          strokeWidth: 10,
+          strokeWidth: 10
         });
 
         canvas.requestRenderAll();
@@ -262,20 +262,20 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
         } else {
           activeObject.set('fill', newColor);
         }
-
       }
       canvas.requestRenderAll();
     }
   };
 
   const handleUndo = () => {
-    if(isHighlighterMode){
-    const lastHighlighterPath = highlighterPaths.pop();
-    if (lastHighlighterPath) {
-      canvas.remove(lastHighlighterPath);
-      canvas.requestRenderAll();
-    }}
-    if(isDrawingMode){
+    if (isHighlighterMode) {
+      const lastHighlighterPath = highlighterPaths.pop();
+      if (lastHighlighterPath) {
+        canvas.remove(lastHighlighterPath);
+        canvas.requestRenderAll();
+      }
+    }
+    if (isDrawingMode) {
       const lastBrushPath = brushPaths.pop();
       if (lastBrushPath) {
         canvas.remove(lastBrushPath);
@@ -300,10 +300,10 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
         selectable: true,
         evented: true,
         draggable: true,
-        ishighlighter: true, // Additional property to identify highlighter paths
+        ishighlighter: true // Additional property to identify highlighter paths
       });
 
-      setHighlighterPaths((prevPaths) => [...prevPaths, path]); 
+      setHighlighterPaths((prevPaths) => [...prevPaths, path]);
     });
   };
 
@@ -329,13 +329,12 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
       return activeObject.type === 'line' || activeObject.type === 'path' ? activeObject.stroke : activeObject.fill;
     }
   };
-  
 
   const toggleDrawingMode = () => {
     setIsDrawingMode(!isDrawingMode);
     if (!isDrawingMode) {
       const drawingBrush = new fabric.PencilBrush(canvas);
-      drawingBrush.color = 'black'; 
+      drawingBrush.color = 'black';
       drawingBrush.width = 2;
       canvas.freeDrawingBrush = drawingBrush;
       canvas.isDrawingMode = true;
@@ -345,9 +344,9 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
           ishighlighter: false,
           selectable: true,
           evented: true,
-          draggable: true,
+          draggable: true
         });
-        setBrushPaths((prevPaths) => [...prevPaths, path]); 
+        setBrushPaths((prevPaths) => [...prevPaths, path]);
       });
     } else {
       canvas.isDrawingMode = false;
@@ -355,7 +354,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
       canvas.off('path:created');
     }
   };
-  
+
   const toggleHighlighterMode = () => {
     if (isHighlighterMode) {
       exitHighlighterMode();
@@ -422,7 +421,13 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
           <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddLine}>
             Add Line
           </Button>
-          <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddRectangle}>
+          <Button
+            disabled={loading || isDrawingMode || isHighlighterMode}
+            variant="outlined"
+            color="primary"
+            size="small"
+            onClick={handleAddRectangle}
+          >
             Add Rectangle
           </Button>
           <Button disabled={loading || isDrawingMode || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={handleAddCircle}>
@@ -434,9 +439,11 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
           <Button disabled={loading || isHighlighterMode} variant="outlined" color="primary" size="small" onClick={toggleDrawingMode}>
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
           </Button>
-          {(isDrawingMode || isHighlighterMode) && ( <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={handleUndo}>
-            Undo
-          </Button>)}
+          {(isDrawingMode || isHighlighterMode) && (
+            <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={handleUndo}>
+              Undo
+            </Button>
+          )}
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
           <Button
             disabled={loading || isDrawingMode || isHighlighterMode}
@@ -471,12 +478,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
         {selectedObject && (
           <Box className="flex items-center gap-2">
             <FormControl size="small" margin="none" variant="outlined">
-              <input
-                type="color"
-                value={getSelectedColor()}
-                onChange={handleColorChange}
-                style={{ marginLeft: '10px' }}
-              />
+              <input type="color" value={getSelectedColor()} onChange={handleColorChange} style={{ marginLeft: '10px' }} />
             </FormControl>
             <DeleteButton mode="light" text="Remove" size="small" onClick={handleRemove} />
           </Box>

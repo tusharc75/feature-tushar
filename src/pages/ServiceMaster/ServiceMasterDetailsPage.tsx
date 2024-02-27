@@ -1,17 +1,17 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs, useMediaQuery } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
 import routes from '../../components/Helpers/Routes';
 import LeadTimeMaster from '../../components/LeadTime';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -22,6 +22,7 @@ import Product from './Product';
 import Steps from './Steps';
 
 const ServiceMasterDetailsPage = () => {
+  const isMobile = useMediaQuery('(max-width:768px)');
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -94,9 +95,9 @@ const ServiceMasterDetailsPage = () => {
               <Skeleton variant="text" width="150px" height="32px" />
             ) : (
               <>
-                {permissions?.product?.isUpdate && (
+                {permissions?.product?.isUpdate && !isMobile && (
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    variant={isMobile ? 'text' : 'contained'}
                     size="small"
                     className={'btn-outline-v1'}
                     onClick={() => {
@@ -108,14 +109,14 @@ const ServiceMasterDetailsPage = () => {
                 )}
                 {permissions?.product?.isUpdate && (
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    variant={isMobile ? 'text' : 'contained'}
                     size="small"
                     className={'btn-outline-v1'}
                     onClick={() => {
                       setOpenUpdateDialog(true);
                     }}
                   >
-                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
+                    {isMobile ? <Edit /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

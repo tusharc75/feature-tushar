@@ -10,7 +10,7 @@ export const DropMaster = ({ section, setSection, addSection }) => {
   const [sectionHoverIndex, setSectionHoverIndex] = useState(null);
   const [fieldHoverId, setFieldHoverId] = React.useState(null);
 
-  const [{}, drop] = useDrop({
+  const [{ }, drop] = useDrop({
     accept: 'master',
     drop: () => {
       addSection(sectionHoverIndex);

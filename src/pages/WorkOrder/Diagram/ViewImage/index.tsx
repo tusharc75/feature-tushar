@@ -5,7 +5,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { b64toBlob } from 'src/constants/helpers';
 import { Box, Button, FormControl, Typography } from '@material-ui/core';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {

@@ -10,6 +10,7 @@ import HtmlTooltip from '../../CustomTooltipTitle';
 import NewChat from './NewChat';
 import NotificationContent from './NotificationContent';
 import { assignAvatar } from './utils';
+import { useHistory } from 'react-router-dom';
 
 // Rename Tabs here
 export const tabOptions: ['all', 'unread', 'chats'] = ['all', 'unread', 'chats'];
@@ -20,6 +21,8 @@ const ChatNotification = () => {
   const notification = useContext(CustomChatNotificationCountContext);
   const isMobile = useMediaQuery('(max-width:960px)');
   const { setOpen: setChatOpen, setSelectedChat, chatList } = useContext(GlobalChatContext);
+
+  const history = useHistory();
 
   const {
     state: { user }
@@ -112,7 +115,7 @@ const ChatNotification = () => {
           toggle: true,
           _id: d._id
         })
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -125,10 +128,15 @@ const ChatNotification = () => {
         setChatOpen(true);
         setSelectedChat(selectedChat);
       }
+      else if (d?.resourcePath !== '') {
+        setAnchorEl(null);
+        history.push(d.resourcePath)
+      }
     }
   };
-  const isDisable = (d)=>{
-    return !Boolean(chatList.find((c) => c.id === d.chatterId))
+
+  const isReplayVisible = (d) => {
+    return Boolean(chatList.find((c) => c.id === d.chatterId)) || d?.resourcePath !== '' ? true : false
   }
 
   const handleClickHistory = (chat) => {
@@ -149,7 +157,7 @@ const ChatNotification = () => {
     <>
       {isMobile ? (
         <>
-          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => {}}>
+          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => { }}>
             <Badge
               variant="dot"
               overlap="circular"
@@ -228,7 +236,7 @@ const ChatNotification = () => {
             data={notificationData}
             setNewChat={setNewChat}
             handleClickHistory={handleClickHistory}
-            isDisable={isDisable}
+            isReplayVisible={isReplayVisible}
           />
         )}
       </Popover>

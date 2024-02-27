@@ -10,7 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import AssignEntityDialog from 'src/components/AssignRolesDialog/AssignEntityDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import TabPanel from 'src/components/TabPanel';
 import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';

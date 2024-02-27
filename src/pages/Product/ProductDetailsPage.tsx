@@ -11,6 +11,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -20,7 +21,6 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
 import routes from '../../components/Helpers/Routes';
 import LeadTimeMaster from '../../components/LeadTime';
 import CreateProduct from '../../components/Product/CreateProduct';
@@ -360,7 +360,6 @@ const ProductDetailsPage = () => {
         </Tabs>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
-            {console.log(tabValue)}
             {tabValue === 0 && (
               <Box>
                 {loading || !productFields.length ? (
