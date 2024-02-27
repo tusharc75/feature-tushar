@@ -117,7 +117,7 @@ const WorkOrderTechnician = () => {
           </HtmlTooltip>
           <HtmlTooltip title={`Refresh`} arrow placement="top" enterTouchDelay={0}>
             <IconButton size="small" aria-label="Clone" onClick={onClickRefreshIcon}>
-              <RefreshIcon />
+              <RefreshIcon color="primary" />
             </IconButton>
           </HtmlTooltip>
         </Box>
@@ -155,7 +155,7 @@ const StatusSelector: React.FC<StatusSelectorProps> = ({ selectedServiceStatus, 
     <>
       <HtmlTooltip title={`Select Status`} arrow placement="top" enterTouchDelay={0}>
         <IconButton size="small" aria-label="Status" onClick={(e) => setAnchorEl(e.currentTarget)}>
-          <DonutLargeIcon />
+          <DonutLargeIcon color="primary" />
         </IconButton>
       </HtmlTooltip>
       <Popover
