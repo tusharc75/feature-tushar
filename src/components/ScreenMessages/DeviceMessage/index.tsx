@@ -1,6 +1,6 @@
 import { Button } from '@material-ui/core';
 import { ArrowBack } from '@material-ui/icons';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { isDesktop, isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 
@@ -37,6 +37,18 @@ const DeviceMessage: FC<DeviceMessageProps> = ({
     setIsVisible(visible);
   }, [devices]);
 
+  const prvPathname = useMemo(() => {
+    const pathname = history.location.pathname;
+    const pathArray = pathname.split('/');
+    let prevPathArray = [];
+    for (let i = 0; i < pathArray.length - 1; i++) {
+      const key = pathArray[i];
+      if (key === 'detail') continue;
+      prevPathArray.push(key);
+    }
+    return prevPathArray.join('/');
+  }, [history.location.pathname]);
+
   return isVisible ? (
     <div className="fixed inset-0 bg-[var(--new-theme-color)] text-[white] z-[999999]">
       <div className=" grid place-items-center h-full">
@@ -46,7 +58,7 @@ const DeviceMessage: FC<DeviceMessageProps> = ({
           <Button
             startIcon={<ArrowBack className="mr-2" />}
             onClick={() => {
-              history.push('/');
+              history.replace(prvPathname);
             }}
             variant="contained"
             className="no-shadow"
