@@ -1,7 +1,6 @@
 import { Box, Button, Dialog } from '@material-ui/core';
 import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiFillFilePdf } from 'react-icons/ai';
 import { MdEmail } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DownloadIcon, ExportIcon } from 'src/assets/svg/svgIcons';
@@ -9,6 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 function PreviewDownload({
   resource,
@@ -28,7 +28,8 @@ function PreviewDownload({
   toEmails = [],
   ccEmails = [],
   isAsyncDownload = false,
-  referenceLabel = ''
+  referenceLabel = '',
+  hideDialog = false
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -51,12 +52,13 @@ function PreviewDownload({
 
   const [showColumnsDialog, setShowColumnsDialog] = useState({ open: false, type: '', operation: '' });
   const [loadingType, setLoadingType] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [btnLoading, setBtnLoading] = useState(null);
 
   const [emailAttachments, setEmailAttachments] = useState([]);
 
   const handleView = (type, operation, subType, visibleColumns) => {
     setLoadingType(subType);
+    setBtnLoading(operation)
 
     let showColumns = visibleColumns?.map((e) => e?.fieldName)?.toString();
 
@@ -92,7 +94,7 @@ function PreviewDownload({
       .get(api, { responseType: responseType })
       .then((response) => {
         setLoadingType(null);
-        setLoading(false);
+        setBtnLoading(null)
         if (isAsyncDownload) {
           toastConfig.setToastConfig({
             message: 'Document creation in process',
@@ -166,13 +168,18 @@ function PreviewDownload({
             color="primary"
             type="button"
             size="small"
-            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
-            disabled={loadingType === 'view'}
+            startIcon={isMobile && !isTablet ? '' : <VisibilityIcon />}
+            disabled={btnLoading === 'Preview'}
             onClick={(e) => {
-              setShowColumnsDialog({ open: true, type: 'PDF', operation: 'Preview' });
+              if (hideDialog) {
+                handleView('PDF', 'Preview', 'Regular', []);
+              }
+              else {
+                setShowColumnsDialog({ open: true, type: 'PDF', operation: 'Preview' });
+              }
             }}
           >
-            {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loadingType === 'view' ? 'Please wait...' : 'Preview'}
+            {isMobile && !isTablet ? <VisibilityIcon /> : btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
           </Button>
           }
           <Button
@@ -182,12 +189,17 @@ function PreviewDownload({
             type="button"
             size="small"
             startIcon={isMobile && !isTablet ? '' : <DownloadIcon />}
-            disabled={loadingType === 'download'}
+            disabled={btnLoading === 'Download'}
             onClick={(e) => {
-              setShowColumnsDialog({ open: true, type: 'PDF', operation: 'Download' });
+              if (hideDialog) {
+                handleView('PDF', 'Download', 'Regular', []);
+              }
+              else {
+                setShowColumnsDialog({ open: true, type: 'PDF', operation: 'Download' });
+              }
             }}
           >
-            {isMobile && !isTablet ? <DownloadIcon fontSize={20} /> : loadingType === 'download' ? 'Please wait...' : 'Download'}
+            {isMobile && !isTablet ? <DownloadIcon fontSize={20} /> : btnLoading === 'Download' ? 'Please wait...' : 'Download'}
           </Button>
           {isExcelDownload && (
             <Button
@@ -197,12 +209,12 @@ function PreviewDownload({
               type="button"
               size="small"
               startIcon={isMobile && !isTablet ? '' : <ExportIcon />}
-              disabled={loadingType === 'excel'}
+              disabled={btnLoading === 'Download'}
               onClick={(e) => {
                 setShowColumnsDialog({ open: true, type: 'Excel', operation: 'Download' });
               }}
             >
-              {isMobile && !isTablet ? <ExportIcon /> : loadingType === 'export' ? 'Please wait...' : 'Export To Excel'}
+              {isMobile && !isTablet ? <ExportIcon /> : btnLoading === 'Download' ? 'Please wait...' : 'Export To Excel'}
             </Button>
           )}
           {isSendEmail && (
@@ -211,7 +223,7 @@ function PreviewDownload({
               color="primary"
               size="small"
               className="btn-outline-v1  with-border"
-              disabled={loadingType === 'email'}
+              disabled={btnLoading === 'Send Email'}
               startIcon={isMobile ? '' : <MdEmail />}
               onClick={() => {
                 if (isAsyncDownload) {
@@ -222,7 +234,7 @@ function PreviewDownload({
                 }
               }}
             >
-              {isMobile && !isTablet ? <MdEmail size={20} /> : loadingType === 'email' ? 'Please wait...' : `Send Email`}
+              {isMobile && !isTablet ? <MdEmail size={20} /> : btnLoading === 'Send Email' ? 'Please wait...' : `Send Email`}
             </Button>
           )}
         </Box>
@@ -254,7 +266,6 @@ function PreviewDownload({
             }
           }}
           loadingType={loadingType}
-          loading={loading}
           hideDetailButton={hideDetailButton}
           allColumn={allColumn}
           resource={resource}

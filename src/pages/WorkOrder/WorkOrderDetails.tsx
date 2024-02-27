@@ -345,6 +345,7 @@ const WorkOrderDetails = () => {
                   referenceId={id}
                   columns={user?.user?.brandPolicy?.servicePrePost ? columns : columns?.filter((e) => e.accessor !== 'serviceType')}
                   hideDetailButton={true}
+                  hideDialog={workOrderData?.type === WORK_ORDER_TYPE.productionOrder ? true : false}
                 />
                 {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed && (
                   <Button
