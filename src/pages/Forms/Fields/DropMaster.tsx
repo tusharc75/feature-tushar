@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import Box from '@material-ui/core/Box';
 import update from 'immutability-helper';

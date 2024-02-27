@@ -1,12 +1,16 @@
-import React, { useRef, useContext, Fragment } from 'react';
+import React, { useRef, useContext, Fragment, useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import FieldList from './FieldList';
+import FieldList, { TEXTBOX, DROPDOWN, DATE } from './FieldList';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { checkFieldDependency } from 'src/constants/formulaUtility';
+import { IconButton } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import Properties from './Properties';
 
 const style = {
   cursor: 'move'
@@ -23,6 +27,8 @@ const dropstyle = {
 export const DropField = ({ section, setSection, sectionId, data, fieldId, index, fieldHoverId, setFieldHoverId, movefield }) => {
   const ref = useRef(null);
   const toastConfig = useContext(CustomToastContext);
+
+  const [propertiesOpen, setPropertiesOpen] = useState(false);
 
   const [{}, drop] = useDrop({
     accept: ['fieldmove', 'field'],
@@ -114,36 +120,94 @@ export const DropField = ({ section, setSection, sectionId, data, fieldId, index
     setSection(data);
   };
 
+  const fieldTypeLabel = (type: string) => {
+    if (
+      Object.keys(TEXTBOX)
+        ?.map((t) => TEXTBOX[t]?.type)
+        .includes(type)
+    ) {
+      return TEXTBOX[Object.keys(TEXTBOX)?.find((t) => TEXTBOX[t]?.type === type)]?.label;
+    }
+
+    if (
+      Object.keys(DROPDOWN)
+        ?.map((t) => DROPDOWN[t]?.type)
+        .includes(type)
+    ) {
+      return DROPDOWN[Object.keys(DROPDOWN)?.find((t) => DROPDOWN[t]?.type === type)]?.label;
+    }
+
+    if (
+      Object.keys(DATE)
+        ?.map((t) => DATE[t]?.type)
+        .includes(type)
+    ) {
+      return DATE[Object.keys(DATE)?.find((t) => DATE[t]?.type === type)]?.label;
+    }
+
+    return FieldList[type?.toUpperCase()]?.label;
+  };
+
   return (
-    <Grid item xs={12} md={6} sm={6}>
+    <Grid item xs={12} md={12} sm={12}>
       {!data._id || (fieldHoverId && fieldHoverId.toString() === data._id.toString()) ? (
         <div ref={ref} style={{ ...dropstyle }}></div>
       ) : (
         <div ref={ref}>
           <Box border={1} p={0.5} borderColor="var(--common-border-color)" style={{ ...style, opacity }}>
-            <Grid container spacing={1}>
-              <Grid item xs={5}>
-                {data.editAble ? (
+            {!propertiesOpen && (
+              <Grid container spacing={1}>
+                <Grid item xs={5}>
                   <TextField
                     id={data._id}
                     variant="outlined"
                     margin="dense"
                     style={{ margin: 2 }}
+                    fullWidth
                     value={data.fieldLabel}
                     onChange={(event) => onChangeFieldName(data._id, event.target.value)}
                   />
-                ) : (
-                  <Box pt={1.2} pl={2}>
-                    <Typography variant="body2">{data.fieldLabel}</Typography>
+                </Grid>
+                <Grid item xs={5}>
+                  <Box pt={1.2} pl={2} color="text.secondary">
+                    <Typography variant="body2">{fieldTypeLabel(data?.type)}</Typography>
                   </Box>
-                )}
+                </Grid>
+                <Grid item xs={2}>
+                  <Box textAlign={'end'} pr={1}>
+                    <IconButton
+                      size="small"
+                      aria-label="Edit"
+                      onClick={() => {
+                        setPropertiesOpen(true);
+                      }}
+                    >
+                      <EditIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      aria-label="Delete"
+                      onClick={() => {
+                        deleteField(data._id);
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" color={'error'} />
+                    </IconButton>
+                  </Box>
+                </Grid>
               </Grid>
-              <Grid item xs={5}>
-                <Box pt={1} color="text.secondary">
-                  <Typography variant="body2">{FieldList[data?.type?.toUpperCase()]?.label}</Typography>
-                </Box>
-              </Grid>
-            </Grid>
+            )}
+            {propertiesOpen && (
+              <Properties
+                section={section}
+                sectionId={sectionId}
+                setSection={setSection}
+                onClose={() => {
+                  setPropertiesOpen(false);
+                }}
+                fieldData={data}
+              />
+            )}
           </Box>
         </div>
       )}
