@@ -148,9 +148,13 @@ const ListingPageHeader = ({
     return (onSearch || handleSearchFilter) && (isAddButtonVisible || isActionButtonVisible) && !Boolean(rightSideContents);
   }, [handleSearchFilter, isActionButtonVisible, isAddButtonVisible, onSearch, rightSideContents]);
 
+  const isLeftSidePresent = useMemo(() => {
+    return Boolean(toggleButtonList) || Boolean(leftSideContents);
+  }, [toggleButtonList, leftSideContents]);
+
   return (
     <div className="header-panel listing-head">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
         <div className={'flex flex-wrap items-center gap-2 w-full'}>
           {toggleButtonList ? (
             <HideWhenOffline>
@@ -173,7 +177,11 @@ const ListingPageHeader = ({
           ) : null}
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
-        <div className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center`}>
+        <div
+          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${
+            !isLeftSidePresent && isMobile ? '-mt-2' : ''
+          }`}
+        >
           {onSearch ? (
             <HideWhenOffline>
               <SearchBox
