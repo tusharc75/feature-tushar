@@ -236,7 +236,7 @@ const ListingPageHeader = ({
                             variant={'outlined'}
                             color="default"
                             size="small"
-                            className={`new-dropdown-v1 min-h-[32px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
+                            className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
                             disabled={actionButtonLoading || actionButtonDisabled}
                             {...restOfActionButtonProps}
                             onClick={openActions}
