@@ -25,7 +25,7 @@ const Pagination: FC<PaginationProps> = ({
   ...others
 }) => {
   const [textFieldvalue, setTextFieldValue] = useState(page + 1);
-  const debouncedTextValue = useDebounce<number>(textFieldvalue, 1000);
+  const debouncedTextValue = useDebounce<number>(textFieldvalue, 800);
   const changedFromInput = useRef(false);
 
   const possibleMaxPage = useMemo(() => {
