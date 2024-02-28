@@ -18,6 +18,18 @@ export const DOAApproved: React.FC<svgInterfaceWithSize> = ({ size = 14, width =
   );
 };
 
+export const CancelInvoiceIcon: React.FC<svgInterfaceWithSize> = ({ size = 20, width = 20, height = 20, ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} version="1" viewBox="0 0 100 100" {...others}>
+      <path
+        fill="currentcolor"
+        d="M120 500V40h278c246 0 283-2 313-17 54-28 146-24 196 9 61 40 88 90 88 163 0 75-25 128-76 164l-38 26-1 288v287H120V500zm620 260c0-19-7-20-240-20s-240 1-240 20 7 20 240 20 240-1 240-20zM340 480c0-17-7-20-40-20s-40 3-40 20 7 20 40 20 40-3 40-20zm400 0c0-19-7-20-170-20s-170 1-170 20 7 20 170 20 170-1 170-20zM340 360c0-17-7-20-40-20s-40 3-40 20 7 20 40 20 40-3 40-20zm340 0c-22-17-41-20-152-20-121 0-128 1-128 20s7 20 153 20h152l-25-20zm198-24c15-15 9-24-90-123-91-91-109-105-122-94-20 17-30 71-22 116 8 42 49 93 91 111 38 18 121 12 143-10zm70-77c18-33 9-114-15-147-38-51-70-67-133-67-43 0-64 5-77 18-17 16-13 22 87 122 58 58 109 104 115 102 5-2 16-14 23-28zm-608-19c0-17-7-20-40-20s-40 3-40 20 7 20 40 20 40-3 40-20zm270 16c0-31-15-36-111-36-92 0-99 1-99 20s7 20 105 20c58 0 105-2 105-4z"
+        transform="matrix(.1 0 0 -.1 0 100)"
+      ></path>
+    </svg>
+  );
+};
+
 export const DOARejected: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
   return (
     <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">

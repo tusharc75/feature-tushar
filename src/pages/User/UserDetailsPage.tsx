@@ -68,6 +68,7 @@ import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail
 import UserSession from './UserSession';
 import UserSetupDialog from './UserSetupDialog';
 import { isMobile } from 'react-device-detect';
+import { PiPasswordFill } from 'react-icons/pi';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -474,7 +475,7 @@ const UserDetailsPage = () => {
               )}
               {user?.user?.userType === userType.brandAdmin && (
                 <ThemeButton
-                  iconForMobile={<VpnKey />}
+                  iconForMobile={<PiPasswordFill />}
                   onClick={() => {
                     setGenerateAutoPassword(true);
                   }}

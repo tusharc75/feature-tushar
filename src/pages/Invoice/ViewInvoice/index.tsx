@@ -1,28 +1,28 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { Box, Dialog, IconButton, Tab, Tabs } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase, startCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { IoMdDownload } from 'react-icons/io';
+import { useData } from 'src/StateProvider/Provider';
+import { CancelInvoiceIcon } from 'src/assets/svg/svgIcons';
+import CommentDialog from 'src/components/CommentDialog';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
+import PreviewDownload from 'src/components/PreviewDownload';
+import TabPanel from 'src/components/TabPanel';
+import { CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Grid, Dialog, IconButton, Tabs, Tab } from '@material-ui/core';
-import { isMobile, isTablet } from 'react-device-detect';
-import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from 'src/constants/helpers';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { camelCase, startCase } from 'lodash';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
-import { IoMdDownload } from 'react-icons/io';
-import TabPanel from 'src/components/TabPanel';
 import CreditMemo from '../CreditMemo';
-import CommentDialog from 'src/components/CommentDialog';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { Cancel } from '@material-ui/icons';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -359,7 +359,12 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                   dataRows?.length > 0 &&
                   [sidebarResource.fieldTicket, sidebarResource.repairOrder]?.includes(resource) &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
-                    <ThemeButton iconForMobile={<Cancel />} tooltip="Cancel Invoice" borderColor="red" onClick={() => setCommentDialog(true)}>
+                    <ThemeButton
+                      iconForMobile={<CancelInvoiceIcon />}
+                      tooltip="Cancel Invoice"
+                      borderColor="red"
+                      onClick={() => setCommentDialog(true)}
+                    >
                       Cancel Invoice
                     </ThemeButton>
                   )}
