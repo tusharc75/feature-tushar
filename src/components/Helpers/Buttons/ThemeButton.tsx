@@ -45,9 +45,7 @@ const ThemeButton = ({
 
   const getButtonProps = useMemo(() => {
     const buttonProps: Pick<ButtonProps, 'className' | 'variant'> = {
-      className: `${
-        iconForMobile ? 'max-[600px]:[max-width:36px_!important] max-[600px]:[height:32px_!important]' : ''
-      } no-shadow min-h-[32px] ${className}`,
+      className: `${iconForMobile ? 'max-[600px]:[max-width:36px_!important] [height:32px_!important]' : ''} no-shadow min-h-[32px] ${className}`,
       variant: 'contained'
     };
 
