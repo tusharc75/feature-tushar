@@ -15,7 +15,7 @@ import {
 
 import { AiOutlineDatabase } from 'react-icons/ai';
 import { BiCart, BiCog } from 'react-icons/bi';
-import { FaReact, FaRegRegistered, FaRegUser, FaRegUserCircle } from 'react-icons/fa';
+import { FaRegRegistered, FaRegUser, FaRegUserCircle } from 'react-icons/fa';
 import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
 import { MdOutlineDynamicForm, MdOutlineEventAvailable } from 'react-icons/md';
 import { RiShieldUserLine } from 'react-icons/ri';
@@ -63,7 +63,7 @@ export const setDataBySectionName = (secName, index = 0) => {
 
   let icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   let text = '';
-  let sideBarIcon = <FaReact size={20} />;
+  let sideBarIcon = <ServiceManagementIcon size={20} />;
   const color = '#ffffff';
   const gradient = colorAccessor.gradient || ['#FFA800', '#E35200'];
 
