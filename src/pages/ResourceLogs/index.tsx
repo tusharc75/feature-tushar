@@ -1,5 +1,4 @@
 import { Box, IconButton, TextField } from '@material-ui/core';
-import { isMobile } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -18,6 +17,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import upperFirst from 'lodash/upperFirst';
 
 const ResourceLogs = () => {
+
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState([]);
   const { state, dispatch } = useTableReducer();
@@ -81,15 +81,15 @@ const ResourceLogs = () => {
   }, [selectedResource]);
 
   useEffect(() => {
-    if(selectedResource){
+    if (selectedResource) {
       axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=User`).then(({ data: { data } }) => {
         setUserOptions(data["User"])
       })
-       .catch((error) => {
-            toastConfig.setToastConfig(error);
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
         });
     }
-}, [selectedResource]);
+  }, [selectedResource]);
 
   useEffect(() => {
     if (selectedResource) {
@@ -103,18 +103,16 @@ const ResourceLogs = () => {
         accessor: 'referenceId',
         Header: 'Resource',
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => (
           <div>
-          <p
-            className="text-truncate link"
-            title={row?.original?.optionLabel}
-            onClick={() => window.open(`${routes[`${row?.original?.key}Detail`]?.path}/${row?.original?.referenceId?.optionValue}`)}
-          >
-            {row?.original?.referenceId?.optionLabel}
-          </p>
+            <p className="text-truncate link"
+              title={row?.original?.optionLabel}
+              onClick={() => window.open(`${routes[`${row?.original?.key}Detail`]?.path}/${row?.original?.referenceId?.optionValue}`)}
+            >
+              {row?.original?.referenceId?.optionLabel}
+            </p>
           </div>
         )
       },
@@ -122,18 +120,17 @@ const ResourceLogs = () => {
         accessor: 'updatedBy',
         Header: 'Updated By',
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => (
           <div>
-          <p
-            className="link text-truncate"
-            title={row?.original?.optionLabel}
-            onClick={() => window.open(`${routes.userDetail.path}/${row?.original?.updatedBy?.optionValue}`)}
-          >
-            {row?.original?.updatedBy?.optionLabel}
-          </p>
+            <p
+              className="link text-truncate"
+              title={row?.original?.optionLabel}
+              onClick={() => window.open(`${routes.userDetail.path}/${row?.original?.updatedBy?.optionValue}`)}
+            >
+              {row?.original?.updatedBy?.optionLabel}
+            </p>
           </div>
         )
       },
@@ -141,7 +138,6 @@ const ResourceLogs = () => {
         accessor: 'actions',
         Header: 'Action',
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => <div>{upperFirst(row.original?.action)}</div>
@@ -150,7 +146,6 @@ const ResourceLogs = () => {
         accessor: 'date',
         Header: 'Updated Date Time',
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => <div className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</div>
@@ -161,7 +156,6 @@ const ResourceLogs = () => {
         disableFilters: true,
         disableSortBy: true,
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <div className="text-truncate">{row?.original?.changeString}</div>
       },
       ActionsRenderer
@@ -207,7 +201,7 @@ const ResourceLogs = () => {
     if (selectedAction) {
       query = `${query}&action=${selectedAction?.optionValue}`;
     }
-    if(selectedUser){
+    if (selectedUser) {
       query = `${query}&userId=${selectedUser?.optionValue}`;
     }
     return query;
@@ -296,8 +290,7 @@ const ResourceLogs = () => {
       </div>
       <CustomContainer>
         <div className="header-panel">
-          {/* xs={12} sm={6} md={4} lg={4} */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[8px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[8px]">
             <Autocomplete
               fullWidth
               options={resourceOptions}
