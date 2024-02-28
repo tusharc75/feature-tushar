@@ -196,14 +196,11 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
       }
     });
 
-    const res = await axiosInstance().post('/user/pdf', { images: imageData });
-    axiosInstance()
-      .put(`/attachment/replace/${data?.attachmentId}`, { oldUrl: data?.url, url: res?.data?.fileName })
-      .then(() => {
-        setSelectedAttachment(null);
-        fetchData();
-        setSubmitting(false);
-      })
+    axiosInstance().post('/user/pdf', { images: imageData, fileName: data?.url, attachmentId: data?.attachmentId }).then(() => {
+      setSelectedAttachment(null);
+      fetchData();
+      setSubmitting(false);
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setSubmitting(false);
