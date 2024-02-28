@@ -210,74 +210,71 @@ const ResourceLogs = () => {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance()
-      .get(`/log?${queryString}`)
-      .then(
-        ({
-          data: {
-            data: { data, count }
-          }
-        }) => {
-          let rows = data?.map((u) => {
-            var changeString = [];
-            var changes = [];
-            var operations = [];
-
-            if (Array.isArray(u?.changes)) {
-              if (u?.changes?.length === 0) {
-                return;
-              }
-              u?.changes?.forEach((e) => {
-                if (e?.fieldLabel) {
-                  if (e?.fieldLabel === 'history' || e?.fieldLabel === 'createdBy' || e?.fieldLabel === '_id') {
-                    return;
-                  }
-                  changes.push(e);
-                  var oldValue = e?.oldValue;
-                  var newValue = e?.newValue;
-                  if (e?.type === 'date') {
-                    if (oldValue && moment(oldValue)?.isValid) {
-                      oldValue = moment(oldValue).format(dateFormat);
-                    }
-                    if (newValue && moment(newValue)?.isValid) {
-                      newValue = moment(newValue).format(dateFormat);
-                    }
-                  } else if (e?.type === 'dropDown' && e?.lookup) {
-                    oldValue = oldValue?.label;
-                    newValue = newValue?.label;
-                  }
-                  if (oldValue && newValue) {
-                    changeString.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);
-                  } else {
-                    changeString.push(`${e.fieldLabel} changed to ${newValue}`);
-                  }
-                } else if (e?.label) {
-                  operations.push(e);
+    axiosInstance().get(`/log?${queryString}`).then(({ data: { data: { data, count } } }) => {
+      let rows = data?.map((u) => {
+        var changeString = [];
+        var changes = [];
+        var operations = [];
+        if (u?.action == 'update' || u?.action == 'create') {
+          if (Array.isArray(u?.changes)) {
+            if (u?.changes?.length === 0) {
+              return;
+            }
+            u?.changes?.forEach((e) => {
+              if (e?.fieldLabel) {
+                if (e?.fieldLabel === 'history' || e?.fieldLabel === 'createdBy' || e?.fieldLabel === '_id') {
+                  return;
                 }
-              });
-            } else {
-              operations.push({ ...u?.changes });
-            }
-            if (changeString?.length) {
-              u.changeString = changeString?.toString();
-            } else {
-              u.changeString = 'Click View for check changes';
-            }
-            if (u?.action == 'create') {
-              u.changeString = 'Created';
-            }
-            u.changes = changes;
-            u.operations = operations;
-            u.key = selectedResource?.key;
-            return u;
-          });
-          rows = rows.filter((e) => e);
-          dispatch({ type: 'initialize', data: rows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
+                changes.push(e);
+                var oldValue = e?.oldValue;
+                var newValue = e?.newValue;
+                if (e?.type === 'date') {
+                  if (oldValue && moment(oldValue)?.isValid) {
+                    oldValue = moment(oldValue).format(dateFormat);
+                  }
+                  if (newValue && moment(newValue)?.isValid) {
+                    newValue = moment(newValue).format(dateFormat);
+                  }
+                } else if (e?.type === 'dropDown' && e?.lookup) {
+                  oldValue = oldValue?.label;
+                  newValue = newValue?.label;
+                }
+                if (oldValue && newValue) {
+                  changeString.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);
+                } else {
+                  changeString.push(`${e.fieldLabel} changed to ${newValue}`);
+                }
+              } else if (e?.label) {
+                operations.push(e);
+              }
+            });
+          } else {
+            operations.push({ ...u?.changes });
+          }
+          if (changeString?.length) {
+            u.changeString = changeString?.toString();
+          } else {
+            u.changeString = 'Click View for check changes';
+          }
+          if (u?.action == 'create') {
+            u.changeString = 'Created';
+          }
         }
-      )
+        else if (u?.action == 'delete') {
+          u.changeString = 'Deleted';
+        }
+        u.changes = changes;
+        u.operations = operations;
+        u.key = selectedResource?.key;
+        return u;
+      });
+      rows = rows.filter((e) => e);
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    }
+    )
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
