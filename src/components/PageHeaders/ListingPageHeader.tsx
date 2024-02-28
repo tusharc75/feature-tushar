@@ -176,7 +176,12 @@ const ListingPageHeader = ({
         <div className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center`}>
           {onSearch ? (
             <HideWhenOffline>
-              <SearchBox onChange={onSearch} value={searchValue} />
+              <SearchBox
+                className={`max-[600px]:hidden`}
+                containerProps={{ className: 'max-[600px]:hidden' }}
+                onChange={onSearch}
+                value={searchValue}
+              />
             </HideWhenOffline>
           ) : null}
           {handleSearchFilter ? (
@@ -203,7 +208,7 @@ const ListingPageHeader = ({
                         onClick={(e) => {
                           addButtonOnclick && addButtonOnclick(e);
                         }}
-                        className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px]`}
+                        className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px] max-[600px]:[padding:4px_!important]`}
                         startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
                       >
                         {renderButtonText({
