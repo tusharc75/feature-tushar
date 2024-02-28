@@ -22,7 +22,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { Cancel, Close } from '@material-ui/icons';
+import { Cancel } from '@material-ui/icons';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -359,7 +359,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                   dataRows?.length > 0 &&
                   [sidebarResource.fieldTicket, sidebarResource.repairOrder]?.includes(resource) &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
-                    <ThemeButton iconForMobile={<Close />} tooltip="Cancel Invoice" borderColor="red" onClick={() => setCommentDialog(true)}>
+                    <ThemeButton iconForMobile={<Cancel />} tooltip="Cancel Invoice" borderColor="red" onClick={() => setCommentDialog(true)}>
                       Cancel Invoice
                     </ThemeButton>
                   )}
