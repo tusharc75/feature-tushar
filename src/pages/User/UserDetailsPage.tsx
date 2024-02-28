@@ -17,15 +17,16 @@ import {
   Typography,
   makeStyles
 } from '@material-ui/core';
-import { ControlPoint, Edit, VpnKey } from '@material-ui/icons';
+import { ControlPoint, Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { startCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
 import { FcFlowChart } from 'react-icons/fc';
-import { MdLockReset } from 'react-icons/md';
 import { RiSettingsFill } from 'react-icons/ri';
 import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
+import { GeneratePasswordIcon, ResetPasswordIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
@@ -67,8 +68,6 @@ import ManageUserDialog from './ManageUserDialog';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import UserSession from './UserSession';
 import UserSetupDialog from './UserSetupDialog';
-import { isMobile } from 'react-device-detect';
-import { PiPasswordFill } from 'react-icons/pi';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -468,14 +467,16 @@ const UserDetailsPage = () => {
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
-              {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && !isMobile && (
-                <ThemeButton iconForMobile={<RiSettingsFill />} className="" tooltip="Assign Entity/Role" onClick={entityDialogOpen}>
-                  Assign Entity/Role
-                </ThemeButton>
+              {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
+                <span className="max-[768px]:hidden">
+                  <ThemeButton iconForMobile={<RiSettingsFill />} className="" tooltip="Assign Entity/Role" onClick={entityDialogOpen}>
+                    Assign Entity/Role
+                  </ThemeButton>
+                </span>
               )}
               {user?.user?.userType === userType.brandAdmin && (
                 <ThemeButton
-                  iconForMobile={<PiPasswordFill />}
+                  iconForMobile={<GeneratePasswordIcon size={20} />}
                   onClick={() => {
                     setGenerateAutoPassword(true);
                   }}
@@ -485,7 +486,7 @@ const UserDetailsPage = () => {
                 </ThemeButton>
               )}
               {permissions?.user?.isUpdate && (
-                <ThemeButton tooltip="Reset Password" iconForMobile={<MdLockReset size={50} />} onClick={handleResetPassword}>
+                <ThemeButton tooltip="Reset Password" iconForMobile={<ResetPasswordIcon />} onClick={handleResetPassword}>
                   Reset Password
                 </ThemeButton>
               )}

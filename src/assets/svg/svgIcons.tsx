@@ -808,3 +808,42 @@ export const FileCopyIcon: FC<svgInterfaceWithSize> = ({ width = null, height = 
     </svg>
   );
 };
+
+export const ResetPasswordIcon: FC<svgInterfaceWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={width ?? size} height={height ?? size} {...others} version="1" viewBox="0 0 100 100">
+      <path
+        d="M770 987c-35-18-70-74-70-113 0-26-4-34-18-34-36 0-42-20-42-140 0-77 4-120 12-128s60-12 168-12 160 4 168 12 12 51 12 128c0 120-6 140-42 140-14 0-18 8-18 34 0 18-10 48-23 67-37 55-93 73-147 46zm91-40c23-17 39-52 39-81 0-26-1-26-80-26s-80 0-80 25c0 31 24 81 42 88 23 10 63 7 79-6zm99-247V600H680v200h280V700z"
+        transform="matrix(.1 0 0 -.1 0 100)"
+        fill="currentcolor"
+      ></path>
+      <path
+        d="M797 726c-9-22 8-71 23-71s32 49 23 71c-3 8-13 14-23 14s-20-6-23-14zM0 812c0-24 32-56 227-225 125-109 237-200 250-203 39-10 65 2 142 68l74 62-32 8c-55 15-63 40-59 187l3 131H0v-28zM0 479c0-239 1-251 18-237 9 8 75 61 147 118 72 56 131 105 132 108 1 4-46 48-104 97-57 50-124 107-149 128L0 732V479zM874 523c-117-3-122-5-147-31l-26-27 150-117 149-118v150c0 83-1 149-2 148-2-1-57-4-124-5z"
+        transform="matrix(.1 0 0 -.1 0 100)"
+        fill="currentcolor"
+      ></path>
+      <path
+        d="M166 309C19 193 0 175 0 149v-29h1001l-3 32c-3 28-23 47-166 160L669 441l-49-41c-90-76-145-77-234-5l-54 45-166-131z"
+        transform="matrix(.1 0 0 -.1 0 100)"
+        fill="currentcolor"
+      ></path>
+    </svg>
+  );
+};
+
+export const GeneratePasswordIcon: FC<svgInterfaceWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={width ?? size} height={height ?? size} {...others} version="1" viewBox="0 0 96 96">
+      <path
+        d="M175 665c-24-24-25-27-25-185 0-224-17-210 258-210h210l7 27c16 64 99 133 160 133h25v105c0 99-2 107-25 130l-24 25H199l-24-25zm190-185c0-33-2-35-35-35-29 0-36 4-38 23-6 40 5 54 40 50 30-3 33-6 33-38zm150 0c0-33-2-35-35-35-29 0-36 4-38 23-6 40 5 54 40 50 30-3 33-6 33-38zm150 0c0-33-2-35-35-35-29 0-36 4-38 23-6 40 5 54 40 50 30-3 33-6 33-38z"
+        transform="matrix(.1 0 0 -.1 0 96)"
+        fill="currentcolor"
+      ></path>
+      <path
+        d="M738 369c-43-22-78-81-78-129 0-74 76-150 149-150 77 0 151 74 151 150 0 50-35 107-80 130-49 25-94 25-142-1zm61-22c32 8 88-25 106-63 20-43 13-83-21-118-35-34-75-41-118-21-47 22-87 105-51 105 8 0 17-11 21-24 21-86 147-74 147 14 0 34-24 64-60 75-17 5-23 2-23-9s-9-16-29-16c-39 0-46 14-24 50 13 23 19 27 25 16 4-8 17-12 27-9z"
+        fill="currentcolor"
+        transform="matrix(.1 0 0 -.1 0 96)"
+      ></path>
+    </svg>
+  );
+};
