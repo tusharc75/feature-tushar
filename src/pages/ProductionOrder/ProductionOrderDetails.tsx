@@ -292,6 +292,7 @@ const ProductionOrderDetails = () => {
             handleNext={
               productionOrderProcessStepsNames[currentStep] === 'Add'
                 ? () => {
+                    setNextStep(false)
                     axiosInstance()
                       .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
                       .then(({ data: { data } }) => {
