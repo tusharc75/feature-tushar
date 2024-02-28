@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -23,9 +22,8 @@ import { Skeleton } from '@material-ui/lab';
 import { startCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiReset } from 'react-icons/bi';
 import { FcFlowChart } from 'react-icons/fc';
+import { MdLockReset } from 'react-icons/md';
 import { RiSettingsFill } from 'react-icons/ri';
 import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -69,9 +67,7 @@ import ManageUserDialog from './ManageUserDialog';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import UserSession from './UserSession';
 import UserSetupDialog from './UserSetupDialog';
-import { MdLockReset, MdOutlineLockReset } from 'react-icons/md';
-import { FaUnlock } from 'react-icons/fa';
-import { TbPasswordFingerprint } from 'react-icons/tb';
+import { isMobile } from 'react-device-detect';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -471,8 +467,8 @@ const UserDetailsPage = () => {
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
-              {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
-                <ThemeButton iconForMobile={<RiSettingsFill />} tooltip="Assign Entity/Role" onClick={entityDialogOpen}>
+              {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && !isMobile && (
+                <ThemeButton iconForMobile={<RiSettingsFill />} className="" tooltip="Assign Entity/Role" onClick={entityDialogOpen}>
                   Assign Entity/Role
                 </ThemeButton>
               )}
