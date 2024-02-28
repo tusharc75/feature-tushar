@@ -753,6 +753,7 @@ const Steps = ({
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsCompleteAllLoading(false);
       });
   };
 

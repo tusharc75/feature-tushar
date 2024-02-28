@@ -148,9 +148,13 @@ const ListingPageHeader = ({
     return (onSearch || handleSearchFilter) && (isAddButtonVisible || isActionButtonVisible) && !Boolean(rightSideContents);
   }, [handleSearchFilter, isActionButtonVisible, isAddButtonVisible, onSearch, rightSideContents]);
 
+  const isLeftSidePresent = useMemo(() => {
+    return Boolean(toggleButtonList) || Boolean(leftSideContents);
+  }, [toggleButtonList, leftSideContents]);
+
   return (
     <div className="header-panel listing-head">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
         <div className={'flex flex-wrap items-center gap-2 w-full'}>
           {toggleButtonList ? (
             <HideWhenOffline>
@@ -173,10 +177,19 @@ const ListingPageHeader = ({
           ) : null}
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
-        <div className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center`}>
+        <div
+          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${
+            !isLeftSidePresent && isMobile ? '-mt-2' : ''
+          }`}
+        >
           {onSearch ? (
             <HideWhenOffline>
-              <SearchBox onChange={onSearch} value={searchValue} />
+              <SearchBox
+                className={`max-[600px]:hidden`}
+                containerProps={{ className: 'max-[600px]:hidden' }}
+                onChange={onSearch}
+                value={searchValue}
+              />
             </HideWhenOffline>
           ) : null}
           {handleSearchFilter ? (
@@ -203,7 +216,7 @@ const ListingPageHeader = ({
                         onClick={(e) => {
                           addButtonOnclick && addButtonOnclick(e);
                         }}
-                        className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px]`}
+                        className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px] max-[600px]:[padding:4px_!important]`}
                         startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
                       >
                         {renderButtonText({
@@ -223,7 +236,7 @@ const ListingPageHeader = ({
                             variant={'outlined'}
                             color="default"
                             size="small"
-                            className={`new-dropdown-v1 min-h-[32px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
+                            className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
                             disabled={actionButtonLoading || actionButtonDisabled}
                             {...restOfActionButtonProps}
                             onClick={openActions}

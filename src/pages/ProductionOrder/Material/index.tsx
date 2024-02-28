@@ -30,7 +30,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
+  const { dataRows, page, limit, filters, sorting, selectedRecords, search } = state;
 
   const {
     state: { user, permissions }
@@ -191,7 +191,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting]);
+  }, [page, limit, filters, sorting, search]);
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -211,6 +211,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return deepFilter;
   };

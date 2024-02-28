@@ -14,6 +14,7 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import { dateFormat } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import moment from 'moment';
+import { ThemeButton } from './Buttons';
 
 const CustomFilter = ({ field, setFilterQuery }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -214,16 +215,17 @@ const CustomFilter = ({ field, setFilterQuery }) => {
           <DisplyaFilters chipData={chipData} handleFilterOpen={handleFilterOpen} clearSingleFilter={clearSingleFilter} />
         </Box>
         <HtmlTooltip title="Apply Filters" placement="top" arrow>
-          <Button
-            startIcon={<BiFilterAlt />}
-            size="small"
+          <ThemeButton
+            tooltip="filters"
+            startIcon={<BiFilterAlt className="-ml-1 mt-[1px] mr-1" />}
+            iconForMobile={<BiFilterAlt />}
             onClick={() => {
               setIsFilterOpen(true);
             }}
             variant="outlined"
           >
             Filters
-          </Button>
+          </ThemeButton>
         </HtmlTooltip>
       </Box>
       {isFilterOpen && (

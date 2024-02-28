@@ -18,6 +18,18 @@ export const DOAApproved: React.FC<svgInterfaceWithSize> = ({ size = 14, width =
   );
 };
 
+export const CancelInvoiceIcon: React.FC<svgInterfaceWithSize> = ({ size = 20, width = 20, height = 20, ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} version="1" viewBox="0 0 100 100" {...others}>
+      <path
+        fill="currentcolor"
+        d="M120 500V40h278c246 0 283-2 313-17 54-28 146-24 196 9 61 40 88 90 88 163 0 75-25 128-76 164l-38 26-1 288v287H120V500zm620 260c0-19-7-20-240-20s-240 1-240 20 7 20 240 20 240-1 240-20zM340 480c0-17-7-20-40-20s-40 3-40 20 7 20 40 20 40-3 40-20zm400 0c0-19-7-20-170-20s-170 1-170 20 7 20 170 20 170-1 170-20zM340 360c0-17-7-20-40-20s-40 3-40 20 7 20 40 20 40-3 40-20zm340 0c-22-17-41-20-152-20-121 0-128 1-128 20s7 20 153 20h152l-25-20zm198-24c15-15 9-24-90-123-91-91-109-105-122-94-20 17-30 71-22 116 8 42 49 93 91 111 38 18 121 12 143-10zm70-77c18-33 9-114-15-147-38-51-70-67-133-67-43 0-64 5-77 18-17 16-13 22 87 122 58 58 109 104 115 102 5-2 16-14 23-28zm-608-19c0-17-7-20-40-20s-40 3-40 20 7 20 40 20 40-3 40-20zm270 16c0-31-15-36-111-36-92 0-99 1-99 20s7 20 105 20c58 0 105-2 105-4z"
+        transform="matrix(.1 0 0 -.1 0 100)"
+      ></path>
+    </svg>
+  );
+};
+
 export const DOARejected: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
   return (
     <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">
@@ -792,6 +804,45 @@ export const FileCopyIcon: FC<svgInterfaceWithSize> = ({ width = null, height = 
       <path
         fill="currentcolor"
         d="M11.25 4.5H7.5A1.5 1.5 0 006 6v6.75H3.75a1.5 1.5 0 01-1.5-1.5V3a1.5 1.5 0 011.5-1.5h6a1.5 1.5 0 011.5 1.5v1.5zm-3 .75h5.25l2.25 2.25V15a1.5 1.5 0 01-1.5 1.5h-6a1.5 1.5 0 01-1.5-1.5V6.75a1.5 1.5 0 011.5-1.5z"
+      ></path>
+    </svg>
+  );
+};
+
+export const ResetPasswordIcon: FC<svgInterfaceWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={width ?? size} height={height ?? size} {...others} version="1" viewBox="0 0 100 100">
+      <path
+        d="M770 987c-35-18-70-74-70-113 0-26-4-34-18-34-36 0-42-20-42-140 0-77 4-120 12-128s60-12 168-12 160 4 168 12 12 51 12 128c0 120-6 140-42 140-14 0-18 8-18 34 0 18-10 48-23 67-37 55-93 73-147 46zm91-40c23-17 39-52 39-81 0-26-1-26-80-26s-80 0-80 25c0 31 24 81 42 88 23 10 63 7 79-6zm99-247V600H680v200h280V700z"
+        transform="matrix(.1 0 0 -.1 0 100)"
+        fill="currentcolor"
+      ></path>
+      <path
+        d="M797 726c-9-22 8-71 23-71s32 49 23 71c-3 8-13 14-23 14s-20-6-23-14zM0 812c0-24 32-56 227-225 125-109 237-200 250-203 39-10 65 2 142 68l74 62-32 8c-55 15-63 40-59 187l3 131H0v-28zM0 479c0-239 1-251 18-237 9 8 75 61 147 118 72 56 131 105 132 108 1 4-46 48-104 97-57 50-124 107-149 128L0 732V479zM874 523c-117-3-122-5-147-31l-26-27 150-117 149-118v150c0 83-1 149-2 148-2-1-57-4-124-5z"
+        transform="matrix(.1 0 0 -.1 0 100)"
+        fill="currentcolor"
+      ></path>
+      <path
+        d="M166 309C19 193 0 175 0 149v-29h1001l-3 32c-3 28-23 47-166 160L669 441l-49-41c-90-76-145-77-234-5l-54 45-166-131z"
+        transform="matrix(.1 0 0 -.1 0 100)"
+        fill="currentcolor"
+      ></path>
+    </svg>
+  );
+};
+
+export const GeneratePasswordIcon: FC<svgInterfaceWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={width ?? size} height={height ?? size} {...others} version="1" viewBox="0 0 96 96">
+      <path
+        d="M175 665c-24-24-25-27-25-185 0-224-17-210 258-210h210l7 27c16 64 99 133 160 133h25v105c0 99-2 107-25 130l-24 25H199l-24-25zm190-185c0-33-2-35-35-35-29 0-36 4-38 23-6 40 5 54 40 50 30-3 33-6 33-38zm150 0c0-33-2-35-35-35-29 0-36 4-38 23-6 40 5 54 40 50 30-3 33-6 33-38zm150 0c0-33-2-35-35-35-29 0-36 4-38 23-6 40 5 54 40 50 30-3 33-6 33-38z"
+        transform="matrix(.1 0 0 -.1 0 96)"
+        fill="currentcolor"
+      ></path>
+      <path
+        d="M738 369c-43-22-78-81-78-129 0-74 76-150 149-150 77 0 151 74 151 150 0 50-35 107-80 130-49 25-94 25-142-1zm61-22c32 8 88-25 106-63 20-43 13-83-21-118-35-34-75-41-118-21-47 22-87 105-51 105 8 0 17-11 21-24 21-86 147-74 147 14 0 34-24 64-60 75-17 5-23 2-23-9s-9-16-29-16c-39 0-46 14-24 50 13 23 19 27 25 16 4-8 17-12 27-9z"
+        fill="currentcolor"
+        transform="matrix(.1 0 0 -.1 0 96)"
       ></path>
     </svg>
   );
