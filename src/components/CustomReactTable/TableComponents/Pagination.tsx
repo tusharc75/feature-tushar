@@ -106,9 +106,9 @@ const Pagination: FC<PaginationProps> = ({
           </FormControl>
         </div>
 
-        <span className="block max-[768px]:text-[12px] text-gray-600 dark:text-gray-300">{visibleDataText}</span>
+        <span className="block max-[768px]:text-[13px] text-gray-500 dark:text-gray-300">{visibleDataText}</span>
 
-        <div className="flex gap-2 items-center max-[400px]:mx-auto">
+        <div className="flex gap-2 items-center max-[365px]:mx-auto">
           <IconButton disabled={disabled || page <= 0} onClick={(e) => gotToPrevPage(e)} size={'small'}>
             <ChevronLeft />
           </IconButton>
