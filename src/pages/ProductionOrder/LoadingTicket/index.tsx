@@ -29,7 +29,7 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
-  const { page, limit, filters, sorting, selectedRecords } = state;
+  const { page, limit, filters, sorting, selectedRecords, search } = state;
 
   const [columns, setColumns] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
@@ -45,7 +45,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
 
   useEffect(() => {
     fetchRecords();
-  }, [page, limit, filters, sorting]);
+  }, [page, limit, filters, sorting, search]);
 
   const fetchRecords = async () => {
     setNextStep(false);
@@ -113,6 +113,9 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return deepFilter;
   };
