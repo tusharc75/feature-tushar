@@ -40,9 +40,9 @@ const Pagination: FC<PaginationProps> = ({
   };
 
   useEffect(() => {
-    setTextFieldValue(page+1);
-  }, [page])
-  
+    setTextFieldValue(page + 1);
+  }, [page]);
+
   const visibleDataText = useMemo(() => {
     const fromValue = page * rowsPerPage + 1;
     let toValue = page * rowsPerPage + rowsPerPage;
@@ -91,10 +91,10 @@ const Pagination: FC<PaginationProps> = ({
   }, [debouncedTextValue]);
 
   return (
-    <div className={`${className} pagination py-3`} {...others}>
+    <div className={`${className} pagination py-3 max-[768px]:mt-3`} {...others}>
       <div className="flex flex-wrap justify-between sm:justify-end items-center sm:gap-3 gap-2">
-        <div className="rows-per-page flex items-center gap-2 justify-center sm:justify-[unset] basis-full sm:basis-[unset]">
-          <span>Rows Per Page:</span>
+        <div className="rows-per-page flex items-center gap-2 justify-center sm:justify-[unset] min-[768px]:ml-auto max-[768px]:[&_.MuiSelect-select]:[padding:5.5px_29px_5.5px_10px_!important] max-[768px]:[&_.MuiSelect-iconOutlined]:[right:2px_!important]">
+          <span className="max-[768px]:sr-only">Rows Per Page:</span>
           <FormControl size="small" margin="none" style={{ width: 'max-content' }} disabled={disabled}>
             <Select labelId="label" id="select" value={rowsPerPage || rowsPerPageOptions[0]} variant="outlined" onChange={handleRowsPerPageChange}>
               {rowsPerPageOptions.map((option) => (
@@ -106,9 +106,9 @@ const Pagination: FC<PaginationProps> = ({
           </FormControl>
         </div>
 
-        <span className="block">{visibleDataText}</span>
+        <span className="block max-[768px]:text-[12px] text-gray-600 dark:text-gray-300">{visibleDataText}</span>
 
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center max-[400px]:mx-auto">
           <IconButton disabled={disabled || page <= 0} onClick={(e) => gotToPrevPage(e)} size={'small'}>
             <ChevronLeft />
           </IconButton>
