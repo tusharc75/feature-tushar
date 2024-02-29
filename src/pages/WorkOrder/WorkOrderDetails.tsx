@@ -3,7 +3,7 @@ import { Delete, ExpandMore } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
 import { Skeleton } from '@material-ui/lab';
 import queryString from 'query-string';
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
@@ -42,6 +42,24 @@ import Versions from './Versions';
 import View from './View';
 import { TbProgressCheck } from 'react-icons/tb';
 import { FaCircleChevronDown } from 'react-icons/fa6';
+
+type ToolbarElement = {
+  type: 'element';
+  id: string;
+  visibilityInMobile: 'inActionMenu' | 'hidden' | 'visible';
+  component: React.ReactNode;
+};
+
+type ToolbarButton = {
+  id: string;
+  visibilityInMobile: 'inActionMenu' | 'hidden' | 'visible';
+  name: string;
+  ripple?: boolean;
+  onClick: (e: any) => void;
+  type: 'button';
+} & ButtonType;
+
+type ToolbarComponents = ToolbarElement | ToolbarButton;
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -566,24 +584,6 @@ const WorkOrderDetails = () => {
 
 export default WorkOrderDetails;
 
-type ToolbarElement = {
-  type: 'element';
-  id: string;
-  visibilityInMobile: 'inActionMenu' | 'hidden' | 'visible';
-  component: React.ReactNode;
-};
-
-type ToolbarButton = {
-  id: string;
-  visibilityInMobile: 'inActionMenu' | 'hidden' | 'visible';
-  name: string;
-  ripple?: boolean;
-  onClick: (e: any) => void;
-  type: 'button';
-} & ButtonType;
-
-type ToolbarComponents = ToolbarElement | ToolbarButton;
-
 const RenderHeaderButtons = ({
   buttonOptions,
   extraMenuItems,
@@ -687,11 +687,11 @@ const RenderHeaderButtons = ({
               {buttonOptions
                 .filter((b) => b.visibilityInMobile === 'inActionMenu')
                 .map((menuItem) => {
-                  return renderComponent(menuItem);
+                  return <Fragment key={menuItem.id}>{renderComponent(menuItem)}</Fragment>;
                 })}
               {isExtraMenuItemsVisible &&
                 extraMenuItems.map((m) => (
-                  <MenuItem onClick={m.onClick} disabled={m.disabled}>
+                  <MenuItem key={m.text} onClick={m.onClick} disabled={m.disabled}>
                     {m.text}
                   </MenuItem>
                 ))}
