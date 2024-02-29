@@ -1,6 +1,5 @@
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Button, Dialog, useMediaQuery } from '@material-ui/core';
 import { useContext, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { MdEmail } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DownloadIcon, ExportIcon } from 'src/assets/svg/svgIcons';
@@ -32,6 +31,7 @@ function PreviewDownload({
   hideDialog = false
 }) {
   const toastConfig = useContext(CustomToastContext);
+  const isMobile = useMediaQuery('(max-width:600px)');
 
   const allColumn =
     columns
@@ -46,7 +46,7 @@ function PreviewDownload({
         return { ...d, fieldName: d.fieldName === 'qtyDisplay' ? 'qty' : d.fieldName };
       }) || [];
 
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [fullScreen, setFullScreen] = useState(isMobile);
 
   const [sendEmail, setSendEmail] = useState(false);
 
@@ -58,23 +58,21 @@ function PreviewDownload({
 
   const handleView = (type, operation, subType, visibleColumns) => {
     setLoadingType(subType);
-    setBtnLoading(operation)
+    setBtnLoading(operation);
 
     let showColumns = visibleColumns?.map((e) => e?.fieldName)?.toString();
 
     let api = '';
     if (type === 'Excel') {
       api = `/excel/${referenceId}?resource=${resource}&columns=${showColumns}`;
-    }
-    else {
+    } else {
       if (isAsyncDownload) {
         if (subType === 'Detail') {
           api = `/pdf/async-download/${referenceId}/detail?resource=${resource}&columns=${showColumns}&referenceLabel=${referenceLabel}`;
         } else {
           api = `/pdf/async-download/${referenceId}?resource=${resource}&columns=${showColumns}&referenceLabel=${referenceLabel}`;
         }
-      }
-      else {
+      } else {
         if (subType === 'Detail') {
           api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
         } else {
@@ -94,15 +92,14 @@ function PreviewDownload({
       .get(api, { responseType: responseType })
       .then((response) => {
         setLoadingType(null);
-        setBtnLoading(null)
+        setBtnLoading(null);
         if (isAsyncDownload) {
           toastConfig.setToastConfig({
             message: 'Document creation in process',
             open: true,
             type: 'success'
           });
-        }
-        else {
+        } else {
           setShowColumnsDialog({ open: false, type: '', operation: '' });
           let newFileName = fileName;
           if (subType !== '' && !hideDetailButton) {
@@ -162,64 +159,63 @@ function PreviewDownload({
     <Box display="flex" justifyContent="space-between">
       <Box display="flex" alignItems="center">
         <Box display="flex" flexWrap={'wrap'} gridGap={8}>
-          {<Button
-            variant={isMobile && !isTablet ? 'text' : 'outlined'}
-            className="btn-outline-v1  with-border"
-            color="primary"
-            type="button"
-            size="small"
-            startIcon={isMobile && !isTablet ? '' : <VisibilityIcon />}
-            disabled={btnLoading === 'Preview'}
-            onClick={(e) => {
-              if (hideDialog) {
-                handleView('PDF', 'Preview', 'Regular', []);
-              }
-              else {
-                setShowColumnsDialog({ open: true, type: 'PDF', operation: 'Preview' });
-              }
-            }}
-          >
-            {isMobile && !isTablet ? <VisibilityIcon /> : btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
-          </Button>
+          {
+            <Button
+              variant={isMobile ? 'text' : 'outlined'}
+              className="btn-outline-v1  with-border"
+              color="primary"
+              type="button"
+              size="small"
+              startIcon={isMobile ? '' : <VisibilityIcon />}
+              disabled={btnLoading === 'Preview'}
+              onClick={(e) => {
+                if (hideDialog) {
+                  handleView('PDF', 'Preview', 'Regular', []);
+                } else {
+                  setShowColumnsDialog({ open: true, type: 'PDF', operation: 'Preview' });
+                }
+              }}
+            >
+              {isMobile ? <VisibilityIcon /> : btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
+            </Button>
           }
           <Button
             className="btn-outline-v1 with-border"
-            variant={isMobile && !isTablet ? 'text' : 'outlined'}
+            variant={isMobile ? 'text' : 'outlined'}
             color="primary"
             type="button"
             size="small"
-            startIcon={isMobile && !isTablet ? '' : <DownloadIcon />}
+            startIcon={isMobile ? '' : <DownloadIcon />}
             disabled={btnLoading === 'Download'}
             onClick={(e) => {
               if (hideDialog) {
                 handleView('PDF', 'Download', 'Regular', []);
-              }
-              else {
+              } else {
                 setShowColumnsDialog({ open: true, type: 'PDF', operation: 'Download' });
               }
             }}
           >
-            {isMobile && !isTablet ? <DownloadIcon fontSize={20} /> : btnLoading === 'Download' ? 'Please wait...' : 'Download'}
+            {isMobile ? <DownloadIcon fontSize={20} /> : btnLoading === 'Download' ? 'Please wait...' : 'Download'}
           </Button>
           {isExcelDownload && (
             <Button
               className="btn-outline-v1  with-border"
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              variant={isMobile ? 'text' : 'outlined'}
               color="primary"
               type="button"
               size="small"
-              startIcon={isMobile && !isTablet ? '' : <ExportIcon />}
+              startIcon={isMobile ? '' : <ExportIcon />}
               disabled={btnLoading === 'Download'}
               onClick={(e) => {
                 setShowColumnsDialog({ open: true, type: 'Excel', operation: 'Download' });
               }}
             >
-              {isMobile && !isTablet ? <ExportIcon /> : btnLoading === 'Download' ? 'Please wait...' : 'Export To Excel'}
+              {isMobile ? <ExportIcon /> : btnLoading === 'Download' ? 'Please wait...' : 'Export To Excel'}
             </Button>
           )}
           {isSendEmail && (
             <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              variant={isMobile ? 'text' : 'outlined'}
               color="primary"
               size="small"
               className="btn-outline-v1  with-border"
@@ -228,13 +224,12 @@ function PreviewDownload({
               onClick={() => {
                 if (isAsyncDownload) {
                   setSendEmail(true);
-                }
-                else {
+                } else {
                   setShowColumnsDialog({ open: true, type: isExcelDownload ? 'PDF-Excel' : 'PDF', operation: 'Send Email' });
                 }
               }}
             >
-              {isMobile && !isTablet ? <MdEmail size={20} /> : btnLoading === 'Send Email' ? 'Please wait...' : `Send Email`}
+              {isMobile ? <MdEmail size={20} /> : btnLoading === 'Send Email' ? 'Please wait...' : `Send Email`}
             </Button>
           )}
         </Box>

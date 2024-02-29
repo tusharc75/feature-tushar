@@ -6,7 +6,7 @@ import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
+import { FaDoorClosed, FaWpforms } from 'react-icons/fa';
 import { IoHandRightSharp } from 'react-icons/io5';
 import { LuPackageCheck } from 'react-icons/lu';
 import { RiFileShredFill, RiFlowChart } from 'react-icons/ri';
@@ -273,6 +273,7 @@ const WorkOrderDetails = () => {
         permissions?.workOrder?.isUpdate && workOrderData?.serializedAsset && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed
       ),
       name: `${ASSET_STATUS.scrap} Asset`,
+      tooltip: `${ASSET_STATUS.scrap} Asset`,
       onClick: () => setShowConfirmBoxScrap(true),
       iconForMobile: <RiFileShredFill />
     },
@@ -307,7 +308,7 @@ const WorkOrderDetails = () => {
         permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed
       ),
       onClick: () => updateJobStatus(WORK_ORDER_STATUS.completed),
-      iconForMobile: <LuPackageCheck />,
+      iconForMobile: <FaDoorClosed />,
       tooltip: 'Complete Work Order',
       name: 'Close'
     },
