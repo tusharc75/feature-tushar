@@ -363,6 +363,8 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                       iconForMobile={<CancelInvoiceIcon />}
                       tooltip="Cancel Invoice"
                       borderColor="red"
+                      mode="light"
+                      hasMobileBorder={false}
                       onClick={() => setCommentDialog(true)}
                     >
                       Cancel Invoice
