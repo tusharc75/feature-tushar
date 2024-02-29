@@ -2,7 +2,7 @@ import { Box, Grid, IconButton, Menu, MenuItem, useMediaQuery } from '@material-
 import { Add, ExpandMore, LowPriority } from '@material-ui/icons';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import { isArray, reverse } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { IoMdArrowDropdown, IoMdArrowDropup } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -81,6 +81,7 @@ const Service = ({
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addServiceAnchorEl, setAddServiceAnchorEl] = useState(null);
   const [isMobileSlideOpen, setIsMobileSlideOpen] = useState(false);
+  const prevOrder = useRef(0);
 
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -314,6 +315,10 @@ const Service = ({
           type: 'success',
           message: data?.message
         });
+        prevOrder.current =
+          serviceSteps.findIndex((s) => s.uniqueId === selectedService.uniqueId) - 1 < 0
+            ? 0
+            : serviceSteps.findIndex((s) => s.uniqueId === selectedService.uniqueId) - 1;
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           setReviseQuotation(true);
         } else {
@@ -548,7 +553,8 @@ const Service = ({
                     allowedToEdit,
                     setShowConfirmBox,
                     servicesButtons: servicesButtons,
-                    isMobile: false
+                    isMobile: false,
+                    initialTabIndex: prevOrder.current
                   }}
                 />
               </Grid>
@@ -599,8 +605,9 @@ const Service = ({
           {mobScreen && (
             <div
               className={`
-              fixed bg-[var(--dark-primary,_#fff)] p-[10px_20px ${isMobileSlideOpen ? 'bottom-0' : '-bottom-[55px]'
-                } left-0 right-0 z-[5] [border:1px_solid_var(--common-border-color)] border-b-0 transition-all duration-300`}
+              fixed bg-[var(--dark-primary,_#fff)] p-[10px_20px ${
+                isMobileSlideOpen ? 'bottom-0' : '-bottom-[55px]'
+              } left-0 right-0 z-[5] [border:1px_solid_var(--common-border-color)] border-b-0 transition-all duration-300`}
             >
               <span className=" absolute top-0 right-0">
                 <IconButton size="small" onClick={() => setIsMobileSlideOpen((prev) => !prev)} className="p-2">
@@ -623,7 +630,8 @@ const Service = ({
                   allowedToEdit,
                   setShowConfirmBox,
                   servicesButtons: servicesButtons,
-                  isMobile: true
+                  isMobile: true,
+                  initialTabIndex: prevOrder.current
                 }}
               />
             </div>
@@ -701,8 +709,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                      isAllowedToServiceEdit &&
-                      selectedService?.clickable
+                    isAllowedToServiceEdit &&
+                    selectedService?.clickable
                       ? false
                       : true
                   }
@@ -770,10 +778,12 @@ const Service = ({
                 </MenuItem>
               )}
               <MenuItem
-                disabled={isAllowedToServiceEdit && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status)
-                  && selectedService?.clickable
-                  ? false
-                  : true
+                disabled={
+                  isAllowedToServiceEdit &&
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
+                    ? false
+                    : true
                 }
                 onClick={() => {
                   handleCompleteService(selectedService?._id, selectedService?.uniqueId);
@@ -783,10 +793,12 @@ const Service = ({
                 Complete Service
               </MenuItem>
               <MenuItem
-                disabled={isAllowedToServiceEdit && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status)
-                  && selectedService?.clickable
-                  ? false
-                  : true
+                disabled={
+                  isAllowedToServiceEdit &&
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
+                    ? false
+                    : true
                 }
                 onClick={() => {
                   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.skipped);
