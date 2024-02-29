@@ -75,7 +75,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
-  const [isAutoCreating, setIsAutoCreating] = useState(true);
+  const [isAutoCreating, setIsAutoCreating] = useState({ open: false, total: 0, done: 0 });
 
   const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedServiceOption, setSelectedServiceOption] = useState(null);
@@ -83,7 +83,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   useEffect(() => {
     setNextStep(false);
-    autoCreateWorkOrder();
+    checkAllWorkOrderComplete();
   }, []);
 
   useEffect(() => {
@@ -97,19 +97,24 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       });
   }, []);
 
-  const autoCreateWorkOrder = async () => {
+  const autoCreateWorkOrder = async (totalCount) => {
     try {
-      apiCallInterval = setInterval(async () => {
-        await fetchData();
-      }, 30000);
-      await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
-      if (apiCallInterval) {
-        clearInterval(apiCallInterval);
+      let tempCount = totalCount;
+      let page = 0;
+      const limit = 200;
+      while (tempCount > 0) {
+        setIsAutoCreating({ open: true, total: totalCount, done: tempCount });
+        await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order?limit=${limit}&page=${0}`);
+        tempCount = tempCount - limit;
+        if (page === 0) {
+          fetchData()
+        }
+        page++;
       }
-      setIsAutoCreating(false);
-      checkAllWorkOrderComplete();
+      setIsAutoCreating({ open: false, total: 0, done: 0 });
+      fetchData()
     } catch (error) {
-      setIsAutoCreating(false);
+      setIsAutoCreating({ open: false, total: 0, done: 0 });
       toastConfig.setToastConfig(error);
     }
   };
@@ -122,6 +127,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     const response = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/check-all-work-order-complete`);
     if (!!response?.data?.data?.isCompletedAll) {
       setNextStep(true);
+    }
+    if (response?.data?.data?.materialCount) {
+      autoCreateWorkOrder(response?.data?.data?.materialCount)
     }
   };
 
@@ -373,7 +381,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   useEffect(() => {
     fetchData(false);
-  }, [page, limit, filters, sorting, isAutoCreating, search]);
+  }, [page, limit, filters, sorting, search]);
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -842,9 +850,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   return (
     <Fragment>
-      {isAutoCreating && (
+      {isAutoCreating.open && (
         <Box p={1} display="flex" alignItems="center">
-          <SyncIcon className="rotate" /> <Typography variant="subtitle2">Work order Auto Creation in Progress</Typography>
+          <SyncIcon className="rotate" /> <Typography variant="subtitle2">Work order Auto Creation in Progress {`${(isAutoCreating.total - isAutoCreating.done)}/${isAutoCreating.total}`}</Typography>
         </Box>
       )}
       <DetailsPageHeader
