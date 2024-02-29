@@ -88,7 +88,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
   };
   // DOWNLOAD ATTACHMENT
   const downloadFile = (event, file) => {
-    if (event) {
+    if (event && !file?.base64) {
       toastConfig.setToastConfig({
         open: true,
         type: 'info',
