@@ -323,7 +323,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         {resource === sidebarResource.fieldTicket && (
           <>
             <ThemeButton
-              iconForMobile={<FaFileInvoice />}
+              iconForMobile={<FaFileZipper />}
               type="button"
               disabled={isDownloadingZip ? true : false}
               startIcon={isMobile ? '' : <IoMdDownload />}
@@ -336,7 +336,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
             </ThemeButton>
             <ThemeButton
               type="button"
-              iconForMobile={<FaFileZipper />}
+              iconForMobile={<FaFileInvoice />}
               disabled={isDownloadingPdf ? true : false}
               startIcon={<IoMdDownload />}
               onClick={(e) => {
