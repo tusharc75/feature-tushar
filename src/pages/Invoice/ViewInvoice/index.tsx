@@ -330,6 +330,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
               onClick={(e) => {
                 handleDownloadZip();
               }}
+              tooltip={isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
             >
               {isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
             </ThemeButton>
@@ -341,6 +342,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
               onClick={(e) => {
                 handleDownloadPdf();
               }}
+              tooltip={isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
             >
               {isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
             </ThemeButton>
