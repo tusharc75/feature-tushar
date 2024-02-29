@@ -4198,6 +4198,7 @@ body .btn-outline-red-v1 {
 
 .MuiAutocomplete-popper {
   .MuiAutocomplete-listbox {
+    background-color: var(--dark-secondary);
     @media all and (max-width: 600px) {
       max-height: max(155px, 20vh);
       li {
