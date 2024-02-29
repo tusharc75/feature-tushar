@@ -9,7 +9,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import CreateProduct from 'src/components/Product/CreateProduct';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
@@ -23,7 +23,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder, sidebarResource } from '../../../constants/helpers';
 import MaterialDialog from './MaterialDialog';
 
 const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete, updateOrderStatus }) => {
@@ -232,13 +232,13 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       parent.detail = parent?.detail
         ? parent?.detail
         : parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.packageDetail?.packageName;
+          ? parent.productDetail?.productName
+          : parent.packageDetail?.packageName;
       parent.description = parent?.description
         ? parent?.description
         : parent.type === MATERIAL_TYPE.product
-        ? parent?.productDetail?.productDescription
-        : parent?.packageDetail?.packageDescription;
+          ? parent?.productDetail?.productDescription
+          : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.canDelete = parent?.workOrder ? false : true;
       if (parent?.workOrder) {
@@ -276,13 +276,13 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       _subRow.detail = _subRow?.detail
         ? _subRow?.detail
         : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.packageDetail?.packageName;
+          ? _subRow.productDetail?.productName
+          : _subRow.packageDetail?.packageName;
       _subRow.description = _subRow?.description
         ? _subRow?.description
         : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productDescription
-        : _subRow?.packageDetail?.packageDescription;
+          ? _subRow?.productDetail?.productDescription
+          : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
       if (_subRow?.workOrder) {
@@ -447,15 +447,18 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const rightSideContents = () => {
     return (
       <>
-        <ImportExportMenu
+        <AsynImportExportMenu
+          resource={sidebarResource.productionOrder}
+          subResource={`material`}
+          referenceId={productionOrderData._id}
           permissions={permissions?.productionOrder}
           module={routes.productionOrder.title}
           api={`${productionOrder.api}/material/${productionOrderData._id}`}
           afterImportCompleted={() => {
             fetchData();
           }}
-          isExportAllOrSomeFeature={true}
-          recordsToExport={selectedRecords.length}
+          isExportCount={true}
+          exportCount={selectedRecords.length}
           ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
         />
       </>
