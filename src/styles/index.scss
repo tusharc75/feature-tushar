@@ -4197,6 +4197,7 @@ body .btn-outline-red-v1 {
 }
 
 .MuiAutocomplete-popper {
+  background-color: var(--dark-secondary);
   .MuiAutocomplete-listbox {
     background-color: var(--dark-secondary);
     @media all and (max-width: 600px) {
