@@ -24,6 +24,8 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import CreditMemo from '../CreditMemo';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { FaFileZipper } from 'react-icons/fa6';
+import { FaFileInvoice } from 'react-icons/fa';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -320,32 +322,30 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       <>
         {resource === sidebarResource.fieldTicket && (
           <>
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              className="btn-outline-v1"
+            <ThemeButton
+              iconForMobile={<FaFileInvoice />}
               type="button"
-              size="small"
               disabled={isDownloadingZip ? true : false}
               startIcon={isMobile ? '' : <IoMdDownload />}
               onClick={(e) => {
                 handleDownloadZip();
               }}
+              tooltip={isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
             >
-              {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
-            </Button>
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              className="btn-outline-v1"
+              {isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
+            </ThemeButton>
+            <ThemeButton
               type="button"
-              size="small"
+              iconForMobile={<FaFileZipper />}
               disabled={isDownloadingPdf ? true : false}
-              startIcon={isMobile ? '' : <IoMdDownload />}
+              startIcon={<IoMdDownload />}
               onClick={(e) => {
                 handleDownloadPdf();
               }}
+              tooltip={isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
             >
-              {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
-            </Button>
+              {isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+            </ThemeButton>
           </>
         )}
       </>
