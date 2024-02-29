@@ -23,6 +23,7 @@ import { CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebar
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CreditMemo from '../CreditMemo';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -290,88 +291,102 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       });
   };
 
+  const previewDownloadProps = {
+    fileName: `${routes.invoice.title}-${invoiceData?.invoiceNumber}`,
+    resource: sidebarResource.invoice,
+    referenceId: invoiceData?._id,
+    columns: columns,
+    hideDetailButton: resource === sidebarResource.fieldTicket ? true : false,
+    isSendEmail: true,
+    defaultColumns: [
+      'type',
+      'detail',
+      'fieldTicket',
+      'qty',
+      'unit',
+      'pricingMethod',
+      'actualStartDate',
+      'actualEndDate',
+      `price_${invoiceData?.currency?.toLowerCase()}`,
+      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+      `taxPercentage`,
+      `tax_${invoiceData?.currency?.toLowerCase()}`,
+      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+    ]
+  };
+
+  const leftSideContents = () => {
+    return (
+      <>
+        {resource === sidebarResource.fieldTicket && (
+          <>
+            <Button
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              className="btn-outline-v1"
+              type="button"
+              size="small"
+              disabled={isDownloadingZip ? true : false}
+              startIcon={isMobile ? '' : <IoMdDownload />}
+              onClick={(e) => {
+                handleDownloadZip();
+              }}
+            >
+              {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
+            </Button>
+            <Button
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              className="btn-outline-v1"
+              type="button"
+              size="small"
+              disabled={isDownloadingPdf ? true : false}
+              startIcon={isMobile ? '' : <IoMdDownload />}
+              onClick={(e) => {
+                handleDownloadPdf();
+              }}
+            >
+              {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+            </Button>
+          </>
+        )}
+      </>
+    );
+  };
+  const rightSideContents = () => {
+    return (
+      <>
+        {dataRows &&
+          dataRows?.length > 0 &&
+          [sidebarResource.fieldTicket, sidebarResource.repairOrder]?.includes(resource) &&
+          ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
+            <ThemeButton
+              iconForMobile={<CancelInvoiceIcon />}
+              tooltip="Cancel Invoice"
+              borderColor="red"
+              mode="light"
+              hasMobileBorder={false}
+              onClick={() => setCommentDialog(true)}
+            >
+              Cancel Invoice
+            </ThemeButton>
+          )}
+      </>
+    );
+  };
+
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
         <CustomDialogHeader title={`Invoice Number : ${invoiceData?.invoiceNumber}`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {invoiceData && (
-                <Box className="flex flex-wrap gap-2">
-                  <PreviewDownload
-                    fileName={`${routes.invoice.title}-${invoiceData?.invoiceNumber}`}
-                    resource={sidebarResource.invoice}
-                    referenceId={invoiceData?._id}
-                    columns={columns}
-                    hideDetailButton={resource === sidebarResource.fieldTicket ? true : false}
-                    isSendEmail={true}
-                    defaultColumns={[
-                      'type',
-                      'detail',
-                      'fieldTicket',
-                      'qty',
-                      'unit',
-                      'pricingMethod',
-                      'actualStartDate',
-                      'actualEndDate',
-                      `price_${invoiceData?.currency?.toLowerCase()}`,
-                      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
-                      `taxPercentage`,
-                      `tax_${invoiceData?.currency?.toLowerCase()}`,
-                      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
-                    ]}
-                  />
-                  {resource === sidebarResource.fieldTicket && (
-                    <>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        className="btn-outline-v1"
-                        type="button"
-                        size="small"
-                        disabled={isDownloadingZip ? true : false}
-                        startIcon={isMobile ? '' : <IoMdDownload />}
-                        onClick={(e) => {
-                          handleDownloadZip();
-                        }}
-                      >
-                        {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
-                      </Button>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        className="btn-outline-v1"
-                        type="button"
-                        size="small"
-                        disabled={isDownloadingPdf ? true : false}
-                        startIcon={isMobile ? '' : <IoMdDownload />}
-                        onClick={(e) => {
-                          handleDownloadPdf();
-                        }}
-                      >
-                        {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
-                      </Button>
-                    </>
-                  )}
-                </Box>
-              )}
-              <div className="ml-auto">
-                {dataRows &&
-                  dataRows?.length > 0 &&
-                  [sidebarResource.fieldTicket, sidebarResource.repairOrder]?.includes(resource) &&
-                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
-                    <ThemeButton
-                      iconForMobile={<CancelInvoiceIcon />}
-                      tooltip="Cancel Invoice"
-                      borderColor="red"
-                      mode="light"
-                      hasMobileBorder={false}
-                      onClick={() => setCommentDialog(true)}
-                    >
-                      Cancel Invoice
-                    </ThemeButton>
-                  )}
-              </div>
-            </div>
+            <DetailsPageHeader
+              previewDownloadProps={previewDownloadProps}
+              isActionButtonVisible={false}
+              isAddButtonVisible={false}
+              leftSideContents={leftSideContents()}
+              rightSideContents={rightSideContents()}
+              hasXpadding={false}
+            />
             <Box pt={1}>
               {resource === sidebarResource.fieldTicket && permissions?.creditMemo?.isRead ? (
                 <>
