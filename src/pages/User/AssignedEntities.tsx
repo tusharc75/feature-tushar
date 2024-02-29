@@ -1,20 +1,19 @@
-import { useContext, useEffect, useState } from 'react';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
 import { Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select } from '@material-ui/core';
+import Box from '@material-ui/core/Box';
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+import Typography from '@material-ui/core/Typography';
 import { ControlPoint, Delete } from '@material-ui/icons';
-import BoxWithBorder from '../../components/BoxWithBorder';
-import UserRoles from './UserRoles';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import BoxWithBorder from '../../components/BoxWithBorder';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import RoleEngine from '../../components/Shared/RoleEngine';
+import UserRoles from './UserRoles';
 
 export default function AssignedEntities({ entities, permissions, userId, onSuccess, loggedInUser, entityAccessIds = [], roleAccessIds = [] }) {
   const {

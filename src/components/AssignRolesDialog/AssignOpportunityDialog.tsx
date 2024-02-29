@@ -19,7 +19,6 @@ import { opportunity } from '../../constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import SearchBox from '../Helpers/SearchBox';
 import Loader from '../Loader';
 import { ListingPageHeader } from '../PageHeaders';
 const AssignOpportunityDialog = ({ opportunityDialogOpen, onSuccess, handleCloseDialog, assignedOpportunity, accountId, contactId }) => {

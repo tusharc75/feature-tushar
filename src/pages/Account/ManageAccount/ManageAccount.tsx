@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid, IconButton } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import { CustomDialogTransition, setFieldsInAscendingOrder, yupSchema } from '../../../constants/helpers';
@@ -9,6 +9,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import Dialog from '@material-ui/core/Dialog';
 import { useData } from '../../../StateProvider/Provider';
+import { NewAddressOptionList } from 'src/StateProvider/AddressProvider';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import Tooltip from '../../../components/CustomTooltipTitle';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -48,6 +49,7 @@ export default function ManageAccount(props) {
     state: { user, permissions }
   }: any = useData();
 
+  const { newAddressOptionList, setNewAddressOptionList } = React.useContext(NewAddressOptionList);
   const [formsData, setFormsData] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [parentAccountDataSource, setParentAccountDataSource] = useState([]);
@@ -157,7 +159,7 @@ export default function ManageAccount(props) {
                     }
                   />
                   <CustomDialogContent>
-                    <Form autoComplete="off" autoCorrect="off" noValidate>
+                    <Form autoComplete="off" autoCorrect="off" noValidate className="truncate-autocomplete">
                       {formsData &&
                         formsData
                           .filter((item) => item.name !== additionalFieldName)
@@ -416,6 +418,13 @@ export default function ManageAccount(props) {
                         }}
                         onSuccess={(obj) => {
                           if (obj) {
+                            let tempNewOption = {
+                              optionLabel: obj?.fullAddress,
+                              optionValue: obj?._id,
+                              order: addressDataSource.length,
+                              default: false
+                            };
+                            setNewAddressOptionList([...newAddressOptionList, tempNewOption]);
                             setShowAddAddresstDialog(false);
                             if (obj?.isAlreadyExist === true) {
                               let tempAddress = addressDataSource.find((d) => d?.optionLabel === obj?.fullAddress);

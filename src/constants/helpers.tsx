@@ -68,6 +68,12 @@ export const fieldTicketSteps: stepInterface[] = [
   { name: 'Submit', title: 'Submit', icon: 'end' }
 ];
 
+export const fieldServiceOrderSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
+  { name: 'Submit', title: 'Submit', icon: 'end' }
+];
+
 export const demandOrderSteps = ['Add Products'];
 
 export const purchaseRequisitionSteps = ['Add Products'];
@@ -162,11 +168,11 @@ export const assetsReceivingSteps: stepInterface[] = [
 
 export const serviceOrderSteps: stepInterface[] = [
   { name: 'Field Ticket', title: 'Field Tickets', icon: 'receivingTicket' },
-  { name: 'Add Services', title: 'Add', icon: 'add' },
-  { name: 'Add Products', title: 'Products', icon: 'assign' },
-  { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
-  { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
-  { name: 'Invoice', title: 'Invoice', icon: 'invoice' },
+  // { name: 'Add Services', title: 'Add', icon: 'add' },
+  // { name: 'Add Products', title: 'Products', icon: 'assign' },
+  // { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
+  // { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
+  // { name: 'Invoice', title: 'Invoice', icon: 'invoice' },
   { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
 ];
 
@@ -395,6 +401,7 @@ export const RESOURCE_LABEL = {
   projectSales: 'Project Sales',
   productBuilder: 'Price Builder',
   formBuilder: 'Form Builder',
+  forms: 'Forms',
   currencyConverter: 'Currency Converter',
   quoteBuilder: 'Quotes',
   PNQBuilder: 'PNQ Builder',
@@ -498,6 +505,8 @@ export const RESOURCE_LABEL = {
   triggerNotificationMaster: 'Trigger Notification Master',
   triggerNotificationHistory: 'Trigger Notification History',
   userAttendance: 'User Attendance',
+  dataList: 'Data List',
+  dataListitems: 'Data List Items'
 };
 
 export const CHILD_RESOURCE = {
@@ -968,7 +977,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
   return obj;
 };
 
-export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false) => {
+export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, defaultCurrentDate: boolean = false) => {
   const obj = {};
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
@@ -1028,12 +1037,16 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
+      } else if (defaultCurrentDate) {
+        obj[key.fieldName] = new Date();
       }
     } else if (key.type === 'date') {
       if (isClone) {
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
+      } else if (defaultCurrentDate) {
+        obj[key.fieldName] = new Date();
       }
     } else if (key.type === 'lookUpDisplay') {
     } else {
@@ -1842,6 +1855,10 @@ export const prepareDataForGrid = (data, user = {}) => {
   if (data?.updatedBy) {
     finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName;
     finalObject['updatedByDate'] = data?.updatedBy?.date;
+  }
+  if (data?.completedBy) {
+    finalObject['completedBy'] = data?.completedBy?.user?.concatedName;
+    finalObject['completedByDate'] = data?.completedBy?.date;
   }
   finalObject['id'] = data?._id;
 
@@ -2911,4 +2928,17 @@ export const convertBlobToBase64 = async (blobUrl) => {
     img.onerror = () => reject('Error in converting blob to base64');
     img.src = blobUrl;
   });
+};
+
+export const IMPORT_EXPORT_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  error: 'Error',
+  completed: 'Completed',
+  partialComplete: 'Partial Complete',
+};
+
+export const IMPORT_EXPORT_TYPE = {
+  import: 'Import',
+  export: 'Export',
 };

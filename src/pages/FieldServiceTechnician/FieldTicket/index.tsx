@@ -16,9 +16,9 @@ import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/cons
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import CustomTableWithCard, { CardInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 import { useTableReducer, useColumns, getStaticFields } from 'src/components/CustomReactTable';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
-
   const renderedFrom = camelCase(`${routes.fieldTicket?.title}`);
 
   const toastConfig = useContext(CustomToastContext);
@@ -26,13 +26,11 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
     state: { permissions, selectedEntity, user }
   }: any = useData();
 
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [deleteRecord, setDeleteRecord] = useState(null);
   const { state, dispatch } = useTableReducer();
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [fieldTicketId, setFieldTicketId] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { isOffline } = useContext(CustomOfflineContext);
   const [accessor, setAccessor] = useState<CardInterface | null>(null);
@@ -175,7 +173,6 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
               ...finalObject
             };
           });
-          dispatch({ type: 'initialize', data: rows, count: count, });
           dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
@@ -268,14 +265,6 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
     }
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const ActionsRenderer = (params) => (
     <Fragment>
       {permissions?.fieldServiceTechnician?.isCreate ? (
@@ -321,70 +310,50 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
     </Fragment>
   );
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setFieldTicketId(null);
+            setOpen({ open: true, isClone: false });
+          }}
+        >
+          {`Create ${routes.fieldTicket.title}`}
+        </MenuItem>
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
+          onClick={() => {
+            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <>
       <Box>
-        <Box display="flex" flexWrap={'wrap'} style={{ gap: '8px' }} justifyContent="flex-end" mb={2}>
-          <Button
-            onClick={() => {
-              setFieldTicketId(null);
-              setOpen({ open: true, isClone: false });
-            }}
-            variant={'contained'}
-            className="no-shadow"
-            size="small"
-            color="primary"
-            startIcon={<AddOutlined />}
-          >
-            {`Create ${routes.fieldTicket.title}`}
-          </Button>
-          {permissions?.fieldServiceTechnician?.isDelete && (
-            <>
-              <Button
-                variant={'outlined'}
-                className="new-dropdown-v1"
-                color="default"
-                size="small"
-                aria-controls="action-menu"
-                onClick={openActions}
-                style={{ marginLeft: '0.4rem' }}
-                endIcon={<ExpandMore />}
-              >
-                {'Actions'}
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  disabled={
-                    !((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)
-                  }
-                  onClick={() => {
-                    closeActions();
-                    // eslint-disable-next-line no-lone-blocks
-                    {
-                      selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                    }
-                    setShowDeleteConfirmBox(true);
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </Menu>
-            </>
-          )}
-        </Box>
+        <DetailsPageHeader
+          isAddButtonVisible={true}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={permissions?.fieldServiceTechnician?.isDelete}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          hasXpadding={false}
+        />
+        <Box display="flex" flexWrap={'wrap'} style={{ gap: '8px' }} justifyContent="flex-end" mb={2}></Box>
         <Box minHeight={'calc(100vh - 290px)'}>
-          {Object.keys(frameWorkComponent).length > 0 && dataRows && dataRows.length > 0 && accessor ? (
+          {dataRows && dataRows.length > 0 && accessor ? (
             <>
               <CustomTableWithCard
                 data={dataRows}

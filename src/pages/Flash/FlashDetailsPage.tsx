@@ -1,19 +1,19 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Typography } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory, useParams } from 'react-router-dom';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
 import { flash } from '../../constants/helpers';
 import ManageFlash from './ManageFlash';
-import { BiEdit } from 'react-icons/bi';
-import { isMobile, isTablet } from 'react-device-detect';
-import DeleteButton from '../../components/Helpers/DeleteButton';
 
 const FlashDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -84,7 +84,7 @@ const FlashDetailsPage = () => {
                 }}
                 className={'btn-outline-v1'}
               >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
             {permissions?.flash?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

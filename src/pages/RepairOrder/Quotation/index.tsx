@@ -1,38 +1,38 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, Typography, Chip, useMediaQuery, Menu, MenuItem, IconButton } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { Box, Button, IconButton, Menu, MenuItem, Typography, useMediaQuery } from '@material-ui/core';
+import { ExpandMore } from '@material-ui/icons';
+import EditIcon from '@material-ui/icons/Edit';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { capitalize, isArray } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
+import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
+import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
+import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
+import SendEmail from 'src/pages/Quotation/SendEmail';
+import Versions from 'src/pages/Quotation/Versions';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
 import {
-  quotation,
-  pricingCondition,
-  repairOrder,
+  PRICING_SETUP_TYPE,
   QUOTATION_STATUS,
   REPAIR_ORDER_STATUS,
-  sidebarResource,
-  PRICING_SETUP_TYPE
+  pricingCondition,
+  quotation,
+  repairOrder,
+  sidebarResource
 } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { isMobile, isTablet } from 'react-device-detect';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import { ExpandMore } from '@material-ui/icons';
-import { capitalize, isArray } from 'lodash';
-import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
-import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
-import Versions from 'src/pages/Quotation/Versions';
-import { FcCancel, FcClock, FcOk } from 'react-icons/all';
-import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
-import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import SendEmail from 'src/pages/Quotation/SendEmail';
-import PreviewDownload from 'src/components/PreviewDownload';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import EditIcon from '@material-ui/icons/Edit';
 
 const Quotation = ({
   repairOrderData,

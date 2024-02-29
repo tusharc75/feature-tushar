@@ -160,6 +160,14 @@ const routes = {
     title: 'Resource',
     path: '/:resource'
   },
+  forms: {
+    title: storedRoutes && storedRoutes.forms && storedRoutes.forms.title ? storedRoutes.forms?.title : RESOURCE_LABEL.forms,
+    path: '/forms'
+  },
+  formsDetail: {
+    title: storedRoutes && storedRoutes.forms && storedRoutes.forms.title ? storedRoutes.forms?.title : RESOURCE_LABEL.forms,
+    path: '/forms/detail'
+  },
   termsAndConditions: {
     title:
       storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title
@@ -1179,6 +1187,14 @@ const routes = {
   userAttendance: {
     title: storedRoutes && storedRoutes.userAttendance && storedRoutes.userAttendance.title ? storedRoutes.userAttendance?.title : RESOURCE_LABEL.userAttendance,
     path: '/user-attendance'
+  },
+  dataList: {
+    title: storedRoutes && storedRoutes.dataList && storedRoutes.dataList.title ? storedRoutes.dataList?.title : RESOURCE_LABEL.dataList,
+    path: '/data-lists'
+  },
+  dataListitems: {
+    title: storedRoutes && storedRoutes.dataListitems && storedRoutes.dataListitems.title ? storedRoutes.dataListitems?.title : RESOURCE_LABEL.dataListitems,
+    path: '/data-lists/data-list-items'
   },
 };
 

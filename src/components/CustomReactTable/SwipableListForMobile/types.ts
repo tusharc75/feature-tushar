@@ -1,3 +1,4 @@
+import { Row } from '@tanstack/react-table';
 import { Dispatch, ReactNode } from 'react';
 import type { TInitialState } from 'src/components/CustomReactTable/hooks/useTableReducer';
 
@@ -5,7 +6,7 @@ export type TSwipableListInputProps = {
   table: any;
   allColumns: any;
   allowSelection: boolean;
-  dataRows: any[];
+  dataRows: Row<any>[];
   dispatch: Dispatch<any>;
   loading: boolean;
   expander: boolean;

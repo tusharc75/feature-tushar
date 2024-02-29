@@ -1,20 +1,20 @@
-import { Box, Button, Grid, Menu, MenuItem, Paper, Tab, Tabs, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageWorkStations from './ManageWorkStations';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
 import CurrentStatus from './CurrentStatus';
+import ManageWorkStations from './ManageWorkStations';
 
 const WorkStationsDetail = () => {
   const { id } = useParams();
@@ -75,7 +75,7 @@ const WorkStationsDetail = () => {
               type: 'success',
               message: data?.message
             });
-            history.push(`${routes.workStations.path}`)
+            history.push(`${routes.workStations.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);
@@ -108,12 +108,8 @@ const WorkStationsDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.workStations?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
               {permissions?.workStations?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
@@ -134,7 +130,13 @@ const WorkStationsDetail = () => {
           }}
         >
           <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          <Tab label={<div className="tab-font">Active Services</div>} value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+          <Tab
+            label={<div className="tab-font">Active Services</div>}
+            value={1}
+            aria-controls="a11y-tabpanel-0"
+            id="a11y-tab-0"
+            className={'tabLayout'}
+          />
         </Tabs>
         {tabValue === 0 && (
           <Box>
@@ -147,11 +149,7 @@ const WorkStationsDetail = () => {
             )}
           </Box>
         )}
-        {tabValue === 1 && (
-          <CurrentStatus
-            id={id}
-          />
-        )}
+        {tabValue === 1 && <CurrentStatus id={id} />}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

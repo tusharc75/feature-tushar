@@ -1,34 +1,25 @@
-import { AiFillAccountBook } from 'react-icons/ai';
-import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
 import DashboardIcons from 'src/assets/dashboard_images/icons';
 import {
-  ProductSetup,
-  ServiceManagementIcon,
-  RentalOperationManagementIcon,
-  ServiceOperationManagementIcon,
-  PurchasingManagementIcon,
-  FieldServiceOperationIcon,
-  FleetManagementIcon,
   CollaborationToolsIcon,
   CustomForms,
+  FieldServiceOperationIcon,
+  FleetManagementIcon,
+  ForeCastingAndPlanning,
   IOT,
-  ForeCastingAndPlanning
+  ProductSetup,
+  PurchasingManagementIcon,
+  RentalOperationManagementIcon,
+  ServiceManagementIcon,
+  ServiceOperationManagementIcon
 } from 'src/assets/sidebar_assets/icons';
 
-import {
-  BiCog,
-  BiCart,
-  FaRegUserCircle,
-  FaReact,
-  FaRegRegistered,
-  FaRegUser,
-  MdOutlineDynamicForm,
-  RiShieldUserLine,
-  SiCivicrm,
-  AiOutlineDatabase,
-  HiOutlineWrenchScrewdriver,
-  MdOutlineEventAvailable
-} from 'react-icons/all';
+import { AiOutlineDatabase } from 'react-icons/ai';
+import { BiCart, BiCog } from 'react-icons/bi';
+import { FaRegRegistered, FaRegUser, FaRegUserCircle } from 'react-icons/fa';
+import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
+import { MdOutlineDynamicForm, MdOutlineEventAvailable } from 'react-icons/md';
+import { RiShieldUserLine } from 'react-icons/ri';
+import { SiCivicrm } from 'react-icons/si';
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
 export const groupByKey = (arr = [], keyGetter) => {
@@ -64,99 +55,156 @@ export const setDataBySectionName = (secName, index = 0) => {
   const iconColour = colorAccessor.icon || ['#FFA800', '#E35200'];
 
   const compareName = (nameList: string[], name) => {
-    const namelistInSmallLetter = nameList.map((n) => n.toLowerCase());
-    const lowercaseName = name.toLowerCase();
+    const namelistInSmallLetter = nameList.map((n) => n.trim().toLowerCase());
+    const lowercaseName = name.toLowerCase().trim();
 
     return namelistInSmallLetter.includes(lowercaseName);
   };
 
   let icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   let text = '';
-  let sideBarIcon = <FaReact size={20} />;
+  let sideBarIcon = <ServiceManagementIcon size={20} />;
   const color = '#ffffff';
   const gradient = colorAccessor.gradient || ['#FFA800', '#E35200'];
 
-  if (compareName(['CRM +', 'Sales Management'], secName)) {
-    text = 'Convert leads and close sales deals faster.';
-    icon = <DashboardIcons.CRM colors={iconColour} />;
-    sideBarIcon = <SiCivicrm size={18} />;
-  } else if (compareName(['eCommerce'], secName)) {
-    text = 'Simplified eCommerce functionalities to smoothen your lives.';
-    icon = <DashboardIcons.ECOMMERCE colors={iconColour} />;
-    sideBarIcon = <BiCart size={20} />;
-  } else if (compareName(['Inventory Management'], secName)) {
-    text = 'Manage Inventory Smartly.';
-    icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
-    sideBarIcon = <ServiceManagementIcon size={20} />;
-  } else if (compareName(['Rental Operations Management'], secName)) {
-    text = 'Fulfill Rental Orders Faster.';
-    icon = <DashboardIcons.ROM colors={iconColour} />;
-    sideBarIcon = <RentalOperationManagementIcon size={20} />;
-  } else if (compareName(['ROM'], secName)) {
-    text = 'Fulfill Rental Orders Faster.';
-    icon = <DashboardIcons.ROM colors={iconColour} />;
-    sideBarIcon = <FaRegRegistered size={20} />;
-  } else if (compareName(['Field Service Operations'], secName)) {
-    text = 'Fulfill Service Orders Faster.';
-    icon = <DashboardIcons.FIELD_SERVICE_OPERATION colors={iconColour} />;
-    sideBarIcon = <FieldServiceOperationIcon size={20} />;
-  } else if (compareName(['Repair & Maintenance Management'], secName)) {
-    text = 'Repair & Maintain your product and services at ease.';
-    icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;
-    sideBarIcon = <HiOutlineWrenchScrewdriver size={18} />;
-  } else if (compareName(['Admin Portal'], secName)) {
-    text = 'Build your own Template, Manage Roles and Entities.';
-    icon = <DashboardIcons.ADMIN_PORTAL colors={iconColour} />;
-    sideBarIcon = <RiShieldUserLine size={20} />;
-  } else if (compareName(['Accounts'], secName)) {
-    text = 'Customer and Supplier Account Management at your fingertips.';
-    icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
-    sideBarIcon = <FaRegUser size={20} />;
-  } else if (compareName(['Product Setup'], secName)) {
-    text = 'Product and Category Setup.';
-    icon = <DashboardIcons.PRODUCT_SETUP colors={iconColour} />;
-    sideBarIcon = <ProductSetup size={20} />;
-  } else if (compareName(['Dynamic Forms'], secName)) {
-    text = 'Setup Dynamic Forms & Templates';
-    icon = <DashboardIcons.FORM_ICON colors={iconColour} />;
-    sideBarIcon = <MdOutlineDynamicForm size={20} />;
-  } else if (compareName(['Service Operations Management'], secName)) {
-    text = 'Deploy, Track and Bill for field services efficiently.';
-    icon = <DashboardIcons.SERVICE_OPERATION_MANAGEMENT colors={iconColour} />;
-    sideBarIcon = <ServiceOperationManagementIcon size={20} />;
-  } else if (compareName(['Purchasing Management'], secName)) {
-    text = 'Manage working capital effectively.';
-    icon = <DashboardIcons.PURCHASING_MANAGEMENT colors={iconColour} />;
-    sideBarIcon = <PurchasingManagementIcon size={20} />;
-  } else if (compareName(['Planning & Forecasting'], secName)) {
-    text = 'Optimize your resource utilization.';
-    icon = <DashboardIcons.PLANNING_FORECASTING colors={iconColour} />;
-    sideBarIcon = <MdOutlineEventAvailable size={20} />;
-  } else if (compareName(['Brand Admin'], secName)) {
-    sideBarIcon = <FaRegUserCircle size={20} />;
-  } else if (compareName(['Master Data'], secName)) {
-    sideBarIcon = <AiOutlineDatabase size={20} />;
-  } else if (compareName(['Rental Management'], secName)) {
-    sideBarIcon = <FaRegRegistered size={20} />;
-  } else if (compareName(['Service Management'], secName)) {
-    sideBarIcon = <ServiceManagementIcon size={18} />;
-  } else if (compareName(['Setups & Administration'], secName)) {
-    sideBarIcon = <BiCog size={20} />;
-  } else if (compareName(['Activities', 'Collaboration Tools'], secName)) {
-    sideBarIcon = <CollaborationToolsIcon size={20} />;
-  } else if (compareName(['Fleet Management'], secName)) {
-    sideBarIcon = <FleetManagementIcon size={20} />;
-    icon = <DashboardIcons.FLEET_MANAGEMENT colors={iconColour} />;
-  } else if (compareName(['iot'], secName)) {
-    sideBarIcon = <IOT size={20} />;
-    icon = <DashboardIcons.IOT colors={iconColour} />;
-  } else if (compareName(['hiii', 'Custom Forms'], secName)) {
-    sideBarIcon = <CustomForms size={18} />;
-    icon = <DashboardIcons.CUSTOM_FORMS colors={iconColour} />;
-  } else if (compareName(['Forecasting & Planning'], secName)) {
-    sideBarIcon = <ForeCastingAndPlanning size={18} />;
-    icon = <DashboardIcons.FORECASTING_AND_PLANNING colors={iconColour} />;
+  switch (true) {
+    case compareName(['CRM +', 'Sales Management'], secName): {
+      text = 'Create Leads, Convert Opportunities and Manage Contracts Effectively';
+      icon = <DashboardIcons.CRM colors={iconColour} />;
+      sideBarIcon = <SiCivicrm size={18} />;
+      break;
+    }
+    case compareName(['Production Order Management'], secName): {
+      text = 'Speed-up shop floor operations and manage technicians and parts issued effectively';
+      icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
+      sideBarIcon = <ServiceManagementIcon size={20} />;
+      break;
+    }
+    case compareName(['eCommerce', 'eCommerce Operations Management'], secName): {
+      text = 'Simplify your Customer Journey and Reduce Execution Time significantly';
+      icon = <DashboardIcons.ECOMMERCE colors={iconColour} />;
+      sideBarIcon = <BiCart size={20} />;
+      break;
+    }
+    case compareName(['Inventory Management'], secName): {
+      text = 'Manage Inventory Smartly';
+      icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
+      sideBarIcon = <ServiceManagementIcon size={20} />;
+      break;
+    }
+    case compareName(['Rental Operations Management', 'Rental Jobs Management'], secName): {
+      text = 'Fulfill Rental Orders Faster';
+      icon = <DashboardIcons.ROM colors={iconColour} />;
+      sideBarIcon = <RentalOperationManagementIcon size={20} />;
+      break;
+    }
+    case compareName(['ROM'], secName): {
+      text = 'Fulfill Rental Orders Faster';
+      icon = <DashboardIcons.ROM colors={iconColour} />;
+      sideBarIcon = <FaRegRegistered size={20} />;
+      break;
+    }
+    case compareName(['Field Service Operations'], secName): {
+      text = 'Fulfill Service Orders Faster';
+      icon = <DashboardIcons.FIELD_SERVICE_OPERATION colors={iconColour} />;
+      sideBarIcon = <FieldServiceOperationIcon size={20} />;
+      break;
+    }
+    case compareName(['Repair & Maintenance Management'], secName): {
+      text = 'Repair & Maintain your product and services at ease';
+      icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;
+      sideBarIcon = <HiOutlineWrenchScrewdriver size={18} />;
+      break;
+    }
+    case compareName(['Admin Portal'], secName): {
+      text = 'Build your own Template, Manage Roles and Entities';
+      icon = <DashboardIcons.ADMIN_PORTAL colors={iconColour} />;
+      sideBarIcon = <RiShieldUserLine size={20} />;
+      break;
+    }
+    case compareName(['Accounts'], secName): {
+      text = 'Customer and Supplier Account Management at your fingertips';
+      icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
+      sideBarIcon = <FaRegUser size={20} />;
+      break;
+    }
+    case compareName(['Product Setup'], secName): {
+      text = 'Product and Category Setup';
+      icon = <DashboardIcons.PRODUCT_SETUP colors={iconColour} />;
+      sideBarIcon = <ProductSetup size={20} />;
+      break;
+    }
+    case compareName(['Dynamic Forms'], secName): {
+      text = 'Setup Dynamic Forms & Templates';
+      icon = <DashboardIcons.FORM_ICON colors={iconColour} />;
+      sideBarIcon = <MdOutlineDynamicForm size={20} />;
+      break;
+    }
+    case compareName(['Service Operations Management', 'Field Service Management'], secName): {
+      text = 'Deploy, Track and Bill for field services efficiently';
+      icon = <DashboardIcons.SERVICE_OPERATION_MANAGEMENT colors={iconColour} />;
+      sideBarIcon = <ServiceOperationManagementIcon size={20} />;
+      break;
+    }
+    case compareName(['Purchasing Management'], secName): {
+      text = 'Manage working capital effectively';
+      icon = <DashboardIcons.PURCHASING_MANAGEMENT colors={iconColour} />;
+      sideBarIcon = <PurchasingManagementIcon size={20} />;
+      break;
+    }
+    case compareName(['Planning & Forecasting', 'Forecasting & Planning'], secName): {
+      text = 'Plan and Schedule your workforce productively';
+      icon = <DashboardIcons.PLANNING_FORECASTING colors={iconColour} />;
+      sideBarIcon = <MdOutlineEventAvailable size={20} />;
+      break;
+    }
+    case compareName(['Brand Admin'], secName): {
+      sideBarIcon = <FaRegUserCircle size={20} />;
+      break;
+    }
+    case compareName(['Master Data'], secName): {
+      sideBarIcon = <AiOutlineDatabase size={20} />;
+      break;
+    }
+    case compareName(['Rental Management'], secName): {
+      sideBarIcon = <FaRegRegistered size={20} />;
+      break;
+    }
+    case compareName(['Service Management'], secName): {
+      sideBarIcon = <ServiceManagementIcon size={18} />;
+      break;
+    }
+    case compareName(['Setups & Administration'], secName): {
+      sideBarIcon = <BiCog size={20} />;
+      break;
+    }
+    case compareName(['Activities', 'Collaboration Tools'], secName): {
+      sideBarIcon = <CollaborationToolsIcon size={20} />;
+      break;
+    }
+    case compareName(['Fleet Management'], secName): {
+      sideBarIcon = <FleetManagementIcon size={20} />;
+      icon = <DashboardIcons.FLEET_MANAGEMENT colors={iconColour} />;
+      text = 'Optimize and Deploy your Asset Fleet simply';
+      break;
+    }
+    case compareName(['iot'], secName): {
+      sideBarIcon = <IOT size={20} />;
+      icon = <DashboardIcons.IOT colors={iconColour} />;
+      break;
+    }
+    case compareName(['hiii', 'Custom Forms'], secName): {
+      sideBarIcon = <CustomForms size={18} />;
+      icon = <DashboardIcons.CUSTOM_FORMS colors={iconColour} />;
+      break;
+    }
+    case compareName(['Forecasting & Planning'], secName): {
+      sideBarIcon = <ForeCastingAndPlanning size={18} />;
+      icon = <DashboardIcons.FORECASTING_AND_PLANNING colors={iconColour} />;
+      break;
+    }
   }
+
   return {
     icon: icon,
     text: text,

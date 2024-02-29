@@ -89,7 +89,7 @@ const WorkOrderTechnician = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <Box className="flex items-center flex-wrap gap-2 justify-end mb-4">
-          <Box className="flex-grow" mt={1}>
+          <Box className="flex-grow w-full min-[600px]:w-[unset] " mt={1}>
             <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterQuery} />
           </Box>
           <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} />
@@ -117,12 +117,14 @@ const WorkOrderTechnician = () => {
           </HtmlTooltip>
           <HtmlTooltip title={`Refresh`} arrow placement="top" enterTouchDelay={0}>
             <IconButton size="small" aria-label="Clone" onClick={onClickRefreshIcon}>
-              <RefreshIcon />
+              <RefreshIcon color="primary" />
             </IconButton>
           </HtmlTooltip>
         </Box>
         {viewType === 1 && <CardView serviceStatus={selectedServiceStatus} filterQuery={filterQuery} ref={ref} />}
-        {viewType === 2 && <GridView serviceStatus={selectedServiceStatus} filterQuery={filterQuery} permissions={permissions?.workOrderTechnician} />}
+        {viewType === 2 && (
+          <GridView serviceStatus={selectedServiceStatus} filterQuery={filterQuery} permissions={permissions?.workOrderTechnician} />
+        )}
       </Box>
     </Box>
   );
@@ -153,7 +155,7 @@ const StatusSelector: React.FC<StatusSelectorProps> = ({ selectedServiceStatus, 
     <>
       <HtmlTooltip title={`Select Status`} arrow placement="top" enterTouchDelay={0}>
         <IconButton size="small" aria-label="Status" onClick={(e) => setAnchorEl(e.currentTarget)}>
-          <DonutLargeIcon />
+          <DonutLargeIcon color="primary" />
         </IconButton>
       </HtmlTooltip>
       <Popover

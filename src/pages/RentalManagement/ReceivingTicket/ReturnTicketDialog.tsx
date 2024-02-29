@@ -93,7 +93,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({ values }) => (
             <>
@@ -231,7 +231,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                 )}
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button variant="outlined" color="primary" onClick={onClose}>
+                <Button size="small" variant="outlined" color="primary" onClick={onClose}>
                   Cancel
                 </Button>
                 <Button
@@ -242,6 +242,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                   }}
                   variant="contained"
                   color="primary"
+                  size="small"
                 >
                   Save
                 </Button>

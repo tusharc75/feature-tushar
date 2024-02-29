@@ -1,37 +1,35 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
+import { MenuItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
-import CreateProduct from '../Product/CreateProduct';
-import AddExistingProduct from './AddExistingProduct';
+import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import ProductDialog from './ProductDialog';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem, Dialog, TextField } from '@material-ui/core';
-import { AddField } from '../FormBuilder/AddField';
-import ConfirmationDialog from '../Helpers/ConfirmationDialog';
-import Button from '@material-ui/core/Button';
-import ImportExportLinks from '../Product/ImportExportLinks';
-import { sortBy, uniq, map, camelCase } from 'lodash';
-import BulkEditDialog from './BulkEditDialog';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { handleAutoCalculation, extractFields } from '../../constants/formulaUtility';
-import { QUOTE_PROCESS_STATUS, gridLoadingTimeout, sidebarResource, supplierContact } from '../../constants/helpers';
-import routes from '../../components/Helpers/Routes';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import { camelCase, map, sortBy, uniq } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiTwotoneEdit } from 'react-icons/ai';
-import { prepareDataForGrid } from '../../constants/helpers';
-import SupplierAskPrice from './SupplierAskPrice';
-import AskSupplierPriceDialog from './AskSupplierPriceDialog';
-import { useData } from './../../StateProvider/Provider';
-import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
-import HtmlTooltip from '../CustomTooltipTitle';
-import CommonSkeleton from '../Helpers/CommonSkeleton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import routes from '../../components/Helpers/Routes';
+import { extractFields, handleAutoCalculation } from '../../constants/formulaUtility';
+import { QUOTE_PROCESS_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, supplierContact } from '../../constants/helpers';
 import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTable';
+import HtmlTooltip from '../CustomTooltipTitle';
+import { AddField } from '../FormBuilder/AddField';
+import CommonSkeleton from '../Helpers/CommonSkeleton';
+import ConfirmationDialog from '../Helpers/ConfirmationDialog';
+import { DetailsPageHeader } from '../PageHeaders';
+import CreateProduct from '../Product/CreateProduct';
+import ImportExportLinks from '../Product/ImportExportLinks';
+import { useData } from './../../StateProvider/Provider';
+import AddExistingProduct from './AddExistingProduct';
+import AskSupplierPriceDialog from './AskSupplierPriceDialog';
+import BulkEditDialog from './BulkEditDialog';
+import ProductDialog from './ProductDialog';
+import SupplierAskPrice from './SupplierAskPrice';
+import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -54,7 +52,12 @@ const ProductBuilder = (props) => {
     fullScreen = false,
     quoteData = null,
     processStatus,
-    setNextStep
+    setNextStep,
+    isAddButtonVisible,
+    addButtonMenuItems,
+    previewDownloadProps,
+    leftSideContents,
+    rightSideContents
   } = props;
 
   const renderedFrom = `${camelCase(`${routes?.quote.title}_Product`)}`;
@@ -65,7 +68,6 @@ const ProductBuilder = (props) => {
   const [productId, setProductId] = useState(null);
   const [productDataList, setproductDataList] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [isAddField, setIsAddField] = useState(false);
   const [showCloseConfirmBox, setShowCloseConfirmBox] = useState(false);
   const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
@@ -328,20 +330,11 @@ const ProductBuilder = (props) => {
       .then(() => {
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         fetchProduct();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const handleOpenAddField = () => {
@@ -503,10 +496,38 @@ const ProductBuilder = (props) => {
       });
   };
 
-  return (
-    <Box pt={0}>
-      {Editable && (
-        <div className="d-flex align-items gap-2 justify-end ml-auto">
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        {stage === 'cost' && permissions?.isUpdate && (
+          <MenuItem onClick={handelOpenBulkEdit} disabled={checkUniqTemplate()}>
+            {isMobile && !isTablet ? '' : 'Bulk Edit'}
+          </MenuItem>
+        )}
+        <MenuItem disabled={selectedRecords.length ? false : true} onClick={() => setShowDeleteConfirmBox(true)}>
+          Delete
+        </MenuItem>
+        <MenuItem disabled={selectedRecords.length ? false : true} onClick={handleOpenAddField}>
+          Add Field
+        </MenuItem>
+        {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
+          <MenuItem
+            onClick={() => {
+              setShowViewSupplierPrice(true);
+            }}
+          >
+            View Supplier Quote
+          </MenuItem>
+        )}
+      </>
+    );
+  };
+
+  const updatedRightSideContents = () => {
+    if (Editable)
+      return (
+        <>
+          {rightSideContents()}
           {permissions?.isUpdate && (
             <ImportExportLinks
               permissions={permissions}
@@ -526,6 +547,7 @@ const ProductBuilder = (props) => {
               onExportToExcelSuccess={() => {
                 fetchProduct();
               }}
+              small={true}
             />
           )}
           {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
@@ -565,69 +587,32 @@ const ProductBuilder = (props) => {
               Ask Supplier to Quote
             </Button>
           )}
-          {stage === 'cost' && permissions?.isUpdate && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              startIcon={<AiTwotoneEdit />}
-              onClick={handelOpenBulkEdit}
-              disabled={checkUniqTemplate()}
-              aria-controls="action-menu"
-            >
-              {isMobile && !isTablet ? '' : 'Bulk Edit'}
-            </Button>
-          )}
-          {permissions?.isUpdate && (
-            <Button
-              size="small"
-              color="primary"
-              className="float-right new-dropdown-v1"
-              disabled={
-                isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
-                  ? false
-                  : selectedRecords.length
-                    ? false
-                    : true
-              }
-              onClick={openActions}
-              endIcon={<ExpandMore />}
-              aria-controls="action-menu"
-            >
-              Actions
-            </Button>
-          )}
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorEl)}
-            onClose={closeActions}
-          >
-            <MenuItem disabled={selectedRecords.length ? false : true} onClick={() => setShowDeleteConfirmBox(true)}>
-              Delete
-            </MenuItem>
-            <MenuItem disabled={selectedRecords.length ? false : true} onClick={handleOpenAddField}>
-              Add Field
-            </MenuItem>
-            {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setShowViewSupplierPrice(true);
-                }}
-              >
-                View Supplier Quote
-              </MenuItem>
-            )}
-          </Menu>
-        </div>
-      )}
+        </>
+      );
+    return rightSideContents();
+  };
+
+  return (
+    <Box pt={0}>
+      <DetailsPageHeader
+        isAddButtonVisible={isAddButtonVisible}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={Editable && permissions?.isUpdate}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{
+          disabled:
+            isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
+              ? false
+              : selectedRecords.length
+              ? false
+              : true
+        }}
+        previewDownloadProps={previewDownloadProps}
+        leftSideContents={leftSideContents()}
+        rightSideContents={updatedRightSideContents()}
+        hasXpadding
+      />
+
       <Box mt={1}>
         {columns ? (
           <CustomReactTable

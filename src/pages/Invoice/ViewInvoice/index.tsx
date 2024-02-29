@@ -1,27 +1,31 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { Box, Dialog, IconButton, Tab, Tabs } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase, startCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { IoMdDownload } from 'react-icons/io';
+import { useData } from 'src/StateProvider/Provider';
+import { CancelInvoiceIcon } from 'src/assets/svg/svgIcons';
+import CommentDialog from 'src/components/CommentDialog';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
+import PreviewDownload from 'src/components/PreviewDownload';
+import TabPanel from 'src/components/TabPanel';
+import { CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Grid, Dialog, IconButton, Tabs, Tab } from '@material-ui/core';
-import { isMobile, isTablet } from 'react-device-detect';
-import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from 'src/constants/helpers';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { camelCase, startCase } from 'lodash';
-import PreviewDownload from 'src/components/PreviewDownload';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { IoMdDownload } from 'react-icons/io';
-import TabPanel from 'src/components/TabPanel';
 import CreditMemo from '../CreditMemo';
-import CommentDialog from 'src/components/CommentDialog';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { FaFileZipper } from 'react-icons/fa6';
+import { FaFileInvoice } from 'react-icons/fa';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -147,7 +151,6 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   };
 
   const fetchData = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -162,24 +165,25 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.package
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.package
           ? parent.packageDetail?.packageName
           : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail?.assetNumber
-            : parent.serviceDetail?.serviceName
-        }`;
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.serviceDetail?.serviceName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === MATERIAL_TYPE.serializedAsset
-                ? parent.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === MATERIAL_TYPE.serializedAsset
+          ? parent.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.subRows = generateNestedData(data.material, parent);
     });
     if (additionalCostData?.length > 0) {
@@ -201,24 +205,25 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productName
-        : _subRow?.type === MATERIAL_TYPE.package
+      _subRow.detail = `${
+        _subRow?.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.package
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.serviceDetail?.serviceName
-        }`;
+          ? _subRow?.serializedAssetDetail?.assetNumber
+          : _subRow?.serviceDetail?.serviceName
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : _subRow.type === MATERIAL_TYPE.serializedAsset
-                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
+          ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -288,79 +293,100 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       });
   };
 
+  const previewDownloadProps = {
+    fileName: `${routes.invoice.title}-${invoiceData?.invoiceNumber}`,
+    resource: sidebarResource.invoice,
+    referenceId: invoiceData?._id,
+    columns: columns,
+    hideDetailButton: resource === sidebarResource.fieldTicket ? true : false,
+    isSendEmail: true,
+    defaultColumns: [
+      'type',
+      'detail',
+      'fieldTicket',
+      'qty',
+      'unit',
+      'pricingMethod',
+      'actualStartDate',
+      'actualEndDate',
+      `price_${invoiceData?.currency?.toLowerCase()}`,
+      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+      `taxPercentage`,
+      `tax_${invoiceData?.currency?.toLowerCase()}`,
+      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+    ]
+  };
+
+  const leftSideContents = () => {
+    return (
+      <>
+        {resource === sidebarResource.fieldTicket && (
+          <>
+            <ThemeButton
+              iconForMobile={<FaFileInvoice />}
+              type="button"
+              disabled={isDownloadingZip ? true : false}
+              startIcon={isMobile ? '' : <IoMdDownload />}
+              onClick={(e) => {
+                handleDownloadZip();
+              }}
+              tooltip={isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
+            >
+              {isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
+            </ThemeButton>
+            <ThemeButton
+              type="button"
+              iconForMobile={<FaFileZipper />}
+              disabled={isDownloadingPdf ? true : false}
+              startIcon={<IoMdDownload />}
+              onClick={(e) => {
+                handleDownloadPdf();
+              }}
+              tooltip={isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+            >
+              {isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+            </ThemeButton>
+          </>
+        )}
+      </>
+    );
+  };
+  const rightSideContents = () => {
+    return (
+      <>
+        {dataRows &&
+          dataRows?.length > 0 &&
+          [sidebarResource.fieldTicket, sidebarResource.repairOrder]?.includes(resource) &&
+          ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
+            <ThemeButton
+              iconForMobile={<CancelInvoiceIcon />}
+              tooltip="Cancel Invoice"
+              borderColor="red"
+              mode="light"
+              hasMobileBorder={false}
+              onClick={() => setCommentDialog(true)}
+            >
+              Cancel Invoice
+            </ThemeButton>
+          )}
+      </>
+    );
+  };
+
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
         <CustomDialogHeader title={`Invoice Number : ${invoiceData?.invoiceNumber}`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {invoiceData && (
-                <Box className="flex flex-wrap gap-2">
-                  <PreviewDownload
-                    fileName={`${routes.invoice.title}-${invoiceData?.invoiceNumber}`}
-                    resource={sidebarResource.invoice}
-                    referenceId={invoiceData?._id}
-                    columns={columns}
-                    hideDetailButton={resource === sidebarResource.fieldTicket ? true : false}
-                    isSendEmail={true}
-                    defaultColumns={[
-                      'type',
-                      'detail',
-                      'fieldTicket',
-                      'qty',
-                      'unit',
-                      'pricingMethod',
-                      'actualStartDate',
-                      'actualEndDate',
-                      `price_${invoiceData?.currency?.toLowerCase()}`,
-                      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
-                      `taxPercentage`,
-                      `tax_${invoiceData?.currency?.toLowerCase()}`,
-                      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
-                    ]}
-                  />
-                  {resource === sidebarResource.fieldTicket && (
-                    <>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        className="btn-outline-v1"
-                        type="button"
-                        size="small"
-                        disabled={isDownloadingZip ? true : false}
-                        startIcon={isMobile ? '' : <IoMdDownload />}
-                        onClick={(e) => {
-                          handleDownloadZip();
-                        }}
-                      >
-                        {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
-                      </Button>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        className="btn-outline-v1"
-                        type="button"
-                        size="small"
-                        disabled={isDownloadingPdf ? true : false}
-                        startIcon={isMobile ? '' : <IoMdDownload />}
-                        onClick={(e) => {
-                          handleDownloadPdf();
-                        }}
-                      >
-                        {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
-                      </Button>
-                    </>
-                  )}
-                </Box>
-              )}
-              <div className="ml-auto">
-                {dataRows &&
-                  dataRows?.length > 0 &&
-                  [sidebarResource.fieldTicket, sidebarResource.repairOrder]?.includes(resource) &&
-                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
-                    <DeleteButton mode="light" text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
-                  )}
-              </div>
-            </div>
+            <DetailsPageHeader
+              previewDownloadProps={previewDownloadProps}
+              isActionButtonVisible={false}
+              isAddButtonVisible={false}
+              leftSideContents={leftSideContents()}
+              rightSideContents={rightSideContents()}
+              hasXpadding={false}
+            />
             <Box pt={1}>
               {resource === sidebarResource.fieldTicket && permissions?.creditMemo?.isRead ? (
                 <>

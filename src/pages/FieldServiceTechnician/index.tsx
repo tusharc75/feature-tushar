@@ -16,6 +16,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { clearAll, deleteOne, findAll, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const status = {
   completed: 'Completed',

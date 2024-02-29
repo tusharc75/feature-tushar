@@ -1,39 +1,28 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, Button, Paper, useMediaQuery, Tab, Tabs } from '@material-ui/core';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-  bulkAssetCreation,
-  getObjKeysWithValues,
-  supplierAccount,
-  customerAccount,
-  bulkAssetCreationSteps,
-  ACTIVITY_RESOURCE
-} from '../../constants/helpers';
-import ManageBulkAssetCreation from './ManageBulkAssetCreation';
-import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import TabPanel from '../../components/TabPanel';
-import queryString from 'query-string';
-import { isMobile, isTablet } from 'react-device-detect';
-import Product from './Product';
-import HideWhenOffline from '../../components/HideWhenOffline';
-import Activity from '../../components/Activity';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import { camelCase } from 'lodash';
-import SerializedAsset from './SerializedAsset';
-import ContentFullScreen from 'src/components/ContentFullScreen';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import Steps, { getIndex } from 'src/components/Steps';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
+import { camelCase } from 'lodash';
+import queryString from 'query-string';
+import React, { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from 'react-icons/fa';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import Steps, { getIndex } from 'src/components/Steps';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
+import { ACTIVITY_RESOURCE, bulkAssetCreation, bulkAssetCreationSteps, getObjKeysWithValues } from '../../constants/helpers';
+import ManageBulkAssetCreation from './ManageBulkAssetCreation';
+import Product from './Product';
+import SerializedAsset from './SerializedAsset';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(routes?.bulkAssetCreation.title);
@@ -148,7 +137,7 @@ const BulkAssetCreationDetailsPage = () => {
       .put(`${bulkAssetCreation.api}/remove`, { ids: [] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.bulkAssetCreation.path}`)
+        history.push(`${routes.bulkAssetCreation.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

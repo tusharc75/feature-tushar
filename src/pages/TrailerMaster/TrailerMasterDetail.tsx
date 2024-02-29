@@ -1,23 +1,24 @@
 import { Box, Button, Grid, Menu, MenuItem, Tab, Tabs } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageTrailerMaster from './ManageTrailerMaster';
-import { sidebarResource } from 'src/constants/helpers';
-import TabPanel from '../../components/TabPanel';
+import { Edit } from '@material-ui/icons';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import routes from 'src/components/Helpers/Routes';
+import { sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
 import History from './History';
+import ManageTrailerMaster from './ManageTrailerMaster';
 
 const TrailerMasterDetail = () => {
   const { id } = useParams();
@@ -87,7 +88,7 @@ const TrailerMasterDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.trailerMaster.path}`)
+          history.push(`${routes.trailerMaster.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -195,7 +196,7 @@ const TrailerMasterDetail = () => {
             </Menu>
             {permissions?.trailerMaster?.isUpdate && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
             {permissions?.trailerMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

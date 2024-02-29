@@ -28,9 +28,8 @@ export const HistoryItem = ({ data, userId, handleClick }) => {
         </div>
         <div className="flex-grow">
           <h4
-            className={`text-[12px] font-medium mb-[8px] leading-[22px] ${
-              isUnseen ? 'dark:text-white text-[var(--primary-text)] font-semibold' : 'text-[#6B6F77] dark:text-gray-300'
-            }  `}
+            className={`text-[12px] font-medium mb-[8px] leading-[22px] ${isUnseen ? 'dark:text-white text-[var(--primary-text)] font-semibold' : 'text-[#6B6F77] dark:text-gray-300'
+              }  `}
           >
             {data.chatTitle}{' '}
             {data?.users.length > 2 && (
@@ -49,9 +48,8 @@ export const HistoryItem = ({ data, userId, handleClick }) => {
           </h4>
           <div className="flex justify-between gap-2" title={data.message?.message ? data.message?.message : "'New chat'"}>
             <h5
-              className={`${
-                isUnseen ? 'dark:text-white text' : 'text-[var(--dark-secondary-text,_#718496)]'
-              } text-[11px] font-normal mb-[2px] line-clamp-1`}
+              className={`${isUnseen ? 'dark:text-white text' : 'text-[var(--dark-secondary-text,_#718496)]'
+                } text-[11px] font-normal mb-[2px] line-clamp-1`}
             >
               {data?.message?.userid === userId ? 'You:' : ''}&nbsp;
               <span className={`  ${isUnseen ? 'unseen' : ''}`}>{data.message?.message ? data.message?.message : "'New chat'"}</span>
@@ -64,8 +62,8 @@ export const HistoryItem = ({ data, userId, handleClick }) => {
   );
 };
 
-export const NotificationItem = forwardRef((props: { handleClick: any; data: any, isDisable: (data:any)=> boolean }, ref: ForwardedRef<any>) => {
-  const { handleClick, data, isDisable } = props;
+export const NotificationItem = forwardRef((props: { handleClick: any; data: any, isReplayVisible: (data: any) => boolean }, ref: ForwardedRef<any>) => {
+  const { handleClick, data, isReplayVisible } = props;
   const splittedTitle = data.title.split(' ') as string[];
   let notificationMessage = '';
   let userName = '';
@@ -103,16 +101,17 @@ export const NotificationItem = forwardRef((props: { handleClick: any; data: any
           >
             {data.description || '--'}
           </h5>
-          <button
-            onClick={() => {
-              handleClick(data);
-            }}
-            disabled={isDisable(data)}
-            tabIndex={0}
-            className={`bg-[var(--primary)] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 hover:opacity-90 hover:scale-110 focus-within:[outline:2px_solid_var(--new-theme-color)] transition-all duration-300 dark:bg-[#163340] shadow-none border-0 outline-[transparent] text-white p-[4px_14px] rounded-[4px] text-[13px] font-semibold cursor-pointer poppins`}
-          >
-            Reply
-          </button>
+          {isReplayVisible(data) &&
+            <button
+              onClick={() => {
+                handleClick(data);
+              }}
+              tabIndex={0}
+              className={`bg-[var(--primary)] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 hover:opacity-90 hover:scale-110 focus-within:[outline:2px_solid_var(--new-theme-color)] transition-all duration-300 dark:bg-[#163340] shadow-none border-0 outline-[transparent] text-white p-[4px_14px] rounded-[4px] text-[13px] font-semibold cursor-pointer poppins`}
+            >
+              Reply
+            </button>
+          }
         </div>
       </div>
     </ListItem>

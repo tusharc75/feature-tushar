@@ -2,7 +2,7 @@ import { Box, Button, Chip, Dialog, IconButton, Menu, MenuItem, Tooltip, Typogra
 import { AddOutlined, Delete as DeleteIcon, ExpandMore } from '@material-ui/icons';
 import { camelCase, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
-import { FaUserAltSlash, FaUserCheck } from 'react-icons/all';
+import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -633,7 +633,7 @@ const User: FC = () => {
                 )}
               </div>
               <div className="flex flex-wrap gap-[8px] justify-end">
-                <SearchBox onChange={handleSearch} value={search} size="small" />
+                <SearchBox onChange={handleSearch} value={search} />
                 <div className="flex gap-[8px] flex-wrap items-center">
                   <Button
                     variant={'contained'}

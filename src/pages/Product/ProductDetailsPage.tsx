@@ -1,45 +1,44 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, Button, Typography, IconButton, Paper, Chip, List, ListItem, ListItemText, ListItemSecondaryAction } from '@material-ui/core';
-import Tabs from '@material-ui/core/Tabs';
+import { Box, Button, Chip, Grid, IconButton, Typography } from '@material-ui/core';
 import Tab from '@material-ui/core/Tab';
-import { ControlPoint, ExpandLess, ExpandMore, InfoOutlined } from '@material-ui/icons';
-import { Skeleton, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
-import { useParams, useHistory, Link } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, product, productInventory, serializedAsset, warehouse } from '../../constants/helpers';
-import CreateProduct from '../../components/Product/CreateProduct';
-import BoxWithBorder from '../../components/BoxWithBorder';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import ManageSerializedAsset from '../SerializedAsset/ManageSerializedAsset';
-import { extractFieldsForDisplay } from '../../constants/formulaUtility';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import queryString from 'query-string';
-import ProductConfiguration from './ProductConfiguration';
-import { camelCase } from 'lodash';
-import Parts from './Parts';
-import ParentProduct from './ParentProduct';
-import NonSerializedAssetProductInventory from './inventory';
-import ProductRepairType from './RepairType';
-import { MdDelete } from 'react-icons/md';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
+import Tabs from '@material-ui/core/Tabs';
+import { ControlPoint, Edit, ExpandLess, ExpandMore, InfoOutlined } from '@material-ui/icons';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import InventoryHistory from './InventoryHistory';
-import CostDetails from './CostDetails';
-import ServiceMaster from './ServiceMaster';
-import LeadTimeMaster from '../../components/LeadTime';
-import Package from './Package';
-import ServicePackage from './ServicePackage';
-import Digital from './Digital';
+import { Skeleton } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import queryString from 'query-string';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdDelete } from 'react-icons/md';
+import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import BoxWithBorder from '../../components/BoxWithBorder';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import LeadTimeMaster from '../../components/LeadTime';
+import CreateProduct from '../../components/Product/CreateProduct';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { extractFieldsForDisplay } from '../../constants/formulaUtility';
+import { ACTIVITY_RESOURCE, product, productInventory, serializedAsset } from '../../constants/helpers';
+import ManageSerializedAsset from '../SerializedAsset/ManageSerializedAsset';
+import CostDetails from './CostDetails';
+import Digital from './Digital';
+import InventoryHistory from './InventoryHistory';
+import Package from './Package';
+import ParentProduct from './ParentProduct';
+import Parts from './Parts';
+import ProductConfiguration from './ProductConfiguration';
+import ProductRepairType from './RepairType';
+import ServiceMaster from './ServiceMaster';
+import ServicePackage from './ServicePackage';
+import NonSerializedAssetProductInventory from './inventory';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -265,7 +264,7 @@ const ProductDetailsPage = () => {
                 size="small"
                 onClick={handleOpenUpdateDialog}
               >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
             {permissions?.product?.isDelete && (

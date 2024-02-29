@@ -1,7 +1,5 @@
 import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -16,12 +14,12 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { WORK_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
+import { WORK_ORDER_STATUS, WORK_ORDER_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkOrder from './ManageWorkOrder';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 let searchTimeout;
 
@@ -56,6 +54,8 @@ const WorkOrder = () => {
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+
+
 
   useEffect(() => {
     fetchGridColumns();
@@ -117,6 +117,22 @@ const WorkOrder = () => {
       });
   };
 
+  const handlePreview = (workOrder) => {
+    axiosInstance().get(`/pdf/${workOrder}?resource=${sidebarResource.workOrder}&columns=[]`, { responseType: 'blob' }).then((response) => {
+      const blobData = new Blob([response.data], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(blobData);
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.target = '_blank';
+      link.style.display = 'none';
+      link.click();
+      toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
+    })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -128,6 +144,18 @@ const WorkOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
+        {row?.original?.type === WORK_ORDER_TYPE.productionOrder &&
+          <HtmlTooltip title={'Preview'}>
+            <IconButton
+              size="small"
+              aria-label="Preview"
+              onClick={() => {
+                handlePreview(row?.original?._id)
+              }}
+            >
+              <VisibilityIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>}
         <HtmlTooltip title={row?.original?.canDelete && !row?.original?.deleted ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
@@ -297,9 +325,8 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
-              deleteRecord?.workOrderName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

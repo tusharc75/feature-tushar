@@ -252,6 +252,13 @@ import TriggerNotificationMasterDetail from './pages/TriggerNotificationMaster/T
 import TriggerNotificationHistory from './pages/TriggerNotificationHistory';
 import UserAttendance from './pages/UserAttendance';
 
+import DataList from './pages/DataList';
+import DataListDetail from './pages/DataList/dataListdetail';
+
+import Forms from './pages/Forms';
+import CreateForm from './pages/Forms/CreateForm';
+
+
 var notificationInterval: any = null;
 
 function App() {
@@ -585,6 +592,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.formBuilder.path}>
               <FormBuilder />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.forms.path}>
+              <Forms />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.formsDetail.path + '/:id'}>
+              <CreateForm />
             </PrivateRoute>
             <PrivateRoute exact path={routes.zone.path}>
               <Zone />
@@ -1093,6 +1106,12 @@ function App() {
             <PrivateRoute exact path={routes.subleaseInvoice.path}>
               <GenerateInvoice resourceRendered="sublease" />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.dataList.path}>
+              <DataList/>
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.dataList.path}/:id`}>
+              <DataListDetail/>
+            </PrivateRoute>
             <PrivateRoute exact path={routes.userDownloadRequest.path}>
               <UserDownloadRequest />
             </PrivateRoute>
@@ -1108,7 +1127,7 @@ function App() {
             <PrivateRoute exact path={`${routes.triggerNotificationHistory.path}`}>
               <TriggerNotificationHistory />
             </PrivateRoute>
-            <PrivateRoute exact  path={routes.userAttendance.path}>
+            <PrivateRoute exact path={routes.userAttendance.path}>
               <UserAttendance />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
@@ -1123,6 +1142,7 @@ function App() {
             <Route path="*" component={NotFound} />
           </Switch>
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
+          <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
         </ErrorBoundaryComponent>
       </AnimatePresence>
       {toast?.toastConfig?.open &&

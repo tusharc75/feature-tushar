@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Dialog,
   FormControl,
   FormControlLabel,
@@ -20,13 +19,18 @@ import {
 } from '@material-ui/core';
 import { ControlPoint, Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import queryString from 'query-string';
 import { startCase } from 'lodash';
+import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiReset, RiSettingsFill } from 'react-icons/all';
+import { isMobile } from 'react-device-detect';
 import { FcFlowChart } from 'react-icons/fc';
+import { RiSettingsFill } from 'react-icons/ri';
 import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
+import { GeneratePasswordIcon, ResetPasswordIcon } from 'src/assets/svg/svgIcons';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -37,7 +41,6 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPageHeader from '../../components/DetailsPageHeader';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
 import routes from '../../components/Helpers/Routes';
 import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';
@@ -59,15 +62,12 @@ import {
 import AccountAccordionDetail from './AccountAccordionInDetail';
 import AssignedEntities from './AssignedEntities';
 import ContactAccordionInDetailPage from './ContactAccordionInDetailPage';
+import GenerateAutoPassword from './GenerateAutoPassword';
 import LeadAccordionInUserDetailPage from './LeadAccordionInUserDetailPage';
 import ManageUserDialog from './ManageUserDialog';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
-import UserSetupDialog from './UserSetupDialog';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import UserSession from './UserSession';
-import GenerateAutoPassword from './GenerateAutoPassword';
+import UserSetupDialog from './UserSetupDialog';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -261,7 +261,6 @@ const UserDetailsPage = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
 
   const fetchUserRelatedDetail = () => {
     // setUserRelatedLoading(true);
@@ -469,36 +468,31 @@ const UserDetailsPage = () => {
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
               {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={`btn-outline-v1`} onClick={entityDialogOpen}>
-                  {isMobile && !isTablet ? <RiSettingsFill /> : 'Assign Entity/Role'}
-                </Button>
+                <span className="max-[768px]:hidden">
+                  <ThemeButton iconForMobile={<RiSettingsFill />} className="" tooltip="Assign Entity/Role" onClick={entityDialogOpen}>
+                    Assign Entity/Role
+                  </ThemeButton>
+                </span>
               )}
               {user?.user?.userType === userType.brandAdmin && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className={`btn-outline-v1`}
+                <ThemeButton
+                  iconForMobile={<GeneratePasswordIcon size={20} />}
                   onClick={() => {
                     setGenerateAutoPassword(true);
                   }}
-                  style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
+                  tooltip="Generate Password"
                 >
-                  {isMobile && !isTablet ? <BiReset size={20} /> : 'Generate Password'}
-                </Button>
+                  Generate Password
+                </ThemeButton>
               )}
               {permissions?.user?.isUpdate && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className={`btn-outline-v1`}
-                  onClick={handleResetPassword}
-                  style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
-                >
-                  {isMobile && !isTablet ? <BiReset size={20} /> : 'Reset Password'}
-                </Button>
+                <ThemeButton tooltip="Reset Password" iconForMobile={<ResetPasswordIcon />} onClick={handleResetPassword}>
+                  Reset Password
+                </ThemeButton>
               )}
               {permissions?.user?.isUpdate ? (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className={`btn-outline-v1`}
+                <ThemeButton
+                  iconForMobile={<Edit />}
                   onClick={handleOpenUpdateDialog}
                   disabled={
                     userData?.userType === userType.brandAdmin
@@ -508,8 +502,8 @@ const UserDetailsPage = () => {
                       : false
                   }
                 >
-                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                </Button>
+                  Edit
+                </ThemeButton>
               ) : null}
               {permissions?.user?.isDelete ? (
                 <DeleteButton
@@ -539,16 +533,11 @@ const UserDetailsPage = () => {
                     <CustomTab index={0} value={0} className={'tabLayout'} label={'Details'} {...a11yProps(0)} />
                     <CustomTab index={1} value={1} className={'tabLayout'} label={'Org Chart'} {...a11yProps(1)} />
                     {userData?.proxyDOA?.optionValue && (
-                      <CustomTab index={2} value={2} className={'tabLayout'} label={'DOA Proxy'} {...a11yProps(2)} 
-                      />
+                      <CustomTab index={2} value={2} className={'tabLayout'} label={'DOA Proxy'} {...a11yProps(2)} />
                     )}
-                    <CustomTab index={3} value={3} className={'tabLayout'} label={'User Session'} {...a11yProps(3)}
-                    />
-                    <CustomTab index={4} value={4} className={'tabLayout'} label={'Assigned Entity'} {...a11yProps(4)}
-                    />
-                    <CustomTab
-                      index={5} value={5} className={'tabLayout'} label={'Approval Process'} {...a11yProps(5)}
-                    />
+                    <CustomTab index={3} value={3} className={'tabLayout'} label={'User Session'} {...a11yProps(3)} />
+                    <CustomTab index={4} value={4} className={'tabLayout'} label={'Assigned Entity'} {...a11yProps(4)} />
+                    <CustomTab index={5} value={5} className={'tabLayout'} label={'Approval Process'} {...a11yProps(5)} />
                   </CustomTabs>
 
                   <TabPanel value={tabValue} index={0}>
@@ -615,7 +604,7 @@ const UserDetailsPage = () => {
                     </TabPanel>
                   )}
                   <TabPanel value={tabValue} index={3}>
-                    <UserSession id = {id} />
+                    <UserSession id={id} />
                   </TabPanel>
                   <TabPanel value={tabValue} index={4}>
                     <Grid container spacing={2}>

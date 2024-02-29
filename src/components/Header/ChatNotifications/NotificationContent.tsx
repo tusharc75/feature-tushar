@@ -6,7 +6,7 @@ import { TabOptions, tabOptions } from '.';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { HistoryItem, NotificationItem } from './listITems';
 
-const NotificationContent = ({ handleMarkAllReadUnread, handleClearAll, handleReadSingle, data, isLoading, setNewChat, handleClickHistory, isDisable }) => {
+const NotificationContent = ({ handleMarkAllReadUnread, handleClearAll, handleReadSingle, data, isLoading, setNewChat, handleClickHistory, isReplayVisible }) => {
   const {
     state: {
       user: { user }
@@ -42,7 +42,7 @@ const NotificationContent = ({ handleMarkAllReadUnread, handleClearAll, handleRe
       return (
         <List component="ul" aria-label="notifications" className=" overflow-x-hidden">
           {notificationList.map((d) => {
-            return <NotificationItem data={d} handleClick={handleReadSingle} key={d._id} isDisable={isDisable} />;
+            return <NotificationItem data={d} handleClick={handleReadSingle} key={d._id} isReplayVisible={isReplayVisible} />;
           })}
         </List>
       );
