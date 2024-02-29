@@ -8,6 +8,7 @@ type SimpleButton = {
   iconForMobile: ReactNode | boolean;
   tooltip?: string;
   isLoading?: boolean;
+  isVisible?: boolean;
 } & Omit<ButtonProps, 'variant'>;
 
 type OutlinedButtonProps = {
@@ -16,6 +17,7 @@ type OutlinedButtonProps = {
   hasMobileBorder?: boolean;
   tooltip?: string;
   isLoading?: boolean;
+  isVisible?: boolean;
 } & ButtonProps;
 
 type RedOutlineProps = {
@@ -25,6 +27,7 @@ type RedOutlineProps = {
   mode?: 'dark' | 'light';
   tooltip?: string;
   isLoading?: boolean;
+  isVisible?: boolean;
 } & ButtonProps;
 
 export type ButtonType = OutlinedButtonProps | RedOutlineProps | SimpleButton;
@@ -39,6 +42,7 @@ const ThemeButton = ({
   className,
   startIcon,
   endIcon,
+  isVisible = true,
   ...rest
 }: ButtonType) => {
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -74,6 +78,8 @@ const ThemeButton = ({
   }, [borderColor, isMobile, rest]);
 
   const loader = useMemo(() => (isLoading ? <CircularProgress size={22} color="inherit" className="ml-1" /> : ''), [isLoading]);
+
+  if (!isVisible) return <></>;
 
   return (
     <HtmlTooltip title={tooltip} placement="top" arrow enterTouchDelay={0}>
