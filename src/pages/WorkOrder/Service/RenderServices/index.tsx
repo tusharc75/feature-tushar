@@ -1,6 +1,6 @@
 import { Chip, IconButton } from '@material-ui/core';
 import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@material-ui/icons';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { PostWorkIcon, PreWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ButtonType, ThemeButton } from 'src/components/Helpers/Buttons';
@@ -24,9 +24,11 @@ type RenderServiceProps = {
   resource: any;
   quotationData: any;
   allowedToEdit: boolean;
-  setShowConfirmBox: any;
+  setShowConfirmBox: (data: boolean) => void;
   servicesButtons: ServicesButtons[];
   isMobile: boolean;
+
+  initialTabIndex: number;
 };
 
 const RenderService = ({
@@ -44,9 +46,10 @@ const RenderService = ({
   allowedToEdit,
   setShowConfirmBox,
   servicesButtons,
-  isMobile
-}: RenderServiceProps) => {
+  isMobile,
 
+  initialTabIndex = 0
+}: RenderServiceProps) => {
   const getFieldsWithOtherDetails = (step: any, stepSubmitedData) => {
     const steps = stepSubmitedData?.filter((item: any) => item?.uniqueId === step?.uniqueId);
     const stepTimes = [];
@@ -62,13 +65,20 @@ const RenderService = ({
     return stepTimes;
   };
 
-  const { containerRef, activeTab, tabSize, handleNextClick, handlePrevClick, hasNextTab, hasPrevTab } = useTab({
+  const { containerRef, handleNextClick, handlePrevClick, hasNextTab, hasPrevTab } = useTab({
     active: isMobile,
     totlaTabs: serviceSteps?.length || 0,
-    activeTabIndex: 0,
-    gap: 8
+    activeTabIndex: initialTabIndex,
+    gap: 8,
+    onTabChange: handleTabChange
   });
 
+  function handleTabChange(index: number) {
+    const data = serviceSteps[index];
+    if (data?.type === 'service') {
+      setSelectedService(data);
+    }
+  }
 
   return (
     <>
@@ -76,18 +86,7 @@ const RenderService = ({
         {isMobile ? (
           <>
             <div className="grid grid-cols-[30px_1fr_30px] items-center gap-[8px] min-h-[74px]">
-              <IconButton
-                disabled={!hasPrevTab}
-                className={`${!hasPrevTab ? 'opacity-0' : 'opacity-100'}`}
-                onClick={() => {
-                  const activeTab = handlePrevClick();
-                  const data = serviceSteps[activeTab];
-                  if (data?.type === 'service') {
-                    setSelectedService(data);
-                  }
-                }}
-                size="small"
-              >
+              <IconButton disabled={!hasPrevTab} className={`${!hasPrevTab ? 'opacity-0' : 'opacity-100'}`} onClick={handlePrevClick} size="small">
                 <ArrowBackIos />
               </IconButton>
               <div className={`flex overflow-x-auto overflow-y-hidden gap-[8px]`} ref={containerRef}>
@@ -116,18 +115,7 @@ const RenderService = ({
                   );
                 })}
               </div>
-              <IconButton
-                disabled={!hasNextTab}
-                className={`${!hasNextTab ? 'opacity-0' : 'opacity-100'}`}
-                onClick={() => {
-                  const activeTab = handleNextClick();
-                  const data = serviceSteps[activeTab];
-                  if (data?.type === 'service') {
-                    setSelectedService(data);
-                  }
-                }}
-                size="small"
-              >
+              <IconButton disabled={!hasNextTab} className={`${!hasNextTab ? 'opacity-0' : 'opacity-100'}`} onClick={handleNextClick} size="small">
                 <ArrowForwardIos />
               </IconButton>
             </div>
@@ -223,8 +211,9 @@ const RenderSingleService = ({
   return (
     <div
       key={data.uniqueId}
-      className={`duration-300 transition-all ${isMobile ? 'p-2 rounded-md' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
-        } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
+      className={`duration-300 transition-all ${
+        isMobile ? 'p-2 rounded-md' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
+      } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
       style={{
         ...style
       }}
@@ -234,12 +223,13 @@ const RenderSingleService = ({
         }
       }}
     >
-      <div className="flex items-start gap-2">
+      <div className="flex items-center gap-2 mb-1">
         <HtmlTooltip enterTouchDelay={0} placement="top" arrow title={isMobile ? data?.serviceName : ''}>
           {data?.type === 'service' ? (
             <div
-              className={`${isColapsed ? 'mx-auto' : ''
-                }  transition-all duration-300 bg-[var(--dark-primary,_var(--primary))] text-white w-[20px] h-[20px] rounded-full text-center flex justify-center items-center text-[10px] flex-shrink-0`}
+              className={`${
+                isColapsed ? 'mx-auto' : ''
+              }  transition-all duration-300 bg-[var(--dark-secondary,_var(--primary))] text-white w-[20px] h-[20px] rounded-full text-center flex justify-center items-center text-[10px] flex-shrink-0`}
             >
               <span>{data?.order}</span>
             </div>
@@ -315,7 +305,9 @@ const RenderSingleService = ({
                       style={{ color: 'red', marginTop: '3px' }}
                       aria-label="delete"
                       disabled={allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
-                      onClick={() => setShowConfirmBox(true)}
+                      onClick={() => {
+                        setShowConfirmBox(true);
+                      }}
                     >
                       <DeleteOutline style={{ fontSize: '18px' }} />
                     </IconButton>

@@ -505,8 +505,8 @@ export const RESOURCE_LABEL = {
   triggerNotificationMaster: 'Trigger Notification Master',
   triggerNotificationHistory: 'Trigger Notification History',
   userAttendance: 'User Attendance',
-  dataList : 'Data List',
-  dataListitems : 'Data List Items'
+  dataList: 'Data List',
+  dataListitems: 'Data List Items'
 };
 
 export const CHILD_RESOURCE = {
@@ -1856,7 +1856,7 @@ export const prepareDataForGrid = (data, user = {}) => {
     finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName;
     finalObject['updatedByDate'] = data?.updatedBy?.date;
   }
-  if(data?.completedBy) {
+  if (data?.completedBy) {
     finalObject['completedBy'] = data?.completedBy?.user?.concatedName;
     finalObject['completedByDate'] = data?.completedBy?.date;
   }
@@ -2928,4 +2928,17 @@ export const convertBlobToBase64 = async (blobUrl) => {
     img.onerror = () => reject('Error in converting blob to base64');
     img.src = blobUrl;
   });
+};
+
+export const IMPORT_EXPORT_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  error: 'Error',
+  completed: 'Completed',
+  partialComplete: 'Partial Complete',
+};
+
+export const IMPORT_EXPORT_TYPE = {
+  import: 'Import',
+  export: 'Export',
 };

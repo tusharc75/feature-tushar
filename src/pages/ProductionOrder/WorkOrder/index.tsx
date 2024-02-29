@@ -39,6 +39,7 @@ import {
   workOrder
 } from '../../../constants/helpers';
 import UploadDrawingDialog from './UploadDrawingDialog';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -74,7 +75,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
-  const [isAutoCreating, setIsAutoCreating] = useState(true);
+  const [isAutoCreating, setIsAutoCreating] = useState({ open: false, total: 0, done: 0 });
 
   const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedServiceOption, setSelectedServiceOption] = useState(null);
@@ -82,7 +83,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   useEffect(() => {
     setNextStep(false);
-    autoCreateWorkOrder();
+    checkAllWorkOrderComplete();
   }, []);
 
   useEffect(() => {
@@ -96,19 +97,24 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       });
   }, []);
 
-  const autoCreateWorkOrder = async () => {
+  const autoCreateWorkOrder = async (totalCount) => {
     try {
-      apiCallInterval = setInterval(async () => {
-        await fetchData();
-      }, 30000);
-      await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
-      if (apiCallInterval) {
-        clearInterval(apiCallInterval);
+      let tempCount = totalCount;
+      let page = 0;
+      const limit = 200;
+      while (tempCount > 0) {
+        setIsAutoCreating({ open: true, total: totalCount, done: tempCount });
+        await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order?limit=${limit}&page=${0}`);
+        tempCount = tempCount - limit;
+        if (page === 0) {
+          fetchData()
+        }
+        page++;
       }
-      setIsAutoCreating(false);
-      checkAllWorkOrderComplete();
+      setIsAutoCreating({ open: false, total: 0, done: 0 });
+      fetchData()
     } catch (error) {
-      setIsAutoCreating(false);
+      setIsAutoCreating({ open: false, total: 0, done: 0 });
       toastConfig.setToastConfig(error);
     }
   };
@@ -121,6 +127,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     const response = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/check-all-work-order-complete`);
     if (!!response?.data?.data?.isCompletedAll) {
       setNextStep(true);
+    }
+    if (response?.data?.data?.materialCount) {
+      autoCreateWorkOrder(response?.data?.data?.materialCount)
     }
   };
 
@@ -372,7 +381,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   useEffect(() => {
     fetchData(false);
-  }, [page, limit, filters, sorting, isAutoCreating, search]);
+  }, [page, limit, filters, sorting, search]);
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -419,15 +428,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       parent.detail = parent.detail
         ? parent.detail
         : parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.packageDetail?.packageName;
       parent.description = parent.description
         ? parent.description
         : parent.type === MATERIAL_TYPE.product
-        ? parent?.productDetail?.productDescription
-        : parent?.packageDetail?.packageDescription;
+          ? parent?.productDetail?.productDescription
+          : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
@@ -459,17 +468,17 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.detail = _subRow.detail
         ? _subRow.detail
         : _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceName
-        : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.packageDetail?.packageName;
       _subRow.description = _subRow.description
         ? _subRow.description
         : _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceDescription
-        : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productDescription
-        : _subRow?.packageDetail?.packageDescription;
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -792,17 +801,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     if (!allowedToEdit) return null;
     return (
       <>
-        <ImportExportMenu
+        <AsynImportExportMenu
+          resource={sidebarResource.productionOrder}
+          subResource={`material`}
+          referenceId={productionOrderData._id}
           permissions={permissions?.productionOrder}
           module={routes.productionOrder.title}
           api={`${productionOrder.api}/material/${productionOrderData._id}`}
           afterImportCompleted={() => {
             fetchData();
           }}
-          isExportAllOrSomeFeature={true}
-          recordsToExport={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).length}
+          isExportCount={true}
+          exportCount={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId).length}
           ids={selectedRecords?.length ? selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.map((obj) => obj._id) : []}
-          small={true}
         />
         {user?.user?.brandPolicy?.workOrderStepDataImport && (
           <ImportExportMenu
@@ -839,9 +850,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   return (
     <Fragment>
-      {isAutoCreating && (
+      {isAutoCreating.open && (
         <Box p={1} display="flex" alignItems="center">
-          <SyncIcon className="rotate" /> <Typography variant="subtitle2">Work order Auto Creation in Progress</Typography>
+          <SyncIcon className="rotate" /> <Typography variant="subtitle2">Work order Auto Creation in Progress {`${(isAutoCreating.total - isAutoCreating.done)}/${isAutoCreating.total}`}</Typography>
         </Box>
       )}
       <DetailsPageHeader
@@ -989,13 +1000,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <ConfirmationDialog
           okBtnLoading={isSubmitting}
           open={showServiceActionConfirmBox.open}
-          message={`Are you sure you want to ${
-            showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-              ? 'complete'
-              : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+            ? 'complete'
+            : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
               ? 'skip'
               : 'revert'
-          } this Service(s)`}
+            } this Service(s)`}
           onClose={() => {
             setShowServiceActionConfirmBox({ open: false, action: '' });
           }}
@@ -1183,8 +1193,8 @@ const ActionButtonMenuItems = ({
         }}
         disabled={
           selectedRecords?.length &&
-          selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-          selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
+            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
+            selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
             ? false
             : true
         }
@@ -1203,8 +1213,8 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-          (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
             ? false
             : true
         }

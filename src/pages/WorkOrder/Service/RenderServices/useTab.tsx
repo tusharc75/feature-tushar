@@ -1,13 +1,14 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 type UseTab = {
   active: boolean;
   activeTabIndex?: number;
   totlaTabs: number;
   gap?: number;
+  onTabChange: (index: number) => void;
 };
 
-const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0 }: UseTab) => {
+const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0, onTabChange }: UseTab) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [activeTab, setActiveTab] = useState(activeTabIndex);
   const [tabSize, setTabSize] = useState(0);
@@ -22,6 +23,15 @@ const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0 }: UseTab) => {
       }
     },
     [active, gap]
+  );
+
+  const changeTab = useCallback(
+    (tab: number) => {
+      setActiveTab(tab);
+      scrollToActiveTab(tab);
+      onTabChange(tab);
+    },
+    [scrollToActiveTab]
   );
 
   const calculatePrevNext = useCallback(
@@ -53,6 +63,7 @@ const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0 }: UseTab) => {
     calculatePrevNext(possibleTab);
     setActiveTab(possibleTab);
     scrollToActiveTab(possibleTab);
+    onTabChange(possibleTab);
     return possibleTab;
   }, [activeTab, scrollToActiveTab, totlaTabs, calculatePrevNext]);
 
@@ -61,6 +72,7 @@ const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0 }: UseTab) => {
     calculatePrevNext(possibleTab);
     setActiveTab(possibleTab);
     scrollToActiveTab(possibleTab);
+    onTabChange(possibleTab);
     return possibleTab;
   }, [activeTab, scrollToActiveTab, calculatePrevNext]);
 
@@ -87,7 +99,7 @@ const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0 }: UseTab) => {
     return () => window.removeEventListener('resize', recalculateTabSize);
   }, [recalculateTabSize]);
 
-  return { containerRef, activeTab, tabSize, handleNextClick, handlePrevClick, hasNextTab, hasPrevTab };
+  return { containerRef, activeTab, tabSize, handleNextClick, handlePrevClick, hasNextTab, hasPrevTab, changeTab };
 };
 
 export default useTab;
