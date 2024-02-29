@@ -316,7 +316,7 @@ const Service = ({
           message: data?.message
         });
         prevOrder.current =
-          serviceSteps.findIndex((s) => s.uniqueId === selectedService.uniqueId) - 1 < 0
+          serviceSteps?.findIndex((s) => s?.uniqueId === selectedService?.uniqueId) - 1 < 0
             ? 0
             : serviceSteps.findIndex((s) => s.uniqueId === selectedService.uniqueId) - 1;
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {

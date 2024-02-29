@@ -65,7 +65,7 @@ const RenderService = ({
     return stepTimes;
   };
 
-  const { containerRef, activeTab, tabSize, changeTab, handleNextClick, handlePrevClick, hasNextTab, hasPrevTab } = useTab({
+  const { containerRef, handleNextClick, handlePrevClick, hasNextTab, hasPrevTab } = useTab({
     active: isMobile,
     totlaTabs: serviceSteps?.length || 0,
     activeTabIndex: initialTabIndex,
@@ -79,13 +79,6 @@ const RenderService = ({
       setSelectedService(data);
     }
   }
-
-  // useEffect(() => {
-  //   if (serviceDeleteConfirmed) {
-  //     const nextActiveTab = activeTab - 1 < 0 ? 0 : activeTab - 1;
-  //     changeTab(nextActiveTab);
-  //   }
-  // }, [serviceDeleteConfirmed, changeTab]);
 
   return (
     <>
