@@ -158,7 +158,9 @@ export default function useColumns() {
     if (!currency) {
       currency = user?.user?.brandCurrency || 'USD';
     }
+
     let gridMetaData = getGridMetaDataFromLocalStorage();
+
     let updatedTitle = camelCase(renderedFrom);
     const column = [];
 
@@ -309,8 +311,8 @@ export default function useColumns() {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
               : isObject(original?.[field?.fieldName])
-              ? original?.[field?.fieldName]?.optionLabel
-              : original?.[field?.fieldName];
+                ? original?.[field?.fieldName]?.optionLabel
+                : original?.[field?.fieldName];
           },
           cell: ({ row }) => <DropdownCell permissions={permissions} permissionForLinks={permissionForLinks} field={field} original={row?.original} />
         });

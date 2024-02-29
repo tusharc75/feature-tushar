@@ -87,6 +87,8 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     }
   };
 
+  console.log(productInventory)
+
   const calculateNestedQty = (material, parent) => {
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
     childProduct?.forEach((child) => {
