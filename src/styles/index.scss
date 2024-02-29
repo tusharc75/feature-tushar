@@ -4195,3 +4195,18 @@ body .btn-outline-red-v1 {
     background-image: url('../assets/nodeStructureIcons/centerDark.svg') !important;
   }
 }
+
+.MuiAutocomplete-popper {
+  .MuiAutocomplete-listbox {
+    background-color: var(--dark-secondary);
+    @media all and (max-width: 600px) {
+      max-height: max(155px, 20vh);
+      li {
+        min-height: 35px !important;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        font-size: 13px;
+      }
+    }
+  }
+}
