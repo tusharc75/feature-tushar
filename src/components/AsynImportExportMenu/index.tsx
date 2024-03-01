@@ -43,7 +43,6 @@ const AsynImportExportMenu = ({
     setAnchorEl(null);
   };
 
-  console.log(additionalParams)
 
   const handleExport = () => {
     let exportApi

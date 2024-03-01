@@ -1,5 +1,5 @@
-import { Fragment, useState, useEffect, useContext } from 'react';
-import { Box, Button, Dialog, Divider, List, ListItem, ListItemAvatar, ListItemText, TextField } from '@material-ui/core';
+import { useState, useEffect, useContext } from 'react';
+import { Box, Button, Dialog, List, ListItem, ListItemText, TextField } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -15,8 +15,9 @@ import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import routes from 'src/components/Helpers/Routes';
 
-const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, purchaseOrderData }) => {
+const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, purchaseOrderData, materialAssets }) => {
   const {
     state: { user }
   }: any = useData();
@@ -93,6 +94,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
         storageLocation: user?.user?.brandPolicy?.storageLocation ? values['storageLocation'] : null,
         serializedProduct: product?.serializedProduct || false,
         assetQty: product?.assetQty || 0,
+        assetIds: values?.assetIds?.map((s) => s?.optionValue)
       }
     ];
     setLoading(true);
@@ -117,29 +119,32 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
     if (parseInt(values?.qty) > validateQty) {
       errors['qty'] = 'Qty cannot be more than quantity';
     }
+    if (product?.assetQty) {
+      if (product?.qty - (product?.actualReceived || 0) < parseInt(values?.qty || 0) + parseInt(product.rejectQuantity || 0)) {
+        const removeActualReceivedQty = parseInt(values?.qty || 0) + parseInt(product.rejectQuantity || 0) - (product?.qty - (product?.actualReceived || 0));
+        if (values?.assetIds?.length !== removeActualReceivedQty) {
+          errors['assetIds'] = `Selected ${routes.serializedAsset.title} must be equal to reject quantity`;
+        }
+      }
+    }
     const serialNumbersList = values['serialNumbers'];
     if (serialNumbersList?.length > parseInt(values?.qty)) {
       errors['serialNumbers'] = `Please select serial numbers same as quantity`;
     }
-
     if (user?.user?.brandPolicy?.storageLocation && !values['storageLocation']) {
       errors['storageLocation'] = `Storage Location is required`;
     }
-
     if (moment(values["rejectDate"]).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
       errors['rejectDate'] = `Date entered prior to the purchase order date`;
     }
-
     if (lockDate) {
       if (!moment(values["rejectDate"]).isSameOrAfter(moment(lockDate))) {
         errors['rejectDate'] = `Date entered prior to the locked date`;
       }
     }
-
     if (moment(values["rejectDate"]).isAfter(moment())) {
       errors['rejectDate'] = `Please select valid date`;
     }
-
     return errors;
   }
 
@@ -163,6 +168,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
           comment: '',
           supplierPartNumber: '',
           storageLocation: purchaseOrderData?.storageLocation?.optionValue || null,
+          assetIds: []
         }}
           onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
@@ -235,38 +241,62 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                     }}
                   />
                 </Box>
+                {product?.serializedProduct && (
+                  <Box m={1}>
+                    <Autocomplete
+                      size="small"
+                      multiple
+                      disableCloseOnSelect={true}
+                      value={values['assetIds']}
+                      options={[{ optionLabel: 'All', optionValue: 'All' }, ...materialAssets]}
+                      getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                      onChange={(_, newValue) => {
+                        var tempValue = newValue;
+                        if (tempValue?.find((e) => e.optionValue === 'All')) {
+                          tempValue = materialAssets;
+                        }
+                        setFieldValue('assetIds', tempValue);
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          name="assetIds"
+                          label={routes.serializedAsset.title}
+                          error={touched['assetIds'] && Boolean(errors['assetIds'])}
+                          helperText={touched['assetIds'] && errors['assetIds']}
+                        />
+                      )}
+                    />
+                  </Box>
+                )}
                 {product?.serializedProduct && user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory ? (
-                  <Fragment>
-                    <Box my={2} mx={1}>
-                      <Divider />
-                    </Box>
-                    <Box m={1}>
-                      <Autocomplete
-                        size="small"
-                        options={serialNumbers.map((item: any) => item?.serialNumber.toString())}
-                        freeSolo={false}
-                        multiple={true}
-                        disableCloseOnSelect
-                        value={values['serialNumbers']}
-                        onChange={(_, val) => {
-                          setFieldValue('serialNumbers', val);
-                        }}
-                        getOptionSelected={(item, current) => item === current}
-                        getOptionLabel={(option) => option}
-                        renderInput={(props) => (
-                          <TextField
-                            {...props}
-                            placeholder={''}
-                            variant="outlined"
-                            name="serialNumbers"
-                            label={'Select Serial Numbers'}
-                            error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
-                            helperText={touched['serialNumbers'] && errors['serialNumbers']}
-                          />
-                        )}
-                      />
-                    </Box>
-                  </Fragment>
+                  <Box m={1}>
+                    <Autocomplete
+                      size="small"
+                      options={serialNumbers.map((item: any) => item?.serialNumber.toString())}
+                      freeSolo={false}
+                      multiple={true}
+                      disableCloseOnSelect
+                      value={values['serialNumbers']}
+                      onChange={(_, val) => {
+                        setFieldValue('serialNumbers', val);
+                      }}
+                      getOptionSelected={(item, current) => item === current}
+                      getOptionLabel={(option) => option}
+                      renderInput={(props) => (
+                        <TextField
+                          {...props}
+                          placeholder={''}
+                          variant="outlined"
+                          name="serialNumbers"
+                          label={'Select Serial Numbers'}
+                          error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
+                          helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                        />
+                      )}
+                    />
+                  </Box>
                 ) : null}
                 {(user?.user?.brandPolicy?.storageLocation && storageLocationOptions) &&
                   <Box m={1}>
