@@ -21,7 +21,8 @@ const AsynImportExportMenu = ({
   exportCount = 0,
   total = 0,
   additionalParams = null,
-  title = ''
+  title = '',
+  onlyExport = true
 }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
 
@@ -42,10 +43,21 @@ const AsynImportExportMenu = ({
     setAnchorEl(null);
   };
 
+  console.log(additionalParams)
+
   const handleExport = () => {
-    let exportApi = `${api}/template?export=true`;
-    if (additionalParams) {
-      exportApi = `${exportApi}&${additionalParams}`;
+    let exportApi
+    if (onlyExport) {
+      exportApi = `${api}/export`
+      if (additionalParams) {
+        exportApi = `${exportApi}${additionalParams}`;
+      }
+    }
+    else {
+      exportApi = `${api}/template?export=true`;
+      if (additionalParams) {
+        exportApi = `${exportApi}&${additionalParams}`;
+      }
     }
     if (exportCount > 0) {
       exportApi = exportApi + `&ids=${JSON.stringify(ids)}`;
@@ -81,25 +93,36 @@ const AsynImportExportMenu = ({
     <>
       <HtmlTooltip title={<>Import/Export {title}</>} placement="top" arrow enterTouchDelay={0}>
         <span>
-          <Button
-            onClick={(e) => handleClick(e)}
-            endIcon={<ArrowDropDownIcon />}
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
-            className="min-h-[32px]"
-            size="small"
-          >
-            {isMobile ? (
-              <>
-                <MdImportExport size={20} />
-                {` ${title}`}
-              </>
-            ) : (
-              <>Import/Export {title}</>
-            )}
-          </Button>
+          {onlyExport ?
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                setDialog({ open: true, type: IMPORT_EXPORT_TYPE.export });
+              }}
+              className={`btn-outline-v-1`}>
+              Export All
+            </Button>
+            :
+            <Button
+              onClick={(e) => handleClick(e)}
+              endIcon={<ArrowDropDownIcon />}
+              variant={'outlined'}
+              color="primary"
+              aria-controls="simple-menu"
+              aria-haspopup="true"
+              className="min-h-[32px]"
+              size="small"
+            >
+              {isMobile ? (
+                <>
+                  <MdImportExport size={20} />
+                  {` ${title}`}
+                </>
+              ) : (
+                <>Import/Export {title}</>
+              )}
+            </Button>}
         </span>
       </HtmlTooltip>
       <Menu

@@ -115,7 +115,7 @@ const intialState = {
   rowCount: 0,
   loading: false,
   page: 0,
-  limit: 25,
+  limit: gridPageSizes[0],
   pageSizes: gridPageSizes,
   search: '',
   filters: {},
@@ -128,7 +128,7 @@ const intialState = {
   loadingExpanderRowId: null,
   initialDataLoaded: false,
   visibleColumns: {},
-  columnOrder: [],
+  columnOrder: []
 };
 
 export type TInitialState = {
@@ -171,7 +171,7 @@ export type TActios =
   | { type: 'updateColumnState'; colState: any[] }
   | { type: 'loadingExpanderRowId'; loadingExpanderRowId: string | null }
   | { type: 'setVisibleColumns'; visibleColumns: { [key: string]: boolean } }
-  | { type: 'setColumnOrder'; columnOrder: ((data: string[]) => string[]) | string[] }
+  | { type: 'setColumnOrder'; columnOrder: ((data: string[]) => string[]) | string[] };
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
