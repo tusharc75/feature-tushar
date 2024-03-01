@@ -85,7 +85,7 @@ const RenderService = ({
 
   return (
     <>
-      <div className={`${isMobile ? 'p-4' : 'container-with-border p-[20px]'}`}>
+      <div className={`${isMobile ? 'p-3' : 'container-with-border p-[20px]'}`}>
         {isMobile ? (
           <>
             <span className=" absolute -top-[25px] right-[15px] bg-[var(--dark-primary,_white)] rounded-[5px_5px_0_0] [border:1px_solid_var(--common-border-color)] [border-bottom:0px_!important]">
