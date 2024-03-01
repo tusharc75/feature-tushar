@@ -1,37 +1,36 @@
 import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageFieldTicket from './ManageFieldTicket';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
-import TabPanel from '../../components/TabPanel';
+import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import AddCost from './AddCost';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { findOne, objectStore } from 'src/constants/indexdbhelper';
-import Steps, { getIndex } from 'src/components/Steps';
-import ContentFullScreen from 'src/components/ContentFullScreen';
-import Material from './material';
-import { camelCase, set } from 'lodash';
-import Submit from './Submit';
 import { VscVersions } from 'react-icons/vsc';
-import CloseIcon from '@material-ui/icons/Close';
-import Versions from 'src/components/Versions';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import routes from 'src/components/Helpers/Routes';
+import Steps, { getIndex } from 'src/components/Steps';
+import Versions from 'src/components/Versions';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
+import { findOne, objectStore } from 'src/constants/indexdbhelper';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
+import AddCost from './AddCost';
+import ManageFieldTicket from './ManageFieldTicket';
+import Submit from './Submit';
+import Material from './material';
 
 const FieldTicketDetail = () => {
-
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -57,7 +56,6 @@ const FieldTicketDetail = () => {
   const [versionDialog, setVersionDialog] = useState(false);
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
-
 
   useEffect(() => {
     if (id) {
@@ -94,8 +92,7 @@ const FieldTicketDetail = () => {
       setFieldTicketData(data);
       if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.readyToInvoice, FIELD_TICKET_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(fieldTicketSteps?.length - 1);
-      }
-      else {
+      } else {
         setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
       }
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -121,7 +118,7 @@ const FieldTicketDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.fieldTicket.path}`)
+          history.push(`${routes.fieldTicket.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -152,23 +149,26 @@ const FieldTicketDetail = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const handleChangeStatus = async (status) => {
-    await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, { status }).then(({ data }) => {
-      setShowClosedConfirmBox(false)
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data?.message
+    await axiosInstance()
+      .patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, { status })
+      .then(({ data }) => {
+        setShowClosedConfirmBox(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        fetchData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
       });
-      fetchData()
-    }).catch((err) => {
-      toastConfig.setToastConfig(err)
-    })
-  }
+  };
 
   return (
     <Box className="main-container-v1">
@@ -184,47 +184,41 @@ const FieldTicketDetail = () => {
                 color="default"
                 size="small"
                 onClick={() => {
-                  setShowClosedConfirmBox(true)
+                  setShowClosedConfirmBox(true);
                 }}
                 className={'btn-outline-v1'}
               >
                 Close
               </ButtonWithPulse>
             )}
-            {fieldTicketData?.versions?.length &&
+            {fieldTicketData?.versions?.length && (
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'outlined'}
                 color="primary"
                 size="small"
                 className={'btn-outline-v1'}
                 onClick={() => {
-                  setVersionDialog(true)
+                  setVersionDialog(true);
                 }}
                 style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                 startIcon={isMobile && !isTablet ? null : <VscVersions />}
               >
                 {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
               </Button>
-            }
-            {(allowedToEdit && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(fieldTicketData?.status)) &&
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+            )}
+            {allowedToEdit && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(fieldTicketData?.status) && (
+              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
-            }
-            {allowedToDelete &&
-              <DeleteButton
-                text="Delete"
-                onClick={() => setShowConfirmBox(true)} />
-            }
+            )}
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton
               referenceId={fieldTicketData?._id}
               resource={ACTIVITY_RESOURCE.fieldTicket}
               resourceLabel={fieldTicketData?.fieldTicketNumber}
               extraRelatedTo={{
                 referenceId: fieldTicketData?.fieldServiceOrder?.optionValue,
-                resource: ACTIVITY_RESOURCE.fieldServiceOrder,
+                resource: ACTIVITY_RESOURCE.fieldServiceOrder
               }}
             />
           </Box>
@@ -295,18 +289,10 @@ const FieldTicketDetail = () => {
               />
             )}
             {currentStep === 1 && fieldTicketData && (
-              <AddCost
-                fieldTicketData={fieldTicketData}
-                allowedToEdit={allowedToEdit}
-                setNextStep={setNextStep} />
+              <AddCost fieldTicketData={fieldTicketData} allowedToEdit={allowedToEdit} setNextStep={setNextStep} />
             )}
             {currentStep === 2 && fieldTicketData && (
-              <Submit
-                stepFullScreen={stepFullScreen}
-                fieldTicketData={fieldTicketData}
-                allowedToEdit={allowedToEdit}
-                fetchData={fetchData}
-              />
+              <Submit stepFullScreen={stepFullScreen} fieldTicketData={fieldTicketData} allowedToEdit={allowedToEdit} fetchData={fetchData} />
             )}
           </ContentFullScreen>
         </TabPanel>
@@ -329,7 +315,7 @@ const FieldTicketDetail = () => {
             setShowClosedConfirmBox(false);
           }}
           onOk={() => {
-            handleChangeStatus(FIELD_TICKET_STATUS.closed)
+            handleChangeStatus(FIELD_TICKET_STATUS.closed);
           }}
         />
       )}
@@ -354,7 +340,7 @@ const FieldTicketDetail = () => {
           versions={fieldTicketData?.versions}
           renderedFrom={`${renderedFrom}_versions`}
           handleClose={() => {
-            setVersionDialog(false)
+            setVersionDialog(false);
           }}
         />
       )}

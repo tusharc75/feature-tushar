@@ -856,7 +856,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .main-container {
-  min-height: calc(100vh - 99px);
+  min-height: max(600px, calc(100vh - 99px));
   position: relative;
   overflow: auto;
   z-index: 1;
@@ -2747,6 +2747,9 @@ svg.MuiSvgIcon-root {
   font-size: 12px;
   line-height: 117%;
   padding: var(--padding, 7px 10px);
+  &.small {
+    padding: 7px 10px;
+  }
   background: #ffffff;
   border: 1px solid #e2e2e2;
   box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);
@@ -3189,7 +3192,9 @@ body {
     &.with-border {
       border: 1px solid var(--common-border-color) !important;
     }
-
+    &.round {
+      border-radius: 9999px !important;
+    }
     & > span {
       line-height: 16px;
       padding: 0;
@@ -3232,49 +3237,6 @@ body {
   .btn-primary-v1 {
     padding: var(--button-v1-padding);
     border: 1px solid #0f9fa9 !important;
-  }
-
-  .btn-outline-red-v1 {
-    background: #ffffff !important;
-    border: 1px solid #d65642 !important;
-    color: #d43e3e !important;
-    box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
-    border-radius: 3px !important;
-    padding: var(--button-v1-padding);
-    font-weight: 400 !important;
-    font-size: 14.7483px !important;
-    line-height: 17px !important;
-    &.MuiButton-text {
-      padding: 6px !important;
-      height: 32px;
-      border: none !important;
-      width: 34px;
-    }
-
-    & > span {
-      line-height: 16px;
-      padding: 0;
-    }
-    &:disabled {
-      opacity: 0.3;
-      border-color: gray !important;
-    }
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.04) !important;
-    }
-    [data-mode='dark'] & {
-      background-color: var(--dark-primary) !important;
-      &.light {
-        background-color: var(--dark-secondary) !important;
-      }
-      border: 0px !important;
-      &:hover {
-        &.light {
-          background-color: hsl(240, 27%, 25%) !important;
-        }
-        background-color: hsl(240, 27%, 25%) !important;
-      }
-    }
   }
 
   .btn-red-v1 {
@@ -4015,6 +3977,33 @@ $isAppliedBillDark: #234623;
   .form-types {
     .MuiChip-root.MuiAutocomplete-tag {
       max-width: 100% !important;
+      min-width: 0;
+    }
+  }
+}
+.truncate-autocomplete {
+  .form-types {
+    .MuiChip-root.MuiAutocomplete-tag {
+      max-width: 330px !important;
+
+      @media all and (max-width: 980px) {
+        max-width: 250px !important;
+      }
+      @media all and (max-width: 830px) {
+        max-width: 200px !important;
+      }
+      @media all and (max-width: 716px) {
+        max-width: 150px !important;
+      }
+      @media all and (max-width: 600px) {
+        max-width: 300px !important;
+      }
+      @media all and (max-width: 504px) {
+        max-width: 200px !important;
+      }
+      @media all and (max-width: 410px) {
+        max-width: 130px !important;
+      }
     }
   }
 }
@@ -4097,6 +4086,130 @@ body {
     color: white;
     .rbc-overlay-header {
       background-color: var(--dark-secondary);
+    }
+  }
+}
+
+body .btn-outline-red-v1 {
+  background: #ffffff !important;
+  border: 1px solid #d65642 !important;
+  color: #d43e3e !important;
+  box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
+  border-radius: 3px !important;
+  padding: var(--button-v1-padding) !important;
+  font-weight: 400 !important;
+  font-size: 14.7483px !important;
+  line-height: 17px !important;
+  &.MuiButton-text {
+    padding: 6px !important;
+    height: 32px;
+    width: 34px;
+  }
+
+  & > span {
+    line-height: 16px;
+    padding: 0;
+  }
+  &:disabled {
+    opacity: 0.6;
+    border-color: gray !important;
+    [data-mode='dark'] & {
+      opacity: 0.6;
+      border: 0 !important;
+    }
+  }
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+  }
+  [data-mode='dark'] & {
+    background-color: var(--dark-primary) !important;
+    border: 1px solid #d65642 !important;
+    color: #d43e3e !important;
+    &.light {
+      background-color: var(--dark-secondary) !important;
+    }
+    &:hover {
+      &.light {
+        background-color: hsl(240, 27%, 25%) !important;
+      }
+      background-color: hsl(240, 27%, 25%) !important;
+    }
+    @media all and (max-width: 600px) {
+      &:not(.with-border) {
+        border: 0px !important;
+      }
+    }
+  }
+}
+
+.vis-button {
+  background-size: 30px !important;
+  background-position: center center !important;
+  border: 1px solid var(--common-border-color);
+  transition: all 0.25s;
+  &:hover {
+    opacity: 0.8;
+  }
+}
+.vis-up {
+  background-image: url('../assets/nodeStructureIcons/up.svg') !important;
+}
+.vis-down {
+  background-image: url('../assets/nodeStructureIcons/down.svg') !important;
+}
+.vis-left {
+  background-image: url('../assets/nodeStructureIcons/left.svg') !important;
+}
+.vis-right {
+  background-image: url('../assets/nodeStructureIcons/right.svg') !important;
+}
+.vis-zoomIn {
+  background-image: url('../assets/nodeStructureIcons/plus.svg') !important;
+}
+.vis-zoomOut {
+  background-image: url('../assets/nodeStructureIcons/minus.svg') !important;
+}
+.vis-zoomExtends {
+  background-image: url('../assets/nodeStructureIcons/center.svg') !important;
+  background-size: 28px !important;
+}
+
+[data-mode='dark'] {
+  .vis-up {
+    background-image: url('../assets/nodeStructureIcons/upDark.svg') !important;
+  }
+  .vis-down {
+    background-image: url('../assets/nodeStructureIcons/downDark.svg') !important;
+  }
+  .vis-left {
+    background-image: url('../assets/nodeStructureIcons/leftDark.svg') !important;
+  }
+  .vis-right {
+    background-image: url('../assets/nodeStructureIcons/rightDark.svg') !important;
+  }
+  .vis-zoomIn {
+    background-image: url('../assets/nodeStructureIcons/plusDark.svg') !important;
+  }
+  .vis-zoomOut {
+    background-image: url('../assets/nodeStructureIcons/minusDark.svg') !important;
+  }
+  .vis-zoomExtends {
+    background-image: url('../assets/nodeStructureIcons/centerDark.svg') !important;
+  }
+}
+
+.MuiAutocomplete-popper {
+  background-color: var(--dark-secondary);
+  .MuiAutocomplete-listbox {
+    background-color: var(--dark-secondary);
+    @media all and (max-width: 600px) {
+      max-height: max(155px, 20vh);
+      li {
+        min-height: 35px !important;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        font-size: 13px;
+      }
     }
   }
 }

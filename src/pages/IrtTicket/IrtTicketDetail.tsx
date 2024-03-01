@@ -1,22 +1,22 @@
 import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageIrtTicket from './ManageIrtTicket';
-import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
-import Approver from './Approver';
-import IrtTicketView from './View';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import routes from 'src/components/Helpers/Routes';
+import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import Approver from './Approver';
+import ManageIrtTicket from './ManageIrtTicket';
+import IrtTicketView from './View';
 
 const IrtTicketDetail = () => {
   const { id } = useParams();
@@ -88,7 +88,7 @@ const IrtTicketDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.irtTicket.path}`)
+          history.push(`${routes.irtTicket.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -123,15 +123,11 @@ const IrtTicketDetail = () => {
                 onClick={handleOpenUpdateDialog}
                 size="small"
               >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
             {permissions?.irtTicket?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton 
-              referenceId={irtTicketData?._id} 
-              resource={ACTIVITY_RESOURCE.irtTicket} 
-              resourceLabel={irtTicketData?.irtTicketNumber}
-              />
+            <ActivityButton referenceId={irtTicketData?._id} resource={ACTIVITY_RESOURCE.irtTicket} resourceLabel={irtTicketData?.irtTicketNumber} />
           </Box>
         </Box>
       </Box>
@@ -149,22 +145,14 @@ const IrtTicketDetail = () => {
         >
           <Tab
             className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                Header
-              </div>
-            }
+            label={<div className="d-flex align-items-center tab-font">Header</div>}
             value={0}
             aria-controls="a11y-tabpanel-0"
             id="a11y-tab-0"
           />
           <Tab
             className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                Details
-              </div>
-            }
+            label={<div className="d-flex align-items-center tab-font">Details</div>}
             value={1}
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
@@ -172,11 +160,7 @@ const IrtTicketDetail = () => {
           {!(isMobile && !isTablet) && (
             <Tab
               className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  Views
-                </div>
-              }
+              label={<div className="d-flex align-items-center tab-font">Views</div>}
               value={2}
               aria-controls="a11y-tabpanel-1"
               id="a11y-tab-1"
@@ -194,15 +178,8 @@ const IrtTicketDetail = () => {
             )}
           </Box>
         )}
-        {tabValue === 1 && (
-          <Approver
-            irtTicketData={irtTicketData} />
-        )}
-        {tabValue === 2 && (
-          <IrtTicketView
-            id={id}
-          />
-        )}
+        {tabValue === 1 && <Approver irtTicketData={irtTicketData} />}
+        {tabValue === 2 && <IrtTicketView id={id} />}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

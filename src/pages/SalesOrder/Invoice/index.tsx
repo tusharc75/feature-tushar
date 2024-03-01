@@ -1,25 +1,26 @@
-import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, Fragment } from 'react';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import Grid from '@material-ui/core/Grid/Grid';
 import { IconButton } from '@material-ui/core';
-import { MATERIAL_TYPE, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
-import axiosInstance from '../../../axios/axiosInstance';
-import { isMobile, isTablet } from 'react-device-detect';
-import routes from '../../../components/Helpers/Routes';
+import Box from '@material-ui/core/Box/Box';
+import Grid from '@material-ui/core/Grid/Grid';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, startCase } from 'lodash';
-import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
-import PreviewDownload from 'src/components/PreviewDownload';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { Fragment, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import axiosInstance from '../../../axios/axiosInstance';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import routes from '../../../components/Helpers/Routes';
+import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
+import { MATERIAL_TYPE, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen }) => {
-
   const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Invoice`;
 
-  const { state: { permissions } }: any = useData();
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const [columns, setColumns] = useState(null);
 
@@ -75,7 +76,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
           return row.original?.detail ? (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p title={row.original?.detail}>{row.original?.detail}</p>
-              {row.original.type !== MATERIAL_TYPE.manualEntry &&
+              {row.original.type !== MATERIAL_TYPE.manualEntry && (
                 <Box ml={1}>
                   <IconButton
                     size="small"
@@ -92,7 +93,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
                     <OpenInNewIcon fontSize="small" color="primary" />
                   </IconButton>
                 </Box>
-              }
+              )}
             </div>
           ) : (
             <NoDataCell />
@@ -109,18 +110,19 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
       },
       ...(permissions?.leadTimeMaster
         ? [
-          {
-            accessor: 'leadTime',
-            Header: 'Lead Time (Days)',
-            Cell: ({ row }) => <div>{(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)}</div>,
-            Footer: (info) => {
-              let rows = info.table.getExpandedRowModel().rows;
-              const total = rows?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-              return <>{total}</>;
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+              Footer: (info) => {
+                let rows = info.table.getExpandedRowModel().rows;
+                const total = rows
+                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
             }
-          }
-        ]
+          ]
         : [])
     ];
     coloum = [...coloum, ...newColumns];
@@ -129,7 +131,6 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
   };
 
   const fetchData = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -141,20 +142,32 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
 
     const additionalCost = await axiosInstance().get(`${salesOrder.api}/additionalcost/${salesOrderData._id}`);
     const additionalCostRows = additionalCost?.data?.data;
-    additionalCostRows.forEach((r) => r.type = MATERIAL_TYPE.manualEntry);
+    additionalCostRows.forEach((r) => (r.type = MATERIAL_TYPE.manualEntry));
 
     rows = [...rows, ...additionalCostRows];
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.package ? parent.packageDetail?.packageName
-            : parent.type === MATERIAL_TYPE.manualEntry ? parent?.description : '';
-      parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription
-        : parent.type === MATERIAL_TYPE.package ? parent?.packageDetail?.packageDescription
-          : parent?.type === MATERIAL_TYPE.manualEntry ? parent?.description
-            : parent?.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription : '';
+      parent.detail =
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.package
+          ? parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.manualEntry
+          ? parent?.description
+          : '';
+      parent.description =
+        parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productDescription
+          : parent.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageDescription
+          : parent?.type === MATERIAL_TYPE.manualEntry
+          ? parent?.description
+          : parent?.type === MATERIAL_TYPE.service
+          ? parent?.serviceDetail?.serviceDescription
+          : '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
@@ -169,16 +182,18 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
-        : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-        ;
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
@@ -187,17 +202,18 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
     return subRows;
   };
 
+  const previewDownloadProps = {
+    fileName: `${routes.salesOrder.title}-${salesOrderData?.salesOrderNo}`,
+    resource: sidebarResource.salesOrder,
+    referenceId: salesOrderData._id,
+    columns: columns,
+    isSendEmail: true
+  };
+
   return (
     <Fragment>
-      <Box p={1} >
-        <PreviewDownload
-          fileName={`${routes.salesOrder.title}-${salesOrderData?.salesOrderNo}`}
-          resource={sidebarResource.salesOrder}
-          referenceId={salesOrderData._id}
-          columns={columns}
-          isSendEmail={true}
-        />
-      </Box>
+      <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} previewDownloadProps={previewDownloadProps} hasXpadding />
+
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <Box zIndex={5} width={'100%'}>

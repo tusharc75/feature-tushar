@@ -1,28 +1,23 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import AddIcon from '@material-ui/icons/Add';
-import { Fragment, useContext, useEffect, useState } from 'react';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { Box, Grid, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import AdditionalCostDialog from './AdditionalCostDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { CHILD_RESOURCE } from 'src/constants/helpers';
+import AdditionalCostDialog from './AdditionalCostDialog';
 
 const AdditionalCost = ({ invoiceData, stepFullScreen, setNextStep }) => {
-
   const renderedFrom = `${camelCase(routes?.invoice.title)}_Cost`;
 
   const toastConfig = useContext(CustomToastContext);
-
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -32,7 +27,6 @@ const AdditionalCost = ({ invoiceData, stepFullScreen, setNextStep }) => {
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
   const { generateColumns } = useColumns();
-
 
   useEffect(() => {
     fetchGridColumns();
@@ -109,19 +103,11 @@ const AdditionalCost = ({ invoiceData, stepFullScreen, setNextStep }) => {
         }
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
-        setNextStep(true)
+        setNextStep(true);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const handleDelete = () => {
@@ -148,61 +134,38 @@ const AdditionalCost = ({ invoiceData, stepFullScreen, setNextStep }) => {
       });
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={!(selectedRecords?.length > 0 && selectedRecords?.length)}
+          onClick={() => {
+            if (selectedRecords.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            }
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center">
-          <Button
-            variant={'outlined'}
-            color="primary"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={() => setAddDialog({ open: true, data: null })}
-            aria-controls="add-menu"
-          >
-            {'Add'}
-          </Button>
-        </Box>
-        <Box display="flex">
-          <Button
-            disabled={selectedRecords.length ? false : true}
-            variant={'outlined'}
-            color="default"
-            size="small"
-            onClick={openActions}
-            aria-controls="action-menu"
-            endIcon={<ExpandMore />}
-            className="new-dropdown-v1"
-          >
-            {'Actions'}
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorEl)}
-            onClose={closeActions}
-          >
-            <MenuItem
-              disabled={!(selectedRecords?.length > 0 && selectedRecords?.length)}
-              onClick={() => {
-                closeActions();
-                if (selectedRecords.length === 1) {
-                  setDeleteRecord(selectedRecords[0]);
-                }
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              Delete
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonProps={{ onClick: () => setAddDialog({ open: true, data: null }) }}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{
+          disabled: selectedRecords.length ? false : true,
+          tooltip: selectedRecords.length ? '' : 'Select records to edit'
+        }}
+        hasXpadding
+      />
+
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable

@@ -1,51 +1,48 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Grid, Typography, IconButton, Card, CardContent, List, ListItemIcon, Tooltip } from '@material-ui/core';
-import { isMobile } from 'react-device-detect';
-import { useHistory, useParams } from 'react-router-dom';
-import { reverse as _reverse } from 'lodash';
-import { Skeleton } from '@material-ui/lab';
-import { accountPage } from '../../routes/Accounts';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { useData } from '../../StateProvider/Provider';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import RelatedContacts from './RelatedContacts';
-import axiosInstance from './../../axios/axiosInstance';
-import Tabs from '@material-ui/core/Tabs';
+import { Box, Button, Card, CardContent, Grid, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@material-ui/core';
+import ListItem from '@material-ui/core/ListItem/ListItem';
 import Tab from '@material-ui/core/Tab';
-import AccountHierarchy from './AccountHierarchy';
-import accountClass from './account.module.scss';
+import Tabs from '@material-ui/core/Tabs';
+import { Edit } from '@material-ui/icons';
+import AddIcon from '@material-ui/icons/Add';
+import { Skeleton } from '@material-ui/lab';
+import { reverse as _reverse } from 'lodash';
+import queryString from 'query-string';
+import React, { useContext, useEffect, useState } from 'react';
+import { BsPerson } from 'react-icons/bs';
+import { FcApproval, FcDisapprove } from 'react-icons/fc';
+import { Link, useHistory, useParams } from 'react-router-dom';
+import { AccountHierarchyIcon, AccountsTeamsIcon, ContactsIcon, OpportunityIcon, ProjectsIcon, QuoteIcon } from 'src/assets/svg/svgIcons';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CustomNodalStructure from '../../components/CustomNodalStructure/CustomNodalStructure';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
+import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
+import ProcessFlow from '../../components/ProcessFlow';
+import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
+import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
+import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { customerAccount, getObjKeysWithValues, isObjectEmpty, processFieldName, sidebarResource } from '../../constants/helpers';
+import { accountPage } from '../../routes/Accounts';
 import ManageContactDialog from '../Contact/ManageContact';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import { getObjKeysWithValues, isObjectEmpty, sidebarResource, customerAccount, processFieldName, RESOURCE_LABEL } from '../../constants/helpers';
+import ManageOpportunityDialog from '../Opportunities/ManageOpportunityDialog';
+import axiosInstance from './../../axios/axiosInstance';
+import routes from './../../components/Helpers/Routes';
+import AccountHierarchy from './AccountHierarchy';
 import ManageAccount from './ManageAccount/ManageAccount';
 import ManageAccountDialog from './ManageAccount/index';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
-import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
-import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
-import { FcApproval, FcDisapprove } from 'react-icons/fc';
-import ManageOpportunityDialog from '../Opportunities/ManageOpportunityDialog';
-import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
-import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
-import { Link } from 'react-router-dom';
-import { BsPerson } from 'react-icons/bs';
-import ListItem from '@material-ui/core/ListItem/ListItem';
-import { ListItemText } from '@material-ui/core';
-import routes from './../../components/Helpers/Routes';
-import CustomNodalStructure from '../../components/CustomNodalStructure/CustomNodalStructure';
-import ProcessFlow from '../../components/ProcessFlow';
-import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import queryString from 'query-string';
-import { BiEdit } from 'react-icons/bi';
-import Warehouse from './Warehouse';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import AddIcon from '@material-ui/icons/Add';
-import { AccountHierarchyIcon, ProjectsIcon, OpportunityIcon, QuoteIcon, AccountsTeamsIcon, ContactsIcon } from 'src/assets/svg/svgIcons';
+import RelatedContacts from './RelatedContacts';
 import SupplierItems from './SupplierItems';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import Warehouse from './Warehouse';
+import accountClass from './account.module.scss';
 
 function DisplayData({ label, value, icon, highlightsHead = false }) {
   return (
@@ -83,6 +80,8 @@ function DisplayData({ label, value, icon, highlightsHead = false }) {
 }
 
 export default function AccountDetailPage(props) {
+  const isMobile = useMediaQuery('(max-width:600px)');
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -322,9 +321,9 @@ export default function AccountDetailPage(props) {
           current: true,
           parentAccount: data.parentAccount
             ? {
-              _id: data.parentAccount.optionValue,
-              accountName: data.parentAccount.optionLabel
-            }
+                _id: data.parentAccount.optionValue,
+                accountName: data.parentAccount.optionLabel
+              }
             : null,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }
@@ -730,8 +729,8 @@ export default function AccountDetailPage(props) {
                         ? accountClass.mobile_button_layout_secondary
                         : ''
                       : isMobile
-                        ? accountClass.mobile_button_layout
-                        : ''
+                      ? accountClass.mobile_button_layout
+                      : ''
                   }
                   onClick={() => {
                     setShowApproveDisapproveConfirmBox(true);
@@ -754,23 +753,19 @@ export default function AccountDetailPage(props) {
             {permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit && (
               <>
                 <Button variant={isMobile ? 'text' : 'contained'} size="small" onClick={handleOpneUpdateDialog} className={'btn-outline-v1'}>
-                  {isMobile ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile ? <Edit /> : 'Edit'}
                 </Button>
               </>
             )}
             {permissions &&
-              permissions[accountResource] &&
-              permissions[accountResource].isDelete &&
-              accountData?.owner?.optionValue &&
-              user?.user?._id &&
-              accountData.owner.optionValue === user.user._id ? (
+            permissions[accountResource] &&
+            permissions[accountResource].isDelete &&
+            accountData?.owner?.optionValue &&
+            user?.user?._id &&
+            accountData.owner.optionValue === user.user._id ? (
               <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
             ) : null}
-            <ActivityButton
-              referenceId={accountData?._id}
-              resource={accountResource}
-              resourceLabel={accountData?.accountName}
-            />
+            <ActivityButton referenceId={accountData?._id} resource={accountResource} resourceLabel={accountData?.accountName} />
           </Box>
         </Box>
       </Box>
@@ -807,9 +802,9 @@ export default function AccountDetailPage(props) {
               <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
               <Tab label={<div className="tab-font">Account Hierarchy</div>} id="a11y-tab-1" className="tabLayout" />
               <Tab label={<div className="tab-font">OM-Neurons</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
-              {(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification) &&
-                <Tab label={<div className="tab-font">Supplier View</div>}
-                  aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className="tabLayout" />}
+              {accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification && (
+                <Tab label={<div className="tab-font">Supplier View</div>} aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className="tabLayout" />
+              )}
               {accountResource === 'customerAccount' && permissions?.productInventory && (
                 <Tab
                   label={<div className="tab-font">{routes.warehouse.title}</div>}
@@ -1025,7 +1020,8 @@ export default function AccountDetailPage(props) {
                   api={accountApi}
                   id={id}
                   allowedToEdit={permissions[accountResource].isUpdate}
-                  permission={permissions[accountResource]} />
+                  permission={permissions[accountResource]}
+                />
               </TabPanel>
             )}
             {accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
@@ -1039,8 +1035,9 @@ export default function AccountDetailPage(props) {
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
-            }`}
+          message={`Are you sure you want to delete this Account ${
+            deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
+          }`}
           onClose={() => {
             setShowConfirmBox(false);
             setDeleteAccountId({});
@@ -1097,7 +1094,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => { }}
+          handleAddressDataSource={() => {}}
         />
       ) : null}
 

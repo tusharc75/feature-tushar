@@ -1,23 +1,24 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Tabs, Tab } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import PricingConditionsDialog from './PricingConditionsDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import { ACTIVITY_RESOURCE, pricingCondition } from '../../constants/helpers';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { startCase } from 'lodash';
-import AddConditions from './AddConditions';
-import ActivityButton from 'src/components/Activity/ActivityButton';
+import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from 'react-icons/fa';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { ACTIVITY_RESOURCE, pricingCondition } from '../../constants/helpers';
+import AddConditions from './AddConditions';
+import PricingConditionsDialog from './PricingConditionsDialog';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -90,7 +91,7 @@ const PricingConditionsDetails = () => {
       .put(`${pricingCondition.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.pricingCondition.path}`)
+        history.push(`${routes.pricingCondition.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -114,16 +115,12 @@ const PricingConditionsDetails = () => {
                   size="small"
                   onClick={() => setOpen(true)}
                 >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
               {permissions?.pricingCondition?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
-            <ActivityButton
-              referenceId={detailData?._id}
-              resource={ACTIVITY_RESOURCE.pricingCondition}
-              resourceLabel={detailData?.conditionName}
-            />
+            <ActivityButton referenceId={detailData?._id} resource={ACTIVITY_RESOURCE.pricingCondition} resourceLabel={detailData?.conditionName} />
           </Box>
         </Box>
       </Box>
@@ -152,7 +149,6 @@ const PricingConditionsDetails = () => {
                     <FaWpforms className="mr-1" fontSize="inherit" /> Header
                   </div>
                 }
-
               />
               <Tab
                 className={'tabLayout'}
@@ -161,7 +157,6 @@ const PricingConditionsDetails = () => {
                     <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
                   </div>
                 }
-
               />
             </Tabs>
             <TabPanel value={tabValue} index={0}>

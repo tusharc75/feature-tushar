@@ -40,6 +40,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
   }: any = useData();
 
   useEffect(() => {
+    setNextStep(false);
     getColumn();
     if (user.user.brandPolicy?.repairOrderAutoLoadingTicket) {
       createLoadingTicket();
@@ -67,7 +68,6 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
   };
 
   const fetchRecords = async () => {
-    setNextStep(false);
     try {
       var material: any = [];
 

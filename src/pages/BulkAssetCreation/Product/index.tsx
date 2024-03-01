@@ -1,24 +1,23 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, MenuItem, Menu } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import { useData } from 'src/StateProvider/Provider';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { bulkAssetCreation, CHILD_RESOURCE } from 'src/constants/helpers';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import { ExpandMore } from '@material-ui/icons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import { deleteDisable } from 'src/constants/messageHelpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { CHILD_RESOURCE, bulkAssetCreation, prepareDataForGrid } from 'src/constants/helpers';
+import { deleteDisable } from 'src/constants/messageHelpers';
+import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
 
 const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProduct, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +28,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
 
-  const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
   const [addProductDialog, setAddProductDialog] = useState(false);
   const [isAddingProducts, setAddingProducts] = useState(false);
@@ -213,8 +211,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 fontSize="small"
                 color={
                   (row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) &&
-                    allowedToEdit &&
-                    permissions?.bulkAssetCreation?.isUpdate
+                  allowedToEdit &&
+                  permissions?.bulkAssetCreation?.isUpdate
                     ? 'error'
                     : 'disabled'
                 }
@@ -293,7 +291,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     axiosInstance()
       .post(`${bulkAssetCreation.api}/create-assets`, { bulkAssetCreation: tempProducts })
       .then(({ data }) => {
-        setShowCreateConfirmBox(false)
+        setShowCreateConfirmBox(false);
         fetchBulkAssetCreationProduct();
         fetchData();
         setLoadingButton(false);
@@ -309,90 +307,69 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddProductDialog(true);
+          }}
+        >
+          Add Existing Products
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          color="primary"
+          disabled={selectedRecords.length === 0}
+          onClick={() => {
+            setIsBulkEdit(true);
+            setShowProductDialog(true);
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
+        <MenuItem
+          color="primary"
+          disabled={selectedRecords.length === 0 || loadingButton}
+          onClick={() => {
+            setShowDeleteConfirmBox(true);
+            setDeleteBulkAssetCreationProduct(selectedRecords.map((d) => d._id));
+          }}
+        >
+          Delete
+        </MenuItem>
+        <MenuItem
+          color="primary"
+          disabled={selectedRecords.length === 0 || loadingButton}
+          onClick={() => {
+            setShowCreateConfirmBox(true);
+          }}
+        >
+          {`Create ${routes.serializedAsset.title}`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <Fragment>
       {allowedToEdit && permissions?.bulkAssetCreation?.isUpdate && (
-        <Box m={1} className="flex flex-wrap gap-2 justify-between">
-          <Box>
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              onClick={() => {
-                setAddProductDialog(true);
-              }}
-            >
-              {`Add Existing Products`}
-            </Button>
-          </Box>
-          <Box display={'flex'} justifyContent="flex-end">
-            <Button
-              variant={'outlined'}
-              color="default"
-              disabled={selectedRecords?.length ? false : true}
-              size="small"
-              onClick={openActions}
-              className={`new-dropdown-v1`}
-              aria-controls="action-menu"
-              endIcon={<ExpandMore />}
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                color="primary"
-                disabled={selectedRecords.length === 0}
-                onClick={() => {
-                  setIsBulkEdit(true);
-                  setShowProductDialog(true);
-                  closeActions();
-                }}
-              >
-                Bulk Edit
-              </MenuItem>
-              <MenuItem
-                color="primary"
-                disabled={selectedRecords.length === 0 || loadingButton}
-                onClick={() => {
-                  setShowDeleteConfirmBox(true);
-                  setDeleteBulkAssetCreationProduct(selectedRecords.map((d) => d._id));
-                  closeActions();
-                }}
-              >
-                Delete
-              </MenuItem>
-              <MenuItem
-                color="primary"
-                disabled={selectedRecords.length === 0 || loadingButton}
-                onClick={() => {
-                  setShowCreateConfirmBox(true)
-                  closeActions();
-                }}
-              >
-                {`Create ${routes.serializedAsset.title}`}
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+            hasXpadding
+          />
+        </>
       )}
       {columns ? (
         <CustomReactTable

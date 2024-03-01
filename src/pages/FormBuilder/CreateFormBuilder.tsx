@@ -14,7 +14,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import { IoIosArrowDropdown } from 'react-icons/io';
-import { RiCloseCircleFill, RiSaveFill } from 'react-icons/all';
+import { RiCloseCircleFill, RiSaveFill } from 'react-icons/ri';
 import TextField from '@material-ui/core/TextField';
 import { camelCase } from 'lodash';
 import { Autocomplete } from '@material-ui/lab';
@@ -198,7 +198,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => { });
+          .catch((error) => {});
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -242,7 +242,7 @@ const CreateFormBuilder = () => {
           open: true,
           type: 'success',
           message: message
-        })
+        });
       })
       .catch((error) => {
         setIsUpdating(false);

@@ -1,9 +1,10 @@
 import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -12,7 +13,6 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPageHeader from '../../components/DetailsPageHeader';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CreateProductCategory from './CreateProductCategory';
@@ -86,7 +86,7 @@ const ProductCategoryDetailPage = () => {
           .then(({ data }) => {
             setShowConfirmBox(false);
 
-            history.push(`${routes.productCategory.path}`)
+            history.push(`${routes.productCategory.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);
@@ -115,21 +115,21 @@ const ProductCategoryDetailPage = () => {
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
               {permissions?.productCategory?.isUpdate && (
-                <Button 
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small" 
-                className={'btn-outline-v1'} 
-                onClick={handleOpenUpdateDialog}
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  size="small"
+                  className={'btn-outline-v1'}
+                  onClick={handleOpenUpdateDialog}
                 >
-               {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
               {permissions?.productCategory?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton 
-              referenceId={productCategoryData?._id} 
-              resource={ACTIVITY_RESOURCE.productCategory} 
-              resourceLabel={productCategoryData?.name}
-              />   
+              <ActivityButton
+                referenceId={productCategoryData?._id}
+                resource={ACTIVITY_RESOURCE.productCategory}
+                resourceLabel={productCategoryData?.name}
+              />
             </Box>
           </Box>
         </Box>

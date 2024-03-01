@@ -19,7 +19,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid, rentalManagement, serializedAsset, sidebarResource } from 'src/constants/helpers';
 import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';

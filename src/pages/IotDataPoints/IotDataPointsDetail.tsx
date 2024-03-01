@@ -1,19 +1,19 @@
-import { Box, Button, Grid, } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageIotDataPoints from './ManageIotDataPoints';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import ManageIotDataPoints from './ManageIotDataPoints';
 
 const IotDataPointsDetail = () => {
   const { id } = useParams();
@@ -35,7 +35,6 @@ const IotDataPointsDetail = () => {
       fetchData();
     }
   }, [id]);
-
 
   const fetchFields = async () => {
     axiosInstance()
@@ -74,7 +73,7 @@ const IotDataPointsDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.iotDataPoints.path}`)
+          history.push(`${routes.iotDataPoints.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -92,7 +91,6 @@ const IotDataPointsDetail = () => {
     setOpenUpdateDialog(false);
   };
 
- 
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -102,32 +100,26 @@ const IotDataPointsDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.iotDataPoints?.isUpdate  && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              {permissions?.iotDataPoints?.isUpdate && (
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.iotDataPoints?.isDelete  && (
-                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-              )}
+              {permissions?.iotDataPoints?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
-      <Box>
-            {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={iotDataPointsData} fields={fields} />
-            )}
-          </Box>
+        <Box>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={iotDataPointsData} fields={fields} />
+          )}
+        </Box>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

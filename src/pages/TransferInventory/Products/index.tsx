@@ -1,35 +1,32 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Button, Box, IconButton } from '@material-ui/core';
-import routes from 'src/components/Helpers/Routes';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
+import DeleteIcon from '@material-ui/icons/Delete';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import React, { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
-import AddInventory from './AddInventory';
-import AssignSerialNumber from './AssignSerialNumber';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_TYPE,
   TRANSFER_INVENTORY_STATUS,
   deliveryTicket,
-  DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_TICKET_TYPE
+  gridLoadingTimeout,
+  prepareDataForGrid
 } from 'src/constants/helpers';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import ProductQtyDialog from './ProductQtyDialog';
 import { deleteDisable } from 'src/constants/messageHelpers';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem } from '@material-ui/core';
-
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import AddInventory from './AddInventory';
+import AssignSerialNumber from './AssignSerialNumber';
+import ProductQtyDialog from './ProductQtyDialog';
 
 const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus, stepFullScreen }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -47,7 +44,6 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const [isAdding, setIsAdding] = useState(false);
   const [columns, setColumns] = useState(null);
   const [viewProductEditDialog, setProductEditDialog] = useState({ open: false, productData: null });
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const [assignNumber, setAssignNumber] = useState({ open: false, serialNumber: [], qty: 0, product: '' });
   useEffect(() => {
@@ -408,66 +404,49 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddInventoryDialog(true);
+          }}
+        >
+          {`Add Products`}
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            closeActions();
+            setShowConfirmBox(true);
+            setRemoveData(selectedRecords?.filter((e) => !e?.hideSelection)?.map((inv: any) => inv?.productId));
+          }}
+        >
+          {`Delete`}
+        </MenuItem>
+      </>
+    );
   };
-
 
   return (
     <React.Fragment>
       {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inProgress]?.includes(transferInventoryData?.status) && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Button
-            variant={'outlined'}
-            color="primary"
-            size="small"
-            onClick={() => {
-              setAddInventoryDialog(true);
-            }}
-          >
-            {`Add Products`}
-          </Button>
-          <Box display="flex">
-            <Button
-              variant={'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              className={`new-dropdown-v1`}
-              aria-controls="action-menu"
-              endIcon={<ExpandMore />}
-              disabled={selectedRecords?.filter((e) => !e?.hideSelection)?.length ? false : true}
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeActions()
-                  setShowConfirmBox(true);
-                  setRemoveData(selectedRecords?.filter((e) => !e?.hideSelection)?.map((inv: any) => inv?.productId));
-                }}
-              >
-                {`Delete`}
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e?.hideSelection)?.length ? false : true }}
+            hasXpadding
+          />
+        </>
       )}
       <Box mt={1}>
         {columns ? (

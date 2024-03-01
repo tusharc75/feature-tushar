@@ -95,7 +95,7 @@ function QuoteHeader({
         {children}
       </div>
       <div className="flex flex-wrap gap-[8px]  justify-end">
-        <SearchBox onChange={onSearch} value={searchVal} size="small" />
+        <SearchBox onChange={onSearch} value={searchVal} />
 
         <div className="flex gap-[8px] flex-wrap items-center">
           {QuotePermissions.isCreate && (
@@ -163,7 +163,6 @@ function QuoteHeader({
           )}
         </div>
       </div>
-      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

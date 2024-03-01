@@ -19,6 +19,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { FileCopyIcon } from 'src/assets/svg/svgIcons';
 import PdfPreview from './ShowPdf/PdfPreview';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Diagram = ({ resource, referenceId, currentVersion }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -127,33 +128,32 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
 
   return (
     <Box>
-      <Box className="container-with-border min-h-[calc(100vh-150px)] max-[600px]:[min-height:unset]" p={'20px'}>
-        <Box mb={1} display="flex" justifyContent="end" alignItems="center">
-          <Button
-            variant={'outlined'}
-            color="primary"
-            size="small"
-            startIcon={<Add />}
+      <Box className="container-with-border" p={'20px'}>
+        <Box className="flex flex-wrap justify-between min-[600px]:justify-end gap-2 items-center mb-2">
+          <h6 className="font-semibold text-[16px] min-[600px]:hidden">Attachments</h6>
+          <ThemeButton
             onClick={() => {
               setAttachemntDialog({ open: true, id: null, isClone: false });
             }}
-            aria-controls="add-menu"
+            iconForMobile={<Add />}
+            tooltip="Add"
           >
-            Add
-          </Button>
+            <Add /> Add
+          </ThemeButton>
         </Box>
         <Box pt={2} pb={2}>
-          <Box className="overflow-auto min-[600px]:h-[calc(100vh-250px)]">
+          <Box className="overflow-auto h-[calc(100vh-250px)]">
             <div className="grid gap-3">
               {rowData &&
                 rowData?.map((file, index) => {
                   return (
                     <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${expended[file?._id]
-                          ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                          : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
-                          }`}
+                        className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                            : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                        }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -282,7 +282,7 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
               <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
             ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
               // <ShowPdf data={selectedAttachment} />
-               <PdfPreview data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
+              <PdfPreview data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
             ) : (
               <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
             )}

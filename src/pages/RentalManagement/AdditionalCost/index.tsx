@@ -18,6 +18,7 @@ import { BiChevronDown } from 'react-icons/bi';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, quotationApprovedMessage } from 'src/constants/messageHelpers';
 import Add from '@material-ui/icons/Add';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -34,8 +35,6 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   const [isDeleting, setDeleting] = useState(false);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [allFields, setAllFields] = useState(null);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -222,14 +221,6 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       });
   };
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
@@ -237,64 +228,46 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     handleUpdateCost(rows);
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <HtmlTooltip
+          title={Boolean(selectedRecords && selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}
+          placement="top"
+          arrow
+          enterTouchDelay={0}
+        >
+          <MenuItem
+            disabled={isDeleting}
+            onClick={() => {
+              setDeleteData(selectedRecords?.map(({ _id }: any) => _id));
+            }}
+          >
+            Delete
+          </MenuItem>
+        </HtmlTooltip>
+      </>
+    );
+  };
+
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex">
-          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``}>
-            <span>
-              <Button
-                color="primary"
-                variant="outlined"
-                size="small"
-                startIcon={<Add />}
-                disabled={allowedToEdit && !isOffline && !quotationApproved ? false : true}
-                onClick={() => {
-                  setShowCostDialog({ open: true, showSaveAndNext: false });
-                  setSelectedCostData(null);
-                }}
-              >
-                Add
-              </Button>
-            </span>
-          </HtmlTooltip>
-        </Box>
-        <Box display="flex" ml={1}>
-          <Button
-            variant={'outlined'}
-            color="primary"
-            size="small"
-            onClick={handleClick}
-            disabled={!Boolean(selectedRecords?.length && selectedRecords?.filter((e) => !e.hideSelection).length)}
-            endIcon={<BiChevronDown />}
-            className="new-dropdown-v1"
-          >
-            Actions
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            onClose={handleClose}
-          >
-            <HtmlTooltip title={Boolean(selectedRecords && selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
-              <MenuItem
-                disabled={isDeleting}
-                onClick={() => {
-                  setDeleteData(selectedRecords?.map(({ _id }: any) => _id));
-                  handleClose();
-                }}
-              >
-                Delete
-              </MenuItem>
-            </HtmlTooltip>
-          </Menu>
-        </Box>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonProps={{
+          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``,
+          disabled: allowedToEdit && !isOffline && !quotationApproved ? false : true,
+          onClick: () => {
+            setShowCostDialog({ open: true, showSaveAndNext: false });
+            setSelectedCostData(null);
+          }
+        }}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: !Boolean(selectedRecords?.length && selectedRecords?.filter((e) => !e.hideSelection).length) }}
+        hasXpadding
+      />
+
       {columns ? (
         <Box zIndex={5}>
           <CustomReactTable

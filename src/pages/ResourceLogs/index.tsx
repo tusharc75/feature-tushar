@@ -1,5 +1,4 @@
 import { Box, IconButton, TextField } from '@material-ui/core';
-import { isMobile } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -15,8 +14,10 @@ import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import moment from 'moment';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import upperFirst from 'lodash/upperFirst';
 
 const ResourceLogs = () => {
+
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState([]);
   const { state, dispatch } = useTableReducer();
@@ -29,6 +30,7 @@ const ResourceLogs = () => {
   const [selectedResource, setSelectedResource] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
+  const [userOptions, setUserOptions] = useState([]);
 
   const actionOptions = [
     {
@@ -46,6 +48,7 @@ const ResourceLogs = () => {
   ];
 
   const [selectedAction, setSelectedAction] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     const data: any = [];
@@ -55,7 +58,7 @@ const ResourceLogs = () => {
       }
     }
     setResourceOptions(data);
-    if (data?.length === 1) {
+    if (data?.length >= 1) {
       setSelectedResource(data[0]);
     }
   }, []);
@@ -79,9 +82,20 @@ const ResourceLogs = () => {
 
   useEffect(() => {
     if (selectedResource) {
+      axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=User`).then(({ data: { data } }) => {
+        setUserOptions(data["User"])
+      })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }, [selectedResource]);
+
+  useEffect(() => {
+    if (selectedResource) {
       fetchData();
     }
-  }, [selectedResource, selectedOption, selectedAction, page, limit]);
+  }, [selectedResource, selectedOption, selectedAction, selectedUser, page, limit]);
 
   const fetchGridColumns = () => {
     let columns = [
@@ -89,53 +103,52 @@ const ResourceLogs = () => {
         accessor: 'referenceId',
         Header: 'Resource',
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => (
-          <p
-            className="text-truncate link"
-            title={row?.original?.optionLabel}
-            onClick={() => window.open(`${routes[`${row?.original?.key}Detail`]?.path}/${row?.original?.referenceId?.optionValue}`)}
-          >
-            {row?.original?.referenceId?.optionLabel}
-          </p>
+          <div>
+            <p className="text-truncate link"
+              title={row?.original?.optionLabel}
+              onClick={() => window.open(`${routes[`${row?.original?.key}Detail`]?.path}/${row?.original?.referenceId?.optionValue}`)}
+            >
+              {row?.original?.referenceId?.optionLabel}
+            </p>
+          </div>
         )
       },
       {
         accessor: 'updatedBy',
         Header: 'Updated By',
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => (
-          <p
-            className="link text-truncate"
-            title={row?.original?.optionLabel}
-            onClick={() => window.open(`${routes.userDetail.path}/${row?.original?.updatedBy?.optionValue}`)}
-          >
-            {row?.original?.updatedBy?.optionLabel}
-          </p>
+          <div>
+            <p
+              className="link text-truncate"
+              title={row?.original?.optionLabel}
+              onClick={() => window.open(`${routes.userDetail.path}/${row?.original?.updatedBy?.optionValue}`)}
+            >
+              {row?.original?.updatedBy?.optionLabel}
+            </p>
+          </div>
         )
       },
       {
         accessor: 'actions',
         Header: 'Action',
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.action}</p>
+        Cell: ({ row }) => <div>{upperFirst(row.original?.action)}</div>
       },
       {
         accessor: 'date',
         Header: 'Updated Date Time',
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         disableSortBy: true,
-        Cell: ({ row }) => <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p>
+        Cell: ({ row }) => <div className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</div>
       },
       {
         accessor: 'changeString',
@@ -143,8 +156,7 @@ const ResourceLogs = () => {
         disableFilters: true,
         disableSortBy: true,
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.changeString}</p>
+        Cell: ({ row }) => <div className="text-truncate">{row?.original?.changeString}</div>
       },
       ActionsRenderer
     ];
@@ -189,80 +201,80 @@ const ResourceLogs = () => {
     if (selectedAction) {
       query = `${query}&action=${selectedAction?.optionValue}`;
     }
+    if (selectedUser) {
+      query = `${query}&userId=${selectedUser?.optionValue}`;
+    }
     return query;
   };
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance()
-      .get(`/log?${queryString}`)
-      .then(
-        ({
-          data: {
-            data: { data, count }
-          }
-        }) => {
-          let rows = data?.map((u) => {
-            var changeString = [];
-            var changes = [];
-            var operations = [];
-
-            if (Array.isArray(u?.changes)) {
-              if (u?.changes?.length === 0) {
-                return;
-              }
-              u?.changes?.forEach((e) => {
-                if (e?.fieldLabel) {
-                  if (e?.fieldLabel === 'history' || e?.fieldLabel === 'createdBy' || e?.fieldLabel === '_id') {
-                    return;
-                  }
-                  changes.push(e);
-                  var oldValue = e?.oldValue;
-                  var newValue = e?.newValue;
-                  if (e?.type === 'date') {
-                    if (oldValue && moment(oldValue)?.isValid) {
-                      oldValue = moment(oldValue).format(dateFormat);
-                    }
-                    if (newValue && moment(newValue)?.isValid) {
-                      newValue = moment(newValue).format(dateFormat);
-                    }
-                  } else if (e?.type === 'dropDown' && e?.lookup) {
-                    oldValue = oldValue?.label;
-                    newValue = newValue?.label;
-                  }
-                  if (oldValue && newValue) {
-                    changeString.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);
-                  } else {
-                    changeString.push(`${e.fieldLabel} changed to ${newValue}`);
-                  }
-                } else if (e?.label) {
-                  operations.push(e);
+    axiosInstance().get(`/log?${queryString}`).then(({ data: { data: { data, count } } }) => {
+      let rows = data?.map((u) => {
+        var changeString = [];
+        var changes = [];
+        var operations = [];
+        if (u?.action == 'update' || u?.action == 'create') {
+          if (Array.isArray(u?.changes)) {
+            if (u?.changes?.length === 0) {
+              return;
+            }
+            u?.changes?.forEach((e) => {
+              if (e?.fieldLabel) {
+                if (e?.fieldLabel === 'history' || e?.fieldLabel === 'createdBy' || e?.fieldLabel === '_id') {
+                  return;
                 }
-              });
-            } else {
-              operations.push({ ...u?.changes });
-            }
-            if (changeString?.length) {
-              u.changeString = changeString?.toString();
-            } else {
-              u.changeString = 'Click View for check changes';
-            }
-            if (u?.action == 'create') {
-              u.changeString = 'Created';
-            }
-            u.changes = changes;
-            u.operations = operations;
-            u.key = selectedResource?.key;
-            return u;
-          });
-          rows = rows.filter((e) => e);
-          dispatch({ type: 'initialize', data: rows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
+                changes.push(e);
+                var oldValue = e?.oldValue;
+                var newValue = e?.newValue;
+                if (e?.type === 'date') {
+                  if (oldValue && moment(oldValue)?.isValid) {
+                    oldValue = moment(oldValue).format(dateFormat);
+                  }
+                  if (newValue && moment(newValue)?.isValid) {
+                    newValue = moment(newValue).format(dateFormat);
+                  }
+                } else if (e?.type === 'dropDown' && e?.lookup) {
+                  oldValue = oldValue?.label;
+                  newValue = newValue?.label;
+                }
+                if (oldValue && newValue) {
+                  changeString.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);
+                } else {
+                  changeString.push(`${e.fieldLabel} changed to ${newValue}`);
+                }
+              } else if (e?.label) {
+                operations.push(e);
+              }
+            });
+          } else {
+            operations.push({ ...u?.changes });
+          }
+          if (changeString?.length) {
+            u.changeString = changeString?.toString();
+          } else {
+            u.changeString = 'Click View for check changes';
+          }
+          if (u?.action == 'create') {
+            u.changeString = 'Created';
+          }
         }
-      )
+        else if (u?.action == 'delete') {
+          u.changeString = 'Deleted';
+        }
+        u.changes = changes;
+        u.operations = operations;
+        u.key = selectedResource?.key;
+        return u;
+      });
+      rows = rows.filter((e) => e);
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    }
+    )
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -275,8 +287,7 @@ const ResourceLogs = () => {
       </div>
       <CustomContainer>
         <div className="header-panel">
-          {/* xs={12} sm={6} md={4} lg={4} */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[8px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[8px]">
             <Autocomplete
               fullWidth
               options={resourceOptions}
@@ -314,6 +325,18 @@ const ResourceLogs = () => {
                   }}
                   size="small"
                   renderInput={(params) => <TextField {...params} label={'Select Action'} variant="outlined" />}
+                />
+                <Autocomplete
+                  options={userOptions}
+                  fullWidth
+                  getOptionLabel={(option: any) => option.optionLabel}
+                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                  value={selectedUser}
+                  onChange={(event, newValue) => {
+                    setSelectedUser(newValue);
+                  }}
+                  size="small"
+                  renderInput={(params) => <TextField {...params} label={'Select User'} variant="outlined" />}
                 />
               </>
             )}

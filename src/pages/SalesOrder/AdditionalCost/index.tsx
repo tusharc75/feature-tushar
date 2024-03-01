@@ -1,28 +1,24 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { salesOrder } from '../../../constants/helpers';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
-import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
-import AdditionalCostDialog from './AdditionalCostDialog';
-import { isMobile } from 'react-device-detect';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE } from '../../../constants/helpers';
-import { flattenArray } from 'src/constants/columns';
-import { GrBusinessService } from 'react-icons/all';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { ExpandMore } from '@material-ui/icons';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { flattenArray } from 'src/constants/columns';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
+import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
+import { CHILD_RESOURCE, salesOrder } from '../../../constants/helpers';
+import AdditionalCostDialog from './AdditionalCostDialog';
 
 const AdditionalCost = ({ salesOrderData, setNextStep, stepFullScreen, allowedToEdit }) => {
-
   const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Cost`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -35,7 +31,6 @@ const AdditionalCost = ({ salesOrderData, setNextStep, stepFullScreen, allowedTo
   const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
   const [selectedCostData, setSelectedCostData] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecords, setDeleteRecords] = useState(null);
 
@@ -206,73 +201,49 @@ const AdditionalCost = ({ salesOrderData, setNextStep, stepFullScreen, allowedTo
     handleUpdateCost(rows);
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setShowCostDialog({ open: true, showSaveAndNext: false });
+            setSelectedCostData(null);
+          }}
+        >
+          Add
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        {permissions?.quotation?.isDelete && (
+          <MenuItem
+            onClick={() => {
+              setShowDeleteConfirmBox(true);
+              setDeleteRecords(selectedRecords.map((d) => d._id));
+            }}
+          >
+            Delete
+          </MenuItem>
+        )}
+      </>
+    );
   };
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex">
-          <Button
-            variant={isMobile ? 'outlined' : 'contained'}
-            color="primary"
-            size="small"
-            onClick={() => {
-              setShowCostDialog({ open: true, showSaveAndNext: false });
-              setSelectedCostData(null);
-            }}
-          >
-            {isMobile ? <GrBusinessService size={20} /> : 'Add'}
-          </Button>
-        </Box>
-        <div className="d-flex gap-2">
-          <HtmlTooltip title="Please select some records">
-            <span>
-              <Button
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={openActions}
-                disabled={selectedRecords.length ? false : true}
-                aria-controls="action-menu"
-                endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
-              >
-                {'Actions'}
-              </Button>
-            </span>
-          </HtmlTooltip>
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorEl)}
-            onClose={closeActions}
-          >
-            {permissions?.quotation?.isDelete && (
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setShowDeleteConfirmBox(true);
-                  setDeleteRecords(selectedRecords.map((d) => d._id));
-                }}
-              >
-                Delete
-              </MenuItem>
-            )}
-          </Menu>
-        </div>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ tooltip: selectedRecords.length ? '' : 'Please select some records', disabled: selectedRecords.length ? false : true }}
+        hasXpadding
+      />
+
       {columns ? (
         <Box zIndex={5}>
           <CustomReactTable

@@ -19,31 +19,11 @@ const useStyles = makeStyles((theme) => ({
   boldFont: {
     fontWeight: 500
   },
-  avatar: {
-    fontSize: 'small',
-    color: '#fff',
-    backgroundColor: theme.palette.primary.main
-  },
 
   add_comment_wrapper: {
     marginTop: '15px'
   },
-  avatar_container: {
-    padding: '0 15px 0 0 !important',
-    ['@media all and (min-width:600px) and (max-width: 800px)']: {
-      flexGrow: '0',
-      maxWidth: '100%',
-      flexBasis: '100%',
-      marginBottom: '8px'
-    },
-    ['@media all and (max-width: 400px)']: {
-      flexGrow: '0',
-      maxWidth: '100%',
-      flexBasis: '100%',
-      width: 'unset',
-      marginBottom: '8px'
-    }
-  },
+
   comment_container: {
     padding: '0 !important',
     ['@media all and (min-width:600px) and (max-width: 800px)']: {
@@ -110,6 +90,8 @@ export const Comment = ({ referenceId }) => {
   };
 
   const classes = useStyles();
+
+  const avatarClass = '[color:var(--primary-text)_!important] [background:var(--dark-secondary,_white)_!important] [font-size:14px_!important]';
   return (
     <Box>
       <Typography variant="body2" className={classes.boldFont}>
@@ -120,7 +102,7 @@ export const Comment = ({ referenceId }) => {
           <Box key={index} mt={1}>
             <Grid container className={`${classes.comments_wrapper}`}>
               <Grid item className={` ${classes.comment_avatar}`}>
-                <Avatar className={`${classes.avatar}`}>{element.firstName[0] + element.lastName[0]}</Avatar>
+                <Avatar className={` ${avatarClass} `}>{element.firstName[0] + element.lastName[0]}</Avatar>
               </Grid>
               <Grid item className={`${classes.comments_container} `}>
                 <Typography variant="body2" className={classes.boldFont}>
@@ -136,11 +118,9 @@ export const Comment = ({ referenceId }) => {
           </Box>
         ))}
       <Box pt={3}>
-        <Grid container className={`${classes.add_comment_wrapper} `}>
-          <Grid item className={`${classes.avatar_container} `}>
-            <Avatar className={`${classes.avatar} `}>{currentUser && currentUser.firstName[0] + currentUser.lastName[0]} </Avatar>
-          </Grid>
-          <Grid item style={{ width: 'calc(100% - 64px)' }} className={`${classes.comment_container} `}>
+        <div className="flex flex-wrap items-start gap-2">
+          <Avatar className={` ${avatarClass} `}>{currentUser && currentUser.firstName[0] + currentUser.lastName[0]} </Avatar>
+          <div className=" space-y-3 flex-grow">
             <TextField
               id="outlined-multiline-static"
               label="Comment"
@@ -151,13 +131,11 @@ export const Comment = ({ referenceId }) => {
               onChange={handleChange}
               variant="outlined"
             />
-            <Box mt={1}>
-              <Button color="primary" size="small" variant="contained" onClick={postComment}>
-                Send
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
+            <Button color="primary" size="small" variant="contained" onClick={postComment}>
+              Send
+            </Button>
+          </div>
+        </div>
       </Box>
     </Box>
   );

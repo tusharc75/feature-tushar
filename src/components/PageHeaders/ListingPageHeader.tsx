@@ -2,12 +2,13 @@ import { Button, ButtonProps, CircularProgress, Menu, useMediaQuery } from '@mat
 import { AddOutlined, ExpandMore, TouchApp } from '@material-ui/icons';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import queryString from 'query-string';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
 import { SearchFilter } from 'src/components/SearchFilter';
 import HtmlTooltip from '../CustomTooltipTitle';
+import { FaCircleChevronDown } from 'react-icons/fa6';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -120,17 +121,40 @@ const ListingPageHeader = ({
     });
   }, [locationKeys]);
 
-  const renderButtonText = ({ text, icon, loading, iconText = '' }) => {
+  const renderButtonText = ({ text, startIcon = null, loading, iconText = null, endIcon = null, mobileIcon = null }) => {
     if (isMobile) {
-      return <>{loading ? <CircularProgress size={20} /> : iconText ? iconText : icon}</>;
+      return (
+        <>
+          <span className={`${loading ? 'sr-only' : ''} flex items-center`}>{mobileIcon}</span>
+          <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} `} />
+        </>
+      );
     } else {
-      return <>{loading ? <CircularProgress size={20} /> : text}</>;
+      return (
+        <>
+          <span className={` flex items-center`}>
+            {startIcon && <span className={`-ml-1 [&>*]:[font-size:20px_!important]`}>{startIcon}</span>}
+            {text && <span className={``}>{text}</span>}
+            {iconText && <span className={`${loading ? 'sr-only' : 'ml-1'}`}>{iconText}</span>}
+            {endIcon && <span className={`-mr-1 [&>*]:[font-size:20px_!important]`}>{endIcon}</span>}
+          </span>
+          <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} ml-2`} />
+        </>
+      );
     }
   };
 
+  const shouldNotFlexWrap = useMemo(() => {
+    return (onSearch || handleSearchFilter) && (isAddButtonVisible || isActionButtonVisible) && !Boolean(rightSideContents);
+  }, [handleSearchFilter, isActionButtonVisible, isAddButtonVisible, onSearch, rightSideContents]);
+
+  const isLeftSidePresent = useMemo(() => {
+    return Boolean(toggleButtonList) || Boolean(leftSideContents);
+  }, [toggleButtonList, leftSideContents]);
+
   return (
     <div className="header-panel listing-head">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
         <div className={'flex flex-wrap items-center gap-2 w-full'}>
           {toggleButtonList ? (
             <HideWhenOffline>
@@ -153,10 +177,19 @@ const ListingPageHeader = ({
           ) : null}
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
-        <div className="flex flex-wrap gap-[8px] justify-end items-center">
+        <div
+          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${
+            !isLeftSidePresent && isMobile ? '-mt-2' : ''
+          }`}
+        >
           {onSearch ? (
             <HideWhenOffline>
-              <SearchBox onChange={onSearch} value={searchValue} size="small" />
+              <SearchBox
+                className={`max-[600px]:hidden`}
+                containerProps={{ className: 'max-[600px]:hidden' }}
+                onChange={onSearch}
+                value={searchValue}
+              />
             </HideWhenOffline>
           ) : null}
           {handleSearchFilter ? (
@@ -170,7 +203,7 @@ const ListingPageHeader = ({
           ) : null}
           {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
             <>
-              <div className="flex gap-[8px] flex-wrap items-center">
+              <div className="flex gap-[8px] flex-wrap items-center min-w-fit">
                 <HideWhenOffline>
                   {isAddButtonVisible ? (
                     <HtmlTooltip title={addButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
@@ -183,14 +216,14 @@ const ListingPageHeader = ({
                         onClick={(e) => {
                           addButtonOnclick && addButtonOnclick(e);
                         }}
-                        className={`no-shadow ${addButtonLoading ? '' : 'max-[600px]:[max-width:36px_!important]'} min-h-[32px]`}
+                        className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px] max-[600px]:[padding:4px_!important]`}
                         startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
                       >
                         {renderButtonText({
-                          text: `Add ${addButtonText}`,
-                          icon: <AddOutlined />,
+                          text: `Add`,
                           loading: addButtonLoading,
-                          iconText: addButtonText
+                          iconText: addButtonText,
+                          mobileIcon: <AddOutlined />
                         })}
                       </Button>
                     </HtmlTooltip>
@@ -203,14 +236,18 @@ const ListingPageHeader = ({
                             variant={'outlined'}
                             color="default"
                             size="small"
-                            className={`new-dropdown-v1 min-h-[32px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
+                            className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
                             disabled={actionButtonLoading || actionButtonDisabled}
                             {...restOfActionButtonProps}
                             onClick={openActions}
                             aria-controls="action-menu"
                             endIcon={isMobile ? null : actionButtonIconsEnabled ? <ExpandMore /> : null}
                           >
-                            {renderButtonText({ text: 'Actions', icon: <TouchApp />, loading: actionButtonLoading })}
+                            {renderButtonText({
+                              text: 'Actions',
+                              loading: actionButtonLoading,
+                              mobileIcon: <FaCircleChevronDown size={20} />
+                            })}
                           </Button>
                         </span>
                       </HtmlTooltip>

@@ -1,22 +1,21 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Typography, Paper } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CreateZone from './CreateZone';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import Tabs from '@material-ui/core/Tabs';
+import { Box, Button, Grid } from '@material-ui/core';
 import Tab from '@material-ui/core/Tab';
-import Zipcode from './zip';
-import { BiEdit } from 'react-icons/bi';
+import Tabs from '@material-ui/core/Tabs';
+import { Edit } from '@material-ui/icons';
+import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory, useParams } from 'react-router-dom';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import CreateZone from './CreateZone';
+import Zipcode from './zip';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -102,7 +101,7 @@ const ZoneDetailPage = () => {
           .then(({ data }) => {
             setShowConfirmBox(false);
 
-            history.push(`${routes.zone.path}`)
+            history.push(`${routes.zone.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);
@@ -137,13 +136,13 @@ const ZoneDetailPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.zone?.isUpdate && (
-              <Button 
-              variant={isMobile && !isTablet ? 'text' : 'contained'}
-              className={'btn-outline-v1'} 
-              size="small" 
-              onClick={handleOpenUpdateDialog}
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                className={'btn-outline-v1'}
+                size="small"
+                onClick={handleOpenUpdateDialog}
               >
-               {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
             {permissions?.zone?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

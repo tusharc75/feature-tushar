@@ -1,18 +1,17 @@
-import { Box, Button, Grid, Paper } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Skeleton } from '@material-ui/lab';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageBlog from './ManageBlog';
 
 const BlogDetail = () => {
@@ -74,7 +73,7 @@ const BlogDetail = () => {
               type: 'success',
               message: data?.message
             });
-            history.push(`${routes.blog.path}`)
+            history.push(`${routes.blog.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);
@@ -102,12 +101,8 @@ const BlogDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.blog?.isUpdate && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className="btn-outline-v1"
-                onClick={handleOpenUpdateDialog}
-              >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
             {permissions?.blog?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

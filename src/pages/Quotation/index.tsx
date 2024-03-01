@@ -20,7 +20,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
-import SearchBox from '../../components/Helpers/SearchBox';
 import {
   QUOTATION_TYPE,
   customerAccount,
@@ -92,16 +91,16 @@ const Quotation = () => {
               <>
                 {moment(row.original?.estimateEndDate).isBefore(moment(), 'day') && (
                   <Box ml={1}>
-                    <HtmlTooltip title={`${routes.quotation.title} Expired`}>
-                      <Warning style={{ fontSize: '14px' }} className=" cursor-pointer" fontSize="small" color="error" />
+                    <HtmlTooltip title={`${routes.quotation.title} Expired`} enterTouchDelay={0} arrow placement="top">
+                      <Warning className=" cursor-pointer text-[22px] md:text-[14px]" fontSize="small" color="error" />
                     </HtmlTooltip>
                   </Box>
                 )}
                 {isDateWithinNext15Days(row.original?.estimateEndDate) && (
                   <Box ml={1}>
-                    <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
+                    <HtmlTooltip title={`${routes.quotation.title} about to renew`} enterTouchDelay={0} arrow placement="top">
                       <span className=" text-yellow-600 dark:text-yellow-500 cursor-pointer block">
-                        <Help style={{ fontSize: '14px' }} fontSize="small" />
+                        <Help className=" text-[22px] md:text-[14px]" fontSize="small" />
                       </span>
                     </HtmlTooltip>
                   </Box>

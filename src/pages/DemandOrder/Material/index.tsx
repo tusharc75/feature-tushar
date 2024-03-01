@@ -1,28 +1,26 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../../StateProvider/Provider';
-import axiosInstance from '../../../axios/axiosInstance';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import routes from '../../../components/Helpers/Routes';
-import { ExpandMore } from '@material-ui/icons';
+import { Box, Grid, IconButton, MenuItem } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import PreviewDownload from 'src/components/PreviewDownload';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import routes from '../../../components/Helpers/Routes';
 import MaterialDialog from './MaterialDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -39,8 +37,6 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
 
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -343,121 +339,78 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddDialog({ open: true, type: 'product', parentId: null });
+          }}
+        >
+          Add Existing Products
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAddDialog({ open: true, type: 'package', parentId: null });
+          }}
+        >
+          Add Existing Packages
+        </MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const previewDownloadProps = {
+    fileName: `${routes.demandOrder.title}-${demandOrderData?.demandOrderNumber}`,
+    resource: sidebarResource.demandOrder,
+    referenceId: demandOrderData?._id,
+    columns: columns
   };
 
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
-  };
-
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            const dataToDelete = selectedRecords
+              ?.filter((e) => !e.hideSelection)
+              .map((rec: any) => {
+                const obj: any = {};
+                obj.id = rec._id;
+                obj.type = rec?.type;
+                obj.materialId = rec?.materialId;
+                return obj;
+              });
+            setDeleteData(dataToDelete);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" my={1}>
-          <Box display="flex" alignItems="center">
-            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'product', parentId: null });
-                }}
-              >
-                Add Existing Products
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'package', parentId: null });
-                }}
-              >
-                Add Existing Packages
-              </MenuItem>
-            </Menu>
-          </Box>
-          <Box display="flex">
-            <PreviewDownload
-              fileName={`${routes.demandOrder.title}-${demandOrderData?.demandOrderNumber}`}
-              resource={sidebarResource.demandOrder}
-              referenceId={demandOrderData?._id}
-              columns={columns}
-            />
-            <Box ml={1} />
-            <Button
-              disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
-              variant={'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              className={`new-dropdown-v1`}
-              aria-controls="action-menu"
-              endIcon={<ExpandMore />}
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
-                }}
-              >
-                Bulk Edit
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  const dataToDelete = selectedRecords
-                    ?.filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                  setDeleteData(dataToDelete);
-                  closeActions();
-                }}
-              >
-                {`Delete (${selectedRecords?.length})`}
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+            previewDownloadProps={previewDownloadProps}
+            hasXpadding={false}
+          />
+        </>
       )}
       {columns ? (
         <>

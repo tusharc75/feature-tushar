@@ -33,12 +33,20 @@ export const capitalize = (string) => {
 type SearchFilterProps = {
   handleChangeFilter: (value) => void;
   filter: any[];
-  chip: ChipProps;
-  dontShowMyActivity?:boolean;
+  chip?: ChipProps;
+  dontShowMyActivity?: boolean;
   activityName?: string;
-} & React.HTMLAttributes<HTMLDivElement>
+} & React.HTMLAttributes<HTMLDivElement>;
 
-export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActivity = false, activityName, className='w-full sm:w-[unset] sm:max-w-[500px] sm:min-w-[200px] flex-grow', ...otherProps }: SearchFilterProps) => {
+export const SearchFilter = ({
+  handleChangeFilter,
+  filter,
+  chip = {},
+  dontShowMyActivity = false,
+  activityName,
+  className = 'w-full sm:w-[unset] sm:max-w-[500px] sm:min-w-[200px] flex-grow',
+  ...otherProps
+}: SearchFilterProps) => {
   const classes = useStyles();
   const {
     state: {
@@ -128,23 +136,24 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
           setInputValue(newInputValue);
         }}
         renderTags={(value, getTagProps) =>
-          value.map((option, index) =>{
-            const {size, ...rest} = chip;
-            return  (
-            <Chip
-              size={size ?? 'medium'}
-              {...rest}
-              label={
-                option && option.type === 'my'
-                  ? activityName
-                    ? 'My' + ' ' + startCase(activityName)
-                    : 'My activities'
-                  : option.label + ' - ' + option.name
-              }
-              {...getTagProps({ index })}
-              className={`${classes.chipStyle} `}
-            />
-          )})
+          value.map((option, index) => {
+            const { size, ...rest } = chip;
+            return (
+              <Chip
+                size={size ?? 'medium'}
+                {...rest}
+                label={
+                  option && option.type === 'my'
+                    ? activityName
+                      ? 'My' + ' ' + startCase(activityName)
+                      : 'My activities'
+                    : option.label + ' - ' + option.name
+                }
+                {...getTagProps({ index })}
+                className={`${classes.chipStyle} `}
+              />
+            );
+          })
         }
         renderInput={(params) => (
           <TextField
@@ -166,7 +175,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
         value={value}
         renderOption={(option) => {
           const index = options.findIndex((o) => o.type === option.type);
-          const {size, className, ...rest} = chip;
+          const { size, className, ...rest } = chip;
           return (
             <Grid container alignItems="center" spacing={3}>
               <Grid item>
@@ -203,4 +212,3 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
     </div>
   );
 };
-
