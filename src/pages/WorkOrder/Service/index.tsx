@@ -80,7 +80,7 @@ const Service = ({
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addServiceAnchorEl, setAddServiceAnchorEl] = useState(null);
-  const [isMobileSlideOpen, setIsMobileSlideOpen] = useState(false);
+
   const prevOrder = useRef(0);
 
   const [isSubmitting, setSubmitting] = useState(false);
@@ -605,15 +605,8 @@ const Service = ({
           {mobScreen && (
             <div
               className={`
-              fixed bg-[var(--dark-primary,_#fff)] p-[10px_20px ${
-                isMobileSlideOpen ? 'bottom-0' : '-bottom-[55px]'
-              } left-0 right-0 z-[5] [border:1px_solid_var(--common-border-color)] border-b-0 transition-all duration-300`}
+              fixed bg-[var(--dark-primary,_#fff)] p-[10px_20px -bottom-2 left-0 right-0 z-[5] [border:1px_solid_var(--common-border-color)] border-b-0 transition-all duration-300`}
             >
-              <span className=" absolute top-0 right-0">
-                <IconButton size="small" onClick={() => setIsMobileSlideOpen((prev) => !prev)} className="p-2">
-                  <MdKeyboardDoubleArrowUp className={`${isMobileSlideOpen ? ' [transform:rotate(180deg)]' : ''} transition-all duration-300`} />
-                </IconButton>
-              </span>
               <RenderService
                 {...{
                   isColapsed,
