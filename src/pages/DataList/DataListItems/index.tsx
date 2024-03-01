@@ -1,39 +1,34 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { editDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { ListingPageHeader } from 'src/components/PageHeaders';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import ManageDataList from './ManageDataList';
 import { Edit } from '@material-ui/icons';
-
-let searchTimeout;
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const DataListItems = ({dataListId}) => {
   const renderedFrom = camelCase(routes?.dataListitems.title);
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const {  page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const {  page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
     state: { user, permissions }
   }: any = useData();
   const [columns, setColumns] = useState(null);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
-  const [renderCount, setRenderCount] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
 
@@ -105,16 +100,6 @@ const DataListItems = ({dataListId}) => {
   };
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
       fetchData(); 
   }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
@@ -162,15 +147,7 @@ const DataListItems = ({dataListId}) => {
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-
-    if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
-    }
     return deepFilter;
-  };
-
-  const handleSearch = (e) => {
-    dispatch({ type: 'search', search: e.target.value });
   };
 
   const handleDelete = () => {
@@ -208,20 +185,38 @@ const DataListItems = ({dataListId}) => {
     );
   };
 
-  return (
-    <section className="main-container-v1">
-      <CustomContainer>
-        <ListingPageHeader
-          onSearch={handleSearch}
-          isActionButtonVisible={permissions?.dataLists?.isDelete}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={<ActionMenuItems />}
-          addButtonProps={{ disabled: !permissions?.dataLists.isCreate }}
-          addButtonOnclick={() => {
-            setShowManageDialog({ open: true, isEdit: false, idToEdit: null });
+  const rightSideContents = () => {
+    return (
+      <>
+        <ImportExportMenu
+          permissions={permissions?.dataLists}
+          module="Data list items"
+          api={`${routes?.dataListitems.path}/${dataListId}`}
+          afterImportCompleted={() => {
+            fetchData();
           }}
-          isAddButtonVisible={true}
+          isExportAllOrSomeFeature={true}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
+          // additionalParams={`dataListId=${dataListId}`}
         />
+      </>
+    );
+  };
+
+  return (
+    <Fragment>
+        <DetailsPageHeader
+            isAddButtonVisible={true}
+            isActionButtonVisible={permissions?.dataLists?.isDelete}
+            actionButtonMenuItems={<ActionMenuItems />}
+            addButtonProps={{ disabled: !permissions?.dataLists.isCreate, onClick: () => {
+              setShowManageDialog({ open: true, isEdit: false, idToEdit: null });
+            } }}
+            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            rightSideContents={rightSideContents()}
+            hasXpadding={false}
+          />
 
         {columns ? (
           <CustomReactTable
@@ -231,13 +226,14 @@ const DataListItems = ({dataListId}) => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
+            showArrangeView={false}
           />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-      </CustomContainer>
+
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
@@ -262,7 +258,7 @@ const DataListItems = ({dataListId}) => {
           }}
         />
       )}
-    </section>
+    </Fragment>
   );
 };
 
