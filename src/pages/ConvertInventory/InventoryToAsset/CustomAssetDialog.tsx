@@ -112,7 +112,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
                     let rowInsert = {};
                     rowInsert['index'] = row[0]?.toString();
                     rowInsert['productName'] = row[1]?.toString();
-                    rowInsert['createAsset'] = row[2];
+                    rowInsert['createAsset'] = row[2]?.toString()?.trim() === 'TRUE' ? true : false;
                     if (assetNumberTypeField) {
                         rowInsert['assetNumberType'] = rowInsert['createAsset'] ? row[3]?.toString() : ASSET_NUMBER_TYPE.manual;
                         rowInsert['assetNumber'] = row[4]?.toString();
