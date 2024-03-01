@@ -88,8 +88,8 @@ const RenderService = ({
       <div className={`${isMobile ? 'p-4' : 'container-with-border p-[20px]'}`}>
         {isMobile ? (
           <>
-            <span className=" absolute top-0 right-0">
-              <IconButton size="small" onClick={() => setIsMobileSlideOpen((prev) => !prev)} className="p-2">
+            <span className=" absolute -top-[25px] right-[15px] bg-[var(--dark-primary,_white)] rounded-[5px_5px_0_0] [border:1px_solid_var(--common-border-color)] [border-bottom:0px_!important]">
+              <IconButton size="small" onClick={() => setIsMobileSlideOpen((prev) => !prev)} className="p-[6px] ">
                 <MdKeyboardDoubleArrowUp className={`${isMobileSlideOpen ? ' ' : '[transform:rotate(180deg)]'} transition-all duration-300`} />
                 <span className="sr-only">Open menu</span>
               </IconButton>
@@ -97,10 +97,12 @@ const RenderService = ({
                 if (!visible) return null;
                 return (
                   <span
-                    className={`absolute right-0 bg-[var(--dark-secondary,_white)] ${isMobileSlideOpen ? 'opacity-100' : 'opacity-0 sr-only'}`}
-                    style={{ top: isMobileSlideOpen ? `-${(index + 1) * 32 + (index + 1) * 8}px` : '0px', transition: `top 0.${index + 1}s` }}
+                    className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${
+                      isMobileSlideOpen ? 'opacity-100' : 'opacity-0 sr-only'
+                    }`}
+                    style={{ top: isMobileSlideOpen ? `-${(index + 1) * 32 + (index + 1) * 8}px` : '-24px', transition: `top 0.${index + 2}s` }}
                   >
-                    <ThemeButton key={id} {...rest} className={isColapsed ? 'hidden' : ''}>
+                    <ThemeButton key={id} {...rest} className={`${isColapsed ? 'hidden' : ''} round`}>
                       {children}
                     </ThemeButton>
                   </span>
