@@ -53,6 +53,11 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
     var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+    if (!allowedToEdit) {
+      data?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
+    }
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
     let newColumns = generateColumns(renderedFrom, data, null, false, productionOrderData?.currency || 'USD');
