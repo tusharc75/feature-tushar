@@ -17,6 +17,7 @@ import {
     gridLoadingTimeout,
     downloadExcel,
     isObjectEmpty,
+    sidebarResource,
 } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -31,6 +32,7 @@ import CustomReactTable, { useTableReducer, useColumns } from 'src/components/Cu
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 
 
 let cancelTokenSource = null;
@@ -42,7 +44,7 @@ const Report = () => {
     const initialRender = React.useRef(true);
     const toastConfig = React.useContext(CustomToastContext);
     const {
-        state: { selectedEntity }
+        state: { selectedEntity, permissions }
     } = useData();
     const { type } = useParams();
     const history = useHistory();
@@ -390,7 +392,7 @@ const Report = () => {
 
     const fetchResourceData = () => {
         setShowGrid(true);
-        let filterQuery = getFilter();
+        let filterQuery = getQueryString();
         if (cancelTokenSource) {
             cancelTokenSource.cancel();
         }
@@ -457,8 +459,11 @@ const Report = () => {
             });
     };
 
-    const getFilter = (isExport = false) => {
-        setShowPricefilter({ warehouse: null, fromDate: null, toDate: null });
+
+    const getQueryString = (isExport = false) => {
+        if (!isExport) {
+            setShowPricefilter({ warehouse: null, fromDate: null, toDate: null });
+        }
         let filterQuery = ``;
         let deepFilter = [];
 
@@ -479,7 +484,9 @@ const Report = () => {
 
                 let filterById = idFilter.map((key) => {
                     if (key === 'warehouse') {
-                        setShowPricefilter((prevState) => ({ ...prevState, warehouse: options.map((d: any) => d.optionValue) }));
+                        if (!isExport) {
+                            setShowPricefilter((prevState) => ({ ...prevState, warehouse: options.map((d: any) => d.optionValue) }));
+                        }
                     }
                     const options = selectedData[key].value;
                     return {
@@ -518,11 +525,13 @@ const Report = () => {
                 const fields = Object.keys(betweenDate);
                 fields.forEach((field) => {
                     if (betweenDate[field]) {
-                        if (field === 'from_date') {
-                            setShowPricefilter((prevState) => ({ ...prevState, fromDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
-                        }
-                        if (field === 'to_date') {
-                            setShowPricefilter((prevState) => ({ ...prevState, toDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
+                        if (!isExport) {
+                            if (field === 'from_date') {
+                                setShowPricefilter((prevState) => ({ ...prevState, fromDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
+                            }
+                            if (field === 'to_date') {
+                                setShowPricefilter((prevState) => ({ ...prevState, toDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
+                            }
                         }
                         deepFilter.push({
                             field,
@@ -554,6 +563,15 @@ const Report = () => {
         if (resourceCamelCase === 'userSession') {
             return `?column=true&${filterQuery}`;
         }
+
+        if (isExport) {
+            let newColumns = columns.map((col) => col.accessor);
+            if (colState.length) {
+                newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor)
+            }
+            filterQuery = `${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`;
+        }
+
         return `?${filterQuery}`;
     };
 
@@ -569,13 +587,13 @@ const Report = () => {
             newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor)
         }
         setExporting(true);
-        let filterQuery = getFilter(true);
+        let filterQuery = getQueryString(true);
 
         var api = '';
         api = `/report/${type}/export`;
 
         axiosInstance()
-            .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(newColumns)} `, {
+            .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`, {
                 responseType: 'arraybuffer'
             })
             .then((res) => {
@@ -606,9 +624,31 @@ const Report = () => {
                     />
                     {showGrid && (
                         <div id="importExportLinks" style={{ minWidth: 80 }}>
-                            <Button variant="outlined" size="small" disabled={isExporting} onClick={exportData} className={`btn-outline-v-1`}>
-                                Export All
-                            </Button>
+                            {type === 'in-used-serialized-asset' ?
+                                <AsynImportExportMenu
+                                    resource={sidebarResource.report}
+                                    subResource={type}
+                                    referenceId={null}
+                                    permissions={permissions?.report}
+                                    module={routes.productionOrder.title}
+                                    api={`/report/${type}`}
+                                    afterImportCompleted={() => {
+                                    }}
+                                    isExportCount={true}
+                                    exportCount={0}
+                                    ids={[]}
+                                    onlyExport={true}
+                                    additionalParams={getQueryString(true)}
+                                /> :
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    disabled={isExporting}
+                                    onClick={exportData}
+                                    className={`btn-outline-v-1`}>
+                                    Export All
+                                </Button>
+                            }
                         </div>
                     )}
                 </div>
