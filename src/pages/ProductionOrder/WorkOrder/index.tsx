@@ -43,8 +43,6 @@ import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-var apiCallInterval: any = null;
-
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const {
@@ -760,7 +758,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     const data = [];
     records?.forEach((record) => {
       let disabled = false;
-      if (record?.assignedUsers?.length > 0) {
+      if (record?.assignedUsers?.length > 0 && !allowedToEdit) {
         if (!record?.assignedUsers?.map((a) => a?.optionValue).includes(user?.user?._id)) {
           disabled = true;
         }
@@ -782,17 +780,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const leftSideContents = () => {
     return (
       <>
-        <Autocomplete
-          className="max-w-[400px] flex-grow min-w-[200px]"
-          options={serviceOptions}
-          getOptionLabel={(option) => option?.optionLabel || ''}
-          size="small"
-          renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Select Service" variant="outlined" />}
-          value={selectedServiceOption}
-          onChange={(event: any, newValue: any) => {
-            handleServiceSelect(newValue);
-          }}
-        />
+        {allowedToEdit &&
+          <Autocomplete
+            className="max-w-[400px] flex-grow min-w-[200px]"
+            options={serviceOptions}
+            getOptionLabel={(option) => option?.optionLabel || ''}
+            size="small"
+            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Select Service" variant="outlined" />}
+            value={selectedServiceOption}
+            onChange={(event: any, newValue: any) => {
+              handleServiceSelect(newValue);
+            }}
+          />
+        }
       </>
     );
   };
@@ -887,7 +887,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         rightSideContents={rightSideContents()}
         hasXpadding
       />
-
       {columns ? (
         <>
           <Box zIndex={5} width={'100%'}>
