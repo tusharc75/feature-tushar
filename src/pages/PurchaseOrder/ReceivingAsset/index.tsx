@@ -44,6 +44,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
   const [columns, setColumns] = useState(null);
   const [addAssetDialog, setAddAssetDialog] = useState({ open: false, product: null });
+  const [assets, setAssets] = useState([]);
 
   useEffect(() => {
     fetchColumns();
@@ -285,6 +286,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       const result = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`);
       const assets: any = await axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/assets`);
       const serializedAsset = assets?.data?.data?.serializedAsset;
+      setAssets(serializedAsset)
       const productSerialNumber = assets?.data?.data?.productSerialNumber;
 
       setInventoryHistory(assets?.data?.data?.inventoryHistory);
@@ -504,6 +506,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             (d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(d.type) && d.qty !== (d?.rejectQuantity || 0)
           )}
           purchaseOrderData={purchaseOrderData}
+          assets={assets?.map(a => ({optionValue: a?._id, optionLabel: a?.assetNumber, materialId: a?.product?.optionValue}))}
         />
       )}
       {rejectProductDialog && (
