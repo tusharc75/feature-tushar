@@ -1931,10 +1931,9 @@ const ActionButtonMenuItems = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        } else if (
-          ![ASSET_STATUS.inUse, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status) &&
-          ![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.complete].includes(e.rentalAssetStatus)
-        ) {
+        } else if (![ASSET_STATUS.inUse, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
+        } else if (![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.complete].includes(e.rentalAssetStatus)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
         }
       } else if (action === rentalManagementActions.swapInUseAssets) {
