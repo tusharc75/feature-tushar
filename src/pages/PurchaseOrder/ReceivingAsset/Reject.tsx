@@ -24,7 +24,7 @@ import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { startCase } from 'lodash';
 
-const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData }) => {
+const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData, assets = [] }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -85,9 +85,11 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
           storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null,
           serializedProduct: element?.row?.serializedProduct || false,
           assetQty: element?.row?.assetQty || 0,
+          serializedAsset: element?.serializedAsset?.map((s) => s?.optionValue)
         });
       }
     });
+
     if (data?.length) {
       axiosInstance()
         .post(`${purchaseOrder.api}/reject-inventory/${purchaseOrderID}`, { material: data, rejectDate: moment(rejectDate).format('MM/DD/YYYY') })
@@ -120,6 +122,13 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
         if (user?.user?.brandPolicy?.storageLocation) {
           if (tempProduct && !d.storageLocation) {
             errors.storageLocation = 'Storage Location is required';
+          }
+        }
+        if (tempProduct?.qty - (tempProduct?.actualReceived || 0) < parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0)) {
+          const removeActualReceivedQty =
+            parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
+          if (d?.serializedAsset?.length !== removeActualReceivedQty) {
+            errors.serializedAsset = 'Selected Serialized Asset must be equal to Rejected Quantity';
           }
         }
       });
@@ -179,11 +188,12 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
               rejectQuantity: 0,
               comment: '',
               supplierPartNumber: '',
+              serializedAsset: [],
               row: d
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({ values, setFieldValue, errors }) => (
             <>
@@ -316,6 +326,40 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                         }}
                                       />
                                     </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
+                                      {data?.row?.serializedProduct && (
+                                        <Autocomplete
+                                          size="small"
+                                          multiple
+                                          disableCloseOnSelect={true}
+                                          value={data?.serializedAsset}
+                                          options={
+                                            assets?.filter((a) => a?.materialId === data?.materialId)?.length > 0
+                                              ? assets?.filter((a) => a?.materialId === data?.materialId)
+                                              : []
+                                          }
+                                          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                          onChange={(_, newValue) => {
+                                            arrayHelpers.replace(index, {
+                                              ...values.material[index],
+                                              ['serializedAsset']: newValue
+                                            });
+                                          }}
+                                          renderInput={(params) => (
+                                            <TextField
+                                              {...params}
+                                              variant="outlined"
+                                              name="serializedAsset"
+                                              label="Serialized Asset"
+                                              error={validate([data]).serializedAsset}
+                                              helperText={
+                                                validate([data]).serializedAsset ? 'Selected Serialized Asset must be equal to Rejected Quantity' : ''
+                                              }
+                                            />
+                                          )}
+                                        />
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               ))}
@@ -368,6 +412,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                     if (
                       !validate(values.material).rejectQuantity &&
                       !validate(values.material).storageLocation &&
+                      !validate(values.material).serializedAsset &&
                       !validateDate(values)?.rejectDate
                     ) {
                       handleReject(values.material, values.rejectDate);
