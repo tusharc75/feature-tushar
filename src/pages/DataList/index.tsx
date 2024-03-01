@@ -235,6 +235,7 @@ const DataList = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
+            showArrangeView={false}
           />
         ) : (
           <Box p={2} height={500}>
