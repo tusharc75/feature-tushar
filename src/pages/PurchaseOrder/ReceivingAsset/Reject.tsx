@@ -124,8 +124,12 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
             errors.storageLocation = 'Storage Location is required';
           }
         }
-        if (d?.serializedAsset?.length !== parseInt(d.rejectQuantity)) {
-          errors.serializedAsset = 'Selected Serialized Asset must be equal to Rejected Quantity';
+        if (tempProduct?.qty - (tempProduct?.actualReceived || 0) < parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0)) {
+          const removeActualReceivedQty =
+            parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
+          if (d?.serializedAsset?.length !== removeActualReceivedQty) {
+            errors.serializedAsset = 'Selected Serialized Asset must be equal to Rejected Quantity';
+          }
         }
       });
     }
