@@ -219,7 +219,7 @@ export const userType = {
   brandAdmin: 2
 };
 
-export const gridPageSizes = [25, 50, 75, 100];
+export const gridPageSizes = [20, 50, 100, 200];
 export const gridLoadingTimeout = 500;
 export const processFieldName = 'process';
 
