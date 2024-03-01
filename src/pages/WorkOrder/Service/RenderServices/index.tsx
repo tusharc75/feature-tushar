@@ -1,6 +1,6 @@
 import { Chip, IconButton } from '@material-ui/core';
 import { ArrowBackIos, ArrowForwardIos, DeleteOutline, FormatQuote, Message, MoreHoriz, People } from '@material-ui/icons';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PostWorkIcon, PreWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ButtonType, ThemeButton } from 'src/components/Helpers/Buttons';
@@ -8,6 +8,7 @@ import { WORKORDER_SERVICE_STATUS, getChipColor, sidebarResource } from 'src/con
 import { RenderStatusIcon } from '../index';
 import RenderTotalTime from './RenderTotalTime';
 import useTab from './useTab';
+import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
 
 export type ServicesButtons = { visible: boolean; id: string | number } & ButtonType;
 
@@ -50,6 +51,8 @@ const RenderService = ({
 
   initialTabIndex = 0
 }: RenderServiceProps) => {
+  const [isMobileSlideOpen, setIsMobileSlideOpen] = useState(false);
+
   const getFieldsWithOtherDetails = (step: any, stepSubmitedData) => {
     const steps = stepSubmitedData?.filter((item: any) => item?.uniqueId === step?.uniqueId);
     const stepTimes = [];
@@ -85,6 +88,26 @@ const RenderService = ({
       <div className={`${isMobile ? 'p-4' : 'container-with-border p-[20px]'}`}>
         {isMobile ? (
           <>
+            <span className=" absolute top-0 right-0">
+              <IconButton size="small" onClick={() => setIsMobileSlideOpen((prev) => !prev)} className="p-2">
+                <MdKeyboardDoubleArrowUp className={`${isMobileSlideOpen ? ' ' : '[transform:rotate(180deg)]'} transition-all duration-300`} />
+                <span className="sr-only">Open menu</span>
+              </IconButton>
+              {servicesButtons.map(({ id, children, visible, ...rest }, index) => {
+                if (!visible) return null;
+                return (
+                  <span
+                    className={`absolute right-0 bg-[var(--dark-secondary,_white)] ${isMobileSlideOpen ? 'opacity-100' : 'opacity-0 sr-only'}`}
+                    style={{ top: isMobileSlideOpen ? `-${(index + 1) * 32 + (index + 1) * 8}px` : '0px', transition: `top 0.${index + 1}s` }}
+                  >
+                    <ThemeButton key={id} {...rest} className={isColapsed ? 'hidden' : ''}>
+                      {children}
+                    </ThemeButton>
+                  </span>
+                );
+              })}
+            </span>
+
             <div className="grid grid-cols-[30px_1fr_30px] items-center gap-[8px] min-h-[74px]">
               <IconButton disabled={!hasPrevTab} className={`${!hasPrevTab ? 'opacity-0' : 'opacity-100'}`} onClick={handlePrevClick} size="small">
                 <ArrowBackIos />
@@ -119,22 +142,6 @@ const RenderService = ({
                 <ArrowForwardIos />
               </IconButton>
             </div>
-
-            <div className={`gap-2 flex flex-wrap ${isColapsed ? 'justify-around' : 'justify-end'} mt-3`}>
-              {servicesButtons.map(({ id, children, visible, ...rest }) => {
-                if (!visible) return null;
-                return (
-                  <ThemeButton key={id} {...rest} className={isColapsed ? 'hidden' : ''}>
-                    {children}
-                  </ThemeButton>
-                );
-              })}
-              {isMobile || (
-                <IconButton size={'small'} onClick={handleColapse}>
-                  {isColapsed ? <ArrowForwardIos /> : <ArrowBackIos />}
-                </IconButton>
-              )}
-            </div>
           </>
         ) : (
           <>
@@ -147,11 +154,9 @@ const RenderService = ({
                   </ThemeButton>
                 );
               })}
-              {isMobile || (
-                <IconButton size={'small'} onClick={handleColapse}>
-                  {isColapsed ? <ArrowForwardIos /> : <ArrowBackIos />}
-                </IconButton>
-              )}
+              <IconButton size={'small'} onClick={handleColapse}>
+                {isColapsed ? <ArrowForwardIos /> : <ArrowBackIos />}
+              </IconButton>
             </div>
             <div className={`overflow-x-hidden overflow-y-auto max-h-[calc(100vh-300px)]`}>
               {serviceSteps?.map((data, index) => {
