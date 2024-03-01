@@ -214,19 +214,17 @@ const CustomFilter = ({ field, setFilterQuery }) => {
         <Box minWidth="70%">
           <DisplyaFilters chipData={chipData} handleFilterOpen={handleFilterOpen} clearSingleFilter={clearSingleFilter} />
         </Box>
-        <HtmlTooltip title="Apply Filters" placement="top" arrow>
-          <ThemeButton
-            tooltip="filters"
-            startIcon={<BiFilterAlt className="-ml-1 mt-[1px] mr-1" />}
-            iconForMobile={<BiFilterAlt />}
-            onClick={() => {
-              setIsFilterOpen(true);
-            }}
-            variant="outlined"
-          >
-            Filters
-          </ThemeButton>
-        </HtmlTooltip>
+        <ThemeButton
+          tooltip="Apply Filters"
+          startIcon={<BiFilterAlt className="-ml-1 mt-[1px] mr-1" />}
+          iconForMobile={<BiFilterAlt />}
+          onClick={() => {
+            setIsFilterOpen(true);
+          }}
+          variant="outlined"
+        >
+          Filters
+        </ThemeButton>
       </Box>
       {isFilterOpen && (
         <Dialog
