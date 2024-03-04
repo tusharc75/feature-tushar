@@ -362,7 +362,8 @@ export const sidebarResource = {
   creditMemo: 'Credit Memo',
   outboundMessage: 'Outbound Message',
   payrollPolicy: 'Payroll Policy',
-  triggerNotificationMaster: 'Trigger Notification Master'
+  triggerNotificationMaster: 'Trigger Notification Master',
+  deals: 'Deals',
 };
 
 export const primaryFields = {
@@ -543,7 +544,8 @@ export const CHILD_RESOURCE = {
   workOrderProduct: 'Work Order Product',
   payrollHoliday: 'Payroll Holiday',
   payrollPayTypes: 'Payroll Pay Types',
-  payrollPaidTimeOff: 'Payroll Paid Time Off'
+  payrollPaidTimeOff: 'Payroll Paid Time Off',
+  dealsMaterial: 'Deals Material',
 };
 
 export const sidebarResourceObjectFromValues = () => {

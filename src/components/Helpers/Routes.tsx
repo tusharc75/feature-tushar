@@ -1,4 +1,4 @@
-import { RESOURCE_LABEL } from '../../constants/helpers';
+import { RESOURCE_LABEL, sidebarResource } from '../../constants/helpers';
 
 const storedRoutes = localStorage.getItem('routes') ? JSON.parse(localStorage.getItem('routes')) : null;
 
@@ -1196,6 +1196,14 @@ const routes = {
     title: storedRoutes && storedRoutes.dataListitems && storedRoutes.dataListitems.title ? storedRoutes.dataListitems?.title : RESOURCE_LABEL.dataListitems,
     path: '/data-lists/data-list-items'
   },
+  deals: {
+    title: storedRoutes && storedRoutes.deals && storedRoutes.deals.title ? storedRoutes.deals?.title : sidebarResource.deals,
+    path: '/deals'
+  },
+  dealDetail: {
+    title: storedRoutes && storedRoutes.deals && storedRoutes.deals.title ? storedRoutes.deals?.title : sidebarResource.deals,
+    path: '/deals/detail'
+  }
 };
 
 export default routes;
