@@ -1658,7 +1658,7 @@ const FormTypes = (props) => {
           {...rest}
           disabled={fieldData?.isUneditable || rest?.disabled}
           variant="outlined"
-          type={fieldData.returnType === 'decimal' ? 'number' : 'text'}
+          type={fieldData?.returnType === 'decimal' ? 'number' : 'text'}
           label={getLabel(label)}
           name={name}
           required={required}
@@ -1669,7 +1669,7 @@ const FormTypes = (props) => {
             onChange
               ? onChange
               : (e) => {
-                if (fieldData.returnType === 'decimal') {
+                if (fieldData?.returnType === 'decimal') {
                   handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
                 } else {
                   handleChange(name, e.target.value);
