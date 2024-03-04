@@ -286,7 +286,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       const result = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`);
       const assets: any = await axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/assets`);
       const serializedAsset = assets?.data?.data?.serializedAsset;
-      setAssets(serializedAsset)
+      setAssets(serializedAsset);
       const productSerialNumber = assets?.data?.data?.productSerialNumber;
 
       setInventoryHistory(assets?.data?.data?.inventoryHistory);
@@ -310,47 +310,70 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           productCategory: item.productDetail?.productCategory?.optionLabel
         };
 
-        res.subRows = [];
-        const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.materialId);
-        if (subRows?.length) {
-          let actualReceived = item.actualReceived;
-          let index = 1;
-          subRows?.forEach((e: any) => {
-            if (actualReceived && !e.isUsed) {
-              res.subRows.push({
-                index: `${res.index}.${index}`,
-                _id: e?._id,
-                detail: e.assetNumber,
-                type: MATERIAL_TYPE.serializedAsset,
-                assetId: e?._id,
-                hideSelection: true
-              });
-              actualReceived = actualReceived - 1;
-              index = index + 1;
-              e.isUsed = true;
-            }
-          });
-        }
-        const subRowsproductSerialNumber = productSerialNumber?.filter((e) => e?.product === res?.materialId);
-        if (subRowsproductSerialNumber?.length) {
-          let actualReceived = item.actualReceived;
-          let index = 1;
-          subRowsproductSerialNumber?.forEach((e: any) => {
-            if (actualReceived && !e.isUsed) {
-              res.subRows.push({
-                _id: e?._id,
-                index: `${res.index}.${index + 1}`,
-                detail: e.serialNumber,
-                type: 'Serial Number',
-                assetId: e?._id,
-                hideSelection: true
-              });
-              actualReceived = actualReceived - 1;
-              index = index + 1;
-              e.isUsed = true;
-            }
-          });
-        }
+        res.subRows = [
+          ...(res?.subRows || []),
+          ...(serializedAsset
+            ?.filter((e) => e?.product?.optionValue === res?.materialId && e?.uniqueId === res?._id)
+            ?.map((e, i) => ({
+              index: `${res.index}.${i + 1}`,
+              _id: e?._id,
+              detail: e.assetNumber,
+              type: MATERIAL_TYPE.serializedAsset,
+              assetId: e?._id,
+              hideSelection: true
+            })) || []),
+          ...(productSerialNumber
+            ?.filter((e) => e?.product === res?.materialId && e?.uniqueId === res?._id)
+            ?.map((e, i) => ({
+              index: `${res.index}.${i + 1}`,
+              _id: e?._id,
+              detail: e.serialNumber,
+              type: 'Serial Number',
+              assetId: e?._id,
+              hideSelection: true
+            })) || [])
+        ];
+
+        // const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.materialId && e?.uniqueId === res?._id);
+        // if (subRows?.length) {
+        //   let actualReceived = item.actualReceived;
+        //   let index = 1;
+        //   subRows?.forEach((e: any) => {
+        //     if (actualReceived && !e.isUsed) {
+        //       res.subRows.push({
+        //         index: `${res.index}.${index}`,
+        //         _id: e?._id,
+        //         detail: e.assetNumber,
+        //         type: MATERIAL_TYPE.serializedAsset,
+        //         assetId: e?._id,
+        //         hideSelection: true
+        //       });
+        //       actualReceived = actualReceived - 1;
+        //       index = index + 1;
+        //       e.isUsed = true;
+        //     }
+        //   });
+        // }
+        // const subRowsproductSerialNumber = productSerialNumber?.filter((e) => e?.product === res?.materialId && e?.uniqueId === res?._id);
+        // if (subRowsproductSerialNumber?.length) {
+        //   let actualReceived = item.actualReceived;
+        //   let index = 1;
+        //   subRowsproductSerialNumber?.forEach((e: any) => {
+        //     if (actualReceived && !e.isUsed) {
+        //       res.subRows.push({
+        //         _id: e?._id,
+        //         index: `${res.index}.${index + 1}`,
+        //         detail: e.serialNumber,
+        //         type: 'Serial Number',
+        //         assetId: e?._id,
+        //         hideSelection: true
+        //       });
+        //       actualReceived = actualReceived - 1;
+        //       index = index + 1;
+        //       e.isUsed = true;
+        //     }
+        //   });
+        // }
         res['assetQty'] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length;
         res['inventoryQty'] = item?.actualReceived
           ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
@@ -506,7 +529,12 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             (d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(d.type) && d.qty !== (d?.rejectQuantity || 0)
           )}
           purchaseOrderData={purchaseOrderData}
-          assets={assets?.map(a => ({optionValue: a?._id, optionLabel: a?.assetNumber, materialId: a?.product?.optionValue}))}
+          assets={assets?.map((a) => ({
+            optionValue: a?._id,
+            optionLabel: a?.assetNumber,
+            materialId: a?.product?.optionValue,
+            uniqueId: a?.uniqueId
+          }))}
         />
       )}
       {rejectProductDialog && (

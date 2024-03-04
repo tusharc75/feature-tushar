@@ -334,8 +334,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                           disableCloseOnSelect={true}
                                           value={data?.serializedAsset}
                                           options={
-                                            assets?.filter((a) => a?.materialId === data?.materialId)?.length > 0
-                                              ? assets?.filter((a) => a?.materialId === data?.materialId)
+                                            assets?.filter((a) => a?.materialId === data?.materialId && a?.uniqueId === data?._id)?.length > 0
+                                              ? assets?.filter((a) => a?.materialId === data?.materialId && a?.uniqueId === data?._id)
                                               : []
                                           }
                                           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
