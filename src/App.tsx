@@ -257,6 +257,8 @@ import DataListDetail from './pages/DataList/dataListdetail';
 
 import Forms from './pages/Forms';
 import CreateForm from './pages/Forms/CreateForm';
+import Deals from './pages/Deals';
+import DealDetail from './pages/Deals/dealDetail';
 
 
 var notificationInterval: any = null;
@@ -1129,6 +1131,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.userAttendance.path}>
               <UserAttendance />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.deals.path}>
+              <Deals />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.dealDetail.path}/:id`}>
+              <DealDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
