@@ -134,7 +134,6 @@ const Material = ({
         materialId: u?.productDetail[0]?._id
       };
     });
-    console.log(rows)
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
