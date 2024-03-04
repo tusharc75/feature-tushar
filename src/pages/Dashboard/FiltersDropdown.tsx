@@ -1,6 +1,7 @@
 import React from 'react';
 import { Popover, TextField, Box } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
+import routes from 'src/components/Helpers/Routes';
 
 interface Props {
   filters: { key: string; title: string; multiple?: boolean; defaultValue?: number; }[];
@@ -64,7 +65,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                 getOptionLabel={(option: any) => option.optionLabel}
                 getOptionSelected={(option, val) => option.optionValue === val.optionValue}
                 onChange={(_, val) => handleChange(filter.key, val)}
-                renderInput={(params) => <TextField {...params} label={filter.title} variant="outlined" />}
+                renderInput={(params) => <TextField {...params} label={routes[`${filter.key}`] ? routes[`${filter.key}`]?.title : filter.title} variant="outlined" />}
               />
             ) : (
               <TextField
