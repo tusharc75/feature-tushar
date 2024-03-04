@@ -22,7 +22,7 @@ const AsynImportExportMenu = ({
   total = 0,
   additionalParams = null,
   title = '',
-  onlyExport = true
+  onlyExport = false
 }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
 
