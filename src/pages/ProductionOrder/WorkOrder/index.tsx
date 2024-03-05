@@ -1111,6 +1111,7 @@ const ActionButtonMenuItems = ({
   return (
     <>
       <MenuItem
+        disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e.parentId)?.length ? false : true}
         onClick={() => {
           setAddServicesDialog({ open: true, new: false });
         }}
@@ -1118,6 +1119,7 @@ const ActionButtonMenuItems = ({
         Add Existing Services
       </MenuItem>
       <MenuItem
+        disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e.parentId)?.length ? false : true}
         onClick={() => {
           setAddServicesDialog({ open: true, new: true });
         }}
