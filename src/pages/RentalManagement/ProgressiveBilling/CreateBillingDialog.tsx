@@ -821,6 +821,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           selectedProducts={[]}
           loading={isUpdating}
           isQtyOnly={true}
+          isRateRequired={false}
         />
       )}
     </Fragment>

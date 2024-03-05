@@ -14,6 +14,7 @@ import { GetApp } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
 import NoDataCell from '../Helpers/NoDataCell';
+import routes from '../Helpers/Routes';
 
 const ImportExportDialog = ({ handleClose, type, resource, subResource, referenceId, handleExport, api, additionalParams, refresh }) => {
     const toastConfig = useContext(CustomToastContext);
@@ -21,6 +22,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
     const [columns, setColumns] = useState([]);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [downloading, setDownloading] = useState({ loading: false, type: null });
+    const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, pageSizes } = state;
 
     const [count, setCount] = useState(0);
 
@@ -37,7 +39,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
 
     useEffect(() => {
         fetchData();
-    }, [count, refresh]);
+    }, [count, refresh, pageSizes, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly,]);
 
     const fetchData = async () => {
         dispatch({ type: 'loading', loading: true });
@@ -53,7 +55,8 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
             let rows = data?.data?.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 return {
-                    ...finalObject
+                    ...finalObject,
+                    user: u?.user,
                 };
             });
             dispatch({ type: 'initialize', data: rows, count: count });
@@ -73,6 +76,20 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
                 width: 120,
                 Cell: ({ row }) => {
                     return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
+                }
+            },
+            {
+                accessor: 'user',
+                Header: 'User',
+                width: 120,
+                Cell: ({ row }) => {
+                    return row.original?.user ?
+                        <div>
+                            <a
+                                className="link text-truncate"
+                                href={`${routes.userDetail.path}/${row.original?.user?._id}`}
+                                target="_blank">{row.original?.user?.concatedName}</a>
+                        </div> : <NoDataCell />;
                 }
             },
             {
@@ -97,7 +114,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
                         {row?.original?.status === IMPORT_EXPORT_STATUS.inProgress &&
                             <CircularProgress size={20} aria-disabled />
                         }
-                        {(type === IMPORT_EXPORT_TYPE.export && [IMPORT_EXPORT_STATUS.completed, IMPORT_EXPORT_STATUS.partialComplete]?.includes(row?.original?.status)
+                        {row?.original?.fileName && (type === IMPORT_EXPORT_TYPE.export && [IMPORT_EXPORT_STATUS.completed, IMPORT_EXPORT_STATUS.partialComplete]?.includes(row?.original?.status)
                             || type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error) &&
                             <HtmlTooltip title={'Download'}>
                                 <IconButton

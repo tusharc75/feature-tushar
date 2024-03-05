@@ -748,7 +748,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const isDisabledCompleteService = () => {
-    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.status === WORKORDER_SERVICE_STATUS.pending);
+    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.includes(e?.status));
     if (records?.length === 0) {
       return true;
     }
@@ -1111,6 +1111,7 @@ const ActionButtonMenuItems = ({
   return (
     <>
       <MenuItem
+        disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e.parentId)?.length ? false : true}
         onClick={() => {
           setAddServicesDialog({ open: true, new: false });
         }}
@@ -1118,6 +1119,7 @@ const ActionButtonMenuItems = ({
         Add Existing Services
       </MenuItem>
       <MenuItem
+        disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e.parentId)?.length ? false : true}
         onClick={() => {
           setAddServicesDialog({ open: true, new: true });
         }}

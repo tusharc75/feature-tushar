@@ -891,11 +891,6 @@ const LoadingTicket = ({
         } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
         } else if (e?.type === 'Asset' &&
-          ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered]?.includes(e?.status)
-        ) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.statusInUseCancelLoading });
-        } else if (
-          e?.type === 'Asset' &&
           ![
             RENTAL_INTERNAL_ASSET_STATUS.inUse,
             RENTAL_INTERNAL_ASSET_STATUS.standBy,
@@ -904,7 +899,13 @@ const LoadingTicket = ({
           ]?.includes(e?.rentalAssetStatus)
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusInUseCancelLoading });
-        } else if (
+        }
+        else if (e?.type === 'Asset' &&
+          ![ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered]?.includes(e?.status)
+        ) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.statusInUseCancelLoading });
+        }
+        else if (
           e?.type === 'Product' &&
           ![
             RENTAL_INTERNAL_ASSET_STATUS.inUse,
