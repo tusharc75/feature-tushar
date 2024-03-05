@@ -61,6 +61,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [isRateRequired, setIsRateRequired] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -294,6 +295,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
       const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+      setIsRateRequired(isPriceRequired)
 
       rows.forEach((parent, i) => {
         parent.index = i + 1;
@@ -716,6 +718,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           loading={isUpdating}
           from={'service'}
           showSaveAndNext={isProductEdit.showSaveAndNext}
+          isRateRequired={isRateRequired}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (

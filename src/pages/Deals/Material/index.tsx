@@ -58,7 +58,63 @@ const Material = ({
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.dealsMaterial}`);
     setAllFields(JSON.parse(JSON.stringify(response?.data?.data)));
     const newColumns = generateColumns(renderedFrom, response?.data?.data, routes.dealDetail.path, true);
-        setColumns([...newColumns]);
+    let column: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        disableFilters: true,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'detail',
+        Header: 'Details',
+        minWidth: 300,
+        width: 300,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p
+                className="link text-truncate"
+                title={row.original.detail}
+              >
+                {row.original.detail}
+            </p>
+            <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+          </div>
+        )
+      }
+    ];
+        setColumns([...column,...newColumns]);
   };
 
   const fetchData = async () => {
@@ -69,10 +125,15 @@ const Material = ({
       
       const data = response?.data?.data;
       const count = response?.data?.data?.count;
-      let rows = response?.data?.data?.map((u) => {
+    let rows = response?.data?.data?.map((u, i) => {
           let finalObject: any = prepareDataForGrid(u, user);
-          return finalObject;
-      });
+      return {
+        ...finalObject,
+        index: i + 1,
+        detail: u?.productDetail[0]?.productName || "",
+        materialId: u?.productDetail[0]?._id
+      };
+    });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
