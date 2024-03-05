@@ -1143,32 +1143,32 @@ const Steps = ({
                               WORKORDER_SERVICE_STEP_STATUS.pause,
                               WORKORDER_SERVICE_STEP_STATUS.needReperform
                             ].includes(stepData?.status) &&
-                              isStepsAllowToPerform && step?.isAllowToPerform
-                                (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && !user?.brandPolicy?.workOrderTimer ? null : (
-                                  <Button
-                                    variant="outlined"
-                                    className={classes.stepButtons}
-                                    color="secondary"
-                                    size="small"
-                                    disabled={!allowedToEdit}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (
-                                        [WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)
-                                      ) {
-                                        handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
-                                      } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
-                                        handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
-                                      }
-                                    }}
-                                  >
-                                    {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
-                                      ? 'Resume'
-                                      : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                        ? 'Pause'
-                                        : 'Restart'}
-                                  </Button>
-                                ))}
+                              isStepsAllowToPerform && step?.isAllowToPerform &&
+                              (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start && !user?.brandPolicy?.workOrderTimer ? null : (
+                                <Button
+                                  variant="outlined"
+                                  className={classes.stepButtons}
+                                  color="secondary"
+                                  size="small"
+                                  disabled={!allowedToEdit}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (
+                                      [WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)
+                                    ) {
+                                      handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
+                                    } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+                                      handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
+                                    }
+                                  }}
+                                >
+                                  {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
+                                    ? 'Resume'
+                                    : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+                                      ? 'Pause'
+                                      : 'Restart'}
+                                </Button>
+                              ))}
                             {stepData?.passFailStatus ? (
                               <RenderPassFailChip status={stepData?.passFailStatus} className={classes.stepTags} />) : null}
                             {step?.isAllowToPerform && isStepsAllowToPerform ?
