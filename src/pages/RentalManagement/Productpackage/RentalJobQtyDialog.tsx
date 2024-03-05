@@ -42,6 +42,7 @@ interface EditDialogProps {
   isQtyOnly?: Boolean;
   isInlineEdit?: Boolean;
   showSaveAndNext?: Boolean;
+  isRateRequired: Boolean;
 }
 
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
@@ -55,6 +56,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   selectedProducts,
   isBulkedit,
   loading,
+  isRateRequired,
   isQtyOnly = false,
   from,
   isInlineEdit = false,
@@ -206,10 +208,10 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       //     });
       //   });
       // } else {
-        setInitialData({
-          fields: data,
-          values: getObjKeysWithValues(rowData, data)
-        });
+      setInitialData({
+        fields: data,
+        values: getObjKeysWithValues(rowData, data)
+      });
       // }
     }
     EvaluteproductFields(data);
@@ -341,8 +343,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         updatedRows.push({ _id: ele._id, ...getObjKeysWithValues(ele, allFields) });
       });
       handleSaveData(updatedRows);
-    } else {
-      if (rowData.parentId && !showConfirmationDialog) {
+    }
+    else {
+      if (rowData.parentId && !showConfirmationDialog && isRateRequired) {
         setShowConfirmationDialog(true);
       } else {
         const rows = await calculateRowsField(material, values, allFields, rowData);

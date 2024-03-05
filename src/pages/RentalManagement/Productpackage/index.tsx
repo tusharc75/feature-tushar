@@ -71,6 +71,7 @@ const Productpackage = ({
   const [addExistingAssets, setAddExistingAssets] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
+  const [isRateRequired, setIsRateRequired] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -135,12 +136,12 @@ const Productpackage = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === MATERIAL_TYPE.service
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === MATERIAL_TYPE.service
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -306,26 +307,26 @@ const Productpackage = ({
     rows = [...products, ...packages];
 
     const isPriceRequired = allFields.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired)
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.product
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
-      }`;
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
@@ -357,23 +358,22 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.package
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === MATERIAL_TYPE.package
           ? _subRow.packageDetail?.packageName
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : ''
-      } `;
+            ? _subRow.productDetail?.productName
+            : ''
+        } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
@@ -569,7 +569,7 @@ const Productpackage = ({
 
   const onConfirmSave = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (rowData.parentId && !showConfirmationDialog.open) {
+    if (rowData.parentId && !showConfirmationDialog.open && isRateRequired) {
       setShowConfirmationDialog({
         open: true,
         data: {
@@ -577,7 +577,8 @@ const Productpackage = ({
           updatedData
         }
       });
-    } else {
+    }
+    else {
       if (inputField.hasOwnProperty('qtyDisplay')) {
         inputField['qty'] = inputField['qtyDisplay'];
         if (rowData.hideSelection && inputField['qty'] < rowData?.assetQty) {
@@ -763,6 +764,7 @@ const Productpackage = ({
           showSaveAndNext={isProductEdit.showSaveAndNext}
           from={'product'}
           isInlineEdit={isInlineEdit}
+          isRateRequired={isRateRequired}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
