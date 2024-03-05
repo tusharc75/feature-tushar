@@ -335,6 +335,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
             handleConvert(rows);
           }}
           loading={loading}
+          resource={sidebarResource.inventoryToAsset}
         />
       )}
     </Dialog>

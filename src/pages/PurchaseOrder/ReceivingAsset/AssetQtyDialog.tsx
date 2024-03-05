@@ -5,7 +5,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { purchaseOrder } from '../../../constants/helpers';
+import { purchaseOrder, sidebarResource } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import CustomAssetDialog from 'src/pages/ConvertInventory/InventoryToAsset/CustomAssetDialog';
 import { isEqual } from 'lodash';
@@ -149,6 +149,7 @@ const AssetQtyDialog = ({ onClose, onSuccess, product, purchaseOrderData }) => {
                         handleReceive(products)
                     }}
                     loading={isSubmitting}
+                    resource={sidebarResource.purchaseOrder}
                 />
             )}
         </>

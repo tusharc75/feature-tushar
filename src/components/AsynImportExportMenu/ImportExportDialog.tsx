@@ -39,7 +39,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
 
     useEffect(() => {
         fetchData();
-    }, [count, refresh,pageSizes,page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly,]);
+    }, [count, refresh, pageSizes, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly,]);
 
     const fetchData = async () => {
         dispatch({ type: 'loading', loading: true });
@@ -83,8 +83,13 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
                 Header: 'User',
                 width: 120,
                 Cell: ({ row }) => {
-                    return row.original?.user ? <a className="link text-truncate" href={`${routes.userDetail.path}/${row.original?.user?._id}`} target="_blank">{row.original?.user?.concatedName ||""
-                    }</a> : <NoDataCell />;
+                    return row.original?.user ?
+                        <div>
+                            <a
+                                className="link text-truncate"
+                                href={`${routes.userDetail.path}/${row.original?.user?._id}`}
+                                target="_blank">{row.original?.user?.concatedName}</a>
+                        </div> : <NoDataCell />;
                 }
             },
             {
@@ -109,7 +114,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
                         {row?.original?.status === IMPORT_EXPORT_STATUS.inProgress &&
                             <CircularProgress size={20} aria-disabled />
                         }
-                        {(type === IMPORT_EXPORT_TYPE.export && [IMPORT_EXPORT_STATUS.completed, IMPORT_EXPORT_STATUS.partialComplete]?.includes(row?.original?.status)
+                        {row?.original?.fileName && (type === IMPORT_EXPORT_TYPE.export && [IMPORT_EXPORT_STATUS.completed, IMPORT_EXPORT_STATUS.partialComplete]?.includes(row?.original?.status)
                             || type === IMPORT_EXPORT_TYPE.import && row?.original?.status === IMPORT_EXPORT_STATUS.error) &&
                             <HtmlTooltip title={'Download'}>
                                 <IconButton

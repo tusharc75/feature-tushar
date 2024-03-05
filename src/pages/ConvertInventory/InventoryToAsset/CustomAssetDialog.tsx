@@ -15,7 +15,7 @@ import {
 } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ASSET_NUMBER_TYPE } from '../../../constants/helpers';
+import { ASSET_NUMBER_TYPE, sidebarResource } from '../../../constants/helpers';
 import { Formik, Form, FieldArray } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { read, utils, writeFile } from 'xlsx';
@@ -26,7 +26,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
+const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, resource }) => {
 
     const { setToastConfig } = useContext(CustomToastContext);
 
@@ -92,7 +92,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
         }
         const wb = utils.book_new();
         utils.book_append_sheet(wb, ws, 'Sheet1');
-        writeFile(wb, 'Inventory to Asset.xlsx');
+        writeFile(wb, sidebarResource.purchaseOrder ? 'Purchase Order Assets.xlsx' : 'Inventory to Assets.xlsx');
     };
 
     const handleImport = (e: React.ChangeEvent<HTMLInputElement>, setValues, values) => {
@@ -180,7 +180,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
             }}
         >
             <CustomDialogHeader
-                title={'Assign Asset Numbers'}
+                title={resource === sidebarResource.purchaseOrder ? 'Create/Assign Asset Numbers' : 'Assign Asset Numbers'}
                 onClose={handleClose}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
