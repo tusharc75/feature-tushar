@@ -387,7 +387,7 @@ const Productpackage = ({
       parent.isValid = false;
     }
     if (subRows?.length) {
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+      parent.hideSelection = parent.hideSelection ? parent.hideSelection: subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
   };
