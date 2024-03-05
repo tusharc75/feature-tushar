@@ -503,7 +503,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     });
 
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
-   console.log(childProduct)
   
     var assetQtySUM = 0;
     var assetAssignedQtySUM = 0;
@@ -570,11 +569,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             ? true
             : false
           : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
-          ? true
-          : _subRow.assetAssignedQty ===
-            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
-          ? true
-          : false;
+            ? true
+            : _subRow.assetAssignedQty ===
+              tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+              ? true
+              : false;
 
       if (_subRow.subRows.length && _subRow.isValid) {
         if (_subRow.subRows.every((d) => d.isValid)) {
@@ -584,9 +583,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         }
       }
       subRows.push(_subRow);
-      assetAssignedQtySUM += _subRow.type=='product' ? _subRow.assetAssignedQty : 0;
+      assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
-    
     parent.assetAssignedQty += assetAssignedQtySUM;
     parent.isValid = parent.serializedProduct || parent.type === 'package' ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
 
