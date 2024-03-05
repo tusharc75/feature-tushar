@@ -386,7 +386,7 @@ const Productpackage = ({
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (subRows?.length) {
+    if (subRows?.length && !parent.hideSelection) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
