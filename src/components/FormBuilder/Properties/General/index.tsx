@@ -50,6 +50,27 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
           setFieldValue('fieldLabel', e.target.value.trimStart());
         }}
       />
+      <Box>
+        <Grid container>
+          <Grid item xs={12} md={6}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="required"
+                  //disabled={values['required'] ? true : false}
+                  checked={values['required']}
+                  onChange={(e) => {
+                    setFieldValue('required', e.target.checked);
+                  }}
+                  color="primary"
+                />
+              }
+              label="Required"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
       {(module === 'product-template' || module === 'price-template') && (
         <Box mb={1}>
           <TextField
@@ -62,6 +83,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
             disabled={true}
             value={values['fieldName'] ? values['fieldName'] : fieldLabelToFieldName(values['fieldLabel'])}
           />
+
           {/* <FormControlLabel
                         control={
                           <Checkbox

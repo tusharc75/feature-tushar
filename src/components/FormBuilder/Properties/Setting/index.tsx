@@ -13,43 +13,74 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
             <FormControlLabel
               control={
                 <Checkbox
-                  name="isShowFieldDependentOn"
-                  checked={values['isShowFieldDependentOn']}
+                  name="isDefaultValue"
+                  disabled={values['type'] === 'freeStyleMultiSelect'}
+                  checked={values['isDefaultValue']}
                   onChange={(e) => {
-                    setFieldValue('isShowFieldDependentOn', e.target.checked);
+                    setFieldValue('isDefaultValue', e.target.checked);
                   }}
                   color="primary"
                 />
               }
-              label="Show Field Dependent On"
+              label="Default Value"
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            {values['isShowFieldDependentOn'] && (
-              <ShowFieldDependentOn values={values} name={'showFieldDependentOn'} setFieldValue={setFieldValue} fields={fields} _id={fieldData._id} />
-            )}
-          </Grid>
-        </Grid>
-      </Box>
-      <Box>
-        <Grid container>
-          <Grid item xs={12} md={6}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="required"
-                  //disabled={values['required'] ? true : false}
-                  checked={values['required']}
-                  onChange={(e) => {
-                    setFieldValue('required', e.target.checked);
+            {values['isDefaultValue'] ? (
+              fieldData.type === 'imageUpload' ? (
+                <FormTypes
+                  values={{ defaultValue: values['defaultValue'] }}
+                  errors={errors}
+                  touched={touched}
+                  label={''}
+                  name={'defaultValue'}
+                  type={fieldData.type}
+                  setFieldValue={(name, value) => {
+                    setFieldValue(name, value);
                   }}
-                  color="primary"
+                  isTooltip={false}
                 />
-              }
-              label="Required"
-            />
+              ) : fieldData.type === 'colorPicker' ? (
+                <Box>
+                  <input
+                    value={values['defaultValue']}
+                    type="color"
+                    onChange={(e) => {
+                      setFieldValue('defaultValue', e.target.value);
+                    }}
+                  />
+                  <Box component="span" ml={2}>
+                    {values['defaultValue']}
+                  </Box>
+                </Box>
+              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['lookup'] ? (
+                <ResourceDropdown
+                  type={fieldData.type}
+                  lookupResource={values['lookupResource']}
+                  value={values['defaultValue']}
+                  setFieldValue={setFieldValue}
+                />
+              ) : (
+                <Box display="block">
+                  <TextField
+                    variant="outlined"
+                    type="text"
+                    label="Default Value"
+                    name="defaultValue"
+                    rows={4}
+                    fullWidth
+                    margin="dense"
+                    value={values['defaultValue']}
+                    error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
+                    helperText={touched['defaultValue'] && errors['defaultValue']}
+                    onChange={(e) => {
+                      setFieldValue('defaultValue', e.target.value.trimStart());
+                    }}
+                  />
+                </Box>
+              )
+            ) : null}
           </Grid>
-          <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
       <Box>
@@ -128,82 +159,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           </Grid>
         </Grid>
       </Box>
-      <Box>
-        <Grid container>
-          <Grid item xs={12} md={6}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="isDefaultValue"
-                  disabled={values['type'] === 'freeStyleMultiSelect'}
-                  checked={values['isDefaultValue']}
-                  onChange={(e) => {
-                    setFieldValue('isDefaultValue', e.target.checked);
-                  }}
-                  color="primary"
-                />
-              }
-              label="Default Value"
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            {values['isDefaultValue'] ? (
-              fieldData.type === 'imageUpload' ? (
-                <FormTypes
-                  values={{ defaultValue: values['defaultValue'] }}
-                  errors={errors}
-                  touched={touched}
-                  label={''}
-                  name={'defaultValue'}
-                  type={fieldData.type}
-                  setFieldValue={(name, value) => {
-                    setFieldValue(name, value);
-                  }}
-                  isTooltip={false}
-                />
-              ) : fieldData.type === 'colorPicker' ? (
-                <Box>
-                  <input
-                    value={values['defaultValue']}
-                    type="color"
-                    onChange={(e) => {
-                      setFieldValue('defaultValue', e.target.value);
-                    }}
-                  />
-                  <Box component="span" ml={2}>
-                    {values['defaultValue']}
-                  </Box>
-                </Box>
-              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['lookup'] ? (
-                <ResourceDropdown
-                  type={fieldData.type}
-                  lookupResource={values['lookupResource']}
-                  value={values['defaultValue']}
-                  setFieldValue={setFieldValue}
-                />
-              ) : (
-                <Box display="block">
-                  <TextField
-                    variant="outlined"
-                    type="text"
-                    label="Default Value"
-                    name="defaultValue"
-                    rows={4}
-                    fullWidth
-                    margin="dense"
-                    value={values['defaultValue']}
-                    error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
-                    helperText={touched['defaultValue'] && errors['defaultValue']}
-                    onChange={(e) => {
-                      setFieldValue('defaultValue', e.target.value.trimStart());
-                    }}
-                  />
-                </Box>
-              )
-            ) : null}
-          </Grid>
-        </Grid>
-      </Box>
+
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
@@ -432,6 +388,30 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
             />
           </Grid>
           <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+      <Box>
+        <Grid container>
+          <Grid item xs={12} md={6}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="isShowFieldDependentOn"
+                  checked={values['isShowFieldDependentOn']}
+                  onChange={(e) => {
+                    setFieldValue('isShowFieldDependentOn', e.target.checked);
+                  }}
+                  color="primary"
+                />
+              }
+              label="Show Field Dependent On"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            {values['isShowFieldDependentOn'] && (
+              <ShowFieldDependentOn values={values} name={'showFieldDependentOn'} setFieldValue={setFieldValue} fields={fields} _id={fieldData._id} />
+            )}
+          </Grid>
         </Grid>
       </Box>
       <Box>
