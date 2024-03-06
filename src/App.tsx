@@ -251,12 +251,8 @@ import TriggerNotificationMaster from './pages/TriggerNotificationMaster';
 import TriggerNotificationMasterDetail from './pages/TriggerNotificationMaster/TriggerNotificationMasterDetail';
 import TriggerNotificationHistory from './pages/TriggerNotificationHistory';
 import UserAttendance from './pages/UserAttendance';
-
 import DataList from './pages/DataList';
 import DataListDetail from './pages/DataList/dataListdetail';
-
-import Forms from './pages/Forms';
-import CreateForm from './pages/Forms/CreateForm';
 import Deals from './pages/Deals';
 import DealDetail from './pages/Deals/dealDetail';
 
@@ -594,12 +590,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.formBuilder.path}>
               <FormBuilder />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.forms.path}>
-              <Forms />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.formsDetail.path + '/:id'}>
-              <CreateForm />
             </PrivateRoute>
             <PrivateRoute exact path={routes.zone.path}>
               <Zone />

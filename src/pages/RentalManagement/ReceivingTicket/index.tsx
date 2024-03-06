@@ -91,7 +91,7 @@ const ReceivingTicket = ({
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { selectedRecords } = state;
+  const { selectedRecords, dataRows } = state;
 
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
@@ -1379,7 +1379,8 @@ const ReceivingTicket = ({
               setShowConformationRevertTicket,
               setShowConformationCancleTicket,
               setShowConformationConsume,
-              setShowConformationConsumeMultiple
+              setShowConformationConsumeMultiple,
+              dataRows
             }}
           />
         }
@@ -1804,7 +1805,8 @@ const ActionButtonMenuItems = ({
   setShowConformationRevertTicket,
   setShowConformationCancleTicket,
   setShowConformationConsume,
-  setShowConformationConsumeMultiple
+  setShowConformationConsumeMultiple,
+  dataRows
 }) => {
   const checkUniqWarehouse = () => {
     if (selectedRecords.length === 0) {
@@ -1818,7 +1820,15 @@ const ActionButtonMenuItems = ({
 
   const validateAction = (action) => {
     const errorMessages = [];
-    selectedRecords.forEach((e) => {
+    var records = selectedRecords;
+    if (action === rentalManagementActions.cancelDeliveredTicket) {
+      const receivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketId), 'receivingTicketId'));
+      const returnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketId), 'returnTicketId'));
+      records = [...selectedRecords?.filter((e) => !e?.receivingTicketId || !e?.returnTicketId),
+      ...dataRows?.filter((e) => receivingTicketIds?.includes(e?.receivingTicketId)),
+      ...dataRows?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))]
+    }
+    records.forEach((e) => {
       if (action === rentalManagementActions.createReceivingTicket) {
         if (e?.type !== 'Asset') {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotProduct });
