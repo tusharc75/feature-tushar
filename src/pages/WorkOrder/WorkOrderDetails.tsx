@@ -318,6 +318,7 @@ const WorkOrderDetails = () => {
       visibilityInMobile: 'hidden',
       isVisible: Boolean(
         permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.deleted
+        && workOrderData?.canCreateWorkOrderVersion
       ),
       onClick: (e) => openAddActions(e),
       iconForMobile: false,
@@ -387,9 +388,9 @@ const WorkOrderDetails = () => {
                   extraMenuItems={createVersionMenuItems.map((c) => ({ ...c, text: `Create Version ${c.text}` }))}
                   isExtraMenuItemsVisible={Boolean(
                     permissions?.workOrder?.isUpdate &&
-                      allowedToEdit &&
-                      workOrderData?.status !== WORK_ORDER_STATUS.completed &&
-                      !workOrderData?.deleted
+                    allowedToEdit &&
+                    workOrderData?.status !== WORK_ORDER_STATUS.completed &&
+                    !workOrderData?.deleted
                   )}
                 />
                 <Menu
