@@ -591,12 +591,6 @@ function App() {
             <PrivateRoute exact path={routes.formBuilder.path}>
               <FormBuilder />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.forms.path}>
-              <Forms />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.formsDetail.path + '/:id'}>
-              <CreateForm />
-            </PrivateRoute>
             <PrivateRoute exact path={routes.zone.path}>
               <Zone />
             </PrivateRoute>
