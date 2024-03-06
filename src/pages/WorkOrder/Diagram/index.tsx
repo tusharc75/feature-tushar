@@ -21,7 +21,7 @@ import { FileCopyIcon } from 'src/assets/svg/svgIcons';
 import PdfPreview from './ShowPdf/PdfPreview';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const Diagram = ({ resource, referenceId, currentVersion }) => {
+const Diagram = ({ resource, referenceId, currentVersion, canAdd = true }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [rowData, setRowData] = useState(null);
@@ -38,7 +38,9 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
 
   const fetchData = async () => {
     axiosInstance()
-      .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}`)
+      .get(
+        `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}&version=${currentVersion}`
+      )
       .then(({ data: { data } }) => {
         const expend: any = {};
         setRowData(data);
@@ -129,18 +131,20 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
   return (
     <Box>
       <Box className="container-with-border" p={'20px'}>
-        <Box className="flex flex-wrap justify-between min-[600px]:justify-end gap-2 items-center mb-2">
-          <h6 className="font-semibold text-[16px] min-[600px]:hidden">Attachments</h6>
-          <ThemeButton
-            onClick={() => {
-              setAttachemntDialog({ open: true, id: null, isClone: false });
-            }}
-            iconForMobile={<Add />}
-            tooltip="Add"
-          >
-            <Add /> Add
-          </ThemeButton>
-        </Box>
+        {canAdd && (
+          <Box className="flex flex-wrap justify-between min-[600px]:justify-end gap-2 items-center mb-2">
+            <h6 className="font-semibold text-[16px] min-[600px]:hidden">Attachments</h6>
+            <ThemeButton
+              onClick={() => {
+                setAttachemntDialog({ open: true, id: null, isClone: false });
+              }}
+              iconForMobile={<Add />}
+              tooltip="Add"
+            >
+              <Add /> Add
+            </ThemeButton>
+          </Box>
+        )}
         <Box pt={2} pb={2}>
           <Box className="overflow-auto h-[calc(100vh-250px)]">
             <div className="grid gap-3">
@@ -184,19 +188,21 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
                               <EditIcon style={{ fontSize: '18px' }} />
                             </IconButton>
                           </HtmlTooltip>
-                          <HtmlTooltip title="Clone" placement="top" arrow>
-                            <IconButton
-                              size="small"
-                              color="inherit"
-                              aria-label="clone"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setAttachemntDialog({ open: true, id: file?._id, isClone: true });
-                              }}
-                            >
-                              <FileCopyIcon style={{ fontSize: '18px' }} />
-                            </IconButton>
-                          </HtmlTooltip>
+                          {canAdd && (
+                            <HtmlTooltip title="Clone" placement="top" arrow>
+                              <IconButton
+                                size="small"
+                                color="inherit"
+                                aria-label="clone"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setAttachemntDialog({ open: true, id: file?._id, isClone: true });
+                                }}
+                              >
+                                <FileCopyIcon style={{ fontSize: '18px' }} />
+                              </IconButton>
+                            </HtmlTooltip>
+                          )}
                           <HtmlTooltip title="Delete" placement="top" arrow>
                             <IconButton
                               size="small"
