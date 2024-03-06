@@ -1824,7 +1824,7 @@ const ActionButtonMenuItems = ({
     if (action === rentalManagementActions.cancelDeliveredTicket) {
       const receivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketId), 'receivingTicketId'));
       const returnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketId), 'returnTicketId'));
-      records = [...selectedRecords?.filter((e) => !e?.receivingTicketId || !e?.returnTicketId),
+      records = [...selectedRecords?.filter((e) => !e?.receivingTicketId && !e?.returnTicketId),
       ...dataRows?.filter((e) => receivingTicketIds?.includes(e?.receivingTicketId)),
       ...dataRows?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))]
     }
