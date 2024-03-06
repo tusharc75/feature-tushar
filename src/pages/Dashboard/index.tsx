@@ -53,41 +53,31 @@ const DashbaordNew = () => {
   React.useEffect(() => {
     (async () => {
       try {
-        const {
-          data: { data }
-        } = await axiosInstance().get(
-          `sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Customer Account,Product,User,Warehouse,Service Master,Competencies`
-        );
-        if (!data) return;
-
-        const res = await axiosInstance().get('/field?resource=Project Sales');
         let businessUnitOptions = [];
+        const res = await axiosInstance().get('/field?resource=Project Sales');
         res?.data?.data.forEach((e: any) => {
           if (e?.fieldData?.fieldName === 'businessUnit') {
             businessUnitOptions = e.fieldData.option;
           }
         });
-
-        Object.keys(data).forEach((_d) => {
-          setFilterOptions({
-            productDescription: data['Product'],
-            productCategory: data['Product Category'],
-            customerAccount: data['Customer Account'].filter((c: any) =>
-              Array.isArray(c?.entity) ? c?.entity?.findIndex((entity: any) => entity === selectedEntity) !== -1 : c?.entity === selectedEntity
-            ),
-            salesRep: data['User'].filter((u: any) => u?.entities?.findIndex((d: any) => d.entity === selectedEntity) !== -1),
-            marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
-            subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
-            warehouse: data['Warehouse'],
-            countryBillTo: countriesData,
-            countrySellTo: countriesData,
-            country: countriesData,
-            period: periodOption,
-            businessUnit: businessUnitOptions,
-            service: data['Service Master'],
-            competencies: data['Competencies'],
-            frequency: frequencyData
-          });
+  
+        setFilterOptions({
+          productDescription: null,
+          productCategory: null,
+          customerAccount: null,
+          salesRep: null,
+          marketSegment: null,
+          subMarketSegment: null,
+          warehouse: null,
+          service: null,
+          competencies: null,
+          countryBillTo: countriesData,
+          countrySellTo: countriesData,
+          country: countriesData,
+          period: periodOption,
+          businessUnit: businessUnitOptions,
+          frequency: frequencyData,
+          
         });
       } catch (error) {
         alert(JSON.stringify(error));
