@@ -1,26 +1,26 @@
 import { Box, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { fieldLabelToFieldName } from 'src/constants/helpers';
+import { Currency } from '../../AddField/currency';
 import { Fragment, useEffect, useState } from 'react';
-import { MinMax } from './Field/MinMax';
-import { DecimalPlaces } from './Field/DecimalPlaces';
 import { Autocomplete } from '@material-ui/lab';
-import { Currency } from './Field/Currency';
-import FieldDependent from './Field/FieldDependent';
-import { Formula } from './Field/Formula';
-import { Converter } from './Field/Converter';
-import { MultipleFormula } from './Field/MultipleFormula';
-import { SignatureUser } from './Field/SignatureUser';
-import { getResource } from './helper';
-import { Option } from './Field/Option';
-import { Vlookup } from './Field/Vlookup';
-import LookUpDisplay from './Field/LookUpDisplay';
+import FieldDependent from '../FieldDependent';
+import { Option } from '../../AddField/option';
+import { Formula } from '../../AddField/formula';
+import { Converter } from '../../AddField/converter';
+import { MultipleFormula } from '../../AddField/multipleformula';
+import { Vlookup } from '../../AddField/vlookup';
+import LookUpDisplay from '../LookUpDisplay';
+import { getLookupResource } from '../../helper';
+import { DecimalPlaces } from '../../AddField/decimalPlaces';
+import { SignatureUser } from '../../AddField/signatureUser';
+import { MinMax } from '../../AddField/minMax';
 
-export default function Advanced({ fields, fieldData, values, touched, errors, setFieldValue }) {
+const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField }) => {
   const [isInitialUpdated, setIsInitialUpdated] = useState({
     MultipleFormula: false,
     Currency: false,
     Converter: false
   });
-
   const [lookupResource, setLookupResource] = useState([]);
 
   useEffect(() => {
@@ -28,12 +28,75 @@ export default function Advanced({ fields, fieldData, values, touched, errors, s
   }, []);
 
   const getLookupList = async () => {
-    const resource = await getResource();
-    setLookupResource(resource);
+    const lookupResource = await getLookupResource();
+    setLookupResource(lookupResource);
   };
 
   return (
-    <Box p={1}>
+    <Box>
+      <TextField
+        variant="outlined"
+        type="text"
+        label="Field Label"
+        required={true}
+        name="fieldLabel"
+        fullWidth
+        margin="dense"
+        disabled={!values['editAble']}
+        value={values['fieldLabel']}
+        error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
+        helperText={touched['fieldLabel'] && errors['fieldLabel']}
+        onChange={(e) => {
+          setFieldValue('fieldLabel', e.target.value.trimStart());
+        }}
+      />
+      <Box>
+        <Grid container>
+          <Grid item xs={12} md={6}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="required"
+                  //disabled={values['required'] ? true : false}
+                  checked={values['required']}
+                  onChange={(e) => {
+                    setFieldValue('required', e.target.checked);
+                  }}
+                  color="primary"
+                />
+              }
+              label="Required"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+      {(module === 'product-template' || module === 'price-template') && (
+        <Box mb={1}>
+          <TextField
+            variant="outlined"
+            type="text"
+            label="Field Name"
+            name="fieldName"
+            fullWidth
+            margin="dense"
+            disabled={true}
+            value={values['fieldName'] ? values['fieldName'] : fieldLabelToFieldName(values['fieldLabel'])}
+          />
+
+          {/* <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="isChangeFieldName"
+                            checked={isChangeFieldName}
+                            onChange={(e) => setIsChangeFieldName(e.target.checked)}
+                            color="primary"
+                          />
+                        }
+                        label="Change Field Name"
+                      /> */}
+        </Box>
+      )}
       {values['type'] === 'currencyAmount' && (
         <Currency
           values={values}
@@ -170,26 +233,27 @@ export default function Advanced({ fields, fieldData, values, touched, errors, s
         values['type'] === 'decimal' ||
         values['type'] === 'percent' ||
         values['type'] === 'date' ||
-        values['type'] === 'converter') && (
-        <>
-          <br></br>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="isFormula"
-                checked={values['isFormula']}
-                onChange={(e) => {
-                  setFieldValue('isFormula', e.target.checked);
-                  setFieldValue('inputFields', []);
-                  setFieldValue('formula', '');
-                }}
-                color="primary"
-              />
-            }
-            label="Formula"
-          />
-        </>
-      )}
+        values['type'] === 'converter') &&
+        isCalculativeField && (
+          <>
+            <br></br>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="isFormula"
+                  checked={values['isFormula']}
+                  onChange={(e) => {
+                    setFieldValue('isFormula', e.target.checked);
+                    setFieldValue('inputFields', []);
+                    setFieldValue('formula', '');
+                  }}
+                  color="primary"
+                />
+              }
+              label="Formula"
+            />
+          </>
+        )}
       {(values['type'] === 'formula' || values['isFormula']) && (
         <Formula
           fields={fields}
@@ -237,27 +301,28 @@ export default function Advanced({ fields, fieldData, values, touched, errors, s
           errors={errors}
         />
       )}
-      {(values['type'] === 'currencyAmount' || values['type'] === 'decimal' || values['type'] === 'percent' || values['type'] === 'converter') && (
-        <>
-          <br></br>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="isMulitFormula"
-                checked={values['isMulitFormula']}
-                onChange={(e) => {
-                  setFieldValue('isMulitFormula', e.target.checked);
-                  setFieldValue('formulaFields', []);
-                  setFieldValue('formulainputFields', []);
-                  setFieldValue('formulaoption', {});
-                }}
-                color="primary"
-              />
-            }
-            label="Multiple Formula"
-          />
-        </>
-      )}
+      {(values['type'] === 'currencyAmount' || values['type'] === 'decimal' || values['type'] === 'percent' || values['type'] === 'converter') &&
+        isCalculativeField && (
+          <>
+            <br></br>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="isMulitFormula"
+                  checked={values['isMulitFormula']}
+                  onChange={(e) => {
+                    setFieldValue('isMulitFormula', e.target.checked);
+                    setFieldValue('formulaFields', []);
+                    setFieldValue('formulainputFields', []);
+                    setFieldValue('formulaoption', {});
+                  }}
+                  color="primary"
+                />
+              }
+              label="Multiple Formula"
+            />
+          </>
+        )}
       {values['isMulitFormula'] && (
         <MultipleFormula
           fields={fields}
@@ -274,25 +339,26 @@ export default function Advanced({ fields, fieldData, values, touched, errors, s
         />
       )}
 
-      {(values['type'] === 'currencyAmount' || values['type'] === 'decimal' || values['type'] === 'percent' || values['type'] === 'converter') && (
-        <>
-          <br></br>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="isVlookup"
-                checked={values['isVlookup']}
-                onChange={(e) => {
-                  setFieldValue('isVlookup', e.target.checked);
-                  setFieldValue('isDropdown', false);
-                }}
-                color="primary"
-              />
-            }
-            label="Vlookup"
-          />
-        </>
-      )}
+      {(values['type'] === 'currencyAmount' || values['type'] === 'decimal' || values['type'] === 'percent' || values['type'] === 'converter') &&
+        isCalculativeField && (
+          <>
+            <br></br>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="isVlookup"
+                  checked={values['isVlookup']}
+                  onChange={(e) => {
+                    setFieldValue('isVlookup', e.target.checked);
+                    setFieldValue('isDropdown', false);
+                  }}
+                  color="primary"
+                />
+              }
+              label="Vlookup"
+            />
+          </>
+        )}
       {(values['isVlookup'] || values['type'] === 'vlookupDropdown') && (
         <Vlookup
           fields={fields}
@@ -306,7 +372,7 @@ export default function Advanced({ fields, fieldData, values, touched, errors, s
         />
       )}
 
-      {(values['type'] === 'converter' || values['type'] === 'formula') && (
+      {(values['type'] === 'converter' || values['type'] === 'formula') && isCalculativeField && (
         <>
           <br></br>
           <FormControlLabel
@@ -346,9 +412,10 @@ export default function Advanced({ fields, fieldData, values, touched, errors, s
           />
         </Box>
       )}
-
       {fieldData.type === 'signature' && <SignatureUser values={values} setFieldValue={setFieldValue} />}
       {fieldData.type === 'decimal' && <MinMax values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />}
     </Box>
   );
-}
+};
+
+export default General;
