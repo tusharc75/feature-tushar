@@ -9,6 +9,16 @@ const ShowPdf = ({ data }) => {
   const [loading, setLoading] = useState(false);
   const [url, seturl] = useState();
 
+  const mimeTypeMap = {
+    'pdf': 'application/pdf',
+    'png': 'image/png',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+  };
+
+  const extension = data?.url.split('.').pop().toLowerCase();
+  const mimeType = mimeTypeMap[extension] || 'application/octet-stream'; // Default to a binary type if unknown
+
   useEffect(() => {
     setLoading(true);
     axiosInstance()
@@ -16,7 +26,7 @@ const ShowPdf = ({ data }) => {
         responseType: 'blob'
       })
       .then(({ data }) => {
-        const file = new Blob([data], { type: 'application/pdf' });
+        const file = new Blob([data], { type: mimeType });
         const fileURL: any = URL.createObjectURL(file);
         seturl(fileURL);
         setLoading(false);

@@ -351,7 +351,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
             )}
             {tabValue === 1 && (
               <Box>
-                <Diagram resource={'workOrder'} referenceId={workOrderId} currentVersion={selectedVersionNumber} canAdd={false}/>
+                <Diagram resource={'workOrder'} referenceId={workOrderId} currentVersion={selectedVersionNumber} fromVersions={true}/>
               </Box>
             )}
           </Box>

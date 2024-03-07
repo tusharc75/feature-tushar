@@ -21,7 +21,7 @@ import { FileCopyIcon } from 'src/assets/svg/svgIcons';
 import PdfPreview from './ShowPdf/PdfPreview';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const Diagram = ({ resource, referenceId, currentVersion, canAdd = true }) => {
+const Diagram = ({ resource, referenceId, currentVersion, fromVersions= false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [rowData, setRowData] = useState(null);
@@ -131,7 +131,7 @@ const Diagram = ({ resource, referenceId, currentVersion, canAdd = true }) => {
   return (
     <Box>
       <Box className="container-with-border" p={'20px'}>
-        {canAdd && (
+        {!fromVersions && (
           <Box className="flex flex-wrap justify-between min-[600px]:justify-end gap-2 items-center mb-2">
             <h6 className="font-semibold text-[16px] min-[600px]:hidden">Attachments</h6>
             <ThemeButton
@@ -188,7 +188,7 @@ const Diagram = ({ resource, referenceId, currentVersion, canAdd = true }) => {
                               <EditIcon style={{ fontSize: '18px' }} />
                             </IconButton>
                           </HtmlTooltip>
-                          {canAdd && (
+                          {!fromVersions && (
                             <HtmlTooltip title="Clone" placement="top" arrow>
                               <IconButton
                                 size="small"
@@ -284,9 +284,9 @@ const Diagram = ({ resource, referenceId, currentVersion, canAdd = true }) => {
             }}
           />
           <CustomDialogContent>
-            {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
+            {checkImageType(selectedAttachment?.url?.split('.')[1]) ? fromVersions ? <ShowPdf data={selectedAttachment} /> : (
               <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
-            ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
+            ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? fromVersions? <ShowPdf data={selectedAttachment} /> : (
               // <ShowPdf data={selectedAttachment} />
               <PdfPreview data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
             ) : (
