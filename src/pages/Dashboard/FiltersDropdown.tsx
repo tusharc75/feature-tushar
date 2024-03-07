@@ -175,8 +175,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
             )}
             ListboxProps={{
               onScroll: (e:any) => {
-                const threshold = 1;
-                if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight-threshold) {
+                if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight-1) {
                   setLoading({ loading: true, resource: filter?.resource });
                   fetchOptions(filter?.resource, '', currentPage + 1);
                 }
