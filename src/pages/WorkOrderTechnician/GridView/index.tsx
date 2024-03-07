@@ -344,7 +344,6 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
       {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog.workOrder}
-          currentVersion={null}
           handleClose={() => {
             setShowDrawingDialog({ open: false, workOrder: null });
           }}

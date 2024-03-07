@@ -28,6 +28,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
         width: 200,
         disableFilters: true,
         disableSortBy: true,
+        disabled: true,
         Cell: ({ row }) => {
           return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
         }
@@ -36,6 +37,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
         accessor: 'type',
         Header: 'Type',
         width: 200,
+        disabled: true,
         Cell: ({ row }) => {
           return row.original?.type ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
         }
@@ -44,6 +46,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
         accessor: 'qty',
         Header: 'Qty',
         width: 200,
+        disabled: true,
         Cell: ({ row }) => {
           return row.original?.qty ? (
             <div

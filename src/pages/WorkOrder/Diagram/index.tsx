@@ -38,9 +38,7 @@ const Diagram = ({ resource, referenceId, currentVersion, fromVersions = false }
 
   const fetchData = async () => {
     axiosInstance()
-      .get(
-        `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}&version=${currentVersion}`
-      )
+      .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}&version=${currentVersion}`)
       .then(({ data: { data } }) => {
         const expend: any = {};
         setRowData(data);
@@ -153,11 +151,10 @@ const Diagram = ({ resource, referenceId, currentVersion, fromVersions = false }
                   return (
                     <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                            : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
-                        }`}
+                        className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${expended[file?._id]
+                          ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                          : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                          }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -173,8 +170,8 @@ const Diagram = ({ resource, referenceId, currentVersion, fromVersions = false }
                             </Typography>
                           </Box>
                         </div>
-                        <div className="flex gap-2">
-                          {!fromVersions && (
+                        {!fromVersions &&
+                          <div className="flex gap-2">
                             <HtmlTooltip title="Edit" placement="top" arrow>
                               <IconButton
                                 size="small"
@@ -189,8 +186,6 @@ const Diagram = ({ resource, referenceId, currentVersion, fromVersions = false }
                                 <EditIcon style={{ fontSize: '18px' }} />
                               </IconButton>
                             </HtmlTooltip>
-                          )}
-                          {!fromVersions && (
                             <HtmlTooltip title="Clone" placement="top" arrow>
                               <IconButton
                                 size="small"
@@ -204,8 +199,6 @@ const Diagram = ({ resource, referenceId, currentVersion, fromVersions = false }
                                 <FileCopyIcon style={{ fontSize: '18px' }} />
                               </IconButton>
                             </HtmlTooltip>
-                          )}
-                          {!fromVersions && (
                             <HtmlTooltip title="Delete" placement="top" arrow>
                               <IconButton
                                 size="small"
@@ -221,10 +214,9 @@ const Diagram = ({ resource, referenceId, currentVersion, fromVersions = false }
                                 <Delete style={{ fontSize: '18px' }} />
                               </IconButton>
                             </HtmlTooltip>
-                          )}
-                        </div>
+                          </div>
+                        }
                       </div>
-
                       <Collapse in={expended[file?._id]}>
                         <div className="border border-[var(--common-border-color)]">
                           {file?.file?.map((f) => {
@@ -298,7 +290,6 @@ const Diagram = ({ resource, referenceId, currentVersion, fromVersions = false }
               fromVersions ? (
                 <ShowPdf data={selectedAttachment} />
               ) : (
-                // <ShowPdf data={selectedAttachment} />
                 <PdfPreview data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
               )
             ) : (
@@ -353,7 +344,7 @@ const Diagram = ({ resource, referenceId, currentVersion, fromVersions = false }
           }}
         />
       )}
-    </Box>
+    </Box >
   );
 };
 

@@ -512,7 +512,11 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} currentVersion={workOrderData?.versions?.length + 1 || 1} />}
+          {workOrderData && <Diagram
+            resource={ACTIVITY_RESOURCE.workOrder}
+            referenceId={id}
+            currentVersion={workOrderData?.versions?.length + 1 || 1}
+          />}
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>
