@@ -10,7 +10,7 @@ type UseTab = {
 
 const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0, onTabChange }: UseTab) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [activeTab, setActiveTab] = useState(activeTabIndex);
+  const [activeTab, setActiveTab] = useState(activeTabIndex > totlaTabs - 1 ? totlaTabs - 1 : activeTabIndex < 0 ? 0 : activeTabIndex);
   const [tabSize, setTabSize] = useState(0);
   const [hasNextTab, setHasNextTab] = useState(true);
   const [hasPrevTab, setHasPrevTab] = useState(true);
