@@ -7,7 +7,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, workOrder } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, workOrder } from 'src/constants/helpers';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import startCase from 'lodash/startCase';
@@ -220,18 +220,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent?.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productName
-          : parent?.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageName
-          : '';
+            ? parent?.productDetail?.productName
+            : parent?.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageName
+              : '';
       parent.description =
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription
           : parent?.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription
-          : parent?.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription
-          : '';
+            ? parent?.productDetail?.productDescription
+            : parent?.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription
+              : '';
       parent.subRows = generateNestedData(data, parent);
     });
 
@@ -248,18 +248,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageName
-          : '';
+            ? _subRow?.productDetail?.productName
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
+              : '';
       _subRow.description =
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription
           : _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription
-          : '';
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription
+              : '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -305,7 +305,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 </Box>
               ))}
           </Box>
-          <Box mb={2}/>
+          <Box mb={2} />
           <Box className="detail-container-v1">
             <Tabs
               className="new-tab-container-v1"
@@ -334,45 +334,42 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
               />
               <Tab
                 label={<div className="tab-font">Diagram</div>}
-                value={2}
-                aria-controls="a11y-tabpanel-2"
-                id="a11y-tab-2"
+                value={1}
+                
+                aria-controls="a11y-tabpanel-0"
+                id="a11y-tab-0"
                 className={'tabLayout'}
               />
             </Tabs>
             {tabValue === 0 && (
-              <>
-                {columns ? (
-                  <Box zIndex={5} width={'100%'} mt={2}>
-                    <CustomReactTable
-                      height={'calc(100vh - 200px)'}
-                      columns={columns}
-                      state={state}
-                      dispatch={dispatch}
-                      hideSelection={true}
-                      refreshGrid={fetchData}
-                      hideAction={true}
-                      renderedFrom={renderedFrom}
-                      isClientSideGrid={true}
-                      expander={true}
-                    />
-                  </Box>
-                ) : (
-                  <Box p={2} height={500}>
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                  </Box>
-                )}
-              </>
+              columns ? (
+                <Box zIndex={5} width={'100%'}>
+                  <CustomReactTable
+                    height={'calc(100vh - 300px)'}
+                    columns={columns}
+                    state={state}
+                    dispatch={dispatch}
+                    hideSelection={true}
+                    refreshGrid={fetchData}
+                    hideAction={true}
+                    renderedFrom={renderedFrom}
+                    isClientSideGrid={true}
+                    expander={true}
+                  />
+                </Box>
+              ) : (
+                <Box p={2} height={500}>
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+              )
             )}
             {tabValue === 1 && (
-              <Box>
-                <ServiceStepsData servicesData={servicesData} stepsData={stepData} />
-              </Box>
-            )}
-            {tabValue === 2 && (
-              <Box>
-                <Diagram resource={'workOrder'} referenceId={workOrderId} currentVersion={selectedVersionNumber} fromVersions={true}/>
-              </Box>
+              <Diagram
+                resource={ACTIVITY_RESOURCE.workOrder}
+                referenceId={workOrderId}
+                currentVersion={selectedVersionNumber}
+                fromVersions={true}
+              />
             )}
           </Box>
         </CustomDialogContent>
