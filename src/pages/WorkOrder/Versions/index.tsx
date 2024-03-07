@@ -334,8 +334,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
               />
               <Tab
                 label={<div className="tab-font">Diagram</div>}
-                value={1}
-                
+                value={2}
                 aria-controls="a11y-tabpanel-0"
                 id="a11y-tab-0"
                 className={'tabLayout'}
@@ -364,6 +363,9 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
               )
             )}
             {tabValue === 1 && (
+              <ServiceStepsData stepsData={stepData} servicesData={servicesData}/>
+            )}
+            {tabValue === 2 && (
               <Diagram
                 resource={ACTIVITY_RESOURCE.workOrder}
                 referenceId={workOrderId}
