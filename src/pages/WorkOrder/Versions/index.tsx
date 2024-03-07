@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton } from '@material-ui/core';
+import { Box, Dialog, IconButton, Tab, Tabs } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -7,20 +7,23 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, workOrder } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, workOrder } from 'src/constants/helpers';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import startCase from 'lodash/startCase';
 import { isMobile } from 'react-device-detect';
 import { camelCase, orderBy } from 'lodash';
+import Diagram from '../Diagram';
 
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
+  const [tabValue, setTabValue] = useState(0);
 
   const { state, dispatch } = useTableReducer();
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(workOrderData?.versions[workOrderData?.versions?.length - 1]?._id);
+  const [selectedVersionNumber, setSelectedVersionNumber] = useState(workOrderData?.versions?.length);
 
   useEffect(() => {
     fetchFields();
@@ -127,30 +130,32 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         width: 200,
         Cell: ({ row }) =>
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
-            <div>{row?.original['assignedUsers']?.map((e, i) => {
-              return i === row?.original['assignedUsers'].length - 1 ? (
-                <a
-                  className="link text-truncate [flex-grow:0_!important]"
-                  target="_blank"
-                  href={`${routes.userDetail.path}/${e.optionValue}`}
-                  rel="noreferrer"
-                >
-                  {e?.optionLabel}
-                </a>
-              ) : (
-                <>
+            <div>
+              {row?.original['assignedUsers']?.map((e, i) => {
+                return i === row?.original['assignedUsers'].length - 1 ? (
                   <a
                     className="link text-truncate [flex-grow:0_!important]"
                     target="_blank"
                     href={`${routes.userDetail.path}/${e.optionValue}`}
                     rel="noreferrer"
                   >
-                    {e?.optionLabel},
+                    {e?.optionLabel}
                   </a>
-                  &nbsp;
-                </>
-              );
-            })}</div>
+                ) : (
+                  <>
+                    <a
+                      className="link text-truncate [flex-grow:0_!important]"
+                      target="_blank"
+                      href={`${routes.userDetail.path}/${e.optionValue}`}
+                      rel="noreferrer"
+                    >
+                      {e?.optionLabel},
+                    </a>
+                    &nbsp;
+                  </>
+                );
+              })}
+            </div>
           ) : (
             <NoDataCell />
           )
@@ -160,30 +165,32 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         Header: 'Assigned Work Station',
         Cell: ({ row }) =>
           row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
-            <div>{row?.original['assignedWorkStations']?.map((e, i) => {
-              return i === row?.original['assignedWorkStations'].length - 1 ? (
-                <a
-                  className="link text-truncate [flex-grow:0_!important]"
-                  target="_blank"
-                  href={`${routes.workStationsDetail.path}/${e.optionValue}`}
-                  rel="noreferrer"
-                >
-                  {e?.optionLabel}
-                </a>
-              ) : (
-                <>
+            <div>
+              {row?.original['assignedWorkStations']?.map((e, i) => {
+                return i === row?.original['assignedWorkStations'].length - 1 ? (
                   <a
                     className="link text-truncate [flex-grow:0_!important]"
                     target="_blank"
                     href={`${routes.workStationsDetail.path}/${e.optionValue}`}
                     rel="noreferrer"
                   >
-                    {e?.optionLabel},
+                    {e?.optionLabel}
                   </a>
-                  &nbsp;
-                </>
-              );
-            })}</div>
+                ) : (
+                  <>
+                    <a
+                      className="link text-truncate [flex-grow:0_!important]"
+                      target="_blank"
+                      href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                      rel="noreferrer"
+                    >
+                      {e?.optionLabel},
+                    </a>
+                    &nbsp;
+                  </>
+                );
+              })}
+            </div>
           ) : (
             <NoDataCell />
           )
@@ -250,6 +257,10 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
     return subRows;
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
   return (
     <>
       <Dialog
@@ -276,6 +287,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                   borderColor="var(--common-border-color)"
                   onClick={() => {
                     if (selectedVersion !== v?._id) setSelectedVersion(v?._id);
+                    setSelectedVersionNumber(i + 1);
                   }}
                   style={{ display: 'inline-block' }}
                   bgcolor={v?._id === selectedVersion ? 'var(--dark-primary, var(--primary))' : 'var(--dark-secondary, transparent)'}
@@ -285,26 +297,65 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 </Box>
               ))}
           </Box>
-          {columns ? (
-            <Box zIndex={5} width={'100%'} mt={2}>
-              <CustomReactTable
-                height={'calc(100vh - 200px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                hideSelection={true}
-                refreshGrid={fetchData}
-                hideAction={true}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-                expander={true}
+          <Box mb={2} />
+          <Box className="detail-container-v1">
+            <Tabs
+              className="new-tab-container-v1"
+              value={tabValue}
+              onChange={handleMainTabChange}
+              textColor="primary"
+              TabIndicatorProps={{
+                style: {
+                  height: 0
+                }
+              }}
+            >
+              <Tab
+                label={<div className="tab-font">Services</div>}
+                value={0}
+                aria-controls="a11y-tabpanel-0"
+                id="a11y-tab-0"
+                className={'tabLayout'}
               />
-            </Box>
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
+              <Tab
+                label={<div className="tab-font">Drawings</div>}
+                value={1}
+                aria-controls="a11y-tabpanel-0"
+                id="a11y-tab-0"
+                className={'tabLayout'}
+              />
+            </Tabs>
+            {tabValue === 0 && (
+              columns ? (
+                <Box zIndex={5} width={'100%'}>
+                  <CustomReactTable
+                    height={'calc(100vh - 300px)'}
+                    columns={columns}
+                    state={state}
+                    dispatch={dispatch}
+                    hideSelection={true}
+                    refreshGrid={fetchData}
+                    hideAction={true}
+                    renderedFrom={renderedFrom}
+                    isClientSideGrid={true}
+                    expander={true}
+                  />
+                </Box>
+              ) : (
+                <Box p={2} height={500}>
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+              )
+            )}
+            {tabValue === 1 && (
+              <Diagram
+                resource={ACTIVITY_RESOURCE.workOrder}
+                referenceId={workOrderId}
+                currentVersion={selectedVersionNumber}
+                fromVersions={true}
+              />
+            )}
+          </Box>
         </CustomDialogContent>
       </Dialog>
     </>

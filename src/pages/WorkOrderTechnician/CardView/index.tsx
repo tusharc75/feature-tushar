@@ -199,7 +199,6 @@ const CardView = (props, ref) => {
       {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog.workOrder}
-          currentVersion={null}
           handleClose={() => {
             setShowDrawingDialog({ open: false, workOrder: null });
           }}

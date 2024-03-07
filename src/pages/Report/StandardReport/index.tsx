@@ -687,7 +687,7 @@ const Report = () => {
                             fullWidth
                             onClose={(e, reason) => {
                                 if (reason !== 'backdropClick') {
-                                    history.push(routes.reports.path);
+                                    // history.push(routes.reports.path);
                                     setShowGrid(true);
                                     dispatch({ type: 'onlyFilter', filters: {} });
                                 }
@@ -696,7 +696,7 @@ const Report = () => {
                             <CustomDialogHeader
                                 title={`Set Filters`}
                                 onClose={() => {
-                                    history.push(routes.reports.path);
+                                    // history.push(routes.reports.path);
                                     setShowGrid(true);
                                     dispatch({ type: 'onlyFilter', filters: {} });
                                 }}

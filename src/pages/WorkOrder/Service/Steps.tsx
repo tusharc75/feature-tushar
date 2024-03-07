@@ -1778,7 +1778,6 @@ const Steps = ({
       {showDrawing && (
         <DiagramDialog
           referenceId={workOrderData?._id}
-          currentVersion={workOrderData?.versions?.length + 1 || 1}
           handleClose={() => {
             setShowDrawing(false);
           }}
