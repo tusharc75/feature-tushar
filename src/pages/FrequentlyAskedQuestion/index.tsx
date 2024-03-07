@@ -18,6 +18,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let searchTimeout;
 
@@ -32,21 +33,12 @@ const FrequentlyAskedQuestion = () => {
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
-  const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [freqentlyAskedQuestionId, setFrequentlyAskedQuestionId] = useState(null);
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   const fetchGridColumns = async () => {
     let data;
@@ -190,7 +182,6 @@ const FrequentlyAskedQuestion = () => {
         fetchFrequentlyAskedQuestionData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -211,6 +202,22 @@ const FrequentlyAskedQuestion = () => {
   useEffect(() => {
     fetchFrequentlyAskedQuestionData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
+          onClick={() => {
+            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
+  };
 
   return (
     <section className="main-container-v1">
@@ -234,76 +241,20 @@ const FrequentlyAskedQuestion = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.frequentlyAskedQuestion?.isCreate && (
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
-                    onClick={() => {
-                      setOpen({ open: true, isClone: false });
-                    }}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                {permissions?.frequentlyAskedQuestion?.isDelete && (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={`new-dropdown-v1`}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                      disabled={selectedRecords?.length ? false : true}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem
-                        disabled={
-                          !(
-                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                          )
-                        }
-                        onClick={() => {
-                          closeActions();
-                          // eslint-disable-next-line no-lone-blocks
-                          {
-                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                          }
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={permissions?.frequentlyAskedQuestion?.isDelete}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={actionButtonMenuItems()}
+          addButtonOnclick={() => {
+            setOpen({ open: true, isClone: false });
+          }}
+          isAddButtonVisible={permissions?.frequentlyAskedQuestion?.isCreate}
+          setQueryString={false}
+          synchronizeType={false}
+        />
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
