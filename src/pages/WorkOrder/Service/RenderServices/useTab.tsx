@@ -3,14 +3,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 type UseTab = {
   active: boolean;
   activeTabIndex?: number;
-  totlaTabs: number;
+  totalTabs: number;
   gap?: number;
   onTabChange: (index: number) => void;
 };
 
-const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0, onTabChange }: UseTab) => {
+const useTab = ({ active, totalTabs, activeTabIndex = 0, gap = 0, onTabChange }: UseTab) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [activeTab, setActiveTab] = useState(activeTabIndex > totlaTabs - 1 ? totlaTabs - 1 : activeTabIndex < 0 ? 0 : activeTabIndex);
+  const [activeTab, setActiveTab] = useState(activeTabIndex > totalTabs - 1 ? totalTabs - 1 : activeTabIndex < 0 ? 0 : activeTabIndex);
   const [tabSize, setTabSize] = useState(0);
   const [hasNextTab, setHasNextTab] = useState(true);
   const [hasPrevTab, setHasPrevTab] = useState(true);
@@ -36,7 +36,7 @@ const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0, onTabChange }:
 
   const calculatePrevNext = useCallback(
     (tab: number) => {
-      if (tab === totlaTabs - 1) {
+      if (tab === totalTabs - 1) {
         setHasNextTab(false);
       } else {
         setHasNextTab(true);
@@ -47,7 +47,7 @@ const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0, onTabChange }:
         setHasPrevTab(true);
       }
     },
-    [totlaTabs]
+    [totalTabs]
   );
 
   const getTabSize = useCallback(() => {
@@ -59,13 +59,13 @@ const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0, onTabChange }:
   }, [active]);
 
   const handleNextClick = useCallback(() => {
-    const possibleTab = activeTab + 1 === totlaTabs ? totlaTabs : activeTab + 1;
+    const possibleTab = activeTab + 1 === totalTabs ? totalTabs : activeTab + 1;
     calculatePrevNext(possibleTab);
     setActiveTab(possibleTab);
     scrollToActiveTab(possibleTab);
     onTabChange(possibleTab);
     return possibleTab;
-  }, [activeTab, scrollToActiveTab, totlaTabs, calculatePrevNext]);
+  }, [activeTab, scrollToActiveTab, totalTabs, calculatePrevNext]);
 
   const handlePrevClick = useCallback(() => {
     const possibleTab = activeTab - 1 === 0 ? 0 : activeTab - 1;
@@ -93,6 +93,17 @@ const useTab = ({ active, totlaTabs, activeTabIndex = 0, gap = 0, onTabChange }:
       getTabSize();
     });
   }, [getTabSize]);
+
+  const recalculatePrevNextVisibility = useCallback(() => {
+    if (totalTabs < 2) {
+      setHasNextTab(false);
+      setHasPrevTab(false);
+    }
+  }, [totalTabs]);
+
+  useEffect(() => {
+    recalculatePrevNextVisibility();
+  }, [totalTabs, recalculatePrevNextVisibility]);
 
   useEffect(() => {
     window.addEventListener('resize', recalculateTabSize);

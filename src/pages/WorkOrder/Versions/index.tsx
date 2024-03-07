@@ -14,6 +14,7 @@ import startCase from 'lodash/startCase';
 import { isMobile } from 'react-device-detect';
 import { camelCase, orderBy } from 'lodash';
 import Diagram from '../Diagram';
+import ServiceStepsData from './ServiceStepsData';
 
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
@@ -24,6 +25,8 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   const [columns, setColumns] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(workOrderData?.versions[workOrderData?.versions?.length - 1]?._id);
   const [selectedVersionNumber, setSelectedVersionNumber] = useState(workOrderData?.versions?.length);
+  const [servicesData, setServicesData] = useState([]);
+  const [stepData, setStepData] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -205,7 +208,10 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
       data: { data }
     } = await axiosInstance().get(`${workOrder.api}/${workOrderId}/version/${selectedVersion}`);
 
-    let rows = data?.filter((e) => e?.parentId == null);
+    setServicesData(data?.data);
+    setStepData(data?.stepData);
+
+    let rows = data?.data?.filter((e) => e?.parentId == null);
     rows?.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =
@@ -224,7 +230,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
             : parent?.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription
               : '';
-      parent.subRows = generateNestedData(data, parent);
+      parent.subRows = generateNestedData(data?.data, parent);
     });
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length || 0 });
@@ -318,8 +324,15 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 className={'tabLayout'}
               />
               <Tab
-                label={<div className="tab-font">Drawings</div>}
+                label={<div className="tab-font">Steps Data</div>}
                 value={1}
+                aria-controls="a11y-tabpanel-1"
+                id="a11y-tab-1"
+                className={'tabLayout'}
+              />
+              <Tab
+                label={<div className="tab-font">Drawings</div>}
+                value={2}
                 aria-controls="a11y-tabpanel-0"
                 id="a11y-tab-0"
                 className={'tabLayout'}
@@ -348,6 +361,9 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
               )
             )}
             {tabValue === 1 && (
+              <ServiceStepsData stepsData={stepData} servicesData={servicesData}/>
+            )}
+            {tabValue === 2 && (
               <Diagram
                 resource={ACTIVITY_RESOURCE.workOrder}
                 referenceId={workOrderId}
