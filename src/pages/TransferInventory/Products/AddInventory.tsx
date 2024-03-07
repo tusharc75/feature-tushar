@@ -1,6 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Typography } from '@material-ui/core';
+import { Box, Dialog, Typography } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -8,7 +7,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 
@@ -186,49 +185,44 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     selectedRecords?.filter((d: any) => Number(d.qty) > Number(d.inventory) && !d?.hideSelection).length > 0 ||
     isAdding;
 
+  const leftSideContents = () => {
+    return (
+      <>
+        {selectedRecords?.filter((d: any) => d.qty === 0 && !d?.hideSelection).length > 0 && (
+          <Typography variant="body2" color="error">
+            Enter quantity before you save
+          </Typography>
+        )}
+        {selectedRecords?.filter((d: any) => Number(d.qty) > Number(d.inventory) && !d?.hideSelection).length > 0 && (
+          <Typography variant="body2" color="error">
+            Quantity should be less then inventory
+          </Typography>
+        )}
+      </>
+    );
+  };
+
   return (
     <Dialog open fullScreen fullWidth onClose={close}>
       <CustomDialogHeader title="Add Product" onClose={close} showRequiredLabel={false} />
       <CustomDialogContent>
-        <Box
-          display={'flex'}
-          mb={1}
-          flexDirection={isMobile ? 'column' : 'row'}
-          justifyContent="space-between"
-          alignItems={isMobile ? 'flex-start' : 'center'}
-        >
-          <div style={{ order: isMobile ? 2 : 1 }}>
-            {selectedRecords?.filter((d: any) => d.qty === 0 && !d?.hideSelection).length > 0 && (
-              <Typography variant="body2" color="error">
-                Enter quantity before you save
-              </Typography>
-            )}
-            {selectedRecords?.filter((d: any) => Number(d.qty) > Number(d.inventory) && !d?.hideSelection).length > 0 && (
-              <Typography variant="body2" color="error">
-                Quantity should be less then inventory
-              </Typography>
-            )}
-          </div>
-          <Box order={isMobile ? 1 : 2} display="flex" justifyContent={'space-between'} minWidth={isMobile ? '100%' : '300px'}>
-            <SearchBox onChange={handleSearch} width={'245px'} style={isMobile ? { flex: 1 } : {}} value={search} />
-            <Box mx={1} />
-            <Box>
-              <Button
-                startIcon={isAdding && <CircularProgress size={18} color="inherit" />}
-                disabled={disableSave}
-                onClick={handleClickSave}
-                variant="contained"
-                color="primary"
-                size="small"
-              >
-                Add{' '}
-                {selectedRecords?.filter((e) => !e?.hideSelection).length > 0
-                  ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')'
-                  : ''}
-              </Button>
-            </Box>
-          </Box>
-        </Box>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={false}
+          leftSideContents={leftSideContents()}
+          addButtonOnclick={handleClickSave}
+          isAddButtonVisible
+          addButtonProps={{
+            disabled: disableSave,
+            loading: isAdding,
+            iconsEnabled: false,
+            text: selectedRecords?.filter((e) => !e?.hideSelection).length > 0 ? `(${selectedRecords?.filter((e) => !e?.hideSelection).length})` : ''
+          }}
+          setQueryString={false}
+          synchronizeType={false}
+        />
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 250px)'}
