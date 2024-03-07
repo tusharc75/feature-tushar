@@ -14,6 +14,7 @@ import startCase from 'lodash/startCase';
 import { isMobile } from 'react-device-detect';
 import { camelCase, orderBy } from 'lodash';
 import Diagram from '../Diagram';
+import ServiceStepsData from './ServiceStepsData';
 
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
@@ -24,6 +25,8 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   const [columns, setColumns] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(workOrderData?.versions[workOrderData?.versions?.length - 1]?._id);
   const [selectedVersionNumber, setSelectedVersionNumber] = useState(workOrderData?.versions?.length);
+  const [servicesData, setServicesData] = useState([]);
+  const [stepData, setStepData] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -205,6 +208,11 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
       data: { data }
     } = await axiosInstance().get(`${workOrder.api}/${workOrderId}/version/${selectedVersion}`);
 
+    if(data?.length) {
+      setServicesData(data);
+      setStepData(data[0]?.stepData || []);
+    } 
+
     let rows = data?.filter((e) => e?.parentId == null);
     rows?.forEach((parent, i) => {
       parent.index = i + 1;
@@ -318,10 +326,17 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 className={'tabLayout'}
               />
               <Tab
-                label={<div className="tab-font">Diagram</div>}
+                label={<div className="tab-font">Steps Data</div>}
                 value={1}
-                aria-controls="a11y-tabpanel-0"
-                id="a11y-tab-0"
+                aria-controls="a11y-tabpanel-1"
+                id="a11y-tab-1"
+                className={'tabLayout'}
+              />
+              <Tab
+                label={<div className="tab-font">Diagram</div>}
+                value={2}
+                aria-controls="a11y-tabpanel-2"
+                id="a11y-tab-2"
                 className={'tabLayout'}
               />
             </Tabs>
@@ -350,6 +365,11 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
               </>
             )}
             {tabValue === 1 && (
+              <Box>
+                <ServiceStepsData servicesData={servicesData} stepsData={stepData} />
+              </Box>
+            )}
+            {tabValue === 2 && (
               <Box>
                 <Diagram resource={'workOrder'} referenceId={workOrderId} currentVersion={selectedVersionNumber} fromVersions={true}/>
               </Box>
