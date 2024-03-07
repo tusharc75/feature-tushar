@@ -208,12 +208,10 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
       data: { data }
     } = await axiosInstance().get(`${workOrder.api}/${workOrderId}/version/${selectedVersion}`);
 
-    if(data?.length) {
-      setServicesData(data);
-      setStepData(data[0]?.stepData || []);
-    } 
+    setServicesData(data?.data);
+    setStepData(data?.stepData);
 
-    let rows = data?.filter((e) => e?.parentId == null);
+    let rows = data?.data?.filter((e) => e?.parentId == null);
     rows?.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =
@@ -232,7 +230,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
             : parent?.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription
               : '';
-      parent.subRows = generateNestedData(data, parent);
+      parent.subRows = generateNestedData(data?.data, parent);
     });
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length || 0 });
