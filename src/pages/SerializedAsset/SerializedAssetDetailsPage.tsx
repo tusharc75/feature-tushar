@@ -249,6 +249,7 @@ const SerializedAssetDetailsPage = () => {
         });
       })
       .catch((error) => {
+        setUpdateLoading(false);
         toastConfig.setToastConfig(error);
       });
   };
