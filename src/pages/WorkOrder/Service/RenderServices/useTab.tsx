@@ -94,7 +94,7 @@ const useTab = ({ active, totalTabs, activeTabIndex = 0, gap = 0, onTabChange }:
     });
   }, [getTabSize]);
 
-  const hidePrevNext = useCallback(() => {
+  const recalculatePrevNextVisibility = useCallback(() => {
     if (totalTabs < 2) {
       setHasNextTab(false);
       setHasPrevTab(false);
@@ -102,8 +102,8 @@ const useTab = ({ active, totalTabs, activeTabIndex = 0, gap = 0, onTabChange }:
   }, [totalTabs]);
 
   useEffect(() => {
-    hidePrevNext();
-  }, [totalTabs, hidePrevNext]);
+    recalculatePrevNextVisibility();
+  }, [totalTabs, recalculatePrevNextVisibility]);
 
   useEffect(() => {
     window.addEventListener('resize', recalculateTabSize);
