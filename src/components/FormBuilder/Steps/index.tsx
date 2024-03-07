@@ -201,7 +201,7 @@ const SingleStep = ({ step, i, setOpen, setOpenField, setDeleteData, moveStep, f
       <div ref={(node) => drop(node)} className="[border:1px_solid_var(--common-border-color)] p-3 rounded-[5px]">
         <div className="flex gap-2 justify-between">
           <h3 className="line-clamp-1 font-semibold">{step?.stepName}</h3>
-          <IconButton size={'small'} className="[cursor:grab_!important]" ref={drag}>
+          <IconButton size={'small'} className={`[cursor:move_!important]`} ref={drag}>
             <MdDragIndicator size={20} />
           </IconButton>
         </div>
