@@ -124,6 +124,49 @@ const Steps = ({ resource }) => {
 
 export default Steps;
 
+const RenderStepItems = ({ steps, setSteps, setOpen, setOpenField, setDeleteData }) => {
+  const findStep = useCallback(
+    (id: string) => {
+      const card = steps.filter((c) => `${c._id}` === id)[0] as {
+        id: string;
+        stepName: string;
+        order: number;
+      };
+      return {
+        card,
+        index: steps.indexOf(card)
+      };
+    },
+    [steps]
+  );
+
+  const moveStep = useCallback(
+    (id: string, atIndex: number) => {
+      const { card, index } = findStep(id);
+      const tempStpes = update(steps, {
+        $splice: [
+          [index, 1],
+          [atIndex, 0, card]
+        ]
+      });
+      const newSteps = tempStpes.map((step, i) => ({ ...step, order: i }));
+      setSteps(newSteps);
+    },
+    [findStep, steps, setSteps]
+  );
+
+  const [, drop] = useDrop(() => ({ accept: DND_NAME }));
+
+  return (
+    <div className="grid grid-cols-1 gap-2" ref={drop}>
+      {steps &&
+        steps?.map((step, i) => {
+          return <SingleStep key={step._id} {...{ step, i, setSteps, setOpen, setOpenField, setDeleteData, moveStep, findStep }} />;
+        })}
+    </div>
+  );
+};
+
 const SingleStep = ({ step, i, setOpen, setOpenField, setDeleteData, moveStep, findStep }) => {
   const [{ opacity }, drag, preview] = useDrag(() => ({
     type: DND_NAME,
@@ -198,49 +241,6 @@ const SingleStep = ({ step, i, setOpen, setOpenField, setDeleteData, moveStep, f
           </HtmlTooltip>
         </Box>
       </div>
-    </div>
-  );
-};
-
-const RenderStepItems = ({ steps, setSteps, setOpen, setOpenField, setDeleteData }) => {
-  const findStep = useCallback(
-    (id: string) => {
-      const card = steps.filter((c) => `${c._id}` === id)[0] as {
-        id: string;
-        stepName: string;
-        order: number;
-      };
-      return {
-        card,
-        index: steps.indexOf(card)
-      };
-    },
-    [steps]
-  );
-
-  const moveStep = useCallback(
-    (id: string, atIndex: number) => {
-      const { card, index } = findStep(id);
-      const tempStpes = update(steps, {
-        $splice: [
-          [index, 1],
-          [atIndex, 0, card]
-        ]
-      });
-      const newSteps = tempStpes.map((step, i) => ({ ...step, order: i }));
-      setSteps(newSteps);
-    },
-    [findStep, steps, setSteps]
-  );
-
-  const [, drop] = useDrop(() => ({ accept: DND_NAME }));
-
-  return (
-    <div className="grid grid-cols-1 gap-2" ref={drop}>
-      {steps &&
-        steps?.map((step, i) => {
-          return <SingleStep key={step._id} {...{ step, i, setSteps, setOpen, setOpenField, setDeleteData, moveStep, findStep }} />;
-        })}
     </div>
   );
 };
