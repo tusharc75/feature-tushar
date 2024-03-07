@@ -315,10 +315,7 @@ const Service = ({
           type: 'success',
           message: data?.message
         });
-        prevOrder.current =
-          serviceSteps?.findIndex((s) => s?.uniqueId === selectedService?.uniqueId) + 1 === serviceSteps.length
-            ? serviceSteps?.findIndex((s) => s?.uniqueId === selectedService?.uniqueId) + 1
-            : serviceSteps.findIndex((s) => s.uniqueId === selectedService.uniqueId);
+        prevOrder.current = serviceSteps?.findIndex((s) => s?.uniqueId === selectedService?.uniqueId) + 1;
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           setReviseQuotation(true);
         } else {
