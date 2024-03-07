@@ -245,7 +245,7 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
                                                   for (var x in result) {
                                                     setFieldValue(x, result[x]);
                                                   }
-                                                }
+                                                } 
                                             }}
                                             required={field.required}
                                             fullWidth
