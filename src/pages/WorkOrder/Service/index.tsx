@@ -316,9 +316,9 @@ const Service = ({
           message: data?.message
         });
         prevOrder.current =
-          serviceSteps?.findIndex((s) => s?.uniqueId === selectedService?.uniqueId) - 1 < 0
-            ? 0
-            : serviceSteps.findIndex((s) => s.uniqueId === selectedService.uniqueId) - 1;
+          serviceSteps?.findIndex((s) => s?.uniqueId === selectedService?.uniqueId) + 1 === serviceSteps.length
+            ? serviceSteps?.findIndex((s) => s?.uniqueId === selectedService?.uniqueId) + 1
+            : serviceSteps.findIndex((s) => s.uniqueId === selectedService.uniqueId);
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           setReviseQuotation(true);
         } else {
@@ -702,8 +702,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                      isAllowedToServiceEdit &&
-                      selectedService?.clickable
+                    isAllowedToServiceEdit &&
+                    selectedService?.clickable
                       ? false
                       : true
                   }
@@ -773,8 +773,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }
@@ -788,8 +788,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }
