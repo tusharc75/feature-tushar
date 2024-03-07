@@ -202,7 +202,7 @@ const SingleStep = ({ step, i, setOpen, setOpenField, setDeleteData, moveStep, f
         <div className="flex gap-2 justify-between">
           <h3 className="line-clamp-1 font-semibold">{step?.stepName}</h3>
           <IconButton size={'small'} className={`[cursor:move_!important]`} ref={drag}>
-            <MdDragIndicator size={20} />
+            <MdDragIndicator size={20} className="text-[var(--primary-text)]" />
           </IconButton>
         </div>
         <Box display={'flex'} justifyContent={'end'}>
