@@ -333,7 +333,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 className={'tabLayout'}
               />
               <Tab
-                label={<div className="tab-font">Diagram</div>}
+                label={<div className="tab-font">Drawings</div>}
                 value={2}
                 aria-controls="a11y-tabpanel-0"
                 id="a11y-tab-0"
