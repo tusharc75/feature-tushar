@@ -1543,8 +1543,6 @@ const ReceivingTicket = ({
           onSuccess={(data) => {
             setShowQtyDialog({ data: data, open: false });
             setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
-            fetchRecords();
-            fetchRentalData();
           }}
           onClose={() => {
             setShowQtyDialog({ open: false, data: null });

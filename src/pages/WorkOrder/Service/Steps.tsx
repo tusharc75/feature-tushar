@@ -471,7 +471,8 @@ const Steps = ({
     if (currentStepIndex === -1 || currentStepIndex === allSteps?.length - 1) return null;
     const nextStep = allSteps[currentStepIndex + 1];
     const { stepData } = getFields(nextStep);
-    return !nextStep?.assignedUsers?.map(u => u?.optionValue).includes(user?._id) || nextStep?.isPassFail || stepData?.status === WORKORDER_SERVICE_STEP_STATUS.end ? null : { step: nextStep, stepData: stepData };
+    return (nextStep?.assignedUsers?.length && !nextStep?.assignedUsers?.map(u => u?.optionValue).includes(user?._id))
+      || nextStep?.isPassFail || stepData?.status === WORKORDER_SERVICE_STEP_STATUS.end ? null : { step: nextStep, stepData: stepData };
   };
 
   const handleSubmit = async (values, step, autoComplete = false, nextStep = false) => {
