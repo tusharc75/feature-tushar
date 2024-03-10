@@ -363,7 +363,7 @@ export const sidebarResource = {
   outboundMessage: 'Outbound Message',
   payrollPolicy: 'Payroll Policy',
   triggerNotificationMaster: 'Trigger Notification Master',
-  deals: 'Deals',
+  deals: 'Deals'
 };
 
 export const primaryFields = {
@@ -545,7 +545,7 @@ export const CHILD_RESOURCE = {
   payrollHoliday: 'Payroll Holiday',
   payrollPayTypes: 'Payroll Pay Types',
   payrollPaidTimeOff: 'Payroll Paid Time Off',
-  dealsMaterial: 'Deals Material',
+  dealsMaterial: 'Deals Material'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -2944,3 +2944,7 @@ export const IMPORT_EXPORT_TYPE = {
   import: 'Import',
   export: 'Export'
 };
+
+export function clamp(val: number, min: number, max: number) {
+  return Math.min(Math.max(val, min), max);
+}
