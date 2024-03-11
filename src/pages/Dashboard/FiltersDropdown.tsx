@@ -104,7 +104,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
               size="small"
               multiple={filter?.multiple}
               fullWidth
-              inputValue={inputValues[filter.key] || ''}
+              // inputValue={inputValues[filter.key] || ''}
               onOpen={() => {
                   setOptions([]);
                   setLoading({ loading: true, resource: filter?.resource });
