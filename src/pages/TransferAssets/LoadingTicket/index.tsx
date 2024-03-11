@@ -127,8 +127,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     backgroundColor: row?.original?.isReplaced
                       ? COLOUR_MASTER.replaceAssetColor.background
                       : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
-                      ? COLOUR_MASTER.lostAssets.background
-                      : ''
+                        ? COLOUR_MASTER.lostAssets.background
+                        : ''
                   }}
                 >
                   <p> {row.original?.assetNumber}</p>
@@ -495,8 +495,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         </MenuItem>
 
         {permissions?.transferAsset?.isUpdate &&
-        selectedRecords.length &&
-        selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+          selectedRecords.length &&
+          selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
           selectedRecords?.length ? (
           <MenuItem
             onClick={() => {
@@ -583,7 +583,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false, products: [] });
           }}
-          referenceType={'ReplaceAsset'}
+          referenceType={'Transfer Asset'}
+          replaceAssets={true}
           referenceData={{
             _id: transferAssetData?._id,
             warehouse: transferAssetData?.transferFromPlant.optionValue
@@ -591,6 +592,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           isAdding={replaceLoading}
           selectedProducts={addSerializedAssetDialog.products}
           filterByPlant={transferAssetData?.transferFromPlant}
+
         />
       )}
       {showReplaceReason.open && (
