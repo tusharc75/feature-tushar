@@ -30,23 +30,25 @@ export const Entity = ({ values, setFieldValue, touched, errors }) => {
     }, []);
 
     return (<Box>
-        <FormControlLabel
-            control={
-                <Checkbox
-                    name="isFieldEntityWise"
-                    checked={values['isFieldEntityWise']}
-                    onChange={(e) => {
-                        setFieldValue('isFieldEntityWise', e.target.checked);
-                        setFieldValue('fieldEntity', []);
-                    }}
-                    color="primary"
+        <Grid container>
+            <Grid item xs={12} md={6}>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            name="isFieldEntityWise"
+                            checked={values['isFieldEntityWise']}
+                            onChange={(e) => {
+                                setFieldValue('isFieldEntityWise', e.target.checked);
+                                setFieldValue('fieldEntity', []);
+                            }}
+                            color="primary"
+                        />
+                    }
+                    label="Show Entity Wise "
                 />
-            }
-            label="Field Entity Wise"
-        />
-        {values['isFieldEntityWise'] &&
-            <Grid spacing={2} container>
-                <Grid item xs={12} sm={6} md={6}>
+            </Grid>
+            <Grid item xs={12} md={6}>
+                {values['isFieldEntityWise'] &&
                     <Autocomplete
                         id="entity-dependent-on-field"
                         multiple={true}
@@ -81,9 +83,8 @@ export const Entity = ({ values, setFieldValue, touched, errors }) => {
                             />
                         )}
                     />
-                </Grid>
+                }
             </Grid>
-        }
-    </Box>
-    );
+        </Grid>
+    </Box>);
 }
