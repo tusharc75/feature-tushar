@@ -507,7 +507,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         id="a11y-tab-1"
                       />
                     </Tabs>
-
                     <TabPanel value={tabValue} index={0}>
                       <General
                         values={values}

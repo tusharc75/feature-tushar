@@ -14,7 +14,7 @@ import { getLookupResource } from '../../helper';
 import { DecimalPlaces } from '../../AddField/decimalPlaces';
 import { SignatureUser } from '../../AddField/signatureUser';
 import { MinMax } from '../../AddField/minMax';
-import { Entity } from '../../AddField/entity';
+
 const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField }) => {
   const [isInitialUpdated, setIsInitialUpdated] = useState({
     MultipleFormula: false,
@@ -57,7 +57,6 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
               control={
                 <Checkbox
                   name="required"
-                  //disabled={values['required'] ? true : false}
                   checked={values['required']}
                   onChange={(e) => {
                     setFieldValue('required', e.target.checked);
@@ -83,18 +82,6 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
             disabled={true}
             value={values['fieldName'] ? values['fieldName'] : fieldLabelToFieldName(values['fieldLabel'])}
           />
-
-          {/* <FormControlLabel
-                        control={
-                          <Checkbox
-                            name="isChangeFieldName"
-                            checked={isChangeFieldName}
-                            onChange={(e) => setIsChangeFieldName(e.target.checked)}
-                            color="primary"
-                          />
-                        }
-                        label="Change Field Name"
-                      /> */}
         </Box>
       )}
       {values['type'] === 'currencyAmount' && (
@@ -414,7 +401,6 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
       )}
       {fieldData.type === 'signature' && <SignatureUser values={values} setFieldValue={setFieldValue} />}
       {fieldData.type === 'decimal' && <MinMax values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />}
-      <Entity values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />
     </Box>
   );
 };
