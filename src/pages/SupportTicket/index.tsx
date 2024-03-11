@@ -1,7 +1,5 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
@@ -9,7 +7,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -56,7 +54,6 @@ const SupportTicket = () => {
   const [renderCount, setRenderCount] = useState(0);
 
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -82,7 +79,12 @@ const SupportTicket = () => {
     axiosInstance()
       .get(`${routes.supportTicket.path}/fields?brand=${user?.user?.brand}`)
       .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data?.filter((field) => field?.fieldData?.sectionName !== 'Internal Information'), routes.supportTicketDetail.path, true);
+        const newColumns = generateColumns(
+          renderedFrom,
+          data?.filter((field) => field?.fieldData?.sectionName !== 'Internal Information'),
+          routes.supportTicketDetail.path,
+          true
+        );
         newColumns?.forEach((o) => {
           if (o?.accessor === 'supportTicketNumber') {
             o.cell = ({ row }) =>
@@ -215,7 +217,6 @@ const SupportTicket = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -224,19 +225,25 @@ const SupportTicket = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
-    history.push(`?type=${value}`);
+  };
+
+  const actionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            if (selectedRecords.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            }
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
@@ -247,7 +254,7 @@ const SupportTicket = () => {
           permissions={{ isCreate: true, isUpdate: true, isRead: true }}
           module={routes.supportTicket.title}
           api={routes.supportTicket.path}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -260,80 +267,24 @@ const SupportTicket = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              <ToggleButtonGroup
-                size="small"
-                className="align-items-center gap-1 "
-                value={types[selectedType - 1].key}
-                exclusive
-                onChange={onTypeChange}
-              >
-                {types.map((k, index) => {
-                  return (
-                    <ToggleButton value={k.key} key={index}>
-                      {k.key}
-                    </ToggleButton>
-                  );
-                })}
-              </ToggleButtonGroup>
-            </div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                <Button
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                  disabled={selectedRecords.length === 0 || selectedRecords?.some((e) => !e.canDelete) ? true : false}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      if (selectedRecords.length === 1) {
-                        setDeleteRecord(selectedRecords[0]);
-                      }
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords?.length})`}
-                  </MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible
+          actionButtonProps={{ disabled: selectedRecords.length === 0 || selectedRecords?.some((e) => !e.canDelete) ? true : false }}
+          actionMenuItems={actionMenuItems()}
+          addButtonOnclick={() => {
+            setShowManageDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible
+          setQueryString
+          synchronizeType
+        />
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
