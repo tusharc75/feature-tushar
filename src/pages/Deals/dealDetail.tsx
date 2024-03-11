@@ -74,6 +74,7 @@ const DealDetail = () => {
                 data: { data }
             } = await axiosInstance().get(`${routes.deals.path}/${id}`);
             setDealData(data);
+            setCustomizedRoutes([routes.deals, { title: data?.dealname }]);
             setLoading(false);
         } catch (error) {
             toastConfig.setToastConfig(error);
@@ -135,7 +136,7 @@ const DealDetail = () => {
                         aria-controls="a11y-tabpanel-0"
                         id="a11y-tab-0"
                     />
-                    <Tab
+                    {/* <Tab
                         className={'tabLayout'}
                         label={
                             <div className="d-flex align-items-center tab-font">
@@ -145,7 +146,7 @@ const DealDetail = () => {
                         value={1}
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
-                    />
+                    /> */}
                 </Tabs>
                 <TabPanel value={tabValue} index={0}>
                     <Box>

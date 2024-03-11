@@ -192,7 +192,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     }
   };
 
-  const Row = React.useMemo(() => {
+  const Row: any = React.useMemo(() => {
     return React.forwardRef((props2: any, ref2: any) => (
       <div style={props2.style} ref={ref2}>
         {values['option'] && values['option'][props2.index] && (
@@ -226,7 +226,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
   };
 
   return (
-    <Box pt={2} pb={2}>
+    <Box>
       {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
         <Grid spacing={3} container>
           <Grid item xs={12} sm={6} md={6}>
@@ -459,23 +459,23 @@ const Card = (props) => {
                 {values['dropdowDependentOn'] && fields.filter((_f) => _f.fieldName === values['dropdowDependentOn']).length
                   ? fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].lookup
                     ? lookupOption &&
-                      lookupOption.map((_option) => {
+                    lookupOption.map((_option) => {
+                      return (
+                        <MenuItem key={_option.optionLabel} value={_option.optionValue}>
+                          {_option.optionLabel}
+                        </MenuItem>
+                      );
+                    })
+                    : fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].option &&
+                    fields
+                      .filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0]
+                      .option.map((_option) => {
                         return (
-                          <MenuItem key={_option.optionLabel} value={_option.optionValue}>
+                          <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
                             {_option.optionLabel}
                           </MenuItem>
                         );
                       })
-                    : fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].option &&
-                      fields
-                        .filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0]
-                        .option.map((_option) => {
-                          return (
-                            <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
-                              {_option.optionLabel}
-                            </MenuItem>
-                          );
-                        })
                   : null}
               </Select>
               {/* <TextField

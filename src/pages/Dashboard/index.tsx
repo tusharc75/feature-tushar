@@ -62,15 +62,6 @@ const DashbaordNew = () => {
         });
   
         setFilterOptions({
-          productDescription: null,
-          productCategory: null,
-          customerAccount: null,
-          salesRep: null,
-          marketSegment: null,
-          subMarketSegment: null,
-          warehouse: null,
-          service: null,
-          competencies: null,
           countryBillTo: countriesData,
           countrySellTo: countriesData,
           country: countriesData,
