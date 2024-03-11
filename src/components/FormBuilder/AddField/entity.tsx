@@ -33,33 +33,34 @@ export const Entity = ({ values, setFieldValue, touched, errors }) => {
         <FormControlLabel
             control={
                 <Checkbox
-                    name="isEntityWise"
-                    checked={values['isEntityWise']}
+                    name="isFieldEntityWise"
+                    checked={values['isFieldEntityWise']}
                     onChange={(e) => {
-                        setFieldValue('isEntityWise', e.target.checked);
+                        setFieldValue('isFieldEntityWise', e.target.checked);
+                        setFieldValue('fieldEntity', []);
                     }}
                     color="primary"
                 />
             }
-            label="Entity Wise"
+            label="Field Entity Wise"
         />
-        {values['isEntityWise'] &&
+        {values['isFieldEntityWise'] &&
             <Grid spacing={2} container>
                 <Grid item xs={12} sm={6} md={6}>
                     <Autocomplete
                         id="entity-dependent-on-field"
                         multiple={true}
                         options={entityOptions}
-                        disabled={!values['isEntityWise']}
+                        disabled={!values['isFieldEntityWise']}
                         getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                         getOptionSelected={(option: any, val) => option?.fieldName === val}
                         value={
-                            values['selectedEntity']?.length > 0
-                                ? entityOptions.filter((option) => values['selectedEntity'].includes(option.optionValue))?.map((option) => option)
+                            values['fieldEntity']?.length > 0
+                                ? entityOptions.filter((option) => values['fieldEntity'].includes(option.optionValue))?.map((option) => option)
                                 : []
                         }
                         onChange={(e, val) => {
-                            setFieldValue('selectedEntity', val.map((option) => option.optionValue));
+                            setFieldValue('fieldEntity', val.map((option) => option.optionValue));
                         }}
                         renderInput={(params) => (
                             <TextField
@@ -76,7 +77,7 @@ export const Entity = ({ values, setFieldValue, touched, errors }) => {
                                         </React.Fragment>
                                     )
                                 }}
-                                error={touched['selectedEntity'] && Boolean(errors['selectedEntity'])}
+                                error={touched['fieldEntity'] && Boolean(errors['fieldEntity'])}
                             />
                         )}
                     />
