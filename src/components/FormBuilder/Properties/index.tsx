@@ -211,6 +211,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.systemGeneratedAutoIncrement = values.systemGeneratedAutoIncrement;
               ele.systemGeneratedPrefix = values.systemGeneratedPrefix;
             }
+            ele.isFieldEntityWise = values?.isFieldEntityWise || false;
+            if (ele.isFieldEntityWise) {
+              ele.fieldEntity = values.fieldEntity;
+            }
             ele.isColumnEditable = values?.isColumnEditable || false;
             ele.stopHideColumn = values?.stopHideColumn || false;
             ele.isHideColumnSum = values?.isHideColumnSum || false;
