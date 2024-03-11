@@ -247,7 +247,7 @@ const AddSerializedAsset = ({
         const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
         deepFilter = `${deepFilter}&rental=true&rentalJobId=${referenceData?._id}&date=${JSON.stringify(dateFilter)}`;
       } else {
-        deepFilter = `${deepFilter}&availableAsset=true`;
+        deepFilter = `${deepFilter}&allAsset=true`;
       }
     }
 
