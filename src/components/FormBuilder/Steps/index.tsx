@@ -237,14 +237,14 @@ const SingleStep = ({ step, i, setOpen, setOpenField, setDeleteData, moveStep, f
   return (
     <div ref={preview} style={{ opacity }}>
       <div ref={(node) => drop(node)} className="[border:1px_solid_var(--common-border-color)] p-3 rounded-[5px]">
-        <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
-          <Box display={'flex'} alignItems={'center'}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <IconButton size={'small'} className={`[cursor:move_!important]`} ref={drag}>
               <MdDragIndicator size={20} className="text-[var(--primary-text)]" />
             </IconButton>
-            <h3 className="line-clamp-1 font-semibold">{step?.stepName}</h3>
-          </Box>
-          <Box>
+            <h3 className="line-clamp-2 md:line-clamp-1 font-semibold">{step?.stepName}</h3>
+          </div>
+          <div className="min-w-fit">
             <HtmlTooltip title={'Edit'}>
               <IconButton
                 size="small"
@@ -278,8 +278,8 @@ const SingleStep = ({ step, i, setOpen, setOpenField, setDeleteData, moveStep, f
                 <DeleteIcon fontSize="small" color={'error'} />
               </IconButton>
             </HtmlTooltip>
-          </Box>
-        </Box>
+          </div>
+        </div>
       </div>
     </div>
   );

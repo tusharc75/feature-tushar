@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { clamp } from 'src/constants/helpers';
 
 type UseTab = {
   active: boolean;
@@ -10,7 +11,7 @@ type UseTab = {
 
 const useTab = ({ active, totalTabs, activeTabIndex = 0, gap = 0, onTabChange }: UseTab) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [activeTab, setActiveTab] = useState(activeTabIndex > totalTabs - 1 ? totalTabs - 1 : activeTabIndex < 0 ? 0 : activeTabIndex);
+  const [activeTab, setActiveTab] = useState(clamp(activeTabIndex, 0, totalTabs - 1));
   const [tabSize, setTabSize] = useState(0);
   const [hasNextTab, setHasNextTab] = useState(true);
   const [hasPrevTab, setHasPrevTab] = useState(true);
