@@ -1259,6 +1259,7 @@ const LoadingTicket = ({
             setAddSerializedAssetDialog({ open: false, products: [] });
           }}
           referenceType={'ReplaceAsset'}
+          replaceAssets={true}
           referenceData={{
             _id: rentalManagementData?._id,
             warehouse: rentalManagementData?.warehouse?.optionValue

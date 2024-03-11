@@ -54,7 +54,8 @@ const AddSerializedAsset = ({
   notIn = null,
   filterByPlant = null,
   handleSuccess = null,
-  chartOfAccount = null
+  chartOfAccount = null,
+  replaceAssets = false
 }) => {
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assign`;
   const toastConfig = useContext(CustomToastContext);
@@ -469,7 +470,7 @@ const AddSerializedAsset = ({
       >
         <CustomDialogHeader
           showRequiredLabel={false}
-          title={`${referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'} ${routes.serializedAsset.title}`}
+          title={`${replaceAssets ? 'Replace' : 'Add'} ${routes.serializedAsset.title}`}
           onClose={handleSerializedAssetClose}
         ></CustomDialogHeader>
         <CustomDialogContent>
@@ -581,7 +582,7 @@ const AddSerializedAsset = ({
                             ? 'Direct transfer to customer location'
                             : referenceType === 'Rental Job'
                               ? 'Add to Job'
-                              : referenceType === 'ReplaceAsset'
+                              : replaceAssets
                                 ? 'Replace'
                                 : 'Add'
                         }
@@ -623,7 +624,7 @@ const AddSerializedAsset = ({
                           className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
                           endIcon={isAdding && <CircularProgress size={20} />}
                         >
-                          {referenceType === 'Rental Job' ? 'Add to Job' : referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'}
+                          {referenceType === 'Rental Job' ? 'Add to Job' : replaceAssets ? 'Replace' : 'Add'}
                           {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
                         </Button>
                       </HtmlTooltip>
