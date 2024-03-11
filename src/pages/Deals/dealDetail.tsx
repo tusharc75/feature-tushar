@@ -74,6 +74,7 @@ const DealDetail = () => {
                 data: { data }
             } = await axiosInstance().get(`${routes.deals.path}/${id}`);
             setDealData(data);
+            setCustomizedRoutes([routes.dealDetail, { title: data?.dealname }]);
             setLoading(false);
         } catch (error) {
             toastConfig.setToastConfig(error);
