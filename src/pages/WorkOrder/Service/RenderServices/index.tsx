@@ -70,7 +70,7 @@ const RenderService = ({
 
   const { containerRef, handleNextClick, handlePrevClick, hasNextTab, hasPrevTab } = useTab({
     active: isMobile,
-    totlaTabs: serviceSteps?.length || 0,
+    totalTabs: serviceSteps?.length || 0,
     activeTabIndex: initialTabIndex,
     gap: 8,
     onTabChange: handleTabChange

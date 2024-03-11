@@ -1076,7 +1076,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog.workOrder}
-          currentVersion={null}
           handleClose={() => {
             setShowDrawingDialog({ open: false, workOrder: null });
           }}

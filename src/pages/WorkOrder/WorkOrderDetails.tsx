@@ -318,6 +318,7 @@ const WorkOrderDetails = () => {
       visibilityInMobile: 'hidden',
       isVisible: Boolean(
         permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.deleted
+        && workOrderData?.canCreateWorkOrderVersion
       ),
       onClick: (e) => openAddActions(e),
       iconForMobile: false,
@@ -387,9 +388,9 @@ const WorkOrderDetails = () => {
                   extraMenuItems={createVersionMenuItems.map((c) => ({ ...c, text: `Create Version ${c.text}` }))}
                   isExtraMenuItemsVisible={Boolean(
                     permissions?.workOrder?.isUpdate &&
-                      allowedToEdit &&
-                      workOrderData?.status !== WORK_ORDER_STATUS.completed &&
-                      !workOrderData?.deleted
+                    allowedToEdit &&
+                    workOrderData?.status !== WORK_ORDER_STATUS.completed &&
+                    !workOrderData?.deleted
                   )}
                 />
                 <Menu
@@ -511,7 +512,11 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} currentVersion={workOrderData?.versions?.length + 1 || 1} />}
+          {workOrderData && <Diagram
+            resource={ACTIVITY_RESOURCE.workOrder}
+            referenceId={id}
+            currentVersion={workOrderData?.versions?.length + 1 || 1}
+          />}
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>
