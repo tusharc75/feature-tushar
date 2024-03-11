@@ -7,7 +7,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
-import queryString from 'query-string';
 import { useParams, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
