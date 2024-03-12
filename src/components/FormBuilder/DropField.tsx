@@ -43,7 +43,8 @@ export const DropField = ({
   addDeleteField,
   extraFields,
   onAddRemoveField,
-  isCalculativeField
+  isCalculativeField,
+  brandId
 }) => {
   const ref = useRef(null);
   const toastConfig = useContext(CustomToastContext);
@@ -266,6 +267,7 @@ export const DropField = ({
                     module={module}
                     extraFields={extraFields}
                     isCalculativeField={isCalculativeField}
+                    brandId={brandId}
                   />
                 ) : null}
               </Grid>
