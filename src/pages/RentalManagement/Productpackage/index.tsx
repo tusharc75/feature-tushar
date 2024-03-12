@@ -478,7 +478,7 @@ const Productpackage = ({
         setPriceDataDialog({ open: false, material: null });
       });
   };
-
+  
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
     axiosInstance()
@@ -486,8 +486,15 @@ const Productpackage = ({
       .then(() => {
         fetchData();
         if (saveAndNext) {
-          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
-          setIsProductEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+          const row = flattenArray(dataRows).find((ele)=>ele._id===rows[0]?._id);
+          if(!row?.parentId){
+            const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
+            setIsProductEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+          }else{
+            const allSubRowData = flattenArray(dataRows).filter((ele)=>ele.parentId===row.parentId);
+            const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
+            setIsProductEdit({ open: true, data: allSubRowData[subRowIdx + 1], showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false });
+          }    
         } else {
           setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
         }
@@ -517,10 +524,23 @@ const Productpackage = ({
   };
 
   const openMaterial = (data, rows) => {
+    let showSaveAndNext;
+    if(data.depth!=0){
+      const rootParent = data.getParentRows()[0];
+      if(rootParent?.original?.type===MATERIAL_TYPE.package){
+        const allRows = rows.filter((ele)=> ele.parentId===rows.parentId);
+        showSaveAndNext = data?.index < allRows.length-1 ? true : false;
+      }else{
+        showSaveAndNext = false;
+      }   
+    }else{
+      showSaveAndNext = data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
+    }
+ 
     setIsProductEdit({
       open: true,
       data: data.original,
-      showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
+      showSaveAndNext: showSaveAndNext
     });
     setIsBulkEdit(false);
   };
