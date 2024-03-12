@@ -40,7 +40,8 @@ export const DropSection = ({
   addDeleteField,
   extraFields,
   onAddRemoveField = null,
-  isCalculativeField
+  isCalculativeField,
+  brandId
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -332,6 +333,7 @@ export const DropSection = ({
                     extraFields={extraFields}
                     onAddRemoveField={onAddRemoveField}
                     isCalculativeField={isCalculativeField}
+                    brandId={brandId}
                   />
                 ))
               ) : (
