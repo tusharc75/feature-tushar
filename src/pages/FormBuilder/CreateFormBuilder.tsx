@@ -24,6 +24,7 @@ import { defaultStepper } from 'src/components/FormBuilder/Stepper/stepHelper';
 import Stepper from 'src/components/FormBuilder/Stepper';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { fieldLabelToFieldName } from 'src/constants/helpers';
+import Steps from 'src/components/FormBuilder/Steps';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -440,7 +441,7 @@ const CreateFormBuilder = () => {
                     Fields
                   </CustomTab>
                   <CustomTab index={1} id="tab-2">
-                    More Features
+                    Steps
                   </CustomTab>
                 </Tabs>
                 <TabPanel value={tabValue} index={0}>
@@ -456,7 +457,8 @@ const CreateFormBuilder = () => {
                   />
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  <Stepper steppers={steppers} setSteppers={setSteppers} resource={resource} />
+                  {/* <Stepper steppers={steppers} setSteppers={setSteppers} resource={resource} /> */}
+                  <Steps resource={resource} />
                 </TabPanel>
               </Box>
               {showConfirmDialog ? (

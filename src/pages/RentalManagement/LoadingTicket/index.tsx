@@ -85,7 +85,7 @@ const LoadingTicket = ({
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
-  const { selectedRecords } = state;
+  const { selectedRecords, dataRows } = state;
 
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
@@ -855,7 +855,13 @@ const LoadingTicket = ({
 
   const validateAction = (action) => {
     const errorMessages = [];
-    selectedRecords?.forEach((e) => {
+    var records = [...selectedRecords];
+    if (action === rentalManagementActions.cancelDeliveredLoadingTicket) {
+      const loadingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
+      records = [...selectedRecords?.filter((e) => !e?.loadingTicketId),
+      ...dataRows?.filter((e) => loadingTicketIds?.includes(e?.loadingTicketId))]
+    }
+    records?.forEach((e) => {
       if (action === rentalManagementActions.createLoadingTicket) {
         if (e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyCreated });
@@ -901,7 +907,8 @@ const LoadingTicket = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusInUseCancelLoading });
         }
         else if (e?.type === 'Asset' &&
-          ![ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered]?.includes(e?.status)
+          ![ASSET_STATUS.needRepair, ASSET_STATUS.needRecert,
+          ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered]?.includes(e?.status)
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.statusInUseCancelLoading });
         }
@@ -1252,6 +1259,7 @@ const LoadingTicket = ({
             setAddSerializedAssetDialog({ open: false, products: [] });
           }}
           referenceType={'ReplaceAsset'}
+          replaceAssets={true}
           referenceData={{
             _id: rentalManagementData?._id,
             warehouse: rentalManagementData?.warehouse?.optionValue

@@ -472,7 +472,7 @@ const Leads = () => {
           addButtonOnclick={() => {
             setIsOpen({ open: true, isClone: false, idToClone: null });
           }}
-          isAddButtonVisible={permissions?.lead?.isCreat}
+          isAddButtonVisible={permissions?.lead?.isCreate}
           synchronizeType
         />
 

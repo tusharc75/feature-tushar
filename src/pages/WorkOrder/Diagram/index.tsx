@@ -21,7 +21,7 @@ import { FileCopyIcon } from 'src/assets/svg/svgIcons';
 import PdfPreview from './ShowPdf/PdfPreview';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const Diagram = ({ resource, referenceId, currentVersion }) => {
+const Diagram = ({ resource, referenceId, currentVersion, fromVersions = false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [rowData, setRowData] = useState(null);
@@ -38,7 +38,7 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
 
   const fetchData = async () => {
     axiosInstance()
-      .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}`)
+      .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}&version=${currentVersion}`)
       .then(({ data: { data } }) => {
         const expend: any = {};
         setRowData(data);
@@ -129,18 +129,20 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
   return (
     <Box>
       <Box className="container-with-border" p={'20px'}>
-        <Box className="flex flex-wrap justify-between min-[600px]:justify-end gap-2 items-center mb-2">
-          <h6 className="font-semibold text-[16px] min-[600px]:hidden">Attachments</h6>
-          <ThemeButton
-            onClick={() => {
-              setAttachemntDialog({ open: true, id: null, isClone: false });
-            }}
-            iconForMobile={<Add />}
-            tooltip="Add"
-          >
-            <Add /> Add
-          </ThemeButton>
-        </Box>
+        {!fromVersions && (
+          <Box className="flex flex-wrap justify-between min-[600px]:justify-end gap-2 items-center mb-2">
+            <h6 className="font-semibold text-[16px] min-[600px]:hidden">Attachments</h6>
+            <ThemeButton
+              onClick={() => {
+                setAttachemntDialog({ open: true, id: null, isClone: false });
+              }}
+              iconForMobile={<Add />}
+              tooltip="Add"
+            >
+              <Add /> Add
+            </ThemeButton>
+          </Box>
+        )}
         <Box pt={2} pb={2}>
           <Box className="overflow-auto h-[calc(100vh-250px)]">
             <div className="grid gap-3">
@@ -149,11 +151,10 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
                   return (
                     <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                            : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
-                        }`}
+                        className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${expended[file?._id]
+                          ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                          : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                          }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -169,52 +170,53 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
                             </Typography>
                           </Box>
                         </div>
-                        <div className="flex gap-2">
-                          <HtmlTooltip title="Edit" placement="top" arrow>
-                            <IconButton
-                              size="small"
-                              color="inherit"
-                              aria-label="edit"
-                              disabled={!file?.canEdit}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setAttachemntDialog({ open: true, id: file?._id, isClone: false });
-                              }}
-                            >
-                              <EditIcon style={{ fontSize: '18px' }} />
-                            </IconButton>
-                          </HtmlTooltip>
-                          <HtmlTooltip title="Clone" placement="top" arrow>
-                            <IconButton
-                              size="small"
-                              color="inherit"
-                              aria-label="clone"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setAttachemntDialog({ open: true, id: file?._id, isClone: true });
-                              }}
-                            >
-                              <FileCopyIcon style={{ fontSize: '18px' }} />
-                            </IconButton>
-                          </HtmlTooltip>
-                          <HtmlTooltip title="Delete" placement="top" arrow>
-                            <IconButton
-                              size="small"
-                              color="inherit"
-                              style={{ color: 'red' }}
-                              aria-label="delete"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedFile(file);
-                                setShowConfirmBox(true);
-                              }}
-                            >
-                              <Delete style={{ fontSize: '18px' }} />
-                            </IconButton>
-                          </HtmlTooltip>
-                        </div>
+                        {!fromVersions &&
+                          <div className="flex gap-2">
+                            <HtmlTooltip title="Edit" placement="top" arrow>
+                              <IconButton
+                                size="small"
+                                color="inherit"
+                                aria-label="edit"
+                                disabled={!file?.canEdit}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setAttachemntDialog({ open: true, id: file?._id, isClone: false });
+                                }}
+                              >
+                                <EditIcon style={{ fontSize: '18px' }} />
+                              </IconButton>
+                            </HtmlTooltip>
+                            <HtmlTooltip title="Clone" placement="top" arrow>
+                              <IconButton
+                                size="small"
+                                color="inherit"
+                                aria-label="clone"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setAttachemntDialog({ open: true, id: file?._id, isClone: true });
+                                }}
+                              >
+                                <FileCopyIcon style={{ fontSize: '18px' }} />
+                              </IconButton>
+                            </HtmlTooltip>
+                            <HtmlTooltip title="Delete" placement="top" arrow>
+                              <IconButton
+                                size="small"
+                                color="inherit"
+                                style={{ color: 'red' }}
+                                aria-label="delete"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedFile(file);
+                                  setShowConfirmBox(true);
+                                }}
+                              >
+                                <Delete style={{ fontSize: '18px' }} />
+                              </IconButton>
+                            </HtmlTooltip>
+                          </div>
+                        }
                       </div>
-
                       <Collapse in={expended[file?._id]}>
                         <div className="border border-[var(--common-border-color)]">
                           {file?.file?.map((f) => {
@@ -279,10 +281,17 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
           />
           <CustomDialogContent>
             {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-              <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
+              fromVersions ? (
+                <ShowPdf data={selectedAttachment} />
+              ) : (
+                <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
+              )
             ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-              // <ShowPdf data={selectedAttachment} />
-              <PdfPreview data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
+              fromVersions ? (
+                <ShowPdf data={selectedAttachment} />
+              ) : (
+                <PdfPreview data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
+              )
             ) : (
               <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
             )}
@@ -335,7 +344,7 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
           }}
         />
       )}
-    </Box>
+    </Box >
   );
 };
 

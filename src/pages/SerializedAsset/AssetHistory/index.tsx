@@ -39,9 +39,9 @@ const AssetHistory = ({ id }) => {
         <div>
           {row.original.reference ? (
             row.original.type === 'Loading Ticket' ||
-            row.original.type === 'Receiving Ticket' ||
-            row.original.type === 'Return Ticket' ||
-            row.original.type === 'Delivery Ticket' ? (
+              row.original.type === 'Receiving Ticket' ||
+              row.original.type === 'Return Ticket' ||
+              row.original.type === 'Delivery Ticket' ? (
               <Link
                 className="link"
                 title={row.original.reference}
@@ -166,6 +166,16 @@ const AssetHistory = ({ id }) => {
                 className="link"
                 title={row.original.reference}
                 to={`${routes.planningDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original?.type === sidebarResource.deals ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.dealDetail.path}/${row.original.referenceId}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

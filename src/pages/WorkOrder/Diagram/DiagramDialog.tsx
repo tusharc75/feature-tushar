@@ -1,10 +1,28 @@
-import { Dialog } from '@material-ui/core';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { Dialog, Grid } from '@material-ui/core';
+import { ACTIVITY_RESOURCE, CustomDialogTransition, workOrder } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Diagram from '.';
+import { useContext, useEffect, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const DiagramDialog = ({ handleClose, referenceId, currentVersion }) => {
+const DiagramDialog = ({ handleClose, referenceId }) => {
+
+    const toastConfig = useContext(CustomToastContext);
+    const [currentVersion, setCurrentVersion] = useState(null);
+
+    useEffect(() => {
+        axiosInstance()
+            .get(`${workOrder.api}/current-version/${referenceId}`)
+            .then(({ data: { data } }) => {
+                setCurrentVersion(data?.currentVersion);
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    }, [referenceId]);
 
     return (
         <Dialog
@@ -26,10 +44,16 @@ const DiagramDialog = ({ handleClose, referenceId, currentVersion }) => {
                 title={`Drawings`}
             ></CustomDialogHeader>
             <CustomDialogContent>
-                <Diagram
-                    resource={'workOrder'}
-                    referenceId={referenceId}
-                    currentVersion={currentVersion || 1} />
+                {currentVersion ?
+                    <Diagram
+                        resource={ACTIVITY_RESOURCE.workOrder}
+                        referenceId={referenceId}
+                        currentVersion={currentVersion}
+                    />
+                    : <Grid container spacing={2} >
+                        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Grid>
+                }
             </CustomDialogContent>
         </Dialog>
     );
