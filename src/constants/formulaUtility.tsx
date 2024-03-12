@@ -616,10 +616,7 @@ export const checkFormulaLoop = (fields) => {
 
         var duplicateList = [];
         fields.forEach((_f) => {
-            if ((fields.filter((_d) => _d.fieldLabel.trim().toLowerCase() === _f.fieldLabel.trim().toLowerCase()).length) > 1) {
-                duplicateList.push(_f.fieldLabel)
-            }
-            if ((fields.filter((_d) => _d.fieldName.toLowerCase() === _f.fieldName.toLowerCase()).length) > 1) {
+            if ((fields.filter((_d) => (_d?.fieldName || _d?.fieldLabel).toLowerCase() === (_f?.fieldName || _f?.fieldLabel).toLowerCase()).length) > 1) {
                 duplicateList.push(_f.fieldLabel)
             }
         })
