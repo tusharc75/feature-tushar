@@ -19,7 +19,7 @@ const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
 });
 
-export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField }) => {
+export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField, brandId }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -530,6 +530,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         touched={touched}
                         errors={errors}
                         module={module}
+                        brandId={brandId}
                       />
                     </TabPanel>
                   </Box>

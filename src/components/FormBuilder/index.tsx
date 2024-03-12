@@ -51,7 +51,8 @@ export const FormBuilder = ({
   module,
   extraFields,
   resource,
-  onAddRemoveField = null
+  onAddRemoveField = null,
+  brandId
 }) => {
   const addSection = (sectionHoverIndex) => {
     let data = [...section];
@@ -141,6 +142,7 @@ export const FormBuilder = ({
                 extraFields={extraFields}
                 onAddRemoveField={onAddRemoveField}
                 isCalculativeField={isCalculativeField}
+                brandId={brandId}
               />
             </Box>
           </Grid>

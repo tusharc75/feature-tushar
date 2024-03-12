@@ -5,7 +5,7 @@ import { ResourceDropdown } from '../resourceDropdown';
 import { Autocomplete } from '@material-ui/lab';
 import { Entity } from '../../AddField/entity';
 
-const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module }) => {
+const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId }) => {
 
   return (
     <Box pb={1}>
@@ -604,7 +604,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
-      <Entity values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />
+      <Entity values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} brandId={brandId} />
     </Box>
   );
 };
