@@ -20,11 +20,14 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { ASSET_STATUS, CHILD_RESOURCE, REPAIR_JOB_STATUS, repairJob, sidebarResource } from 'src/constants/helpers';
 import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerializedAsset';
 import ManageAssetDialog from './ManageAssetDialog';
+import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
+  const [addNewSerializedAssetDialog, setAddNewSerializedAssetDialog] = useState(false);
+
   const [isAdding, setIsAdding] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [columns, setColumns] = useState(null);
@@ -301,6 +304,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       })
       .then(({ data }) => {
         setAddSerializedAssetDialog(false);
+        setAddNewSerializedAssetDialog(false);
         if (repairJobData.status === REPAIR_JOB_STATUS.new) {
           updateJobStatus(REPAIR_JOB_STATUS.inProgress);
         }
@@ -370,6 +374,14 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
         >
           Add Existing {routes.serializedAsset.title}
         </MenuItem>
+        {permissions?.serializedAsset?.isCreate &&
+          <MenuItem
+            onClick={() => {
+              setAddNewSerializedAssetDialog(true);
+            }}
+          >
+            Add New {routes.serializedAsset.title}
+          </MenuItem>}
       </>
     );
   };
@@ -447,6 +459,20 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
           chartOfAccount={repairJobData?.chartOfAccount}
         />
       )}
+      {addNewSerializedAssetDialog &&
+        <ManageSerializedAsset
+          onClose={() =>
+            setAddNewSerializedAssetDialog(false)
+          }
+          referenceType={'repairJob'}
+          referenceData={{
+            warehouse: repairJobData?.warehouse?.optionValue
+          }}
+          onSuccess={(data) => {
+            handleAdd([data]);
+          }}
+        />
+      }
       {showAssetRemoveConfirmationDialog.open && (
         <ConfirmationDialog
           open={true}

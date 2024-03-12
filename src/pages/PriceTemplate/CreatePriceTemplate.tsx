@@ -621,6 +621,7 @@ const PriceTemplate = () => {
                       extraFields={[...productField, ...templateField]}
                       module="price-template"
                       resource=""
+                      brandId={user.user.brand}
                     />
                   </Box>
                   {showConfirmDialog ? (

@@ -1,5 +1,4 @@
 import { Box, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
-import { fieldLabelToFieldName } from 'src/constants/helpers';
 import { Currency } from '../../AddField/currency';
 import { Fragment, useEffect, useState } from 'react';
 import { Autocomplete } from '@material-ui/lab';
@@ -14,6 +13,7 @@ import { getLookupResource } from '../../helper';
 import { DecimalPlaces } from '../../AddField/decimalPlaces';
 import { SignatureUser } from '../../AddField/signatureUser';
 import { MinMax } from '../../AddField/minMax';
+import { fieldLabelToFieldName } from '../../../../constants/helpers';
 
 const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField }) => {
   const [isInitialUpdated, setIsInitialUpdated] = useState({
