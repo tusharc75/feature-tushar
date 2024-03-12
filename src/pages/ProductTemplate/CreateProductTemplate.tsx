@@ -625,6 +625,7 @@ const ProductTemplate = () => {
                       extraFields={productField}
                       module="product-template"
                       resource=""
+                      brandId={user.user.brand}
                     />
                   </Box>
                   {generalRemarkOpen && (

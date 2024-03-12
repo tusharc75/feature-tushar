@@ -19,7 +19,7 @@ const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
 });
 
-export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField }) => {
+export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField, brandId }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -210,6 +210,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (values.isSystemGenerate) {
               ele.systemGeneratedAutoIncrement = values.systemGeneratedAutoIncrement;
               ele.systemGeneratedPrefix = values.systemGeneratedPrefix;
+            }
+            ele.isFieldEntityWise = values?.isFieldEntityWise || false;
+            if (ele.isFieldEntityWise) {
+              ele.fieldEntity = values.fieldEntity;
             }
             ele.isColumnEditable = values?.isColumnEditable || false;
             ele.stopHideColumn = values?.stopHideColumn || false;
@@ -503,7 +507,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         id="a11y-tab-1"
                       />
                     </Tabs>
-
                     <TabPanel value={tabValue} index={0}>
                       <General
                         values={values}
@@ -527,6 +530,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         touched={touched}
                         errors={errors}
                         module={module}
+                        brandId={brandId}
                       />
                     </TabPanel>
                   </Box>
