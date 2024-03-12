@@ -10,6 +10,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 let searchTimeout;
 
@@ -37,6 +38,9 @@ const AssignSerializedAssetDialog = ({
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [columns, setColumns] = useState(null);
   const [products, setProducts] = useState([]);
+  const [checkMTRValidation, setCheckMTRValidation] = useState(false);
+  const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
+  const [isSubmitting,setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -56,6 +60,7 @@ const AssignSerializedAssetDialog = ({
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data: { data } }) => {
+        if(reference==='rentalJob') setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         setColumns([...newColumns, ...getStaticFields()]);
       });
@@ -262,7 +267,17 @@ const AssignSerializedAssetDialog = ({
             loading: isAssigning,
             text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
           }}
-          addButtonOnclick={handleAdd}
+          addButtonOnclick={()=>{
+            if (checkMTRValidation) {
+              if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
+                setMtrConfirmBox(true);
+              }else{
+                handleAdd();
+              }
+            }else{
+              handleAdd();
+            }
+          }}
           isAddButtonVisible
           setQueryString={false}
           synchronizeType={false}
@@ -289,6 +304,20 @@ const AssignSerializedAssetDialog = ({
           </Box>
         )}
       </CustomDialogContent>
+      {mtrConfirmBox && (
+        <ConfirmationDialog
+          open={mtrConfirmBox}
+          okBtnLoading={isSubmitting}
+          message={`MTR(s) missing for some or all line items.`}
+          onClose={() => {
+            setMtrConfirmBox(false);
+          }}
+          onOk={() => {
+            handleAdd();
+            setMtrConfirmBox(false);
+          }}
+        />
+      )}
     </Dialog>
   );
 };
