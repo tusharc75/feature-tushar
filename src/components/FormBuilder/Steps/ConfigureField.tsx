@@ -8,8 +8,12 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { FormBuilder } from '../../../components/FormBuilder';
 import { map, uniq } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 const ConfigureField = ({ resourceId, step = null, handleClose, handleSucess }) => {
+
+  const { state: { user } }: any = useData();
+
   const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -106,6 +110,7 @@ const ConfigureField = ({ resourceId, step = null, handleClose, handleSucess }) 
           extraFields={[]}
           module="form-builder"
           resource={null}
+          brandId={user.user.brand}
         />
       </CustomDialogContent>
       <CustomDialogFooter>
