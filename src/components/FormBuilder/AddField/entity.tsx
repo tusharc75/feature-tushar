@@ -2,32 +2,31 @@ import { useState, useEffect, useContext } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { Checkbox, CircularProgress, FormControlLabel, Grid } from '@material-ui/core';
 import React from 'react';
+import { getEntity } from '../helper';
 
-export const Entity = ({ values, setFieldValue, touched, errors }) => {
+export const Entity = ({ values, setFieldValue, touched, errors, brandId }) => {
+
     const toastConfig = useContext(CustomToastContext)
     const [entityOptions, setEntityOptions] = useState([]);
     const [loadingEntity, setLoadingEntity] = useState(false);
 
     useEffect(() => {
-        setLoadingEntity(true)
-        axiosInstance()
-            .get(`/entity`)
-            .then(({ data: { data } }) => {
-                const options = data.map((data) => ({
-                    optionValue: data._id,
-                    optionLabel: data?.entityName || ""
-                }))
-                setEntityOptions(options || []);
-                setLoadingEntity(false);
-            }).catch((e) => {
-                toastConfig.toast("error", "Error fetching entity options");
-                setLoadingEntity(false);
-            })
+        getEntityList()
     }, []);
+
+    const getEntityList = async () => {
+        setLoadingEntity(true)
+        try {
+            const data: any = await getEntity(brandId);
+            setEntityOptions(data);
+            setLoadingEntity(false);
+        } catch (e) {
+            setLoadingEntity(false);
+        }
+    };
 
     return (<Box>
         <Grid container>
