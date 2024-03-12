@@ -169,17 +169,19 @@ const DynamicFormDetail = () => {
             aria-controls="a11y-tabpanel-0"
             id="a11y-tab-0"
           />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            value={1}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
-          />
+          {detailData?.steps?.length && (
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                </div>
+              }
+              value={1}
+              aria-controls="a11y-tabpanel-1"
+              id="a11y-tab-1"
+            />
+          )}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -190,9 +192,11 @@ const DynamicFormDetail = () => {
             <DetailsPage data={detailData} fields={fields} />
           )}
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
-          <Step resourceId={id} resource={resource} data={detailData} allowedToEdit={permissions[renderedFrom]?.isUpdate} />
-        </TabPanel>
+        {detailData?.steps?.length && (
+          <TabPanel value={tabValue} index={1}>
+            <Step resourceId={id} resource={resource} data={detailData} allowedToEdit={permissions[renderedFrom]?.isUpdate} />
+          </TabPanel>
+        )}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

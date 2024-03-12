@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem, Typography } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -14,6 +14,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../../components/Shared/DetailsPage';
 
 const Step = ({ resourceId, resource, data, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -27,27 +28,12 @@ const Step = ({ resourceId, resource, data, allowedToEdit }) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   const { state, dispatch } = useTableReducer();
-  const { selectedRecords } = state;
+  const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   useEffect(() => {
-    fetchSteps();
-  }, []);
-
-  const fetchSteps = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/step/steps`, {
-        headers: {
-          Resource: resource
-        }
-      });
-      setSteps(_.sortBy(data, 'order'));
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
+    setSteps(_.sortBy(data?.steps, 'order'));
+  }, [data]);
 
   const getColumns = () => {
     const newColumns = generateColumns(
@@ -198,12 +184,11 @@ const Step = ({ resourceId, resource, data, allowedToEdit }) => {
 
   return (
     <>
-      {steps ? (
+      {steps && steps?.length && (
         <>
           <Steps
             isNextStep={false}
-            nextStep={true}
-            isPrevStep={true}
+            nextStep={steps[currentStep]?.stepDataRequired ? (dataRows?.length ? true : false) : true}
             steps={steps?.map((s) => ({ name: s?.stepName, title: s?.stepName }))}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
@@ -212,41 +197,66 @@ const Step = ({ resourceId, resource, data, allowedToEdit }) => {
           />
           <ContentFullScreen title={steps[currentStep]?.stepName} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {steps[currentStep]?.fields?.length ? (
-              <>
-                {allowedToEdit && (
-                  <DetailsPageHeader
-                    isAddButtonVisible={false}
-                    isActionButtonVisible={true}
-                    actionButtonMenuItems={actionButtonMenuItems()}
-                    actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-                    hasXpadding
-                    leftSideContents={
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setOpen({ open: true, id: null });
-                        }}
-                      >
-                        Add
-                      </Button>
-                    }
-                  />
-                )}
-                <Box zIndex={5} width={'100%'}>
-                  <CustomReactTable
-                    height={'300px'}
-                    columns={getColumns()}
-                    state={state}
-                    dispatch={dispatch}
-                    renderedFrom={`${renderedFrom}_${steps[currentStep]?.stepName}`}
-                    isClientSideGrid={true}
-                    refreshGrid={fetchData}
-                  />
-                </Box>
-              </>
-            ) : null}
+              steps[currentStep]?.multipleStepData ? (
+                <>
+                  {allowedToEdit && (
+                    <DetailsPageHeader
+                      isAddButtonVisible={false}
+                      isActionButtonVisible={true}
+                      actionButtonMenuItems={actionButtonMenuItems()}
+                      actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+                      hasXpadding
+                      leftSideContents={
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            setOpen({ open: true, id: null });
+                          }}
+                        >
+                          Add
+                        </Button>
+                      }
+                    />
+                  )}
+                  <Box zIndex={5} width={'100%'}>
+                    <CustomReactTable
+                      height={'300px'}
+                      columns={getColumns()}
+                      state={state}
+                      dispatch={dispatch}
+                      renderedFrom={`${renderedFrom}_${steps[currentStep]?.stepName}`}
+                      isClientSideGrid={true}
+                      refreshGrid={fetchData}
+                    />
+                  </Box>
+                </>
+              ) : (
+                <>
+                  <Box textAlign={'right'}>
+                    <Button
+                      className={'no-shadow'}
+                      onClick={() => {
+                        setOpen({ open: true, id: dataRows[0] ? dataRows[0]?._id : null });
+                      }}
+                      variant={'contained'}
+                      size="small"
+                      color="primary"
+                    >
+                      Edit
+                    </Button>
+                  </Box>
+                  <Box mt={2}>
+                    <DetailsPage data={dataRows[0] || {}} fields={steps[currentStep]?.fields?.map((f) => ({ fieldData: f }))} />
+                  </Box>
+                </>
+              )
+            ) : (
+              <Box minHeight={'270px'} display={'flex'} alignItems={'center'} justifyContent={'center'}>
+                <Typography>No Fields</Typography>
+              </Box>
+            )}
 
             {open?.open && (
               <ManageStep
@@ -278,8 +288,6 @@ const Step = ({ resourceId, resource, data, allowedToEdit }) => {
             )}
           </ContentFullScreen>
         </>
-      ) : (
-        <></>
       )}
     </>
   );
