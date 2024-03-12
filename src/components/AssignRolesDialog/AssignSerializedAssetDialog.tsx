@@ -60,7 +60,7 @@ const AssignSerializedAssetDialog = ({
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data: { data } }) => {
-        setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
+        if(reference==='rentalJob') setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         setColumns([...newColumns, ...getStaticFields()]);
       });
@@ -271,6 +271,8 @@ const AssignSerializedAssetDialog = ({
             if (checkMTRValidation) {
               if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
                 setMtrConfirmBox(true);
+              }else{
+                handleAdd();
               }
             }else{
               handleAdd();
