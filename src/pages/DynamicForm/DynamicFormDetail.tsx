@@ -17,6 +17,8 @@ import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
 import TabPanel from 'src/components/TabPanel';
 import Step from './Step';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { useColumns } from 'src/components/CustomReactTable';
 
 const DynamicFormDetail = () => {
   const { route, id } = useParams();
@@ -32,10 +34,12 @@ const DynamicFormDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [columns, setColumns] = useState([]);
 
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
 
   const [tabValue, setTabValue] = useState(0);
+  const { generateColumns } = useColumns();
 
   const {
     state: { permissions, user }
@@ -52,7 +56,10 @@ const DynamicFormDetail = () => {
     axiosInstance()
       .get(`/field?resource=${resource}`)
       .then(({ data: { data } }) => {
-        setFields(data?.filter((field) => field.isRead));
+        const fields = data?.filter((field) => field.isRead);
+        setFields(fields);
+        const newColumns = generateColumns(`${renderedFrom}_${resource}`, fields);
+        setColumns(newColumns);
         const primaryField = data?.find((e) => e?.fieldData?.primaryField);
         if (primaryField) {
           setPrimaryFieldName(primaryField?.fieldData?.fieldName);
@@ -137,6 +144,13 @@ const DynamicFormDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            <PreviewDownload
+              fileName={`${resource}`}
+              resource={resource}
+              referenceId={id}
+              columns={columns}
+              hideDetailButton={true}
+            />
             {permissions[renderedFrom]?.isUpdate && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}

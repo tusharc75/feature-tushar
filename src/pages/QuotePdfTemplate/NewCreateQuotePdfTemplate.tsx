@@ -124,11 +124,10 @@ export default function NewCreateQuotePdfTemplate() {
       }
     });
     for (const [key, value] of Object.entries(permissions)) {
-      let result = key.charAt(0).toUpperCase() + key.slice(1);
-      result = result.replace(/([A-Z])/g, ' $1').trim();
+      let result = key?.replace(/ /g, '').toLowerCase();
       let foundFlag = false;
       for(const [key2, value2] of Object.entries(sidebarResource)) {
-        if (value2 === result) {
+        if (value2?.replace(/ /g, '').toLowerCase() === result) {
           foundFlag = true;
           break;
         }
