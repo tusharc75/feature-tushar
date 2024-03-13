@@ -1,9 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, IconButton, MenuItem, Typography } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, MenuItem, Typography } from '@material-ui/core';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import Steps, { getIndex } from 'src/components/Steps';
+import Steps from 'src/components/Steps';
 import _ from 'lodash';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -15,13 +16,98 @@ import EditIcon from '@material-ui/icons/Edit';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../../components/Shared/DetailsPage';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
-const Step = ({ steps, resourceId, resource, data, allowedToEdit }) => {
+const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
+  const [steps, setSteps] = useState(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [expended, setExpended] = useState({});
+  const [nextStep, setNextStep] = useState(false);
+
+  useEffect(() => {
+    setSteps(_.sortBy(resourceData?.steps, 'order'));
+  }, [resourceData]);
+
+  return (
+    <>
+      {steps &&
+        steps?.length &&
+        (resourceData?.showStepsInList ? (
+          <>
+            <Steps
+              isNextStep={false}
+              nextStep={steps[currentStep]?.stepDataRequired ? nextStep : true}
+              steps={steps?.map((s) => ({ name: s?.stepName, title: s?.stepName }))}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={false}
+              setStepFullScreen={() => setStepFullScreen(true)}
+            />
+            <ContentFullScreen title={steps[currentStep]?.stepName} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+              <RenderData
+                step={steps[currentStep]}
+                allowedToEdit={allowedToEdit}
+                data={data}
+                resource={resource}
+                resourceId={resourceId}
+                setNextStep={setNextStep}
+              />
+            </ContentFullScreen>
+          </>
+        ) : (
+          <>
+            {steps?.map((step, i) => {
+              return (
+                <Box mt={2} key={i}>
+                  <Accordion
+                    expanded={expended[`${step?._id}`]}
+                    className="accordOpportunity"
+                    onChange={() => setExpended({ ...expended, [`${step?._id}`]: !expended[`${step?._id}`] })}
+                  >
+                    <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+                      <Grid container className="pos_rel">
+                        <Grid item xs={8}>
+                          <Box display="flex" alignItems="center">
+                            <Box>
+                              <IconButton size="small">{expended[`${step?._id}`] === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+                            </Box>
+                            <Box padding="5px">
+                              <Typography variant="subtitle2">{step?.stepName}</Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <>
+                        {expended[`${step?._id}`] && (
+                          <RenderData
+                            step={step}
+                            allowedToEdit={allowedToEdit}
+                            data={data}
+                            resource={resource}
+                            resourceId={resourceId}
+                            fromAccordian={true}
+                          />
+                        )}
+                      </>
+                    </AccordionDetails>
+                  </Accordion>
+                </Box>
+              );
+            })}
+          </>
+        ))}
+    </>
+  );
+};
+
+const RenderData = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = null, fromAccordian = false }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${_.camelCase(resource)}`;
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [stepFullScreen, setStepFullScreen] = useState(false);
   const [open, setOpen] = useState({ open: false, id: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -31,13 +117,7 @@ const Step = ({ steps, resourceId, resource, data, allowedToEdit }) => {
   const { generateColumns } = useColumns();
 
   const getColumns = () => {
-    const newColumns = generateColumns(
-      `${renderedFrom}_${steps[currentStep]?.stepName}`,
-      steps[currentStep]?.fields || [],
-      null,
-      false,
-      data?.currency
-    );
+    const newColumns = generateColumns(`${renderedFrom}_${step?.stepName}`, step?.fields || [], null, false, data?.currency);
     const column: any = [
       {
         accessor: 'index',
@@ -101,17 +181,11 @@ const Step = ({ steps, resourceId, resource, data, allowedToEdit }) => {
     ];
   };
 
-  useEffect(() => {
-    if (steps && steps[currentStep]?.fields?.length) {
-      fetchData();
-    }
-  }, [steps, currentStep]);
-
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
 
     axiosInstance()
-      .get(`/dynamic-form/step/${resourceId}/${steps[currentStep]?._id}`, {
+      .get(`/dynamic-form/step/${resourceId}/${step?._id}`, {
         headers: {
           Resource: resource
         }
@@ -124,6 +198,13 @@ const Step = ({ steps, resourceId, resource, data, allowedToEdit }) => {
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: data?.length });
+        if (setNextStep) {
+          if (rows?.length > 0) {
+            setNextStep(true);
+          } else {
+            setNextStep(false);
+          }
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -134,6 +215,12 @@ const Step = ({ steps, resourceId, resource, data, allowedToEdit }) => {
         }, gridLoadingTimeout);
       });
   };
+
+  useEffect(() => {
+    if (step && step?.fields?.length) {
+      fetchData();
+    }
+  }, [step]);
 
   const handleDelete = async () => {
     let ids: any = [];
@@ -146,7 +233,7 @@ const Step = ({ steps, resourceId, resource, data, allowedToEdit }) => {
     axiosInstance()
       .put(
         `/dynamic-form/step/remove/${resourceId}`,
-        { ids: ids, stepId: steps[currentStep]?._id },
+        { ids: ids, stepId: step?._id },
         {
           headers: {
             Resource: resource
@@ -179,110 +266,95 @@ const Step = ({ steps, resourceId, resource, data, allowedToEdit }) => {
 
   return (
     <>
-      {steps && steps?.length && (
-        <>
-          <Steps
-            isNextStep={false}
-            nextStep={steps[currentStep]?.stepDataRequired ? (dataRows?.length ? true : false) : true}
-            steps={steps?.map((s) => ({ name: s?.stepName, title: s?.stepName }))}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={false}
-            setStepFullScreen={() => setStepFullScreen(true)}
-          />
-          <ContentFullScreen title={steps[currentStep]?.stepName} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {steps[currentStep]?.fields?.length ? (
-              steps[currentStep]?.multipleStepData ? (
-                <>
-                  {allowedToEdit && (
-                    <DetailsPageHeader
-                      isAddButtonVisible={false}
-                      isActionButtonVisible={true}
-                      actionButtonMenuItems={actionButtonMenuItems()}
-                      actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-                      hasXpadding
-                      leftSideContents={
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={() => {
-                            setOpen({ open: true, id: null });
-                          }}
-                        >
-                          Add
-                        </Button>
-                      }
-                    />
-                  )}
-                  <Box zIndex={5} width={'100%'}>
-                    <CustomReactTable
-                      height={'300px'}
-                      columns={getColumns()}
-                      state={state}
-                      dispatch={dispatch}
-                      renderedFrom={`${renderedFrom}_${steps[currentStep]?.stepName}`}
-                      isClientSideGrid={true}
-                      refreshGrid={fetchData}
-                    />
-                  </Box>
-                </>
-              ) : (
-                <>
-                  <Box textAlign={'right'}>
-                    <Button
-                      className={'no-shadow'}
-                      onClick={() => {
-                        setOpen({ open: true, id: dataRows[0] ? dataRows[0]?._id : null });
-                      }}
-                      variant={'contained'}
-                      size="small"
-                      color="primary"
-                    >
-                      Edit
-                    </Button>
-                  </Box>
-                  <Box mt={2}>
-                    <DetailsPage data={dataRows[0] || {}} fields={steps[currentStep]?.fields?.map((f) => ({ fieldData: f }))} />
-                  </Box>
-                </>
-              )
-            ) : (
-              <Box minHeight={'270px'} display={'flex'} alignItems={'center'} justifyContent={'center'}>
-                <Typography>No Fields</Typography>
-              </Box>
-            )}
-
-            {open?.open && (
-              <ManageStep
-                onClose={() => {
-                  setOpen({ open: false, id: null });
-                }}
-                onSuccess={() => {
-                  fetchData();
-                  setOpen({ open: false, id: null });
-                }}
-                resource={resource}
-                resourceId={resourceId}
-                stepId={steps[currentStep]?._id}
-                id={open?.id}
-                fields={steps[currentStep]?.fields || []}
+      {step?.fields?.length ? (
+        step?.multipleStepData ? (
+          <>
+            {allowedToEdit && (
+              <DetailsPageHeader
+                isAddButtonVisible={false}
+                isActionButtonVisible={true}
+                actionButtonMenuItems={actionButtonMenuItems()}
+                actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+                hasXpadding
+                leftSideContents={
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                      setOpen({ open: true, id: null });
+                    }}
+                  >
+                    Add
+                  </Button>
+                }
               />
             )}
-
-            {showDeleteConfirmBox && (
-              <ConfirmationDialog
-                open={showDeleteConfirmBox}
-                message={`Are you sure, you want to delete ?`}
-                onClose={() => {
-                  setDeleteRecord(null);
-                  setShowDeleteConfirmBox(false);
-                }}
-                onOk={handleDelete}
+            <Box zIndex={5} width={'100%'}>
+              <CustomReactTable
+                height={'300px'}
+                columns={getColumns()}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={`${renderedFrom}_${step?.stepName}`}
+                isClientSideGrid={true}
+                refreshGrid={fetchData}
               />
-            )}
-          </ContentFullScreen>
-        </>
+            </Box>
+          </>
+        ) : (
+          <>
+            <Box textAlign={'right'}>
+              <Button
+                className={'no-shadow'}
+                onClick={() => {
+                  setOpen({ open: true, id: dataRows[0] ? dataRows[0]?._id : null });
+                }}
+                variant={'contained'}
+                size="small"
+                color="primary"
+              >
+                Edit
+              </Button>
+            </Box>
+            <Box mt={2}>
+              <DetailsPage data={dataRows[0] || {}} fields={step?.fields?.map((f) => ({ fieldData: f }))} />
+            </Box>
+          </>
+        )
+      ) : (
+        <Box minHeight={fromAccordian ? '50px' : '270px'} display={'flex'} alignItems={'center'} justifyContent={'center'}>
+          <Typography>No Fields</Typography>
+        </Box>
+      )}
+
+      {open?.open && (
+        <ManageStep
+          onClose={() => {
+            setOpen({ open: false, id: null });
+          }}
+          onSuccess={() => {
+            fetchData();
+            setOpen({ open: false, id: null });
+          }}
+          resource={resource}
+          resourceId={resourceId}
+          stepId={step?._id}
+          id={open?.id}
+          fields={step?.fields || []}
+        />
+      )}
+
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure, you want to delete ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
       )}
     </>
   );
