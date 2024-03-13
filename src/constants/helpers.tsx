@@ -2948,3 +2948,7 @@ export const IMPORT_EXPORT_TYPE = {
 export function clamp(val: number, min: number, max: number) {
   return Math.min(Math.max(val, min), max);
 }
+
+export const getResourceLabel = (resource, user) => {
+  return user?.role?.selectedEntity?.resource?.find((e) => e.name === resource)?.resourceLabel || resource
+}
