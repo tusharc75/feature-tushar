@@ -17,11 +17,19 @@ import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
 import TabPanel from 'src/components/TabPanel';
 import Step from './Step';
+import { getResourceLabel } from 'src/constants/helpers';
 
 const DynamicFormDetail = () => {
+  
   const { route, id } = useParams();
+
+  const {
+    state: { permissions, user }
+  }: any = useData();
+
   const resource = startCase(route?.replace(/-/g, ' '));
   const renderedFrom = camelCase(resource);
+  const resourceLabel = getResourceLabel(resource, user);
 
   const resourcePath = `/${route}`;
 
@@ -38,9 +46,6 @@ const DynamicFormDetail = () => {
 
   const [tabValue, setTabValue] = useState(0);
 
-  const {
-    state: { permissions, user }
-  }: any = useData();
 
   useEffect(() => {
     if (id) {
@@ -147,12 +152,8 @@ const DynamicFormDetail = () => {
       <Box className="headerbox-v1">
         <Box className="nav-v1">
           <CustomBreadCrumbs
-            routes={[
-              { title: resource, path: `/${route}` },
-              {
-                title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resource
-              }
-            ]}
+            routes={[{ title: resourceLabel, path: `/${route}` },
+            { title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resourceLabel }]}
           />
         </Box>
         <Box className="controls-v1">
