@@ -23,6 +23,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
 import { Edit } from '@material-ui/icons';
 import Material from './Material';
+import Assets from './Assets';
 
 const DealDetail = () => {
     const { id } = useParams();
@@ -147,7 +148,29 @@ const DealDetail = () => {
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
                     /> */}
+                    <Tab
+                        className={'tabLayout'}
+                        label={
+                            <div className="d-flex align-items-center tab-font">
+                                <BiFoodMenu className="mr-1" fontSize="inherit" /> Assets
+                            </div>
+                        }
+                        value={2}
+                        aria-controls="a11y-tabpanel-2"
+                        id="a11y-tab-2"
+                    />
                 </Tabs>
+                <TabPanel value={tabValue} index={0}>
+                    <Box>
+                        {loading || !fields?.length ? (
+                            <Grid container spacing={2} style={{ padding: '8px' }}>
+                                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                            </Grid>
+                        ) : (
+                            <DetailsPage data={dealData} fields={fields} />
+                        )}
+                    </Box>
+                </TabPanel>
                 <TabPanel value={tabValue} index={0}>
                     <Box>
                         {loading || !fields?.length ? (
@@ -161,6 +184,9 @@ const DealDetail = () => {
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
                     <Material dealId={id} />
+                </TabPanel>
+                <TabPanel value={tabValue} index={2}>
+                    <Assets dealId={id} />
                 </TabPanel>
             </Box>
         </Box>
