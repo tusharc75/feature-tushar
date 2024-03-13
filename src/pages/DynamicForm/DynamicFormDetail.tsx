@@ -42,7 +42,6 @@ const DynamicFormDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [columns, setColumns] = useState([]);
   const [steps, setSteps] = useState(null);
 
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
@@ -62,10 +61,7 @@ const DynamicFormDetail = () => {
     axiosInstance()
       .get(`/field?resource=${resource}`)
       .then(({ data: { data } }) => {
-        const fields = data?.filter((field) => field.isRead);
-        setFields(fields);
-        const newColumns = generateColumns(`${renderedFrom}_${resource}`, fields);
-        setColumns(newColumns);
+        setFields(data?.filter((field) => field.isRead));
         const primaryField = data?.find((e) => e?.fieldData?.primaryField);
         if (primaryField) {
           setPrimaryFieldName(primaryField?.fieldData?.fieldName);
@@ -165,8 +161,9 @@ const DynamicFormDetail = () => {
               fileName={`${resource}`}
               resource={resource}
               referenceId={id}
-              columns={columns}
+              columns={[]}
               hideDetailButton={true}
+              hideDialog={true}
             />
             {permissions[renderedFrom]?.isUpdate && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
