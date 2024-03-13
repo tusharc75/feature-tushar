@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Menu, MenuItem, Chip, IconButton } from '@material-ui/core';
+import { Grid, Box, Button, Menu, MenuItem, Chip, IconButton, TextField } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -17,7 +17,8 @@ import {
   MATERIAL_TYPE,
   asyncForEach,
   MATERIAL_SUB_TYPE,
-  REPAIR_ORDER_STATUS
+  REPAIR_ORDER_STATUS,
+  sidebarResource
 } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -39,6 +40,7 @@ import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { Autocomplete } from '@material-ui/lab';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
@@ -79,10 +81,24 @@ const WorkOrder = ({
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [isSubmitting, setSubmitting] = useState(false);
   const [reviseQuotation, setReviseQuotation] = useState(false);
+  const [serviceOptions, setServiceOptions] = useState([]);
+  const [selectedServiceOption, setSelectedServiceOption] = useState(null);
+  const [showServiceActionConfirmBox, setShowServiceActionConfirmBox] = useState({ open: false, action: '' });
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.serviceMaster}`)
+      .then(({ data: { data } }) => {
+        setServiceOptions(data[sidebarResource.serviceMaster]);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, []);
 
   useEffect(() => {
     fetchFields();
@@ -530,6 +546,10 @@ const WorkOrder = ({
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
+    if (selectedServiceOption) {
+        setSelectedServiceOption(null);
+    }
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
     var data: any = [];
 
@@ -667,9 +687,9 @@ const WorkOrder = ({
       }
 
       _subRow.hideSelection = false;
-      if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed || !_subRow.canDelete) {
-        _subRow.hideSelection = true;
-      }
+      // if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed || !_subRow.canDelete) {
+      //   _subRow.hideSelection = true;
+      // }
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -838,6 +858,102 @@ const WorkOrder = ({
     }
   };
 
+  const handleServiceSelect = (newValue) => {
+    setSelectedServiceOption(newValue);
+    if (newValue) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      setTimeout(() => {
+        dispatch({
+          type: 'selection',
+          selectedRecords: flattenArray(dataRows)?.filter((_f) => [newValue?.optionValue].includes(_f?.serviceDetail?._id) && !_f?.hideSelection)
+        });
+      }, 100);
+    } else {
+      dispatch({ type: 'selection', selectedRecords: [] });
+    }
+  };
+
+  const isDisabledCompleteService = () => {
+    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.includes(e?.status));
+    if (records?.length === 0) {
+      return true;
+    }
+    if (records?.length !== selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service)?.length) {
+      return true;
+    }
+    const data = [];
+    records?.forEach((record) => {
+      let disabled = false;
+      if (record?.assignedUsers?.length > 0 && !allowedToEdit) {
+        if (!record?.assignedUsers?.map((a) => a?.optionValue).includes(user?.user?._id)) {
+          disabled = true;
+        }
+      }
+      if (!disabled) {
+        if (
+          dataRows
+            ?.find((d) => d?._id === record?.parentId)
+            ?.subRows?.filter((s) => s?.order < record?.order)
+            ?.every((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status))
+        ) {
+          data.push(record);
+        }
+      }
+    });
+    return !(data?.length === records?.length);
+  };
+
+  const handleCompleteService = () => {
+    setSubmitting(true);
+    var records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service);
+    if (showServiceActionConfirmBox.action === 'revert') {
+      records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending);
+    }
+    const data = records?.map((e) => ({
+      workOrder: e?.workOrder?._id,
+      service: e?.serviceDetail?._id,
+      uniqueId: e?.uniqueId,
+      status: showServiceActionConfirmBox.action
+    }));
+    axiosInstance()
+      .put(`${workOrder.api}/service/work-orders-services-status`, data)
+      .then(({ data }) => {
+        setSubmitting(false);
+        setShowServiceActionConfirmBox({ open: false, action: '' });
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((err) => {
+        setSubmitting(false);
+        setShowServiceActionConfirmBox({ open: false, action: '' });
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const leftSideContents = () => {
+    return (
+      <>
+        {allowedToEdit &&
+          <Autocomplete
+            className="max-w-[400px] flex-grow min-w-[200px]"
+            options={serviceOptions}
+            getOptionLabel={(option) => option?.optionLabel || ''}
+            size="small"
+            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Select Service" variant="outlined" />}
+            value={selectedServiceOption}
+            onChange={(event: any, newValue: any) => {
+              handleServiceSelect(newValue);
+            }}
+          />
+        }
+      </>
+    );
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -924,6 +1040,34 @@ const WorkOrder = ({
           Auto Complete Work Order(s)
         </MenuItem>
         <MenuItem
+        onClick={() => {
+          setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
+        }}
+        disabled={isDisabledCompleteService()}
+      >
+        Complete Service
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
+        }}
+        disabled={isDisabledCompleteService()}
+      >
+        Skip Service
+      </MenuItem>
+      <MenuItem
+        disabled={
+          selectedRecords?.length && selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)
+            ? false
+            : true
+        }
+        onClick={() => {
+          setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
+        }}
+      >
+        Revert Service
+      </MenuItem>
+        <MenuItem
           onClick={() => {
             setIsBulkEdit(true);
             setUpdateDialog({
@@ -956,6 +1100,7 @@ const WorkOrder = ({
         // addButtonProps
         isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
+        leftSideContents={leftSideContents()}
         actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
         hasXpadding
       />
@@ -1063,6 +1208,22 @@ const WorkOrder = ({
               onOk={handleDelete}
             />
           )}
+          {showServiceActionConfirmBox.open && (
+        <ConfirmationDialog
+          okBtnLoading={isSubmitting}
+          open={showServiceActionConfirmBox.open}
+          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+            ? 'complete'
+            : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+              ? 'skip'
+              : 'revert'
+            } this Service(s)`}
+          onClose={() => {
+            setShowServiceActionConfirmBox({ open: false, action: '' });
+          }}
+          onOk={handleCompleteService}
+        />
+      )}
           {completeConfirmBox && (
             <ConfirmationDialog
               open={completeConfirmBox}
