@@ -363,7 +363,11 @@ export const sidebarResource = {
   outboundMessage: 'Outbound Message',
   payrollPolicy: 'Payroll Policy',
   triggerNotificationMaster: 'Trigger Notification Master',
-  deals: 'Deals'
+  deals: 'Deals',
+  triggerNotificationHistory: 'Trigger Notification History',
+  userAttendance : 'User Attendance',
+  dataLists: 'Data Lists',
+  assetsReceiving : 'Assets Receiving'
 };
 
 export const primaryFields = {
