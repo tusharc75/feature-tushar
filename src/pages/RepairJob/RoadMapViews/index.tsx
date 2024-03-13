@@ -30,8 +30,8 @@ const customNodeStyles = {
     ...COLOUR_MASTER.scrapAssets
   },
   loadingTicket: {
-    name: 'Loading Ticket',
-    ...COLOUR_MASTER.loadingTicket
+    name: 'Delivery Ticket',
+    ...COLOUR_MASTER.deliveredLoadingTicket
   },
   closedRepairJob: {
     name: 'Completed Repair Job',
@@ -41,7 +41,7 @@ const customNodeStyles = {
 
 const customDeliveredNodeStyle = {
   loadingTicket: {
-    name: 'Loading Ticket',
+    name: 'Delivery Ticket',
     ...COLOUR_MASTER.deliveredLoadingTicket,
     borderLeft: '10px solid #008000'
   }
