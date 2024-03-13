@@ -29,7 +29,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
     if (data) {
       setInitialValues(data);
     } else {
-      setInitialValues({ stepName: '', multipleStepData: true, stepDataRequired: false });
+      setInitialValues({ stepName: '', multipleStepData: true, stepDataRequired: false, showInPdf: false });
     }
   }, [data]);
 
@@ -153,6 +153,20 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                       />
                     }
                     label="Step Data Required"
+                  />
+                </Box>
+                <Box>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="showInPdf"
+                        checked={values['showInPdf']}
+                        onChange={(e) => {
+                          setFieldValue('showInPdf', e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Show In Pdf"
                   />
                 </Box>
               </Form>
