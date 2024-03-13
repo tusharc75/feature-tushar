@@ -90,6 +90,7 @@ const DeliveryTicket = () => {
             <Link
               className="link text-truncate"
               title={row.original[column.accessor]}
+              target='_blank'
               to={
                 row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.pickupFromId}`
@@ -109,6 +110,7 @@ const DeliveryTicket = () => {
             <Link
               className="link text-truncate"
               title={row.original[column.accessor]}
+              target='_blank'
               to={
                 row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.deliveryToId}`

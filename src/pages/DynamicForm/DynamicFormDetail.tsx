@@ -1,6 +1,6 @@
 import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
-import _, { camelCase, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
@@ -18,9 +18,9 @@ import { BiFoodMenu } from 'react-icons/bi';
 import TabPanel from 'src/components/TabPanel';
 import Step from './Step';
 import { getResourceLabel } from 'src/constants/helpers';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const DynamicFormDetail = () => {
-
   const { route, id } = useParams();
 
   const {
@@ -40,12 +40,11 @@ const DynamicFormDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [steps, setSteps] = useState(null);
+  const [resourceData, setResourceData] = useState(null);
 
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
 
   const [tabValue, setTabValue] = useState(0);
-
 
   useEffect(() => {
     if (id) {
@@ -94,7 +93,7 @@ const DynamicFormDetail = () => {
     try {
       const { data: { data } } = await axiosInstance().get(`/dynamic-form/policy?resource=${resource}`);
       if (data) {
-        setSteps(_.sortBy(data?.steps, 'order'));
+        setResourceData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -154,6 +153,9 @@ const DynamicFormDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {detailData?.pdfTemplate && (
+              <PreviewDownload fileName={`${resource}`} resource={resource} referenceId={id} columns={[]} hideDetailButton={true} hideDialog={true} />
+            )}
             {permissions[renderedFrom]?.isUpdate && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
@@ -186,7 +188,7 @@ const DynamicFormDetail = () => {
             aria-controls="a11y-tabpanel-0"
             id="a11y-tab-0"
           />
-          {steps && steps?.length > 0 ? (
+          {resourceData && resourceData?.steps?.length ? (
             <Tab
               className={'tabLayout'}
               label={
@@ -211,7 +213,7 @@ const DynamicFormDetail = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Step
-            steps={steps}
+            resourceData={resourceData}
             resourceId={id}
             resource={resource}
             data={detailData}
