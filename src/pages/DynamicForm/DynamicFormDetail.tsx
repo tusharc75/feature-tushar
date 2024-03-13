@@ -19,10 +19,8 @@ import TabPanel from 'src/components/TabPanel';
 import Step from './Step';
 import { getResourceLabel } from 'src/constants/helpers';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { useColumns } from 'src/components/CustomReactTable';
 
 const DynamicFormDetail = () => {
-
   const { route, id } = useParams();
 
   const {
@@ -47,8 +45,6 @@ const DynamicFormDetail = () => {
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
 
   const [tabValue, setTabValue] = useState(0);
-  const { generateColumns } = useColumns();
-
 
   useEffect(() => {
     if (id) {
@@ -157,14 +153,9 @@ const DynamicFormDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <PreviewDownload
-              fileName={`${resource}`}
-              resource={resource}
-              referenceId={id}
-              columns={[]}
-              hideDetailButton={true}
-              hideDialog={true}
-            />
+            {detailData?.pdfTemplate && (
+              <PreviewDownload fileName={`${resource}`} resource={resource} referenceId={id} columns={[]} hideDetailButton={true} hideDialog={true} />
+            )}
             {permissions[renderedFrom]?.isUpdate && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
@@ -221,12 +212,7 @@ const DynamicFormDetail = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Step
-            steps={steps}
-            resourceId={id}
-            resource={resource}
-            data={detailData}
-            allowedToEdit={permissions[renderedFrom]?.isUpdate} />
+          <Step steps={steps} resourceId={id} resource={resource} data={detailData} allowedToEdit={permissions[renderedFrom]?.isUpdate} />
         </TabPanel>
       </Box>
       {showConfirmBox && (
