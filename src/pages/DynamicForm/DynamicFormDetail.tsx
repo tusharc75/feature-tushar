@@ -1,6 +1,6 @@
 import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
-import { camelCase, startCase } from 'lodash';
+import _, { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
@@ -32,6 +32,7 @@ const DynamicFormDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [steps, setSteps] = useState(null);
 
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
 
@@ -75,6 +76,25 @@ const DynamicFormDetail = () => {
       });
       setDetailData(data);
       setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSteps();
+  }, [resource]);
+
+  const fetchSteps = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/step/steps`, {
+        headers: {
+          Resource: resource
+        }
+      });
+      setSteps(_.sortBy(data?.steps, 'order'));
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -169,7 +189,7 @@ const DynamicFormDetail = () => {
             aria-controls="a11y-tabpanel-0"
             id="a11y-tab-0"
           />
-          {detailData?.steps?.length && (
+          {steps && steps?.length && (
             <Tab
               className={'tabLayout'}
               label={
@@ -192,9 +212,9 @@ const DynamicFormDetail = () => {
             <DetailsPage data={detailData} fields={fields} />
           )}
         </TabPanel>
-        {detailData?.steps?.length && (
+        {steps && steps?.length && (
           <TabPanel value={tabValue} index={1}>
-            <Step resourceId={id} resource={resource} data={detailData} allowedToEdit={permissions[renderedFrom]?.isUpdate} />
+            <Step steps={steps} resourceId={id} resource={resource} data={detailData} allowedToEdit={permissions[renderedFrom]?.isUpdate} />
           </TabPanel>
         )}
       </Box>
