@@ -19,7 +19,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from '../../StateProvider/Provider';
-import { quoteBuilder, PDF_RESOURCE_LIST } from '../../constants/helpers';
+import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomTable from './customTable/customTable';
 import { useLocation } from 'react-router-dom';
@@ -123,6 +123,19 @@ export default function NewCreateQuotePdfTemplate() {
         options.push({ title: routes[item.key] ? routes[item.key]?.title : item.title, value: item.value });
       }
     });
+    for (const [key, value] of Object.entries(permissions)) {
+      let result = key?.replace(/ /g, '').toLowerCase();
+      let foundFlag = false;
+      for(const [key2, value2] of Object.entries(sidebarResource)) {
+        if (value2?.replace(/ /g, '').toLowerCase() === result) {
+          foundFlag = true;
+          break;
+        }
+      }
+      if (!foundFlag) {
+        options.push({ title: routes[key] ? routes[key]?.title : result, value: result });
+      }
+    }
     setpdfResourceOption(options);
   }, []);
 

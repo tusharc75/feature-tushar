@@ -6,19 +6,19 @@ import Button from '@material-ui/core/Button';
 import { AiFillFilePdf } from 'react-icons/ai';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, deliveryTicket, sidebarResource } from '../../constants/helpers';
-import { useHistory } from 'react-router-dom';
+import { gridLoadingTimeout, deliveryTicket, sidebarResource, DELIVERY_FROM_TO_TYPE } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from '../Helpers/Routes';
+import { Link } from 'react-router-dom';
 
 const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
-  
+
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
-  
+
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
@@ -40,12 +40,46 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
         let newColumns = generateColumns(renderedFrom, data, routes.deliveryTicketDetail.path);
         columns = [...newColumns, ...getStaticFields()];
         columns = columns.filter((e) => !['warehouse', 'customerAccount', 'supplierAccount'].includes(e.field));
-        columns.forEach((e) => {
-          if (e.field === 'pickupFrom') {
-            e.cellRenderer = 'pickupFromRenderer';
+        columns.forEach((column) => {
+          if (column.accessor === 'pickupFrom') {
+            column.cell = ({ row }) => (
+              <>
+                <Link
+                  className="link text-truncate"
+                  title={row.original[column.accessor]}
+                  target='_blank'
+                  to={
+                    row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant
+                      ? `${routes.warehouseDetail.path}/${row.original.pickupFromId}`
+                      : row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.customer
+                        ? `${routes.customerAccountDetail.path}/${row.original?.pickupFromId}`
+                        : `${routes.supplierAccountDetail.path}/${row.original?.pickupFromId}`
+                  }
+                >
+                  {row.original[column.accessor]}
+                </Link>
+              </>
+            );
           }
-          if (e.field === 'deliveryTo') {
-            e.cellRenderer = 'deliveryToRenderer';
+          if (column.accessor === 'deliveryTo') {
+            column.cell = ({ row }) => (
+              <>
+                <Link
+                  className="link text-truncate"
+                  title={row.original[column.accessor]}
+                  target='_blank'
+                  to={
+                    row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant
+                      ? `${routes.warehouseDetail.path}/${row.original.deliveryToId}`
+                      : row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer
+                        ? `${routes.customerAccountDetail.path}/${row.original?.deliveryToId}`
+                        : `${routes.supplierAccountDetail.path}/${row.original?.deliveryToId}`
+                  }
+                >
+                  {row.original[column.accessor]}
+                </Link>
+              </>
+            );
           }
         });
         setColumns([...columns]);

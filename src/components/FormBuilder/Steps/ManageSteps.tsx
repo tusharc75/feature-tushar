@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -28,6 +28,8 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
   useEffect(() => {
     if (data) {
       setInitialValues(data);
+    } else {
+      setInitialValues({ stepName: '', multipleStepData: true, stepDataRequired: false });
     }
   }, [data]);
 
@@ -123,6 +125,34 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                     error={touched['stepName'] && Boolean(errors['stepName'])}
                     helperText={touched['stepName'] && errors['stepName']}
                     onChange={(e) => setFieldValue('stepName', e.target.value.trimStart())}
+                  />
+                </Box>
+                <Box>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="multipleStepData"
+                        checked={values['multipleStepData']}
+                        onChange={(e) => {
+                          setFieldValue('multipleStepData', e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Multiple Step Data"
+                  />
+                </Box>
+                <Box>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="stepDataRequired"
+                        checked={values['stepDataRequired']}
+                        onChange={(e) => {
+                          setFieldValue('stepDataRequired', e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Step Data Required"
                   />
                 </Box>
               </Form>
