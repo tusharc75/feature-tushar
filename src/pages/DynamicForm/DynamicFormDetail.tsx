@@ -17,11 +17,19 @@ import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
 import TabPanel from 'src/components/TabPanel';
 import Step from './Step';
+import { getResourceLabel } from 'src/constants/helpers';
 
 const DynamicFormDetail = () => {
+
   const { route, id } = useParams();
+
+  const {
+    state: { permissions, user }
+  }: any = useData();
+
   const resource = startCase(route?.replace(/-/g, ' '));
   const renderedFrom = camelCase(resource);
+  const resourceLabel = getResourceLabel(resource, user);
 
   const resourcePath = `/${route}`;
 
@@ -38,9 +46,6 @@ const DynamicFormDetail = () => {
 
   const [tabValue, setTabValue] = useState(0);
 
-  const {
-    state: { permissions, user }
-  }: any = useData();
 
   useEffect(() => {
     if (id) {
@@ -82,19 +87,15 @@ const DynamicFormDetail = () => {
   };
 
   useEffect(() => {
-    fetchResourceData();
+    fetchPolicy();
   }, [resource]);
 
-  const fetchResourceData = async () => {
+  const fetchPolicy = async () => {
     try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/step`, {
-        headers: {
-          Resource: resource
-        }
-      });
-      setResourceData(data);
+      const { data: { data } } = await axiosInstance().get(`/dynamic-form/policy?resource=${resource}`);
+      if (data) {
+        setResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -147,12 +148,8 @@ const DynamicFormDetail = () => {
       <Box className="headerbox-v1">
         <Box className="nav-v1">
           <CustomBreadCrumbs
-            routes={[
-              { title: resource, path: `/${route}` },
-              {
-                title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resource
-              }
-            ]}
+            routes={[{ title: resourceLabel, path: `/${route}` },
+            { title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resourceLabel }]}
           />
         </Box>
         <Box className="controls-v1">
@@ -189,7 +186,7 @@ const DynamicFormDetail = () => {
             aria-controls="a11y-tabpanel-0"
             id="a11y-tab-0"
           />
-          {resourceData && resourceData?.steps?.length && (
+          {resourceData && resourceData?.steps?.length ? (
             <Tab
               className={'tabLayout'}
               label={
@@ -201,7 +198,7 @@ const DynamicFormDetail = () => {
               aria-controls="a11y-tabpanel-1"
               id="a11y-tab-1"
             />
-          )}
+          ) : null}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -212,17 +209,14 @@ const DynamicFormDetail = () => {
             <DetailsPage data={detailData} fields={fields} />
           )}
         </TabPanel>
-        {resourceData && resourceData?.steps?.length && (
-          <TabPanel value={tabValue} index={1}>
-            <Step
-              resourceData={resourceData}
-              resourceId={id}
-              resource={resource}
-              data={detailData}
-              allowedToEdit={permissions[renderedFrom]?.isUpdate}
-            />
-          </TabPanel>
-        )}
+        <TabPanel value={tabValue} index={1}>
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={resource}
+            data={detailData}
+            allowedToEdit={permissions[renderedFrom]?.isUpdate} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

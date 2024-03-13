@@ -125,7 +125,8 @@ const SendOutboundMessage = () => {
             serializedAssetId: d?.serializedAsset?.optionValue,
             date: d?.date,
             user: d?.user?.optionLabel,
-            ...d?.outboundMessageDetail
+            ...d?.outboundMessageDetail,
+            outboundMessageNumber: d?.messageValue || d?.outboundMessageDetail?.outboundMessageNumber,
           };
         });
 

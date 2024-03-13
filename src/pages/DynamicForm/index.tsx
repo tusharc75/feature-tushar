@@ -14,7 +14,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import { getResourceLabel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageDynamicForm from './ManageDynamicForm';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -24,18 +24,22 @@ let searchTimeout;
 const DynamicForm = () => {
   const { route } = useParams();
 
-  const resource = startCase(route?.replace(/-/g, ' '));
-  const resourcePath = `/${route}`;
-  const detailPagePath = `/${route}/detail`;
-  let renderedFrom = camelCase(resource);
-  const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { generateColumns } = useColumns();
-
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
+
+  const resource = startCase(route?.replace(/-/g, ' '));
+  const renderedFrom = camelCase(resource);
+  const resourceLabel = getResourceLabel(resource, user);
+
+  const resourcePath = `/${route}`;
+  const detailPagePath = `/${route}/detail`;
+
+  const toastConfig = useContext(CustomToastContext);
+
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { generateColumns } = useColumns();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -225,7 +229,7 @@ const DynamicForm = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: resource, path: `/${route}` }]} />
+        <CustomBreadCrumbs routes={[{ title: resourceLabel, path: `/${route}` }]} />
         <ImportExportLinks
           permissions={permissions[renderedFrom]}
           module={renderedFrom}
