@@ -105,7 +105,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
           validationSchema={schema}
           onSubmit={handleSubmit}
         >
-          {({ values, errors, setFieldValue, submitForm }) => (
+          {({ values, touched, errors, setFieldValue, submitForm, setValues }) => (
             <Fragment>
               <CustomDialogHeader
                 title={'Send'}
@@ -117,7 +117,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                 showManimizeMaximize={true}
               />
               <CustomDialogContent>
-                <Form>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2}>
                     <Grid item md={12} lg={12} sm={12}>
                       <Autocomplete
@@ -131,7 +131,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                             : ''
                         }
                         onChange={(e, val) => {
-                          setFieldValue('serializedAsset', val && val?.optionValue);
+                          setFieldValue('serializedAsset', val && val?.optionValue ? val?.optionValue : '');
                         }}
                         renderInput={(params) => (
                           <TextField
@@ -140,8 +140,8 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                             name="serializedAsset"
                             label={routes.serializedAsset.title}
                             variant="outlined"
-                            error={Boolean(errors['serializedAsset'])}
-                            helperText={errors && errors['serializedAsset']}
+                            error={touched['serializedAsset'] && Boolean(errors['serializedAsset'])}
+                            helperText={touched['serializedAsset'] && errors['serializedAsset']}
                             required={true}
                             fullWidth
                           />
@@ -158,9 +158,11 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                             : ''
                         }
                         onChange={(e, val) => {
-                          setFieldValue('messageType', val);
-                          setFieldValue('messageId', '');
-                          setFieldValue('messageValue', '');
+                          const result: any = {};
+                          result['messageType'] = val ? val : ''
+                          result['messageId'] = ''
+                          result['messageValue'] = ''
+                          setValues({ ...values, ...result });
                         }}
                         renderInput={(params) => (
                           <TextField
@@ -169,8 +171,8 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                             name="messageType"
                             label="Type"
                             required={true}
-                            error={Boolean(errors['messageType'])}
-                            helperText={errors && errors['messageType']}
+                            error={touched['messageType'] && Boolean(errors['messageType'])}
+                            helperText={touched['messageType'] && errors['messageType']}
                             variant="outlined"
                             fullWidth
                           />
@@ -187,13 +189,10 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                           : ''
                         }
                         onChange={(e, val) => {
-                          setFieldValue('messageId', val && val?.optionValue);
-                          if (val?.outboundMessageNumber) {
-                            setFieldValue('messageValue', val?.outboundMessageNumber);
-                          }
-                          else {
-                            setFieldValue('messageValue', '');
-                          }
+                          const result: any = {};
+                          result['messageId'] = val && val?.optionValue ? val?.optionValue : ''
+                          result['messageValue'] = val?.outboundMessageNumber ? val?.outboundMessageNumber : ''
+                          setValues({ ...values, ...result });
                         }}
                         renderInput={(params) => (
                           <TextField
@@ -202,8 +201,8 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                             name="messageId"
                             label="Description"
                             variant="outlined"
-                            error={Boolean(errors['messageId'])}
-                            helperText={errors && errors['messageId']}
+                            error={touched['messageId'] && Boolean(errors['messageId'])}
+                            helperText={touched['messageId'] && errors['messageId']}
                             required={true}
                             fullWidth
                           />
@@ -216,8 +215,8 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                         name="messageValue"
                         label="Value"
                         variant="outlined"
-                        error={Boolean(errors['messageValue'])}
-                        helperText={errors && errors['messageValue']}
+                        error={touched['messageValue'] && Boolean(errors['messageValue'])}
+                        helperText={touched['messageValue'] && errors['messageValue']}
                         required={true}
                         type='number'
                         fullWidth
