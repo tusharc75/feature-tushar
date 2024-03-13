@@ -16,11 +16,10 @@ import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../../components/Shared/DetailsPage';
 
-const Step = ({ resourceId, resource, data, allowedToEdit }) => {
+const Step = ({ steps, resourceId, resource, data, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${_.camelCase(resource)}`;
 
-  const [steps, setSteps] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [open, setOpen] = useState({ open: false, id: null });
@@ -30,10 +29,6 @@ const Step = ({ resourceId, resource, data, allowedToEdit }) => {
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
-
-  useEffect(() => {
-    setSteps(_.sortBy(data?.steps, 'order'));
-  }, [data]);
 
   const getColumns = () => {
     const newColumns = generateColumns(

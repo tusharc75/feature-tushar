@@ -56,16 +56,16 @@ const GENERATE_RESOURCE = [
     progressiveBilling: false,
     path: routes.fieldTicketDetail.path,
     title: routes.fieldTicket.title
+  },
+  {
+    key: 'salesOrder',
+    resource: sidebarResource.salesOrder,
+    fieldName: 'salesOrderNumber',
+    invoiceFieldName: 'salesOrder',
+    progressiveBilling: false,
+    path: routes.salesOrderDetail.path,
+    title: routes.salesOrder.title
   }
-  // {
-  //   key: 'salesOrder',
-  //   resource: sidebarResource.salesOrder,
-  //   fieldName: 'salesOrderNumber',
-  //   invoiceFieldName: 'salesOrder',
-  //   progressiveBilling: false,
-  //   path: routes.salesOrderDetail.path,
-  //   title: routes.salesOrder.title
-  // }
 ];
 
 const GenerateInvoice = ({ resourceRendered = null }) => {
