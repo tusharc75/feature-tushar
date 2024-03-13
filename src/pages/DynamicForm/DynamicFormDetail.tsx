@@ -1,6 +1,6 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
-import { camelCase, startCase } from 'lodash';
+import _, { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
@@ -13,6 +13,10 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDynamicForm from './ManageDynamicForm';
+import { FaWpforms } from 'react-icons/fa';
+import { BiFoodMenu } from 'react-icons/bi';
+import TabPanel from 'src/components/TabPanel';
+import Step from './Step';
 
 const DynamicFormDetail = () => {
   const { route, id } = useParams();
@@ -28,8 +32,11 @@ const DynamicFormDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [steps, setSteps] = useState(null);
 
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
+
+  const [tabValue, setTabValue] = useState(0);
 
   const {
     state: { permissions, user }
@@ -74,6 +81,25 @@ const DynamicFormDetail = () => {
     }
   };
 
+  useEffect(() => {
+    fetchSteps();
+  }, [resource]);
+
+  const fetchSteps = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/step/steps`, {
+        headers: {
+          Resource: resource
+        }
+      });
+      setSteps(_.sortBy(data?.steps, 'order'));
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const handleDelete = () => {
     if (id) {
       axiosInstance()
@@ -112,6 +138,10 @@ const DynamicFormDetail = () => {
     setOpenUpdateDialog(false);
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -137,7 +167,43 @@ const DynamicFormDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Box>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            value={0}
+            aria-controls="a11y-tabpanel-0"
+            id="a11y-tab-0"
+          />
+          {steps && steps?.length && (
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                </div>
+              }
+              value={1}
+              aria-controls="a11y-tabpanel-1"
+              id="a11y-tab-1"
+            />
+          )}
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
               <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -145,7 +211,12 @@ const DynamicFormDetail = () => {
           ) : (
             <DetailsPage data={detailData} fields={fields} />
           )}
-        </Box>
+        </TabPanel>
+        {steps && steps?.length && (
+          <TabPanel value={tabValue} index={1}>
+            <Step steps={steps} resourceId={id} resource={resource} data={detailData} allowedToEdit={permissions[renderedFrom]?.isUpdate} />
+          </TabPanel>
+        )}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
