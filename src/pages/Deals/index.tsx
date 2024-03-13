@@ -1,26 +1,19 @@
-import { Box} from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import { camelCase } from 'lodash';
-import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
-import {
-    gridLoadingTimeout,
-    prepareDataForGrid,
-    // getLocalStorageArrayData,
-    sidebarResource
-} from '../../constants/helpers';
+import { prepareDataForGrid } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 
-let jobTimeout;
 
 const Deals = () => {
+
     const renderedFrom = camelCase(routes?.deals.title);
     const toastConfig = useContext(CustomToastContext);
 
@@ -31,27 +24,26 @@ const Deals = () => {
         state: { user, selectedEntity }
     }: any = useData();
 
-
     const [columns, setColumns] = useState(null);
-
     const { generateColumns } = useColumns();
 
     useEffect(() => {
         fetchGridColumns();
-        fetchDeals()
     }, []);
 
-    const fetchGridColumns = async () => {
-        let data;
-        const response = await axiosInstance().get(`/field?resource=Deals`);
-        data = response?.data?.data;
-        const newColumns = generateColumns(renderedFrom, data, routes.dealDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields()]);
-    };
-
     useEffect(() => {
-            fetchDeals();
+        fetchDeals();
     }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, search]);
+
+    const fetchGridColumns = async () => {
+        axiosInstance().get(`/field?resource=Deals`).then(({ data: { data } }) => {
+            const newColumns = generateColumns(renderedFrom, data, routes.dealDetail.path, true);
+            setColumns([...newColumns, ...getStaticFields()]);
+        })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    };
 
     const getQueryString = (isExport = false) => {
         let deepFilter = `?page=${page}&limit=${limit}`;
@@ -83,27 +75,19 @@ const Deals = () => {
     const fetchDeals = async () => {
         dispatch({ type: 'loading', loading: true });
         const queryString = getQueryString();
-        try {
-            let data: any = [],
-                count;
-            const response: any = await axiosInstance().get(`${routes.deals.path}${queryString}`);
-            data = response?.data?.data;
-            count = response?.data?.data?.count;
+        axiosInstance().get(`${routes.deals.path}${queryString}`).then(({ data: { data, count } }) => {
             let rows = data?.map((u) => {
                 let finalObject: any = prepareDataForGrid(u, user);
                 return finalObject;
             });
             dispatch({ type: 'initialize', data: rows, count: count });
             dispatch({ type: 'loading', loading: false });
-            setTimeout(() => {
-                
-            }, gridLoadingTimeout);
-        } catch (error) {
-            dispatch({ type: 'loading', loading: false });
-            toastConfig.setToastConfig(error);
-        }
+        })
+            .catch((err) => {
+                dispatch({ type: 'loading', loading: false });
+                toastConfig.setToastConfig(err);
+            });
     };
-
 
     return (
         <section className="main-container-v1">
