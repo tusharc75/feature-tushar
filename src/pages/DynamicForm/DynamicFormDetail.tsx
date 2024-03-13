@@ -22,7 +22,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import { useColumns } from 'src/components/CustomReactTable';
 
 const DynamicFormDetail = () => {
-  
+
   const { route, id } = useParams();
 
   const {
@@ -94,19 +94,15 @@ const DynamicFormDetail = () => {
   };
 
   useEffect(() => {
-    fetchSteps();
+    fetchPolicy();
   }, [resource]);
 
-  const fetchSteps = async () => {
+  const fetchPolicy = async () => {
     try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/step/steps`, {
-        headers: {
-          Resource: resource
-        }
-      });
-      setSteps(_.sortBy(data?.steps, 'order'));
+      const { data: { data } } = await axiosInstance().get(`/dynamic-form/policy?resource=${resource}`);
+      if (data) {
+        setSteps(_.sortBy(data?.steps, 'order'));
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -204,7 +200,7 @@ const DynamicFormDetail = () => {
             aria-controls="a11y-tabpanel-0"
             id="a11y-tab-0"
           />
-          {steps && steps?.length && (
+          {steps && steps?.length > 0 ? (
             <Tab
               className={'tabLayout'}
               label={
@@ -216,7 +212,7 @@ const DynamicFormDetail = () => {
               aria-controls="a11y-tabpanel-1"
               id="a11y-tab-1"
             />
-          )}
+          ) : null}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -227,11 +223,14 @@ const DynamicFormDetail = () => {
             <DetailsPage data={detailData} fields={fields} />
           )}
         </TabPanel>
-        {steps && steps?.length && (
-          <TabPanel value={tabValue} index={1}>
-            <Step steps={steps} resourceId={id} resource={resource} data={detailData} allowedToEdit={permissions[renderedFrom]?.isUpdate} />
-          </TabPanel>
-        )}
+        <TabPanel value={tabValue} index={1}>
+          <Step
+            steps={steps}
+            resourceId={id}
+            resource={resource}
+            data={detailData}
+            allowedToEdit={permissions[renderedFrom]?.isUpdate} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
