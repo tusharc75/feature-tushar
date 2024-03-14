@@ -19,12 +19,11 @@ import { CHILD_RESOURCE, fieldTicket } from 'src/constants/helpers';
 import AddCostDialog from './AddCostDialog';
 
 const AddCost = ({ fieldTicketData, setNextStep, allowedToEdit }) => {
+
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Cost`;
 
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions }
-  }: any = useData();
+
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -44,6 +43,11 @@ const AddCost = ({ fieldTicketData, setNextStep, allowedToEdit }) => {
       .get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`)
       .then(({ data: { data } }) => {
         data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
+        if (!allowedToEdit || fieldTicketData?.quotation) {
+          data?.forEach((e) => {
+            e.isColumnEditable = false;
+          });
+        }
         setAllFields(JSON.parse(JSON.stringify(data)));
         const newColumns = generateColumns(renderedFrom, data, null, false, fieldTicketData?.currency || 'USD');
         let columns: any = [
@@ -210,7 +214,7 @@ const AddCost = ({ fieldTicketData, setNextStep, allowedToEdit }) => {
 
   return (
     <Fragment>
-      {allowedToEdit && (
+      {allowedToEdit && !fieldTicketData?.quotation && (
         <>
           <DetailsPageHeader
             isAddButtonVisible={true}
@@ -231,8 +235,8 @@ const AddCost = ({ fieldTicketData, setNextStep, allowedToEdit }) => {
             dispatch={dispatch}
             onSaveEdit={onSaveInlineEdit}
             renderedFrom={renderedFrom}
-            hideAction={!allowedToEdit}
-            hideSelection={!allowedToEdit}
+            hideSelection={allowedToEdit && !fieldTicketData?.quotation ? false : true}
+            hideAction={allowedToEdit && !fieldTicketData?.quotation ? false : true}
             isClientSideGrid={true}
             refreshGrid={fetchCostData}
           />
