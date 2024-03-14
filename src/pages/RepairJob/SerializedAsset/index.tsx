@@ -1,53 +1,57 @@
-import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useContext, Fragment } from 'react';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import routes from '../../../components/Helpers/Routes';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
+import Box from '@material-ui/core/Box/Box';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import HelpIcon from '@material-ui/icons/Help';
+import LayersIcon from '@material-ui/icons/Layers';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { groupBy, map, uniq } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { useData } from 'src/StateProvider/Provider';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import AssetScrapRepairDialog from '../../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import routes from '../../../components/Helpers/Routes';
 import {
-  repairJob,
-  REPAIR_JOB_STATUS,
-  deliveryTicket,
   ASSET_STATUS,
-  DELIVERY_TICKET_TYPE,
+  CHILD_RESOURCE,
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_STATUS,
+  DELIVERY_TICKET_TYPE,
   INVENTORY_OWNER_TYPE,
-  sidebarResource,
-  CHILD_RESOURCE,
-  DELIVERY_TICKET_STATUS
+  REPAIR_JOB_STATUS,
+  deliveryTicket,
+  repairJob,
+  sidebarResource
 } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import { isMobile, isTablet } from 'react-device-detect';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import AssetScrapRepairDialog from '../../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
-import { ExpandMore } from '@material-ui/icons';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import { groupBy, uniq, map } from 'lodash';
 import RepairProcess from '../RepairProcess';
-import LayersIcon from '@material-ui/icons/Layers';
-import PreviewDownload from 'src/components/PreviewDownload';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { useData } from 'src/StateProvider/Provider';
-import HelpIcon from '@material-ui/icons/Help';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
-
-const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus, stepFullScreen }) => {
-
+const SerializedAsset = ({
+  repairJobData,
+  fetchRepairJobData,
+  repairedAssetStatus,
+  renderedFrom,
+  allowedToEdit,
+  allowUpdateStatus,
+  stepFullScreen
+}) => {
   const toastConfig = useContext(CustomToastContext);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {} });
   const [repairAssetDialog, setRepairAssetDialog] = useState({ open: false, assetId: null, assetName: null, assetIds: [] });
 
@@ -69,16 +73,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     setAnchorEl(null);
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
   useEffect(() => {
-    fetchFields()
+    fetchFields();
   }, []);
 
   const fetchFields = async () => {
@@ -98,7 +94,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       ]
     });
 
-    let fields = CURReplaceByCurrencySingle(fieldResponce?.data?.data, repairJobData?.currency || "USD");
+    let fields = CURReplaceByCurrencySingle(fieldResponce?.data?.data, repairJobData?.currency || 'USD');
     fields?.forEach((e) => {
       e.isColumnEditable = false;
     });
@@ -116,7 +112,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         Footer: () => {
           return <>Total</>;
         }
-      },
+      }
     ];
     assetField?.forEach((ele) => {
       if (ele?.fieldName === 'assetNumber') {
@@ -129,28 +125,24 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             <>
               {row.original.assetNumber ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <p
-                    className="text-truncate"
-                  >{row.original.assetNumber}</p>
+                  <p className="text-truncate">{row.original.assetNumber}</p>
                   <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
-                        window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`)
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
                       }}
                     >
                       <OpenInNewIcon fontSize="small" color="primary" />
                     </IconButton>
                   </Box>
                 </div>
-              ) :
-                (
-                  <NoDataCell />
-                )
-              }
+              ) : (
+                <NoDataCell />
+              )}
             </>
           )
-        })
+        });
       }
       if (ele?.fieldName === 'serialNumber') {
         coloum.push({
@@ -168,9 +160,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 <NoDataCell />
               )}
             </>
-
           )
-        })
+        });
       }
     });
     productField?.forEach((ele) => {
@@ -190,7 +181,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             )}
           </>
         )
-      })
+      });
     });
     coloum.push({
       accessor: 'status',
@@ -202,7 +193,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
           <p className="text-truncate">{row.original.status}</p>
         </div>
       )
-    })
+    });
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
@@ -211,81 +202,96 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       sticky: 'right',
       disableSortBy: true,
       Cell: ({ row }) => {
-        return <div className="d-flex gap-1">
-          {row?.original?.repairTypeId && (
-            <HtmlTooltip title="Repair Process">
-              <IconButton
-                size="small"
-                aria-label="Repair Process"
-                color="primary"
-                onClick={() => {
-                  setRepairProcessDialog({ open: true, assetId: row?.original?._id, assetNumber: row?.original?.assetNumber, repaired: row?.original?.repaired });
-                }}
-              >
-                <LayersIcon fontSize="small" />
-              </IconButton>
-            </HtmlTooltip>
-          )}
-          {row?.original?.repaired ? (
-            <HtmlTooltip title="Repaired">
-              <CheckCircleIcon color="primary" fontSize="small" />
-            </HtmlTooltip>
-          ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) && row?.original?.canRepair
-            && row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand
-            && !row?.original?.repairTypeId ? (
-            <HtmlTooltip title="Repair Asset">
-              <IconButton
-                size="small"
-                aria-label="Repair Asset"
-                color="primary"
-                onClick={() => {
-                  setRepairAssetDialog({ open: true, assetId: row?.original?._id, assetName: `${row?.original?.assetNumber}`, assetIds: [] });
-                }}
-              >
-                <CheckCircleOutlineIcon fontSize="small" />
-              </IconButton>
-            </HtmlTooltip>
-          ) : null}
-        </div>
+        return (
+          <div className="d-flex gap-1">
+            {row?.original?.repairTypeId && (
+              <HtmlTooltip title="Repair Process">
+                <IconButton
+                  size="small"
+                  aria-label="Repair Process"
+                  color="primary"
+                  onClick={() => {
+                    setRepairProcessDialog({
+                      open: true,
+                      assetId: row?.original?._id,
+                      assetNumber: row?.original?.assetNumber,
+                      repaired: row?.original?.repaired
+                    });
+                  }}
+                >
+                  <LayersIcon fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            {row?.original?.repaired ? (
+              <HtmlTooltip title="Repaired">
+                <CheckCircleIcon color="primary" fontSize="small" />
+              </HtmlTooltip>
+            ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
+              row?.original?.canRepair &&
+              row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
+              !row?.original?.repairTypeId ? (
+              <HtmlTooltip title="Repair Asset">
+                <IconButton
+                  size="small"
+                  aria-label="Repair Asset"
+                  color="primary"
+                  onClick={() => {
+                    setRepairAssetDialog({ open: true, assetId: row?.original?._id, assetName: `${row?.original?.assetNumber}`, assetIds: [] });
+                  }}
+                >
+                  <CheckCircleOutlineIcon fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            ) : null}
+          </div>
+        );
       }
     });
-    setColumns(coloum)
+    setColumns(coloum);
     fetchRecords();
   };
 
   const fetchRecords = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
     var data: any = [];
-    let assetSendedToSupplier = []
+    let assetSendedToSupplier = [];
 
     if (user.user?.brandPolicy?.repairJobSendSupplierRequired) {
+      const tickets = await axiosInstance().get(
+        `${deliveryTicket.api}/typewise?referenceType=${sidebarResource.repairJob}&referenceId=${repairJobData._id}`
+      );
 
-      const tickets = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${sidebarResource.repairJob}&referenceId=${repairJobData._id}`);
-
-      const receivedTickets = tickets?.data?.data?.filter((e) => e.status === DELIVERY_TICKET_STATUS.delivered
-        && e.deliveryToType === DELIVERY_FROM_TO_TYPE.plant && e.pickupFromType === DELIVERY_FROM_TO_TYPE.supplier) || []
+      const receivedTickets =
+        tickets?.data?.data?.filter(
+          (e) =>
+            e.status === DELIVERY_TICKET_STATUS.delivered &&
+            e.deliveryToType === DELIVERY_FROM_TO_TYPE.plant &&
+            e.pickupFromType === DELIVERY_FROM_TO_TYPE.supplier
+        ) || [];
 
       assetSendedToSupplier = receivedTickets?.reduce((acc, t) => {
         if (t?.assets && t?.assets?.length > 0) {
-          let ids = t?.assets.map(inventory => inventory?.asset);
+          let ids = t?.assets.map((inventory) => inventory?.asset);
           return acc.concat(ids);
         }
       }, []);
     }
 
-    const response = await axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`)
+    const response = await axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`);
     data = response?.data?.data;
     data.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.productName = parent.product?.optionLabel
-      parent.productDescription = parent?.productDetail?.productDescription
-      parent.productCategory = parent?.productCategory?.optionLabel
-      parent.isValid = parent.status === ASSET_STATUS.scrap || parent.status === ASSET_STATUS.lost ? false : true
+      parent.productName = parent.product?.optionLabel;
+      parent.productDescription = parent?.productDetail?.productDescription;
+      parent.productCategory = parent?.productCategory?.optionLabel;
+      parent.isValid = parent.status === ASSET_STATUS.scrap || parent.status === ASSET_STATUS.lost ? false : true;
       parent.hideSelection = parent.status === ASSET_STATUS.lost;
-      parent.canRepair = user.user?.brandPolicy?.repairJobSendSupplierRequired ? assetSendedToSupplier?.includes(parent.inventory) && !parent?.repaired : true;
+      parent.canRepair = user.user?.brandPolicy?.repairJobSendSupplierRequired
+        ? assetSendedToSupplier?.includes(parent.inventory) && !parent?.repaired
+        : true;
     });
 
     dispatch({ type: 'initialize', data: data, count: data?.length });
@@ -308,7 +314,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     data['pickupFromAddress'] = selectedRecords[0]?.currentLocation?.optionValue;
     data['isPickupFromDisable'] = true;
 
-
     data['deliveryToType'] = deliveryToType;
     if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier && pickupFromType === DELIVERY_FROM_TO_TYPE.plant) {
       if (repairJobData?.supplierAccount?.optionValue) {
@@ -318,8 +323,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       if (repairJobData?.shippingAddress?.optionValue) {
         data['deliveryToAddress'] = repairJobData?.shippingAddress?.optionValue;
       }
-    }
-    else if (deliveryToType === DELIVERY_FROM_TO_TYPE.plant) {
+    } else if (deliveryToType === DELIVERY_FROM_TO_TYPE.plant) {
       if (repairJobData?.warehouse?.optionValue) {
         data['deliveryTo'] = repairJobData?.warehouse?.optionValue;
       }
@@ -337,9 +341,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     if (repairJobData?.processor?.optionValue) {
       data['processor'] = repairJobData?.processor?.optionValue;
     }
+    data['status'] = DELIVERY_TICKET_STATUS.delivered;
 
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
-    closeActions();
   };
 
   const checkUniqcurrentOwnerType = () => {
@@ -376,160 +380,159 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     }
   };
 
+  const rightSideContents = () => {
+    return (
+      <>
+        {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
+          <Fragment>
+            <Button
+              variant="outlined"
+              color="primary"
+              aria-controls="simple-menu"
+              aria-haspopup="true"
+              disabled={selectedRecords.length === 0 || !allowUpdateStatus}
+              size="small"
+              onClick={handleClick}
+              endIcon={<ArrowDropDownIcon />}
+            >
+              Change Status
+            </Button>
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right'
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right'
+              }}
+            >
+              <MenuItem
+                disabled={checkUniqcurrentOwnerType()}
+                onClick={() => {
+                  setAnchorEl(null);
+                  setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
+                }}
+              >
+                {ASSET_STATUS.scrap}
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setAnchorEl(null);
+                  setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
+                }}
+              >
+                {ASSET_STATUS.lost}
+              </MenuItem>
+            </Menu>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              disabled={
+                selectedRecords.length === 0 ||
+                selectedRecords.some((s) => !s?.canRepair || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
+                selectedRecords.some((s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
+                checkUniqcurrentOwnerType()
+              }
+              onClick={() => {
+                setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map((m) => m._id)] });
+              }}
+            >
+              {isMobile && !isTablet ? 'Complete' : 'Complete Repair'}
+            </Button>
+          </Fragment>
+        )}
+        {user.user?.brandPolicy?.repairJobSendSupplierRequired && (
+          <HtmlTooltip title="To complete the repair, assets must be sent to the supplier and received back at the plant">
+            <HelpIcon fontSize="small" color="primary" />
+          </HtmlTooltip>
+        )}
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        {uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount ? (
+          <MenuItem
+            disabled={checkUniqSupplier() || checkUniqWarehouse()}
+            onClick={() => {
+              if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
+                if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
+                  handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
+                } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+                  handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
+                }
+              }
+            }}
+          >
+            Receive to Plant
+          </MenuItem>
+        ) : null}
+        <MenuItem
+          disabled={checkUniqSupplier() || checkUniqWarehouse()}
+          onClick={() => {
+            if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
+              if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
+                handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier);
+              } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+                handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.supplier);
+              }
+            }
+          }}
+        >
+          Send to Supplier
+        </MenuItem>
+      </>
+    );
+  };
+
+  const previewDownloadProps = {
+    fileName: `${routes.repairJob.title}-${repairJobData?.repairJobName}`,
+    resource: sidebarResource.repairJob,
+    referenceId: repairJobData?._id,
+    columns: columns,
+    hideDetailButton: true,
+    isSendEmail: true
+  };
+
   return (
     <>
-      <Box display="flex" justifyContent="flex-end" m={1}>
-        <Box display="flex" alignItems="center" gridGap={'8px'} className="isolate">
-          <PreviewDownload
-            fileName={`${routes.repairJob.title}-${repairJobData?.repairJobName}`}
-            resource={sidebarResource.repairJob}
-            referenceId={repairJobData?._id}
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{
+          disabled: selectedRecords.length === 0 || selectedRecords.some((s) => s.repaired === true) || checkUniqSupplier() || checkUniqWarehouse()
+        }}
+        previewDownloadProps={previewDownloadProps}
+        rightSideContents={rightSideContents()}
+        hasXpadding
+      />
+
+      {columns ? (
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
-            hideDetailButton={true}
-            isSendEmail={true}
+            state={state}
+            dispatch={dispatch}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
+            refreshGrid={fetchRecords}
           />
-          {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
-            <Fragment>
-              <Button
-                variant="outlined"
-                color="primary"
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                disabled={selectedRecords.length === 0 || !allowUpdateStatus}
-                size="small"
-                onClick={handleClick}
-                endIcon={<ArrowDropDownIcon />}
-              >
-                Change Status
-              </Button>
-              <Menu
-                id="simple-menu"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-              >
-                <MenuItem
-                  disabled={checkUniqcurrentOwnerType()}
-                  onClick={() => {
-                    setAnchorEl(null);
-                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
-                  }}
-                >
-                  {ASSET_STATUS.scrap}
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setAnchorEl(null);
-                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
-                  }}
-                >
-                  {ASSET_STATUS.lost}
-                </MenuItem>
-              </Menu>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                disabled={
-                  selectedRecords.length === 0 ||
-                  selectedRecords.some((s) => !s?.canRepair || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
-                  selectedRecords.some((s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
-                  checkUniqcurrentOwnerType()
-                }
-                onClick={() => {
-                  setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map((m) => m._id)] });
-                }}
-              >
-                {isMobile && !isTablet ? 'Complete' : 'Complete Repair'}
-              </Button>
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedRecords.length === 0 || selectedRecords.some((s) => s.repaired === true) || checkUniqSupplier() || checkUniqWarehouse()}
-                endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
-              >
-                Actions
-              </Button>
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorActionEl)}
-                onClose={closeActions}
-              >
-                {uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount ?
-                  <MenuItem
-                    disabled={checkUniqSupplier() || checkUniqWarehouse()}
-                    onClick={() => {
-                      if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
-                        if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
-                          handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
-                        } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
-                          handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
-                        }
-                      }
-                    }}
-                  >
-                    Receive to Plant
-                  </MenuItem> : null
-                }
-                <MenuItem
-                  disabled={checkUniqSupplier() || checkUniqWarehouse()}
-                  onClick={() => {
-                    if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
-                      if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier);
-                      } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.supplier);
-                      }
-                    }
-                  }}
-                >
-                  Send to Supplier
-                </MenuItem>
-              </Menu>
-            </Fragment>
-          )}
-          {user.user?.brandPolicy?.repairJobSendSupplierRequired &&
-            <HtmlTooltip title='To complete the repair, assets must be sent to the supplier and received back at the plant'>
-              <HelpIcon fontSize='small' color='primary' />
-            </HtmlTooltip>
-          }
         </Box>
-      </Box>
-      {columns ? (<Box zIndex={5} width={'100%'}>
-        <CustomReactTable
-          height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-          columns={columns}
-          state={state}
-          dispatch={dispatch}
-          setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-          renderedFrom={renderedFrom}
-          isClientSideGrid={true}
-          hideSelection={!allowedToEdit}
-          hideAction={!allowedToEdit}
-          refreshGrid={fetchRecords}
-        />
-      </Box>
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -596,8 +599,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       {repairAssetDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
-            } ? `}
+          message={`Are you sure you want to mark repair complete for ${
+            repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
+          } ? `}
           onClose={() => {
             setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
           }}

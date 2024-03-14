@@ -1,16 +1,18 @@
-import { Box, Button, Grid, Menu, MenuItem, Tab, Tabs } from '@material-ui/core';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { GrStatusInfo, RiFlowChart } from 'react-icons/all';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
+import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import Steps, { getIndex } from 'src/components/Steps';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -18,7 +20,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
@@ -29,7 +30,6 @@ import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import Material from './Material';
 import Process from './Process';
 import SalesOrderView from './View';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -185,19 +185,37 @@ const SalesOrderDetails = () => {
           <Box className="control-buttons-v1">
             {salesOrderData ? (
               <>
-                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
-                  <ButtonWithPulse
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={() => {
-                      setShowClosedConfirmBox(true);
-                    }}
-                    className={'btn-outline-v1'}
-                  >
-                    Close
-                  </ButtonWithPulse>
-                )}
+                {permissions?.salesOrder?.isUpdate &&
+                  [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
+                    <ButtonWithPulse
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={() => {
+                        setShowClosedConfirmBox(true);
+                      }}
+                      className={'btn-outline-v1'}
+                    >
+                      Close
+                    </ButtonWithPulse>
+                  )}
+                {permissions?.salesOrder?.isUpdate &&
+                  [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        if (salesOrderData?.invoice) {
+                          updateJobStatus(SALES_ORDER_STATUS.invoiced);
+                        } else {
+                          updateJobStatus(SALES_ORDER_STATUS.readyToInvoice);
+                        }
+                      }}
+                    >
+                      Re-Open
+                    </Button>
+                  )}
                 {permissions?.salesOrder?.isUpdate && allowedToEdit && ![SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <Button
                     className={'btn-outline-v1'}
@@ -205,7 +223,7 @@ const SalesOrderDetails = () => {
                     size="small"
                     onClick={handleOpenUpdateDialog}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
 
@@ -216,10 +234,7 @@ const SalesOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton
-              referenceId={salesOrderData?._id}
-              resource={ACTIVITY_RESOURCE.salesOrder}
-              resourceLabel={salesOrderData?.salesOrderNo} />
+            <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.salesOrder} resourceLabel={salesOrderData?.salesOrderNo} />
           </Box>
         </Box>
       </Box>
@@ -306,18 +321,10 @@ const SalesOrderDetails = () => {
               />
             )}
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[2].name && salesOrderData && (
-              <Process
-                salesOrderData={salesOrderData}
-                setNextStep={setNextStep}
-                stepFullScreen={stepFullScreen} />
+              <Process salesOrderData={salesOrderData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
             )}
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[3].name && salesOrderData && (
-              <Invoice
-                salesOrderData={salesOrderData}
-                setNextStep={setNextStep}
-                updateJobStatus={updateJobStatus}
-                stepFullScreen={stepFullScreen}
-              />
+              <Invoice salesOrderData={salesOrderData} setNextStep={setNextStep} updateJobStatus={updateJobStatus} stepFullScreen={stepFullScreen} />
             )}
           </ContentFullScreen>
         </TabPanel>

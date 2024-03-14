@@ -68,6 +68,12 @@ export const fieldTicketSteps: stepInterface[] = [
   { name: 'Submit', title: 'Submit', icon: 'end' }
 ];
 
+export const fieldServiceOrderSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
+  { name: 'Submit', title: 'Submit', icon: 'end' }
+];
+
 export const demandOrderSteps = ['Add Products'];
 
 export const purchaseRequisitionSteps = ['Add Products'];
@@ -162,11 +168,11 @@ export const assetsReceivingSteps: stepInterface[] = [
 
 export const serviceOrderSteps: stepInterface[] = [
   { name: 'Field Ticket', title: 'Field Tickets', icon: 'receivingTicket' },
-  { name: 'Add Services', title: 'Add', icon: 'add' },
-  { name: 'Add Products', title: 'Products', icon: 'assign' },
-  { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
-  { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
-  { name: 'Invoice', title: 'Invoice', icon: 'invoice' },
+  // { name: 'Add Services', title: 'Add', icon: 'add' },
+  // { name: 'Add Products', title: 'Products', icon: 'assign' },
+  // { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
+  // { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
+  // { name: 'Invoice', title: 'Invoice', icon: 'invoice' },
   { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
 ];
 
@@ -213,7 +219,7 @@ export const userType = {
   brandAdmin: 2
 };
 
-export const gridPageSizes = [25, 50, 75];
+export const gridPageSizes = [25, 50, 75, 100];
 export const gridLoadingTimeout = 500;
 export const processFieldName = 'process';
 
@@ -356,7 +362,12 @@ export const sidebarResource = {
   creditMemo: 'Credit Memo',
   outboundMessage: 'Outbound Message',
   payrollPolicy: 'Payroll Policy',
-  triggerNotificationMaster: 'Trigger Notification Master'
+  triggerNotificationMaster: 'Trigger Notification Master',
+  deals: 'Deals',
+  triggerNotificationHistory: 'Trigger Notification History',
+  userAttendance : 'User Attendance',
+  dataLists: 'Data Lists',
+  assetsReceiving : 'Assets Receiving'
 };
 
 export const primaryFields = {
@@ -395,6 +406,7 @@ export const RESOURCE_LABEL = {
   projectSales: 'Project Sales',
   productBuilder: 'Price Builder',
   formBuilder: 'Form Builder',
+  forms: 'Forms',
   currencyConverter: 'Currency Converter',
   quoteBuilder: 'Quotes',
   PNQBuilder: 'PNQ Builder',
@@ -498,6 +510,8 @@ export const RESOURCE_LABEL = {
   triggerNotificationMaster: 'Trigger Notification Master',
   triggerNotificationHistory: 'Trigger Notification History',
   userAttendance: 'User Attendance',
+  dataList: 'Data List',
+  dataListitems: 'Data List Items'
 };
 
 export const CHILD_RESOURCE = {
@@ -534,7 +548,8 @@ export const CHILD_RESOURCE = {
   workOrderProduct: 'Work Order Product',
   payrollHoliday: 'Payroll Holiday',
   payrollPayTypes: 'Payroll Pay Types',
-  payrollPaidTimeOff: 'Payroll Paid Time Off'
+  payrollPaidTimeOff: 'Payroll Paid Time Off',
+  dealsMaterial: 'Deals Material'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -922,8 +937,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       if (defaultOptions?.length === 0 && key.required && key.option?.length === 1) {
         defaultOptions = key.option;
       }
-      if (value && isArray(value) && value?.length && key.fieldName === "collaborator" && obj['owner']) {
-        value = value?.filter((e) => obj['owner'] !== e)
+      if (value && isArray(value) && value?.length && key.fieldName === 'collaborator' && obj['owner']) {
+        value = value?.filter((e) => obj['owner'] !== e);
       }
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? (typeof value === 'string' ? [value] : value) : options;
@@ -968,7 +983,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
   return obj;
 };
 
-export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false) => {
+export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, defaultCurrentDate: boolean = false) => {
   const obj = {};
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
@@ -1028,12 +1043,16 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
+      } else if (defaultCurrentDate) {
+        obj[key.fieldName] = new Date();
       }
     } else if (key.type === 'date') {
       if (isClone) {
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
+      } else if (defaultCurrentDate) {
+        obj[key.fieldName] = new Date();
       }
     } else if (key.type === 'lookUpDisplay') {
     } else {
@@ -1058,21 +1077,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1843,6 +1862,10 @@ export const prepareDataForGrid = (data, user = {}) => {
     finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName;
     finalObject['updatedByDate'] = data?.updatedBy?.date;
   }
+  if (data?.completedBy) {
+    finalObject['completedBy'] = data?.completedBy?.user?.concatedName;
+    finalObject['completedByDate'] = data?.completedBy?.date;
+  }
   finalObject['id'] = data?._id;
 
   return finalObject;
@@ -1996,7 +2019,7 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   consumed: 'Consumed',
   standBy: 'Stand By',
   standByNotChargeable: 'Stand By-Not Chargeable',
-  delivered: 'Delivered',
+  delivered: 'Delivered'
 } as const;
 
 export const REPAIR_JOB_STATUS = {
@@ -2356,6 +2379,12 @@ export const REPORT_LIST = [
     type: 'dynamic'
   },
   {
+    title: sidebarResource.invoice,
+    permission: 'invoice',
+    key: 'invoice',
+    type: 'dynamic'
+  },
+  {
     title: 'Purchase Order Details',
     permission: 'purchaseOrder',
     key: 'standardReport',
@@ -2534,8 +2563,8 @@ export const COLOUR_MASTER = {
     borderColor: '#db765c'
   },
   replaceAssetColor: {
-    background: '#FFFF99',
-    borderColor: '#FFFF99'
+    background: 'var(--replaceAsset-bg)',
+    borderColor: 'var(--replaceAsset-bg)'
   }
 };
 
@@ -2906,3 +2935,24 @@ export const convertBlobToBase64 = async (blobUrl) => {
     img.src = blobUrl;
   });
 };
+
+export const IMPORT_EXPORT_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  error: 'Error',
+  completed: 'Completed',
+  partialComplete: 'Partial Complete'
+};
+
+export const IMPORT_EXPORT_TYPE = {
+  import: 'Import',
+  export: 'Export'
+};
+
+export function clamp(val: number, min: number, max: number) {
+  return Math.min(Math.max(val, min), max);
+}
+
+export const getResourceLabel = (resource, user) => {
+  return user?.role?.selectedEntity?.resource?.find((e) => e.name === resource)?.resourceLabel || resource
+}

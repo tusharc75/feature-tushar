@@ -1,36 +1,36 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder, sidebarResource } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { isMobile, isTablet } from 'react-device-detect';
-import { ExpandMore } from '@material-ui/icons';
-import { startCase } from 'lodash';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import MaterialDialog from './MaterialDialog';
-import Add from '@material-ui/icons/Add';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import { startCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import CreateProduct from 'src/components/Product/CreateProduct';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import CreateProduct from 'src/components/Product/CreateProduct';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder, sidebarResource } from '../../../constants/helpers';
+import MaterialDialog from './MaterialDialog';
 
 const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete, updateOrderStatus }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
+  const { dataRows, page, limit, filters, sorting, selectedRecords, search } = state;
 
   const {
     state: { user, permissions }
@@ -41,10 +41,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
-  const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [isSubmitting, setSubmitting] = useState(false);
   const { generateColumns } = useColumns();
 
@@ -55,6 +53,11 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
     var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+    if (!allowedToEdit) {
+      data?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
+    }
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
     let newColumns = generateColumns(renderedFrom, data, null, false, productionOrderData?.currency || 'USD');
@@ -193,7 +196,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting]);
+  }, [page, limit, filters, sorting, search]);
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -213,6 +216,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return deepFilter;
   };
@@ -389,136 +395,95 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
+          }}
+        >
+          Add Existing Products
+        </MenuItem>
+        {permissions?.product?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              setAddDialog({ open: true, type: 'newProduct', parentId: null });
+            }}
+          >
+            Add New Product
+          </MenuItem>
+        )}
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
+          onClick={() => {
+            const dataToDelete = selectedRecords
+              ?.filter((e) => !e.hideSelection && e.canDelete)
+              .map((rec: any) => {
+                const obj: any = {};
+                obj.id = rec._id;
+                obj.type = rec?.type;
+                obj.materialId = rec?.materialId;
+                return obj;
+              });
+            setDeleteData(dataToDelete);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
-  };
-
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
+  const rightSideContents = () => {
+    return (
+      <>
+        <AsynImportExportMenu
+          resource={sidebarResource.productionOrder}
+          subResource={`material`}
+          referenceId={productionOrderData._id}
+          permissions={permissions?.productionOrder}
+          module={routes.productionOrder.title}
+          api={`${productionOrder.api}/material/${productionOrderData._id}`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportCount={true}
+          exportCount={selectedRecords.length}
+          ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
+        />
+      </>
+    );
   };
 
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" alignItems="center">
-            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
-                }}
-              >
-                Add Existing Products
-              </MenuItem>
-              {permissions?.product?.isCreate && (
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions();
-                    setAddDialog({ open: true, type: 'newProduct', parentId: null });
-                  }}
-                >
-                  Add New Product
-                </MenuItem>
-              )}
-              {/* <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
-                }}
-              >
-                Add Existing Packages
-              </MenuItem> */}
-            </Menu>
-          </Box>
-          <Box display="flex">
-            <ImportExportMenu
-              permissions={permissions?.productionOrder}
-              module={routes.productionOrder.title}
-              api={`${productionOrder.api}/material/${productionOrderData._id}`}
-              afterImportCompleted={() => {
-                fetchData();
-              }}
-              isExportAllOrSomeFeature={true}
-              recordsToExport={selectedRecords.length}
-              ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
-            />
-            <Box ml={1} />
-            <Button
-              disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
-              variant={isMobile ? 'text' : 'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              endIcon={<ExpandMore />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
-                }}
-              >
-                Bulk Edit
-              </MenuItem>
-              <MenuItem
-                disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
-                onClick={() => {
-                  const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection && e.canDelete)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                  setDeleteData(dataToDelete);
-                  closeActions();
-                }}
-              >
-                Delete
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+            rightSideContents={rightSideContents()}
+            hasXpadding
+          />
+        </>
       )}
       {columns ? (
         <>

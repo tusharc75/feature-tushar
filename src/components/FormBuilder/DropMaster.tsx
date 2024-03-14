@@ -6,7 +6,7 @@ import update from 'immutability-helper';
 import { Button, Typography } from '@material-ui/core';
 
 export const DropMaster = ({ module, screenHeight, section, setSection, addSection,
-    addDeleteField, extraFields, onAddRemoveField, isCalculativeField }) => {
+    addDeleteField, extraFields, onAddRemoveField, isCalculativeField, brandId }) => {
 
     const [sectionHoverIndex, setSectionHoverIndex] = useState(null);
     const [fieldHoverId, setFieldHoverId] = React.useState(null);
@@ -33,7 +33,10 @@ export const DropMaster = ({ module, screenHeight, section, setSection, addSecti
         <Box className={screenHeight}>
             {section.length > 0 ?
                 section.map((data, index) => (
-                    <DropSection key={data.sectionId} index={index} id={data.sectionId}
+                    <DropSection
+                        key={data.sectionId}
+                        index={index}
+                        id={data.sectionId}
                         setSectionHoverIndex={setSectionHoverIndex} sectionHoverIndex={sectionHoverIndex}
                         sectionId={data.sectionId} data={data} moveSection={moveSection}
                         fieldHoverId={fieldHoverId} setFieldHoverId={setFieldHoverId}
@@ -43,6 +46,7 @@ export const DropMaster = ({ module, screenHeight, section, setSection, addSecti
                         extraFields={extraFields}
                         onAddRemoveField={onAddRemoveField}
                         isCalculativeField={isCalculativeField}
+                        brandId={brandId}
                     />
                 )) :
                 <Typography variant="body2" align="center">Drag and drop your sections here</Typography>

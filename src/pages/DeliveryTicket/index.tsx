@@ -1,15 +1,13 @@
 import { Box, Chip, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { GiAbstract055 } from 'react-icons/gi';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import HideWhenOffline from 'src/components/HideWhenOffline';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
@@ -19,7 +17,6 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import SearchBox from '../../components/Helpers/SearchBox';
 import { DELIVERY_FROM_TO_TYPE, deliveryTicket, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import { findAll, findOne, objectStore } from '../../constants/indexdbhelper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -63,7 +60,6 @@ const DeliveryTicket = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -94,6 +90,7 @@ const DeliveryTicket = () => {
             <Link
               className="link text-truncate"
               title={row.original[column.accessor]}
+              target='_blank'
               to={
                 row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.pickupFromId}`
@@ -113,6 +110,7 @@ const DeliveryTicket = () => {
             <Link
               className="link text-truncate"
               title={row.original[column.accessor]}
+              target='_blank'
               to={
                 row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.deliveryToId}`
@@ -297,7 +295,6 @@ const DeliveryTicket = () => {
           fetchData();
           setIsConformDialogVisible(false);
           setDeleteRecord(null);
-          setAnchorEl(null);
           setDeleteLoading(false);
         })
         .catch((error) => {
@@ -322,17 +319,6 @@ const DeliveryTicket = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
-    history.push(`?type=${value}`);
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   return (
@@ -357,70 +343,20 @@ const DeliveryTicket = () => {
 
         {/* Tables Begins Here */}
         <CustomContainer>
-          <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'d-flex align-items-center gap-1'}>
-                <div className="flex flex-wrap">
-                  <GiAbstract055 className="headerLogo" />
-                  <span className="listingHeader">{routes.deliveryTicket.title} </span>
-                  {referenceType && <Chip className="ml-3" color="primary" label={`Rental : ${referenceType}`} onDelete={updateQueryParams} />}
-                </div>
-                <HideWhenOffline>
-                  <div className={`align-items-center gap-1 layout-for-mobile `}>
-                    {types && (
-                      <ToggleButtonGroup size="small" className="ml-2" value={types[selectedType - 1].key} exclusive onChange={onTypeChange}>
-                        {types.map((k, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
-                  </div>
-                </HideWhenOffline>
-              </div>
-              <div className="flex flex-wrap gap-[8px]  justify-end">
-                <SearchBox onChange={handleSearch} size="small" value={search} />
-                {/* {deliveryPermissions?.isCreate &&
-                    <Button className={'no-shadow'}
-                      onClick={() => setShowManageDeliveryTicket(true)}
-                      variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                  } */}
-                {/* {deliveryPermissions?.isDelete &&
-                    <Button
-                      className={styles.action_submit_btn}
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                    >Actions
-                    </Button>
-                  }
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "left",
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem onClick={() => {
-                      setIsConformDialogVisible(true)
-                      closeActions()
-                    }}>Delete</MenuItem>
-                  </Menu> */}
-              </div>
-            </div>
-          </div>
+          <ListingPageHeader
+            toggleButtonList={types}
+            onToggle={onTypeChange}
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            leftSideContents={
+              referenceType ? <Chip className="ml-3" color="primary" label={`Rental : ${referenceType}`} onDelete={updateQueryParams} /> : null
+            }
+            searchValue={search}
+            onSearch={handleSearch}
+            isActionButtonVisible={false}
+            isAddButtonVisible={false}
+            synchronizeType
+          />
 
           {columns ? (
             <CustomReactTable

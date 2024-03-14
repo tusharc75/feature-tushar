@@ -1,22 +1,20 @@
-import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
+import { Box, Chip, MenuItem, TextField } from '@material-ui/core';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IconButton from '@material-ui/core/IconButton';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import WarningIcon from '@material-ui/icons/Warning';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { GiStockpiles } from 'react-icons/gi';
 import { Link, useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -26,11 +24,11 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
-import SearchBox from '../../components/Helpers/SearchBox';
 import {
   ASSET_STATUS,
   COLOUR_MASTER,
   INVENTORY_HISTORY_TYPE,
+  INVENTORY_OWNER_TYPE,
   gridLoadingTimeout,
   prepareDataForGrid,
   product,
@@ -58,7 +56,6 @@ const SerializedAsset = () => {
   const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productFilterList, setProductFilterList] = useState([]);
@@ -288,14 +285,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-            ![
-              ASSET_STATUS.new,
-              ASSET_STATUS.available,
-              ASSET_STATUS.lost,
-              ASSET_STATUS.customerPossession,
-              ASSET_STATUS.onPO,
-              ASSET_STATUS.scrap
-            ]?.includes(u?.status)
+              ![
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.lost,
+                ASSET_STATUS.customerPossession,
+                ASSET_STATUS.onPO,
+                ASSET_STATUS.scrap
+              ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -381,7 +378,6 @@ const SerializedAsset = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -412,11 +408,10 @@ const SerializedAsset = () => {
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
-        setAnchorEl(null);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Status changed to ${status}`
+          message: `Status changed to ${obj?.status}`
         });
       })
       .catch((error) => {
@@ -426,14 +421,6 @@ const SerializedAsset = () => {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const handleCertificationSupplier = async (data) => {
@@ -481,274 +468,55 @@ const SerializedAsset = () => {
       </div>
 
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[4fr_3fr] gap-4 items-start">
-            <div className={'flex flex-wrap align-items-center gap-[8px]'}>
-              <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-              <span className="listingHeader">{routes.serializedAsset?.title} </span>
-              {warehouse || warehouse || fromPurchaseOrder?.pOId ? (
-                <Fragment>
-                  {warehouse && (
-                    <Chip
-                      className="ml-3"
-                      color="primary"
-                      label={`Plants : ${warehouse.optionLabel}`}
-                      onDelete={() => {
-                        setWarehouse(null);
-                      }}
-                    />
-                  )}
-                  {redirectProduct && (
-                    <Chip
-                      className="ml-3"
-                      color="primary"
-                      label={`Product : ${redirectProduct.name}`}
-                      onDelete={() => {
-                        setRedirectProduct(null);
-                      }}
-                    />
-                  )}
-                  {fromPurchaseOrder?.productId && (
-                    <Fragment>
-                      <Chip
-                        className="ml-3"
-                        color="primary"
-                        label={`Product : ${fromPurchaseOrder.productName}`}
-                        onDelete={() => {
-                          setFromPurchaseOrder(null);
-                        }}
-                      />
-                      <Chip
-                        className="ml-3"
-                        color="primary"
-                        label={`Purchase Order : ${fromPurchaseOrder.pOName}`}
-                        onDelete={() => {
-                          setFromPurchaseOrder(null);
-                        }}
-                      />
-                    </Fragment>
-                  )}
-                </Fragment>
-              ) : (
-                <Fragment>
-                  {permissions?.productCategory?.isRead && (
-                    <Autocomplete
-                      className={`lg:w-[230px] w-full`}
-                      options={productCategoryList}
-                      getOptionLabel={(option: any) => (option ? option.name : '')}
-                      getOptionSelected={(option: any, val) => option._id === val}
-                      value={
-                        productCategoryList.filter((data) => data._id === productCategory).length
-                          ? productCategoryList.filter((data) => data._id === productCategory)[0]
-                          : ''
-                      }
-                      onChange={(e, val) => {
-                        setProductCategory(val && val._id ? val._id : '');
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          size="small"
-                          margin="none"
-                          name="productCategory"
-                          label="Product Category"
-                          variant="outlined"
-                          fullWidth
-                        />
-                      )}
-                    />
-                  )}
-                  {productCategory && (
-                    <Autocomplete
-                      className={`lg:w-[230px] w-full`}
-                      options={productFilterList}
-                      size="small"
-                      getOptionLabel={(option: any) => (option ? option.productName : '')}
-                      getOptionSelected={(option: any, val) => option._id === val}
-                      value={
-                        productFilterList.filter((data) => data._id === productFilter).length
-                          ? productFilterList.filter((data) => data._id === productFilter)[0]
-                          : ''
-                      }
-                      onChange={(e, val) => {
-                        setProductFilter(val && val._id ? val._id : '');
-                      }}
-                      renderInput={(params) => (
-                        <TextField size="small" {...params} margin="none" name="product" label="Product" variant="outlined" fullWidth />
-                      )}
-                    />
-                  )}
-                  <Autocomplete
-                    className={`lg:w-[230px] w-full`}
-                    options={warehouseOptions}
-                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={
-                      warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                        ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                    )}
-                  />
-                  {permissions?.sublease && (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name="subleaseAsset"
-                          checked={subleaseAsset}
-                          onChange={(e) => {
-                            setSubleaseAsset(e.target.checked);
-                          }}
-                          color="primary"
-                        />
-                      }
-                      style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
-                      label="Sublease Assets"
-                    />
-                  )}
-                </Fragment>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  disabled={!permissions?.serializedAsset?.isCreate}
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                <Button
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                  disabled={selectedRecords?.length ? false : true}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                    onClick={() => {
-                      closeActions();
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords?.length})`}
-                  </MenuItem>
-                  {permissions?.serializedAsset?.isUpdate &&
-                    allowUpdateStatus &&
-                    [ASSET_STATUS.available].map((status) => (
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          handleStatusChange(status);
-                        }}
-                        disabled={
-                          selectedRecords?.filter((o) => [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(o.status))
-                            .length === selectedRecords?.length
-                            ? false
-                            : true
-                        }
-                      >
-                        {`Status Change - ${status}`}
-                      </MenuItem>
-                    ))}
-                  {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length && (
-                    <>
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          handleStatusChange(ASSET_STATUS.needRepair);
-                        }}
-                        disabled={
-                          selectedRecords?.filter((o) => ![ASSET_STATUS.needRepair].includes(o.status)).length === selectedRecords?.length
-                            ? false
-                            : true
-                        }
-                      >
-                        {`Status Change - ${ASSET_STATUS.needRepair}`}
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          handleStatusChange(ASSET_STATUS.needRecert);
-                        }}
-                        disabled={
-                          selectedRecords?.filter((o) => ![ASSET_STATUS.needRecert].includes(o.status)).length === selectedRecords?.length
-                            ? false
-                            : true
-                        }
-                      >
-                        {`Status Change - ${ASSET_STATUS.needRecert}`}
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          handleStatusChange(ASSET_STATUS.scrap);
-                        }}
-                        disabled={
-                          selectedRecords?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status)).length === selectedRecords?.length ? false : true
-                        }
-                      >
-                        {`Status Change - ${ASSET_STATUS.scrap}`}
-                      </MenuItem>
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          handleStatusChange(ASSET_STATUS.lost);
-                        }}
-                        disabled={
-                          selectedRecords?.filter((o) => ![ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true
-                        }
-                      >
-                        {`Status Change - ${ASSET_STATUS.lost}`}
-                      </MenuItem>
-                      {columns?.some((e) => e.field === 'certificationSupplier') && (
-                        <MenuItem
-                          disabled={!permissions?.serializedAsset?.isUpdate}
-                          onClick={() => {
-                            closeActions();
-                            setOpenSupplierAccountDialog(true);
-                          }}
-                        >
-                          {`Assign Certification Supplier`}
-                        </MenuItem>
-                      )}
-                    </>
-                  )}
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          leftSideContents={
+            <LeftSideContent
+              {...{
+                warehouse,
+                fromPurchaseOrder,
+                setWarehouse,
+                redirectProduct,
+                setRedirectProduct,
+                setFromPurchaseOrder,
+                permissions,
+                productCategoryList,
+                productCategory,
+                setProductCategory,
+                productFilterList,
+                productFilter,
+                setProductFilter,
+                warehouseOptions,
+                selectedWarehouse,
+                setSelectedWarehouse,
+                subleaseAsset,
+                setSubleaseAsset
+              }}
+            />
+          }
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={
+            <ActionMenuItems
+              {...{
+                selectedRecords,
+                setShowDeleteConfirmBox,
+                permissions,
+                allowUpdateStatus,
+                handleStatusChange,
+                columns,
+                setOpenSupplierAccountDialog
+              }}
+            />
+          }
+          addButtonProps={{ disabled: !permissions?.serializedAsset?.isCreate }}
+          addButtonOnclick={() => {
+            setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={true}
+        />
 
         {columns ? (
           <CustomReactTable
@@ -784,9 +552,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -824,3 +591,234 @@ const SerializedAsset = () => {
 };
 
 export default SerializedAsset;
+
+const LeftSideContent = ({
+  warehouse,
+  fromPurchaseOrder,
+  setWarehouse,
+  redirectProduct,
+  setRedirectProduct,
+  setFromPurchaseOrder,
+  permissions,
+  productCategoryList,
+  productCategory,
+  setProductCategory,
+  productFilterList,
+  productFilter,
+  setProductFilter,
+  warehouseOptions,
+  selectedWarehouse,
+  setSelectedWarehouse,
+  subleaseAsset,
+  setSubleaseAsset
+}) => {
+  return (
+    <>
+      {warehouse || warehouse || fromPurchaseOrder?.pOId ? (
+        <Fragment>
+          {warehouse && (
+            <Chip
+              className="ml-3"
+              color="primary"
+              label={`Plants : ${warehouse.optionLabel}`}
+              onDelete={() => {
+                setWarehouse(null);
+              }}
+            />
+          )}
+          {redirectProduct && (
+            <Chip
+              className="ml-3"
+              color="primary"
+              label={`Product : ${redirectProduct.name}`}
+              onDelete={() => {
+                setRedirectProduct(null);
+              }}
+            />
+          )}
+          {fromPurchaseOrder?.productId && (
+            <Fragment>
+              <Chip
+                className="ml-3"
+                color="primary"
+                label={`Product : ${fromPurchaseOrder.productName}`}
+                onDelete={() => {
+                  setFromPurchaseOrder(null);
+                }}
+              />
+              <Chip
+                className="ml-3"
+                color="primary"
+                label={`Purchase Order : ${fromPurchaseOrder.pOName}`}
+                onDelete={() => {
+                  setFromPurchaseOrder(null);
+                }}
+              />
+            </Fragment>
+          )}
+        </Fragment>
+      ) : (
+        <Fragment>
+          {permissions?.productCategory?.isRead && (
+            <Autocomplete
+              className={`lg:w-[230px] w-full`}
+              options={productCategoryList}
+              getOptionLabel={(option: any) => (option ? option.name : '')}
+              getOptionSelected={(option: any, val) => option._id === val}
+              value={
+                productCategoryList.filter((data) => data._id === productCategory).length
+                  ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                  : ''
+              }
+              onChange={(e, val) => {
+                setProductCategory(val && val._id ? val._id : '');
+              }}
+              renderInput={(params) => (
+                <TextField {...params} size="small" margin="none" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+              )}
+            />
+          )}
+          {productCategory && (
+            <Autocomplete
+              className={`lg:w-[230px] w-full`}
+              options={productFilterList}
+              size="small"
+              getOptionLabel={(option: any) => (option ? option.productName : '')}
+              getOptionSelected={(option: any, val) => option._id === val}
+              value={
+                productFilterList.filter((data) => data._id === productFilter).length
+                  ? productFilterList.filter((data) => data._id === productFilter)[0]
+                  : ''
+              }
+              onChange={(e, val) => {
+                setProductFilter(val && val._id ? val._id : '');
+              }}
+              renderInput={(params) => (
+                <TextField size="small" {...params} margin="none" name="product" label="Product" variant="outlined" fullWidth />
+              )}
+            />
+          )}
+          <Autocomplete
+            className={`lg:w-[230px] w-full`}
+            options={warehouseOptions}
+            getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+            getOptionSelected={(option: any, val) => option.optionValue === val}
+            value={
+              warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                : ''
+            }
+            onChange={(e, val) => {
+              setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+            }}
+            renderInput={(params) => (
+              <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+            )}
+          />
+          {permissions?.sublease && (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="subleaseAsset"
+                  checked={subleaseAsset}
+                  onChange={(e) => {
+                    setSubleaseAsset(e.target.checked);
+                  }}
+                  color="primary"
+                />
+              }
+              style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
+              label="Sublease Assets"
+            />
+          )}
+        </Fragment>
+      )}
+    </>
+  );
+};
+
+const ActionMenuItems = ({
+  selectedRecords,
+  setShowDeleteConfirmBox,
+  permissions,
+  allowUpdateStatus,
+  handleStatusChange,
+  columns,
+  setOpenSupplierAccountDialog
+}) => {
+  return (
+    <>
+      <MenuItem
+        disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+        onClick={() => {
+          setShowDeleteConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+      {permissions?.serializedAsset?.isUpdate &&
+        allowUpdateStatus &&
+        [ASSET_STATUS.available].map((status) => (
+          <MenuItem
+            onClick={() => {
+              handleStatusChange(status);
+            }}
+            disabled={
+              selectedRecords?.filter((o) => [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(o.status)
+                || (ASSET_STATUS.scrap === o.status && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand)
+              ).length === selectedRecords?.length
+                ? false : true
+            }
+          >
+            {`Status Change - ${status}`}
+          </MenuItem>
+        ))}
+      {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length && (
+        <>
+          <MenuItem
+            onClick={() => {
+              handleStatusChange(ASSET_STATUS.needRepair);
+            }}
+            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.needRepair].includes(o.status)).length === selectedRecords?.length ? false : true}
+          >
+            {`Status Change - ${ASSET_STATUS.needRepair}`}
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleStatusChange(ASSET_STATUS.needRecert);
+            }}
+            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.needRecert].includes(o.status)).length === selectedRecords?.length ? false : true}
+          >
+            {`Status Change - ${ASSET_STATUS.needRecert}`}
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleStatusChange(ASSET_STATUS.scrap);
+            }}
+            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status)).length === selectedRecords?.length ? false : true}
+          >
+            {`Status Change - ${ASSET_STATUS.scrap}`}
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleStatusChange(ASSET_STATUS.lost);
+            }}
+            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
+          >
+            {`Status Change - ${ASSET_STATUS.lost}`}
+          </MenuItem>
+          {columns?.some((e) => e.field === 'certificationSupplier') && (
+            <MenuItem
+              disabled={!permissions?.serializedAsset?.isUpdate}
+              onClick={() => {
+                setOpenSupplierAccountDialog(true);
+              }}
+            >
+              {`Assign Certification Supplier`}
+            </MenuItem>
+          )}
+        </>
+      )}
+    </>
+  );
+};

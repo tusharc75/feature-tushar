@@ -1,23 +1,23 @@
-import { useEffect, useState, useContext, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import { Autocomplete } from '@material-ui/lab';
 import { Box, TextField } from '@material-ui/core';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomContainer from '../../components/CustomContainer';
-import { FaWpforms } from 'react-icons/fa';
-import Chip from '@material-ui/core/Chip';
-import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
+import Chip from '@material-ui/core/Chip';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Grid from '@material-ui/core/Grid';
+import { makeStyles } from '@material-ui/core/styles';
+import { Autocomplete } from '@material-ui/lab';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdUpdate } from 'react-icons/md';
+import { ListingPageHeader } from 'src/components/PageHeaders';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
 import CustomButton from '../../components/Helpers/CustomButton';
 import { getUniqueCurrencies } from '../../constants/helpers';
-import { useData } from '../../StateProvider/Provider';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdUpdate } from 'react-icons/all';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
 
 const useStyles = makeStyles(() => ({
   tdWidth: {
@@ -185,25 +185,24 @@ const CurrencyConverter = () => {
         <CustomBreadCrumbs routes={[routes.currencyConverter]} />
       </Grid>
       <CustomContainer styles={{ overflowY: 'auto' }}>
-        <div className="header-panel">
-          <Grid container>
-            <Grid item xs={6} md={6} sm={6} className="d-flex align-items-center gap-1"></Grid>
-            <Grid xs={6} md={6} sm={6} container justify="flex-end">
-              {currencyConverterPermissions.isUpdate && (
-                <Button
-                  onClick={handleUpdate}
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  color="primary"
-                  style={isMobile && !isTablet ? { color: 'var(--info)' } : {}}
-                >
-                  {' '}
-                  {isMobile && !isTablet ? <MdUpdate size={20} /> : 'Update'}{' '}
-                </Button>
-              )}
-            </Grid>
-          </Grid>
-        </div>
+        <ListingPageHeader
+          rightSideContents={
+            currencyConverterPermissions.isUpdate ? (
+              <Button
+                onClick={handleUpdate}
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                size="small"
+                color="primary"
+                style={isMobile && !isTablet ? { color: 'var(--info)' } : {}}
+              >
+                {' '}
+                {isMobile && !isTablet ? <MdUpdate size={20} /> : 'Update'}{' '}
+              </Button>
+            ) : null
+          }
+          isActionButtonVisible={false}
+          isAddButtonVisible={false}
+        />
         <div className="listing-grid">
           <Box p={1}>
             <Grid

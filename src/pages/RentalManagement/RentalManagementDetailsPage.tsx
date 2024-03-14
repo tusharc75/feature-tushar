@@ -1,60 +1,53 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from 'react';
-import { Grid, Box, Button, Paper, CircularProgress, useMediaQuery, Typography, Tab, Tabs } from '@material-ui/core';
-import { Skeleton, Alert } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-  serializedAsset,
-  getUniqueCurrencies,
-  gridLoadingTimeout,
-  rentalManagement,
-  RENTAL_STATUS,
-  rentalManagementSteps,
-  ACTIVITY_RESOURCE,
-  QUOTATION_STATUS,
-  deliveryTicket,
-  DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_TICKET_TYPE
-} from '../../constants/helpers';
-import ManageRentalManagementDialog from './ManageRental';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import ContentFullScreen from '../../components/ContentFullScreen';
-import queryString from 'query-string';
-import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import { RiFlowChart } from 'react-icons/ri';
-import TabPanel from '../../components/TabPanel';
-import Menu from '@material-ui/core/Menu';
-import { isMobile, isTablet } from 'react-device-detect';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GrStatusInfo } from 'react-icons/all';
-import MenuItem from '@material-ui/core/MenuItem';
-import { objectStore, insertUpdate, findAll, findOne } from '../../constants/indexdbhelper';
-import Productpackage from './Productpackage';
-import AdditionalCost from './AdditionalCost';
-import SerializedAsset from './SerializedAsset';
-import LoadingTicket from './LoadingTicket';
-import ReceivingTicket from './ReceivingTicket';
-import Invoice from './Invoice';
-import RentalManagementViews from './RoadMapViews';
-import { camelCase } from 'lodash';
-import { updateRentalProcessStatus } from './rentalOfflineHelper';
-import Quotation from './Quotation';
-import ProgressiveBilling from './ProgressiveBilling';
-import Services from './Services';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import { IoMdDownload } from 'react-icons/io';
-import Steps, { getIndex } from 'src/components/Steps';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, Button, CircularProgress, Tab, Tabs } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
+import EditIcon from '@material-ui/icons/Edit';
+import { camelCase } from 'lodash';
+import queryString from 'query-string';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from 'react-icons/fa';
+import { IoMdDownload } from 'react-icons/io';
+import { RiFlowChart } from 'react-icons/ri';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import Steps, { getIndex } from 'src/components/Steps';
 import { ownerAndColaborator } from 'src/constants/messageHelpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import ContentFullScreen from '../../components/ContentFullScreen';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
+import {
+  ACTIVITY_RESOURCE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_TYPE,
+  QUOTATION_STATUS,
+  RENTAL_STATUS,
+  deliveryTicket,
+  rentalManagement,
+  rentalManagementSteps,
+  serializedAsset
+} from '../../constants/helpers';
+import { findOne, objectStore } from '../../constants/indexdbhelper';
+import AdditionalCost from './AdditionalCost';
+import Invoice from './Invoice';
+import LoadingTicket from './LoadingTicket';
+import ManageRentalManagementDialog from './ManageRental';
+import Productpackage from './Productpackage';
+import ProgressiveBilling from './ProgressiveBilling';
+import Quotation from './Quotation';
+import ReceivingTicket from './ReceivingTicket';
+import RentalManagementViews from './RoadMapViews';
+import SerializedAsset from './SerializedAsset';
+import Services from './Services';
+import { updateRentalProcessStatus } from './rentalOfflineHelper';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -154,7 +147,10 @@ const RentalManagementDetailsPage = () => {
 
   const checkProgressiveBilling = () => {
     if (user?.user?.brandPolicy?.rentalProgressiveBilling) {
-      axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
+      axiosInstance()
+        .get(
+          `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+        )
         .then(({ data: { data } }) => {
           if (data.length > 0) {
             setDisplayProgressiveBillingTab(true);
@@ -212,7 +208,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -306,7 +302,7 @@ const RentalManagementDetailsPage = () => {
       .put(`${rentalManagement.api}/remove`, { ids: [rentalManagementData._id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.rentalManagement.path}`)
+        history.push(`${routes.rentalManagement.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -334,8 +330,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -436,7 +432,8 @@ const RentalManagementDetailsPage = () => {
                   >
                     {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
                   </Button>
-                  {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) && versionNotClonned &&
+                  {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) &&
+                    versionNotClonned &&
                     rentalManagementData?.addQuotationStep && (
                       <Button
                         disabled={!versionNotClonned}
@@ -481,7 +478,8 @@ const RentalManagementDetailsPage = () => {
                       Re-Open
                     </Button>
                   )}
-                  {permissions?.rentalManagement?.isUpdate && !isOffline &&
+                  {permissions?.rentalManagement?.isUpdate &&
+                    !isOffline &&
                     ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) &&
                     !(
                       [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
@@ -495,7 +493,8 @@ const RentalManagementDetailsPage = () => {
                               disabled={allowedToEdit ? false : true}
                               variant={isMobile && !isTablet ? 'text' : 'contained'}
                               className={'btn-outline-v1'}
-                              onClick={handleOpenUpdateDialog}>
+                              onClick={handleOpenUpdateDialog}
+                            >
                               {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                             </Button>
                           </span>
@@ -613,12 +612,17 @@ const RentalManagementDetailsPage = () => {
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
-                  quotationApproved={quotationData && [
-                    QUOTATION_STATUS.acceptByCustomer,
-                    QUOTATION_STATUS.rejectByCustomer,
-                    QUOTATION_STATUS.sentToCustomer,
-                    QUOTATION_STATUS.waitingForSupplierPrice
-                  ].includes(quotationData?.versions[currentVersion]?.status) ? true : false}
+                  quotationApproved={
+                    quotationData &&
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      ? true
+                      : false
+                  }
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Add Services' && rentalManagementData && (
@@ -629,12 +633,17 @@ const RentalManagementDetailsPage = () => {
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
-                  quotationApproved={quotationData && [
-                    QUOTATION_STATUS.acceptByCustomer,
-                    QUOTATION_STATUS.rejectByCustomer,
-                    QUOTATION_STATUS.sentToCustomer,
-                    QUOTATION_STATUS.waitingForSupplierPrice
-                  ].includes(quotationData?.versions[currentVersion]?.status) ? true : false}
+                  quotationApproved={
+                    quotationData &&
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      ? true
+                      : false
+                  }
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Add-on' && rentalManagementData && (
@@ -644,14 +653,20 @@ const RentalManagementDetailsPage = () => {
                   renderedFrom={`${renderedFrom}_grid-2`}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
-                  quotationApproved={quotationData && [
-                    QUOTATION_STATUS.acceptByCustomer,
-                    QUOTATION_STATUS.rejectByCustomer,
-                    QUOTATION_STATUS.sentToCustomer,
-                    QUOTATION_STATUS.waitingForSupplierPrice
-                  ].includes(quotationData?.versions[currentVersion]?.status) ? true : false}
+                  quotationApproved={
+                    quotationData &&
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      ? true
+                      : false
+                  }
                 />
               )}
+
               {rentalSteps[currentStep]?.name === 'Quotation' && rentalManagementData && (
                 <Quotation
                   rentalManagementData={rentalManagementData}
@@ -718,11 +733,7 @@ const RentalManagementDetailsPage = () => {
           <TabPanel value={tabValue} index={2}>
             <Box>
               {displayProgressiveBillingTab ? (
-                <ProgressiveBilling
-                  rentalId={id}
-                  rentalManagementData={rentalManagementData}
-                  allowCreateInvoice={true}
-                />
+                <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={true} />
               ) : (
                 <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
               )}

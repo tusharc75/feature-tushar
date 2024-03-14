@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Menu, MenuItem, Chip, IconButton } from '@material-ui/core';
+import { Grid, Box, Button, Menu, MenuItem, Chip, IconButton, TextField } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -17,7 +17,8 @@ import {
   MATERIAL_TYPE,
   asyncForEach,
   MATERIAL_SUB_TYPE,
-  REPAIR_ORDER_STATUS
+  REPAIR_ORDER_STATUS,
+  sidebarResource
 } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -38,6 +39,8 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { Autocomplete } from '@material-ui/lab';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
@@ -69,7 +72,6 @@ const WorkOrder = ({
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
@@ -79,10 +81,24 @@ const WorkOrder = ({
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [isSubmitting, setSubmitting] = useState(false);
   const [reviseQuotation, setReviseQuotation] = useState(false);
+  const [serviceOptions, setServiceOptions] = useState([]);
+  const [selectedServiceOption, setSelectedServiceOption] = useState(null);
+  const [showServiceActionConfirmBox, setShowServiceActionConfirmBox] = useState({ open: false, action: '' });
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.serviceMaster}`)
+      .then(({ data: { data } }) => {
+        setServiceOptions(data[sidebarResource.serviceMaster]);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, []);
 
   useEffect(() => {
     fetchFields();
@@ -530,6 +546,10 @@ const WorkOrder = ({
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
+    if (selectedServiceOption) {
+        setSelectedServiceOption(null);
+    }
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
     var data: any = [];
 
@@ -594,20 +614,26 @@ const WorkOrder = ({
         setNextStep(false);
       }
     } else {
-      if (
-        data?.material?.filter(
-          (e) =>
-            e?.type === 'service' &&
-            e?.serviceDetail?.preWork &&
-            [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status)
-        )?.length
-      ) {
-        setNextStep(false);
-      } else {
-        setNextStep(true);
+      if (repairOrderData.addQuotationStep) {
+        if (data?.material?.filter((e) => e?.type === MATERIAL_TYPE.service && e?.serviceDetail?.preWork
+          && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.includes(e?.status))?.length
+        ) {
+          setNextStep(false);
+        } else {
+          setNextStep(true);
+        }
+      }
+      else {
+        if ((repairOrderData?.type === REPAIR_ORDER_TYPE.internal &&
+          rows?.every((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed) ||
+          (repairOrderData?.type === REPAIR_ORDER_TYPE.external &&
+            rows?.some((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed)))) {
+          setNextStep(true);
+        } else {
+          setNextStep(false);
+        }
       }
     }
-
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -661,9 +687,9 @@ const WorkOrder = ({
       }
 
       _subRow.hideSelection = false;
-      if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed || !_subRow.canDelete) {
-        _subRow.hideSelection = true;
-      }
+      // if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed || !_subRow.canDelete) {
+      //   _subRow.hideSelection = true;
+      // }
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -718,14 +744,6 @@ const WorkOrder = ({
     }
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
     rows?.forEach((e: any) => {
       delete e.name;
@@ -774,8 +792,8 @@ const WorkOrder = ({
     const workOrderId: any = [];
     const asset = records?.filter((s) => s.type === MATERIAL_TYPE.serializedAsset);
     if (asset?.length > 0) {
-      asset?.forEach(_asset => {
-        workOrderId.push(_asset?.workOrder?._id)
+      asset?.forEach((_asset) => {
+        workOrderId.push(_asset?.workOrder?._id);
       });
       rows?.forEach((e) => {
         data.push({
@@ -789,7 +807,7 @@ const WorkOrder = ({
       });
     } else {
       const services = records?.filter((s) => s.type === MATERIAL_TYPE.service);
-      workOrderId.push(services[0]?.workOrder?._id)
+      workOrderId.push(services[0]?.workOrder?._id);
       services?.forEach((s) => {
         rows?.forEach((e) => {
           data.push({
@@ -840,151 +858,253 @@ const WorkOrder = ({
     }
   };
 
+  const handleServiceSelect = (newValue) => {
+    setSelectedServiceOption(newValue);
+    if (newValue) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      setTimeout(() => {
+        dispatch({
+          type: 'selection',
+          selectedRecords: flattenArray(dataRows)?.filter((_f) => [newValue?.optionValue].includes(_f?.serviceDetail?._id) && !_f?.hideSelection)
+        });
+      }, 100);
+    } else {
+      dispatch({ type: 'selection', selectedRecords: [] });
+    }
+  };
+
+  const isDisabledCompleteService = () => {
+    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.includes(e?.status));
+    if (records?.length === 0) {
+      return true;
+    }
+    if (records?.length !== selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service)?.length) {
+      return true;
+    }
+    const data = [];
+    records?.forEach((record) => {
+      let disabled = false;
+      if (record?.assignedUsers?.length > 0 && !allowedToEdit) {
+        if (!record?.assignedUsers?.map((a) => a?.optionValue).includes(user?.user?._id)) {
+          disabled = true;
+        }
+      }
+      if (!disabled) {
+        if (
+          dataRows
+            ?.find((d) => d?._id === record?.parentId)
+            ?.subRows?.filter((s) => s?.order < record?.order)
+            ?.every((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status))
+        ) {
+          data.push(record);
+        }
+      }
+    });
+    return !(data?.length === records?.length);
+  };
+
+  const handleCompleteService = () => {
+    setSubmitting(true);
+    var records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service);
+    if (showServiceActionConfirmBox.action === 'revert') {
+      records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending);
+    }
+    const data = records?.map((e) => ({
+      workOrder: e?.workOrder?._id,
+      service: e?.serviceDetail?._id,
+      uniqueId: e?.uniqueId,
+      status: showServiceActionConfirmBox.action
+    }));
+    axiosInstance()
+      .put(`${workOrder.api}/service/work-orders-services-status`, data)
+      .then(({ data }) => {
+        setSubmitting(false);
+        setShowServiceActionConfirmBox({ open: false, action: '' });
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((err) => {
+        setSubmitting(false);
+        setShowServiceActionConfirmBox({ open: false, action: '' });
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const leftSideContents = () => {
+    return (
+      <>
+        {allowedToEdit &&
+          <Autocomplete
+            className="max-w-[400px] flex-grow min-w-[200px]"
+            options={serviceOptions}
+            getOptionLabel={(option) => option?.optionLabel || ''}
+            size="small"
+            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Select Service" variant="outlined" />}
+            value={selectedServiceOption}
+            onChange={(event: any, newValue: any) => {
+              handleServiceSelect(newValue);
+            }}
+          />
+        }
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddServicesDialog({ open: true, new: false });
+          }}
+        >
+          Add Existing Services
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAddServicesDialog({ open: true, new: true });
+          }}
+        >
+          Add New Service
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
+          onClick={() => {
+            setUserAssignDialog(true);
+          }}
+        >
+          Assign Technician
+        </MenuItem>
+        {allowedToEdit && permissions?.workStations?.isRead && (
+          <MenuItem
+            disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
+            onClick={() => {
+              setWorkStationAssignDialog(true);
+            }}
+          >
+            Assign Work Station
+          </MenuItem>
+        )}
+        {!user?.brandPolicy?.workOrderConsumableHide && (
+          <MenuItem
+            disabled={
+              selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
+                ? // checkUniqWorkOrder()
+                false
+                : true
+            }
+            onClick={() => {
+              var ids = [];
+              if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                const asset = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset);
+                ids = flattenArray(dataRows)
+                  ?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)
+                  ?.map((e) => e.materialId);
+              } else {
+                const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
+                ids = flattenArray(dataRows)
+                  ?.filter((e) => serviceIds?.includes(e?.parentId))
+                  ?.map((e) => e.materialId);
+              }
+              setConsumablesDialog({ open: true, ids: ids, data: null });
+            }}
+          >
+            Add Products/Consumables
+          </MenuItem>
+        )}
+        <MenuItem
+          onClick={() => {
+            setArrangeView(true);
+          }}
+          disabled={checkUniqWorkOrder() && selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length ? false : true}
+        >
+          Arrange Services
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setAutoCompleteData(selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset));
+            setCompleteConfirmBox(true);
+          }}
+          disabled={
+            selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
+              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
+              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
+              ? false
+              : true
+          }
+        >
+          Auto Complete Work Order(s)
+        </MenuItem>
+        <MenuItem
+        onClick={() => {
+          setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
+        }}
+        disabled={isDisabledCompleteService()}
+      >
+        Complete Service
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
+        }}
+        disabled={isDisabledCompleteService()}
+      >
+        Skip Service
+      </MenuItem>
+      <MenuItem
+        disabled={
+          selectedRecords?.length && selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)
+            ? false
+            : true
+        }
+        onClick={() => {
+          setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
+        }}
+      >
+        Revert Service
+      </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setIsBulkEdit(true);
+            setUpdateDialog({
+              open: true,
+              data: selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
+            });
+          }}
+          disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 ? false : true}
+        >
+          Bulk Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
+            setShowConfirmBox(true);
+          }}
+          disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
-      <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
-        {allowedToEdit && (
-          <Box display="flex" gridColumnGap={5}>
-            <Button
-              variant="outlined"
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              disabled={selectedRecords?.length === 0}
-              endIcon={<ExpandMore />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorActionEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorActionEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setAddServicesDialog({ open: true, new: false });
-                }}
-              >
-                Add Existing Services
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setAddServicesDialog({ open: true, new: true });
-                }}
-              >
-                Add New Service
-              </MenuItem>
-              <MenuItem
-                disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
-                onClick={() => {
-                  closeActions();
-                  setUserAssignDialog(true);
-                }}
-              >
-                Assign Technician
-              </MenuItem>
-              {allowedToEdit && permissions?.workStations?.isRead && (
-                <MenuItem
-                  disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
-                  onClick={() => {
-                    closeActions();
-                    setWorkStationAssignDialog(true);
-                  }}
-                >
-                  Assign Work Station
-                </MenuItem>
-              )}
-              {!user?.brandPolicy?.workOrderConsumableHide && (
-                <MenuItem
-                  disabled={
-                    selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 
-                      // checkUniqWorkOrder()
-                      ? false
-                      : true
-                  }
-                  onClick={() => {
-                    var ids = [];
-                    if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                      const asset = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset);
-                      ids = flattenArray(dataRows)
-                        ?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)
-                        ?.map((e) => e.materialId);
-                    } else {
-                      const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
-                      ids = flattenArray(dataRows)
-                        ?.filter((e) => serviceIds?.includes(e?.parentId))
-                        ?.map((e) => e.materialId);
-                    }
-                    closeActions();
-                    setConsumablesDialog({ open: true, ids: ids, data: null });
-                  }}
-                >
-                  Add Products/Consumables
-                </MenuItem>
-              )}
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setArrangeView(true);
-                }}
-                disabled={checkUniqWorkOrder() && selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length ? false : true}
-              >
-                Arrange Services
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setAutoCompleteData(selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset));
-                  setCompleteConfirmBox(true);
-                  closeActions();
-                }}
-                disabled={
-                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-                    selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
-                    selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
-                    ? false
-                    : true
-                }
-              >
-                Auto Complete Work Order(s)
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setIsBulkEdit(true);
-                  setUpdateDialog({
-                    open: true,
-                    data: selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
-                  });
-                  closeActions();
-                }}
-                disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 ? false : true}
-              >
-                Bulk Edit
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
-                  setShowConfirmBox(true);
-                  closeActions();
-                }}
-                disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
-              >
-                Delete
-              </MenuItem>
-            </Menu>
-          </Box>
-        )}
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        // addButtonMenuItems
+        // addButtonProps
+        isActionButtonVisible={allowedToEdit}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        leftSideContents={leftSideContents()}
+        actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+        hasXpadding
+      />
+
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           {columns ? (
@@ -1088,6 +1208,22 @@ const WorkOrder = ({
               onOk={handleDelete}
             />
           )}
+          {showServiceActionConfirmBox.open && (
+        <ConfirmationDialog
+          okBtnLoading={isSubmitting}
+          open={showServiceActionConfirmBox.open}
+          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+            ? 'complete'
+            : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+              ? 'skip'
+              : 'revert'
+            } this Service(s)`}
+          onClose={() => {
+            setShowServiceActionConfirmBox({ open: false, action: '' });
+          }}
+          onOk={handleCompleteService}
+        />
+      )}
           {completeConfirmBox && (
             <ConfirmationDialog
               open={completeConfirmBox}

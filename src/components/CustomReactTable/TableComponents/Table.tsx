@@ -43,7 +43,7 @@ const TableComponent = ({
   height,
   virtualization = false
 }: TTableProps) => {
-  const { filters: customFilters,  initialDataLoaded }: TInitialState = state;
+  const { filters: customFilters, initialDataLoaded }: TInitialState = state;
   const columns = table.getAllColumns();
   const { columnVisibility } = table.getState();
 
@@ -188,7 +188,8 @@ const TableComponent = ({
         style={{
           display: 'block',
           overflow: loading ? 'hidden' : 'auto',
-          height: height ?? '100%'
+          height: height ?? '100%',
+          minHeight: 500
         }}
         className="border z-10 bg-[var(--dark-primary,_white)] isolate"
         ref={virtualization ? parentRef : undefined}
@@ -277,7 +278,7 @@ const TableComponent = ({
                             }}
                             key={header.id}
                           >
-                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
+                            {header?.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
                           </th>
                         );
                       })}

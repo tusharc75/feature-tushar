@@ -1,16 +1,16 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset, sidebarResource } from 'src/constants/helpers';
-import styles from 'src/pages/Leads/Header.module.scss';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
-import SearchBox from '../Helpers/SearchBox';
+import { ListingPageHeader } from '../PageHeaders';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 let searchTimeout;
 
@@ -21,7 +21,6 @@ const AssignSerializedAssetDialog = ({
   handleSucess,
   ids,
   isAssigning,
-  extraStaticFilter = [],
   selectedProducts = []
 }) => {
   const renderedFrom = `${routes.serializedAsset.title}_${reference}_selected`;
@@ -39,6 +38,9 @@ const AssignSerializedAssetDialog = ({
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [columns, setColumns] = useState(null);
   const [products, setProducts] = useState([]);
+  const [checkMTRValidation, setCheckMTRValidation] = useState(false);
+  const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
+  const [isSubmitting,setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -58,6 +60,7 @@ const AssignSerializedAssetDialog = ({
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data: { data } }) => {
+        if(reference==='rentalJob') setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         setColumns([...newColumns, ...getStaticFields()]);
       });
@@ -143,25 +146,20 @@ const AssignSerializedAssetDialog = ({
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
       }
     }
+
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    const updatedFilters = [];
-    if (extraStaticFilter?.length) {
-      extraStaticFilter?.forEach((e) => {
-        updatedFilters.push(e);
-      });
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
-    } else {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
@@ -192,6 +190,63 @@ const AssignSerializedAssetDialog = ({
     setProducts(tempProducts);
   }, [selectedRecords]);
 
+  const handleAdd = () => {
+    if (selectedProducts?.length) {
+      const data = [];
+      selectedProducts?.forEach((ele) => {
+        let qty = ele.qty;
+        while (qty) {
+          const result = selectedRecords?.filter((f) => f.productId === ele.product && !f.isCounted);
+          if (result.length) {
+            data.push({ ...ele, asset: result[0]._id });
+            result[0].isCounted = true;
+          }
+          qty--;
+        }
+      });
+      handleSucess(data);
+    } else {
+      handleSucess(selectedRecords);
+    }
+  };
+
+  const leftSideContents = () => {
+    return (
+      <>
+        <Box style={{ display: 'inline' }}>
+          {products.length > 0
+            ? products?.map((d) => (
+              <Box
+                m={0.5}
+                p={1}
+                border={1}
+                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                  }`}
+                borderColor="var(--common-border-color)"
+                onClick={() => {
+                  if (selectedProduct === d.id) {
+                    setSelectedProduct(null);
+                  } else {
+                    setSelectedProduct(d.id);
+                  }
+                }}
+                style={{ display: 'inline-block' }}
+              >
+                {d?.qty < 0 ? (
+                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                ) : d?.qty === 0 ? (
+                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                ) : (
+                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                )}
+              </Box>
+            ))
+            : null}
+        </Box>
+      </>
+    );
+  };
+
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader
@@ -201,81 +256,36 @@ const AssignSerializedAssetDialog = ({
         onClose={handleClose}
       />
       <CustomDialogContent>
-        <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} className="d-flex align-items-center gap-1">
-              <Box style={{ display: 'inline' }}>
-                {products.length > 0
-                  ? products?.map((d) => (
-                      <Box
-                        m={0.5}
-                        p={1}
-                        border={1}
-                        className={`cursor-pointer rounded-sm ${
-                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
-                        }`}
-                        borderColor="var(--common-border-color)"
-                        onClick={() => {
-                          if (selectedProduct === d.id) {
-                            setSelectedProduct(null);
-                          } else {
-                            setSelectedProduct(d.id);
-                          }
-                        }}
-                        style={{ display: 'inline-block' }}
-                      >
-                        {d?.qty < 0 ? (
-                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                        ) : d?.qty === 0 ? (
-                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                        ) : (
-                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                        )}
-                      </Box>
-                    ))
-                  : null}
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6} className={styles.filter_side}>
-              <Box className={styles.filter_side_header} component="div">
-                <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
-                <Button
-                  disabled={isAssigning || disableSaveButton || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0)}
-                  onClick={() => {
-                    if (selectedProducts?.length) {
-                      const data = [];
-                      selectedProducts?.forEach((ele) => {
-                        let qty = ele.qty;
-                        while (qty) {
-                          const result = selectedRecords?.filter((f) => f.productId === ele.product && !f.isCounted);
-                          if (result.length) {
-                            data.push({ ...ele, asset: result[0]._id });
-                            result[0].isCounted = true;
-                          }
-                          qty--;
-                        }
-                      });
-                      handleSucess(data);
-                    } else {
-                      handleSucess(selectedRecords);
-                    }
-                  }}
-                  color="primary"
-                  size="small"
-                  variant="contained"
-                  endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
-                >
-                  Add {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
-                </Button>
-              </Box>
-            </Grid>
-            {products.length > 0 && products.some((s) => s.qty < 0) ? (
-              <div className="text-error font-weight-bold">You have selected more assets than required</div>
-            ) : (
-              ''
-            )}
-          </Grid>
-        </div>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={false}
+          leftSideContents={leftSideContents()}
+          addButtonProps={{
+            iconsEnabled: false,
+            disabled: isAssigning || disableSaveButton || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0),
+            loading: isAssigning,
+            text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+          }}
+          addButtonOnclick={()=>{
+            if (checkMTRValidation) {
+              if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
+                setMtrConfirmBox(true);
+              }else{
+                handleAdd();
+              }
+            }else{
+              handleAdd();
+            }
+          }}
+          isAddButtonVisible
+          setQueryString={false}
+          synchronizeType={false}
+        />
+
+        {products.length > 0 && products.some((s) => s.qty < 0) ? (
+          <div className="text-error font-weight-bold">You have selected more assets than required</div>
+        ) : null}
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -294,6 +304,20 @@ const AssignSerializedAssetDialog = ({
           </Box>
         )}
       </CustomDialogContent>
+      {mtrConfirmBox && (
+        <ConfirmationDialog
+          open={mtrConfirmBox}
+          okBtnLoading={isSubmitting}
+          message={`MTR(s) missing for some or all line items.`}
+          onClose={() => {
+            setMtrConfirmBox(false);
+          }}
+          onOk={() => {
+            handleAdd();
+            setMtrConfirmBox(false);
+          }}
+        />
+      )}
     </Dialog>
   );
 };

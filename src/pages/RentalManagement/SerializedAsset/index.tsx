@@ -1,43 +1,41 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import Box from '@material-ui/core/Box/Box';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import routes from '../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import AddSerializedAsset from './AddSerializedAsset';
-import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS, TRANSFER_ASSET_STATUS, MATERIAL_TYPE } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
-import ManageBulkAssetCreation from '../../BulkAssetCreation/ManageBulkAssetCreation';
-import ManageSublease from '../../Sublease/ManageSublease';
-import { uniqBy, startCase } from 'lodash';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { objectStore, findOne } from '../../../constants/indexdbhelper';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import { useHistory } from 'react-router-dom';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import Box from '@material-ui/core/Box/Box';
+import Grid from '@material-ui/core/Grid/Grid';
+import { Delete, ExpandMore } from '@material-ui/icons';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import RepeatIcon from '@material-ui/icons/Repeat';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useData } from '../../../StateProvider/Provider';
-import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
-import { ExpandMore } from '@material-ui/icons';
-import AddNonSerializeAssets from './AddNonSerializeAssets';
-import { removeAssetsInRental } from '../rentalOfflineHelper';
 import WarningIcon from '@material-ui/icons/Warning';
+import { startCase, uniqBy } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { ASSET_STATUS, MATERIAL_TYPE, TRANSFER_ASSET_STATUS, rentalManagement, sidebarResource, treeToFlatArray } from '../../../constants/helpers';
+import { findOne, objectStore } from '../../../constants/indexdbhelper';
+import ManageBulkAssetCreation from '../../BulkAssetCreation/ManageBulkAssetCreation';
+import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
+import ManageSublease from '../../Sublease/ManageSublease';
+import { removeAssetsInRental } from '../rentalOfflineHelper';
+import AddNonSerializeAssets from './AddNonSerializeAssets';
+import AddSerializedAsset from './AddSerializedAsset';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = 'rental_management_serialized_asset';
-  const history = useHistory();
 
   const [deleting, setDeleting] = useState(false);
   const [isAdding, setAdding] = useState(false);
@@ -49,7 +47,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [deleteData, setDeleteData] = useState([]);
   const [columns, setColumns] = useState(null);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: '' });
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
   const [purchaseOrderCount, setPurchaseOrderCount] = useState(0);
   const [subleaseCount, setSubleaseCount] = useState(0);
@@ -60,7 +57,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords, loading } = state;
+  const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -69,17 +66,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     fetchFields();
   }, []);
 
-  useEffect(()=>{
-    if(loading){
-      setNextStep(false)
-    }
-  },[loading])
-
   const OpenInNewWindow = (url) => {
     window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank');
   };
 
   const fetchFields = async () => {
+    setNextStep(false)
     var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     data?.forEach((e) => {
       e.isColumnEditable = false;
@@ -272,7 +264,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
     fetchData();
-    // setNextStep(true);
   };
 
   const checkProductInside = (item, material) => {
@@ -353,10 +344,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail = `${parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
-            ? parent?.productDetail?.productName
-            : parent?.packageDetail?.packageName
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'product'
+              ? parent?.productDetail?.productName
+              : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === 'service'
@@ -402,15 +393,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             ? parent.assetAssignedQty
             : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0) +
             (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
-        parent.isValid = parent.serializedProduct && !parent.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
-          ? parent.assetAssignedQty === parent.assetQty
-            ? true
-            : false
-          : parent.subRows.length !== 0
-            ? parent.assetAssignedQty ===
-            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
-            parent.subRows.every((d) => d.isValid)
-            : true;
+        parent.isValid =
+          parent.serializedProduct && !parent.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
+            ? parent.assetAssignedQty === parent.assetQty
+              ? true
+              : false
+            : parent.subRows.length !== 0
+              ? parent.assetAssignedQty ===
+              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+              parent.subRows.every((d) => d.isValid)
+              : true;
 
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
@@ -419,6 +411,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             parent.isValid = false;
           }
         }
+       
       });
 
       if (rows.filter((_rows) => _rows.isValid === false).length > 0 && !user?.user?.brandPolicy?.rentalStopAssetNextStepValidation) {
@@ -463,12 +456,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         }
       } else {
         if (
-          [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.reserved].includes(_inventory?.inventoryDetail?.status) &&
+          [ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.reserved].includes(_inventory?.inventoryDetail?.status) &&
           (!_inventory?.status || _inventory?.status === ASSET_STATUS.reserved)
         ) {
           canRemove = true;
         }
       }
+      
       subRows.push({
         ..._inventory,
         index: `${parent.index}.${subRows?.length + 1}`,
@@ -509,6 +503,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     });
 
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
+  
     var assetQtySUM = 0;
     var assetAssignedQtySUM = 0;
     childProduct.forEach((_subRow, j) => {
@@ -538,7 +533,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       _subRow.assetAssignedQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.realAssetQty : 0;
+      _subRow.realAssetQty =
+        _subRow.type === 'product' || _subRow.type === 'package' || _subRow.type === 'service' ? _subRow.qty * parent.realAssetQty : 0;
       _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
       // _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : true;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
@@ -548,6 +544,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       if (_subRow.isOfflineError) {
         _subRow.offlineErrorAsset = offlineAssetErrorLog?.filter((e) => e._id === _subRow._id).map((e) => e.assetNumber);
       }
+      
       let tempSubRows = generateNestedData(
         material,
         inventory,
@@ -559,22 +556,24 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         bulkAssetCreationProduct,
         offlineAssetErrorLog
       );
+      
       _subRow.subRows = tempSubRows;
       _subRow.assetQty =
         tempSubRows.filter((d) => d.type !== 'asset').length === 0
           ? _subRow.assetQty
           : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
           (_subRow.type === 'product' ? _subRow.assetQty : 0);
-      _subRow.isValid = _subRow.serializedProduct && !_subRow.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
-        ? _subRow.assetAssignedQty === _subRow.assetQty
-          ? true
-          : false
-        : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
-          ? true
-          : _subRow.assetAssignedQty ===
-            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+      _subRow.isValid =
+        _subRow.serializedProduct && !_subRow.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
+          ? _subRow.assetAssignedQty === _subRow.assetQty
             ? true
-            : false;
+            : false
+          : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
+            ? true
+            : _subRow.assetAssignedQty ===
+              tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+              ? true
+              : _subRow.serializedProduct && _subRow.subRows?.every((e) => (e.type === MATERIAL_TYPE.product && !e.serializedProduct) || e.type === 'asset') ? true : false;
 
       if (_subRow.subRows.length && _subRow.isValid) {
         if (_subRow.subRows.every((d) => d.isValid)) {
@@ -586,7 +585,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
-
     parent.assetAssignedQty += assetAssignedQtySUM;
     parent.isValid = parent.serializedProduct || parent.type === 'package' ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
 
@@ -643,12 +641,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             type: 'success',
             message: data.message
           });
-          // setNextStep(true);
         })
         .catch((error) => {
           setAdding(false);
           toastConfig.setToastConfig(error);
-          setNextStep(true);
         });
     }
   };
@@ -674,13 +670,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             fetchData();
             setDeleteData(null);
             setShowConfirmBox(false);
-            // setNextStep(true);
           })
           .catch((error) => {
             setDeleting(false);
             toastConfig.setToastConfig(error);
             setDeleteData(null);
-            // setNextStep(true);
           });
       }
     }
@@ -765,14 +759,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     return flatArray.length === 0;
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
   const openLinkActions = (event) => {
     setAnchorLinkActionEl(event.currentTarget);
   };
@@ -781,231 +767,208 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     setAnchorLinkActionEl(null);
   };
 
+  const rightSideContents = () => {
+    return (
+      <>
+        <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+          <span>
+            <Button
+              variant="contained"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={disableAssignSerializedAssets()}
+              onClick={() => {
+                if (isOffline) {
+                  setAddNonSerializedAssetDialog(true);
+                } else {
+                  setAddSerializedAssetDialog({ open: true });
+                }
+              }}
+            >
+              {`Assign ${routes.serializedAsset.title}`}
+            </Button>
+          </span>
+        </HtmlTooltip>
+        {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
+          <Button
+            onClick={openLinkActions}
+            variant="outlined"
+            color="default"
+            size="small"
+            aria-controls="action-menu"
+            className="normal-case"
+            endIcon={<ExpandMore fontSize="inherit" />}
+          >
+            Order(s)
+          </Button>
+        )}
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        {permissions?.bulkAssetCreation?.isCreate && (
+          <MenuItem
+            disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
+            onClick={() => {
+              setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'bulkAssetCreation' }));
+            }}
+          >
+            {`Create ${routes.bulkAssetCreation.title}`}
+          </MenuItem>
+        )}
+        {permissions?.purchaseOrder?.isCreate && (
+          <MenuItem
+            disabled={showOrderDialog?.products?.filter((e) => e.serialized === false)?.length === 0}
+            onClick={() => {
+              setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'purchaseOrder' }));
+            }}
+          >
+            {`Create ${routes.purchaseOrder.title}`}
+          </MenuItem>
+        )}
+        {permissions?.sublease?.isCreate && (
+          <MenuItem
+            disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
+            onClick={() => {
+              setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
+            }}
+          >
+            {`Create ${routes.sublease.title}`}
+          </MenuItem>
+        )}
+        <MenuItem
+          disabled={selectedRecords.length === 0 || nonSerializedAssetProduct?.length === 0}
+          onClick={() => {
+            setAddNonSerializedAssetDialog(true);
+          }}
+        >
+          {`Assign Serial Number`}
+        </MenuItem>
+        <MenuItem
+          disabled={flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove)?.length === 0}
+          onClick={() => {
+            const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
+            const dataTodelete = [];
+            assets?.forEach((element) => {
+              let isTransferAsset = false;
+              if (element?.transferData && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(element?.transferData?.status)) {
+                isTransferAsset = true;
+              }
+              dataTodelete.push({
+                _id: element.uniqueId,
+                assetId: element.inventory,
+                assetNumber: element?.detail,
+                isNonSerializeAsset: element?.isNonSerializeAsset,
+                isTransferAsset: isTransferAsset
+              });
+            });
+            setDeleteData(dataTodelete);
+            setShowConfirmBox(true);
+          }}
+        >
+          {`Remove Asset/Serial Number`}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
-      <Box display="flex" justifyContent="flex-end" m={1}>
-        <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1}>
-          <Box display="flex" gridGap={'8px'}>
-            <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
-              <span>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  type="button"
-                  size="small"
-                  disabled={disableAssignSerializedAssets()}
-                  onClick={() => {
-                    if (isOffline) {
-                      setAddNonSerializedAssetDialog(true);
-                    } else {
-                      setAddSerializedAssetDialog({ open: true });
-                    }
-                  }}
-                >
-                  {`Assign ${routes.serializedAsset.title}`}
-                </Button>
-              </span>
-            </HtmlTooltip>
-            {!isOffline && (
-              <Button
-                variant="outlined"
-                color="default"
-                className="new-dropdown-v1"
-                size="small"
-                onClick={openActions}
-                disabled={selectedRecords?.length ? false : true}
-                aria-controls="action-menu"
-                endIcon={<ExpandMore />}
-              >
-                Actions
-              </Button>
-            )}
-            <Menu
-              anchorEl={anchorActionEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorActionEl)}
-              onClose={closeActions}
-            >
-              {permissions?.bulkAssetCreation?.isCreate && (
-                <MenuItem
-                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
-                  onClick={() => {
-                    setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'bulkAssetCreation' }));
-                    closeActions();
-                  }}
-                >
-                  {`Create ${routes.bulkAssetCreation.title}`}
-                </MenuItem>
-              )}
-              {permissions?.purchaseOrder?.isCreate && (
-                <MenuItem
-                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === false)?.length === 0}
-                  onClick={() => {
-                    setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'purchaseOrder' }));
-                    closeActions();
-                  }}
-                >
-                  {`Create ${routes.purchaseOrder.title}`}
-                </MenuItem>
-              )}
-              {permissions?.sublease?.isCreate && (
-                <MenuItem
-                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
-                  onClick={() => {
-                    setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
-                    closeActions();
-                  }}
-                >
-                  {`Create ${routes.sublease.title}`}
-                </MenuItem>
-              )}
-              <MenuItem
-                disabled={selectedRecords.length === 0 || nonSerializedAssetProduct?.length === 0}
-                onClick={() => {
-                  setAddNonSerializedAssetDialog(true);
-                  closeActions();
-                }}
-              >
-                {`Assign Serial Number`}
-              </MenuItem>
-              <MenuItem
-                disabled={flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove)?.length === 0}
-                onClick={() => {
-                  const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
-                  const dataTodelete = [];
-                  assets?.forEach((element) => {
-                    let isTransferAsset = false;
-                    if (
-                      element?.transferData &&
-                      [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(element?.transferData?.status)
-                    ) {
-                      isTransferAsset = true;
-                    }
-                    dataTodelete.push({
-                      _id: element.uniqueId,
-                      assetId: element.inventory,
-                      assetNumber: element?.detail,
-                      isNonSerializeAsset: element?.isNonSerializeAsset,
-                      isTransferAsset: isTransferAsset
-                    });
-                  });
-                  setDeleteData(dataTodelete);
-                  setShowConfirmBox(true);
-                  closeActions();
-                }}
-              >
-                {`Remove Asset/Serial Number`}
-              </MenuItem>
-            </Menu>
-            {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
-              <Button
-                onClick={openLinkActions}
-                variant="outlined"
-                color="default"
-                size="small"
-                aria-controls="action-menu"
-                className="normal-case"
-                endIcon={<ExpandMore fontSize="inherit" />}
-              >
-                Order(s)
-              </Button>
-            )}
-            <Menu
-              anchorEl={anchorLinkActionEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-              id="action-menu"
-              open={Boolean(anchorLinkActionEl)}
-              onClose={closeLinkActions}
-            >
-              {permissions?.purchaseOrder?.isRead && (
-                <MenuItem
-                  disabled={purchaseOrderCount === 0}
-                  onClick={() => {
-                    OpenInNewWindow(routes.purchaseOrder.path);
-                  }}
-                >
-                  {`Show ${routes.purchaseOrder.title}`}
-                </MenuItem>
-              )}
-              {permissions?.bulkAssetCreation?.isRead && (
-                <MenuItem
-                  disabled={bulkAssetCreationCount === 0}
-                  onClick={() => {
-                    OpenInNewWindow(routes.bulkAssetCreation.path);
-                  }}
-                >
-                  {`Show ${routes.bulkAssetCreation.title}`}
-                </MenuItem>
-              )}
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+        rightSideContents={rightSideContents()}
+        hasXpadding
+      />
+      <Menu
+        anchorEl={anchorLinkActionEl}
+        keepMounted
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+        id="Order(s)-menu"
+        open={Boolean(anchorLinkActionEl)}
+        onClose={closeLinkActions}
+      >
+        {permissions?.purchaseOrder?.isRead && (
+          <MenuItem
+            disabled={purchaseOrderCount === 0}
+            onClick={() => {
+              OpenInNewWindow(routes.purchaseOrder.path);
+            }}
+          >
+            {`Show ${routes.purchaseOrder.title}`}
+          </MenuItem>
+        )}
+        {permissions?.bulkAssetCreation?.isRead && (
+          <MenuItem
+            disabled={bulkAssetCreationCount === 0}
+            onClick={() => {
+              OpenInNewWindow(routes.bulkAssetCreation.path);
+            }}
+          >
+            {`Show ${routes.bulkAssetCreation.title}`}
+          </MenuItem>
+        )}
 
-              {permissions?.sublease?.isRead && (
-                <MenuItem
-                  disabled={subleaseCount === 0}
-                  onClick={() => {
-                    OpenInNewWindow(routes.sublease.path);
-                  }}
-                >
-                  {`Show ${routes.sublease.title}`}
-                </MenuItem>
-              )}
-              {permissions?.transferAsset?.isRead && (
-                <MenuItem
-                  disabled={transferAssetCount === 0}
-                  onClick={() => {
-                    OpenInNewWindow(routes.transferAsset.path);
-                  }}
-                >
-                  {`Show ${routes.transferAsset.title}`}
-                </MenuItem>
-              )}
-            </Menu>
-          </Box>
+        {permissions?.sublease?.isRead && (
+          <MenuItem
+            disabled={subleaseCount === 0}
+            onClick={() => {
+              OpenInNewWindow(routes.sublease.path);
+            }}
+          >
+            {`Show ${routes.sublease.title}`}
+          </MenuItem>
+        )}
+        {permissions?.transferAsset?.isRead && (
+          <MenuItem
+            disabled={transferAssetCount === 0}
+            onClick={() => {
+              OpenInNewWindow(routes.transferAsset.path);
+            }}
+          >
+            {`Show ${routes.transferAsset.title}`}
+          </MenuItem>
+        )}
+      </Menu>
+      {columns ? (
+        <Box zIndex={5}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            setWholeRowsCellColor={(rowData) => {
+              if (!rowData.isValid) return 'error';
+
+              return '';
+            }}
+            refreshGrid={fetchData}
+            hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            expander={true}
+          />
         </Box>
-      </Box>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={12} sm={12}>
-          {columns ? (
-            <Box zIndex={5}>
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                setWholeRowsCellColor={(rowData) => {
-                  if (!rowData.isValid) return 'error';
-
-                  return '';
-                }}
-                refreshGrid={fetchData}
-                hideSelection={!allowedToEdit}
-                hideAction={!allowedToEdit}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-                expander={true}
-              />
-            </Box>
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </Grid>
-      </Grid>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset
           addSerializedAsset={handleAddSerializedAsset}

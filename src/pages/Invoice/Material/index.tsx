@@ -1,34 +1,32 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem, MenuList, Popover } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import { Box, IconButton, MenuItem, MenuList, Popover } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
-import { pricingCondition, invoice, PRICING_SETUP_TYPE, MATERIAL_TYPE } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
-import AddIcon from '@material-ui/icons/Add';
-import { isMobile, isTablet } from 'react-device-detect';
-import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
-import { camelCase, isArray, startCase } from 'lodash';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { flattenArray } from 'src/constants/columns';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import MaterialDialog from './MaterialDialog';
-import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase, isArray, startCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { flattenArray } from 'src/constants/columns';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import routes from '../../../components/Helpers/Routes';
+import { MATERIAL_TYPE, PRICING_SETUP_TYPE, invoice, pricingCondition } from '../../../constants/helpers';
+import MaterialDialog from './MaterialDialog';
 
 const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
-
   const renderedFrom = `${camelCase(routes?.invoice.title)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -45,8 +43,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   const [columns, setColumns] = useState(null);
   const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
   const [allFields, setAllFields] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
 
@@ -61,7 +57,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   useEffect(() => {
     fetchData();
   }, [columns]);
-
 
   const fetchFields = async () => {
     let data = await fetch_invoice_product_fields(invoiceData?.currency);
@@ -184,7 +179,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
-      },
+      }
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
@@ -196,7 +191,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, table }) =>
+      Cell: ({ row, table }) => (
         <>
           <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
             <IconButton
@@ -222,15 +217,14 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
             >
               <DeleteIcon fontSize="small" color="error" />
             </IconButton>
-          )
-          }
+          )}
         </>
+      )
     });
     setColumns(coloum);
   };
 
   const fetchData = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -248,18 +242,18 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'package'
-            ? parent.packageDetail?.packageName
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail?.assetNumber
-              : parent.serviceDetail?.serviceName;
+          ? parent.packageDetail?.packageName
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription
-            : parent.type === 'serializedAsset'
-              ? parent?.serializedAssetDetail?.product?.productDescription
-              : parent?.serviceDetail?.serviceDescription;
+          ? parent?.packageDetail?.packageDescription
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.product?.productDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.assetQty = assignedAssets.filter((i) => i.parentId === parent._id).length;
       parent.isValid = parent['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -282,18 +276,18 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.serializedAssetDetail.assetNumber
-              : _subRow.serviceDetail?.serviceName;
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail.assetNumber
+          : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow.type === 'serializedAsset'
-              ? parent.description
-              : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === 'serializedAsset'
+          ? parent.description
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.isValid = _subRow['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -310,22 +304,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
       bulkedit: false,
       showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
     });
-  };
-
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
-  const openAddMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeAddMenu = () => {
-    setAnchorEl(null);
   };
 
   const handleAdd = async (rows) => {
@@ -418,7 +396,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     if (invoiceData) {
       const data: any = {};
       data.conditionType = [PRICING_SETUP_TYPE.rent];
-      const material: any = []
+      const material: any = [];
       arr?.forEach((ele) => {
         const obj = {
           materialId: ele?.materialId,
@@ -426,16 +404,15 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           qty: ele?.qty,
           pricingMethod: ele?.pricingMethod,
           currency: invoiceData?.currency
-        }
+        };
         if (isArray(ele?.unit)) {
           ele?.unit?.forEach((e) => {
-            material.push({ ...obj, unit: e })
-          })
+            material.push({ ...obj, unit: e });
+          });
+        } else {
+          material.push({ ...obj, unit: ele?.unit });
         }
-        else {
-          material.push({ ...obj, unit: ele?.unit })
-        }
-      })
+      });
       data.material = material;
       data.supplier = [];
       data.customer = [invoiceData?.customerAccount?.optionValue];
@@ -460,124 +437,95 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     handleSaveData(rows);
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        {permissions?.product?.isRead && (
+          <MenuItem
+            color="primary"
+            onClick={() => {
+              setAddDialog({ open: true, type: 'product', parentId: null });
+            }}
+          >
+            {`Add Existing Products`}
+          </MenuItem>
+        )}
+
+        {permissions?.packages?.isRead && (
+          <MenuItem
+            color="primary"
+            onClick={() => {
+              setAddDialog({ open: true, type: 'package', parentId: null });
+            }}
+          >
+            {`Add Existing Packages`}
+          </MenuItem>
+        )}
+        {permissions?.serviceMaster?.isRead && (
+          <MenuItem
+            color="primary"
+            onClick={() => {
+              setAddDialog({ open: true, type: 'service', parentId: null });
+            }}
+          >
+            {`Add Existing Services`}
+          </MenuItem>
+        )}
+        <MenuItem
+          color="primary"
+          onClick={() => {
+            setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
+          }}
+        >
+          {`Add Existing Assets`}
+        </MenuItem>
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            const obj: any = [];
+            const dataToDelete = selectedRecords.filter((e) => !e.hideSelection);
+            dataToDelete?.forEach((ele) => {
+              obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
+            });
+            dataToDelete?.forEach((ele) => {
+              getNestedSubRows(obj, ele);
+            });
+            setDeleteData(obj);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center">
-          <Button variant="outlined" size="small" onClick={openAddMenu} startIcon={<AddIcon />} color="primary">
-            Add
-            <ExpandMore fontSize="small" />
-          </Button>
-          <Menu
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            anchorEl={anchorEl}
-            keepMounted
-            open={Boolean(anchorEl)}
-            onClose={closeAddMenu}
-          >
-            {permissions?.product?.isRead && (
-              <MenuItem
-                color="primary"
-                onClick={() => {
-                  setAddDialog({ open: true, type: 'product', parentId: null });
-                  closeAddMenu();
-                }}
-              >
-                {`Add Existing Products`}
-              </MenuItem>
-            )}
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{
+          disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length),
+          tooltip: Boolean(selectedRecords && selectedRecords.length) ? '' : 'Select records to edit'
+        }}
+        hasXpadding
+      />
 
-            {permissions?.packages?.isRead && (
-              <MenuItem
-                color="primary"
-                onClick={() => {
-                  setAddDialog({ open: true, type: 'package', parentId: null });
-                  closeAddMenu();
-                }}
-              >
-                {`Add Existing Packages`}
-              </MenuItem>
-            )}
-            {permissions?.serviceMaster?.isRead && (
-              <MenuItem
-                color="primary"
-                onClick={() => {
-                  setAddDialog({ open: true, type: 'service', parentId: null });
-                  closeAddMenu();
-                }}
-              >
-                {`Add Existing Services`}
-              </MenuItem>
-            )}
-            <MenuItem
-              color="primary"
-              onClick={() => {
-                setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
-                closeAddMenu();
-              }}
-            >
-              {`Add Existing Assets`}
-            </MenuItem>
-          </Menu>
-        </Box>
-        <Box display="flex">
-          <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-            <span>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
-                onClick={openActions}
-                endIcon={<KeyboardArrowDown fontSize="small" />}
-                className="new-dropdown-v1"
-              >
-                Actions
-              </Button>
-            </span>
-          </HtmlTooltip>
-          <Menu
-            anchorEl={anchorActionEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            open={Boolean(anchorActionEl)}
-            onClose={closeActions}
-          >
-            <MenuItem
-              onClick={() => {
-                setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
-                closeActions();
-              }}
-            >
-              Bulk Edit
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                const obj: any = [];
-                const dataToDelete = selectedRecords.filter((e) => !e.hideSelection);
-                dataToDelete?.forEach((ele) => {
-                  obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
-                });
-                dataToDelete?.forEach((ele) => {
-                  getNestedSubRows(obj, ele);
-                });
-                setDeleteData(obj);
-                closeActions();
-              }}
-            >
-              Delete
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Box>
       {columns ? (
         <>
           <Box zIndex={5} width={'100%'}>

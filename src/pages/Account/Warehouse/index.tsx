@@ -1,18 +1,19 @@
-import { Button, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
+import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import routes from './../../../components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { Box } from '@material-ui/core';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import WarhouseList from './WarhouseList';
-import { camelCase } from 'lodash';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 const Warehouse = ({ reference, api, id, accountId = '' }) => {
   const renderedFrom = camelCase(routes?.warehouse.title);
@@ -45,7 +46,7 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Warehouse`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true)
+    const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -144,55 +145,64 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
       });
   };
 
+  const rightSideContents = () => {
+    return (
+      <>
+        {permissions[reference]?.isUpdate && (
+          <DeleteButton
+            variant="contained"
+            color="primary"
+            size="small"
+            disabled={selectedRecords.length === 0}
+            onClick={() => {
+              setShowDeleteConfirmBox(true);
+            }}
+            mode="light"
+            text="Delete"
+          />
+        )}
+      </>
+    );
+  };
+
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setOpenAssignWarehouse(true);
+          }}
+        >
+          {`Assign ${routes.warehouse.title}`}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <>
-      {permissions[reference]?.isUpdate ? (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" pt={1} alignItems="center">
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              onClick={() => {
-                setOpenAssignWarehouse(true);
-              }}
-            >
-              {`Assign ${routes.warehouse.title}`}
-            </Button>
-          </Box>
-          <Box display="flex" pt={1} justifyContent="flex-end">
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              disabled={selectedRecords.length === 0}
-              onClick={() => {
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              Delete
-            </Button>
-            <Box mx={1} />
-          </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={permissions[reference]?.isUpdate}
+        isActionButtonVisible={false}
+        addButtonMenuItems={addButtonMenuItems()}
+        rightSideContents={rightSideContents()}
+        hasXpadding={false}
+      />
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchData}
+          showOnlyShowFilteredRecordSwitch={false}
+        />
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      ) : null}
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
-        {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={false}
-          />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </Grid>
+      )}
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={true}

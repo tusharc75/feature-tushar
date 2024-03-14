@@ -13,6 +13,7 @@ import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { isArray, isObject } from 'lodash';
 import InfoIcon from '@material-ui/icons/Info';
+import { getGridMetaDataFromLocalStorage } from '../utils';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -76,23 +77,46 @@ export const getStaticFields = () => {
         ) : (
           <NoDataCell />
         )
+    },
+  ];
+};
+
+export const getCompletedByField = () => {
+  return [
+    {
+      id: 'completedBy',
+      accessorKey: 'completedBy',
+      accessor: 'completedBy',
+      size: 200,
+      header: 'Completed By',
+      Header: 'CompletedBy',
+      show: true,
+      minSize: 185,
+      disableFilters: true,
+      cell: ({ row }) =>
+        row?.original?.completedBy ? (
+          <h5 className="createBy" title={`${row?.original?.completedBy} • ${moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}`}>
+            {row?.original?.completedBy}
+            <span className="createdAtTime badge-date">{moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}</span>
+          </h5>
+        ) : (
+          <NoDataCell />
+        )
     }
   ];
 };
 
 export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
-  let data = localStorage.getItem('gridMetaData');
-  let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-  if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+  let gridMetaData = getGridMetaDataFromLocalStorage();
+  if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
     return gridMetaData[renderedFrom]?.hide?.indexOf(fieldName) >= 0 ? false : true;
   }
   return true;
 };
 
 export const checkStaticField = (renderedFrom, fieldData) => {
-  let data = localStorage.getItem('gridMetaData');
-  let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-  if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+  let gridMetaData = getGridMetaDataFromLocalStorage();
+  if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
     return {
       ...fieldData,
       show: gridMetaData[renderedFrom]?.hide?.indexOf(fieldData?.field) >= 0 ? false : true
@@ -134,11 +158,7 @@ export default function useColumns() {
     if (!currency) {
       currency = user?.user?.brandCurrency || 'USD';
     }
-    let data = localStorage.getItem('gridMetaData');
-    let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-    if (!gridMetaData) {
-      gridMetaData = {};
-    }
+    let gridMetaData = getGridMetaDataFromLocalStorage();
     let updatedTitle = camelCase(renderedFrom);
     const column = [];
 
@@ -153,7 +173,10 @@ export default function useColumns() {
         width: 200,
         type: field?.type,
         Header: headerName[field?.fieldName] ?? field?.fieldLabel,
-        show: gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
+        show:
+          gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide.indexOf(field?.fieldName) >= 0
+            ? false
+            : true,
         primaryField: field?.primaryField ?? false,
         decimalPlaces: field?.decimalPlaces || 0
       };
@@ -223,7 +246,7 @@ export default function useColumns() {
                 let rows = info.table.getExpandedRowModel().rows;
                 const total = rows
                   ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(fieldName) && !isNaN(f.original[fieldName]))
-                  .reduce((sum, row) => row.original[fieldName] + sum, 0);
+                  .reduce((sum, row) => Number(row.original[fieldName]) + sum, 0);
                 return (
                   <>
                     {field?.isHideColumnSum
@@ -314,7 +337,7 @@ export default function useColumns() {
           disableSortBy: true,
           cell: ({ row }) => (
             <div>
-              <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]}>
+              <Avatar className="grid-avatar ml-auto min-[769px]:mx-auto" src={row?.original?.[field?.fieldName]}>
                 <Image style={{ fontSize: 18 }} />
               </Avatar>
             </div>
@@ -404,7 +427,7 @@ export default function useColumns() {
             let rows = info.table.getExpandedRowModel().rows;
             const total = rows
               ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))
-              .reduce((sum, row) => row.original[commonFieldData.accessor] + sum, 0);
+              .reduce((sum, row) => Number(row.original[commonFieldData.accessor]) + sum, 0);
             return <>{field?.isHideColumnSum ? '' : total}</>;
           }
         });

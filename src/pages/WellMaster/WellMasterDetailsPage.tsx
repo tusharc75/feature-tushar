@@ -1,21 +1,21 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Tabs, Tab } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ManageWellMaster from './ManageWellMaster';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import { ACTIVITY_RESOURCE, wellMaster } from 'src/constants/helpers';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import WellNumber from './WellNumber';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { ACTIVITY_RESOURCE, wellMaster } from 'src/constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import ManageWellMaster from './ManageWellMaster';
+import WellNumber from './WellNumber';
 
 const WellMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -72,7 +72,7 @@ const WellMasterDetailsPage = () => {
       .put(`${wellMaster.api}/remove`, { ids: [id] })
       .then(({ data }) => {
         setShowConfirmBox(false);
-        history.push(`${routes.wellMaster.path}`)
+        history.push(`${routes.wellMaster.path}`);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -102,15 +102,11 @@ const WellMasterDetailsPage = () => {
                   }
                 }}
               >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
             {permissions?.wellMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton 
-              referenceId={wellMasterData?._id} 
-              resource={ACTIVITY_RESOURCE.wellMaster} 
-              resourceLabel={wellMasterData?.wellName}
-              />
+            <ActivityButton referenceId={wellMasterData?._id} resource={ACTIVITY_RESOURCE.wellMaster} resourceLabel={wellMasterData?.wellName} />
           </Box>
         </Box>
       </Box>

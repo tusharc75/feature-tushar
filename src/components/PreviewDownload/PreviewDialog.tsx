@@ -17,7 +17,6 @@ export const PreviewDialog = ({
   handleClose,
   handleView,
   loadingType,
-  loading,
   hideDetailButton,
   allColumn,
   resource,
@@ -171,7 +170,7 @@ export const PreviewDialog = ({
               className="no-shadow"
               color="primary"
               size="small"
-              loading={loadingType === 'Regular' || loading}
+              loading={loadingType === 'Regular'}
               disabled={loadingType || visibleColumnsPdf?.length === 0}
               onClick={(e) => {
                 handleView('Regular', visibleColumnsPdf, visibleColumnsExcel);
@@ -185,7 +184,7 @@ export const PreviewDialog = ({
                 className="no-shadow"
                 color="primary"
                 size="small"
-                loading={loadingType === 'Regular' || loading}
+                loading={loadingType === 'Regular'}
                 disabled={loadingType || visibleColumnsPdf?.length === 0}
                 onClick={(e) => {
                   handleView('Regular', visibleColumnsPdf, visibleColumnsExcel);
@@ -199,7 +198,7 @@ export const PreviewDialog = ({
                   color="primary"
                   className="no-shadow"
                   size="small"
-                  loading={loadingType === 'Detail' || loading}
+                  loading={loadingType === 'Detail'}
                   disabled={loadingType || visibleColumnsPdf?.length === 0}
                   onClick={(e) => {
                     handleView('Detail', visibleColumnsPdf, visibleColumnsExcel);

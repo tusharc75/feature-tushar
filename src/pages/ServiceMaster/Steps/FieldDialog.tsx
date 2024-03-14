@@ -6,12 +6,15 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import axiosInstance from 'src/axios/axiosInstance';
 import { fieldLabelToFieldName, serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { camelCase } from 'lodash';
 import { FormBuilder } from '../../../components/FormBuilder';
 import { uniq, map } from 'lodash';
 import { CustomDialogTransition } from '../../../constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, reference = '', fields = null, notEditable = false }) => {
+
+  const { state: { user } }: any = useData();
+
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
 
@@ -180,6 +183,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
           extraFields={[]}
           module="form-builder"
           resource={null}
+          brandId={user.user.brand}
         />
       </CustomDialogContent>
       <CustomDialogFooter>

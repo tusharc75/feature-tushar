@@ -1,17 +1,17 @@
 import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { cloneDeep } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { SVG } from '../../assets';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
 import ProcessFlow from '../../components/ProcessFlow';
@@ -597,7 +597,7 @@ function OpportunityDetailsPage() {
                       onClick={handleOpenUpdateDialog}
                       className={'btn-outline-v1'}
                     >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
                     </Button>
                   ) : null}
                   {opportunityPermissions.isDelete &&

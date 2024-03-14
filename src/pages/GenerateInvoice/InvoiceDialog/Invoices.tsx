@@ -14,7 +14,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
-import CustomReactTable, { checkStaticField, getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
 const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
@@ -47,17 +47,18 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
       if (o.accessor === 'invoiceNumber') {
         o.show = true;
         o.disabled = true;
-        o.index = 0;
         o.cell = ({ row }) => (
+          <div>
+            <span
+              className="link"
+              onClick={() => {
+                setViewInvoiceDialog({ open: true, invoice: row.original?._id });
+              }}
+            >
+              <CustomRenderCell value={row.original?.invoiceNumber} />
 
-          <span
-            className="link"
-            onClick={() => {
-              setViewInvoiceDialog({ open: true, invoice: row.original?._id });
-            }}
-          >
-            <CustomRenderCell value={row.original?.invoiceNumber} />
 
+            </span>
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -68,16 +69,11 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
             </Box>
-          </span>
-
+          </div>
         );
       }
     });
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      newColumns.push(checkStaticField(routes.projectSales.title, field));
-    });
-    setColumns([...newColumns, ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

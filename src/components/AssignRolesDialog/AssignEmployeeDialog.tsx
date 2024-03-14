@@ -1,23 +1,16 @@
-import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
+import { Box, Dialog, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import {
-  employeeMaster,
-  gridLoadingTimeout,
-  isObjectEmpty,
-  prepareDataForGrid,
-  sidebarResource
-} from 'src/constants/helpers';
-import styles from 'src/pages/Leads/Header.module.scss';
+import { employeeMaster, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
-import SearchBox from '../Helpers/SearchBox';
+import { ListingPageHeader } from '../PageHeaders';
 
 let searchTimeout;
 
@@ -177,6 +170,29 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
     setDisableSaveButton(selectedRecords?.some((d) => d.qty === 0));
   };
 
+  const leftSideContents = () => {
+    return (
+      <>
+        <Autocomplete
+          fullWidth
+          className="max-w-[300px]"
+          options={competencyOptions}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+          onChange={(e, val) => {
+            setSelectedCompetency(val);
+          }}
+          multiple
+          size={'small'}
+          value={selectedCompetency}
+          filterSelectedOptions={true}
+          renderInput={(params) => (
+            <TextField {...params} margin="none" size={'small'} name="competencyType" label="Competency Type" variant="outlined" fullWidth />
+          )}
+        />
+      </>
+    );
+  };
+
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader
@@ -188,41 +204,22 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
       <CustomDialogContent>
         {competencyOptions && columns ? (
           <>
-            <div className="header-panel">
-              <Grid container className={styles.filter_side_container}>
-                <Grid item xs={12} md={6} className="d-flex align-items-center gap-1">
-                  <Autocomplete
-                    fullWidth
-                    options={competencyOptions}
-                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                    onChange={(e, val) => {
-                      setSelectedCompetency(val);
-                    }}
-                    multiple
-                    value={selectedCompetency}
-                    filterSelectedOptions={true}
-                    renderInput={(params) => (
-                      <TextField {...params} margin="dense" name="competencyType" label="Competency Type" variant="outlined" fullWidth />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6} className={styles.filter_side}>
-                  <Box className={styles.filter_side_header} component="div">
-                    <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
-                    <Button
-                      disabled={isAssigning || disableSaveButton || selectedRecords?.length === 0}
-                      onClick={handleSubmit}
-                      color="primary"
-                      size="small"
-                      variant="contained"
-                      endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
-                    >
-                      Add {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
-                    </Button>
-                  </Box>
-                </Grid>
-              </Grid>
-            </div>
+            <ListingPageHeader
+              searchValue={search}
+              onSearch={handleSearch}
+              isActionButtonVisible={false}
+              leftSideContents={leftSideContents()}
+              addButtonProps={{
+                iconsEnabled: false,
+                disabled: isAssigning || disableSaveButton || selectedRecords?.length === 0,
+                loading: isAssigning,
+                text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+              }}
+              addButtonOnclick={handleSubmit}
+              isAddButtonVisible
+              setQueryString={false}
+              synchronizeType={false}
+            />
 
             <CustomReactTable
               height={'calc(100vh - 200px)'}

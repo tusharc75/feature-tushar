@@ -370,7 +370,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
         >
           <div className="line-clamp-1">
             <span className={`overflow-hidden overflow-ellipsis whitespace-normal `}>
-              {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+              {header?.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
             </span>
           </div>
           {column.getCanSort() && columnDef.disableSortBy !== true ? (

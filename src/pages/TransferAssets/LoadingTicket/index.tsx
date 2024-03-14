@@ -1,37 +1,36 @@
-import { useState, Fragment, useContext, useEffect, FC } from 'react';
-import { Button, Box, MenuItem, Menu, IconButton } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import {
-  deliveryTicket,
-  sidebarResource,
-  DELIVERY_TICKET_STATUS,
-  DELIVERY_TICKET_TYPE,
-  DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_FROM_TO_TYPE,
-  serializedAsset,
-  prepareDataForGrid,
-  ASSET_STATUS,
-  TRANSFER_ASSET_STATUS,
-  COLOUR_MASTER,
-  dateTimeFormat
-} from 'src/constants/helpers';
-import { isMobile } from 'react-device-detect';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { uniq, map, groupBy } from 'lodash';
-import { ExpandMore } from '@material-ui/icons';
-import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
-import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import PreviewDownload from 'src/components/PreviewDownload';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { groupBy, map, uniq } from 'lodash';
 import moment from 'moment';
+import { FC, Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import {
+  ASSET_STATUS,
+  COLOUR_MASTER,
+  DELIVERY_FROM_TO_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_STATUS,
+  DELIVERY_TICKET_TYPE,
+  TRANSFER_ASSET_STATUS,
+  dateTimeFormat,
+  deliveryTicket,
+  prepareDataForGrid,
+  serializedAsset,
+  sidebarResource
+} from 'src/constants/helpers';
+import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
+import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
+import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 
 interface LoadingGridProps {
   permissions: any;
@@ -75,7 +74,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
@@ -363,14 +361,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     }
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
   const handleOpenReplaceAssetReason = (rows) => {
     const data: any = {};
     data.referenceType = 'transferAsset';
@@ -407,154 +397,130 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       });
   };
 
+  const previewDownloadProps = {
+    fileName: `${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`,
+    resource: sidebarResource.transferAsset,
+    referenceId: transferAssetId,
+    columns: columns?.filter((e) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor)),
+    hideDetailButton: true
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={
+            selectedRecords.length === 0 ||
+            selectedRecords.filter((asset) => asset?.hasOwnProperty('loadingTicket')).length > 0 ||
+            selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0
+          }
+          onClick={() => {
+            const data: any = {};
+            data['referenceId'] = transferAssetData._id;
+            data['ticketName'] = transferAssetData.transferAssetNumber;
+            data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
+            data['pickupFrom'] = transferAssetData?.transferFromPlant?.optionValue;
+            data['pickupFromAddress'] = transferAssetData?.transferFromPlant?.address;
+            if (transferAssetData?.transferType === 'Internal') {
+              data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
+              data['deliveryTo'] = transferAssetData?.transfertoPlant?.optionValue;
+              data['deliveryToLabel'] = transferAssetData?.transfertoPlant?.optionLabel;
+              data['deliveryToAddress'] = transferAssetData?.plantShipTo?.optionValue;
+              data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+            } else if (transferAssetData?.transferType === 'External Customer') {
+              data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
+              data['deliveryTo'] = transferAssetData?.transfertoCustomer?.optionValue;
+              data['deliveryToAddress'] = transferAssetData?.customerShipTo?.optionValue;
+            } else if (transferAssetData?.transferType === 'External Supplier') {
+              data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.supplier;
+              data['deliveryTo'] = transferAssetData?.transfertoSupplier?.optionValue;
+              data['deliveryToAddress'] = transferAssetData?.supplierShipTo?.optionValue;
+            }
+            data['wellName'] = transferAssetData?.wellName?.optionValue;
+            if (transferAssetData?.wellNumber) {
+              if (transferAssetData?.wellNumber?.optionValue) {
+                data['wellNumber'] = transferAssetData?.wellNumber?.optionValue;
+              } else {
+                data['wellNumber'] = transferAssetData?.wellNumber?.map((e) => e?.optionValue);
+              }
+            }
+            data['afeNumber'] = transferAssetData?.afeNumber;
+            if (transferAssetData?.processor?.optionValue) {
+              data['processor'] = transferAssetData?.processor?.optionValue;
+            }
+            data['isPickupFromDisable'] = true;
+            data['isDeliveryToDisable'] = true;
+            setShowTicketDialog({ open: true, data: data });
+          }}
+        >
+          Create Loading Ticket
+        </MenuItem>
+        <MenuItem
+          disabled={
+            !canReceive ||
+            selectedRecords.length === 0 ||
+            selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+          }
+          onClick={() => {
+            setShowConfirmBoxReceive(true);
+          }}
+        >
+          Receive Assets
+        </MenuItem>
+
+        <MenuItem
+          disabled={
+            selectedRecords.length === 0 ||
+            selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+          }
+          onClick={() => {
+            const products = [];
+            selectedRecords?.forEach((element) => {
+              const foundProduct = products.filter((e) => e._id === element?.productId);
+              if (foundProduct.length) {
+                foundProduct[0].qty += 1;
+              } else {
+                products.push({
+                  _id: element?.productId,
+                  id: element?.productId,
+                  productName: element?.product,
+                  qty: 1
+                });
+              }
+            });
+            setAddSerializedAssetDialog({ open: true, products: products });
+          }}
+        >
+          Replace Assets
+        </MenuItem>
+
+        {permissions?.transferAsset?.isUpdate &&
+          selectedRecords.length &&
+          selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+          selectedRecords?.length ? (
+          <MenuItem
+            onClick={() => {
+              setShowConfirmBox(true);
+            }}
+          >
+            Receive Assets
+          </MenuItem>
+        ) : null}
+      </>
+    );
+  };
+
   return (
     <Fragment>
-      <Box display="flex" flexDirection={'row'} justifyContent={'flex-end'} mx={1} my={1}>
-        <PreviewDownload
-          fileName={`${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`}
-          resource={sidebarResource.transferAsset}
-          referenceId={transferAssetId}
-          columns={columns?.filter((e) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor))}
-          hideDetailButton={true}
-        />
-        {allowedToEdit && !isTransferEnded && (
-          <Box pl={1}>
-            {permissions?.transferAsset?.isUpdate && (
-              <Fragment>
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length === 0}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorActionEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorActionEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={
-                      selectedRecords.length === 0 ||
-                      selectedRecords.filter((asset) => asset?.hasOwnProperty('loadingTicket')).length > 0 ||
-                      selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0
-                    }
-                    onClick={() => {
-                      const data: any = {};
-                      data['referenceId'] = transferAssetData._id;
-                      data['ticketName'] = transferAssetData.transferAssetNumber;
-                      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-                      data['pickupFrom'] = transferAssetData?.transferFromPlant?.optionValue;
-                      data['pickupFromAddress'] = transferAssetData?.transferFromPlant?.address;
-                      if (transferAssetData?.transferType === 'Internal') {
-                        data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-                        data['deliveryTo'] = transferAssetData?.transfertoPlant?.optionValue;
-                        data['deliveryToLabel'] = transferAssetData?.transfertoPlant?.optionLabel;
-                        data['deliveryToAddress'] = transferAssetData?.plantShipTo?.optionValue;
-                        data['status'] = DELIVERY_TICKET_STATUS.indTransit;
-                      } else if (transferAssetData?.transferType === 'External Customer') {
-                        data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
-                        data['deliveryTo'] = transferAssetData?.transfertoCustomer?.optionValue;
-                        data['deliveryToAddress'] = transferAssetData?.customerShipTo?.optionValue;
-                      } else if (transferAssetData?.transferType === 'External Supplier') {
-                        data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.supplier;
-                        data['deliveryTo'] = transferAssetData?.transfertoSupplier?.optionValue;
-                        data['deliveryToAddress'] = transferAssetData?.supplierShipTo?.optionValue;
-                      }
-                      data['wellName'] = transferAssetData?.wellName?.optionValue;
-                      if (transferAssetData?.wellNumber) {
-                        if (transferAssetData?.wellNumber?.optionValue) {
-                          data['wellNumber'] = transferAssetData?.wellNumber?.optionValue;
-                        } else {
-                          data['wellNumber'] = transferAssetData?.wellNumber?.map((e) => e?.optionValue);
-                        }
-                      }
-                      data['afeNumber'] = transferAssetData?.afeNumber;
-                      if (transferAssetData?.processor?.optionValue) {
-                        data['processor'] = transferAssetData?.processor?.optionValue;
-                      }
-                      data['isPickupFromDisable'] = true;
-                      data['isDeliveryToDisable'] = true;
-                      setShowTicketDialog({ open: true, data: data });
-                      closeActions();
-                    }}
-                  >
-                    Create Loading Ticket
-                  </MenuItem>
-                  <MenuItem
-                    disabled={
-                      !canReceive ||
-                      selectedRecords.length === 0 ||
-                      selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                      selectedRecords.length
-                    }
-                    onClick={() => {
-                      setShowConfirmBoxReceive(true);
-                      closeActions();
-                    }}
-                  >
-                    Receive Assets
-                  </MenuItem>
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={allowedToEdit && !isTransferEnded}
+        actionButtonMenuItems={<ActionMenuItems />}
+        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+        previewDownloadProps={previewDownloadProps}
+        hasXpadding
+      />
 
-                  <MenuItem
-                    disabled={
-                      selectedRecords.length === 0 ||
-                      selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                      selectedRecords.length
-                    }
-                    onClick={() => {
-                      const products = [];
-                      selectedRecords?.forEach((element) => {
-                        const foundProduct = products.filter((e) => e._id === element?.productId);
-                        if (foundProduct.length) {
-                          foundProduct[0].qty += 1;
-                        } else {
-                          products.push({
-                            _id: element?.productId,
-                            id: element?.productId,
-                            productName: element?.product,
-                            qty: 1
-                          });
-                        }
-                      });
-                      setAddSerializedAssetDialog({ open: true, products: products });
-                      closeActions();
-                    }}
-                  >
-                    Replace Assets
-                  </MenuItem>
-
-                  {permissions?.transferAsset?.isUpdate &&
-                    selectedRecords.length &&
-                    selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                      ?.length === selectedRecords?.length ? (
-                    <MenuItem
-                      onClick={() => {
-                        setShowConfirmBox(true);
-                        closeActions();
-                      }}
-                    >
-                      Receive Assets
-                    </MenuItem>
-                  ) : null}
-                </Menu>
-              </Fragment>
-            )}
-          </Box>
-        )}
-      </Box>
       <Box mt={1}>
         {columns ? (
           <Box zIndex={5} width={'100%'}>
@@ -617,7 +583,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false, products: [] });
           }}
-          referenceType={'ReplaceAsset'}
+          referenceType={'Transfer Asset'}
+          replaceAssets={true}
           referenceData={{
             _id: transferAssetData?._id,
             warehouse: transferAssetData?.transferFromPlant.optionValue
@@ -625,6 +592,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           isAdding={replaceLoading}
           selectedProducts={addSerializedAssetDialog.products}
           filterByPlant={transferAssetData?.transferFromPlant}
+
         />
       )}
       {showReplaceReason.open && (

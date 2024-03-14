@@ -1,20 +1,27 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
-import Grid from '@material-ui/core/Grid';
+import { Box } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import Dialog from '@material-ui/core/Dialog';
-import axiosInstance from '../../axios/axiosInstance';
-import { dateTimeFormat, getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, product, removeLocalStorage, sidebarResource } from '../../constants/helpers';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import Grid from '@material-ui/core/Grid';
 import { sortBy } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { CustomDialogTransition } from '../../constants/helpers';
-import { Box, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { prepareDataForGrid } from '../../constants/helpers';
+import {
+  CustomDialogTransition,
+  dateTimeFormat,
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource
+} from '../../constants/helpers';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 
-import DeleteButton from '../Helpers/DeleteButton';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+
 import moment from 'moment';
 import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTable';
 
@@ -59,7 +66,7 @@ const SupplierAskPrice = (props) => {
           const filteredFields = ele?.fields?.filter((e) => !requiredFields.includes(e.fieldName));
           const newColumns = generateColumns(renderedFrom, filteredFields);
           columns = [...columns, ...newColumns];
-        })
+        });
         columns = sortBy(
           [
             ...columns,
@@ -73,7 +80,6 @@ const SupplierAskPrice = (props) => {
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <p>{row.original.supplierContact}</p>
                 </div>
-
               ),
               leval: 'product',
               order: 3
@@ -98,15 +104,14 @@ const SupplierAskPrice = (props) => {
               width: 180,
               show: true,
               disabled: false,
-              Cell: ({ row }) => (
+              Cell: ({ row }) =>
                 row?.original?.responseDate ? (
                   <h5 className="createBy" title={`${moment(row?.original?.responseDate)?.format(dateTimeFormat)}`}>
                     {moment(row?.original?.responseDate)?.format(dateTimeFormat)}
                   </h5>
                 ) : (
                   <NoDataCell />
-                )
-              ),
+                ),
               leval: 'product',
               order: 3
             }
@@ -127,7 +132,6 @@ const SupplierAskPrice = (props) => {
         dispatch({ type: 'loading', loading: false });
       });
   };
-
 
   const handleAdd = () => {
     let tempData = {
@@ -206,7 +210,7 @@ const SupplierAskPrice = (props) => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
+            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}

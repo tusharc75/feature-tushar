@@ -1,15 +1,12 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import { Box, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Grid, Typography, Box, Paper, Tooltip } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import CopyToClipboard from '../components/Helpers/CopyToClipboard';
-import { FcApproval } from 'react-icons/fc';
-import routes from './Helpers/Routes';
-import { Link } from 'react-router-dom';
-import { FiCheckCircle } from 'react-icons/fi';
-import { AiOutlineCloseCircle } from 'react-icons/ai';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { Link } from 'react-router-dom';
+import CopyToClipboard from '../components/Helpers/CopyToClipboard';
+import routes from './Helpers/Routes';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -146,7 +143,7 @@ DetailsPageHeader.propTypes = {
   children: PropTypes.any,
   loading: PropTypes.any,
   logo: PropTypes.any,
-  mainPoints: PropTypes.any,
+  mainPoints: PropTypes.any
 };
 
 export default DetailsPageHeader;

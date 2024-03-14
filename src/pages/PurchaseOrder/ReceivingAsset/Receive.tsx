@@ -588,6 +588,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
             handleReceive(material, assetNumberDialog.receiveDate)
           }}
           loading={isSubmitting}
+          resource={sidebarResource.purchaseOrder}
         />
       )}
     </>

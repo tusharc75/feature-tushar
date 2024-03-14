@@ -1,26 +1,25 @@
-import React, { useState, Fragment, useContext, useEffect, FC } from 'react';
-import { Button, Box } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
+import { groupBy } from 'lodash';
+import { FC, Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
-  deliveryTicket,
-  sidebarResource,
+  DELIVERY_FROM_TO_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
-  DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_FROM_TO_TYPE,
+  deliveryTicket,
+  prepareDataForGrid,
   serializedAsset,
-  prepareDataForGrid
+  sidebarResource
 } from 'src/constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { groupBy } from 'lodash';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import PreviewDownload from 'src/components/PreviewDownload';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 interface ReceivingGridProps {
   fetchAssets: any;
   permissions: any;
@@ -65,7 +64,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
 
-
   const fetchFields = () => {
     setColumns(null);
     axiosInstance()
@@ -73,7 +71,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(
           renderedFrom,
-          data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
+          data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))
         );
 
         const column = [
@@ -258,88 +256,104 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       });
   };
 
+  const createReceivingTicket = () => {
+    const data: any = {};
+    data['referenceId'] = transferAssetData._id;
+    data['ticketName'] = transferAssetData.transferAssetNumber;
+
+    if (transferAssetData?.transferType === 'Internal') {
+      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
+      data['pickupFrom'] = transferAssetData?.transfertoPlant?.optionValue;
+      data['pickupFromAddress'] = transferAssetData?.plantShipTo?.optionValue;
+    } else if (transferAssetData?.transferType === 'External Customer') {
+      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
+      data['pickupFrom'] = transferAssetData?.transfertoCustomer?.optionValue;
+      data['pickupFromAddress'] = transferAssetData?.customerShipTo?.optionValue;
+    } else if (transferAssetData?.transferType === 'External Supplier') {
+      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.supplier;
+      data['pickupFrom'] = transferAssetData?.transfertoSupplier?.optionValue;
+      data['pickupFromAddress'] = transferAssetData?.supplierShipTo?.optionValue;
+    }
+
+    data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
+    data['deliveryTo'] = transferAssetData?.transferFromPlant?.optionValue;
+    data['deliveryToAddress'] = transferAssetData?.transferFromPlant?.address;
+
+    data['wellName'] = transferAssetData?.wellName?.optionValue;
+
+    if (transferAssetData?.wellNumber) {
+      if (transferAssetData?.wellNumber?.optionValue) {
+        data['wellNumber'] = transferAssetData?.wellNumber?.optionValue;
+      } else {
+        data['wellNumber'] = transferAssetData?.wellNumber?.map((e) => e?.optionValue);
+      }
+    }
+
+    data['afeNumber'] = transferAssetData?.afeNumber;
+    if (transferAssetData?.processor?.optionValue) {
+      data['processor'] = transferAssetData?.processor?.optionValue;
+    }
+    data['isPickupFromDisable'] = true;
+    data['isDeliveryToDisable'] = false;
+    setShowTicketDialog({ open: true, data: data });
+  };
+
+  const previewDownloadProps = {
+    fileName: `${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`,
+    resource: sidebarResource.transferAsset,
+    referenceId: transferAssetId,
+    columns: columns?.filter((e) => ['assetNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor)),
+    hideDetailButton: true
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        {!isTransferEnded && (
+          <>
+            {permissions?.transferAsset?.isUpdate && (
+              <Button
+                variant="contained"
+                size="small"
+                color="primary"
+                disabled={
+                  selectedRecords.length === 0 ||
+                  assetWithNoTicket.length === 0 ||
+                  loadingTicketsNotDelivered.length > 0 ||
+                  selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0 ||
+                  selectedRecords.filter((asset: any) => asset.hasOwnProperty('receivingTicket')).length > 0
+                }
+                onClick={createReceivingTicket}
+              >
+                Create Receiving Ticket
+              </Button>
+            )}
+            {permissions?.transferAsset?.isUpdate &&
+            selectedRecords.length &&
+            selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicket') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+              selectedRecords?.length ? (
+              <Button variant="contained" size="small" color="primary" onClick={() => setShowConfirmBox(true)}>
+                Remove Receiving Ticket
+              </Button>
+            ) : null}
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" flexDirection={isMobile && !isTablet ? 'column' : 'row'} justifyContent="space-between" mx={1} my={1}>
-          <PreviewDownload
-            fileName={`${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`}
-            resource={sidebarResource.transferAsset}
-            referenceId={transferAssetId}
-            columns={columns?.filter((e) => ['assetNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor))}
-            hideDetailButton={true}
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={false}
+            isActionButtonVisible={false}
+            previewDownloadProps={previewDownloadProps}
+            rightSideContents={rightSideContents()}
+            hasXpadding
           />
-          {!isTransferEnded && (
-            <Box marginTop={isMobile && !isTablet ? 2 : 0}>
-              {permissions?.transferAsset?.isUpdate && (
-                <Button
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                  disabled={
-                    selectedRecords.length === 0 ||
-                    assetWithNoTicket.length === 0 ||
-                    loadingTicketsNotDelivered.length > 0 ||
-                    selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0 ||
-                    selectedRecords.filter((asset: any) => asset.hasOwnProperty('receivingTicket')).length > 0
-                  }
-                  onClick={() => {
-                    const data: any = {};
-                    data['referenceId'] = transferAssetData._id;
-                    data['ticketName'] = transferAssetData.transferAssetNumber;
-
-                    if (transferAssetData?.transferType === 'Internal') {
-                      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-                      data['pickupFrom'] = transferAssetData?.transfertoPlant?.optionValue;
-                      data['pickupFromAddress'] = transferAssetData?.plantShipTo?.optionValue;
-                    } else if (transferAssetData?.transferType === 'External Customer') {
-                      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
-                      data['pickupFrom'] = transferAssetData?.transfertoCustomer?.optionValue;
-                      data['pickupFromAddress'] = transferAssetData?.customerShipTo?.optionValue;
-                    } else if (transferAssetData?.transferType === 'External Supplier') {
-                      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.supplier;
-                      data['pickupFrom'] = transferAssetData?.transfertoSupplier?.optionValue;
-                      data['pickupFromAddress'] = transferAssetData?.supplierShipTo?.optionValue;
-                    }
-
-                    data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-                    data['deliveryTo'] = transferAssetData?.transferFromPlant?.optionValue;
-                    data['deliveryToAddress'] = transferAssetData?.transferFromPlant?.address;
-
-                    data['wellName'] = transferAssetData?.wellName?.optionValue;
-
-                    if (transferAssetData?.wellNumber) {
-                      if (transferAssetData?.wellNumber?.optionValue) {
-                        data['wellNumber'] = transferAssetData?.wellNumber?.optionValue;
-                      } else {
-                        data['wellNumber'] = transferAssetData?.wellNumber?.map((e) => e?.optionValue);
-                      }
-                    }
-
-                    data['afeNumber'] = transferAssetData?.afeNumber;
-                    if (transferAssetData?.processor?.optionValue) {
-                      data['processor'] = transferAssetData?.processor?.optionValue;
-                    }
-                    data['isPickupFromDisable'] = true;
-                    data['isDeliveryToDisable'] = false;
-                    setShowTicketDialog({ open: true, data: data });
-                  }}
-                >
-                  Create Receiving Ticket
-                </Button>
-              )}
-              <Box component="span" mx={1} />
-              {permissions?.transferAsset?.isUpdate &&
-                selectedRecords.length &&
-                selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicket') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                  ?.length === selectedRecords?.length ? (
-                <Button variant="contained" size="small" color="primary" onClick={() => setShowConfirmBox(true)}>
-                  Remove Receiving Ticket
-                </Button>
-              ) : null}
-            </Box>
-          )}
-        </Box>
+        </>
       )}
       <Box mt={1}>
         {columns ? (

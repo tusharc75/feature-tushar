@@ -251,6 +251,11 @@ import TriggerNotificationMaster from './pages/TriggerNotificationMaster';
 import TriggerNotificationMasterDetail from './pages/TriggerNotificationMaster/TriggerNotificationMasterDetail';
 import TriggerNotificationHistory from './pages/TriggerNotificationHistory';
 import UserAttendance from './pages/UserAttendance';
+import DataList from './pages/DataList';
+import DataListDetail from './pages/DataList/dataListdetail';
+import Deals from './pages/Deals';
+import DealDetail from './pages/Deals/dealDetail';
+
 
 var notificationInterval: any = null;
 
@@ -1093,6 +1098,12 @@ function App() {
             <PrivateRoute exact path={routes.subleaseInvoice.path}>
               <GenerateInvoice resourceRendered="sublease" />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.dataList.path}>
+              <DataList/>
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.dataList.path}/:id`}>
+              <DataListDetail/>
+            </PrivateRoute>
             <PrivateRoute exact path={routes.userDownloadRequest.path}>
               <UserDownloadRequest />
             </PrivateRoute>
@@ -1108,8 +1119,14 @@ function App() {
             <PrivateRoute exact path={`${routes.triggerNotificationHistory.path}`}>
               <TriggerNotificationHistory />
             </PrivateRoute>
-            <PrivateRoute exact  path={routes.userAttendance.path}>
+            <PrivateRoute exact path={routes.userAttendance.path}>
               <UserAttendance />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.deals.path}>
+              <Deals />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.dealDetail.path}/:id`}>
+              <DealDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
@@ -1123,6 +1140,7 @@ function App() {
             <Route path="*" component={NotFound} />
           </Switch>
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
+          <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
         </ErrorBoundaryComponent>
       </AnimatePresence>
       {toast?.toastConfig?.open &&

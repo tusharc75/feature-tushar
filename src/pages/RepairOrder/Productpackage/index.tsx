@@ -1,29 +1,28 @@
-import React from 'react';
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, Menu, MenuItem, Popover, MenuList } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { MATERIAL_TYPE, REPAIR_ORDER_TYPE, repairOrder } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { isMobile, isTablet } from 'react-device-detect';
-import RepairOrderQtyDialog from './RepairOrderQtyDialog';
-import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
-import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
-import { ExpandMore } from '@material-ui/icons';
+import { Box, IconButton, MenuItem, MenuList, Popover } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
-import { capitalize, sortBy, uniqBy } from 'lodash';
+import DeleteIcon from '@material-ui/icons/Delete';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { getNestedSubRows } from 'src/components/RentalManagment/helper';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import { capitalize, sortBy, uniqBy } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
+import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import { MATERIAL_TYPE, REPAIR_ORDER_TYPE, repairOrder } from '../../../constants/helpers';
+import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 
 const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setHasAssetsAdded }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -55,8 +54,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     productCategory: null
   });
   const [columns, setColumns] = useState(null);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [products, setProducts] = useState([]);
 
   const { state, dispatch } = useTableReducer();
@@ -223,7 +220,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
         width: 200,
         Cell: ({ row }) => {
           return row.original['qtyDisplay'] ? <p className="text-truncate">{row.original.qtyDisplay}</p> : <NoDataCell />;
-        },
+        }
       },
       {
         accessor: 'description',
@@ -274,7 +271,8 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       if (element.accessor === 'qty') {
         element['Footer'] = (info) => {
           let rows = info.table.getExpandedRowModel().rows;
-          const qtyTotal = rows?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(element.accessor) && !isNaN(f.original[element.accessor]))
+          const qtyTotal = rows
+            ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(element.accessor) && !isNaN(f.original[element.accessor]))
             .reduce((sum, row) => row.original[element.accessor] + sum, 0);
           return <>{qtyTotal}</>;
         };
@@ -454,22 +452,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     setDeleteData(obj);
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
-  };
-
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
-  };
-
   useEffect(() => {
     var serializedProduct = flattenArray(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.product);
     var serializedAsset = flattenArray(selectedRecords)?.filter((d) => d.type === MATERIAL_TYPE.serializedAsset);
@@ -486,158 +468,123 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     setProducts([...products?.filter((e) => e.qty > 0)]);
   }, [selectedRecords]);
 
-  return (
-    <Fragment>
-      {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" flexWrap={'wrap'} gridGap={1} m={1}>
-          <Box display="flex" flexWrap={'wrap'}>
-            {allowedToEdit && (
-              <Fragment>
-                <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
-                  {'Add'}
-                  <ExpandMore fontSize="small" />
-                </Button>
-                <Menu
-                  anchorEl={addAnchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="add-menu"
-                  open={Boolean(addAnchorEl)}
-                  onClose={closeAddActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      setAddExistingProductDialog({
-                        open: true,
-                        type: 'serializedAsset',
-                        parentId: null,
-                        existing: true,
-                        productId: null,
-                        productCategory: null
-                      });
-                      closeAddActions();
-                    }}
-                  >
-                    {repairOrderData?.type === REPAIR_ORDER_TYPE.external
-                      ? `Add Existing Customer Assets`
-                      : `Add Existing ${routes.serializedAsset.title}`}
-                  </MenuItem>
-                  {permissions?.serializedAsset?.isCreate && (
-                    <MenuItem
-                      onClick={() => {
-                        setAddExistingProductDialog({
-                          open: true,
-                          type: 'serializedAsset',
-                          parentId: null,
-                          existing: false,
-                          productId: null,
-                          productCategory: null
-                        });
-                        closeAddActions();
-                      }}
-                    >
-                      {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add New Customer Assets` : `Add New ${routes.serializedAsset.title}`}
-                    </MenuItem>
-                  )}
-                  {user?.user?.brandPolicy?.repairOrderAddProductPackage && (
-                    <>
-                      {permissions?.product?.isCreate && (
-                        <MenuItem
-                          onClick={() => {
-                            closeAddActions();
-                            setAddExistingProductDialog({
-                              open: true,
-                              type: 'product',
-                              parentId: null,
-                              existing: false,
-                              productId: null,
-                              productCategory: null
-                            });
-                          }}
-                        >
-                          Add New Products
-                        </MenuItem>
-                      )}
-                      {permissions?.packages?.isCreate && (
-                        <MenuItem
-                          onClick={() => {
-                            closeAddActions();
-                            setAddExistingProductDialog({
-                              open: true,
-                              type: 'package',
-                              parentId: null,
-                              existing: false,
-                              productId: null,
-                              productCategory: null
-                            });
-                          }}
-                        >
-                          Add New Packages
-                        </MenuItem>
-                      )}
-                    </>
-                  )}
-                </Menu>
-              </Fragment>
-            )}
-          </Box>
-          <Box display="flex">
-            <Button
-              variant="outlined"
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              disabled={selectedRecords.length === 0}
-              endIcon={<ExpandMore />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorActionEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorActionEl)}
-              onClose={closeActions}
-            >
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setAddExistingProductDialog({
+              open: true,
+              type: 'serializedAsset',
+              parentId: null,
+              existing: true,
+              productId: null,
+              productCategory: null
+            });
+          }}
+        >
+          {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Existing Customer Assets` : `Add Existing ${routes.serializedAsset.title}`}
+        </MenuItem>
+        {permissions?.serializedAsset?.isCreate && (
+          <MenuItem
+            onClick={() => {
+              setAddExistingProductDialog({
+                open: true,
+                type: 'serializedAsset',
+                parentId: null,
+                existing: false,
+                productId: null,
+                productCategory: null
+              });
+            }}
+          >
+            {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add New Customer Assets` : `Add New ${routes.serializedAsset.title}`}
+          </MenuItem>
+        )}
+        {user?.user?.brandPolicy?.repairOrderAddProductPackage && (
+          <>
+            {permissions?.product?.isCreate && (
               <MenuItem
-                disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product)?.length <= 0}
                 onClick={() => {
-                  closeActions();
                   setAddExistingProductDialog({
                     open: true,
-                    type: 'serializedAsset',
+                    type: 'product',
                     parentId: null,
-                    existing: true,
+                    existing: false,
                     productId: null,
                     productCategory: null
                   });
                 }}
               >
-                Assign Assets
+                Add New Products
               </MenuItem>
+            )}
+            {permissions?.packages?.isCreate && (
               <MenuItem
-                disabled={selectedRecords?.filter((e) => e.canDelete)?.length === selectedRecords?.length ? false : true}
                 onClick={() => {
-                  closeActions();
-                  handleDeleteMultiple();
+                  setAddExistingProductDialog({
+                    open: true,
+                    type: 'package',
+                    parentId: null,
+                    existing: false,
+                    productId: null,
+                    productCategory: null
+                  });
                 }}
               >
-                Delete
+                Add New Packages
               </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
+            )}
+          </>
+        )}
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product)?.length > 0 && (
+          <MenuItem
+            onClick={() => {
+              setAddExistingProductDialog({
+                open: true,
+                type: 'serializedAsset',
+                parentId: null,
+                existing: true,
+                productId: null,
+                productCategory: null
+              });
+            }}
+          >
+            Assign Assets
+          </MenuItem>
+        )}
+        <MenuItem
+          disabled={selectedRecords?.filter((e) => e.canDelete)?.length === selectedRecords?.length ? false : true}
+          onClick={() => {
+            handleDeleteMultiple();
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
+  return (
+    <Fragment>
+      {allowedToEdit && !repairOrderData?.otherBrandRepairJob && (
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={allowedToEdit}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            hasXpadding
+          />
+        </>
       )}
       {columns ? (
         <Box zIndex={5} width={'100%'}>
@@ -648,8 +595,8 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
             dispatch={dispatch}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             refreshGrid={fetchData}
-            hideSelection={!allowedToEdit}
-            hideAction={!allowedToEdit}
+            hideSelection={repairOrderData?.otherBrandRepairJob ? true : !allowedToEdit}
+            hideAction={repairOrderData?.otherBrandRepairJob ? true : !allowedToEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             expander={user?.user?.brandPolicy?.repairOrderAddProductPackage ? true : false}

@@ -8,7 +8,6 @@ import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
@@ -22,6 +21,7 @@ import { findAll, findOne, insertUpdate, objectStore } from '../../constants/ind
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageRepairJob from './ManageRepairJob';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let repairJobTimeout;
 
@@ -100,28 +100,6 @@ const RepairJob = () => {
     });
     setColumns([...newColumns, ActionsRenderer]);
   };
-
-  //  Grid Variables - End
-  const [locationKeys, setLocationKeys] = useState([]);
-  useEffect(() => {
-    return history.listen((location) => {
-      const { type }: any = queryString.parse(history.location.search);
-      if (history.action === 'PUSH') {
-        setLocationKeys([location.key]);
-      }
-      if (history.action === 'POP') {
-        if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys);
-          // Handle forward event
-          setSelectedType(type ? parseInt(type) : 1);
-        } else {
-          setLocationKeys((keys) => [location.key, ...keys]);
-          // Handle back event
-          setSelectedType(type ? parseInt(type) : 1);
-        }
-      }
-    });
-  }, [locationKeys]);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -326,9 +304,28 @@ const RepairJob = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const value = types.find((d) => d.key === type).value;
-    setSelectedType(value);
-    history.push(`?type=${value}`);
+  };
+
+  const LeftSideContent = () => {
+    return (
+      <>
+        {accountDetails.accountId ? (
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`Account: ${accountDetails.accountName}`}
+            onDelete={() => {
+              setAccountDetails({
+                accountId: null,
+                accountName: null,
+                resource: null
+              });
+            }}
+          />
+        ) : null}
+        {referenceType ? <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} /> : null}
+      </>
+    );
   };
 
   return (
@@ -353,61 +350,25 @@ const RepairJob = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'d-flex flex-wrap align-items-center gap-1 w-full'}>
-              <ToggleButtonGroup
-                size="small"
-                className="ml-2 align-items-center gap-1 layout-for-mobile "
-                value={types[selectedType - 1].key}
-                exclusive
-                onChange={onTypeChange}
-              >
-                {types.map((k, index) => {
-                  return (
-                    <ToggleButton value={k.key} key={index}>
-                      {k.key}
-                    </ToggleButton>
-                  );
-                })}
-              </ToggleButtonGroup>
-              {accountDetails.accountId && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Account: ${accountDetails.accountName}`}
-                  onDelete={() => {
-                    setAccountDetails({
-                      accountId: null,
-                      accountName: null,
-                      resource: null
-                    });
-                  }}
-                />
-              )}
-              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.repairJob?.isCreate && (
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      setShowManageRepairJobDialog({ open: true, isClone: false, idToClone: null });
-                    }}
-                    className={`no-shadow`}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContents={<LeftSideContent />}
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={false}
+          // actionButtonProps
+          // actionMenuItems
+          // addButtonProps
+          addButtonOnclick={() => {
+            setShowManageRepairJobDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.repairJob?.isCreate}
+        />
+
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

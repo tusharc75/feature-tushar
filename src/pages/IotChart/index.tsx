@@ -11,9 +11,9 @@ import CustomContainer from 'src/components/CustomContainer';
 import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import { serializedAsset } from '../../constants/helpers';
 import cardStyle from '../ReportMaster/index.module.scss';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 function IotChart() {
   const toastConfig = useContext(CustomToastContext);
@@ -103,32 +103,47 @@ function IotChart() {
     }
   ];
 
+  const LeftSideContent = () => {
+    return showAsset ? (
+      <Button
+        size="small"
+        variant="outlined"
+        color="primary"
+        disableElevation
+        onClick={() => {
+          setShowAsset(null);
+          setSearch('');
+        }}
+        startIcon={<MdChevronLeft />}
+      >
+        Go Back
+      </Button>
+    ) : null;
+  };
+
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.iotChart]} />
       </div>
       <CustomContainer>
-        <div className="flex justify-between mb-3">
-          <div>
-            {showAsset && (
-              <Button
-                size="small"
-                variant="outlined"
-                color="primary"
-                disableElevation
-                onClick={() => {
-                  setShowAsset(null);
-                  setSearch('');
-                }}
-                startIcon={<MdChevronLeft />}
-              >
-                Go Back
-              </Button>
-            )}
-          </div>
-          <SearchBox onChange={handleSearch} size="small" value={search} className="flex-grow md:flex-grow-0" />
-        </div>
+        <ListingPageHeader
+          // toggleButtonList
+          // onToggle
+          // selectedType
+          // setSelectedType
+          leftSideContents={<LeftSideContent />}
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={false}
+          // actionButtonProps
+          // actionMenuItems
+          // addButtonProps
+          // addButtonOnclick
+          isAddButtonVisible={false}
+          // setQueryString
+        />
         {!showAsset ? (
           assetLocation ? (
             <Box className={cardStyle.reportGrid}>

@@ -1,23 +1,13 @@
-import { Box, Button, Chip, Menu, MenuItem } from '@material-ui/core';
+import { Box, Chip, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
-import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { Link, useHistory } from 'react-router-dom';
-import CustomReactTable, {
-  checkStaticField,
-  getStaticFields,
-  gridFilterParser,
-  useColumns,
-  useTableReducer
-} from 'src/components/CustomReactTable';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -62,7 +52,6 @@ const QuoteBuilders = () => {
   const { state, dispatch } = useTableReducer();
 
   const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
   const renderedFrom = camelCase(routes?.quoteBuilder.title);
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -396,12 +385,7 @@ const QuoteBuilders = () => {
 
   const handleQuoteBuilderTypeSel = (filterValues) => {
     dispatch({ type: 'pageChange', page: 0 });
-    setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
   };
-  useEffect(() => {
-    setSelectedType(type ? parseInt(type) : 1);
-  }, []);
 
   const onSuccess = () => {
     setshowCreateQuoteDialog(false);
@@ -463,6 +447,87 @@ const QuoteBuilders = () => {
     setAnchorEl(null);
   };
 
+  const LeftSideContents = () => {
+    return (
+      <>
+        {accountDetails.accountId && (
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`Account: ${accountDetails.accountName}`}
+            onDelete={() => {
+              setAccountDetails({
+                accountId: null,
+                accountName: null,
+                resource: null
+              });
+            }}
+          />
+        )}
+        {contactDetails.contactId && (
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`Contact: ${contactDetails.contactName}`}
+            onDelete={() => {
+              setContactDetails({
+                contactId: null,
+                contactName: null,
+                resource: null
+              });
+            }}
+          />
+        )}
+
+        {opportunityDetails.opportunityId && (
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`Opportunity: ${opportunityDetails.opportunityName}`}
+            onDelete={() => {
+              setOpportunityDetails({
+                opportunityId: null,
+                opportunityName: null
+              });
+            }}
+          />
+        )}
+      </>
+    );
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+          onClick={() => {
+            setIsConformDialogVisible(true);
+          }}
+        >
+          {`Delete (${selectedRecords.length})`}
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords.find((d) => d.canDelete === false)}
+          onClick={() => {
+            setShowTransferEntityDialog(true);
+          }}
+        >
+          {`Transfer Entity (${selectedRecords.length})`}
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords.length !== 1}
+          onClick={() => {
+            setIsClone(true);
+            setshowCreateQuoteDialog(true);
+          }}
+        >
+          {`Clone (${selectedRecords.length})`}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
@@ -485,154 +550,30 @@ const QuoteBuilders = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'d-flex flex-wrap align-items-center gap-2'}>
-              <div className={`flex flex-wrap items-center gap-2 `}>
-                {types && (
-                  <ToggleButtonGroup size="small" className="ml-2" value={types[selectedType - 1].key} exclusive onChange={handleFilter}>
-                    {types.map((k, index) => {
-                      return (
-                        <ToggleButton value={k.key} key={index}>
-                          {k.key}
-                        </ToggleButton>
-                      );
-                    })}
-                  </ToggleButtonGroup>
-                )}
-                {accountDetails.accountId && (
-                  <Chip
-                    className="ml-3"
-                    color="primary"
-                    label={`Account: ${accountDetails.accountName}`}
-                    onDelete={() => {
-                      setAccountDetails({
-                        accountId: null,
-                        accountName: null,
-                        resource: null
-                      });
-                    }}
-                  />
-                )}
-                {contactDetails.contactId && (
-                  <Chip
-                    className="ml-3"
-                    color="primary"
-                    label={`Contact: ${contactDetails.contactName}`}
-                    onDelete={() => {
-                      setContactDetails({
-                        contactId: null,
-                        contactName: null,
-                        resource: null
-                      });
-                    }}
-                  />
-                )}
-
-                {opportunityDetails.opportunityId && (
-                  <Chip
-                    className="ml-3"
-                    color="primary"
-                    label={`Opportunity: ${opportunityDetails.opportunityName}`}
-                    onDelete={() => {
-                      setOpportunityDetails({
-                        opportunityId: null,
-                        opportunityName: null
-                      });
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                width="242px"
-                size="small"
-                value={search}
-                style={isMobile ? { flex: 1 } : {}}
-              />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.quoteBuilder?.isCreate && (
-                  <Button
-                    onClick={() => {
-                      setshowCreateQuoteDialog(true);
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={`no-shadow`}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                <HtmlTooltip title={!selectedRecords.length ? 'Please select some quotes' : ''}>
-                  <span>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                  </span>
-                </HtmlTooltip>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                    onClick={() => {
-                      closeActions();
-                      setIsConformDialogVisible(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords.length})`}
-                  </MenuItem>
-                  <MenuItem
-                    disabled={selectedRecords.find((d) => d.canDelete === false)}
-                    onClick={() => {
-                      closeActions();
-                      setShowTransferEntityDialog(true);
-                    }}
-                  >
-                    {`Transfer Entity (${selectedRecords.length})`}
-                  </MenuItem>
-                  <MenuItem
-                    disabled={selectedRecords.length !== 1}
-                    onClick={() => {
-                      closeActions();
-                      setIsClone(true);
-                      setshowCreateQuoteDialog(true);
-                    }}
-                  >
-                    {`Clone (${selectedRecords.length})`}
-                  </MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          toggleButtonList={types}
+          onToggle={handleFilter}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          leftSideContents={LeftSideContents}
+          searchValue={search}
+          onSearch={handleSearch}
+          // rightSideContents
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+          // addButtonProps
+          addButtonOnclick={() => {
+            setshowCreateQuoteDialog(true);
+          }}
+          isAddButtonVisible={permissions?.quoteBuilder?.isCreate}
+          synchronizeType={true}
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
+            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -713,7 +654,7 @@ const QuoteBuilders = () => {
           quoteId={showVersionsDialog.id}
           quoteData={showVersionsDialog.quoteData}
           quotePermissions={permissions?.quoteBuilder}
-          fetchQuoteData={() => { }}
+          fetchQuoteData={() => {}}
           handleChangeVersionFromAllVersion={(versionNumber) => {
             history.push(`quotes/detail/${showVersionsDialog.id}`, {
               versionNumber: `${versionNumber}`,

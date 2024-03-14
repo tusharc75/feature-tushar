@@ -1,21 +1,22 @@
-import { useState, useContext, useEffect} from 'react';
 import { Box, Button, TextField } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { ListingPageHeader } from 'src/components/PageHeaders';
+import { prepareDataForGrid } from 'src/constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import { gridLoadingTimeout } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { Autocomplete } from '@material-ui/lab';
-import CustomContainer from '../../components/CustomContainer';
-import { isMobile } from 'react-device-detect';
-import axiosInstance from '../../axios/axiosInstance';
-import { useData } from '../../StateProvider/Provider';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { camelCase } from 'lodash';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { gridLoadingTimeout} from '../../constants/helpers';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageCycleCountDetermination from './ManageCycleCountDetermination';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const CycleCountDetermination = () => {
   const renderedFrom = camelCase(`${routes.cycleCountDetermination.title}`);
@@ -31,7 +32,7 @@ const CycleCountDetermination = () => {
   const { state, dispatch } = useTableReducer();
   const [columns, setColumns] = useState(null);
   const [editData, setEditData] = useState(null);
-  const { rowCount,  selectedRecords } = state;
+  const { rowCount, selectedRecords } = state;
   useEffect(() => {
     getWarehouse();
   }, [selectedEntity]);
@@ -111,10 +112,53 @@ const CycleCountDetermination = () => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-      }).catch((error) => {
+      })
+      .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
       });
+  };
+
+  const LeftSideContent = () => {
+    return (
+      <>
+        <Autocomplete
+          style={{ minWidth: 200, flexGrow: 1 }}
+          className="md:max-w-[250px]"
+          options={warehouseOption}
+          getOptionLabel={(option: any) => option?.optionLabel}
+          disableClearable
+          value={
+            warehouseOption.filter((data) => data.optionValue === warehouse).length
+              ? warehouseOption.filter((data) => data.optionValue === warehouse)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            setWarehouse(val && val.optionValue ? val.optionValue : null);
+          }}
+          renderInput={(params) => (
+            <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+          )}
+        />
+      </>
+    );
+  };
+  const RightSideContents = () => {
+    return (
+      <>
+        <Button
+          className={'no-shadow'}
+          onClick={() => {
+            setOpen(true);
+          }}
+          variant={'contained'}
+          size="small"
+          color="primary"
+        >
+          Edit
+        </Button>
+      </>
+    );
   };
 
   return (
@@ -139,43 +183,12 @@ const CycleCountDetermination = () => {
         />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
-            <div className={'d-flex flex-wrap align-items-center gap-1'}>
-              <Autocomplete
-                style={{ minWidth: 200, flexGrow: 1 }}
-                className="md:max-w-[250px]"
-                options={warehouseOption}
-                getOptionLabel={(option: any) => option?.optionLabel}
-                disableClearable
-                value={
-                  warehouseOption.filter((data) => data.optionValue === warehouse).length
-                    ? warehouseOption.filter((data) => data.optionValue === warehouse)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setWarehouse(val && val.optionValue ? val.optionValue : null);
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                )}
-              />
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <Button
-                className={'no-shadow'}
-                onClick={() => {
-                  setOpen(true);
-                }}
-                variant={'contained'}
-                size="small"
-                color="primary"
-              >
-                Edit
-              </Button>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          leftSideContents={<LeftSideContent />}
+          rightSideContents={<RightSideContents />}
+          isActionButtonVisible={false}
+          isAddButtonVisible={false}
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

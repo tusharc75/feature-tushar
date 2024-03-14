@@ -1,26 +1,27 @@
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import React from 'react';
+import { MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { read, utils, writeFile } from 'xlsx';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import CarouselDialog from '../../../components/CarouselDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import DeleteButton from '../../../components/Helpers/DeleteButton';
 import routes from '../../../components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import CreateZip from '../CreateZip';
-import { MobileImportIcon, MobileExportIcon } from 'src/assets/svg/svgIcons';
-import { isMobile, isTablet } from 'react-device-detect';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 interface ConfigProps {
   id: string;
 }
 
 const Zipcode = (props: ConfigProps) => {
+  const isMobile = useMediaQuery('(max-width:600px)');
   const { id } = props;
   const { setToastConfig, toastConfig } = React.useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -55,21 +56,20 @@ const Zipcode = (props: ConfigProps) => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setShowConfirmBox({
-                  open: true,
-                  zips: [row?.original?.zipCode]
-                });
-              }}
-            >
-              <Delete color="error" />
-            </IconButton>
-          </HtmlTooltip>
-        
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setShowConfirmBox({
+                open: true,
+                zips: [row?.original?.zipCode]
+              });
+            }}
+          >
+            <Delete color="error" />
+          </IconButton>
+        </HtmlTooltip>
       </>
     )
   };
@@ -83,9 +83,7 @@ const Zipcode = (props: ConfigProps) => {
         order: 1,
         Cell: ({ row }) => (
           <>
-            <p className="text-truncate">
-              {row?.original?.zipCode}
-            </p>
+            <p className="text-truncate">{row?.original?.zipCode}</p>
           </>
         )
       },
@@ -193,63 +191,83 @@ const Zipcode = (props: ConfigProps) => {
     reader.readAsBinaryString(f);
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem onClick={() => setOpenDialog(true)}>Add Zip Code</MenuItem>
+      </>
+    );
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        <Button size="small" variant={isMobile ? 'text' : 'contained'} className="btn-outline-v1 with-border ">
+          <label className=" cursor-pointer">
+            {isMobile ? <MobileImportIcon /> : 'Import from Excel'}
+            <input
+              onClick={(e: any) => (e.target.value = null)}
+              id="importField"
+              name="importField"
+              onChange={handleImportFields}
+              style={{
+                opacity: '0',
+                position: 'absolute',
+                zIndex: -1
+              }}
+              type="file"
+            />
+          </label>
+        </Button>
+        <Button size="small" variant={isMobile ? 'text' : 'contained'} className="btn-outline-v1 with-border" onClick={handleExportFields}>
+          {isMobile ? <MobileExportIcon /> : 'Export to Excel'}
+        </Button>
+        <DeleteButton
+          mode="light"
+          onClick={() => {
+            setShowConfirmBox({
+              open: true,
+              zips: selectedRecords.map((s) => s.zipCode)
+            });
+          }}
+          size="small"
+          disabled={selectedRecords.length === 0}
+          disableElevation
+          text={'Delete'}
+        />
+      </>
+    );
+  };
+
   return (
     <Box>
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={false}
+        rightSideContents={rightSideContents()}
+        hasXpadding
+      />
       <Box className="flex flex-wrap justify-between gap-2">
-        <Button onClick={() => setOpenDialog(true)} size="small" variant="contained" color="primary" disableElevation>
-          Add Zip Code
-        </Button>
-        <Box className="flex flex-wrap gap-2">
-          <Button size="small" variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1">
-            <label className=" cursor-pointer">
-              {isMobile && !isTablet ? <MobileImportIcon /> : 'Import from Excel'}
-              <input
-                onClick={(e: any) => (e.target.value = null)}
-                id="importField"
-                name="importField"
-                onChange={handleImportFields}
-                style={{
-                  opacity: '0',
-                  position: 'absolute',
-                  zIndex: -1
-                }}
-                type="file"
-              />
-            </label>
-          </Button>
-          <Button size="small" variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleExportFields}>
-            {isMobile && !isTablet ? <MobileExportIcon /> : 'Export to Excel'}
-          </Button>
-          <DeleteButton
-            mode="light"
-            onClick={() => {
-              setShowConfirmBox({
-                open: true,
-                zips: selectedRecords.map((s) => s.zipCode)
-              });
-            }}
-            size="small"
-            disabled={selectedRecords.length === 0}
-            disableElevation
-            text={'Delete'}
-          />
-        </Box>
+        <Box className="flex flex-wrap gap-2"></Box>
       </Box>
       <Box>
-      {columns ? (
+        {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
-            renderedFrom={"zone"}
+            renderedFrom={'zone'}
             refreshGrid={getZipData}
             showOnlyShowFilteredRecordSwitch={false}
             showFilters={false}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </Box>
       {openDialog && (
         <CreateZip

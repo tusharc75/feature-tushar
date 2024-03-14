@@ -14,7 +14,6 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import { camelCase } from 'lodash';
 
 const AssetHistory = ({ id }) => {
-
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assetHistory`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -172,6 +171,16 @@ const AssetHistory = ({ id }) => {
               >
                 {row.original.reference}
               </Link>
+            ) : row.original?.type === sidebarResource.deals ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.dealDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
             ) : (
               row.original.reference
             )
@@ -184,22 +193,14 @@ const AssetHistory = ({ id }) => {
     {
       accessor: 'type',
       Header: 'Type',
-      Cell: ({ row }) => (
-        row.original?.type ? (
-          <div>
-            {row.original?.type}
-          </div>
-        ) : (
-          <NoDataCell />
-        )
-      )
+      Cell: ({ row }) => (row.original?.type ? <div>{row.original?.type}</div> : <NoDataCell />)
     },
     {
       accessor: 'date',
       Header: 'Date & Time',
       disableFilters: true,
       disableSortBy: false,
-      Cell: ({ row }) => (
+      Cell: ({ row }) =>
         row.original?.date ? (
           <div className="createBy" title={`${moment(row.original?.date)?.format(dateTimeFormat)}`}>
             {moment(row.original?.date)?.format(dateTimeFormat)}
@@ -207,48 +208,23 @@ const AssetHistory = ({ id }) => {
         ) : (
           <NoDataCell />
         )
-      )
     },
     {
       accessor: 'days',
       Header: 'Days',
       disableFilters: true,
       disableSortBy: false,
-      Cell: ({ row }) => (
-        <div>
-          {row.original?.days ? (
-            <span>{row.original?.days}</span>
-          ) : (
-            <span>Less than a day</span>
-          )}
-        </div>
-      )
+      Cell: ({ row }) => <div>{row.original?.days ? <span>{row.original?.days}</span> : <span>Less than a day</span>}</div>
     },
     {
       accessor: 'status',
       Header: 'Status',
-      Cell: ({ row }) => (
-        row.original?.status ? (
-          <div>
-            {row.original?.status}
-          </div>
-        ) : (
-          <NoDataCell />
-        )
-      )
+      Cell: ({ row }) => (row.original?.status ? <div>{row.original?.status}</div> : <NoDataCell />)
     },
     {
       accessor: 'comments',
       Header: 'Comment',
-      Cell: ({ row }) => (
-        row.original?.comments ? (
-          <div>
-            {row.original?.comments}
-          </div>
-        ) : (
-          <NoDataCell />
-        )
-      )
+      Cell: ({ row }) => (row.original?.comments ? <div>{row.original?.comments}</div> : <NoDataCell />)
     },
     {
       accessor: 'warehouse',
@@ -256,7 +232,7 @@ const AssetHistory = ({ id }) => {
       Cell: ({ row }) => (
         <div>
           {row.original?.warehouse ? (
-            permissions?.warehouse?.isRead ?
+            permissions?.warehouse?.isRead ? (
               <Link
                 className="link"
                 title={row.original?.warehouse}
@@ -265,8 +241,10 @@ const AssetHistory = ({ id }) => {
                 rel="noopener noreferrer"
               >
                 {row.original?.warehouse}
-              </Link> :
+              </Link>
+            ) : (
               <span>{row.original?.warehouse}</span>
+            )
           ) : (
             <NoDataCell />
           )}
@@ -276,41 +254,17 @@ const AssetHistory = ({ id }) => {
     {
       accessor: 'location',
       Header: 'Location',
-      Cell: ({ row }) => (
-        row.original?.location ? (
-          <div>
-            {row.original?.location}
-          </div>
-        ) : (
-          <NoDataCell />
-        )
-      )
+      Cell: ({ row }) => (row.original?.location ? <div>{row.original?.location}</div> : <NoDataCell />)
     },
     {
       accessor: 'ownerType',
       Header: 'Owner Type',
-      Cell: ({ row }) => (
-        row.original?.ownerType ? (
-          <div>
-            {row.original?.ownerType}
-          </div>
-        ) : (
-          <NoDataCell />
-        )
-      )
+      Cell: ({ row }) => (row.original?.ownerType ? <div>{row.original?.ownerType}</div> : <NoDataCell />)
     },
     {
       accessor: 'owner',
       Header: 'Owner',
-      Cell: ({ row }) => (
-        row.original?.owner ? (
-          <div>
-            {row.original?.owner}
-          </div>
-        ) : (
-          <NoDataCell />
-        )
-      )
+      Cell: ({ row }) => (row.original?.owner ? <div>{row.original?.owner}</div> : <NoDataCell />)
     },
     {
       accessor: 'transactionDate',
@@ -328,7 +282,7 @@ const AssetHistory = ({ id }) => {
           )}
         </>
       )
-    },
+    }
   ];
 
   useEffect(() => {
@@ -393,7 +347,7 @@ const AssetHistory = ({ id }) => {
 
   return (
     <Box>
-      <Box width="60%">
+      <Box className="max-w-[800px]">
         <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
       </Box>
       {columns ? (

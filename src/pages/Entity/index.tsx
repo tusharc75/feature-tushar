@@ -1,14 +1,13 @@
-import { Box, Button, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Box, Dialog, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
-import { FaUser } from 'react-icons/all';
+import { FaUser } from 'react-icons/fa';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cloneDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -46,7 +45,6 @@ const Entity: FC = () => {
   const [deleteEntity, setDeleteEntity] = useState<any>({});
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const { entityResource, entityApi } = entity;
 
@@ -267,12 +265,36 @@ const Entity: FC = () => {
     setUsersDialogOpen(false);
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={
+            permissions[entityResource]?.isDelete && selectedRecords.length > 1
+              ? true
+              : Boolean(!(selectedRecords[0] && selectedRecords[0].createdById === user?.user?._id))
+              ? true
+              : false
+          }
+          onClick={() => {
+            if (selectedRecords[0] && selectedRecords[0]?._id) {
+              setDeleteEntity(selectedRecords[0]);
+              setShowDeleteDialog(true);
+            }
+          }}
+        >
+          Delete
+        </MenuItem>
+        <MenuItem
+          disabled={!(permissions[entityResource]?.isUpdate && selectedRecords?.length)}
+          onClick={() => {
+            setUsersDialogOpen(true);
+          }}
+        >
+          Assign User
+        </MenuItem>
+      </>
+    );
   };
 
   return (
@@ -297,81 +319,18 @@ const Entity: FC = () => {
       </div>
 
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  disabled={!permissions[entityResource].isCreate}
-                  onClick={() => {
-                    setIsOpen({ open: true, isClone: false, entityId: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-                <Button
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                  disabled={selectedRecords?.length === 0}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={
-                      permissions[entityResource]?.isDelete && selectedRecords.length > 1
-                        ? true
-                        : Boolean(!(selectedRecords[0] && selectedRecords[0].createdById === user?.user?._id))
-                        ? true
-                        : false
-                    }
-                    onClick={() => {
-                      if (selectedRecords[0] && selectedRecords[0]?._id) {
-                        setDeleteEntity(selectedRecords[0]);
-                        setShowDeleteDialog(true);
-                      }
-                      closeActions();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                  <MenuItem
-                    disabled={!(permissions[entityResource]?.isUpdate && selectedRecords?.length)}
-                    onClick={() => {
-                      setUsersDialogOpen(true);
-                      closeActions();
-                    }}
-                  >
-                    Assign User
-                  </MenuItem>
-                </Menu>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+          actionMenuItems={<ActionMenuItems />}
+          addButtonProps={{ disabled: !permissions[entityResource].isCreate }}
+          addButtonOnclick={() => {
+            setIsOpen({ open: true, isClone: false, entityId: null });
+          }}
+          isAddButtonVisible={true}
+        />
 
         {columns ? (
           <CustomReactTable

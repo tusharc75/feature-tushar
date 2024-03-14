@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Button, Dialog, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, IconButton, MenuItem } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -16,6 +16,7 @@ import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachme
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetDetails = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -71,17 +72,30 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
     axiosInstance()
       .get(`/field/child?resource=${CHILD_RESOURCE.serializedAssetsCertification}`)
       .then(({ data: { data } }) => {
-        let newColumns = generateColumns(renderedFrom, data?.filter(o => o.fieldName !== 'attachments'), routes.serializedAssetDetail.path, true);
+        let newColumns = generateColumns(
+          renderedFrom,
+          data?.filter((o) => o.fieldName !== 'attachments'),
+          routes.serializedAssetDetail.path,
+          true
+        );
         newColumns.push({
           accessor: 'supplierAccount',
           Header: 'Certification Supplier',
           Cell: ({ row }) => (
             <div>
               {row.original?.supplierAccount ? (
-                permissions?.supplierAccount?.isRead ?
-                  <Link className="link" target="_blanck" title={row.original?.supplierAccount} to={`${routes.supplierAccountDetail.path}/${row.original?.supplierAccountId}`}>
+                permissions?.supplierAccount?.isRead ? (
+                  <Link
+                    className="link"
+                    target="_blanck"
+                    title={row.original?.supplierAccount}
+                    to={`${routes.supplierAccountDetail.path}/${row.original?.supplierAccountId}`}
+                  >
                     {row.original?.supplierAccount}
-                  </Link> : <span>{row.original?.supplierAccount}</span>
+                  </Link>
+                ) : (
+                  <span>{row.original?.supplierAccount}</span>
+                )
               ) : (
                 <NoDataCell />
               )}
@@ -93,7 +107,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
           Header: 'Created By',
           disableFilters: true,
           disableSortBy: false,
-          Cell: ({ row }) => (
+          Cell: ({ row }) =>
             row.original?.createdBy ? (
               <h5 className="createBy" title={`${row.original?.createdBy} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
                 {row.original?.createdBy}
@@ -102,13 +116,12 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
             ) : (
               <NoDataCell />
             )
-          )
         });
         newColumns?.forEach((e) => {
-          if (["issueDate", "expiryDate"].includes(e.accessor)) {
+          if (['issueDate', 'expiryDate'].includes(e.accessor)) {
             e.disabled = true;
           }
-        })
+        });
         setColumns([...newColumns, ActionsRenderer]);
       });
   };
@@ -139,23 +152,25 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
         )}
       </>
     )
-  }
+  };
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setOpenDialog({ open: true });
+          }}
+        >
+          Attach Certificate
+        </MenuItem>
+      </>
+    );
+  };
 
   return (
     <>
       {canIssueCertificate && (
-        <Grid item xs={12} sm={12} md={6}>
-          <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
-            onClick={() => {
-              setOpenDialog({ open: true });
-            }}
-          >
-            Attach Certificate
-          </Button>
-        </Grid>
+        <DetailsPageHeader isActionButtonVisible={false} isAddButtonVisible={true} addButtonMenuItems={addButtonMenuItems()} hasXpadding={false} />
       )}
       <Box>
         {columns ? (

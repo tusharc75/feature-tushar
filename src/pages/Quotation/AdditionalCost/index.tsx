@@ -1,23 +1,23 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { quotation } from '../../../constants/helpers';
-import EditIcon from '@material-ui/icons/Edit';
-import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
-import AdditionalCostDialog from './AdditionalCostDialog';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE } from '../../../constants/helpers';
-import { flattenArray } from '../../../constants/columns';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { Add, ExpandMore } from '@material-ui/icons';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
+import EditIcon from '@material-ui/icons/Edit';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
+import { flattenArray } from '../../../constants/columns';
+import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
+import { CHILD_RESOURCE, quotation } from '../../../constants/helpers';
+import AdditionalCostDialog from './AdditionalCostDialog';
+import LeadTimeDialog from './LeadTimeDialog';
 
 const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,7 +33,6 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
   const [columns, setColumns] = useState(null);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
   const [selectedCostData, setSelectedCostData] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [allFields, setAllFields] = useState([]);
   const [deleteRecords, setDeleteRecords] = useState(null);
@@ -216,74 +215,39 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
     handleUpdateCost(rows);
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        {permissions?.quotation?.isDelete && (
+          <MenuItem
+            onClick={() => {
+              setShowDeleteConfirmBox(true);
+              setDeleteRecords(selectedRecords.map((d) => d._id));
+            }}
+          >
+            Delete
+          </MenuItem>
+        )}
+      </>
+    );
   };
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex">
-          <Button
-            color="primary"
-            variant="outlined"
-            size="small"
-            onClick={() => {
-              setShowCostDialog({ open: true, showSaveAndNext: false });
-              setSelectedCostData(null);
-            }}
-            startIcon={<Add />}
-          >
-            Add
-          </Button>
-        </Box>
-        <div className="d-flex gap-2">
-          <HtmlTooltip title="Please select some product">
-            <span>
-              <Button
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={openActions}
-                disabled={selectedRecords.length ? false : true}
-                aria-controls="action-menu"
-                endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
-              >
-                {'Actions'}
-              </Button>
-            </span>
-          </HtmlTooltip>
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorEl)}
-            onClose={closeActions}
-          >
-            {permissions?.quotation?.isDelete && (
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setShowDeleteConfirmBox(true);
-                  setDeleteRecords(selectedRecords.map((d) => d._id));
-                }}
-              >
-                Delete
-              </MenuItem>
-            )}
-          </Menu>
-        </div>
-      </Box>
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonProps={{
+          onClick: () => {
+            setShowCostDialog({ open: true, showSaveAndNext: false });
+            setSelectedCostData(null);
+          }
+        }}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: dataRows?.length > 0 ? false : true, tooltip: dataRows?.length > 0 ? '' : 'Please select some product' }}
+        hasXpadding
+      />
+
       {columns ? (
         <Box zIndex={5}>
           <CustomReactTable

@@ -1,25 +1,24 @@
 import { Box, Button, Dialog, Grid, Tab, Tabs, Tooltip } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageEmployeeMaster from './ManageEmployeeMaster';
-import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
-import ActivityButton from 'src/components/Activity/ActivityButton';
+import { Edit } from '@material-ui/icons';
 import queryString from 'query-string';
-import TabPanel from 'src/components/TabPanel';
-import History from './History';
-import { RiLayoutFill } from 'react-icons/ri';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 import AssignEntityDialog from 'src/components/AssignRolesDialog/AssignEntityDialog';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import routes from 'src/components/Helpers/Routes';
+import TabPanel from 'src/components/TabPanel';
+import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import History from './History';
+import ManageEmployeeMaster from './ManageEmployeeMaster';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
@@ -86,7 +85,7 @@ const EmployeeMasterDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.employeeMaster.path}`)
+          history.push(`${routes.employeeMaster.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -183,7 +182,7 @@ const EmployeeMasterDetail = () => {
                   onClick={handleOpenUpdateDialog}
                   className={'btn-outline-v1'}
                 >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
 
@@ -268,7 +267,7 @@ const EmployeeMasterDetail = () => {
             regionalRole={false}
             onSuccess={() => {
               setShowAssignEntityDialog(false);
-              fetchData()
+              fetchData();
             }}
             roleAccessIds={roleAccessOfLoggedInUser}
             contactResource={'employeeMaster'}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
 import Grid from '@material-ui/core/Grid';
-import { Box, Typography, Button, CircularProgress, Menu, MenuItem, IconButton, makeStyles, useMediaQuery, Chip } from '@material-ui/core';
+import { Box, Button, CircularProgress, Menu, MenuItem, IconButton, makeStyles, useMediaQuery } from '@material-ui/core';
 import { useHistory, useParams } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -12,18 +12,16 @@ import { useData } from '../../StateProvider/Provider';
 import { checkFormulaLoop, checkUniqueValidation } from '../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isTablet } from 'react-device-detect';
 import { IoIosArrowDropdown } from 'react-icons/io';
-import { RiCloseCircleFill, RiSaveFill } from 'react-icons/all';
+import { RiCloseCircleFill, RiSaveFill } from 'react-icons/ri';
 import TextField from '@material-ui/core/TextField';
-import { camelCase } from 'lodash';
 import { Autocomplete } from '@material-ui/lab';
 import History from './History';
 import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { defaultStepper } from 'src/components/FormBuilder/Stepper/stepHelper';
-import Stepper from 'src/components/FormBuilder/Stepper';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { fieldLabelToFieldName } from 'src/constants/helpers';
+import Steps from 'src/components/FormBuilder/Steps';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -71,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
 
 const CreateFormBuilder = () => {
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
   const [formBuilderPermissions, setFormBuilderPermissions] = useState({
     isCreate: false,
@@ -242,7 +240,7 @@ const CreateFormBuilder = () => {
           open: true,
           type: 'success',
           message: message
-        })
+        });
       })
       .catch((error) => {
         setIsUpdating(false);
@@ -440,7 +438,7 @@ const CreateFormBuilder = () => {
                     Fields
                   </CustomTab>
                   <CustomTab index={1} id="tab-2">
-                    More Features
+                    Steps
                   </CustomTab>
                 </Tabs>
                 <TabPanel value={tabValue} index={0}>
@@ -453,10 +451,12 @@ const CreateFormBuilder = () => {
                     extraFields={[]}
                     module="form-builder"
                     resource={resource}
+                    brandId={user.user.brand}
                   />
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  <Stepper steppers={steppers} setSteppers={setSteppers} resource={resource} />
+                  {/* <Stepper steppers={steppers} setSteppers={setSteppers} resource={resource} /> */}
+                  <Steps resource={resource} />
                 </TabPanel>
               </Box>
               {showConfirmDialog ? (

@@ -5,61 +5,18 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { CustomDialogTransition, dateTimeFormat, prepareDataForGrid } from '../../../constants/helpers';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import { withStyles } from '@material-ui/core/styles';
 import { Box, Button, Grid, IconButton, TextField, Typography } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { FaThumbsUp, FaThumbsDown } from 'react-icons/fa6';
 import moment from 'moment';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-
-const Accordion = withStyles({
-  root: {
-    border: '1px solid rgba(0, 0, 0, .125)',
-    '&:not(:last-child)': {
-      borderBottom: 0
-    },
-    '&:before': {
-      display: 'none'
-    },
-    '&$expanded': {
-      margin: 'auto'
-    }
-  },
-  expanded: {}
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    backgroundColor: 'white',
-    borderBottom: '1px solid #f1ece8',
-    background: '#ffffff',
-    fontWeight: 'bold',
-    padding: '0px',
-    '&$expanded': {
-      minHeight: 46
-    }
-  },
-  content: {
-    '&$expanded': {
-      margin: '15px 0'
-    }
-  },
-  expanded: {}
-})(MuiAccordionSummary);
-
-const AccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(1),
-    display: 'block'
-  }
-}))(MuiAccordionDetails);
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 
 const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId }) => {
   let renderedFrom = 'ViewQuotationSupplierPrice';
@@ -289,159 +246,149 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
   return (
     <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
       <CustomDialogHeader title={`View ${type} Quote`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
-      {productDataList && productDataList.length !== 0 && !isLoading ? (
-        productDataList.map((data) => {
-          return (
-            <Box ml={2} mr={2}>
-              <div className="pt-1 modified_style_of_accordion_supplier_ask_price">
-                <Accordion expanded={Boolean(expandSupplierGrid === data?._id)} className="omsAccordian accordSupplierAskPrice">
-                  <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-                    <Grid container className="pos_rel">
-                      <div
-                        className="clicker_div"
-                        onClick={() => (expandSupplierGrid === data?._id ? setExpandSupplierGrid(null) : setExpandSupplierGrid(data?._id))}
-                      ></div>
-                      <Grid item xs={12} sm={12} md={12}>
-                        <Box display="flex">
-                          <Box>
-                            <IconButton
-                              size="small"
-                              onClick={() => (expandSupplierGrid === data?._id ? setExpandSupplierGrid(null) : setExpandSupplierGrid(data?._id))}
-                            >
-                              {expandSupplierGrid === data?._id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                            </IconButton>
-                          </Box>
-                          <Box padding="5px">
-                            <Typography variant="subtitle2">{data?.status && `Status : ${data?.status} `}</Typography>
-                          </Box>
-                          <Box padding="5px">
-                            <Typography variant="subtitle2">
-                              {data?.requestDate && `Request Date : ${moment(data?.requestDate).format(dateTimeFormat)} `}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Grid>
-                    </Grid>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {expandSupplierGrid === data?._id && (
-                      <>
-                        {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
-                          <Grid item xs={12} sm={12} md={12} container justify="flex-end">
-                            <Box ml={1} mt={1}>
-                              <Button
-                                size="small"
-                                color="primary"
-                                onClick={() => {
-                                  handleAccept(data?._id);
-                                }}
-                                variant="contained"
-                              >
-                                Accept
-                              </Button>
-                            </Box>
-                            <Box ml={1} mt={1}>
-                              <DeleteButton
-                                id="detailDeleteButton"
-                                text={'Reject'}
-                                onClick={() => {
-                                  setResponse({ open: true, type: 'Reject', id: data?._id });
-                                }}
-                              />
-                            </Box>
-                          </Grid>
-                        )}
-                        <CustomReactTable
-                          height={'calc(100vh - 393px)'}
-                          columns={fetchColumns(data?._id)}
-                          state={{ ...state, dataRows: dataRows?.filter((d) => d?.uniqueId === data?._id) }}
-                          dispatch={dispatch}
-                          renderedFrom={renderedFrom}
-                          refreshGrid={fetchProductGridData}
-                          isClientSideGrid={true}
-                          hideAction={true}
-                          hideSelection={true}
-                          expander={true}
-                        />
-                      </>
-                    )}
-                  </AccordionDetails>
-                </Accordion>
-              </div>
-            </Box>
-          );
-        })
-      ) : isLoading ? (
-        <Box height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      ) : (
-        <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={' Thanks for your submission'}>
-          No supplier quote
-        </h1>
-      )}
-      {response.open && (
-        <Dialog
-          TransitionComponent={CustomDialogTransition}
-          open={true}
-          aria-labelledby="customized-dialog-title"
-          fullWidth
-          maxWidth={'sm'}
-          onClose={(e, reason) => {
-            if (reason !== 'backdropClick') {
-            }
-          }}
-        >
-          <CustomDialogHeader
-            onClose={() => {
-              setResponse({ open: false, type: '', id: '' });
+      <div className="m-2 md:m-3">
+        {productDataList && productDataList.length !== 0 && !isLoading ? (
+          productDataList.map((data) => {
+            return (
+              <Accordion
+                expanded={Boolean(expandSupplierGrid === data?._id)}
+                onChange={() => (expandSupplierGrid === data?._id ? setExpandSupplierGrid(null) : setExpandSupplierGrid(data?._id))}
+              >
+                <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+                  <div className="flex  gap-[5px] items-center">
+                    <Box>
+                      <IconButton size="small">{expandSupplierGrid === data?._id ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+                    </Box>
+                    <div className="min-[768px]:flex items-center gap-[5px]">
+                      <Box className="min-w-0 line-clamp-1" title={data?.status ? data?.status : ''}>
+                        <Typography variant="subtitle2">{data?.status && `Status : ${data?.status}, `}</Typography>
+                      </Box>
+                      <Box className="min-w-0  line-clamp-1" title={data?.requestDate ? moment(data?.requestDate).format(dateTimeFormat) : ''}>
+                        <Typography variant="subtitle2">
+                          {data?.requestDate && `Request Date : ${moment(data?.requestDate).format(dateTimeFormat)} `}
+                        </Typography>
+                      </Box>
+                    </div>
+                  </div>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {expandSupplierGrid === data?._id && (
+                    <>
+                      {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
+                        <div className="flex flex-wrap gap-2 justify-end">
+                          <ThemeButton
+                            borderColor="default"
+                            iconForMobile={<FaThumbsUp />}
+                            onClick={() => {
+                              handleAccept(data?._id);
+                            }}
+                            tooltip="Accept"
+                          >
+                            Accept
+                          </ThemeButton>
+                          <ThemeButton
+                            borderColor="red"
+                            hasMobileBorder
+                            iconForMobile={<FaThumbsDown />}
+                            onClick={() => {
+                              setResponse({ open: true, type: 'Reject', id: data?._id });
+                            }}
+                            tooltip="Reject"
+                          >
+                            Reject
+                          </ThemeButton>
+                        </div>
+                      )}
+                      <CustomReactTable
+                        height={'calc(100vh - 393px)'}
+                        columns={fetchColumns(data?._id)}
+                        state={{ ...state, dataRows: dataRows?.filter((d) => d?.uniqueId === data?._id) }}
+                        dispatch={dispatch}
+                        renderedFrom={renderedFrom}
+                        refreshGrid={fetchProductGridData}
+                        isClientSideGrid={true}
+                        hideAction={true}
+                        hideSelection={true}
+                        expander={true}
+                      />
+                    </>
+                  )}
+                </AccordionDetails>
+              </Accordion>
+            );
+          })
+        ) : isLoading ? (
+          <Box height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        ) : (
+          <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={' Thanks for your submission'}>
+            No supplier quote
+          </h1>
+        )}
+        {response.open && (
+          <Dialog
+            TransitionComponent={CustomDialogTransition}
+            open={true}
+            aria-labelledby="customized-dialog-title"
+            fullWidth
+            maxWidth={'sm'}
+            onClose={(e, reason) => {
+              if (reason !== 'backdropClick') {
+              }
             }}
-            showRequiredLabel={false}
-            title={'Response comment'}
-          ></CustomDialogHeader>
-          <CustomDialogContent>
-            <Box>
-              <Box pt={3} pb={3}>
-                <Grid container spacing={3}>
-                  <Grid item xs={10} sm={11} md={11}>
-                    <TextField
-                      id="outlined-multiline-static"
-                      label="comment"
-                      placeholder={`Add a comment`}
-                      fullWidth
-                      value={comment}
-                      onChange={handleChange}
-                      variant="outlined"
-                      helperText="At least more then 10 character"
-                    />
-                  </Grid>
-                </Grid>
-              </Box>
-            </Box>
-          </CustomDialogContent>
-          <CustomDialogFooter>
-            <Button
-              color="primary"
-              size="small"
-              onClick={() => {
+          >
+            <CustomDialogHeader
+              onClose={() => {
                 setResponse({ open: false, type: '', id: '' });
               }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              color="primary"
-              variant="contained"
-              onClick={() => {
-                response.type === 'Reject' && handleReject();
-              }}
-            >
-              Save
-            </Button>
-          </CustomDialogFooter>
-        </Dialog>
-      )}
+              showRequiredLabel={false}
+              title={'Response comment'}
+            ></CustomDialogHeader>
+            <CustomDialogContent>
+              <Box>
+                <Box pt={3} pb={3}>
+                  <Grid container spacing={3}>
+                    <Grid item xs={10} sm={11} md={11}>
+                      <TextField
+                        id="outlined-multiline-static"
+                        label="comment"
+                        placeholder={`Add a comment`}
+                        fullWidth
+                        value={comment}
+                        onChange={handleChange}
+                        variant="outlined"
+                        helperText="At least more then 10 character"
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Box>
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <Button
+                color="primary"
+                size="small"
+                onClick={() => {
+                  setResponse({ open: false, type: '', id: '' });
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                color="primary"
+                variant="contained"
+                onClick={() => {
+                  response.type === 'Reject' && handleReject();
+                }}
+              >
+                Save
+              </Button>
+            </CustomDialogFooter>
+          </Dialog>
+        )}
+      </div>
     </Dialog>
   );
 };

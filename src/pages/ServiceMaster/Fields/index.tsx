@@ -8,9 +8,12 @@ import { FormBuilder } from 'src/components/FormBuilder';
 import { CustomDialogTransition, fieldLabelToFieldName, serviceMaster } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import { map, uniq } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '', fields = null }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const { state: { user } }: any = useData();
 
   const [isSubmitting, setSubmitting] = useState(false);
   const [section, setSection] = useState([]);
@@ -180,6 +183,7 @@ const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '',
           extraFields={[]}
           module="form-builder"
           resource={null}
+          brandId={user.user.brand}
         />
       </CustomDialogContent>
       <CustomDialogFooter>

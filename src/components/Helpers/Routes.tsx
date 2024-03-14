@@ -1,4 +1,4 @@
-import { RESOURCE_LABEL } from '../../constants/helpers';
+import { RESOURCE_LABEL, sidebarResource } from '../../constants/helpers';
 
 const storedRoutes = localStorage.getItem('routes') ? JSON.parse(localStorage.getItem('routes')) : null;
 
@@ -159,6 +159,14 @@ const routes = {
   formBuilderResource: {
     title: 'Resource',
     path: '/:resource'
+  },
+  forms: {
+    title: storedRoutes && storedRoutes.forms && storedRoutes.forms.title ? storedRoutes.forms?.title : RESOURCE_LABEL.forms,
+    path: '/forms'
+  },
+  formsDetail: {
+    title: storedRoutes && storedRoutes.forms && storedRoutes.forms.title ? storedRoutes.forms?.title : RESOURCE_LABEL.forms,
+    path: '/forms/detail'
   },
   termsAndConditions: {
     title:
@@ -1180,6 +1188,22 @@ const routes = {
     title: storedRoutes && storedRoutes.userAttendance && storedRoutes.userAttendance.title ? storedRoutes.userAttendance?.title : RESOURCE_LABEL.userAttendance,
     path: '/user-attendance'
   },
+  dataList: {
+    title: storedRoutes && storedRoutes.dataList && storedRoutes.dataList.title ? storedRoutes.dataList?.title : RESOURCE_LABEL.dataList,
+    path: '/data-lists'
+  },
+  dataListitems: {
+    title: storedRoutes && storedRoutes.dataListitems && storedRoutes.dataListitems.title ? storedRoutes.dataListitems?.title : RESOURCE_LABEL.dataListitems,
+    path: '/data-lists/data-list-items'
+  },
+  deals: {
+    title: storedRoutes && storedRoutes.deals && storedRoutes.deals.title ? storedRoutes.deals?.title : sidebarResource.deals,
+    path: '/deals'
+  },
+  dealDetail: {
+    title: storedRoutes && storedRoutes.deals && storedRoutes.deals.title ? storedRoutes.deals?.title : sidebarResource.deals,
+    path: '/deals/detail'
+  }
 };
 
 export default routes;

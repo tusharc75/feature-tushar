@@ -1,18 +1,17 @@
 import { Box, Button, Grid } from '@material-ui/core';
-import {  useContext, useEffect, useState } from 'react';
+import { Edit } from '@material-ui/icons';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Skeleton } from '@material-ui/lab';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { useData } from 'src/StateProvider/Provider';
-import { useParams, useHistory } from 'react-router-dom';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
 
 const FrequencyAskedQuestionDetail = () => {
@@ -73,7 +72,7 @@ const FrequencyAskedQuestionDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.push(`${routes.frequentlyAskedQuestion.path}`)
+          history.push(`${routes.frequentlyAskedQuestion.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);
@@ -99,31 +98,27 @@ const FrequencyAskedQuestionDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.frequentlyAskedQuestion?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className="btn-outline-v1"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.frequentlyAskedQuestion?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
+            <>
+              {permissions?.frequentlyAskedQuestion?.isUpdate && (
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.frequentlyAskedQuestion?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </>
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
-            <Box>
-              {loading || !fields?.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              ) : (
-                <DetailsPage data={frequentlyAskedQuestionData} fields={fields} />
-              )}
-            </Box>
+        <Box>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={frequentlyAskedQuestionData} fields={fields} />
+          )}
+        </Box>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

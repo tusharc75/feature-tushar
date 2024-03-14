@@ -1,31 +1,32 @@
+import { Button, Tooltip } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { map, uniq } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
+import { subleaseMessage } from 'src/constants/messageHelpers';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { ASSET_STATUS, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import {
-  prepareDataForGrid,
+  ASSET_STATUS,
+  DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
-  DELIVERY_FROM_TO_TYPE,
-  sublease,
+  INVENTORY_OWNER_TYPE,
   SUBLEASE_STATUS,
-  INVENTORY_OWNER_TYPE
+  prepareDataForGrid,
+  serializedAsset,
+  sidebarResource,
+  sublease
 } from '../../../constants/helpers';
-import { useData } from '../../../StateProvider/Provider';
-import { Button, Tooltip } from '@material-ui/core';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { uniq, map } from 'lodash';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { Link } from 'react-router-dom';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { subleaseMessage } from 'src/constants/messageHelpers';
-import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const SerializedAsset = ({
   subleaseData,
@@ -139,7 +140,7 @@ const SerializedAsset = ({
             accessor: 'remainingJobDays',
             Header: 'Remaining Job Days',
             show: true,
-            Cell: ({ row }) => <div>{(row.original?.remainingJobDays ? row.original?.remainingJobDays : <NoDataCell />)}</div>
+            Cell: ({ row }) => <div>{row.original?.remainingJobDays ? row.original?.remainingJobDays : <NoDataCell />}</div>
           }
         ];
         setColumns([...newColumns.slice(0, 1), ...extraColoums, ...newColumns.slice(1), ...getStaticFields()]);
@@ -222,117 +223,82 @@ const SerializedAsset = ({
     }
   };
 
-  return (
-    <>
-      <Box display="flex" justifyContent="flex-end" my={1} className="px-2" gridGap={'8px'} alignItems="center">
+  const previewDownloadProps =
+    columns && pdfColumns
+      ? {
+          fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
+          resource: sidebarResource.sublease,
+          referenceId: subleaseData?._id,
+          columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
+          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+        }
+      : null;
+
+  const rightSideContents = () => {
+    return (
+      <>
         {allowedToEdit && (
-          <Box>
-            <ImportExportLinks
-              permissions={permissions?.packages}
-              module={routes.serializedAsset.title}
-              api={`${serializedAsset.api}/custom-template`}
-              afterImportCompleted={() => {
-                fetchRecords();
-              }}
-              isExportAllOrSomeFeature={true}
-              total={rowCount}
-              recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows.length}
-              ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
-              isDownloadExcel={false}
-              isBackgroundWhite={true}
-            />
-          </Box>
-        )}
-        {columns && pdfColumns && (
-          <PreviewDownload
-            fileName={`${routes.sublease.title}-${subleaseData?.subleaseName}`}
-            resource={sidebarResource.sublease}
-            referenceId={subleaseData?._id}
-            columns={[...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))]}
-            defaultColumns={['index', 'type', 'detail', 'description', 'qty']}
+          <ImportExportLinks
+            permissions={permissions?.packages}
+            module={routes.serializedAsset.title}
+            api={`${serializedAsset.api}/custom-template`}
+            afterImportCompleted={() => {
+              fetchRecords();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows.length}
+            ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
+            isDownloadExcel={false}
+            isBackgroundWhite={true}
+            small
           />
         )}
         {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
-          <Fragment>
-            {/* {currentStep === 1 && (
-              <Fragment>
-                <Tooltip title="Transfer to Plant">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      const data = {};
-                      data['ticketName'] = subleaseData.subleaseName;
-                      data['referenceId'] = subleaseData._id;
-                      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.supplier;
-                      data['pickupFrom'] = subleaseData?.supplierAccount?.optionValue;
-                      data['pickupFromAddress'] = subleaseData?.shippingAddress?.optionValue;
-                      data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-                      data['isPickupFromDisable'] = true;
-                      setShowTicketDialog({ open: true, data: data });
-                    }}
-                    disabled={
-                      selectedRecords.length === 0 ||
-                      selectedRecords.some(
-                        (f) =>
-                          f.hasOwnProperty('warehouse') ||
-                          f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount ||
-                          [ASSET_STATUS.reserved].includes(f.status)
-                      )
-                    }
-                  >
-                    Receiving to Plant
-                  </Button>
-                </Tooltip>
-                <Box mx={1} />
-              </Fragment>
-            )} */}
+          <>
             {selectedRecords.length > 0 &&
-              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-              checkUniqWarehouse() &&
-              currentStep === 1 ? (
-              <Fragment>
-                <Tooltip title="Send to Supplier">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      const data = {};
-                      data['ticketName'] = subleaseData.subleaseName;
-                      data['referenceId'] = subleaseData._id;
-                      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-                      data['pickupFrom'] = selectedRecords[0]?.warehouseId;
-                      data['pickupFromAddress'] = selectedRecords[0]?.currentLocationId;
-                      data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.supplier;
-                      data['deliveryTo'] = subleaseData?.supplierAccount?.optionValue;
-                      data['deliveryToAddress'] = subleaseData?.shippingAddress?.optionValue;
-                      data['isPickupFromDisable'] = true;
-                      data['isDeliveryToDisable'] = true;
-                      if (subleaseData?.wellName?.optionValue) {
-                        data['wellName'] = subleaseData?.wellName?.optionValue;
+            selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+            checkUniqWarehouse() &&
+            currentStep === 1 ? (
+              <Tooltip title="Send to Supplier">
+                <Button
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                    const data = {};
+                    data['ticketName'] = subleaseData.subleaseName;
+                    data['referenceId'] = subleaseData._id;
+                    data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
+                    data['pickupFrom'] = selectedRecords[0]?.warehouseId;
+                    data['pickupFromAddress'] = selectedRecords[0]?.currentLocationId;
+                    data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.supplier;
+                    data['deliveryTo'] = subleaseData?.supplierAccount?.optionValue;
+                    data['deliveryToAddress'] = subleaseData?.shippingAddress?.optionValue;
+                    data['isPickupFromDisable'] = true;
+                    data['isDeliveryToDisable'] = true;
+                    if (subleaseData?.wellName?.optionValue) {
+                      data['wellName'] = subleaseData?.wellName?.optionValue;
+                    }
+                    if (subleaseData?.wellNumber) {
+                      if (subleaseData?.wellNumber?.optionValue) {
+                        data['wellNumber'] = subleaseData?.wellNumber?.optionValue;
+                      } else {
+                        data['wellNumber'] = subleaseData?.wellNumber?.map((e) => e?.optionValue);
                       }
-                      if (subleaseData?.wellNumber) {
-                        if (subleaseData?.wellNumber?.optionValue) {
-                          data['wellNumber'] = subleaseData?.wellNumber?.optionValue;
-                        } else {
-                          data['wellNumber'] = subleaseData?.wellNumber?.map((e) => e?.optionValue);
-                        }
-                      }
-                      if (subleaseData?.afeNumber) {
-                        data['afeNumber'] = subleaseData?.afeNumber;
-                      }
-                      if (subleaseData?.processor?.optionValue) {
-                        data['processor'] = subleaseData?.processor?.optionValue;
-                      }
-                      setShowTicketDialog({ open: true, data: data });
-                    }}
-                  >
-                    Send to Supplier
-                  </Button>
-                </Tooltip>
-              </Fragment>
+                    }
+                    if (subleaseData?.afeNumber) {
+                      data['afeNumber'] = subleaseData?.afeNumber;
+                    }
+                    if (subleaseData?.processor?.optionValue) {
+                      data['processor'] = subleaseData?.processor?.optionValue;
+                    }
+                    setShowTicketDialog({ open: true, data: data });
+                  }}
+                >
+                  Send to Supplier
+                </Button>
+              </Tooltip>
             ) : null}
             {currentStep === 2 && allowedToEdit && (
               <Fragment>
@@ -349,26 +315,37 @@ const SerializedAsset = ({
                 </Button>
               </Fragment>
             )}
-          </Fragment>
+          </>
         )}
-      </Box>
-      <Grid item xs={12} md={12} sm={12}>
-        {columns ? (
-          <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchRecords}
-            isClientSideGrid={true}
-          />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </Grid>
+      </>
+    );
+  };
+
+  return (
+    <>
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={false}
+        previewDownloadProps={previewDownloadProps}
+        rightSideContents={rightSideContents()}
+        hasXpadding
+      />
+
+      {columns ? (
+        <CustomReactTable
+          height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchRecords}
+          isClientSideGrid={true}
+        />
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
       {showTicketDialog.open && (
         <ManageDeliveryTicket
           ticketType={DELIVERY_TICKET_TYPE.delivery}

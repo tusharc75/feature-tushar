@@ -1,8 +1,4 @@
-import {
-  Grid,
-  IconButton,
-  TextField
-} from '@material-ui/core';
+import { Grid, IconButton, TextField } from '@material-ui/core';
 import CropFreeIcon from '@material-ui/icons/CropFree';
 import HistoryIcon from '@material-ui/icons/History';
 import { Autocomplete } from '@material-ui/lab';
@@ -10,7 +6,7 @@ import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cageManagement } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -150,83 +146,16 @@ const CageManagement = () => {
         <Grid item md={8} sm={11} xs={10}></Grid>
       </Grid>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
-            <div className={'d-flex flex-wrap align-items-center gap-2'}>
-              <Autocomplete
-                style={{ minWidth: '200px', flexGrow: 1 }}
-                className="md:max-w-[250px]"
-                options={plantOptions}
-                getOptionLabel={(option: any) => option.warehouseName}
-                disableClearable
-                getOptionSelected={(option: any, val) => option.warehouseId === val}
-                size={'small'}
-                value={
-                  plantOptions.filter((data) => data.warehouseId === plantId).length
-                    ? plantOptions.filter((data) => data.warehouseId === plantId)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  if (val !== null) {
-                    setPlantId(val && val.warehouseId ? val.warehouseId : '');
-                  }
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                )}
-              />
-              <Autocomplete
-                style={{ minWidth: '200px', flexGrow: 1 }}
-                className="md:max-w-[250px]"
-                options={productCategoryList}
-                getOptionLabel={(option: any) => (option ? option.name : '')}
-                getOptionSelected={(option: any, val) => option._id === val}
-                value={
-                  productCategoryList.find((data) => data._id === productCategory)
-                    ? productCategoryList.find((data) => data._id === productCategory)
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setProductCategory(val && val._id ? val._id : '');
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} margin="none" size="small" name="productCategory" label="Product Category" variant="outlined" fullWidth />
-                )}
-              />
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end items-center">
-              <SearchBox
-                onChange={(e) => {
-                  setSearchVal(e.target.value);
-                }}
-                value={searchVal}
-                size="small"
-              />
-              <IconButton
-                onClick={() => {
-                  setScanDialog(true);
-                }}
-                size="small"
-                color="primary"
-                aria-label="open drawer"
-              >
-                <CropFreeIcon />
-              </IconButton>
-              <IconButton
-                id="History"
-                aria-label="History"
-                color="primary"
-                title="History"
-                size={isMobile ? 'small' : 'medium'}
-                onClick={() => {
-                  setHistoryDialog(true);
-                }}
-              >
-                <HistoryIcon />
-              </IconButton>
-            </div>
-          </div>
-        </div>
+        <ListingPageHeader
+          leftSideContents={<LeftSideContent {...{ plantOptions, plantId, setPlantId, productCategoryList, productCategory, setProductCategory }} />}
+          searchValue={searchVal}
+          onSearch={(e) => {
+            setSearchVal(e.target.value);
+          }}
+          rightSideContents={<RightSideContent {...{ setScanDialog, setHistoryDialog }} />}
+          isActionButtonVisible={false}
+          isAddButtonVisible={false}
+        />
         {
           <ProductGridLayout
             renderedFrom={renderedFrom}
@@ -275,3 +204,75 @@ const CageManagement = () => {
 };
 
 export default CageManagement;
+
+const LeftSideContent = ({ plantOptions, plantId, setPlantId, productCategoryList, productCategory, setProductCategory }) => {
+  return (
+    <>
+      <Autocomplete
+        style={{ minWidth: '200px', flexGrow: 1 }}
+        className="md:max-w-[250px]"
+        options={plantOptions}
+        getOptionLabel={(option: any) => option.warehouseName}
+        disableClearable
+        getOptionSelected={(option: any, val) => option.warehouseId === val}
+        size={'small'}
+        value={
+          plantOptions.filter((data) => data.warehouseId === plantId).length ? plantOptions.filter((data) => data.warehouseId === plantId)[0] : ''
+        }
+        onChange={(e, val) => {
+          if (val !== null) {
+            setPlantId(val && val.warehouseId ? val.warehouseId : '');
+          }
+        }}
+        renderInput={(params) => (
+          <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+        )}
+      />
+      <Autocomplete
+        style={{ minWidth: '200px', flexGrow: 1 }}
+        className="md:max-w-[250px]"
+        options={productCategoryList}
+        getOptionLabel={(option: any) => (option ? option.name : '')}
+        getOptionSelected={(option: any, val) => option._id === val}
+        value={
+          productCategoryList.find((data) => data._id === productCategory) ? productCategoryList.find((data) => data._id === productCategory) : ''
+        }
+        onChange={(e, val) => {
+          setProductCategory(val && val._id ? val._id : '');
+        }}
+        renderInput={(params) => (
+          <TextField {...params} margin="none" size="small" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+        )}
+      />
+    </>
+  );
+};
+
+const RightSideContent = ({ setScanDialog, setHistoryDialog }) => {
+  return (
+    <>
+      <IconButton
+        onClick={() => {
+          setScanDialog(true);
+        }}
+        size="small"
+        color="primary"
+        aria-label="open drawer"
+      >
+        <CropFreeIcon />
+      </IconButton>
+      <IconButton
+        id="History"
+        aria-label="History"
+        color="primary"
+        title="History"
+        size={'small'}
+        onClick={() => {
+          setHistoryDialog(true);
+        }}
+      >
+        <HistoryIcon />
+      </IconButton>
+    </>
+  );
+};

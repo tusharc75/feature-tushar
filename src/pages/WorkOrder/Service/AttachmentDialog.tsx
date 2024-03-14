@@ -59,24 +59,26 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
     if (stepId) {
       api = api + `&stepId=${stepId}`;
     }
-    axiosInstance().get(api).then(({ data: { data } }) => {
-      if (!data) {
-        setInitialValues({ name: stepName, fileUrl: '' });
-        setIsFetching(false);
-        setIsEdit(false);
-      } else {
-        setIsEdit(true);
-        setCanEdit(data?.canEdit);
-        if (data?.file && data?.file?.length) {
-          data?.file?.sort((a: any, b: any) => {
-            return new Date(b?.date).getTime() - new Date(a?.date).getTime();
-          });
-          setOtherAttachments(data.file);
+    axiosInstance()
+      .get(api)
+      .then(({ data: { data } }) => {
+        if (!data) {
+          setInitialValues({ name: stepName, fileUrl: '' });
+          setIsFetching(false);
+          setIsEdit(false);
+        } else {
+          setIsEdit(true);
+          setCanEdit(data?.canEdit);
+          if (data?.file && data?.file?.length) {
+            data?.file?.sort((a: any, b: any) => {
+              return new Date(b?.date).getTime() - new Date(a?.date).getTime();
+            });
+            setOtherAttachments(data.file);
+          }
+          setIsFetching(false);
+          setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' });
         }
-        setIsFetching(false);
-        setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' });
-      }
-    })
+      })
       .catch((error) => {
         setInitialValues({ name: '', fileUrl: '' });
         setIsFetching(false);
@@ -88,15 +90,17 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
   const handleSave = (values) => {
     if (isEdit && otherAttachments?.length === 0) {
       setLoading(true);
-      axiosInstance().put('attachment/deletemany', { ids: [values?._id] }).then(({ data }) => {
-        setLoading(false);
-        handleSuccess();
-      }).catch((error) => {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
-      });
-    }
-    else {
+      axiosInstance()
+        .put('attachment/deletemany', { ids: [values?._id] })
+        .then(({ data }) => {
+          setLoading(false);
+          handleSuccess();
+        })
+        .catch((error) => {
+          setLoading(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else {
       let data = {
         name: values.name,
         attachmentType: values?.attachmentType || '',
@@ -169,82 +173,63 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
                     <Box padding={1}>
-                      <Grid container spacing={3}>
-                        <Grid item xs={6}>
-                          <TextField
-                            variant="outlined"
-                            type="text"
-                            label={'Name'}
-                            required={true}
-                            disabled={!canEdit}
-                            name="name"
-                            fullWidth
-                            margin="dense"
-                            value={values['name']}
-                            error={touched['name'] && Boolean(errors['name'])}
-                            helperText={touched['name'] && errors['name']}
-                            onChange={(e) => {
-                              setFieldValue('name', e.target.value.trimStart());
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Autocomplete
-                            id="attachmentType"
-                            size="small"
-                            disabled={!canEdit}
-                            options={Object.values(ATTACHMENT_TYPE)}
-                            renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="dense" />}
-                            getOptionLabel={(option) => option}
-                            getOptionSelected={(option: any, value: any) => option === value}
-                            onChange={(e, val) => {
-                              setFieldValue('attachmentType', val);
-                            }}
-                            value={values['attachmentType']}
-                          />
-                        </Grid>
-                        <Grid container item xs={12}>
-                          <Grid item xs={12}>
-                            <div style={{ width: '100%' }}>
-                              <Box display="flex" flexDirection="row">
-                                <Box>
-                                  <FormTypes
-                                    label="File"
-                                    name="fileUrl"
-                                    required={true}
-                                    type="fileUpload"
-                                    values={values}
-                                    canEdit={canEdit}
-                                    errors={errors}
-                                    touched={touched}
-                                    size="small"
-                                    setFieldValue={(fname, file) => {
-                                      setFieldValue('fileUrl', file);
-                                      onUploadFile(file);
-                                    }}
-                                    doNotShowUploadedFile={true}
-                                    imageOrFileUploadCompletePercentage={(completePercentage) => {
-                                      setUploadingImageOrFileProgress(completePercentage);
-                                    }}
-                                  />
-                                </Box>
-                                <Box pl={2}>
-                                  <CustomButton
-                                    variant="contained"
-                                    color="primary"
-                                    disabled={!canEdit}
-                                    onClick={() => setDocumentScanDialog(true)}>
-                                    Scan Document
-                                  </CustomButton>
-                                </Box>
-                              </Box>
-                            </div>
-                          </Grid>
-                          <Grid item xs={12}>
-                            <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit} />
-                          </Grid>
-                        </Grid>
-                      </Grid>
+                      <div className="grid grid-cols-1 min-[600px]:grid-cols-2 gap-2 max-w-[950px]">
+                        <TextField
+                          variant="outlined"
+                          type="text"
+                          label={'Name'}
+                          required={true}
+                          disabled={!canEdit}
+                          name="name"
+                          fullWidth
+                          margin="none"
+                          size="small"
+                          value={values['name']}
+                          error={touched['name'] && Boolean(errors['name'])}
+                          helperText={touched['name'] && errors['name']}
+                          onChange={(e) => {
+                            setFieldValue('name', e.target.value.trimStart());
+                          }}
+                        />
+                        <Autocomplete
+                          id="attachmentType"
+                          size="small"
+                          disabled={!canEdit}
+                          options={Object.values(ATTACHMENT_TYPE)}
+                          renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="none" />}
+                          getOptionLabel={(option) => option}
+                          getOptionSelected={(option: any, value: any) => option === value}
+                          onChange={(e, val) => {
+                            setFieldValue('attachmentType', val);
+                          }}
+                          value={values['attachmentType']}
+                        />
+                      </div>
+                      <div className="flex flex-wrap gap-2 my-2">
+                        <FormTypes
+                          label="File"
+                          name="fileUrl"
+                          required={true}
+                          type="fileUpload"
+                          values={values}
+                          canEdit={canEdit}
+                          errors={errors}
+                          touched={touched}
+                          size="small"
+                          setFieldValue={(fname, file) => {
+                            setFieldValue('fileUrl', file);
+                            onUploadFile(file);
+                          }}
+                          doNotShowUploadedFile={true}
+                          imageOrFileUploadCompletePercentage={(completePercentage) => {
+                            setUploadingImageOrFileProgress(completePercentage);
+                          }}
+                        />
+                        <CustomButton variant="contained" color="primary" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
+                          Scan Document
+                        </CustomButton>
+                      </div>
+                      <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit} />
                     </Box>
                   </Form>
                 </CustomDialogContent>

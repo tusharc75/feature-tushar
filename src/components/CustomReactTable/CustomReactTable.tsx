@@ -30,7 +30,7 @@ import Pagination from './TableComponents/Pagination';
 import TableComponent from './TableComponents/Table';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
-import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
+import { childrenProperty, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
 
 const CustomReactTable = ({
   columns,
@@ -82,6 +82,7 @@ const CustomReactTable = ({
   const [expandedRefChanged, setExpandedRefChanged] = useState(0);
 
   function toggleExpandChange() {
+    if (isMobileView) return;
     setExpandedRefChanged((prev) => {
       return prev === 10 ? 0 : (prev += 1);
     });
@@ -287,7 +288,7 @@ const CustomReactTable = ({
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
 
   const paginationLimit = useMemo(() => {
-    if (!expander) return limit;
+    if (!expander || isMobileView) return limit;
     if (isAllRowsExpanded) {
       if (isClientSideGrid) return table.getRowModel().flatRows.length;
       else return table.getExpandedRowModel().flatRows.length;
@@ -304,7 +305,7 @@ const CustomReactTable = ({
     };
     let length = getRowCount(table.getExpandedRowModel().rows, limit);
     return Math.max(length, limit);
-  }, [table, limit, expandedRefChanged, isAllRowsExpanded, isClientSideGrid, expander]);
+  }, [table, limit, expandedRefChanged, isAllRowsExpanded, isClientSideGrid, expander, isMobileView]);
 
   useEffect(() => {
     table.setPageSize(paginationLimit);

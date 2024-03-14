@@ -1,13 +1,13 @@
-import { Box, Button, Chip, Dialog, IconButton, Menu, MenuItem, Tooltip, Typography } from '@material-ui/core';
-import { AddOutlined, Delete as DeleteIcon, ExpandMore } from '@material-ui/icons';
+import { Box, Chip, Dialog, IconButton, MenuItem, Tooltip, Typography } from '@material-ui/core';
+import { Delete as DeleteIcon } from '@material-ui/icons';
 import { camelCase, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
-import { FaUserAltSlash, FaUserCheck } from 'react-icons/all';
+import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import SearchBox from 'src/components/Helpers/SearchBox';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -71,7 +71,6 @@ const User: FC = () => {
   const [entityAccess, setEntityAccess] = useState([]);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [generateAutoPassword, setGenerateAutoPassword] = useState(false);
 
   const extraColumns = [
@@ -496,17 +495,121 @@ const User: FC = () => {
     }
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const isLoggedInUserBrandAdmin = 'userType' in user?.user && user?.user?.userType === userType.brandAdmin;
   const isRoleSetUpPermission = permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate;
   const isUserSetupPermission = isLoggedInUserBrandAdmin || isRoleSetUpPermission;
+
+  const leftSideContents = () => {
+    return (
+      <>
+        {entityRoleRedirectDetails.id && (
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`${entityRoleRedirectDetails.text} : ${entityRoleRedirectDetails.name}`}
+            onDelete={() => {
+              setEntityRoleRedirectDetails({ id: null, name: null, type: null, text: null });
+            }}
+          />
+        )}
+      </>
+    );
+  };
+
+  const actionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+          onClick={() => {
+            if (selectedRecords) {
+              setDeleteUser(selectedRecords);
+              setShowDeleteDialog(true);
+            }
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+        <MenuItem
+          disabled={
+            !(
+              user?.user?.userType === userType.brandAdmin &&
+              selectedRecords?.length &&
+              selectedRecords.some((records) => 'userType' in records && records.userType === userType.brandAdmin)
+            )
+          }
+          onClick={handleAssignBrandAdmin}
+        >
+          Assign Brand Admin
+        </MenuItem>
+        <MenuItem
+          disabled={!(permissions?.user?.isUpdate && user?.user?.userType === userType.brandAdmin && selectedRecords?.length)}
+          onClick={() => {
+            setShowApprovalProcessDialog(true);
+          }}
+        >
+          Set Approval Process
+        </MenuItem>
+        <MenuItem
+          disabled={!(permissions?.user?.isUpdate && selectedRecords?.length)}
+          onClick={() => {
+            handleRegionalRolesOpenDialog();
+          }}
+        >
+          Assign Entities - Roles
+        </MenuItem>
+        <MenuItem
+          disabled={!(permissions?.user?.isUpdate && entityRoleRedirectDetails.id && selectedRecords?.length)}
+          onClick={() => {
+            unAssignUsersFromEntity();
+          }}
+        >
+          Un-assign Entity
+        </MenuItem>
+        <MenuItem
+          disabled={!(isUserSetupPermission && selectedRecords?.length)}
+          onClick={() => {
+            setOpenUserSetupDialog(true);
+          }}
+        >
+          User Setup
+        </MenuItem>
+        {user?.user?.userType === userType.brandAdmin && (
+          <MenuItem
+            onClick={() => {
+              setGenerateAutoPassword(true);
+            }}
+          >
+            Generate Password
+          </MenuItem>
+        )}
+        <MenuItem
+          disabled={!permissions?.user?.isUpdate}
+          onClick={() => {
+            handleResetPassword();
+          }}
+        >
+          Reset Password
+        </MenuItem>
+        <MenuItem
+          disabled={!user?.role?.selectedEntity?.superAdminAccess}
+          onClick={() => {
+            handleEmailVisibility(true);
+          }}
+        >
+          Hide Email
+        </MenuItem>
+        <MenuItem
+          disabled={!user?.role?.selectedEntity?.superAdminAccess}
+          onClick={() => {
+            handleEmailVisibility(false);
+          }}
+        >
+          Unhide Email
+        </MenuItem>
+      </>
+    );
+  };
 
   return (
     <>
@@ -618,162 +721,20 @@ const User: FC = () => {
           />
         </div>
         <CustomContainer>
-          <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'flex justify-between align-items-center gap-1 w-full'}>
-                {entityRoleRedirectDetails.id && (
-                  <Chip
-                    className="ml-3"
-                    color="primary"
-                    label={`${entityRoleRedirectDetails.text} : ${entityRoleRedirectDetails.name}`}
-                    onDelete={() => {
-                      setEntityRoleRedirectDetails({ id: null, name: null, type: null, text: null });
-                    }}
-                  />
-                )}
-              </div>
-              <div className="flex flex-wrap gap-[8px] justify-end">
-                <SearchBox onChange={handleSearch} value={search} size="small" />
-                <div className="flex gap-[8px] flex-wrap items-center">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    className={`no-shadow`}
-                    disabled={!permissions?.user?.isCreate}
-                    onClick={() => {
-                      setIsOpen({ open: true, isClone: false, idToClone: null });
-                    }}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    className={`new-dropdown-v1`}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                    disabled={selectedRecords?.length === 0}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                      onClick={() => {
-                        closeActions();
-                        if (selectedRecords) {
-                          setDeleteUser(selectedRecords);
-                          setShowDeleteDialog(true);
-                        }
-                      }}
-                    >
-                      {`Delete (${selectedRecords?.length})`}
-                    </MenuItem>
-                    <MenuItem
-                      disabled={
-                        !(
-                          user?.user?.userType === userType.brandAdmin &&
-                          selectedRecords?.length &&
-                          selectedRecords.some((records) => 'userType' in records && records.userType === userType.brandAdmin)
-                        )
-                      }
-                      onClick={handleAssignBrandAdmin}
-                    >
-                      Assign Brand Admin
-                    </MenuItem>
-                    <MenuItem
-                      disabled={!(permissions?.user?.isUpdate && user?.user?.userType === userType.brandAdmin && selectedRecords?.length)}
-                      onClick={() => {
-                        setShowApprovalProcessDialog(true);
-                        closeActions();
-                      }}
-                    >
-                      Set Approval Process
-                    </MenuItem>
-                    <MenuItem
-                      disabled={!(permissions?.user?.isUpdate && selectedRecords?.length)}
-                      onClick={() => {
-                        handleRegionalRolesOpenDialog();
-                        closeActions();
-                      }}
-                    >
-                      Assign Entities - Roles
-                    </MenuItem>
-                    <MenuItem
-                      disabled={!(permissions?.user?.isUpdate && entityRoleRedirectDetails.id && selectedRecords?.length)}
-                      onClick={() => {
-                        unAssignUsersFromEntity();
-                        closeActions();
-                      }}
-                    >
-                      Un-assign Entity
-                    </MenuItem>
-                    <MenuItem
-                      disabled={!(isUserSetupPermission && selectedRecords?.length)}
-                      onClick={() => {
-                        setOpenUserSetupDialog(true);
-                        closeActions();
-                      }}
-                    >
-                      User Setup
-                    </MenuItem>
-                    {user?.user?.userType === userType.brandAdmin && (
-                      <MenuItem
-                        onClick={() => {
-                          setGenerateAutoPassword(true);
-                          closeActions();
-                        }}
-                      >
-                        Generate Password
-                      </MenuItem>
-                    )}
-                    <MenuItem
-                      disabled={!permissions?.user?.isUpdate}
-                      onClick={() => {
-                        handleResetPassword();
-                        closeActions();
-                      }}
-                    >
-                      Reset Password
-                    </MenuItem>
-                    <MenuItem
-                      disabled={!user?.role?.selectedEntity?.superAdminAccess}
-                      onClick={() => {
-                        handleEmailVisibility(true);
-                        closeActions();
-                      }}
-                    >
-                      Hide Email
-                    </MenuItem>
-                    <MenuItem
-                      disabled={!user?.role?.selectedEntity?.superAdminAccess}
-                      onClick={() => {
-                        handleEmailVisibility(false);
-                        closeActions();
-                      }}
-                    >
-                      Unhide Email
-                    </MenuItem>
-                  </Menu>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ListingPageHeader
+            leftSideContents={leftSideContents()}
+            searchValue={search}
+            onSearch={handleSearch}
+            isActionButtonVisible
+            actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+            actionMenuItems={actionMenuItems()}
+            addButtonOnclick={() => {
+              setIsOpen({ open: true, isClone: false, idToClone: null });
+            }}
+            isAddButtonVisible
+            setQueryString={false}
+            synchronizeType={false}
+          />
 
           {columns ? (
             <CustomReactTable

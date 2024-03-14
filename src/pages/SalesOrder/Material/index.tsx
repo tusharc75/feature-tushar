@@ -1,32 +1,31 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, MenuItem, MenuList, Popover, Menu } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import Add from '@material-ui/icons/Add';
-import { MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
+import { Box, IconButton, MenuItem, MenuList, Popover } from '@material-ui/core';
+import { default as Add } from '@material-ui/icons/Add';
+import DateRangeIcon from '@material-ui/icons/DateRange';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { isMobile, isTablet } from 'react-device-detect';
-import { camelCase, isArray, startCase } from 'lodash';
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import SalesOrderQtyDialog from './SalesOrderQtyDialog';
-import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
-import LeadTimeDialog from './LeadTimeDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase, isArray, startCase } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import AddIcon from '@material-ui/icons/Add';
-import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import routes from '../../../components/Helpers/Routes';
+import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
+import { MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
+import LeadTimeDialog from './LeadTimeDialog';
+import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 
 const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
   const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
@@ -46,8 +45,6 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
 
   const { state, dispatch } = useTableReducer();
@@ -102,15 +99,17 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         width: 300,
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {<p
-              onClick={() => {
-                handleOpen(row, table.getRowModel().rows);
-              }}
-              className="link text-truncate"
-              title={row.original?.detail}
-            >
-              {row.original?.detail}
-            </p>}
+            {
+              <p
+                onClick={() => {
+                  handleOpen(row, table.getRowModel().rows);
+                }}
+                className="link text-truncate"
+                title={row.original?.detail}
+              >
+                {row.original?.detail}
+              </p>
+            }
             {row?.original?.type !== MATERIAL_TYPE.service && (
               <Box ml={1} className="d-flex align-items-center">
                 {row.original?.subRows?.length > 0 && (
@@ -157,18 +156,19 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       },
       ...(permissions?.leadTimeMaster
         ? [
-          {
-            accessor: 'leadTime',
-            Header: 'Lead Time (Days)',
-            Cell: ({ row }) => <div>{(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)}</div>,
-            Footer: (info) => {
-              let rows = info.table.getExpandedRowModel().rows;
-              const total = rows?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-              return <>{total}</>;
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+              Footer: (info) => {
+                let rows = info.table.getExpandedRowModel().rows;
+                const total = rows
+                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
             }
-          }
-        ]
+          ]
         : [])
     ];
     coloum = [...coloum, ...newColumns];
@@ -181,53 +181,52 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, table }) =>
-      (<>
-        <HtmlTooltip title={'Edit'} placement="top" enterTouchDelay={0} arrow>
-          <IconButton
-            size="small"
-            aria-label="Details"
-            onClick={() => {
-              handleOpen(row, table.getRowModel().rows);
-            }}
-          >
-            <EditIcon fontSize="small" color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-        {permissions?.leadTimeMaster && (
-          <HtmlTooltip title={'Lead Time'} placement="top" enterTouchDelay={0} arrow>
+      Cell: ({ row, table }) => (
+        <>
+          <HtmlTooltip title={'Edit'} placement="top" enterTouchDelay={0} arrow>
             <IconButton
               size="small"
               aria-label="Details"
               onClick={() => {
-                setLeadTimeDialog({ open: true, data: row.original });
+                handleOpen(row, table.getRowModel().rows);
               }}
             >
-              <DateRangeIcon fontSize="small" color="primary" />
+              <EditIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-        )}
-        <HtmlTooltip title={'Delete'} placement="top" enterTouchDelay={0} arrow>
-          <IconButton
-            size="small"
-            aria-label="Details"
-            onClick={() => {
-              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-              getNestedSubRows(obj, row.original);
-              setDeleteData(obj);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </HtmlTooltip>
-      </>
+          {permissions?.leadTimeMaster && (
+            <HtmlTooltip title={'Lead Time'} placement="top" enterTouchDelay={0} arrow>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  setLeadTimeDialog({ open: true, data: row.original });
+                }}
+              >
+                <DateRangeIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          <HtmlTooltip title={'Delete'} placement="top" enterTouchDelay={0} arrow>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                getNestedSubRows(obj, row.original);
+                setDeleteData(obj);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        </>
       )
     });
     setColumns(coloum);
   };
 
   const fetchData = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -239,18 +238,19 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.service
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
-        }`;
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
           : parent.type === MATERIAL_TYPE.package
-            ? parent?.packageDetail?.packageDescription
-            : parent?.serviceDetail?.serviceDescription;
+          ? parent?.packageDetail?.packageDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -264,25 +264,25 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
-
   };
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.type === MATERIAL_TYPE.service
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
-        }`;
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
@@ -295,22 +295,6 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
-  };
-
-  const openAddMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeAddMenu = () => {
-    setAnchorEl(null);
-  };
-
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
   };
 
   const handleAdd = async (rows) => {
@@ -348,10 +332,10 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       .then(() => {
         setAddDialog({ open: false, type: '', parentId: null });
         fetchData();
-        fetchSalesOrderData()
+        fetchSalesOrderData();
         setSubmitting(false);
         if (salesOrderData?.status === SALES_ORDER_STATUS.new) {
-          updateJobStatus(SALES_ORDER_STATUS.inProgress)
+          updateJobStatus(SALES_ORDER_STATUS.inProgress);
         }
       })
       .catch((error) => {
@@ -383,7 +367,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
         fetchData();
-        fetchSalesOrderData()
+        fetchSalesOrderData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -398,7 +382,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       .then(() => {
         setDeleting(false);
         fetchData();
-        fetchSalesOrderData()
+        fetchSalesOrderData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -455,119 +439,93 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     }
   };
 
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        {permissions?.product?.isRead && (
+          <MenuItem
+            color="primary"
+            onClick={() => {
+              setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
+            }}
+          >
+            {`Add Existing Products`}
+          </MenuItem>
+        )}
+
+        {permissions?.packages?.isRead && (
+          <MenuItem
+            color="primary"
+            onClick={() => {
+              setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
+            }}
+          >
+            {`Add Existing Packages`}
+          </MenuItem>
+        )}
+        {permissions?.serviceMaster?.isRead && (
+          <MenuItem
+            color="primary"
+            onClick={() => {
+              setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
+            }}
+          >
+            {`Add Existing Services`}
+          </MenuItem>
+        )}
+      </>
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            const dataToDelete =
+              selectedRecords &&
+              selectedRecords
+                .filter((e) => !e.hideSelection)
+                .map((rec: any) => {
+                  const obj: any = {};
+                  obj.id = rec._id;
+                  obj.type = rec?.type;
+                  obj.materialId = rec?.materialId;
+                  return obj;
+                });
+            setDeleteData(dataToDelete);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center">
-          <Button variant="outlined" size="small" onClick={openAddMenu} startIcon={<AddIcon />} color="primary">
-            Add
-            <ExpandMore fontSize="small" />
-          </Button>
-          <Menu
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            anchorEl={anchorEl}
-            keepMounted
-            open={Boolean(anchorEl)}
-            onClose={closeAddMenu}
-          >
-            {permissions?.product?.isRead && (
-              <MenuItem
-                color="primary"
-                onClick={() => {
-                  setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
-                  closeAddMenu();
-                }}
-              >
-                {`Add Existing Products`}
-              </MenuItem>
-            )}
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{
+          tooltip: Boolean(selectedRecords && selectedRecords.length) ? 'Delete selected records' : 'Select records to delete',
+          disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)
+        }}
+        leftSideContents
+        rightSideContents
+        hasXpadding
+      />
 
-            {permissions?.packages?.isRead && (
-              <MenuItem
-                color="primary"
-                onClick={() => {
-                  setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
-                  closeAddMenu();
-                }}
-              >
-                {`Add Existing Packages`}
-              </MenuItem>
-            )}
-            {permissions?.serviceMaster?.isRead && (
-              <MenuItem
-                color="primary"
-                onClick={() => {
-                  setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
-                  closeAddMenu();
-                }}
-              >
-                {`Add Existing Services`}
-              </MenuItem>
-            )}
-          </Menu>
-        </Box>
-        <Box display="flex">
-          <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
-            <span>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
-                onClick={openActions}
-                endIcon={<KeyboardArrowDown fontSize="small" />}
-                className="new-dropdown-v1"
-              >
-                Actions
-              </Button>
-            </span>
-          </HtmlTooltip>
-          <Menu
-            anchorEl={anchorActionEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            open={Boolean(anchorActionEl)}
-            onClose={closeActions}
-          >
-            <MenuItem
-              onClick={() => {
-                setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
-                closeActions();
-              }}
-            >
-              Bulk Edit
-            </MenuItem>
-
-            <MenuItem
-              onClick={() => {
-                const dataToDelete =
-                  selectedRecords &&
-                  selectedRecords
-                    .filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                setDeleteData(dataToDelete);
-                closeActions();
-              }}
-            >
-              Delete
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Box>
       {columns ? (
         <>
           <Box zIndex={5} width={'100%'}>

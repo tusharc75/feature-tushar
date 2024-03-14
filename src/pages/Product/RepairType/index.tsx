@@ -1,20 +1,18 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { repairType, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { ExpandMore } from '@material-ui/icons';
-import { deleteDisable } from 'src/constants/messageHelpers';
+import axiosInstance from 'src/axios/axiosInstance';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import routes from 'src/components/Helpers/Routes';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { gridLoadingTimeout, prepareDataForGrid, repairType, sidebarResource } from 'src/constants/helpers';
+import { deleteDisable } from 'src/constants/messageHelpers';
 
 interface Props {
   renderedFrom: string;
@@ -34,7 +32,6 @@ const ProductRepairType = (props: Props) => {
   const [isDeleting, setDeleting] = useState(false);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const {
     state: { permissions }
@@ -126,7 +123,6 @@ const ProductRepairType = (props: Props) => {
       ids = selectedRecords.map((d) => d._id);
     }
     setDeleting(true);
-    closeActions();
     axiosInstance()
       .put(`${routes.product.path}/${id}/repair-type/remove`, { ids: ids })
       .then(() => {
@@ -158,53 +154,37 @@ const ProductRepairType = (props: Props) => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem onClick={() => setOpenAddDialog(true)}>Add Repair Types</MenuItem>
+      </>
+    );
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
+          Delete
+        </MenuItem>
+      </>
+    );
   };
 
   return (
     <Fragment>
       {permissions?.product?.isUpdate && (
-        <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
-          <Button variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
-            Add Repair Types
-          </Button>
-          <Box display={'flex'}>
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              disabled={selectedRecords.length ? false : true}
-              aria-controls="action-menu"
-              style={{ marginLeft: '0.6rem' }}
-              endIcon={<ExpandMore />}
-              className="new-dropdown-v1"
-            >
-              {isMobile && !isTablet ? '' : 'Actions'}
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
-                Delete
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonMenuItems={addButtonMenuItems()}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            hasXpadding={false}
+          />
+        </>
       )}
       {columns ? (
         <CustomReactTable

@@ -124,7 +124,7 @@ const ManageSerializedAsset = ({
               createValues[key] = '';
             }
           })
-          if (referenceType === 'repairOrder') {
+          if (referenceType === 'repairOrder' || referenceType === 'repairJob') {
             if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount') && referenceData?.customerAccount) {
               createValues['customerAccount'] = referenceData?.customerAccount;
             }
@@ -144,7 +144,6 @@ const ManageSerializedAsset = ({
               }
             });
           }
-
           if (createValues['warehouse'] && !createValues['currentLocation']) {
             const warehouseAddress = plantsOptions?.find((e) => e.optionValue === createValues['warehouse']);
             if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === 'currentLocation')) {

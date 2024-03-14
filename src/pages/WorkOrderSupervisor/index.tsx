@@ -1,10 +1,10 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Select, TextField } from '@material-ui/core';
+import { FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Popover, Select, TextField, useMediaQuery } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
-import React, { Fragment, useCallback, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CardColTimeline, { useCardReducer, datarowInterface } from 'src/components/CardColTimeline';
@@ -16,6 +16,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
 import AssignUserDialog from '../WorkOrder/Service/AssignUserDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { BiFilterAlt } from 'react-icons/bi';
 
 const RESOURCE = [
   { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
@@ -94,7 +96,6 @@ const WorkOrderSupervisor = () => {
       .then(({ data: { data } }) => {
         setServiceMasterOption(data['Service Master'] || []);
         setUsersOption(data['Employee Master'] || []);
-
       });
   }, []);
 
@@ -244,6 +245,161 @@ const WorkOrderSupervisor = () => {
     globalFilters
   ]);
 
+  const isMobile = useMediaQuery('(max-width: 650px)');
+
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
+
+  const reset = () => {
+    setSelectedUser(null);
+    setSelectedService(null);
+    setSelectedResource(null);
+    setSelectedResourceOption(null);
+  };
+
+  const isFilterPresent = useMemo(() => {
+    return selectedUser || selectedService || selectedResource || selectedResourceOption;
+  }, [selectedUser, selectedService, selectedResource, selectedResourceOption]);
+
+  const filters = (
+    <>
+      <Autocomplete
+        fullWidth
+        options={usersOption}
+        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+        getOptionSelected={(option: any, val) => {
+          return option.optionValue === val.optionValue;
+        }}
+        value={
+          usersOption.filter((data) => data.optionValue === selectedUser).length
+            ? usersOption.filter((data) => data.optionValue === selectedUser)[0]
+            : ''
+        }
+        onChange={(e, val) => {
+          setSelectedUser(val && val.optionValue ? val.optionValue : '');
+        }}
+        renderInput={(params) => (
+          <TextField {...params} margin="none" size="small" name="user" placeholder="Technician" label="Technician" variant="outlined" fullWidth />
+        )}
+      />
+      <Autocomplete
+        fullWidth
+        options={serviceMasterOption}
+        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+        getOptionSelected={(option: any, val) => {
+          return option.optionValue === val.optionValue;
+        }}
+        value={
+          serviceMasterOption.filter((data) => data.optionValue === selectedService).length
+            ? serviceMasterOption.filter((data) => data.optionValue === selectedService)[0]
+            : ''
+        }
+        onChange={(e, val) => {
+          setSelectedService(val && val.optionValue ? val.optionValue : '');
+        }}
+        renderInput={(params) => (
+          <TextField {...params} margin="none" size="small" name="user" placeholder="Service" label="Service" variant="outlined" fullWidth />
+        )}
+      />
+      <Autocomplete
+        fullWidth
+        options={resourceFilter}
+        getOptionLabel={(option: any) => (option ? option?.title : '')}
+        value={selectedResource}
+        onChange={(e, val) => {
+          setSelectedResourceOption(null);
+          setSelectedResource(val);
+        }}
+        renderInput={(params) => <TextField {...params} margin="none" size="small" label="Select Resource" variant="outlined" fullWidth />}
+      />
+      {selectedResource && (
+        <Autocomplete
+          fullWidth
+          options={resourceOptions}
+          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+          getOptionSelected={(option: any, val) => {
+            return option.optionValue === val.optionValue;
+          }}
+          value={
+            resourceOptions.filter((data) => data.optionValue === selectedResourceOption).length
+              ? resourceOptions.filter((data) => data.optionValue === selectedResourceOption)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            setSelectedResourceOption(val && val.optionValue ? val.optionValue : '');
+          }}
+          renderInput={(params) => (
+            <TextField {...params} margin="none" size="small" label={`Select ${selectedResource?.title}`} variant="outlined" fullWidth />
+          )}
+        />
+      )}
+      <FormControl fullWidth size="small" margin="none" variant="outlined">
+        <InputLabel id="duration">Select Duration</InputLabel>
+        <Select
+          labelId="duration"
+          id="time-duration"
+          value={timeFrame}
+          onChange={(e) => setTimeFrame(e.target.value)}
+          label="Select Duration"
+          SelectDisplayProps={{
+            style: { minHeight: 22.5 }
+          }}
+          fullWidth
+        >
+          <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+          <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+          <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+          <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+          <MenuItem value={'custom'}>Custom</MenuItem>
+        </Select>
+      </FormControl>
+      <KeyboardDatePicker
+        disabled={timeFrame !== 'custom'}
+        inputVariant="outlined"
+        variant="inline"
+        size="small"
+        InputProps={{
+          style: { minHeight: '38px' }
+        }}
+        autoOk
+        format={dateFormatForInputControl}
+        maxDate={globalFilters.to}
+        label="From"
+        value={globalFilters.from}
+        onChange={(date) => {
+          setGlobalFilters({ ...globalFilters, from: date });
+        }}
+      />
+      <KeyboardDatePicker
+        disabled={timeFrame !== 'custom'}
+        inputVariant="outlined"
+        variant="inline"
+        autoOk
+        size="small"
+        InputProps={{
+          style: { minHeight: '38px' }
+        }}
+        minDate={globalFilters.from}
+        format={dateFormatForInputControl}
+        label="To"
+        value={globalFilters.to}
+        onChange={(date) => {
+          setGlobalFilters({ ...globalFilters, to: date });
+        }}
+      />
+    </>
+  );
+
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <Fragment>
@@ -256,148 +412,62 @@ const WorkOrderSupervisor = () => {
           <div className="header-panel">
             <div className="grid grid-cols-[1fr_30px] gap-2 items-start">
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3 align-items-center">
-                <Autocomplete
-                  fullWidth
-                  options={usersOption}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => {
-                    return option.optionValue === val.optionValue;
-                  }}
-                  value={
-                    usersOption.filter((data) => data.optionValue === selectedUser).length
-                      ? usersOption.filter((data) => data.optionValue === selectedUser)[0]
-                      : ''
-                  }
-                  onChange={(e, val) => {
-                    setSelectedUser(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      margin="none"
-                      size="small"
-                      name="user"
-                      placeholder="Technician"
-                      label="Technician"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  )}
-                />
-                <Autocomplete
-                  fullWidth
-                  options={serviceMasterOption}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => {
-                    return option.optionValue === val.optionValue;
-                  }}
-                  value={
-                    serviceMasterOption.filter((data) => data.optionValue === selectedService).length
-                      ? serviceMasterOption.filter((data) => data.optionValue === selectedService)[0]
-                      : ''
-                  }
-                  onChange={(e, val) => {
-                    setSelectedService(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      margin="none"
-                      size="small"
-                      name="user"
-                      placeholder="Service"
-                      label="Service"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  )}
-                />
-                <Autocomplete
-                  fullWidth
-                  options={resourceFilter}
-                  getOptionLabel={(option: any) => (option ? option?.title : '')}
-                  value={selectedResource}
-                  onChange={(e, val) => {
-                    setSelectedResourceOption(null);
-                    setSelectedResource(val);
-                  }}
-                  renderInput={(params) => <TextField {...params} margin="none" size="small" label="Select Resource" variant="outlined" fullWidth />}
-                />
-                {selectedResource && (
-                  <Autocomplete
-                    fullWidth
-                    options={resourceOptions}
-                    getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => {
-                      return option.optionValue === val.optionValue;
-                    }}
-                    value={
-                      resourceOptions.filter((data) => data.optionValue === selectedResourceOption).length
-                        ? resourceOptions.filter((data) => data.optionValue === selectedResourceOption)[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setSelectedResourceOption(val && val.optionValue ? val.optionValue : '');
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} margin="none" size="small" label={`Select ${selectedResource?.title}`} variant="outlined" fullWidth />
-                    )}
-                  />
+                {isMobile ? (
+                  <>
+                    <div className="max-w-fit mr-auto relative">
+                      {isFilterPresent ? (
+                        <>
+                          <span
+                            className={`${
+                              isFilterPresent ? ' opacity-100' : 'opacity-0'
+                            } bg-red-500 w-[6px] h-[6px] absolute -top-[2px] -right-[2px] rounded-full z-[9] animate-ping`}
+                          ></span>
+                          <span
+                            className={`${
+                              isFilterPresent ? ' opacity-100' : 'opacity-0'
+                            } bg-red-500 w-[6px] h-[6px] absolute -top-[2px] -right-[2px] rounded-full z-10`}
+                          ></span>
+                        </>
+                      ) : null}
+                      <ThemeButton startIcon={<BiFilterAlt />} iconForMobile={<BiFilterAlt />} tooltip="Apply Filters" onClick={handleClick}>
+                        Filter
+                      </ThemeButton>
+                    </div>
+                    <Popover
+                      id={id}
+                      open={open}
+                      anchorEl={anchorEl}
+                      onClose={handleClose}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      PaperProps={{
+                        style: {
+                          borderRadius: 5
+                        }
+                      }}
+                    >
+                      <div className="grid gap-3 p-5">
+                        {filters}
+                        <div className="flex justify-between gap-2">
+                          {isFilterPresent ? (
+                            <ThemeButton iconForMobile={false} onClick={reset}>
+                              Clear Filters
+                            </ThemeButton>
+                          ) : (
+                            <span />
+                          )}
+                          <ThemeButton iconForMobile={false} onClick={handleClose} className="ml-auto">
+                            Close
+                          </ThemeButton>
+                        </div>
+                      </div>
+                    </Popover>
+                  </>
+                ) : (
+                  filters
                 )}
-                <FormControl fullWidth size="small" margin="none" variant="outlined">
-                  <InputLabel id="duration">Select Duration</InputLabel>
-                  <Select
-                    labelId="duration"
-                    id="time-duration"
-                    value={timeFrame}
-                    onChange={(e) => setTimeFrame(e.target.value)}
-                    label="Select Duration"
-                    SelectDisplayProps={{
-                      style: { minHeight: 22.5 }
-                    }}
-                    fullWidth
-                  >
-                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                    <MenuItem value={'custom'}>Custom</MenuItem>
-                  </Select>
-                </FormControl>
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
-                  inputVariant="outlined"
-                  variant="inline"
-                  size="small"
-                  InputProps={{
-                    style: { minHeight: '38px' }
-                  }}
-                  autoOk
-                  format={dateFormatForInputControl}
-                  maxDate={globalFilters.to}
-                  label="From"
-                  value={globalFilters.from}
-                  onChange={(date) => {
-                    setGlobalFilters({ ...globalFilters, from: date });
-                  }}
-                />
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
-                  inputVariant="outlined"
-                  variant="inline"
-                  autoOk
-                  size="small"
-                  InputProps={{
-                    style: { minHeight: '38px' }
-                  }}
-                  minDate={globalFilters.from}
-                  format={dateFormatForInputControl}
-                  label="To"
-                  value={globalFilters.to}
-                  onChange={(date) => {
-                    setGlobalFilters({ ...globalFilters, to: date });
-                  }}
-                />
               </div>
               <div className="pt-[4px]">
                 <HtmlTooltip title={'Refresh'}>

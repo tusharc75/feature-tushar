@@ -13,6 +13,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const PackagesTable = ({ packageId, packageData }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
@@ -29,7 +30,6 @@ const PackagesTable = ({ packageId, packageData }) => {
   const [isRemovingProducts, setRemovingProducts] = useState(false);
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const { dataRows, selectedRecords } = state;
 
   const [isSubmitting, setSubmitting] = useState(false);
@@ -47,7 +47,7 @@ const PackagesTable = ({ packageId, packageData }) => {
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res = {
-            ...prepareDataForGrid(u,user),
+            ...prepareDataForGrid(u, user),
             inventoryCount: u?.qty,
             warehouses: u.warehouse?.map((w) => w.warehouseName).join(', '),
             productCategoryChipColor: u.productCategory?.chipColour
@@ -72,7 +72,7 @@ const PackagesTable = ({ packageId, packageData }) => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Packages`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path);
     setColumns([...newColumns, ActionsRenderer]);
   };
 
@@ -142,102 +142,77 @@ const PackagesTable = ({ packageId, packageData }) => {
       });
   };
 
-  const handleClick = (event) => {
-    setAnchorActionEl(event.currentTarget);
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem onClick={() => setShowProductAssignDialog(true)}>Add Product Packages</MenuItem>
+        <Box ml={1} />
+        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>Add Service Packages</MenuItem>
+      </>
+    );
   };
 
-  const handleClose = () => {
-    setAnchorActionEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords.length === 0 || isRemovingProducts}
+          onClick={() => {
+            setShowProductConfirmBox(true);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        <ImportExportMenu
+          permissions={permissions?.packages}
+          module="packages"
+          api={`${packages.api}/${packageId}/package`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          ids={[]}
+          additionalParams={`refrenceId=${packageId}`}
+        />
+      </>
+    );
   };
 
   return (
-    <Box>
-      <Box mb={1} mt={1} display="flex" justifyContent="space-between">
-        <Box display="flex">
-          {permissions?.packages?.isUpdate && (
-            <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-start' }}>
-              <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
-                {`Add Product Packages`}
-              </Button>
-              <Box ml={1} />
-              <Button variant="contained" color="primary" size="small" onClick={() => setShowServiceAssignDialog(true)}>
-                {`Add Service Packages`}
-              </Button>
-            </Box>
-          )}
-        </Box>
-        <Box display="flex">
-          {permissions?.packages?.isUpdate && (
-            <>
-              <Button
-                variant={'outlined'}
-                color="primary"
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                disabled={selectedRecords.length === 0 || isRemovingProducts}
-                size="small"
-                onClick={handleClick}
-                endIcon={<ArrowDropDownIcon />}
-                className="new-dropdown-v1"
-              >
-                {'Actions'}
-              </Button>
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                open={Boolean(anchorActionEl)}
-                onClose={handleClose}
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-              >
-                <MenuItem
-                  disabled={selectedRecords.length === 0 || isRemovingProducts}
-                  onClick={() => {
-                    setShowProductConfirmBox(true);
-                    handleClose();
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </Menu>
-            </>
-          )}
+    <>
+      <DetailsPageHeader
+        isAddButtonVisible={permissions?.packages?.isUpdate}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={permissions?.packages?.isUpdate}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingProducts }}
+        rightSideContents={rightSideContents()}
+        hasXpadding
+      />
 
-          <Box ml={1} />
-          <ImportExportMenu
-            permissions={permissions?.packages}
-            module="packages"
-            api={`${packages.api}/${packageId}/package`}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
-          />
-        </Box>
-      </Box>
       {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 393px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            isClientSideGrid={true}
-            refreshGrid={fetchData}
-            onSaveEdit={handleUpdateQuantity}
-          />
-        ) : <Box p={2} height={500}>
+        <CustomReactTable
+          height={'calc(100vh - 393px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          isClientSideGrid={true}
+          refreshGrid={fetchData}
+          onSaveEdit={handleUpdateQuantity}
+        />
+      ) : (
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        </Box>
+      )}
       {showProductAssignDialog && (
         <AssignPackageDialog
           handleClose={() => setShowProductAssignDialog(false)}
@@ -271,7 +246,7 @@ const PackagesTable = ({ packageId, packageData }) => {
           onOk={removeProducts}
         />
       )}
-    </Box>
+    </>
   );
 };
 

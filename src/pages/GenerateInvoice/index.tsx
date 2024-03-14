@@ -13,13 +13,12 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import { FIELD_TICKET_STATUS, INVOICE_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ViewInvoice from '../Invoice/ViewInvoice';
 import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
 import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
-import ListingPageHeader from 'src/components/ListingPageHeader';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 const GENERATE_RESOURCE = [
   {
@@ -57,16 +56,16 @@ const GENERATE_RESOURCE = [
     progressiveBilling: false,
     path: routes.fieldTicketDetail.path,
     title: routes.fieldTicket.title
+  },
+  {
+    key: 'salesOrder',
+    resource: sidebarResource.salesOrder,
+    fieldName: 'salesOrderNumber',
+    invoiceFieldName: 'salesOrder',
+    progressiveBilling: false,
+    path: routes.salesOrderDetail.path,
+    title: routes.salesOrder.title
   }
-  // {
-  //   key: 'salesOrder',
-  //   resource: sidebarResource.salesOrder,
-  //   fieldName: 'salesOrderNumber',
-  //   invoiceFieldName: 'salesOrder',
-  //   progressiveBilling: false,
-  //   path: routes.salesOrderDetail.path,
-  //   title: routes.salesOrder.title
-  // }
 ];
 
 const GenerateInvoice = ({ resourceRendered = null }) => {

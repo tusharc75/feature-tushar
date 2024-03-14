@@ -10,11 +10,12 @@ import {
     TableBody,
     TableCell,
     TableRow,
-    Link
+    Link,
+    Checkbox
 } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ASSET_NUMBER_TYPE } from '../../../constants/helpers';
+import { ASSET_NUMBER_TYPE, sidebarResource } from '../../../constants/helpers';
 import { Formik, Form, FieldArray } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { read, utils, writeFile } from 'xlsx';
@@ -25,7 +26,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
+const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, resource }) => {
 
     const { setToastConfig } = useContext(CustomToastContext);
 
@@ -46,6 +47,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
                         id: product?.id,
                         index: `${index + 1}.${index2 + 1}`,
                         productName: product?.productName,
+                        createAsset: true,
                         assetNumberType: assetNumberType ? ASSET_NUMBER_TYPE.auto : ASSET_NUMBER_TYPE.manual,
                         assetNumber: ''
                     }))
@@ -59,7 +61,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
     const handleSubmit = (values) => {
         const data: any = [...products];
         data?.forEach((ele) => {
-            ele.assetNumbers = values?.products?.filter((e) => e.assetNumberType === ASSET_NUMBER_TYPE.manual && e.id === ele.id)?.map((e) => e.assetNumber)
+            ele.assetNumbers = values?.products?.filter((e) => e.assetNumberType === ASSET_NUMBER_TYPE.manual && e.id === ele.id)?.map((e) => { return { assetNumber: e.assetNumber, createAsset: e.createAsset } })
         })
         handleSuccess(data)
     };
@@ -69,6 +71,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
             const obj: any = {};
             obj['Index'] = data['index'];
             obj['Product Name'] = data['productName'];
+            obj['Create Assets'] = data['createAsset'] ? 'TRUE' : 'FALSE';
             if (assetNumberTypeField) {
                 obj['Asset Number Type'] = data['assetNumberType'];
             }
@@ -78,6 +81,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
         let header = [];
         header.push('Index')
         header.push('Product Name')
+        header.push('Create Assets')
         if (assetNumberTypeField) {
             header.push('Asset Number Type')
         }
@@ -88,7 +92,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
         }
         const wb = utils.book_new();
         utils.book_append_sheet(wb, ws, 'Sheet1');
-        writeFile(wb, 'Inventory to Asset.xlsx');
+        writeFile(wb, sidebarResource.purchaseOrder ? 'Purchase Order Assets.xlsx' : 'Inventory to Assets.xlsx');
     };
 
     const handleImport = (e: React.ChangeEvent<HTMLInputElement>, setValues, values) => {
@@ -108,12 +112,13 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
                     let rowInsert = {};
                     rowInsert['index'] = row[0]?.toString();
                     rowInsert['productName'] = row[1]?.toString();
+                    rowInsert['createAsset'] = row[2]?.toString()?.trim() === 'TRUE' ? true : false;
                     if (assetNumberTypeField) {
-                        rowInsert['assetNumberType'] = row[2]?.toString();
-                        rowInsert['assetNumber'] = row[3]?.toString();
+                        rowInsert['assetNumberType'] = rowInsert['createAsset'] ? row[3]?.toString() : ASSET_NUMBER_TYPE.manual;
+                        rowInsert['assetNumber'] = row[4]?.toString();
                     }
                     else {
-                        rowInsert['assetNumber'] = row[2]?.toString();
+                        rowInsert['assetNumber'] = row[3]?.toString();
                     }
                     option.push(rowInsert);
                 });
@@ -122,6 +127,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
                     if (matchingRow) {
                         return {
                             ...product,
+                            createAsset: matchingRow.createAsset,
                             assetNumberType: matchingRow.assetNumberType,
                             assetNumber: matchingRow.assetNumber,
                         };
@@ -174,7 +180,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
             }}
         >
             <CustomDialogHeader
-                title={'Assign Asset Numbers'}
+                title={resource === sidebarResource.purchaseOrder ? 'Create/Assign Asset Numbers' : 'Assign Asset Numbers'}
                 onClose={handleClose}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -215,6 +221,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
                                                     <TableRow>
                                                         <TableCell>Index</TableCell>
                                                         <TableCell align="left">Product</TableCell>
+                                                        <TableCell align="left">Create Assets</TableCell>
                                                         {assetNumberTypeField ? (<TableCell>Asset Number Type *</TableCell>) : null}
                                                         <TableCell align="left">Asset Number *</TableCell>
                                                     </TableRow>
@@ -229,6 +236,19 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
                                                                         {data.index}
                                                                     </TableCell>
                                                                     <TableCell align="left">{data.productName}</TableCell>
+                                                                    <TableCell align="left">
+                                                                        <Checkbox
+                                                                            checked={data?.createAsset}
+                                                                            onChange={(event) => {
+                                                                                arrayHelpers.replace(index, {
+                                                                                    ...values.products[index],
+                                                                                    createAsset: event.target.checked,
+                                                                                    assetNumberType: ASSET_NUMBER_TYPE.manual,
+                                                                                })
+                                                                            }}
+                                                                            inputProps={{ 'aria-label': 'primary checkbox' }}
+                                                                        />
+                                                                    </TableCell>
                                                                     {assetNumberTypeField &&
                                                                         <TableCell align="left">
                                                                             <Autocomplete
@@ -242,6 +262,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
                                                                                         ['assetNumberType']: newValue,
                                                                                     });
                                                                                 }}
+                                                                                disabled={data.createAsset ? false : true}
                                                                                 disableClearable
                                                                                 renderInput={(params) => (
                                                                                     <TextField
