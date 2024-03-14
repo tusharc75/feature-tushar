@@ -39,8 +39,6 @@ const BulkAssetCreationDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [bulkAssetCreationFields, setBulkAssetCreationFields] = useState([]);
-  const [statusOptions, setStatusOptions] = useState([]);
-  const [bulkAssetCreationProduct, setBulkAssetCreationProduct] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
 
@@ -114,14 +112,6 @@ const BulkAssetCreationDetailsPage = () => {
       .get('/field?resource=Bulk Asset Creation')
       .then(({ data }) => {
         setBulkAssetCreationFields(data.data);
-        if (data.data && data.data.length) {
-          data.data.some((o) => {
-            if (o?.fieldData?.fieldName === 'status') {
-              setStatusOptions([...o.fieldData.option]);
-              return true;
-            }
-          });
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -255,7 +245,6 @@ const BulkAssetCreationDetailsPage = () => {
                     <Product
                       bulkAssetCreationData={bulkAssetCreationData}
                       setNextStep={setNextStep}
-                      setBulkAssetCreationProduct={setBulkAssetCreationProduct}
                       renderedFrom={`${renderedFrom}_grid-1`}
                       handleUpdateData={handleUpdateData}
                       fetchData={fetchData}
