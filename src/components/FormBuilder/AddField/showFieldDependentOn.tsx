@@ -3,7 +3,7 @@ import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
-export const ShowFieldDependentOn = ({ name, values, setFieldValue, fields, _id }) => {
+export const ShowFieldDependentOn = ({ name, values, setFieldValue, fields, _id, touched, errors }) => {
   const [options, setOptions] = useState([]);
   useEffect(() => {
     const checkboxFields = fields
@@ -27,7 +27,15 @@ export const ShowFieldDependentOn = ({ name, values, setFieldValue, fields, _id 
           setFieldValue(name, val.optionValue);
         }}
         renderInput={(params) => (
-          <TextField {...params} margin="dense" variant="outlined" label="Show Field Dependent On" placeholder="Show Field Dependent On" />
+          <TextField
+            {...params}
+            margin="dense"
+            variant="outlined"
+            label="Show Field Dependent On"
+            placeholder="Show Field Dependent On"
+            error={touched[name] && Boolean(errors[name])}
+            helperText={touched[name] && errors[name]}
+          />
         )}
       />
     </Box>

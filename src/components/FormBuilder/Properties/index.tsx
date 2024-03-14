@@ -44,6 +44,18 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.isDefaultValue = false;
         values.defaultValue = '';
       }
+      if (!values.isShowFieldDependentOn) {
+        values.isShowFieldDependentOn = false;
+        values.showFieldDependentOn = null;
+      }
+      if (!values.isFieldEntityWise) {
+        values.isFieldEntityWise = false;
+        values.fieldEntity = [];
+      }
+      if (!values.lookup) {
+        values.lookup = false;
+        values.lookupResource = null;
+      }
       if (
         !values.isColumnEditable &&
         fieldData.resource === 'Rental Management Product' &&
@@ -404,12 +416,28 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       }
     }
 
+    if (values.isDefaultValue && !values.defaultValue) {
+      errors['defaultValue'] = 'Please enter default value.';
+    }
+
     if (values.isTooltip && !values.tooltipMessage) {
       errors['tooltipMessage'] = 'Please enter tooltip message.';
     }
 
     if (values.isWarningTooltip && !values.warningTooltipMessage) {
       errors['warningTooltipMessage'] = 'Please enter warning message.';
+    }
+
+    if (values.isShowFieldDependentOn && !values.showFieldDependentOn) {
+      errors['showFieldDependentOn'] = 'Please select Show Field Dependent On.';
+    }
+
+    if (values.isFieldEntityWise && !values.fieldEntity?.length) {
+      errors['fieldEntity'] = 'Please select Entity.';
+    }
+
+    if (values.lookup && !values.lookupResource) {
+      errors['lookupResource'] = 'Please select Lopkup Resource.';
     }
 
     if (values?.isMinMaxValue) {
