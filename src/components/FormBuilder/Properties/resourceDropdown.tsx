@@ -1,24 +1,23 @@
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Box from '@material-ui/core/Box';
-import axiosInstance from '../../../axios/axiosInstance'
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import TextField from "@material-ui/core/TextField";
 import { map } from 'lodash';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { getLookupOption } from "../helper";
 
-export const ResourceDropdown = ({ type, lookupResource, value, setFieldValue }) => {
+export const ResourceDropdown = ({ type, lookupResource, value, setFieldValue, brandId }) => {
 
     const [lookupOption, setlookupOption] = useState(null);
 
     useEffect(() => {
-        GetLookupOption()
+        getData()
     }, [lookupResource]);
 
-    const GetLookupOption = () => {
-        axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=` + lookupResource).then(({ data: { data } }) => {
-            setlookupOption(data[lookupResource])
-        })
+    const getData = async () => {
+        const data = await getLookupOption(brandId, lookupResource)
+        setlookupOption(data)
     }
 
     return (
