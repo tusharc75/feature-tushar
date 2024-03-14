@@ -61,6 +61,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   lookupResource={values['lookupResource']}
                   value={values['defaultValue']}
                   setFieldValue={setFieldValue}
+                  brandId={brandId}
                 />
               ) : (
                 <Box display="block">

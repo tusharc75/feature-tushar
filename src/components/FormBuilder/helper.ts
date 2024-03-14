@@ -15,3 +15,8 @@ export const getEntity = async (brandId) => {
     const { data: { data } } = await axiosInstance().get(`/entity`)
     return data?.map((data) => ({ optionValue: data._id, optionLabel: data?.entityName }))
 }
+
+export const getLookupOption = async (brandId, resource) => {
+    const { data: { data } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=` + resource)
+    return data[resource] || [];
+}
