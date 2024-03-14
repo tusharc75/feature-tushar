@@ -188,10 +188,9 @@ const TableComponent = ({
         style={{
           display: 'block',
           overflow: loading ? 'hidden' : 'auto',
-          height: height ?? '100%',
-          minHeight: 500
+          height: height ?? '100%'
         }}
-        className="border z-10 bg-[var(--dark-primary,_white)] isolate"
+        className="border z-10 bg-[var(--dark-primary,_white)] isolate max-[768px]:min-h-[500px]"
         ref={virtualization ? parentRef : undefined}
       >
         {!loading && !error && rows.length === 0 && initialDataLoaded && (
