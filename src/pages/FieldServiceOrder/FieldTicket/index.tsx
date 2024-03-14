@@ -190,22 +190,22 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             </IconButton>
           </span>
         </HtmlTooltip>
-
-        <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
-          <span>
-            <IconButton
-              disabled={permissions?.fieldTicket?.isCreate ? false : true}
-              size="small"
-              aria-label="Clone"
-              onClick={() => {
-                setOpenDialog({ open: true, isClone: true, id: row?.original?._id });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-
+        {!serviceOrderData?.quotation &&
+          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
+            <span>
+              <IconButton
+                disabled={permissions?.fieldTicket?.isCreate ? false : true}
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                  setOpenDialog({ open: true, isClone: true, id: row?.original?._id });
+                }}
+              >
+                <FileCopyIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        }
         <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
@@ -258,14 +258,13 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
   return (
     <Fragment>
       <DetailsPageHeader
-        isAddButtonVisible={allowedToEdit}
+        isAddButtonVisible={allowedToEdit && !serviceOrderData?.quotation}
         addButtonMenuItems={addButtonMenuItems()}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 }}
         hasXpadding
       />
-
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 393px)'}

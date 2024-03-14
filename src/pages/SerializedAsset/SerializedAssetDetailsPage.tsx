@@ -287,7 +287,7 @@ const SerializedAssetDetailsPage = () => {
                     className={'btn-outline-v1'}
                     size="small"
                     onClick={() => {
-                      window.open(`${routes.iotChart.path}/${assetDetails?._id}`);
+                      history.push(`${routes.iotChart.path}/${assetDetails?._id}`);
                     }}
                   >
                     View Data

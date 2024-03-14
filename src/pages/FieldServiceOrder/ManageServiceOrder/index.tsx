@@ -36,8 +36,6 @@ const ManageServiceOrderDialog = ({
   onClose,
   onSuccess,
   open,
-  referenceData = null,
-  isDisableCustomerAccount = false
 }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -69,6 +67,8 @@ const ManageServiceOrderDialog = ({
       let fieldData;
       const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
       fieldData = response?.data?.data;
+
+      fieldData = fieldData?.filter((e) => !['quotation'].includes(e?.fieldData?.fieldName));
 
       var statusOptions = [];
       fieldData?.forEach((e: any) => {
