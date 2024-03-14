@@ -233,7 +233,8 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
                                             type={field.type}
                                             options={field.option}
                                             setFieldValue={(name, value) => {
-                                                setFieldValue(name, value);
+                                              setFieldValue(name, value);
+                                              if (name === 'taxCode') {
                                                 const taxCode = field.option?.find((d) => d.optionValue === value);
                                                 setFieldValue('taxPercentage', taxCode?.taxRate || 0);
                                                 const result = autoCalculateSpecificFields(
@@ -245,7 +246,8 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
                                                   for (var x in result) {
                                                     setFieldValue(x, result[x]);
                                                   }
-                                                } 
+                                                }
+                                              }
                                             }}
                                             required={field.required}
                                             fullWidth
