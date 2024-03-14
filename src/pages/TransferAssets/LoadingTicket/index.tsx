@@ -426,7 +426,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               data['deliveryTo'] = transferAssetData?.transfertoPlant?.optionValue;
               data['deliveryToLabel'] = transferAssetData?.transfertoPlant?.optionLabel;
               data['deliveryToAddress'] = transferAssetData?.plantShipTo?.optionValue;
-              data['status'] = DELIVERY_TICKET_STATUS.indTransit;
             } else if (transferAssetData?.transferType === 'External Customer') {
               data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
               data['deliveryTo'] = transferAssetData?.transfertoCustomer?.optionValue;
@@ -450,6 +449,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             }
             data['isPickupFromDisable'] = true;
             data['isDeliveryToDisable'] = true;
+            data['status'] = DELIVERY_TICKET_STATUS.indTransit;
             setShowTicketDialog({ open: true, data: data });
           }}
         >
@@ -503,7 +503,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               setShowConfirmBox(true);
             }}
           >
-            Receive Assets
+            Remove Assets
           </MenuItem>
         ) : null}
       </>
