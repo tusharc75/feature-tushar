@@ -2,6 +2,7 @@ import { Box, Button, IconButton } from '@material-ui/core';
 import BuildIcon from '@material-ui/icons/Build';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import SettingIcon from '@material-ui/icons/Settings';
 import update from 'immutability-helper';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -16,12 +17,14 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ConfigureField from './ConfigureField';
 import ManageSteps from './ManageSteps';
 import _ from 'lodash';
+import Setting from './Setting';
 
 const DND_NAME = 'Box';
 
 const Steps = ({ resource }) => {
   const toastConfig = useContext(CustomToastContext);
 
+  const [resourceData, setResourceData] = useState(null);
   const [steps, setSteps] = useState(null);
   const [initialSteps, setInitialSteps] = useState(null);
   const [open, setOpen] = useState({ open: false, data: null });
@@ -29,11 +32,13 @@ const Steps = ({ resource }) => {
   const [resourceId, setResourceId] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
+  const [openSetting, setOpenSetting] = useState(false);
 
   const fetchData = async () => {
     axiosInstance()
       .get(`/sa-formbuilder/steps/${resource}`)
       .then(({ data: { data } }) => {
+        setResourceData(data);
         setResourceId(data?._id);
         setSteps(_.sortBy(data?.steps, 'order'));
         setInitialSteps(_.sortBy(data?.steps, 'order'));
@@ -93,7 +98,7 @@ const Steps = ({ resource }) => {
 
   return (
     <Box>
-      <Box>
+      <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
         <Button
           variant="contained"
           color="primary"
@@ -104,6 +109,19 @@ const Steps = ({ resource }) => {
         >
           Add Step
         </Button>
+        <Box>
+          <HtmlTooltip title={'Setting'}>
+            <IconButton
+              size="small"
+              aria-label="Setting"
+              onClick={() => {
+                setOpenSetting(true);
+              }}
+            >
+              <SettingIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
+        </Box>
       </Box>
       <Box pt={2}>
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
@@ -147,6 +165,20 @@ const Steps = ({ resource }) => {
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
+        />
+      )}
+
+      {openSetting && (
+        <Setting
+          onClose={() => {
+            setOpenSetting(false);
+          }}
+          onSuccess={() => {
+            fetchData()
+            setOpenSetting(false);
+          }}
+          resource={resource}
+          resourceData={resourceData}
         />
       )}
     </Box>

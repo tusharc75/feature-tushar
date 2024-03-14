@@ -363,7 +363,11 @@ export const sidebarResource = {
   outboundMessage: 'Outbound Message',
   payrollPolicy: 'Payroll Policy',
   triggerNotificationMaster: 'Trigger Notification Master',
-  deals: 'Deals'
+  deals: 'Deals',
+  triggerNotificationHistory: 'Trigger Notification History',
+  userAttendance : 'User Attendance',
+  dataLists: 'Data Lists',
+  assetsReceiving : 'Assets Receiving'
 };
 
 export const primaryFields = {
@@ -2947,4 +2951,8 @@ export const IMPORT_EXPORT_TYPE = {
 
 export function clamp(val: number, min: number, max: number) {
   return Math.min(Math.max(val, min), max);
+}
+
+export const getResourceLabel = (resource, user) => {
+  return user?.role?.selectedEntity?.resource?.find((e) => e.name === resource)?.resourceLabel || resource
 }

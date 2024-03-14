@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -13,11 +13,23 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDynamicForm from './ManageDynamicForm';
+import { FaWpforms } from 'react-icons/fa';
+import { BiFoodMenu } from 'react-icons/bi';
+import TabPanel from 'src/components/TabPanel';
+import Step from './Step';
+import { getResourceLabel } from 'src/constants/helpers';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const DynamicFormDetail = () => {
   const { route, id } = useParams();
+
+  const {
+    state: { permissions, user }
+  }: any = useData();
+
   const resource = startCase(route?.replace(/-/g, ' '));
   const renderedFrom = camelCase(resource);
+  const resourceLabel = getResourceLabel(resource, user);
 
   const resourcePath = `/${route}`;
 
@@ -28,12 +40,11 @@ const DynamicFormDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
 
-  const {
-    state: { permissions, user }
-  }: any = useData();
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -69,6 +80,21 @@ const DynamicFormDetail = () => {
       });
       setDetailData(data);
       setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPolicy();
+  }, [resource]);
+
+  const fetchPolicy = async () => {
+    try {
+      const { data: { data } } = await axiosInstance().get(`/dynamic-form/policy?resource=${resource}`);
+      if (data) {
+        setResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -112,21 +138,24 @@ const DynamicFormDetail = () => {
     setOpenUpdateDialog(false);
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
           <CustomBreadCrumbs
-            routes={[
-              { title: resource, path: `/${route}` },
-              {
-                title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resource
-              }
-            ]}
+            routes={[{ title: resourceLabel, path: `/${route}` },
+            { title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resourceLabel }]}
           />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {detailData?.pdfTemplate && (
+              <PreviewDownload fileName={`${resource}`} resource={resource} referenceId={id} columns={[]} hideDetailButton={true} hideDialog={true} />
+            )}
             {permissions[renderedFrom]?.isUpdate && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
@@ -137,7 +166,43 @@ const DynamicFormDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Box>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            value={0}
+            aria-controls="a11y-tabpanel-0"
+            id="a11y-tab-0"
+          />
+          {resourceData && resourceData?.steps?.length ? (
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                </div>
+              }
+              value={1}
+              aria-controls="a11y-tabpanel-1"
+              id="a11y-tab-1"
+            />
+          ) : null}
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
               <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -145,7 +210,15 @@ const DynamicFormDetail = () => {
           ) : (
             <DetailsPage data={detailData} fields={fields} />
           )}
-        </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={resource}
+            data={detailData}
+            allowedToEdit={permissions[renderedFrom]?.isUpdate} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

@@ -13,8 +13,18 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import routes from 'src/components/Helpers/Routes';
 import { uniqBy } from 'lodash';
+import { object, string } from 'yup';
+
+const schema = object().shape({
+  serializedAsset: string().required(`${routes?.serializedAsset?.title} is required`),
+  messageType: string().required(`Type is required`),
+  messageId: string().required(`Description is required`),
+  messageValue: string().required(`Value is required`),
+});
+
 
 const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -24,28 +34,30 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Serialized Asset`)
-      .then(({ data: { data } }) => {
-        setSerializedAssetOptions(data['Serialized Asset']);
-      })
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Serialized Asset`).then(({ data: { data } }) => {
+      setSerializedAssetOptions(data['Serialized Asset']);
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   }, []);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/dynamic-form`, {
-        headers: {
-          Resource: 'Outbound Message'
-        }
-      })
+    axiosInstance().get(`/dynamic-form`, {
+      headers: {
+        Resource: 'Outbound Message'
+      }
+    })
       .then(({ data: { data } }) => {
         const aa = uniqBy(data, 'type');
         setOutBoundMessageTypeOptions(uniqBy(data, 'type')?.map((d: any) => d?.type));
         setOutBoundMessageOptions(
-          data?.map((d) => ({ type: d?.type, optionLabel: `${d?.outboundMessageNumber} - ${d?.description}`, optionValue: d?._id }))
+          data?.map((d) => ({
+            type: d?.type,
+            outboundMessageNumber: d?.outboundMessageNumber,
+            optionLabel: d?.description,
+            optionValue: d?._id
+          }))
         );
       })
       .catch((error) => {
@@ -55,33 +67,18 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
 
   const handleSubmit = (values) => {
     setIsSubmitting(true);
-    axiosInstance()
-      .post(`/iot-out-bound-message`, {
-        asset: values['serializedAsset'],
-        message: values['messageValue']
-      })
-      .then(() => {
-        setIsSubmitting(false);
-        onSuccess();
-      })
+    axiosInstance().post(`/iot-out-bound-message`, {
+      asset: values['serializedAsset'],
+      messageId: values['messageId'],
+      messageValue: values['messageValue']
+    }).then(() => {
+      setIsSubmitting(false);
+      onSuccess();
+    })
       .catch((error) => {
         setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
-  };
-
-  const validate = (values) => {
-    const error: any = {};
-    if (!values['serializedAsset']) {
-      error.serializedAsset = 'Serialized Asset is required';
-    }
-    if (!values['messageType']) {
-      error.messageType = 'Message Type is required';
-    }
-    if (!values['messageValue']) {
-      error.messageValue = 'Message Value is required';
-    }
-    return error;
   };
 
   return (
@@ -100,12 +97,15 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
       {serializedAssetOptions?.length ? (
         <Formik
           initialValues={{
-            serializedAsset: assetId
+            serializedAsset: assetId ? assetId : '',
+            messageType: '',
+            messageId: '',
+            messageValue: ''
           }}
-          validate={validate}
+          validationSchema={schema}
           onSubmit={handleSubmit}
         >
-          {({ values, errors, setFieldValue, submitForm }) => (
+          {({ values, touched, errors, setFieldValue, submitForm, setValues }) => (
             <Fragment>
               <CustomDialogHeader
                 title={'Send'}
@@ -117,7 +117,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                 showManimizeMaximize={true}
               />
               <CustomDialogContent>
-                <Form>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2}>
                     <Grid item md={12} lg={12} sm={12}>
                       <Autocomplete
@@ -128,10 +128,10 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                         value={
                           serializedAssetOptions?.filter((data) => values['serializedAsset'] === data?.optionValue).length
                             ? serializedAssetOptions?.find((data) => values['serializedAsset'] === data?.optionValue)
-                            : null
+                            : ''
                         }
                         onChange={(e, val) => {
-                          setFieldValue('serializedAsset', val && val?.optionValue);
+                          setFieldValue('serializedAsset', val && val?.optionValue ? val?.optionValue : '');
                         }}
                         renderInput={(params) => (
                           <TextField
@@ -140,8 +140,8 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                             name="serializedAsset"
                             label={routes.serializedAsset.title}
                             variant="outlined"
-                            error={Boolean(errors['serializedAsset'])}
-                            helperText={errors && errors['serializedAsset']}
+                            error={touched['serializedAsset'] && Boolean(errors['serializedAsset'])}
+                            helperText={touched['serializedAsset'] && errors['serializedAsset']}
                             required={true}
                             fullWidth
                           />
@@ -153,23 +153,26 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                         options={outBoundMessageTypeOptions}
                         getOptionLabel={(option: any) => option || ''}
                         value={
-                          outBoundMessageTypeOptions?.filter((data) => values['messageType'] === data).length
+                          outBoundMessageTypeOptions?.filter((data) => values['messageType'] === data)?.length
                             ? outBoundMessageTypeOptions?.find((data) => values['messageType'] === data)
-                            : null
+                            : ''
                         }
                         onChange={(e, val) => {
-                          setFieldValue('messageType', val);
-                          setFieldValue('messageValue', null);
+                          const result: any = {};
+                          result['messageType'] = val ? val : ''
+                          result['messageId'] = ''
+                          result['messageValue'] = ''
+                          setValues({ ...values, ...result });
                         }}
                         renderInput={(params) => (
                           <TextField
                             {...params}
                             margin="dense"
                             name="messageType"
-                            label="Message Type"
+                            label="Type"
                             required={true}
-                            error={Boolean(errors['messageType'])}
-                            helperText={errors && errors['messageType']}
+                            error={touched['messageType'] && Boolean(errors['messageType'])}
+                            helperText={touched['messageType'] && errors['messageType']}
                             variant="outlined"
                             fullWidth
                           />
@@ -178,32 +181,49 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                     </Grid>
                     <Grid item md={12} lg={12} sm={12}>
                       <Autocomplete
-                        options={
-                          values?.messageType ? outBoundMessageOptions?.filter((o) => o?.type === values?.messageType) : outBoundMessageOptions
-                        }
+                        options={values?.messageType ? outBoundMessageOptions?.filter((o) => o?.type === values?.messageType) : outBoundMessageOptions}
                         getOptionLabel={(option: any) => option?.optionLabel || ''}
                         getOptionSelected={(option: any, val) => option?.optionValue === val}
-                        value={
-                          outBoundMessageOptions?.filter((data) => values['messageValue'] === data?.optionValue).length
-                            ? outBoundMessageOptions?.find((data) => values['messageValue'] === data?.optionValue)
-                            : null
+                        value={outBoundMessageOptions?.filter((data) => values['messageId'] === data?.optionValue).length
+                          ? outBoundMessageOptions?.find((data) => values['messageId'] === data?.optionValue)
+                          : ''
                         }
                         onChange={(e, val) => {
-                          setFieldValue('messageValue', val && val?.optionValue);
+                          const result: any = {};
+                          result['messageId'] = val && val?.optionValue ? val?.optionValue : ''
+                          result['messageValue'] = val?.outboundMessageNumber ? val?.outboundMessageNumber : ''
+                          setValues({ ...values, ...result });
                         }}
                         renderInput={(params) => (
                           <TextField
                             {...params}
                             margin="dense"
-                            name="messageValue"
-                            label="Message Value"
+                            name="messageId"
+                            label="Description"
                             variant="outlined"
-                            error={Boolean(errors['messageValue'])}
-                            helperText={errors && errors['messageValue']}
+                            error={touched['messageId'] && Boolean(errors['messageId'])}
+                            helperText={touched['messageId'] && errors['messageId']}
                             required={true}
                             fullWidth
                           />
                         )}
+                      />
+                    </Grid>
+                    <Grid item md={12} lg={12} sm={12}>
+                      <TextField
+                        margin="dense"
+                        name="messageValue"
+                        label="Value"
+                        variant="outlined"
+                        error={touched['messageValue'] && Boolean(errors['messageValue'])}
+                        helperText={touched['messageValue'] && errors['messageValue']}
+                        required={true}
+                        type='number'
+                        fullWidth
+                        onChange={(e) => {
+                          setFieldValue('messageValue', e.target.value);
+                        }}
+                        value={values['messageValue']}
                       />
                     </Grid>
                   </Grid>

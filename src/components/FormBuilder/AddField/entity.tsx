@@ -79,6 +79,7 @@ export const Entity = ({ values, setFieldValue, touched, errors, brandId }) => {
                                     )
                                 }}
                                 error={touched['fieldEntity'] && Boolean(errors['fieldEntity'])}
+                                helperText={touched['fieldEntity'] && errors['fieldEntity']}
                             />
                         )}
                     />

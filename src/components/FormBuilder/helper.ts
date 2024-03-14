@@ -6,12 +6,17 @@ export const getLookupResource = async () => {
     return sortBy(data, ['name'])?.map((e) => { return { optionLabel: e.name, optionValue: e.value } });
 }
 
-export const getResourceField = async (resource) => {
-    const { data: { data } } = await axiosInstance().get(`/field?resource=${resource}`)
+export const getResourceField = async (resource, view = false) => {
+    const { data: { data } } = await axiosInstance().get(`/field?resource=${resource}&view=${view}`)
     return data?.map((e) => { return { fieldName: e.fieldData.fieldName, fieldLabel: e.fieldData.fieldLabel } })
 }
 
 export const getEntity = async (brandId) => {
     const { data: { data } } = await axiosInstance().get(`/entity`)
     return data?.map((data) => ({ optionValue: data._id, optionLabel: data?.entityName }))
+}
+
+export const getLookupOption = async (brandId, resource) => {
+    const { data: { data } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=` + resource)
+    return data[resource] || [];
 }
