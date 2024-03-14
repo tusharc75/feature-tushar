@@ -597,9 +597,9 @@ const CreateProduct = (props) => {
                                         <Grid container spacing={1}>
                                           <Grid
                                             item
-                                            xs={permissions.productCategory.isCreate ? 11 : 11}
-                                            sm={permissions.productCategory.isCreate ? 11 : 11}
-                                            md={permissions.productCategory.isCreate ? 11 : 11}
+                                            xs={permissions.productCategory?.isCreate ? 11 : 11}
+                                            sm={permissions.productCategory?.isCreate ? 11 : 11}
+                                            md={permissions.productCategory?.isCreate ? 11 : 11}
                                           >
                                             <FormTypes
                                               disabled={(Boolean(productId) && field.disableOnEdit) || productCategoryID}
@@ -651,7 +651,7 @@ const CreateProduct = (props) => {
                                               doNotShowInfoTooltip={true}
                                             />
                                           </Grid>
-                                          {permissions.productCategory.isCreate && (
+                                          {permissions.productCategory?.isCreate && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip title="Add Product Category" className="mt-1">
                                                 <IconButton
