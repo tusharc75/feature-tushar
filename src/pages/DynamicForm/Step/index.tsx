@@ -34,7 +34,7 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
     <>
       {steps &&
         steps?.length &&
-        (resourceData?.showStepsInList ? (
+        (!resourceData?.showStepsInList ? (
           <>
             <Steps
               isNextStep={false}
