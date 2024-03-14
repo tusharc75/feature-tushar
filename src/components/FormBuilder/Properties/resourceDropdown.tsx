@@ -1,64 +1,70 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import Box from '@material-ui/core/Box';
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import TextField from "@material-ui/core/TextField";
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import TextField from '@material-ui/core/TextField';
 import { map } from 'lodash';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { getLookupOption } from "../helper";
+import { getLookupOption } from '../helper';
 
-export const ResourceDropdown = ({ type, lookupResource, value, setFieldValue, brandId }) => {
+export const ResourceDropdown = ({ type, lookupResource, value, setFieldValue, brandId, touched, errors }) => {
+  const [lookupOption, setlookupOption] = useState(null);
 
-    const [lookupOption, setlookupOption] = useState(null);
+  useEffect(() => {
+    getData();
+  }, [lookupResource]);
 
-    useEffect(() => {
-        getData()
-    }, [lookupResource]);
+  const getData = async () => {
+    const data = await getLookupOption(brandId, lookupResource);
+    setlookupOption(data);
+  };
 
-    const getData = async () => {
-        const data = await getLookupOption(brandId, lookupResource)
-        setlookupOption(data)
-    }
-
-    return (
-        <Box>
-            {lookupOption ?
-                <Autocomplete
-                    id="tags-filled"
-                    options={lookupOption}
-                    getOptionLabel={(option: any) =>
-                        option ? option.optionLabel : ""
-                    }
-                    value={value && type === "multiSelect" ? lookupOption?.filter((data) => map(value, (optionValue) => { return optionValue; })?.includes(data?.optionValue))
-                        : lookupOption?.filter((data) => data?.optionValue === value)?.length > 0 ? lookupOption?.filter((data) => data?.optionValue === value)[0]
-                            : type === "multiSelect" ? [] : ""
-                    }
-                    multiple={type === "multiSelect" ? true : false}
-                    onChange={(e, val) => {
-                        if (type === "multiSelect") {
-                            const res = [];
-                            val?.forEach((e) => {
-                                res.push(e.optionValue ? e.optionValue : e)
-                            })
-                            setFieldValue('defaultValue', res);
-                        }
-                        else {
-                            setFieldValue('defaultValue', (val && val?.optionValue) ? val?.optionValue : "");
-                        }
-                    }}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            margin="dense"
-                            variant="outlined"
-                            label="Default Value"
-                            placeholder="Default Value"
-                        />
-                    )}
-                />
-                :
-                <CommonSkeleton lenArray={[...Array(1).keys()]} />
+  return (
+    <Box>
+      {lookupOption ? (
+        <Autocomplete
+          id="tags-filled"
+          options={lookupOption}
+          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+          value={
+            value && type === 'multiSelect'
+              ? lookupOption?.filter((data) =>
+                  map(value, (optionValue) => {
+                    return optionValue;
+                  })?.includes(data?.optionValue)
+                )
+              : lookupOption?.filter((data) => data?.optionValue === value)?.length > 0
+              ? lookupOption?.filter((data) => data?.optionValue === value)[0]
+              : type === 'multiSelect'
+              ? []
+              : ''
+          }
+          multiple={type === 'multiSelect' ? true : false}
+          onChange={(e, val) => {
+            if (type === 'multiSelect') {
+              const res = [];
+              val?.forEach((e) => {
+                res.push(e.optionValue ? e.optionValue : e);
+              });
+              setFieldValue('defaultValue', res);
+            } else {
+              setFieldValue('defaultValue', val && val?.optionValue ? val?.optionValue : '');
             }
-        </Box>
-    );
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="dense"
+              variant="outlined"
+              label="Default Value"
+              placeholder="Default Value"
+              error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
+              helperText={touched['defaultValue'] && errors['defaultValue']}
+            />
+          )}
+        />
+      ) : (
+        <CommonSkeleton lenArray={[...Array(1).keys()]} />
+      )}
+    </Box>
+  );
 };

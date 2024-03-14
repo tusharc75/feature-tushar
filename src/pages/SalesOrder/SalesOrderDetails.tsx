@@ -103,7 +103,7 @@ const SalesOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${salesOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -198,6 +198,23 @@ const SalesOrderDetails = () => {
                     >
                       Close
                     </ButtonWithPulse>
+                  )}
+                {permissions?.salesOrder?.isUpdate &&
+                  [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        if (salesOrderData?.invoice) {
+                          updateJobStatus(SALES_ORDER_STATUS.invoiced);
+                        } else {
+                          updateJobStatus(SALES_ORDER_STATUS.readyToInvoice);
+                        }
+                      }}
+                    >
+                      Re-Open
+                    </Button>
                   )}
                 {permissions?.salesOrder?.isUpdate && allowedToEdit && ![SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <Button
