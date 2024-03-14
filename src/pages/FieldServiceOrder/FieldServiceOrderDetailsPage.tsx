@@ -122,9 +122,9 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-          data.owner.optionValue === user?.user?._id &&
-          data.canDelete &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        data.owner.optionValue === user?.user?._id &&
+        data.canDelete &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setServiceOrderData(data);
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
@@ -144,7 +144,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {
@@ -389,7 +389,6 @@ const ServiceOrderDetailsPage = () => {
           isClone={false}
           open={openUpdateDialog}
           serviceOrderId={id}
-          serviceOrderData={serviceOrderData}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
             setOpenUpdateDialog(false);
