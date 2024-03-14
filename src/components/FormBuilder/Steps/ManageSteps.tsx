@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
@@ -10,8 +10,9 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { object, string } from 'yup';
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { Autocomplete } from '@material-ui/lab';
+import { getLookupResource, getResourceField } from '../helper';
 
 const stepSchema = object().shape({
   stepName: string().required('Please enter Step name')
@@ -24,12 +25,46 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [resourceOption, setResourceOption] = useState([]);
+  const [resourceFieldOption, setResourceFieldOption] = useState([]);
+  const [resourceFieldsLoading, setResourceFieldsLoading] = React.useState(false);
+
+  useEffect(() => {
+    getResourceList();
+    if (data?.linkResourceName) {
+      getResourceFieldList(data?.linkResourceName);
+    }
+  }, []);
+
+  const getResourceList = async () => {
+    const resourceOption = await getLookupResource();
+    setResourceOption(resourceOption);
+  };
+
+  const getResourceFieldList = async (linkResourceName) => {
+    setResourceFieldsLoading(true);
+    try {
+      const data: any = await getResourceField(linkResourceName, true);
+      setResourceFieldOption(data);
+      setResourceFieldsLoading(false);
+    } catch (e) {
+      setResourceFieldsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (data) {
       setInitialValues(data);
     } else {
-      setInitialValues({ stepName: '', multipleStepData: true, stepDataRequired: false, showInPdf: false });
+      setInitialValues({
+        stepName: '',
+        multipleStepData: true,
+        stepDataRequired: false,
+        showInPdf: false,
+        linkWithResource: false,
+        linkResourceName: '',
+        linkResourceField: ''
+      });
     }
   }, [data]);
 
@@ -77,6 +112,9 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
     const errors = {};
     if (!values?.stepName) {
       errors['stepName'] = 'Required field';
+    }
+    if (values.linkWithResource && !values?.linkResourceName) {
+      errors['linkResourceName'] = 'please select Resource';
     }
     return errors;
   };
@@ -127,6 +165,89 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                     onChange={(e) => setFieldValue('stepName', e.target.value.trimStart())}
                   />
                 </Box>
+                <Box>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="linkWithResource"
+                        checked={values['linkWithResource']}
+                        onChange={(e) => {
+                          setFieldValue('linkWithResource', e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Link With Resource"
+                  />
+                </Box>
+                {values['linkWithResource'] && (
+                  <>
+                    <Box>
+                      <Autocomplete
+                        id="linkResourceName"
+                        options={resourceOption}
+                        getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        value={
+                          resourceOption && resourceOption?.filter((data) => data.optionValue === values['linkResourceName'])?.length
+                            ? resourceOption && resourceOption?.filter((data) => data.optionValue === values['linkResourceName'])[0]
+                            : ''
+                        }
+                        onChange={(e: any, value) => {
+                          getResourceFieldList(value && value?.optionValue ? value.optionValue : '');
+                          setFieldValue('linkResourceName', value && value?.optionValue ? value.optionValue : '');
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            variant="outlined"
+                            label="Resource"
+                            placeholder="Resource"
+                            name="linkResourceName"
+                            required
+                            error={touched['linkResourceName'] && Boolean(errors['linkResourceName'])}
+                            helperText={touched['linkResourceName'] && errors['linkResourceName']}
+                          />
+                        )}
+                      />
+                    </Box>
+                    <Box>
+                      <Autocomplete
+                        id="linkResourceField"
+                        options={resourceFieldOption}
+                        disabled={resourceFieldsLoading}
+                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                        getOptionSelected={(option: any, val) => option?.fieldName === val}
+                        value={
+                          resourceFieldOption && resourceFieldOption.filter((data) => data?.fieldName === values['linkResourceField']).length
+                            ? resourceFieldOption && resourceFieldOption.filter((data) => data?.fieldName === values['linkResourceField'])[0]
+                            : ''
+                        }
+                        onChange={(e, val) => {
+                          setFieldValue('linkResourceField', val && val?.fieldName ? val?.fieldName : '');
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            variant="outlined"
+                            label="Resource Field"
+                            placeholder="Resource Field"
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: (
+                                <React.Fragment>
+                                  {resourceFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                                  {params.InputProps.endAdornment}
+                                </React.Fragment>
+                              )
+                            }}
+                          />
+                        )}
+                      />
+                    </Box>
+                  </>
+                )}
                 <Box>
                   <FormControlLabel
                     control={
