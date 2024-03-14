@@ -51,7 +51,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const fetchFields = async () => {
     setColumns(null);
     var data = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
-    if (!allowedToEdit) {
+    if (!allowedToEdit || fieldTicketData?.quotation) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
@@ -78,7 +78,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {!allowedToEdit ? (
+            {!allowedToEdit || fieldTicketData?.quotation ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
@@ -419,7 +419,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
 
   return (
     <>
-      {allowedToEdit && (
+      {allowedToEdit && !fieldTicketData?.quotation && (
         <>
           <DetailsPageHeader
             isAddButtonVisible={true}
@@ -439,8 +439,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             state={state}
             dispatch={dispatch}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            hideSelection={!allowedToEdit}
-            hideAction={!allowedToEdit}
+            hideSelection={allowedToEdit && !fieldTicketData?.quotation ? false : true}
+            hideAction={allowedToEdit && !fieldTicketData?.quotation ? false : true}
             onSaveEdit={onSaveInlineEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
@@ -453,7 +453,10 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         </Box>
       )}
       <Box mt={3}>
-        <Consumables allowedToEdit={allowedToEdit} services={dataRows} fieldTicketData={fieldTicketData} />
+        <Consumables
+          allowedToEdit={allowedToEdit}
+          services={dataRows}
+          fieldTicketData={fieldTicketData} />
       </Box>
       {serviceDialog?.open && serviceDialog?.type === 'service' && (
         <AssignServiceDialog

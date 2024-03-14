@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControlLabel, Grid, TextField } from '@material-ui/core';
+import { Box, Checkbox, FormControlLabel, Grid, TextField, Typography } from '@material-ui/core';
 import { ShowFieldDependentOn } from '../../AddField/showFieldDependentOn';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { ResourceDropdown } from '../resourceDropdown';
@@ -6,7 +6,6 @@ import { Autocomplete } from '@material-ui/lab';
 import { Entity } from '../../AddField/entity';
 
 const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId }) => {
-
   return (
     <Box pb={1}>
       <Box>
@@ -44,16 +43,23 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                 />
               ) : fieldData.type === 'colorPicker' ? (
                 <Box>
-                  <input
-                    value={values['defaultValue']}
-                    type="color"
-                    onChange={(e) => {
-                      setFieldValue('defaultValue', e.target.value);
-                    }}
-                  />
-                  <Box component="span" ml={2}>
-                    {values['defaultValue']}
+                  <Box>
+                    <input
+                      value={values['defaultValue']}
+                      type="color"
+                      onChange={(e) => {
+                        setFieldValue('defaultValue', e.target.value);
+                      }}
+                    />
+                    <Box component="span" ml={2}>
+                      {values['defaultValue']}
+                    </Box>
                   </Box>
+                  {touched['defaultValue'] && Boolean(errors['defaultValue']) && (
+                    <Typography color="error" style={{ fontSize: '11px' }}>
+                      {errors['defaultValue']}
+                    </Typography>
+                  )}
                 </Box>
               ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['lookup'] ? (
                 <ResourceDropdown
@@ -61,6 +67,9 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   lookupResource={values['lookupResource']}
                   value={values['defaultValue']}
                   setFieldValue={setFieldValue}
+                  brandId={brandId}
+                  touched={touched}
+                  errors={errors}
                 />
               ) : (
                 <Box display="block">
@@ -411,7 +420,15 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           </Grid>
           <Grid item xs={12} md={6}>
             {values['isShowFieldDependentOn'] && (
-              <ShowFieldDependentOn values={values} name={'showFieldDependentOn'} setFieldValue={setFieldValue} fields={fields} _id={fieldData._id} />
+              <ShowFieldDependentOn
+                values={values}
+                name={'showFieldDependentOn'}
+                setFieldValue={setFieldValue}
+                fields={fields}
+                _id={fieldData._id}
+                touched={touched}
+                errors={errors}
+              />
             )}
           </Grid>
         </Grid>

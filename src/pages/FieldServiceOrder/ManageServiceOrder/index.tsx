@@ -17,7 +17,8 @@ import {
   setFieldsInAscendingOrder,
   yupSchema,
   sidebarResource,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  SERVICE_ORDER_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -32,12 +33,9 @@ import moment from 'moment';
 const ManageServiceOrderDialog = ({
   isClone,
   serviceOrderId,
-  serviceOrderData = null,
   onClose,
   onSuccess,
   open,
-  referenceData = null,
-  isDisableCustomerAccount = false
 }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -70,6 +68,8 @@ const ManageServiceOrderDialog = ({
       const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
       fieldData = response?.data?.data;
 
+      fieldData = fieldData?.filter((e) => !['quotation'].includes(e?.fieldData?.fieldName));
+
       var statusOptions = [];
       fieldData?.forEach((e: any) => {
         if (e?.fieldData?.fieldName === 'status') {
@@ -86,7 +86,7 @@ const ManageServiceOrderDialog = ({
           data = response?.data?.data;
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, fieldServiceOrderNumber, updatedBy, ...rest } = data;
-            rest['status'] = 'New';
+            rest['status'] = SERVICE_ORDER_STATUS.new;
             rest['fieldServiceOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(fieldServiceOrderNumber);
             setInitialData({
@@ -211,7 +211,7 @@ const ManageServiceOrderDialog = ({
                   title={
                     !serviceOrderId
                       ? `Create ${routes.fieldServiceOrder.title}`
-                      : `${isClone ? `Clone - ${cloneHeading}` : `Update ${serviceOrderData?.fieldServiceOrderNumber}`}`
+                      : `${isClone ? `Clone - ${cloneHeading}` : `Update ${serviceDetails?.fieldServiceOrderNumber}`}`
                   }
                   onClose={(e, reason) => {
                     if (isEqual(initialData.values, values)) {

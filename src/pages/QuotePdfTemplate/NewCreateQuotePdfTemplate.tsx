@@ -19,13 +19,14 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from '../../StateProvider/Provider';
-import { quoteBuilder, PDF_RESOURCE_LIST } from '../../constants/helpers';
+import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomTable from './customTable/customTable';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { quotation } from '../../constants/helpers';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
+import { camelCase, startCase } from 'lodash';
 
 const defaultProductColumns = 7;
 
@@ -123,22 +124,24 @@ export default function NewCreateQuotePdfTemplate() {
         options.push({ title: routes[item.key] ? routes[item.key]?.title : item.title, value: item.value });
       }
     });
+    for (const [key] of Object.entries(permissions)) {
+      let result = key?.replace(/ /g, '').toLowerCase();
+      let foundFlag = false;
+      for (const [key2, value2] of Object.entries(sidebarResource)) {
+        if (value2?.replace(/ /g, '').toLowerCase() === result) {
+          foundFlag = true;
+          break;
+        }
+      }
+      if (!foundFlag) {
+        options.push({ title: startCase(camelCase(key)), value: startCase(camelCase(key)) });
+      }
+    }
     setpdfResourceOption(options);
   }, []);
 
   useEffect(() => {
     if (formValues && formValues.type) {
-      // let type: any = formValues.type;
-      // type = type.split('');
-      // if (type[type.length - 1] === 's' && type.join('') !== 'Quotes') {
-      //   type.pop();
-      // }
-      // type = type.join('');
-      // if (type === 'Rental Job') {
-      //   resource = 'Rental Management';
-      // } else {
-      //   resource = type;
-      // }
       let resource: string = formValues.type;
       if (resource) {
         axiosInstance()
@@ -576,8 +579,8 @@ export default function NewCreateQuotePdfTemplate() {
                             setFieldValue('entity', val && val?.map((d) => d._id));
                             val && val.length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                )
+                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                           }}
                           renderInput={(params) => (
@@ -609,10 +612,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
+                                ownerCollaboratorDataConst.filter((data) =>
+                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                 )
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -646,10 +649,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
+                                ownerCollaboratorDataConst.filter((data) =>
+                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                 )
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
