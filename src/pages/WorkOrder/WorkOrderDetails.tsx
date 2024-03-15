@@ -290,7 +290,7 @@ const WorkOrderDetails = () => {
 
   const handleReceiveAssetInRepairJob = () => {
     setIsSubmitting(true)
-    axiosInstance().put(`${repairJob.api}/receive-assets-complete`, { repairJob: workOrderData?.repairJob })
+    axiosInstance().put(`${repairJob.api}/receive-assets-complete`, { repairJob: workOrderData?.repairJob?.optionValue || workOrderData?.repairJob })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -312,7 +312,7 @@ const WorkOrderDetails = () => {
       id: `Repair Job`,
       type: 'button',
       visibilityInMobile: 'visible',
-      isVisible: allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder
+      isVisible: permissions?.repairJob?.isCreate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder
         && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.repairJob ? true : false,
       name: `Create ${routes?.repairJob.title}`,
       tooltip: `Create ${routes?.repairJob.title}`,
@@ -323,7 +323,7 @@ const WorkOrderDetails = () => {
       id: `Repair Job Receive`,
       type: 'button',
       visibilityInMobile: 'visible',
-      isVisible: allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder
+      isVisible: permissions?.repairJob?.isUpdate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder
         && workOrderData?.repairJob ? true : false,
       name: `Receive Asset From Supplier`,
       tooltip: `Receive Asset From Supplier`,

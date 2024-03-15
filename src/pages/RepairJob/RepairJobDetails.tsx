@@ -63,6 +63,9 @@ const RepairJobDetails = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
+  const [alloweOperation, setAlloweOperation] = useState(true);
+
+
   const repairJobProcessStepsNames = React.useMemo(() => {
     return repairJobProcessSteps.map((item) => item.name);
   }, [repairJobProcessSteps]);
@@ -141,6 +144,7 @@ const RepairJobDetails = () => {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);
+        setAlloweOperation(data?.workOrder ? false : true)
         setRepairJobData({ ...data });
       })
       .catch((err) => {
@@ -302,6 +306,7 @@ const RepairJobDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-1`}
                   allowedToEdit={allowedToEdit}
                   stepFullScreen={stepFullScreen}
+                  alloweOperation={alloweOperation}
                 />
               )}
               {(currentStep === 1 && repairJobData) && (
@@ -313,6 +318,7 @@ const RepairJobDetails = () => {
                   allowedToEdit={allowedToEdit}
                   allowUpdateStatus={allowUpdateStatus}
                   stepFullScreen={stepFullScreen}
+                  alloweOperation={alloweOperation}
                 />
               )}
             </ContentFullScreen>
