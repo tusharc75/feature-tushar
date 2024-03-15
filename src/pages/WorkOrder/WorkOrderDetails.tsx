@@ -42,6 +42,7 @@ import Versions from './Versions';
 import View from './View';
 import { TbProgressCheck } from 'react-icons/tb';
 import { FaCircleChevronDown } from 'react-icons/fa6';
+import ManageRepairJob from '../RepairJob/ManageRepairJob';
 
 type ToolbarElement = {
   type: 'element';
@@ -86,6 +87,7 @@ const WorkOrderDetails = () => {
 
   const [showConfirmVersion, setShowConfirmVersion] = useState({ open: false, withData: 0 });
   const [versionDialog, setVersionDialog] = useState(false);
+  const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, isClone: false, idToClone: null });
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -265,6 +267,18 @@ const WorkOrderDetails = () => {
   ];
 
   const toolbarButtons: ToolbarComponents[] = [
+     {
+      id: `Repair Job`,
+      type: 'button',
+      visibilityInMobile: 'visible',
+      isVisible: Boolean(
+        permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.repairOrder && workOrderData?.status !== WORK_ORDER_STATUS.completed
+      ),
+      name: `Create ${routes?.repairJob.title}`,
+      tooltip: `Create ${routes?.repairJob.title}`,
+      onClick: () => setShowManageRepairJobDialog({ open: true, isClone: false, idToClone: null }),
+      iconForMobile: <RiFileShredFill />
+    },
     {
       id: 'Scrap Asset',
       type: 'button',
@@ -584,6 +598,23 @@ const WorkOrderDetails = () => {
           }}
         />
       )}
+      {showManageRepairJobDialog.open && (
+        <ManageRepairJob
+          isClone={showManageRepairJobDialog.isClone}
+          repairJobId={showManageRepairJobDialog.idToClone}
+          onClose={() => setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null })}
+          onSuccess={(data) => {
+            setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null });
+            updateJobStatus(WORK_ORDER_STATUS.onHold)
+            history.push(`${routes.repairJobDetail.path}/${data._id}`);
+          }}
+          referenceType={sidebarResource.workOrder}
+          referenceData={{
+            warehouse: workOrderData?.warehouse?.optionValue || '',
+          }}
+        />
+      )}
+      
     </Box>
   );
 };
