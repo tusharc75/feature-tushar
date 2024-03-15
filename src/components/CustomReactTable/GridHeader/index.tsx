@@ -18,6 +18,7 @@ import { dateTimeFormat } from 'src/constants/helpers';
 
 const GridHeader = ({
   resource,
+  isClientSideGrid,
   dispatch,
   renderedFrom,
   showOnlyShowFilteredRecordSwitch,
@@ -137,19 +138,21 @@ const GridHeader = ({
               </Button>
             </HtmlTooltip>
           )}
-          {exportTable ? (
-            <HtmlTooltip title="Export table to excel" placement="top" arrow>
-              <IconButton
-                className={`refresh-arrange-button`}
-                color="primary"
-                disabled={loading}
-                size="small"
-                onClick={() => {
-                  handleTableExport();
-                }}
-              >
-                <ExportIcon />
-              </IconButton>
+          {exportTable || isClientSideGrid ? (
+            <HtmlTooltip title={dataRows.length === 0 ? 'Add some data first' : 'Export table to excel'} placement="top" arrow>
+              <span>
+                <IconButton
+                  className={`refresh-arrange-button`}
+                  color="primary"
+                  disabled={loading || dataRows.length === 0}
+                  size="small"
+                  onClick={() => {
+                    handleTableExport();
+                  }}
+                >
+                  <ExportIcon />
+                </IconButton>
+              </span>
             </HtmlTooltip>
           ) : null}
           {showArrangeView && (
