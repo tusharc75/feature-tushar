@@ -18,6 +18,7 @@ import ConfigureField from './ConfigureField';
 import ManageSteps from './ManageSteps';
 import _ from 'lodash';
 import Setting from './Setting';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const DND_NAME = 'Box';
 
@@ -174,7 +175,7 @@ const Steps = ({ resource }) => {
             setOpenSetting(false);
           }}
           onSuccess={() => {
-            fetchData()
+            fetchData();
             setOpenSetting(false);
           }}
           resource={resource}
@@ -222,12 +223,17 @@ const RenderStepItems = ({ steps, setSteps, setOpen, setOpenField, setDeleteData
 
   return (
     <div className="grid grid-cols-1 gap-2" ref={drop}>
-      {steps &&
+      {steps && steps?.length ? (
         steps?.map((step, i) => {
           return (
             <SingleStep key={step._id} {...{ step, i, setSteps, setOpen, setOpenField, setDeleteData, moveStep, findStep, handleUpdateOrder }} />
           );
-        })}
+        })
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </div>
   );
 };
