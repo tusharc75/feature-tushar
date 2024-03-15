@@ -9,13 +9,13 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
-import { camelCase } from 'lodash';
+import { camelCase, kebabCase } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
-import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
 import ManageDynamicForm from '../../ManageDynamicForm';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-const ResourceField = ({ step, allowedToEdit, renderedFrom, data }) => {
+const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen = false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -26,7 +26,6 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data }) => {
   const [open, setOpen] = useState({ open: false, id: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { state, dispatch } = useTableReducer();
@@ -42,18 +41,13 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data }) => {
       const {
         data: { data }
       } = await axiosInstance().get(`/field?resource=${step?.linkResourceName}`);
-      const newColumns = generateColumns(`${renderedFrom}_${step?.stepName}`, data, null, false);
+      const newColumns = generateColumns(
+        camelCase(step?.linkResourceName),
+        data?.filter((d) => d?.fieldData?.fieldName !== step?.linkResourceField),
+        `/${kebabCase(step?.linkResourceName)}/detail`,
+        false
+      );
       setColumns([
-        {
-          accessor: 'index',
-          Header: 'Index',
-          width: 70,
-          sticky: 'left',
-          Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
-          Footer: () => {
-            return <>Total</>;
-          }
-        },
         ...newColumns,
         {
           accessor: 'action',
@@ -122,7 +116,6 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data }) => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u, i) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject['index'] = i + 1;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions[camelCase(step?.linkResourceName)]?.isUpdate;
           finalObject['canDelete'] = permissions[camelCase(step?.linkResourceName)]?.isDelete;
@@ -168,7 +161,6 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data }) => {
   };
 
   const handleDelete = () => {
-    handleClose();
     setIsSubmitting(true);
     let ids = [];
     if (deleteRecord) {
@@ -199,73 +191,41 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data }) => {
       });
   };
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
+  const actionButtonMenuItems = () => {
+    return (
+      <MenuItem disabled={selectedRecords.length ? false : true} onClick={() => setShowDeleteConfirmBox(true)}>
+        Delete
+      </MenuItem>
+    );
   };
 
   return (
     <>
-      <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          onClick={() => {
-            setOpen({ open: true, id: null });
-          }}
-        >
-          Add
-        </Button>
-
-        <Box>
-          <Button
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
-            disabled={selectedRecords.length === 0}
-            size="small"
-            onClick={handleClick}
-            endIcon={<ExpandMore />}
-            className="new-dropdown-v1"
-          >
-            {'Actions'}
-          </Button>
-
-          <Menu
-            id="action-menu"
-            anchorEl={anchorEl}
-            keepMounted
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right'
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right'
-            }}
-          >
-            <MenuItem
+      {allowedToEdit && (
+        <DetailsPageHeader
+          isAddButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+          hasXpadding
+          leftSideContents={
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
               onClick={() => {
-                setShowDeleteConfirmBox(true);
+                setOpen({ open: true, id: null });
               }}
             >
-              Delete
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Box>
+              Add
+            </Button>
+          }
+        />
+      )}
       <Box mt={1}>
         {columns ? (
           <CustomReactTable
-            height={'300px'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
@@ -291,7 +251,7 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data }) => {
             fetchData();
             setOpen({ open: false, id: null });
           }}
-          referenceData={{[step?.linkResourceField]: data?._id}}
+          referenceData={{ [step?.linkResourceField]: data?._id }}
         />
       )}
 
