@@ -1,10 +1,9 @@
-import { Box, Chip, MenuItem, TextField } from '@material-ui/core';
+import { Box, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import { camelCase } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -17,45 +16,25 @@ import routes from '../../../components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import { CheckCircleOutline, Close } from '@material-ui/icons';
 
-let searchTimeout;
-
 const SerializedAssetStatusChangeRequest = () => {
   const renderedFrom = camelCase(routes?.serializedAssetStatusChangeRequest.title);
   const toastConfig = useContext(CustomToastContext);
-
-  const history = useHistory();
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const {
-    state: {
-      permissions,
-      selectedEntity,
-      user: { user }
-    }
+    state: { permissions, selectedEntity }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null });
-  const [status, setStatus] = useState('');
   const [renderCount, setRenderCount] = useState(0);
   const [approveRejectRecord, setApproveRejectRecord] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
-
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
@@ -65,7 +44,7 @@ const SerializedAssetStatusChangeRequest = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=Serialized Asset Status Change Request`)
+      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
       .then(({ data: { data } }) => {
         let newColumns = generateColumns(renderedFrom, data);
         setColumns([...newColumns, ActionsRenderer]);
