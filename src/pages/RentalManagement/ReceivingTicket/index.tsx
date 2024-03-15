@@ -41,6 +41,7 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
+  MATERIAL_TYPE,
   RENTAL_INTERNAL_ASSET_STATUS,
   REPAIR_JOB_STATUS,
   dateFormat,
@@ -918,8 +919,7 @@ const ReceivingTicket = ({
   const handleAddAssetsToRepairOrder = async (repairOrderData: any) => {
     let rows = selectedRecords.map((record: any) => ({
       materialId: record._id,
-      type: 'serializedAsset',
-      unit: '',
+      type: MATERIAL_TYPE.serializedAsset,
       qty: 1,
       parentId: null
     }));
