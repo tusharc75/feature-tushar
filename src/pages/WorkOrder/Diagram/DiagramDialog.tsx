@@ -11,13 +11,13 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 const DiagramDialog = ({ handleClose, referenceId }) => {
 
     const toastConfig = useContext(CustomToastContext);
-    const [currentVersion, setCurrentVersion] = useState(null);
+    const [workOrderData, setWorkOrderData] = useState(null);
 
     useEffect(() => {
         axiosInstance()
             .get(`${workOrder.api}/current-version/${referenceId}`)
             .then(({ data: { data } }) => {
-                setCurrentVersion(data?.currentVersion);
+                setWorkOrderData(data);
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -44,11 +44,12 @@ const DiagramDialog = ({ handleClose, referenceId }) => {
                 title={`Drawings`}
             ></CustomDialogHeader>
             <CustomDialogContent>
-                {currentVersion ?
+                {workOrderData ?
                     <Diagram
                         resource={ACTIVITY_RESOURCE.workOrder}
                         referenceId={referenceId}
-                        currentVersion={currentVersion}
+                        currentVersion={workOrderData?.currentVersion}
+                        workOrderData={workOrderData}
                     />
                     : <Grid container spacing={2} >
                         <CommonSkeleton lenArray={[...Array(10).keys()]} />
