@@ -13,7 +13,7 @@ import { TInitialState } from '../hooks/useTableReducer';
 import { camelCaseToWords, createJsonDataForTableExport, getExcelColumnNameFromRange } from '../utils';
 
 import moment from 'moment';
-import { ExportIcon } from 'src/assets/svg/svgIcons';
+import { ImportIcon } from 'src/assets/svg/svgIcons';
 import { dateTimeFormat } from 'src/constants/helpers';
 
 const GridHeader = ({
@@ -150,7 +150,7 @@ const GridHeader = ({
                     handleTableExport();
                   }}
                 >
-                  <ExportIcon />
+                  <ImportIcon />
                 </IconButton>
               </span>
             </HtmlTooltip>
