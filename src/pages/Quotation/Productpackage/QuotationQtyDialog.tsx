@@ -121,6 +121,9 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
         }
+        if (element.fieldName === 'pricingCondition') {
+          element.option = [];
+        }
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;

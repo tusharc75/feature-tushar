@@ -15,7 +15,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ResourceField from './ResourceField';
 
-const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = null, fromAccordian = false }) => {
+const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = null, fromAccordian = false, stepFullScreen = false }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${_.camelCase(resource)}`;
 
@@ -28,7 +28,7 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   const { generateColumns } = useColumns();
 
   const getColumns = () => {
-    const newColumns = generateColumns(`${renderedFrom}_${step?.stepName}`, step?.fields || [], null, false, data?.currency);
+    const newColumns = generateColumns(renderedFrom, step?.fields || [], null, false, data?.currency);
     const column: any = [
       {
         accessor: 'index',
@@ -178,7 +178,7 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   return (
     <>
       {step?.linkWithResource ? (
-        <ResourceField step={step} allowedToEdit={allowedToEdit} renderedFrom={renderedFrom} data={data} />
+        <ResourceField step={step} allowedToEdit={allowedToEdit} renderedFrom={renderedFrom} data={data} stepFullScreen={stepFullScreen} />
       ) : (
         <>
           {step?.fields?.length ? (
@@ -207,7 +207,7 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
                 )}
                 <Box zIndex={5} width={'100%'}>
                   <CustomReactTable
-                    height={'300px'}
+                    height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                     columns={getColumns()}
                     state={state}
                     dispatch={dispatch}

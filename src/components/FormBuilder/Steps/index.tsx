@@ -294,17 +294,19 @@ const SingleStep = ({ step, i, setOpen, setOpenField, setDeleteData, moveStep, f
                 <EditIcon fontSize="small" color={'primary'} />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title={'Add Fields'}>
-              <IconButton
-                size="small"
-                aria-label="Edit"
-                onClick={() => {
-                  setOpenField({ open: true, step: step });
-                }}
-              >
-                <BuildIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </HtmlTooltip>
+            {!step?.linkWithResource && (
+              <HtmlTooltip title={'Add Fields'}>
+                <IconButton
+                  size="small"
+                  aria-label="Edit"
+                  onClick={() => {
+                    setOpenField({ open: true, step: step });
+                  }}
+                >
+                  <BuildIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
             <HtmlTooltip title={'Delete'}>
               <IconButton
                 size="small"

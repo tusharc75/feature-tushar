@@ -380,6 +380,7 @@ const CustomReactTable = ({
       <div className="react-table-v8 ">
         <div className="table-container-v1" style={{ position: 'relative' }}>
           <GridHeader
+            isClientSideGrid={isClientSideGrid}
             resource={resource}
             dispatch={dispatch}
             renderedFrom={renderedFrom}

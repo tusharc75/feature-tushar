@@ -95,6 +95,13 @@ const ManageServiceOrderDialog = ({
             });
             setLoading(false);
           } else {
+            if (data?.canEdit === false) {
+              fieldsDataForUpdate?.forEach((e) => {
+                if (['warehouse', 'customerAccount']?.includes(e?.fieldName)) {
+                  e.isUneditable = true;
+                }
+              });
+            }
             setServiceDetails(data);
             setInitialData({
               fields: fieldsDataForUpdate,

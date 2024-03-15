@@ -42,6 +42,7 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
                 resource={resource}
                 resourceId={resourceId}
                 setNextStep={setNextStep}
+                stepFullScreen={stepFullScreen}
               />
             </ContentFullScreen>
           </>
