@@ -44,7 +44,8 @@ const SerializedAsset = ({
   renderedFrom,
   allowedToEdit,
   allowUpdateStatus,
-  stepFullScreen
+  stepFullScreen,
+  alloweOperation
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
@@ -227,7 +228,7 @@ const SerializedAsset = ({
               <HtmlTooltip title="Repaired">
                 <CheckCircleIcon color="primary" fontSize="small" />
               </HtmlTooltip>
-            ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
+            ) : alloweOperation && ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
               row?.original?.canRepair &&
               row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
               !row?.original?.repairTypeId ? (
@@ -383,7 +384,7 @@ const SerializedAsset = ({
   const rightSideContents = () => {
     return (
       <>
-        {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
+        {allowedToEdit && alloweOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
           <Fragment>
             <Button
               variant="outlined"
@@ -508,7 +509,7 @@ const SerializedAsset = ({
     <>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed}
+        isActionButtonVisible={allowedToEdit && alloweOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{
           disabled: selectedRecords.length === 0 || selectedRecords.some((s) => s.repaired === true) || checkUniqSupplier() || checkUniqWarehouse()
@@ -599,9 +600,8 @@ const SerializedAsset = ({
       {repairAssetDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to mark repair complete for ${
-            repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
-          } ? `}
+          message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
+            } ? `}
           onClose={() => {
             setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
           }}
