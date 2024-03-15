@@ -126,6 +126,7 @@ const LoadingTicket = ({
       var products: any = [];
       var nonSerializeAsset: any = [];
       var invoiceData: any = [];
+      var consumeProducts: any = [];
 
       dispatch({ type: 'selection', selectedRecords: [] });
       dispatch({ type: 'loading', loading: true });
@@ -189,6 +190,8 @@ const LoadingTicket = ({
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         material = productResponse?.data?.data?.material;
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
+        consumeProducts = productResponse?.data?.data?.consumeProducts;
+
 
         const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`);
         invoiceData = invoiceResponse?.data?.data?.material || [];
@@ -213,6 +216,10 @@ const LoadingTicket = ({
       products?.forEach((element) => {
         var qty = element.qty;
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+
+        var consumeQty = 0;
+        consumeProducts?.filter((e) => e.product === element.materialId)?.forEach((e) => { consumeQty = consumeQty + e.qty; });
+
         ticketProduct?.forEach((ele) => {
           const obj: any = {};
           obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
@@ -239,6 +246,13 @@ const LoadingTicket = ({
               ? element?.status
               : 'N/A';
           obj.rentalAssetStatus = element?.status;
+          obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
+            ? ele.qty === consumeQty
+              ? 'Consumed'
+              : consumeQty < ele.qty && consumeQty > 0
+                ? 'Partially Consumed'
+                : element?.status
+            : element?.status;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;

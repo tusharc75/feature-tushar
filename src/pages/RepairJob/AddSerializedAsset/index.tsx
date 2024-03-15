@@ -22,7 +22,7 @@ import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerial
 import ManageAssetDialog from './ManageAssetDialog';
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 
-const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen }) => {
+const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen, alloweOperation }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
@@ -414,7 +414,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
         <>
           <DetailsPageHeader
-            isAddButtonVisible={true}
+            isAddButtonVisible={alloweOperation}
             addButtonMenuItems={addButtonMenuItems()}
             isActionButtonVisible={true}
             actionButtonMenuItems={actionButtonMenuitems()}

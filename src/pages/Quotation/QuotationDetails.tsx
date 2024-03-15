@@ -83,12 +83,6 @@ const QuotationDetails = () => {
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
   const [canConvert, setCanConvert] = useState(false);
 
-  useEffect(() => {
-    if (tabValue !== tab) {
-      setTabValue(tab ? parseInt(tab) : 0);
-    }
-  }, [tab]);
-
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
