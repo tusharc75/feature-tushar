@@ -461,11 +461,9 @@ const WorkOrderDetails = () => {
               <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
             </CustomTab>
           )}
-          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
-            <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawings
-            </CustomTab>
-          )}
+          <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawings
+          </CustomTab>
           {!(isMobile && !isTablet) && (
             <CustomTab index={5} value={5} className={'tabLayout'} {...a11yProps(5)}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
@@ -526,11 +524,13 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          {workOrderData && <Diagram
-            resource={ACTIVITY_RESOURCE.workOrder}
-            referenceId={id}
-            currentVersion={workOrderData?.versions?.length + 1 || 1}
-          />}
+          {workOrderData &&
+            <Diagram
+              resource={ACTIVITY_RESOURCE.workOrder}
+              referenceId={id}
+              currentVersion={workOrderData?.versions?.length + 1 || 1}
+              workOrderData={workOrderData}
+            />}
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>

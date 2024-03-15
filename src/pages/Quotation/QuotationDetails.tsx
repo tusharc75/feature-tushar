@@ -188,9 +188,7 @@ const QuotationDetails = () => {
               canAllowMultipleTimeConvert = true;
             }
           }
-          if (
-            canAllowMultipleTimeConvert &&
-            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status) &&
+          if (canAllowMultipleTimeConvert && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status) &&
             quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
           ) {
             var isAllowedToEdit = [...(quotationData.collaborator ?? []), quotationData.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -199,26 +197,29 @@ const QuotationDetails = () => {
             }
             setAllowedToEdit(isAllowedToEdit);
             setCanConvert(true);
-          } else if (!quotationData?.rentalJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status) && 
-          quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
+          }
+          else if (!quotationData?.rentalJob && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
           } else {
             setCanConvert(false);
           }
-        } else if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
-          if (!quotationData?.salesOrder && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+        }
+        else if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
+          if (!quotationData?.salesOrder && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
           } else {
             setCanConvert(false);
           }
-        } else if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
-          if (!quotationData?.repairOrder && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+        }
+        else if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
+          if (!quotationData?.repairOrder && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
           } else {
             setCanConvert(false);
           }
-        } else if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
-          if (!quotationData?.fieldJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+        }
+        else if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
+          if (!quotationData?.fieldJob && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
           } else {
             setCanConvert(false);
@@ -226,7 +227,7 @@ const QuotationDetails = () => {
         }
       }
     }
-  }, [quotationData, quotationFields]);
+  }, [quotationData, quotationFields, currentVersion]);
 
   const fetchQuotationData = async (version: any = 0, loading = true) => {
     setLoading(loading);
@@ -619,10 +620,10 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-            <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
-              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-            </Box>
-          )}
+              <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
+                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+              </Box>
+            )}
           <div>
             <Steps
               isNextStep={false}
@@ -639,8 +640,8 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
-                      setCustomerAcceptable(true);
-                    }
+                    setCustomerAcceptable(true);
+                  }
                   : null
               }
             />
