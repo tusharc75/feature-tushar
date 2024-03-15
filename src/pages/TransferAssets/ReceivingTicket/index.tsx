@@ -1,5 +1,5 @@
-import { Box, Button } from '@material-ui/core';
-import { groupBy } from 'lodash';
+import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
+import { groupBy, map, uniq } from 'lodash';
 import { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -10,6 +10,8 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
+  ASSET_STATUS,
+  COLOUR_MASTER,
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
@@ -20,6 +22,10 @@ import {
   sidebarResource
 } from 'src/constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
+import InfoIcon from '@material-ui/icons/Info';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+
 interface ReceivingGridProps {
   fetchAssets: any;
   permissions: any;
@@ -28,7 +34,6 @@ interface ReceivingGridProps {
   setNextStep: any;
   setTransferIsEnded?: any;
   currentStep: number;
-  setTickets: any;
   updateTransferStatus?: any;
   renderedFrom?: string;
   isTransferEnded: boolean;
@@ -42,7 +47,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     fetchAssets,
     transferAssetId,
     transferAssetData,
-    setTickets,
     setNextStep,
     setTransferIsEnded,
     updateTransferStatus,
@@ -59,21 +63,76 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const [loadingTicketsNotDelivered, setLoadingTicketsNotDelivered] = useState([]);
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
+  const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [isRemovingTicket, setRemovingTicket] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
 
   const fetchFields = () => {
     setColumns(null);
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
+    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(
           renderedFrom,
           data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))
         );
-
+        newColumns?.forEach((o) => {
+          if (o?.accessor === 'assetNumber') {
+            o.cell = ({ row }) =>
+              row?.original?.assetNumber ? (
+                <div
+                  className="d-flex gap-2 align-items-center"
+                  style={{
+                    backgroundColor: row?.original?.isReplaced
+                      ? COLOUR_MASTER.replaceAssetColor.background
+                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                        ? COLOUR_MASTER.lostAssets.background
+                        : ''
+                  }}
+                >
+                  <p> {row.original?.assetNumber}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                  {row?.original?.isReplaced && (
+                    <Box>
+                      <HtmlTooltip enterTouchDelay={0} title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
+                        <InfoIcon fontSize="small" color={'primary'} />
+                      </HtmlTooltip>
+                    </Box>
+                  )}
+                </div>
+              ) : (
+                <NoDataCell />
+              );
+          } else if (o?.accessor === 'product') {
+            o.cell = ({ row }) =>
+              row?.original?.product ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p> {row.original?.product}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
+          }
+        });
         const column = [
           {
             accessor: 'index',
@@ -149,7 +208,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     await fetchFields();
-
     try {
       let assetData = await fetchAssets(forceRefresh);
       let ticketData: any = await fetchLoadingTickets();
@@ -228,34 +286,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     }
   }, [dataRows, selectedRecords]);
 
-  const handleRemoveTicket = () => {
-    setRemovingTicket(true);
-    const groupByCalls = groupBy(selectedRecords, 'receivingTicketId');
-    let apiCalls = [];
-
-    Object.keys(groupByCalls).forEach((key) => {
-      apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map((m) => m._id) }));
-    });
-
-    Promise.all(apiCalls)
-      .then(() => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)`
-        });
-        fetchAssetsData(true);
-        setRemovingTicket(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      })
-      .finally(() => {
-        setRemovingTicket(false);
-        setShowConfirmBox(false);
-      });
-  };
-
   const createReceivingTicket = () => {
     const data: any = {};
     data['referenceId'] = transferAssetData._id;
@@ -295,6 +325,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     }
     data['isPickupFromDisable'] = true;
     data['isDeliveryToDisable'] = false;
+    data['status'] = DELIVERY_TICKET_STATUS.indTransit;
     setShowTicketDialog({ open: true, data: data });
   };
 
@@ -306,41 +337,62 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     hideDetailButton: true
   };
 
-  const rightSideContents = () => {
+  const ActionMenuItems = () => {
     return (
       <>
-        {!isTransferEnded && (
-          <>
-            {permissions?.transferAsset?.isUpdate && (
-              <Button
-                variant="contained"
-                size="small"
-                color="primary"
-                disabled={
-                  selectedRecords.length === 0 ||
-                  assetWithNoTicket.length === 0 ||
-                  loadingTicketsNotDelivered.length > 0 ||
-                  selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0 ||
-                  selectedRecords.filter((asset: any) => asset.hasOwnProperty('receivingTicket')).length > 0
-                }
-                onClick={createReceivingTicket}
-              >
-                Create Receiving Ticket
-              </Button>
-            )}
-            {permissions?.transferAsset?.isUpdate &&
-            selectedRecords.length &&
-            selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicket') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
-              selectedRecords?.length ? (
-              <Button variant="contained" size="small" color="primary" onClick={() => setShowConfirmBox(true)}>
-                Remove Receiving Ticket
-              </Button>
-            ) : null}
-          </>
-        )}
+        <MenuItem
+          disabled={
+            selectedRecords.length === 0 ||
+            assetWithNoTicket.length === 0 ||
+            loadingTicketsNotDelivered.length > 0 ||
+            selectedRecords.filter((asset: any) => asset?.status === ASSET_STATUS.lost).length > 0 ||
+            selectedRecords.filter((asset: any) => asset.hasOwnProperty('receivingTicket')).length > 0
+          }
+          onClick={createReceivingTicket}
+        >
+          Create Receiving Ticket
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords.length === 0 ||
+            selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+          }
+          onClick={() => {
+            setShowConfirmBoxReceive(true);
+          }}
+        >
+          Receive Assets
+        </MenuItem>
       </>
     );
   };
+
+  const handelReceiveAssets = () => {
+    let data = {};
+    setIsSubmitting(true)
+    const loadingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
+    if (loadingTicketIds.length) {
+      data['_ids'] = loadingTicketIds?.map((e) => e);
+      data['status'] = DELIVERY_TICKET_STATUS.delivered;
+      data['signatures'] = [];
+      axiosInstance()
+        .post(`${deliveryTicket.api}/updatebulk`, data)
+        .then(({ data: { data } }) => {
+          fetchAssetsData(true);
+          setShowConfirmBoxReceive(false);
+          setIsSubmitting(false)
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Assets Received Successfully`
+          });
+        })
+        .catch((error) => {
+          setIsSubmitting(false)
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
 
   return (
     <Fragment>
@@ -348,10 +400,11 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         <>
           <DetailsPageHeader
             isAddButtonVisible={false}
-            isActionButtonVisible={false}
             previewDownloadProps={previewDownloadProps}
-            rightSideContents={rightSideContents()}
             hasXpadding
+            isActionButtonVisible={allowedToEdit && !isTransferEnded}
+            actionButtonMenuItems={<ActionMenuItems />}
+            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
           />
         </>
       )}
@@ -389,15 +442,15 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           }}
         />
       )}
-      {showConfirmBox && (
+      {showConfirmBoxReceive && (
         <ConfirmationDialog
-          okBtnLoading={isRemovingTicket}
-          open={showConfirmBox}
-          message={`Are you sure you want to remove asset(s)?`}
+          okBtnLoading={isSubmitting}
+          open={showConfirmBoxReceive}
+          message={`Are you sure you want to receive assets?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowConfirmBoxReceive(false);
           }}
-          onOk={handleRemoveTicket}
+          onOk={handelReceiveAssets}
         />
       )}
     </Fragment>
