@@ -18,7 +18,8 @@ import {
   asyncForEach,
   MATERIAL_SUB_TYPE,
   REPAIR_ORDER_STATUS,
-  sidebarResource
+  sidebarResource,
+  ASSET_STATUS
 } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -384,7 +385,7 @@ const WorkOrder = ({
                 </IconButton>
               </HtmlTooltip>
             )}
-            {[MATERIAL_TYPE.service, MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) && !user?.brandPolicy?.workOrderConsumableHide && (
+            {row?.original?.workOrder && [MATERIAL_TYPE.service, MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) && !user?.brandPolicy?.workOrderConsumableHide && (
               <HtmlTooltip title="Add Products/Consumables">
                 <IconButton
                   size="small"
@@ -547,7 +548,7 @@ const WorkOrder = ({
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     if (selectedServiceOption) {
-        setSelectedServiceOption(null);
+      setSelectedServiceOption(null);
     }
     dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
@@ -602,7 +603,7 @@ const WorkOrder = ({
         parent.canAutoCompleteWorkOrder = true;
       }
       parent.canDelete = false;
-      if (parent?.subRows?.length === 0 && parent?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+      if (parent?.subRows?.length === 0 && parent?.workOrder && parent?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
         parent.canDelete = true;
       }
     });
@@ -725,22 +726,26 @@ const WorkOrder = ({
   const createWorkorderService = (rows) => {
     const rowsForWorkorder = rows.filter((d) => d.type === MATERIAL_TYPE.serializedAsset && !d.workOrder);
     if (rowsForWorkorder.length > 0) {
-      const tempInitialData = rowsForWorkorder.map((element) => {
-        return {
-          _id: element?._id,
-          product: element?.serializedAssetDetail?.product?.optionValue,
-          serializedAsset: element?.serializedAssetDetail?._id
-        };
-      });
-      axiosInstance()
-        .post(`${repairOrder.api}/${repairOrderData._id}/work-order/create-many`, tempInitialData)
-        .then(({ data }) => {
-          fetchData();
-          fetchRepairOrderData();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
+      const data: any = []
+      rowsForWorkorder?.forEach((e) => {
+        if (e?.serializedAssetDetail?.status !== ASSET_STATUS.lost) {
+          data.push({
+            _id: e?._id,
+            product: e?.serializedAssetDetail?.product?.optionValue,
+            serializedAsset: e?.serializedAssetDetail?._id
+          })
+        }
+      })
+      if (data?.length) {
+        axiosInstance().post(`${repairOrder.api}/${repairOrderData._id}/work-order/create-many`, data)
+          .then(({ data }) => {
+            fetchData();
+            fetchRepairOrderData();
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      }
     }
   };
 
@@ -958,6 +963,7 @@ const WorkOrder = ({
     return (
       <>
         <MenuItem
+          disabled={selectedRecords?.every((d) => d?.workOrder) ? false : true}
           onClick={() => {
             setAddServicesDialog({ open: true, new: false });
           }}
@@ -965,6 +971,7 @@ const WorkOrder = ({
           Add Existing Services
         </MenuItem>
         <MenuItem
+          disabled={selectedRecords?.every((d) => d?.workOrder) ? false : true}
           onClick={() => {
             setAddServicesDialog({ open: true, new: true });
           }}
@@ -992,10 +999,8 @@ const WorkOrder = ({
         {!user?.brandPolicy?.workOrderConsumableHide && (
           <MenuItem
             disabled={
-              selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
-                ? // checkUniqWorkOrder()
-                false
-                : true
+              selectedRecords?.filter((d) => d?.workOrder && [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
+                ? false : true
             }
             onClick={() => {
               var ids = [];
@@ -1040,33 +1045,33 @@ const WorkOrder = ({
           Auto Complete Work Order(s)
         </MenuItem>
         <MenuItem
-        onClick={() => {
-          setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
-        }}
-        disabled={isDisabledCompleteService()}
-      >
-        Complete Service
-      </MenuItem>
-      <MenuItem
-        onClick={() => {
-          setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
-        }}
-        disabled={isDisabledCompleteService()}
-      >
-        Skip Service
-      </MenuItem>
-      <MenuItem
-        disabled={
-          selectedRecords?.length && selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)
-            ? false
-            : true
-        }
-        onClick={() => {
-          setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
-        }}
-      >
-        Revert Service
-      </MenuItem>
+          onClick={() => {
+            setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
+          }}
+          disabled={isDisabledCompleteService()}
+        >
+          Complete Service
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
+          }}
+          disabled={isDisabledCompleteService()}
+        >
+          Skip Service
+        </MenuItem>
+        <MenuItem
+          disabled={
+            selectedRecords?.length && selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)
+              ? false
+              : true
+          }
+          onClick={() => {
+            setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
+          }}
+        >
+          Revert Service
+        </MenuItem>
         <MenuItem
           onClick={() => {
             setIsBulkEdit(true);
@@ -1209,21 +1214,21 @@ const WorkOrder = ({
             />
           )}
           {showServiceActionConfirmBox.open && (
-        <ConfirmationDialog
-          okBtnLoading={isSubmitting}
-          open={showServiceActionConfirmBox.open}
-          message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-            ? 'complete'
-            : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-              ? 'skip'
-              : 'revert'
-            } this Service(s)`}
-          onClose={() => {
-            setShowServiceActionConfirmBox({ open: false, action: '' });
-          }}
-          onOk={handleCompleteService}
-        />
-      )}
+            <ConfirmationDialog
+              okBtnLoading={isSubmitting}
+              open={showServiceActionConfirmBox.open}
+              message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+                ? 'complete'
+                : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+                  ? 'skip'
+                  : 'revert'
+                } this Service(s)`}
+              onClose={() => {
+                setShowServiceActionConfirmBox({ open: false, action: '' });
+              }}
+              onOk={handleCompleteService}
+            />
+          )}
           {completeConfirmBox && (
             <ConfirmationDialog
               open={completeConfirmBox}
