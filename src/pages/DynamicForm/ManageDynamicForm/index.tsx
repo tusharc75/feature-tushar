@@ -15,7 +15,16 @@ import { CustomDialogTransition, GenerateResourceLineNumber } from 'src/constant
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
-const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, redirected = true, isClone = false, id = null }) => {
+const ManageDynamicForm = ({
+  resource,
+  resourcePath = '',
+  onClose,
+  onSuccess,
+  redirected = true,
+  isClone = false,
+  id = null,
+  referenceData = null
+}) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -44,6 +53,17 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
             }
           })
           .then(({ data: { data } }) => {
+            if (referenceData) {
+              Object.keys(referenceData)?.forEach((_r) => {
+                fieldsDataForUpdate?.forEach((_f) => {
+                  if (_f?.fieldName === _r) {
+                    _f.disabled = true;
+                    return;
+                  }
+                });
+              });
+            }
+
             setInitialData({
               fields: isClone ? fieldsDataForCreate : fieldsDataForUpdate,
               values: getObjKeysWithValues(data, isClone ? fieldsDataForCreate : fieldsDataForUpdate)
@@ -54,10 +74,23 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
           });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate)
+        const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate);
         if (primaryField) {
-          tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);;
+          tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
         }
+
+        if (referenceData) {
+          Object.keys(referenceData)?.forEach((_r) => {
+            fieldsDataForCreate?.forEach((_f) => {
+              if (_f?.fieldName === _r) {
+                _f.disabled = true;
+                tempInitialData[_f?.fieldName] = referenceData[_f?.fieldName];
+                return;
+              }
+            });
+          });
+        }
+
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -101,10 +134,10 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
         })
         .then(({ data: { data, message } }) => {
           setLoading(false);
-          if (redirected){
+          if (redirected) {
             history.push(`${resourcePath}/detail/${data._id}`);
             onSuccess(data.data);
-          } else{
+          } else {
             onSuccess(data, primaryField);
           }
           setSubmitting(true);
