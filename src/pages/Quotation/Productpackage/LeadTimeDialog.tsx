@@ -28,9 +28,14 @@ function LeadTimeDialog({ quotationId, data, versionId, onClose, handleSucess })
       leadTime: leadTimeMasterSteps,
       _id: data?._id
     };
-
+   let api = '';
+   if(data.type==='Manual Entry'){
+    api = `${quotation.api}/additionalcost/${quotationId}/${versionId}/lead-time`
+   }else{
+    api = `${quotation.api}/productpackage/${quotationId}/${versionId}/lead-time`
+   }
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationId}/${versionId}/lead-time`, value)
+      .put(api, value)
       .then((res) => {
         setLoading(false);
         handleSucess();
