@@ -137,8 +137,16 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
           if (referenceData?.warehouse) {
             if (fieldsDataForCreate.some((e) => e.fieldName === 'warehouse')) {
               initialData['warehouse'] = referenceData?.warehouse;
+              if(referenceType === sidebarResource.workOrder){
+                fieldsDataForCreate?.forEach((e) => {
+                  if (['warehouse']?.includes(e?.fieldName)) {
+                    e.isUneditable = true;
+                  }
+                });
+              }
             }
           }
+          
           setInitialData({
             fields: fieldsDataForCreate,
             values: initialData
