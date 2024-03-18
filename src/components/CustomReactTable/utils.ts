@@ -1,10 +1,9 @@
-import { camelCase, isEmpty } from 'lodash';
+import { camelCase, flatMapDeep, isEmpty, startCase } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrencies } from 'src/constants/helpers';
 import { TColType } from './TableComponents/TableHelperComponents';
-import { flatMapDeep, startCase } from 'lodash';
 
 export const childrenProperty = 'subRows';
 
@@ -399,7 +398,7 @@ export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]
           value = value ? moment(row[col.id]).format(dateTimeFormat) : noCellData;
           break;
         case col.type === 'checkBox':
-          value = Boolean(value) ? 'Yes' : 'No';
+          value = Boolean(row[col.id]) ? 'Yes' : 'No';
           break;
         case col.type === 'number':
           value = row[col.id] ?? 0;
