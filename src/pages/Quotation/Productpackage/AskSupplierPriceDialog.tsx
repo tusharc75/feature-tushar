@@ -276,7 +276,8 @@ const AskSupplierPriceDialog = (props) => {
               variant="contained"
               color="primary"
               disabled={contactId.length === 0 || selectedFields.length === 0}
-              onClick={() => handelAskPriceToSupplier(contantValue, contactId, selectedFields)}
+              onClick={() => 
+                handelAskPriceToSupplier(contantValue, contactId, selectedFields, otherAttachments)}
             >
               Send
             </CustomButton>
