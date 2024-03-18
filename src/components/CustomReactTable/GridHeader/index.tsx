@@ -66,9 +66,8 @@ const GridHeader = ({
       };
     }
     const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
-    console.log({ newColumns, data });
-    // xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
-    // xlsx.writeFile(wb, `${name}.xlsx`);
+    xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
+    xlsx.writeFile(wb, `${name}.xlsx`);
   };
 
   return (
