@@ -652,16 +652,6 @@ const QuotationDetails = () => {
                   updateDOASetup={updateDOASetup}
                 />
               )}
-              {stepNames[currentStep] === 'Manual Entry' && quotationData && (
-                <AdditionalCost
-                  quotationData={quotationData}
-                  setNextStep={setNextStep}
-                  renderedFrom={renderedFrom}
-                  version={currentVersion}
-                  allowedToEdit={allowedToEdit}
-                  stepFullScreen={stepFullScreen}
-                />
-              )}
               {stepNames[currentStep] === 'Quote Builder' && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
