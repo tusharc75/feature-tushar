@@ -375,6 +375,7 @@ export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]
   for (let row of normalizedRowData) {
     const temp = {};
     for (let col of columns) {
+      console.log({ head: col.Header, col: col.type, value: row.type === 'Debit' ? `-${row[col.id] ?? 0}` : row[col.id] ?? 0 });
       let value = row[col.id];
       if (camelCase(row[col.id]) === row[col.id]) {
         value = startCase(row[col.id]);
@@ -401,7 +402,7 @@ export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]
           value = Boolean(row[col.id]) ? 'Yes' : 'No';
           break;
         case col.type === 'number':
-          value = row[col.id] ?? 0;
+          value = row.type === 'Debit' ? `-${row[col.id] ?? 0}` : row[col.id] ?? 0;
           break;
         case col.type === 'currencyAmount':
           value = formatAmountWithCurrency(col.currency, value)?.amountWithouCurrencyCode;
