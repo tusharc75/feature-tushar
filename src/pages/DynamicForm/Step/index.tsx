@@ -7,6 +7,7 @@ import _ from 'lodash';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import View from './View';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
   const [steps, setSteps] = useState(null);
@@ -16,6 +17,9 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
   const [nextStep, setNextStep] = useState(false);
 
   useEffect(() => {
+    resourceData?.steps?.forEach((step) => {
+      step.fields = CURReplaceByCurrencySingle(step?.fields, data?.currency ? data?.currency : 'USD');
+    });
     setSteps(_.sortBy(resourceData?.steps, 'order'));
   }, [resourceData]);
 

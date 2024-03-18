@@ -49,7 +49,7 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
     >
       <Formik
         initialValues={{
-          showStepsInList: resourceData.hasOwnProperty('showStepsInList') ? resourceData?.showStepsInList : true
+          showStepsInList: resourceData.hasOwnProperty('showStepsInList') ? resourceData?.showStepsInList : false
         }}
         onSubmit={handleSubmit}
       >

@@ -21,6 +21,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import routes from 'src/components/Helpers/Routes';
+import { flattenArray } from 'src/constants/columns';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 
 const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = null, fromAccordian = false, stepFullScreen = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -96,12 +98,11 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
             {
               accessor: 'description',
               Header: 'Description',
-              Cell: ({ row }) => <p className="text-truncate">{row.original.description}</p>
+              Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
             }
           ]
         : [])
     ];
-
     return [
       ...column,
       ...newColumns,
@@ -162,7 +163,8 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
         }
       })
       .then(({ data: { data } }) => {
-        let rows = data.map((u, i) => {
+        const rows = data?.filter((e) => e?.parentId === null || !e?.parentId);
+        let _rows = rows?.map((u, i) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['index'] = i + 1;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
@@ -182,12 +184,13 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
               : u?.type === MATERIAL_TYPE.package
               ? u?.packageDetail?.packageDescription
               : '';
+          finalObject['subRows'] = generateNestedData(data, finalObject);
           return finalObject;
         });
 
-        dispatch({ type: 'initialize', data: rows, count: data?.length });
+        dispatch({ type: 'initialize', data: _rows, count: data?.length });
         if (setNextStep) {
-          if (rows?.length > 0) {
+          if (data?.length > 0) {
             setNextStep(true);
           } else {
             setNextStep(false);
@@ -204,8 +207,34 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
       });
   };
 
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow['isChecked'] = selectedRecords?.some((s) => s._id === _subRow._id);
+      _subRow.detail =
+        _subRow?.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageName
+          : '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
+    });
+
+    return subRows;
+  };
+
   useEffect(() => {
-    if (step && step?.fields?.length) {
+    if (step && (step?.fields?.length || step?.linkWithMaterial)) {
       fetchData();
     }
   }, [step]);
@@ -269,6 +298,35 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
       });
   };
 
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, step?.fields || [], updatedData);
+
+    axiosInstance()
+      .put(
+        `/dynamic-form/step/${resourceId}`,
+
+        { ...rows[0], stepId: step?._id },
+        {
+          headers: {
+            Resource: resource
+          }
+        }
+      )
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <MenuItem disabled={selectedRecords.length ? false : true} onClick={() => setShowDeleteConfirmBox(true)}>
@@ -279,7 +337,9 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
 
   const addButtonMenuItems = () => {
     return step?.linkWithMaterial
-      ? step?.linkedMaterial?.map((m) => <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m)}</MenuItem>)
+      ? step?.linkedMaterial?.map((m) => (
+          <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
+        ))
       : null;
   };
 
@@ -289,7 +349,7 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
         <ResourceField step={step} allowedToEdit={allowedToEdit} renderedFrom={renderedFrom} data={data} stepFullScreen={stepFullScreen} />
       ) : (
         <>
-          {step?.fields?.length ? (
+          {step?.fields?.length || step?.linkWithMaterial ? (
             step?.multipleStepData ? (
               <>
                 {allowedToEdit && (
@@ -324,7 +384,9 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
                     dispatch={dispatch}
                     renderedFrom={`${renderedFrom}_${step?.stepName}`}
                     isClientSideGrid={true}
+                    onSaveEdit={onSaveInlineEdit}
                     refreshGrid={fetchData}
+                    expander={true}
                   />
                 </Box>
               </>
@@ -391,8 +453,10 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
                 handleAdd(rows);
               }}
               isSubmitting={isSubmitting}
+              ids={dataRows?.filter((d) => d?.type === MATERIAL_TYPE.product)?.map((e) => e?.materialId)}
             />
           )}
+
           {openMaterial.open && openMaterial.type === MATERIAL_TYPE.service && (
             <AssignServiceDialog
               handleClose={() => setOpenMaterial({ open: false, type: '' })}
@@ -401,8 +465,10 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
                 handleAdd(rows);
               }}
               isSubmitting={isSubmitting}
+              ids={dataRows?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e?.materialId)}
             />
           )}
+
           {openMaterial.open && openMaterial.type === MATERIAL_TYPE.package && (
             <AssignPackageDialog
               handleClose={() => setOpenMaterial({ open: false, type: '' })}
@@ -411,6 +477,7 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
                 handleAdd(rows);
               }}
               isSubmitting={isSubmitting}
+              ids={dataRows?.filter((d) => d?.type === MATERIAL_TYPE.package)?.map((e) => e?.materialId)}
             />
           )}
         </>
