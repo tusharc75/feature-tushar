@@ -57,7 +57,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
     const productFields = productResult?.data?.data?.filter((e) =>
-      ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName)
+      ['productCategory', 'productNumber', 'serializedProduct', 'chartOfAccount'].includes(e?.fieldData?.fieldName)
     );
     column.push({
       accessor: 'index',
@@ -127,38 +127,11 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         return row.original['description'] ? <p className="text-truncate">{row?.original?.description}</p> : <NoDataCell />;
       }
     });
-    productFields?.forEach((e) => {
-      if (e?.fieldData?.fieldName === 'productNumber') {
-        column.push({
-          accessor: 'productNumber',
-          Header: e?.fieldData?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => (row.original.productNumber ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />)
-        });
-      }
-      if (e?.fieldData?.fieldName === 'serializedProduct') {
-        column.push({
-          accessor: 'serializedProduct',
-          Header: e?.fieldData?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) =>
-            row.original.type === MATERIAL_TYPE.product ? (
-              <p className="text-truncate">{row.original.serializedProduct ? 'Yes' : 'No'}</p>
-            ) : (
-              <NoDataCell />
-            )
-        });
-      }
-      if (e?.fieldData?.fieldName === 'productCategory') {
-        column.push({
-          accessor: 'productCategory',
-          Header: e?.fieldData?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) =>
-            row.original.type === MATERIAL_TYPE.product ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />
-        });
-      }
-    });
+
+    const productFieldsColumns = generateColumns(renderedFrom, productFields);
+    productFieldsColumns?.forEach((e) => {
+      column.push(e)
+    })
 
     let fields = await fetch_po_product_fields(purchaseOrderData?.currency);
     fields?.forEach((e) => {
@@ -309,7 +282,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           description: item?.productDetail?.productDescription,
           productNumber: item?.productDetail?.productNumber,
           serializedProduct: item?.productDetail?.serializedProduct,
-          productCategory: item.productDetail?.productCategory?.optionLabel
+          productCategory: item.productDetail?.productCategory,
+          chartOfAccount: item.productDetail?.chartOfAccount
         };
 
         res.subRows = [

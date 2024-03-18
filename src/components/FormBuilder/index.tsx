@@ -1,17 +1,15 @@
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Divider from '@material-ui/core/Divider';
+import { makeStyles } from '@material-ui/core/styles';
+import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
-import { isMobile, isTablet } from 'react-device-detect';
-import { makeStyles } from '@material-ui/core/styles';
-import FieldList from './FieldList';
+import { CHILD_RESOURCE } from '../../constants/helpers';
+import { CustomField } from './CustomField/index';
 import { DragBox } from './DragBox';
 import { DropMaster } from './DropMaster';
-import { CustomField } from './CustomField/index';
-import styles from './Form.module.scss';
-import { CHILD_RESOURCE } from '../../constants/helpers';
+import FieldList from './FieldList';
 
 const subForms = [
   CHILD_RESOURCE.rentalManagementProduct,
@@ -107,11 +105,16 @@ export const FormBuilder = ({
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
         <Grid container spacing={1}>
           <Grid item xs={12} md={3} sm={4}>
-            <Box border={1} p={2} borderColor="var(--common-border-color)" className={styles.set_gridbox_layout}>
+            <Box
+              border={1}
+              p={2}
+              borderColor="var(--common-border-color)"
+              className={`h-[calc(100vh-200px)] overflow-auto max-[960px]:h-[calc(100vh-200px)] overflow-x-hidden`}
+            >
               <Box pt={1} pb={1} pr={'8px'}>
                 <DragBox name="New Section" label="New Section" type="master"></DragBox>
               </Box>
-              <Grid container spacing={1} className={styles.form_grid_box}>
+              <Grid container spacing={1} className={`max-[960px]:grid grid-cols-1 max-[960px]:w-[200%] max-[960px]:pb-[15px]`}>
                 {Object.keys(FieldList).map((type, index) => {
                   return !filterFieldType.includes(type) ? (
                     <DragBox key={index} type="field" label={FieldList[type].label} name={FieldList[type].type} removeExtraField={removeExtraField} />
