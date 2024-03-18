@@ -181,7 +181,7 @@ const SerializedAssetStatusChangeRequest = () => {
   };
 
   const statusOptions = [
-      { optionLabel: ASSET_APPROVAL_STATUS.pending, optionValue: ASSET_APPROVAL_STATUS.pending, default: true},
+      { optionLabel: ASSET_APPROVAL_STATUS.pending, optionValue: ASSET_APPROVAL_STATUS.pending },
       { optionLabel: ASSET_APPROVAL_STATUS.approved, optionValue: ASSET_APPROVAL_STATUS.approved },
       { optionLabel: ASSET_APPROVAL_STATUS.rejected, optionValue: ASSET_APPROVAL_STATUS.rejected }
   ]
