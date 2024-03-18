@@ -117,7 +117,6 @@ export const sublease_InterCompany_Steps: stepInterface[] = [
 
 export const quotationProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
   { name: 'Quote Builder', title: 'Builder', icon: 'quote' },
   { name: 'DOA', title: 'DOA', icon: 'doa' },
   { name: 'Quote Approval', title: 'Approval', icon: 'approval' },
@@ -367,7 +366,8 @@ export const sidebarResource = {
   triggerNotificationHistory: 'Trigger Notification History',
   userAttendance : 'User Attendance',
   dataLists: 'Data Lists',
-  assetsReceiving : 'Assets Receiving'
+  assetsReceiving : 'Assets Receiving',
+  serializedAssetStatusChangeRequest : 'Serialized Asset Status Change Request',
 };
 
 export const primaryFields = {
@@ -511,7 +511,8 @@ export const RESOURCE_LABEL = {
   triggerNotificationHistory: 'Trigger Notification History',
   userAttendance: 'User Attendance',
   dataList: 'Data List',
-  dataListitems: 'Data List Items'
+  dataListitems: 'Data List Items',
+  serializedAssetStatusChangeRequest : 'Serialized Asset Status Change Request',
 };
 
 export const CHILD_RESOURCE = {
