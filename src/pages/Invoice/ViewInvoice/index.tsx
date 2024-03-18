@@ -356,7 +356,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       <>
         {dataRows &&
           dataRows?.length > 0 &&
-          [sidebarResource.fieldTicket, sidebarResource.repairOrder]?.includes(resource) &&
+          [sidebarResource.fieldTicket, sidebarResource.repairOrder,sidebarResource.salesOrder]?.includes(resource) &&
           ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
             <ThemeButton
               iconForMobile={<CancelInvoiceIcon />}

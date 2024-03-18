@@ -77,7 +77,7 @@ export const getStaticFields = () => {
         ) : (
           <NoDataCell />
         )
-    },
+    }
   ];
 };
 
@@ -95,7 +95,10 @@ export const getCompletedByField = () => {
       disableFilters: true,
       cell: ({ row }) =>
         row?.original?.completedBy ? (
-          <h5 className="createBy" title={`${row?.original?.completedBy} • ${moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}`}>
+          <h5
+            className="createBy"
+            title={`${row?.original?.completedBy} • ${moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}`}
+          >
             {row?.original?.completedBy}
             <span className="createdAtTime badge-date">{moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}</span>
           </h5>
@@ -232,6 +235,7 @@ export default function useColumns() {
             let fieldName = field.fieldName + '_' + _currency.toLowerCase();
             let fieldLabel = field.fieldLabel + ' ' + _currency;
             column.push({
+              ...commonFieldData,
               accessor: fieldName,
               Header: fieldLabel,
               editable: Boolean(field?.isColumnEditable),
