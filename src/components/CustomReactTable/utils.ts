@@ -2,8 +2,9 @@ import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, dateTimeFormat, formatAmountWithCurrency } from 'src/constants/helpers';
+import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrencies } from 'src/constants/helpers';
 import { TColType } from './TableComponents/TableHelperComponents';
+import { flatMapDeep } from 'lodash';
 
 export const childrenProperty = 'subRows';
 
@@ -85,10 +86,9 @@ export const getGridMetaDataFromLocalStorage = () => {
   try {
     const data = localStorage.getItem('gridMetaData');
     if (data && data !== 'undefined') {
-      return JSON.parse(data)
-    }
-    else {
-      return {}
+      return JSON.parse(data);
+    } else {
+      return {};
     }
   } catch (ex) {
     return {};
@@ -320,12 +320,60 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
   }
 };
 
-export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]) => {
+const flatDataRowsItem = (mem) => {
+  const member = { ...mem };
+  delete member[childrenProperty];
+  if (!mem[childrenProperty] || !mem[childrenProperty].length) {
+    return member;
+  }
+  return [member, flatMapDeep(mem[childrenProperty], flatDataRowsItem)];
+};
+
+export function normalizeRowData(array) {
+  return flatMapDeep(array, flatDataRowsItem);
+}
+
+const renderFoter = (columns: TColType[], rowData: any[]) => {
+  const data = {};
+  for (const column of columns) {
+    const fieldName = column.accessor;
+    const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === column.currency)?.symbolNative;
+    const total = rowData
+      ?.filter((f) => !f.parentId && f.hasOwnProperty(fieldName) && !isNaN(f[fieldName]))
+      .reduce((sum, row) => Number(row[fieldName]) + sum, 0);
+    switch (true) {
+      case ['action', 'selection', 'expander'].includes(column.id):
+        break;
+      case column.id === 'index':
+        data[column.header] = 'Total';
+        break;
+      case Boolean(column.isHideColumnSum):
+        data[column.header] = '';
+        break;
+      case column.type === 'currencyAmount':
+        data[column.header] = `${currencySymbol} ${formatAmountWithCurrency(column.currency, total)?.amountWithouCurrencyCode ?? total}`;
+        break;
+      case column.type === 'decimal':
+        data[column.header] = total;
+        break;
+      case typeof column.Footer === 'function':
+        data[column.header] = total;
+        break;
+      default:
+        data[column.header] = '';
+        break;
+    }
+  }
+  return data;
+};
+
+export const createJsonDataForTableExport = (columns: TColType[], rowData: any[], isFooterPresent: boolean) => {
+  const normalizedRowData = normalizeRowData(rowData);
   const data = [];
-  if (!rowData || rowData.length === 0) return false;
+  if (!normalizedRowData || normalizedRowData.length === 0) return false;
   const noCellData = '------';
 
-  for (let row of rowData) {
+  for (let row of normalizedRowData) {
     const temp = {};
     for (let col of columns) {
       let value = row[col.id];
@@ -362,12 +410,9 @@ export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]
       temp[col.Header] = value || noCellData;
     }
     data.push(temp);
-    if (row[childrenProperty]) {
-      const tempData = createJsonDataForTableExport(columns, row[childrenProperty]);
-      if (tempData) data.push(...tempData);
-    }
   }
-  return data;
+  const footer = isFooterPresent ? renderFoter(columns, normalizedRowData) : {};
+  return [...data, footer];
 };
 
 export function camelCaseToWords(s: string) {
@@ -404,4 +449,10 @@ export function getExcelColumnNameFromRange(range) {
   }
 
   return res;
+}
+
+export function extractLastNumberFromDataRange(input: string): number | null {
+  const regex = /(\d+)(?!.*\d)/;
+  const match = input.match(regex);
+  return match ? parseInt(match[1], 10) : null;
 }

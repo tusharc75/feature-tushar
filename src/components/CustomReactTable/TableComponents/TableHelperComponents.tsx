@@ -1,7 +1,7 @@
 import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell } from '@material-ui/core';
 import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
@@ -12,6 +12,7 @@ export type TColType = {
   Header: string;
   header: string;
   isHideColumnSum?: boolean;
+  Footer?: (data: any) => React.ReactNode;
   type?:
     | 'mobileNumber'
     | 'phone'

@@ -10,7 +10,7 @@ import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
-import { camelCaseToWords, createJsonDataForTableExport, getExcelColumnNameFromRange } from '../utils';
+import { camelCaseToWords, createJsonDataForTableExport, extractLastNumberFromDataRange, getExcelColumnNameFromRange } from '../utils';
 
 import moment from 'moment';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
@@ -51,19 +51,32 @@ const GridHeader = ({
   };
 
   const handleTableExport = () => {
-    const data = createJsonDataForTableExport(newColumns, dataRows);
+    const isFooterPresent = newColumns.some((c) => typeof c.Footer === 'function');
+
+    const data = createJsonDataForTableExport(newColumns, dataRows, isFooterPresent);
     if (!data) return;
     const wb = xlsx.utils.book_new();
     const ws = xlsx.utils.json_to_sheet(data);
 
-    // for table head style
-    for (const col of getExcelColumnNameFromRange(ws['!ref'])) {
+    const columns = getExcelColumnNameFromRange(ws['!ref']);
+    const lastRowNumber = extractLastNumberFromDataRange(ws['!ref']);
+    for (const col of columns) {
+      // For header style
       ws[`${col}1`].s = {
         font: {
           name: 'Calibri',
           bold: true
         }
       };
+      // For footer style
+      if (lastRowNumber && isFooterPresent) {
+        ws[`${col}${lastRowNumber}`].s = {
+          font: {
+            name: 'Calibri',
+            bold: true
+          }
+        };
+      }
     }
     const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
     xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
