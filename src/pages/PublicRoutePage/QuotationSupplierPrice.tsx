@@ -446,7 +446,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                   isClientSideGrid={true}
                   hideAction={true}
                   hideSelection={true}
-                  expander={false}
+                  expander={true}
                   hideExportTable={true}
                 />
               ) : (
