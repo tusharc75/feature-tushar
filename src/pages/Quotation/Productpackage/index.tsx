@@ -1,11 +1,10 @@
 import { Box, Button, IconButton, Menu, MenuItem, MenuList, Popover } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
 import Add from '@material-ui/icons/Add';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { capitalize, isArray, uniqBy } from 'lodash';
+import { isArray, startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -118,18 +117,18 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         Cell: ({ row }) =>
           <div>
             <p className="text-truncate">
-              {row.original.type === 'serializedAsset' ? 'Asset' : `${capitalize(row.original.type)} `}
-              {row.original['type'] === 'product'
+              {row.original.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : `${startCase(row.original.type)} `}
+              {row.original['type'] === MATERIAL_TYPE.product
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
                   : '(Non-Serialized)'
-                : row.original?.type === 'package'
+                : row.original?.type === MATERIAL_TYPE.package
                   ? row.original?.packageDetail.packageType === 'Product'
                     ? '(Product)'
                     : '(Service)'
-                  : row.original.type === 'service'
+                  : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : row?.original?.type}
+                    : ''}
             </p>
           </div>
       },
@@ -142,7 +141,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original.type === MATERIAL_TYPE.serializedAsset || row.original.type === 'Manual Entry' ? (
+            {row.original.type === MATERIAL_TYPE.serializedAsset ? (
               <p>{row.original?.detail}</p>
             ) : (
               <p
@@ -160,7 +159,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 <span>({row.original?.subRows?.length})</span>
               </Box>
             ) : null}
-            {row.original.type !== MATERIAL_TYPE.serializedAsset && row.original.type !== 'Manual Entry'  && (
+            {![MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.manualEntry]?.includes(row.original.type) && (
               <Box ml={1}>
                 <HtmlTooltip title="Add ">
                   <IconButton
@@ -181,26 +180,26 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 </HtmlTooltip>
               </Box>
             )}
-           {row.original.type !== 'Manual Entry' && ( 
-           <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(
-                    `${row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === 'product'
-                        ? routes.productDetail.path
-                        : row.original.type === 'package'
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
-                    }/${row.original.materialId}`
-                  );
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+            {row.original.type !== MATERIAL_TYPE.manualEntry && (
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(
+                      `${row.original.type === MATERIAL_TYPE.serializedAsset
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === MATERIAL_TYPE.product
+                          ? routes.productDetail.path
+                          : row.original.type === MATERIAL_TYPE.package
+                            ? routes.packagesDetail.path
+                            : routes.serviceMasterDetail.path
+                      }/${row.original.materialId}`
+                    );
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
             )}
           </div>
         )
@@ -301,31 +300,31 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     const additionalCost = await axiosInstance().get(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}`);
     const additionalData = additionalCost?.data?.data || [];
     const updatedAdditionalData = additionalData?.map((e: any) => {
-      return { ...e, type: 'Manual Entry' };
+      return { ...e, type: MATERIAL_TYPE.manualEntry };
     })
-   
+
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     let rows = data.material.filter((e) => e.parentId === null);
-     rows = [...rows,...updatedAdditionalData]
+    rows = [...rows, ...updatedAdditionalData]
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
+      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
         ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+        : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
-          : parent.type === 'service'
+          : parent.type === MATERIAL_TYPE.service
             ? parent.serviceDetail?.serviceName
-            : parent.type === 'package'
-            ? parent.packageDetail?.packageName
-            : parent.detail
+            : parent.type === MATERIAL_TYPE.package
+              ? parent.packageDetail?.packageName
+              : parent.detail
         }`;
       parent.description =
-        parent.type === 'service'
+        parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
+          : parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
+            : parent.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription || ''
               : parent.description;
       parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
@@ -348,20 +347,20 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
         ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+        : _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
+          : _subRow.type === MATERIAL_TYPE.service
             ? _subRow.serviceDetail?.serviceName
             : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct || false;
@@ -374,10 +373,10 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       }
       _subRow.subRows = generateNestedData(material, _subRow);
     });
-    if (subRows.length === 0 && parent.type === 'package') {
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (parent.type === MATERIAL_TYPE.package) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
@@ -390,7 +389,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       const element: any = {};
       element.materialId = d._id;
       element.type = addDialog.type;
-      if (addDialog.type !== 'serializedAsset') {
+      if (addDialog.type !== MATERIAL_TYPE.serializedAsset) {
         element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
         if (quotationData?.estimateStartDate && quotationData?.estimateEndDate) {
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -477,21 +476,21 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         if (saveAndNext) {
           const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
           setRecordToUpdate(dataRows[rowIndex + 1]);
-          if(dataRows[rowIndex + 1]?.type === 'Manual Entry'){
+          if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
             setIsProductEdit({
               open: false,
               isBulkedit: false,
               showSaveAndNext: false
             });
             setShowCostDialog({ open: true, showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
-          }else{
-            
+          } else {
+
             setIsProductEdit({
               open: true,
               isBulkedit: false,
               showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
             });
-          }  
+          }
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
@@ -514,20 +513,20 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           type: 'success',
           message: data.message
         });
-        
+
         if (saveAndNext) {
           const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
           setRecordToUpdate(dataRows[rowIndex + 1]);
-          if(dataRows[rowIndex + 1]?.type === 'Manual Entry'){
+          if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
             setShowCostDialog({ open: true, showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
-          }else{
+          } else {
             setShowCostDialog({ open: false, showSaveAndNext: false });
             setIsProductEdit({
               open: true,
               isBulkedit: false,
               showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
             });
-          }  
+          }
         } else {
           setShowCostDialog({ open: false, showSaveAndNext: false });
         }
@@ -541,54 +540,54 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
 
   const handleDelete = (rows) => {
     setDeleting(true);
-    const cost = rows?.filter((ele)=> ele.type==='Manual Entry').map((e)=>e?.id)
-    const products = rows?.filter((ele)=> ele.type!=='Manual Entry')
+    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id)
+    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry)
 
-    if(products?.length){
+    if (products?.length) {
       axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/${versionId}/delete`, { ids: products })
-      .then(() => {
-        setDeleting(false);
-        fetchData();
-        fetchQuotationData(version);
-        setDeleteData(null);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-        setDeleteData(null);
-      });
+        .put(`${quotation.api}/productpackage/${quotationData?._id}/${versionId}/delete`, { ids: products })
+        .then(() => {
+          setDeleting(false);
+          fetchData();
+          fetchQuotationData(version);
+          setDeleteData(null);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
+        });
     }
 
-    if(cost?.length){
+    if (cost?.length) {
       axiosInstance()
-      .post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/delete`, { ids: cost })
-      .then(({ data }) => {
-        setDeleting(false);
-        fetchData();
-        fetchQuotationData(version);
-        setDeleteData(null);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-        setDeleteData(null);
-      });
+        .post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/delete`, { ids: cost })
+        .then(({ data }) => {
+          setDeleting(false);
+          fetchData();
+          fetchQuotationData(version);
+          setDeleteData(null);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
+        });
     }
-    
+
   };
 
   const openMaterial = (row, rows) => {
-    if (row?.original?.type === 'Manual Entry') {
-      setShowCostDialog({ open: true, showSaveAndNext: row?.index < rows?.length-1 ? true : false });
-    }else{
+    if (row?.original?.type === MATERIAL_TYPE.manualEntry) {
+      setShowCostDialog({ open: true, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
+    } else {
       setIsProductEdit({
         open: true,
         isBulkedit: false,
         showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
       });
     }
-    
+
     setRecordToUpdate(row.original);
   };
 
@@ -667,13 +666,13 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
 
-   if(rowData?.type === 'Manual Entry'){
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
-    handleSaveCostData(rows);
-   }else{
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
-    handleSaveData(rows);
-   } 
+    if (rowData?.type === MATERIAL_TYPE.manualEntry) {
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
+      handleSaveCostData(rows);
+    } else {
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+      handleSaveData(rows);
+    }
   };
 
   useEffect(() => {
@@ -736,16 +735,16 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       <>
         {quotationData?.type === QUOTATION_TYPE.rentalJob && (
           <MenuItem
-            disabled={(products.length || !selectedRecords.some((e)=> e.type==='Manual Entry')) ? false : true}
+            disabled={(products.length || !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)) ? false : true}
             onClick={() => {
-              setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
+              setAddDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, parentId: null });
             }}
           >
             Assign Assets
           </MenuItem>
         )}
         <MenuItem
-          disabled={selectedRecords.length === 0 || selectedRecords.some((e)=> e.type==='Manual Entry')}
+          disabled={selectedRecords.length === 0 || selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
           onClick={() => {
             let tempSupplierAccountId = [];
             selectedRecords?.forEach((element) => {
@@ -789,7 +788,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 View Customer Price
               </MenuItem> */}
         <MenuItem
-          disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length && !selectedRecords.some((e)=> e.type==='Manual Entry'))}
+          disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length && !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry))}
           onClick={() => {
             setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
           }}

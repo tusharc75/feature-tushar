@@ -15,6 +15,7 @@ import { camelCaseToWords, createJsonDataForTableExport, getExcelColumnNameFromR
 import moment from 'moment';
 import { ImportIcon } from 'src/assets/svg/svgIcons';
 import { dateTimeFormat } from 'src/constants/helpers';
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 const GridHeader = ({
   resource,
@@ -150,7 +151,7 @@ const GridHeader = ({
                     handleTableExport();
                   }}
                 >
-                  <ImportIcon />
+                  <GetAppIcon fontSize='small' />
                 </IconButton>
               </span>
             </HtmlTooltip>
