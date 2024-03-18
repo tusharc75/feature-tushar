@@ -34,7 +34,7 @@ const SerializedAssetStatusChangeRequest = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null });
   const [renderCount, setRenderCount] = useState(0);
   const [approveRejectRecord, setApproveRejectRecord] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState('Pending');
+  const [selectedStatus, setSelectedStatus] = useState(ASSET_APPROVAL_STATUS.pending);
 
   useEffect(() => {
     fetchGridColumns();
