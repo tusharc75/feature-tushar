@@ -367,7 +367,8 @@ export const sidebarResource = {
   triggerNotificationHistory: 'Trigger Notification History',
   userAttendance : 'User Attendance',
   dataLists: 'Data Lists',
-  assetsReceiving : 'Assets Receiving'
+  assetsReceiving : 'Assets Receiving',
+  serializedAssetStatusChangeRequest : 'Serialized Asset Status Change Request',
 };
 
 export const primaryFields = {
@@ -511,7 +512,8 @@ export const RESOURCE_LABEL = {
   triggerNotificationHistory: 'Trigger Notification History',
   userAttendance: 'User Attendance',
   dataList: 'Data List',
-  dataListitems: 'Data List Items'
+  dataListitems: 'Data List Items',
+  serializedAssetStatusChangeRequest : 'Serialized Asset Status Change Request',
 };
 
 export const CHILD_RESOURCE = {

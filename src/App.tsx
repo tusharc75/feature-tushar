@@ -255,6 +255,7 @@ import DataList from './pages/DataList';
 import DataListDetail from './pages/DataList/dataListdetail';
 import Deals from './pages/Deals';
 import DealDetail from './pages/Deals/dealDetail';
+import SerializedAssetStatusChangeRequest from './pages/SerializedAsset/SerializedAssetStatusChangeRequest';
 
 
 var notificationInterval: any = null;
@@ -1127,6 +1128,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.dealDetail.path}/:id`}>
               <DealDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serializedAssetStatusChangeRequest.path}`}>
+              <SerializedAssetStatusChangeRequest />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
