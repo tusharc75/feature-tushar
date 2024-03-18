@@ -376,6 +376,7 @@ const Quotation = ({
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             expander={true}
+            hideExportTable={true}
           />
         </Box>
       ) : (
