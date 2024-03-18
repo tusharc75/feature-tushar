@@ -645,7 +645,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       supplierContact: contactId,
       requiredFields: selectedFields,
       versionId: versionId,
-      attachments: otherAttachments
+      attachment: otherAttachments
     };
 
     axiosInstance()
