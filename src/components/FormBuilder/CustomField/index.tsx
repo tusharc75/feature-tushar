@@ -1,12 +1,11 @@
-import { useEffect, useContext, useState, Fragment } from 'react';
-import Divider from '@material-ui/core/Divider';
-import { AddField } from '../AddField';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Box, Grid } from '@material-ui/core';
-import { DragBox } from './DragBox';
+import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
-import styles from '../Form.module.scss';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import { AddField } from '../AddField';
+import { DragBox } from './DragBox';
 
 const useStyles = makeStyles(() => ({
   acionBtn: {
@@ -117,7 +116,7 @@ export const CustomField = ({}) => {
       </Box>
 
       <Box className="pr-2">
-        <Grid spacing={1} container className={styles.custom_field}>
+        <Grid spacing={1} container>
           <Grid item xs={12}>
             <label className={classes.acionBtn} onClick={handleOpenAddField}>
               Add Custom Field
@@ -139,7 +138,7 @@ export const CustomField = ({}) => {
         </Grid>
       </Box>
       <Box mt={1} mb={1}>
-        <Grid container spacing={1} className={styles.addiction_field}>
+        <Grid container spacing={1} className={`max-[960px]:grid max-[960px]:w-[200%]`}>
           {fields &&
             fields.map((data, i) => <DragBox data={data} handleDelete={handleDelete} handleEdit={handleEdit} handleAddField={handleAddField} />)}
         </Grid>
