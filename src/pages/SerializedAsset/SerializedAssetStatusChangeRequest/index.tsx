@@ -13,10 +13,12 @@ import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
-import { CheckCircleOutline, Close } from '@material-ui/icons';
+import { ASSET_APPROVAL_STATUS, gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
+import CancelIcon from '@material-ui/icons/Cancel';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 const SerializedAssetStatusChangeRequest = () => {
+
   const renderedFrom = camelCase(routes?.serializedAssetStatusChangeRequest.title);
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
@@ -67,15 +69,15 @@ const SerializedAssetStatusChangeRequest = () => {
             <IconButton
               size="small"
               aria-label="Approve"
-              disabled={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== 'Pending' ? true : false}
+              disabled={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? true : false}
               onClick={() => {
                 setApproveRejectRecord(row?.original);
-                setShowConfirmDialog({ open: true, status: 'Approved' });
+                setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.approved });
               }}
             >
-              <CheckCircleOutline
+              <CheckCircleIcon
                 fontSize="small"
-                color={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== 'Pending' ? 'disabled' : 'primary'}
+                color={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? 'disabled' : 'primary'}
               />
             </IconButton>
           </span>
@@ -85,15 +87,14 @@ const SerializedAssetStatusChangeRequest = () => {
             <IconButton
               size="small"
               aria-label="Reject"
-              disabled={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== 'Pending' ? true : false}
+              disabled={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? true : false}
               onClick={() => {
                 setApproveRejectRecord(row?.original);
-                setShowConfirmDialog({ open: true, status: 'Rejected' });
+                setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.rejected });
               }}
             >
-              <Close
-                fontSize="small"
-                color={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== 'Pending' ? 'disabled' : 'primary'}
+              <CancelIcon fontSize="small"
+                color={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? 'disabled' : 'error'}
               />
             </IconButton>
           </span>
@@ -152,24 +153,16 @@ const SerializedAssetStatusChangeRequest = () => {
   };
 
   const handleStatusChange = (status) => {
-    let assets = [];
+    let _ids = [];
     if (approveRejectRecord) {
-      assets.push({
-        _id: approveRejectRecord._id,
-        assetId: approveRejectRecord.assetId,
-        assetStatus: approveRejectRecord.assetStatus
-      });
+      _ids.push(approveRejectRecord._id);
     } else {
-      selectedRecords?.forEach((record) => {
-        assets.push({
-          _id: record._id,
-          assetId: record.assetId,
-          assetStatus: record.assetStatus
-        });
+      selectedRecords?.forEach((e) => {
+        _ids.push(e._id);
       });
     }
     axiosInstance()
-      .put(`${serializedAsset.api}/status-approval-process`, { assets: assets, status: status })
+      .put(`${serializedAsset.api}/status-approval-process`, { _ids: _ids, status: status })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
@@ -186,7 +179,6 @@ const SerializedAssetStatusChangeRequest = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.serializedAssetStatusChangeRequest]} />
       </div>
-
       <CustomContainer>
         <ListingPageHeader
           isActionButtonVisible={true}
@@ -196,10 +188,11 @@ const SerializedAssetStatusChangeRequest = () => {
             <>
               <MenuItem
                 onClick={() => {
-                  setShowConfirmDialog({ open: true, status: 'Approved' });
+                  setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.approved });
                 }}
                 disabled={
-                  selectedRecords?.filter((o) => o.status === 'Pending')?.length === selectedRecords?.length && permissions?.serializedAsset?.isUpdate
+                  selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length
+                    && permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }
@@ -208,10 +201,10 @@ const SerializedAssetStatusChangeRequest = () => {
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  setShowConfirmDialog({ open: true, status: 'Approved' });
+                  setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.approved });
                 }}
                 disabled={
-                  selectedRecords?.filter((o) => o.status === 'Pending')?.length === selectedRecords?.length && permissions?.serializedAsset?.isUpdate
+                  selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length && permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }
@@ -238,11 +231,10 @@ const SerializedAssetStatusChangeRequest = () => {
           </Box>
         )}
       </CustomContainer>
-
       {showConfirmDialog.open && (
         <ConfirmationDialog
           open={showConfirmDialog.open}
-          message={`Are you sure you want to mark Asset Status(s) ${showConfirmDialog.status} ? `}
+          message={`Are you sure you want to ${showConfirmDialog.status === ASSET_APPROVAL_STATUS.approved ? 'approve' : 'reject'} request ?`}
           onClose={() => {
             setApproveRejectRecord(null);
             setShowConfirmDialog({ open: false, status: null });
