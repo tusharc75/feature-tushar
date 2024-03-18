@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
-import _ from 'lodash';
+import _, { startCase } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { Box, Button, IconButton, MenuItem, Typography } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { MATERIAL_TYPE, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import ManageStep from '../ManageStep';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../../../components/Shared/DetailsPage';
@@ -14,6 +14,13 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ResourceField from './ResourceField';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import { isMobile, isTablet } from 'react-device-detect';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import routes from 'src/components/Helpers/Routes';
 
 const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = null, fromAccordian = false, stepFullScreen = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -22,6 +29,8 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   const [open, setOpen] = useState({ open: false, id: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const [openMaterial, setOpenMaterial] = useState({ open: false, type: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -39,7 +48,58 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
         Footer: () => {
           return <>Total</>;
         }
-      }
+      },
+      ...(step?.linkWithMaterial
+        ? [
+            {
+              accessor: 'type',
+              Header: 'Type',
+              disableFilters: true,
+              disabled: true,
+              sticky: isMobile || isTablet ? 'none' : 'left',
+              width: 200,
+              Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+            },
+            {
+              accessor: 'detail',
+              Header: 'Details',
+              minWidth: 300,
+              width: 300,
+              disabled: true,
+              sticky: isMobile || isTablet ? 'none' : 'left',
+              Cell: ({ row, table }) => (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p className="text-truncate" title={row.original.detail}>
+                    {row.original.detail}
+                  </p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        if (row.original.type === MATERIAL_TYPE.product) {
+                          window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                        }
+                        if (row.original.type === MATERIAL_TYPE.service) {
+                          window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                        }
+                        if (row.original.type === MATERIAL_TYPE.package) {
+                          window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                        }
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              )
+            },
+            {
+              accessor: 'description',
+              Header: 'Description',
+              Cell: ({ row }) => <p className="text-truncate">{row.original.description}</p>
+            }
+          ]
+        : [])
     ];
 
     return [
@@ -106,8 +166,25 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
           let finalObject = prepareDataForGrid(u);
           finalObject['index'] = i + 1;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['detail'] =
+            u?.type === MATERIAL_TYPE.product
+              ? u?.productDetail?.productName
+              : u?.type === MATERIAL_TYPE.service
+              ? u?.serviceDetail?.serviceName
+              : u?.type === MATERIAL_TYPE.package
+              ? u?.packageDetail?.packageName
+              : '';
+          finalObject['description'] =
+            u?.type === MATERIAL_TYPE.product
+              ? u?.productDetail?.productDescription
+              : u?.type === MATERIAL_TYPE.service
+              ? u?.serviceDetail?.serviceDescription
+              : u?.type === MATERIAL_TYPE.package
+              ? u?.packageDetail?.packageDescription
+              : '';
           return finalObject;
         });
+
         dispatch({ type: 'initialize', data: rows, count: data?.length });
         if (setNextStep) {
           if (rows?.length > 0) {
@@ -132,6 +209,31 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
       fetchData();
     }
   }, [step]);
+
+  const handleAdd = (rows) => {
+    const values = rows?.map((r) => ({ type: openMaterial?.type, materialId: r?._id, parentId: null, qty: r?.qty, stepId: step?._id }));
+
+    setIsSubmitting(true);
+    axiosInstance()
+      .post(`/dynamic-form/step/${resourceId}`, values, {
+        headers: {
+          Resource: resource
+        }
+      })
+      .then(({ data }) => {
+        setIsSubmitting(false);
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const handleDelete = async () => {
     let ids: any = [];
@@ -175,6 +277,12 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
     );
   };
 
+  const addButtonMenuItems = () => {
+    return step?.linkWithMaterial
+      ? step?.linkedMaterial?.map((m) => <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m)}</MenuItem>)
+      : null;
+  };
+
   return (
     <>
       {step?.linkWithResource ? (
@@ -186,22 +294,25 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
               <>
                 {allowedToEdit && (
                   <DetailsPageHeader
-                    isAddButtonVisible={false}
+                    isAddButtonVisible={step?.linkWithMaterial ? true : false}
+                    addButtonMenuItems={addButtonMenuItems()}
                     isActionButtonVisible={true}
                     actionButtonMenuItems={actionButtonMenuItems()}
                     actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
                     hasXpadding
                     leftSideContents={
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setOpen({ open: true, id: null });
-                        }}
-                      >
-                        Add
-                      </Button>
+                      !step?.linkWithMaterial ? (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            setOpen({ open: true, id: null });
+                          }}
+                        >
+                          Add
+                        </Button>
+                      ) : null
                     }
                   />
                 )}
@@ -269,6 +380,37 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
                 setShowDeleteConfirmBox(false);
               }}
               onOk={handleDelete}
+            />
+          )}
+
+          {openMaterial?.open && openMaterial?.type === MATERIAL_TYPE.product && (
+            <AssignProductDialog
+              handleCloseDialog={() => setOpenMaterial({ open: false, type: '' })}
+              onSuccess={(rows) => {
+                setOpenMaterial({ open: false, type: '' });
+                handleAdd(rows);
+              }}
+              isSubmitting={isSubmitting}
+            />
+          )}
+          {openMaterial.open && openMaterial.type === MATERIAL_TYPE.service && (
+            <AssignServiceDialog
+              handleClose={() => setOpenMaterial({ open: false, type: '' })}
+              onSuccess={(rows) => {
+                setOpenMaterial({ open: false, type: '' });
+                handleAdd(rows);
+              }}
+              isSubmitting={isSubmitting}
+            />
+          )}
+          {openMaterial.open && openMaterial.type === MATERIAL_TYPE.package && (
+            <AssignPackageDialog
+              handleClose={() => setOpenMaterial({ open: false, type: '' })}
+              onSuccess={(rows) => {
+                setOpenMaterial({ open: false, type: '' });
+                handleAdd(rows);
+              }}
+              isSubmitting={isSubmitting}
             />
           )}
         </>

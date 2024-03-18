@@ -55,7 +55,7 @@ const CustomReactTable = ({
   reportSave = false,
   virtualization = false,
   showArrangeView = true,
-  exportTable = false
+  hideExportTable = false
 }) => {
   const {
     currentEditingCellPosition,
@@ -396,7 +396,7 @@ const CustomReactTable = ({
             selectedReportView={selectedReportView}
             state={state}
             expander={expander}
-            exportTable={exportTable}
+            hideExportTable={hideExportTable}
           />
           {!isMobileView && (
             <div className="relative">
