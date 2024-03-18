@@ -33,7 +33,7 @@ const GridHeader = ({
   selectedReportView,
   expander,
   state,
-  exportTable = false
+  hideExportTable = false
 }) => {
   const { selectedRecords, loading, filters: customFilters, dataRows, page }: TInitialState = state;
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -150,8 +150,8 @@ const GridHeader = ({
               </Button>
             </HtmlTooltip>
           )}
-          {exportTable || isClientSideGrid ? (
-            <HtmlTooltip title={dataRows.length === 0 ? 'Add some data first' : 'Export table to excel'} placement="top" arrow>
+          {!hideExportTable && isClientSideGrid ? (
+            <HtmlTooltip title={dataRows.length === 0 ? 'No Data to Export' : 'Export to Excel'} placement="top" arrow>
               <span>
                 <IconButton
                   className={`refresh-arrange-button`}
