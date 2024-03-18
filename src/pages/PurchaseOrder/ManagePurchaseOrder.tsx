@@ -89,10 +89,7 @@ const ManagePurchaseOrder = ({
               } else {
                 if (!data?.canDelete) {
                   fieldsDataForUpdate?.forEach((e) => {
-                    if (['supplierAccount']?.includes(e?.fieldName)) {
-                      e.isUneditable = true;
-                    }
-                    if (['warehouse', 'currency', 'expenseItem']?.includes(e?.fieldName)) {
+                    if (['warehouse', 'currency', 'expenseItem', 'supplierAccount']?.includes(e?.fieldName)) {
                       e.disableOnEdit = true;
                     }
                   });
