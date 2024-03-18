@@ -117,7 +117,6 @@ export const sublease_InterCompany_Steps: stepInterface[] = [
 
 export const quotationProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
   { name: 'Quote Builder', title: 'Builder', icon: 'quote' },
   { name: 'DOA', title: 'DOA', icon: 'doa' },
   { name: 'Quote Approval', title: 'Approval', icon: 'approval' },
