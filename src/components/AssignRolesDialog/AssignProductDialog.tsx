@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
@@ -136,54 +136,50 @@ const AssignProductDialog = ({
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
 
-    const deepFilters = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    const updatedDeepFilters = [...deepFilters];
+    const updatedFilterByIds = [...filterByIds];
 
     if (extraDeepFilter?.length > 0) {
       extraDeepFilter?.map((e) => {
-        deepFilters.push(e);
+        updatedDeepFilters.push(e);
       });
     }
     if (isProductType) {
-      deepFilters.push({
+      updatedDeepFilters.push({
         field: 'productType',
         term: 'Part'
       });
     }
-
     if (reference === 'purchaseOrder') {
       if (!user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct) {
-        deepFilters.push({ field: 'serializedProduct', term: 'No' });
+        updatedDeepFilters.push({ field: 'serializedProduct', term: 'No' });
       }
     } else {
       if (serialized != null) {
-        deepFilters.push({
+        updatedDeepFilters.push({
           field: 'serializedProduct',
           term: `${serialized === true ? 'Yes' : 'No'}`
         });
       }
     }
-
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        deepFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
+    if (extraFilterById && extraFilterById?.length) {
+      extraFilterById?.forEach((e) => {
+        updatedFilterByIds.push(e);
       });
     }
 
-    if (extraFilterById?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(extraFilterById)}`;
+    if (updatedDeepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
     }
-
-    if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    if (updatedFilterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
     }
-
-    if (extraFilterById?.length || deepFilters?.length) {
+ 
+    if (updatedDeepFilters?.length || updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }

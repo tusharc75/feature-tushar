@@ -629,7 +629,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     }
   };
 
-  const handelAskPriceToSupplier = (content, contactId, selectedFields = [], displayColumns = []) => {
+  const handelAskPriceToSupplier = (content, contactId, selectedFields = [], otherAttachments = []) => {
     let data: any = {
       material: selectedRecords?.map((d) => {
         return {
@@ -644,7 +644,8 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       body: content ? content : '',
       supplierContact: contactId,
       requiredFields: selectedFields,
-      versionId: versionId
+      versionId: versionId,
+      attachment: otherAttachments
     };
 
     axiosInstance()
