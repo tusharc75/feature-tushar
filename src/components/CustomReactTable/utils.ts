@@ -1,10 +1,10 @@
-import { isEmpty } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrencies } from 'src/constants/helpers';
 import { TColType } from './TableComponents/TableHelperComponents';
-import { flatMapDeep } from 'lodash';
+import { flatMapDeep, startCase } from 'lodash';
 
 export const childrenProperty = 'subRows';
 
@@ -333,7 +333,7 @@ export function normalizeRowData(array) {
   return flatMapDeep(array, flatDataRowsItem);
 }
 
-const renderFoter = (columns: TColType[], rowData: any[]) => {
+const createJsonDataForFooter = (columns: TColType[], rowData: any[]) => {
   const data = {};
   for (const column of columns) {
     const fieldName = column.accessor;
@@ -377,6 +377,9 @@ export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]
     const temp = {};
     for (let col of columns) {
       let value = row[col.id];
+      if (camelCase(row[col.id]) === row[col.id]) {
+        value = startCase(row[col.id]);
+      }
       switch (true) {
         case ['action', 'selection', 'expander'].includes(col.id):
           continue;
@@ -390,16 +393,16 @@ export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]
           value = `${row?.updatedBy || noCellData} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`;
           break;
         case col.type === 'date':
-          value = value ? moment(value).format(dateFormat) : noCellData;
+          value = value ? moment(row[col.id]).format(dateFormat) : noCellData;
           break;
         case col.type === 'dateTime':
-          value = value ? moment(value).format(dateTimeFormat) : noCellData;
+          value = value ? moment(row[col.id]).format(dateTimeFormat) : noCellData;
           break;
         case col.type === 'checkBox':
           value = Boolean(value) ? 'Yes' : 'No';
           break;
         case col.type === 'number':
-          value = value ?? 0;
+          value = row[col.id] ?? 0;
           break;
         case col.type === 'currencyAmount':
           value = formatAmountWithCurrency(col.currency, value)?.amountWithouCurrencyCode;
@@ -411,7 +414,7 @@ export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]
     }
     data.push(temp);
   }
-  const footer = isFooterPresent ? renderFoter(columns, normalizedRowData) : {};
+  const footer = isFooterPresent ? createJsonDataForFooter(columns, normalizedRowData) : {};
   return [...data, footer];
 };
 
