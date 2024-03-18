@@ -13,9 +13,8 @@ import { TInitialState } from '../hooks/useTableReducer';
 import { camelCaseToWords, createJsonDataForTableExport, getExcelColumnNameFromRange } from '../utils';
 
 import moment from 'moment';
-import { ImportIcon } from 'src/assets/svg/svgIcons';
+import { ExportIcon } from 'src/assets/svg/svgIcons';
 import { dateTimeFormat } from 'src/constants/helpers';
-import GetAppIcon from '@material-ui/icons/GetApp';
 
 const GridHeader = ({
   resource,
@@ -67,7 +66,6 @@ const GridHeader = ({
       };
     }
     const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
-
     xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
     xlsx.writeFile(wb, `${name}.xlsx`);
   };
@@ -151,7 +149,7 @@ const GridHeader = ({
                     handleTableExport();
                   }}
                 >
-                  <GetAppIcon fontSize='small' />
+                  <ExportIcon fontSize="small" />
                 </IconButton>
               </span>
             </HtmlTooltip>

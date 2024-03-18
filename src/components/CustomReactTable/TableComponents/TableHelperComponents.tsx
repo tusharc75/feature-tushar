@@ -11,6 +11,7 @@ import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
 export type TColType = {
   Header: string;
   header: string;
+  isHideColumnSum?: boolean;
   type?:
     | 'mobileNumber'
     | 'phone'
