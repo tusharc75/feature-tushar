@@ -375,7 +375,6 @@ export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]
   for (let row of normalizedRowData) {
     const temp = {};
     for (let col of columns) {
-      console.log({ head: col.Header, col: col.type, value: row.type === 'Debit' ? `-${row[col.id] ?? 0}` : row[col.id] ?? 0 });
       let value = row[col.id];
       if (camelCase(row[col.id]) === row[col.id]) {
         value = startCase(row[col.id]);
