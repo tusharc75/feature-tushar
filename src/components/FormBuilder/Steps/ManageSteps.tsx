@@ -182,10 +182,11 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                     control={
                       <Checkbox
                         name="linkWithMaterial"
+                        disabled={values['linkWithResource']}
                         checked={values['linkWithMaterial']}
                         onChange={(e) => {
                           setFieldValue('linkWithMaterial', e.target.checked);
-                          setFieldValue('linkedMaterial', [])
+                          setFieldValue('linkedMaterial', []);
                         }}
                       />
                     }
@@ -225,6 +226,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                   <FormControlLabel
                     control={
                       <Checkbox
+                        disabled={values['linkWithMaterial']}
                         name="linkWithResource"
                         checked={values['linkWithResource']}
                         onChange={(e) => {

@@ -45,6 +45,8 @@ const DynamicFormDetail = () => {
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
 
   const [tabValue, setTabValue] = useState(0);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -78,6 +80,17 @@ const DynamicFormDetail = () => {
           Resource: resource
         }
       });
+      let isAllowedToEdit = true;
+      let isAllowedToDelete = true;
+      if (data.hasOwnProperty('collaborator') || data.hasOwnProperty('owner')) {
+        isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        if (user?.role?.selectedEntity?.superAdminAccess) {
+          isAllowedToEdit = true;
+        }
+        isAllowedToDelete = data.owner.optionValue === user?.user?._id;
+      }
+      setAllowedToEdit(isAllowedToEdit);
+      setAllowedToDelete(isAllowedToDelete);
       setDetailData(data);
       setLoading(false);
     } catch (error) {
@@ -91,7 +104,9 @@ const DynamicFormDetail = () => {
 
   const fetchPolicy = async () => {
     try {
-      const { data: { data } } = await axiosInstance().get(`/dynamic-form/policy?resource=${resource}`);
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${resource}`);
       if (data) {
         setResourceData(data);
       }
@@ -147,8 +162,10 @@ const DynamicFormDetail = () => {
       <Box className="headerbox-v1">
         <Box className="nav-v1">
           <CustomBreadCrumbs
-            routes={[{ title: resourceLabel, path: `/${route}` },
-            { title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resourceLabel }]}
+            routes={[
+              { title: resourceLabel, path: `/${route}` },
+              { title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resourceLabel }
+            ]}
           />
         </Box>
         <Box className="controls-v1">
@@ -156,12 +173,12 @@ const DynamicFormDetail = () => {
             {detailData?.pdfTemplate && (
               <PreviewDownload fileName={`${resource}`} resource={resource} referenceId={id} columns={[]} hideDetailButton={true} hideDialog={true} />
             )}
-            {permissions[renderedFrom]?.isUpdate && (
+            {permissions[renderedFrom]?.isUpdate && allowedToEdit && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
               </Button>
             )}
-            {permissions[renderedFrom]?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            {permissions[renderedFrom]?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>
@@ -217,7 +234,8 @@ const DynamicFormDetail = () => {
             resourceId={id}
             resource={resource}
             data={detailData}
-            allowedToEdit={permissions[renderedFrom]?.isUpdate} />
+            allowedToEdit={permissions[renderedFrom]?.isUpdate ? allowedToEdit : false}
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

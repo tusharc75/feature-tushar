@@ -27,6 +27,7 @@ const Steps = ({ resource }) => {
 
   const [resourceData, setResourceData] = useState(null);
   const [steps, setSteps] = useState(null);
+  const [stepsLoading, setStepsLoading] = useState(false);
   const [initialSteps, setInitialSteps] = useState(null);
   const [open, setOpen] = useState({ open: false, data: null });
   const [openField, setOpenField] = useState({ open: false, step: null });
@@ -36,6 +37,7 @@ const Steps = ({ resource }) => {
   const [openSetting, setOpenSetting] = useState(false);
 
   const fetchData = async () => {
+    setStepsLoading(true);
     axiosInstance()
       .get(`/sa-formbuilder/steps/${resource}`)
       .then(({ data: { data } }) => {
@@ -43,8 +45,10 @@ const Steps = ({ resource }) => {
         setResourceId(data?._id);
         setSteps(_.sortBy(data?.steps, 'order'));
         setInitialSteps(_.sortBy(data?.steps, 'order'));
+        setStepsLoading(false);
       })
       .catch((error) => {
+        setStepsLoading(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -126,7 +130,7 @@ const Steps = ({ resource }) => {
       </Box>
       <Box pt={2}>
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-          <RenderStepItems {...{ steps, setSteps, setOpen, setOpenField, setDeleteData, handleUpdateOrder }} />
+          <RenderStepItems {...{ steps, setSteps, stepsLoading, setOpen, setOpenField, setDeleteData, handleUpdateOrder }} />
         </DndProvider>
       </Box>
 
@@ -188,7 +192,7 @@ const Steps = ({ resource }) => {
 
 export default Steps;
 
-const RenderStepItems = ({ steps, setSteps, setOpen, setOpenField, setDeleteData, handleUpdateOrder }) => {
+const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setOpenField, setDeleteData, handleUpdateOrder }) => {
   const findStep = useCallback(
     (id: string) => {
       const card = steps.filter((c) => `${c._id}` === id)[0] as {
@@ -229,9 +233,13 @@ const RenderStepItems = ({ steps, setSteps, setOpen, setOpenField, setDeleteData
             <SingleStep key={step._id} {...{ step, i, setSteps, setOpen, setOpenField, setDeleteData, moveStep, findStep, handleUpdateOrder }} />
           );
         })
-      ) : (
+      ) : stepsLoading ? (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      ) : (
+        <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+          NO Steps
         </Box>
       )}
     </div>
