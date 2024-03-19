@@ -207,13 +207,12 @@ const WorkOrderDetails = () => {
     if (assetStatus) {
       data.assetStatus = assetStatus;
     }
-    axiosInstance()
-      .patch(`${workOrder.api}/status/${id}`, data)
+    axiosInstance().patch(`${workOrder.api}/status/${id}`, data)
       .then(({ data: { data } }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Status changed to ${status}`
+          message: data
         });
         fetchWorkOrderData();
       })
