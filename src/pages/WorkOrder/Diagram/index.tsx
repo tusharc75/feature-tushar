@@ -12,7 +12,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { ATTACHMENT_TYPE, CustomDialogTransition } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, ATTACHMENT_TYPE, CustomDialogTransition, WORK_ORDER_TYPE } from 'src/constants/helpers';
 import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -21,7 +21,7 @@ import { FileCopyIcon } from 'src/assets/svg/svgIcons';
 import PdfPreview from './ShowPdf/PdfPreview';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const Diagram = ({ resource, referenceId, currentVersion, fromVersions = false }) => {
+const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVersions = false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [rowData, setRowData] = useState(null);
@@ -320,7 +320,16 @@ const Diagram = ({ resource, referenceId, currentVersion, fromVersions = false }
               setAttachemntDialog({ open: false, id: null, isClone: false });
               setFullScreen(false);
             }}
-            relatedTo={[{ type: resource, referenceId: referenceId, version: currentVersion, access: true }]}
+            relatedTo={[
+              { type: resource, referenceId: referenceId, version: currentVersion, access: true },
+              {
+                type: workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? ACTIVITY_RESOURCE.repairOrder : ACTIVITY_RESOURCE.productionOrder,
+                referenceId: workOrderData?.type === WORK_ORDER_TYPE.repairOrder ?
+                  workOrderData?.repairOrder?.optionValue || workOrderData?.repairOrder :
+                  workOrderData?.productionOrder?.optionValue || workOrderData?.productionOrder,
+                access: true
+              }
+            ]}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);

@@ -54,10 +54,10 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
 
   useEffect(() => {
     setLoading(true);
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.repairJob}`)
+    axiosInstance().get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
-        const hideFields = ['rentalJob', 'actualEndDate']
+        const hideFields = ['rentalJob', 'actualEndDate', 'workOrder']
+
         data = data.filter((obj) => !hideFields?.includes(obj?.fieldData?.fieldName));
 
         data?.forEach((e) => {
@@ -75,13 +75,13 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
             .get(`${repairJob.api}/` + repairJobId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, brand, createdBy, history, repairJobName, actualEndDate, expectedCompletionDate, updatedBy, ...rest } = data;
+                const { _id, brand, createdBy, history, repairJobName, actualEndDate, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${repairJobName}`);
                 rest.repairJobName = GenerateResourceLineNumber(fieldsDataForCreate);
                 rest.status = REPAIR_JOB_STATUS.new;
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
+                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate), expectedCompletionDate: null }
                 });
                 setLoading(false);
               } else {
@@ -134,10 +134,16 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
               initialData['afeNumber'] = referenceData?.afeNumber;
             }
           }
-          if (referenceData?.warehouse) {
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'warehouse')) {
-              initialData['warehouse'] = referenceData?.warehouse;
-            }
+          if (referenceData?.warehouse && fieldsDataForCreate.some((e) => e.fieldName === 'warehouse')) {
+            initialData['warehouse'] = referenceData?.warehouse;
+          }
+          if (referenceType === sidebarResource.workOrder) {
+            initialData['workOrder'] = referenceData?.workOrder;
+            fieldsDataForCreate?.forEach((e) => {
+              if (['warehouse']?.includes(e?.fieldName)) {
+                e.isUneditable = true;
+              }
+            });
           }
           setInitialData({
             fields: fieldsDataForCreate,

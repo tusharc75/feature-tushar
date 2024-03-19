@@ -55,7 +55,7 @@ const CustomReactTable = ({
   reportSave = false,
   virtualization = false,
   showArrangeView = true,
-  exportTable = false
+  hideExportTable = false
 }) => {
   const {
     currentEditingCellPosition,
@@ -380,6 +380,7 @@ const CustomReactTable = ({
       <div className="react-table-v8 ">
         <div className="table-container-v1" style={{ position: 'relative' }}>
           <GridHeader
+            isClientSideGrid={isClientSideGrid}
             resource={resource}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -395,7 +396,7 @@ const CustomReactTable = ({
             selectedReportView={selectedReportView}
             state={state}
             expander={expander}
-            exportTable={exportTable}
+            hideExportTable={hideExportTable}
           />
           {!isMobileView && (
             <div className="relative">

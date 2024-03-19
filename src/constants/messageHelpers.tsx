@@ -65,6 +65,7 @@ export const rentalManagementMessage = {
     statusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
     rentalStatusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
     statusURForCancelReceiving: 'Receiving Ticket can be cancelled only for Under Review assets',
+    rentalProductConsumed: 'Product already consumed',
     rentalStatusCompleteCancelReceiving: 'Receiving Ticket can be cancelled only for Complete Rental assets',
     repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
     repairSameWarehouse: `Selected assets must be in same ${routes.warehouse.title} to perform this action`,

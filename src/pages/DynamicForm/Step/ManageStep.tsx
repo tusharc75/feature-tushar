@@ -92,7 +92,7 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
         .post(
           `/dynamic-form/step/${resourceId}`,
 
-          { ...values, stepId },
+          [{ ...values, stepId }],
           {
             headers: {
               Resource: resource

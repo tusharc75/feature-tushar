@@ -198,9 +198,19 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
                                           options={field.option}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
-                                            if (field.fieldName === 'taxCode') {
+                                            if (name === 'taxCode') {
                                               const taxCode = field.option?.find((d) => d.optionValue === value);
                                               setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                              const result = autoCalculateSpecificFields(
+                                                { ['taxPercentage']: taxCode?.taxRate || 0 },
+                                                values,
+                                                initialData.fields
+                                              );
+                                              if (Object.keys(result).length >= 1) {
+                                                for (var x in result) {
+                                                  setFieldValue(x, result[x]);
+                                                }
+                                              }
                                             }
                                           }}
                                           required={field.required}

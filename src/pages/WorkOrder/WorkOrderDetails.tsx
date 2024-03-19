@@ -31,6 +31,7 @@ import {
   MATERIAL_SUB_TYPE,
   WORK_ORDER_STATUS,
   WORK_ORDER_TYPE,
+  repairJob,
   sidebarResource,
   workOrder
 } from 'src/constants/helpers';
@@ -42,6 +43,7 @@ import Versions from './Versions';
 import View from './View';
 import { TbProgressCheck } from 'react-icons/tb';
 import { FaCircleChevronDown } from 'react-icons/fa6';
+import ManageRepairJob from '../RepairJob/ManageRepairJob';
 
 type ToolbarElement = {
   type: 'element';
@@ -86,6 +88,12 @@ const WorkOrderDetails = () => {
 
   const [showConfirmVersion, setShowConfirmVersion] = useState({ open: false, withData: 0 });
   const [versionDialog, setVersionDialog] = useState(false);
+  const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false });
+
+
+  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -264,14 +272,70 @@ const WorkOrderDetails = () => {
     }
   ];
 
+  const handleAddAssetInRepairJob = (data) => {
+    axiosInstance().put(`${repairJob.api}/add-assets-create-ticket`, { repairJob: data?._id, assets: [workOrderData?.serializedAsset?.optionValue] })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowManageRepairJobDialog({ open: false })
+        fetchWorkOrderData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  const handleReceiveAssetInRepairJob = () => {
+    setIsSubmitting(true)
+    axiosInstance().put(`${repairJob.api}/receive-assets-complete`, { repairJob: workOrderData?.repairJob?.optionValue || workOrderData?.repairJob })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setRepairJobReceiveConfirmation(false)
+        setIsSubmitting(false)
+        fetchWorkOrderData();
+      })
+      .catch((error) => {
+        setIsSubmitting(false)
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   const toolbarButtons: ToolbarComponents[] = [
+    {
+      id: `Repair Job`,
+      type: 'button',
+      visibilityInMobile: 'visible',
+      isVisible: permissions?.repairJob?.isCreate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder
+        && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.repairJob ? true : false,
+      name: `Create ${routes?.repairJob.title}`,
+      tooltip: `Create ${routes?.repairJob.title}`,
+      onClick: () => setShowManageRepairJobDialog({ open: true }),
+      iconForMobile: <RiFileShredFill />
+    },
+    {
+      id: `Repair Job Receive`,
+      type: 'button',
+      visibilityInMobile: 'visible',
+      isVisible: permissions?.repairJob?.isUpdate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder
+        && workOrderData?.repairJob ? true : false,
+      name: `Receive Asset From Supplier`,
+      tooltip: `Receive Asset From Supplier`,
+      onClick: () => setRepairJobReceiveConfirmation(true),
+      iconForMobile: <RiFileShredFill />
+    },
     {
       id: 'Scrap Asset',
       type: 'button',
       visibilityInMobile: 'visible',
-      isVisible: Boolean(
-        permissions?.workOrder?.isUpdate && workOrderData?.serializedAsset && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed
-      ),
+      isVisible: Boolean(workOrderData?.serializedAsset && allowedToEdit && !workOrderData?.repairJob
+        && workOrderData?.status !== WORK_ORDER_STATUS.completed),
       name: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
       onClick: () => setShowConfirmBoxScrap(true),
@@ -281,7 +345,7 @@ const WorkOrderDetails = () => {
       id: 'In-Progress',
       type: 'button',
       visibilityInMobile: 'inActionMenu',
-      isVisible: Boolean(permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status === WORK_ORDER_STATUS.onHold),
+      isVisible: Boolean(allowedToEdit && !workOrderData?.repairJob && workOrderData?.status === WORK_ORDER_STATUS.onHold),
       onClick: () => updateJobStatus(WORK_ORDER_STATUS.inProgress),
       tooltip: `Change Status ${WORK_ORDER_STATUS.inProgress}`,
       name: WORK_ORDER_STATUS.inProgress,
@@ -291,9 +355,7 @@ const WorkOrderDetails = () => {
       id: 'On-hold',
       type: 'button',
       visibilityInMobile: 'inActionMenu',
-      isVisible: Boolean(
-        permissions?.workOrder?.isUpdate && allowedToEdit && [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status)
-      ),
+      isVisible: Boolean(allowedToEdit && [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status)),
       onClick: () => updateJobStatus(WORK_ORDER_STATUS.onHold),
       tooltip: `Change Status ${WORK_ORDER_STATUS.onHold}`,
       name: WORK_ORDER_STATUS.onHold,
@@ -304,9 +366,7 @@ const WorkOrderDetails = () => {
       type: 'button',
       visibilityInMobile: 'visible',
       ripple: true,
-      isVisible: Boolean(
-        permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed
-      ),
+      isVisible: Boolean(allowedToEdit && workOrderData?.canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed),
       onClick: () => updateJobStatus(WORK_ORDER_STATUS.completed),
       iconForMobile: <FaDoorClosed />,
       tooltip: 'Complete Work Order',
@@ -316,10 +376,8 @@ const WorkOrderDetails = () => {
       id: 'Create Version',
       type: 'button',
       visibilityInMobile: 'hidden',
-      isVisible: Boolean(
-        permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.deleted
-        && workOrderData?.canCreateWorkOrderVersion
-      ),
+      isVisible: Boolean(allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed
+        && !workOrderData?.repairJob && !workOrderData?.deleted && workOrderData?.canCreateWorkOrderVersion),
       onClick: (e) => openAddActions(e),
       iconForMobile: false,
       endIcon: <ExpandMore fontSize="small" />,
@@ -355,7 +413,7 @@ const WorkOrderDetails = () => {
       type: 'button',
       visibilityInMobile: 'inActionMenu',
       tooltip: 'Edit Work Order',
-      isVisible: Boolean(permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed),
+      isVisible: Boolean(allowedToEdit && !workOrderData?.deleted && !completed),
       iconForMobile: <EditIcon />,
       name: 'Edit',
       onClick: () => setOpenUpdateDialog(true)
@@ -386,9 +444,7 @@ const WorkOrderDetails = () => {
                 <RenderHeaderButtons
                   buttonOptions={toolbarButtons}
                   extraMenuItems={createVersionMenuItems.map((c) => ({ ...c, text: `Create Version ${c.text}` }))}
-                  isExtraMenuItemsVisible={Boolean(
-                    permissions?.workOrder?.isUpdate &&
-                    allowedToEdit &&
+                  isExtraMenuItemsVisible={Boolean(allowedToEdit &&
                     workOrderData?.status !== WORK_ORDER_STATUS.completed &&
                     !workOrderData?.deleted
                   )}
@@ -447,11 +503,9 @@ const WorkOrderDetails = () => {
               <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
             </CustomTab>
           )}
-          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
-            <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawings
-            </CustomTab>
-          )}
+          <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawings
+          </CustomTab>
           {!(isMobile && !isTablet) && (
             <CustomTab index={5} value={5} className={'tabLayout'} {...a11yProps(5)}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
@@ -512,11 +566,13 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          {workOrderData && <Diagram
-            resource={ACTIVITY_RESOURCE.workOrder}
-            referenceId={id}
-            currentVersion={workOrderData?.versions?.length + 1 || 1}
-          />}
+          {workOrderData &&
+            <Diagram
+              resource={ACTIVITY_RESOURCE.workOrder}
+              referenceId={id}
+              currentVersion={workOrderData?.versions?.length + 1 || 1}
+              workOrderData={workOrderData}
+            />}
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>
@@ -582,6 +638,30 @@ const WorkOrderDetails = () => {
           handleClose={() => {
             setVersionDialog(false);
           }}
+        />
+      )}
+      {showManageRepairJobDialog.open && (
+        <ManageRepairJob
+          onClose={() => setShowManageRepairJobDialog({ open: false })}
+          onSuccess={(data) => {
+            handleAddAssetInRepairJob(data)
+          }}
+          referenceType={sidebarResource.workOrder}
+          referenceData={{
+            warehouse: workOrderData?.warehouse?.optionValue,
+            workOrder: workOrderData?._id
+          }}
+        />
+      )}
+      {repairJobReceiveConfirmation && (
+        <ConfirmationDialog
+          open={repairJobReceiveConfirmation}
+          message={`Are you sure you want to receive asset?`}
+          onClose={() => {
+            setRepairJobReceiveConfirmation(false);
+          }}
+          onOk={handleReceiveAssetInRepairJob}
+          okBtnLoading={isSubmitting}
         />
       )}
     </Box>

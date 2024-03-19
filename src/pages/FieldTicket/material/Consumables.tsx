@@ -109,7 +109,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
 
   const fetchColumns = async () => {
     var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
-    if (!allowedToEdit) {
+    if (!allowedToEdit || fieldTicketData?.quotation) {
       fields?.forEach((e) => {
         e.isColumnEditable = false;
       });
@@ -151,7 +151,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
           primaryField: true,
           cell: ({ row, table }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              {!allowedToEdit ? (
+              {!allowedToEdit || fieldTicketData?.quotation ? (
                 <p>{row?.original[e?.fieldName]}</p>
               ) : (
                 <p
@@ -542,7 +542,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
 
   return (
     <>
-      {allowedToEdit && serviceOption?.length > 0 && (
+      {allowedToEdit && !fieldTicketData?.quotation && serviceOption?.length > 0 && (
         <Box style={{ maxWidth: '400px' }} mb={3}>
           <Autocomplete
             size="small"
@@ -572,7 +572,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
 
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-          {allowedToEdit && (
+          {allowedToEdit && !fieldTicketData?.quotation && (
             <>
               <DetailsPageHeader
                 isAddButtonVisible={true}
@@ -596,8 +596,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
                   onSaveEdit={onSaveInlineEdit}
                   renderedFrom={renderedFrom}
                   isClientSideGrid={true}
-                  hideSelection={!allowedToEdit}
-                  hideAction={!allowedToEdit}
+                  hideSelection={allowedToEdit && !fieldTicketData?.quotation ? false : true}
+                  hideAction={allowedToEdit && !fieldTicketData?.quotation ? false : true}
                   refreshGrid={fetchData}
                 />
               ) : (

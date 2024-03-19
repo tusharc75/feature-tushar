@@ -239,13 +239,13 @@ const SerializedAssetDetailsPage = () => {
         comment: obj?.reason ? obj?.reason : '',
         reference: { _id: assetDetails._id, type: INVENTORY_HISTORY_TYPE.serializedAssets }
       })
-      .then(() => {
+      .then(({ data }) => {
         setUpdateLoading(false);
         fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Status changed to ${obj?.status}`
+          message: data?.message
         });
       })
       .catch((error) => {
@@ -287,7 +287,7 @@ const SerializedAssetDetailsPage = () => {
                     className={'btn-outline-v1'}
                     size="small"
                     onClick={() => {
-                      window.open(`${routes.iotChart.path}/${assetDetails?._id}`);
+                      history.push(`${routes.iotChart.path}/${assetDetails?._id}`);
                     }}
                   >
                     View Data

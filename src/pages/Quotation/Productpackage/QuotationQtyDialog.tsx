@@ -121,6 +121,9 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
         }
+        if (element.fieldName === 'pricingCondition') {
+          element.option = [];
+        }
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
@@ -145,8 +148,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
-      setPriceMethodListConst(pricingMethodOptions);
-      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
       data.forEach((element) => {
         if (rowData?.type === 'serializedAsset') {
           if (element.fieldName === 'qty') {
@@ -162,12 +163,12 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
             element.value = 'Piece';
           }
           if (element.fieldName === 'pricingMethod') {
-            element.option = [
-              {
-                optionValue: 'Per Job',
-                optionLabel: 'Per Job'
-              }
-            ];
+            const assetPricingMethod = {
+              optionValue: 'Per Job',
+              optionLabel: 'Per Job'
+            }
+            pricingMethodOptions.push(assetPricingMethod)
+            element.option = [assetPricingMethod];
             element.value = 'Per Job';
           }
         } else {
@@ -179,6 +180,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
           }
         }
       });
+      setPriceMethodListConst(pricingMethodOptions);
+      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
       if (rowData?.actualStartDate === '' || rowData?.actualStartDate === '') {
         data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
       }

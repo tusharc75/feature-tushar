@@ -1,6 +1,6 @@
 import { Box, Button, IconButton, useMediaQuery } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { capitalize } from 'lodash';
+import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';
 import { useHistory } from 'react-router-dom';
@@ -11,7 +11,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import { prepareDataForGrid, quotation } from 'src/constants/helpers';
+import { MATERIAL_TYPE, prepareDataForGrid, quotation } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -91,18 +91,18 @@ const QuoteBuilder = ({
           row.original['type'] ? (
             <div>
               <p className="text-truncate">
-                {row.original.type === 'serializedAsset' ? 'Asset' : `${capitalize(row.original.type)} `}
+                {row.original.type === 'serializedAsset' ? 'Asset' : `${startCase(row.original.type)} `}
                 {row.original['type'] === 'product'
                   ? row.original?.productDetail?.serializedProduct
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                  : ''}
+                    ? row.original?.packageDetail.packageType === 'Product'
+                      ? '(Product)'
+                      : '(Service)'
+                    : row.original.type === 'service'
+                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                      : ''}
               </p>
             </div>
           ) : (
@@ -131,14 +131,13 @@ const QuoteBuilder = ({
                   size="small"
                   onClick={() => {
                     window.open(
-                      `${
-                        row.original.type === 'serializedAsset'
-                          ? routes.serializedAssetDetail.path
-                          : row.original.type === 'product'
+                      `${row.original.type === 'serializedAsset'
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === 'product'
                           ? routes.productDetail.path
                           : row.original.type === 'package'
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
+                            ? routes.packagesDetail.path
+                            : routes.serviceMasterDetail.path
                       }/${row.original.materialId}`
                     );
                   }}
@@ -152,19 +151,19 @@ const QuoteBuilder = ({
       },
       ...(permissions?.leadTimeMaster
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
-              Footer: (info) => {
-                let rows = info.table.getExpandedRowModel().rows;
-                const total = rows
-                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-                return <>{total}</>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
+            Footer: (info) => {
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows
+                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+              return <>{total}</>;
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'description',
@@ -193,23 +192,22 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
@@ -224,12 +222,11 @@ const QuoteBuilder = ({
         finalObject['detail'] = item?.detail;
         finalObject['description'] = item?.description;
         finalObject['qtyDisplay'] = item?.qty;
-        finalObject['leadTime'] =
-          Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
+        finalObject['leadTime'] = Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
         finalObject['parentId'] = null;
         finalObject['isValid'] = true;
         finalObject['hideSelection'] = false;
-        finalObject['type'] = item?.costType || 'Manual Entry';
+        finalObject['type'] = MATERIAL_TYPE.manualEntry;
         let res: any = {
           ...finalObject
         };
@@ -271,23 +268,22 @@ const QuoteBuilder = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -421,6 +417,7 @@ const QuoteBuilder = ({
             hideAction={true}
             isClientSideGrid={true}
             expander={true}
+            hideExportTable={true}
           />
         </Box>
       ) : (
