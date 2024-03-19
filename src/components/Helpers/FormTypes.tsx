@@ -1487,6 +1487,7 @@ const FormTypes = (props) => {
             </Grid>
           ))
         ) : (
+          <Grid key={_currency} item xs={12} sm={6} md={6}>
             <Box display="flex">
               <Box flexGrow={1}>
                 <InfoLabel
@@ -1601,6 +1602,7 @@ const FormTypes = (props) => {
                 </Box>
               )}
             </Box>
+          </Grid>
         )
       )
     ) : type === 'decimal' ? (
