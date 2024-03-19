@@ -4,6 +4,7 @@ import { Chip, Box, Typography } from '@material-ui/core';
 import { purple } from '@material-ui/core/colors';
 import { useHistory } from 'react-router-dom';
 import routes from '../../Helpers/Routes';
+import { kebabCase, startCase } from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
   boldFont: {
@@ -25,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
 export const RelatedToDispay = ({ relatedTo, inline = false }) => {
   const classes = useStyles();
   const handleClick = (obj, resourceName) => {
-    window.open(`${routes[resourceName].path}/detail/${obj?._id}`);
+    window.open(`${routes[resourceName]?.path || `/${kebabCase(resourceName)}`}/detail/${obj?._id}`);
   };
   return (
     <Box style={{ display: inline ? 'flex' : 'block', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -39,7 +40,7 @@ export const RelatedToDispay = ({ relatedTo, inline = false }) => {
           <Box mr={1} key={`relatedTo${index}`} component="div" display="inline">
             <Chip
               key={index}
-              label={`${routes[_element?.type]?.title + ' - ' + _element.name} `}
+              label={`${routes[_element?.type]?.title || startCase(_element?.type)} - ${_element.name}`}
               size="medium"
               clickable={true}
               onClick={(e) => {
