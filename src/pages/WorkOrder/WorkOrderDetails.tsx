@@ -130,6 +130,7 @@ const WorkOrderDetails = () => {
   useEffect(() => {
     if (id) {
       fetchWorkOrderData();
+      fetchTotalConsumablesCost();
     }
   }, [id]);
 
@@ -178,6 +179,20 @@ const WorkOrderDetails = () => {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchTotalConsumablesCost = () => {
+    axiosInstance()
+      .get(`${routes.workOrder.path}/cost/${id}`)
+      .then(({ data: { data } }) => {
+        setWorkOrderData(prevData => ({
+          ...prevData,
+          totalConsumablesCost: data.totalConsumablesCost ?? 0
+        }));
+      })
+      .catch((err) => {
+        console.error("Error fetching totalConsumablesCost:", err);
       });
   };
 
