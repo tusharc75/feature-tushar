@@ -720,13 +720,15 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
             Add Existing Services
           </MenuItem>
         )}
-        <MenuItem
-          onClick={() => {
-            setShowCostDialog({ open: true, showSaveAndNext: false });
-          }}
-        >
-          Add Manual Entry
-        </MenuItem>
+        {costFields?.length > 0 &&
+          <MenuItem
+            onClick={() => {
+              setShowCostDialog({ open: true, showSaveAndNext: false });
+            }}
+          >
+            Add Manual Entry
+          </MenuItem>
+        }
       </>
     );
   };
