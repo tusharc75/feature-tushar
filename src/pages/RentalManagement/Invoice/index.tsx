@@ -16,7 +16,7 @@ import routes from '../../../components/Helpers/Routes';
 import { fetch_rental_cost_fields, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { RENTAL_STATUS, rentalManagement, sidebarResource } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
-import AdditionalCostDialog from '../AdditionalCost/AdditionalCostDialog';
+import AdditionalCostDialog from '../Productpackage/AdditionalCostDialog';
 
 const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFullScreen, allowedToEdit, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
