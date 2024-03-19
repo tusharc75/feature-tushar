@@ -54,7 +54,6 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const rentalManagementSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
   { name: 'Add Services', title: 'Services', icon: 'add' },
-  { name: 'Add-on', title: 'Add-on', icon: 'add' },
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
   { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },

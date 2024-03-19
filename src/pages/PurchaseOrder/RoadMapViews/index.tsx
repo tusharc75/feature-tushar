@@ -1,8 +1,7 @@
-import _ from 'lodash';
-import React, { useContext, useState, useEffect, Fragment } from 'react';
+import { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import { COLOUR_MASTER, purchaseOrder, PURCHASE_ORDER_STATUS } from '../../../constants/helpers';
+import { COLOUR_MASTER, purchaseOrder } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -35,15 +34,9 @@ const customNodeStyles = {
   }
 };
 
-const customDeliveredNodeStyle = {
-  closedPurchaseOrder: {
-    name: 'Purchase Order',
-    ...COLOUR_MASTER.closedRentalJob
-  }
-};
 
-const PurchaseOrderViews = (props) => {
-  const { pName, pId, pStatus } = props;
+const PurchaseOrderViews = ({ purchaseOrderData }) => {
+
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
   const history = useHistory();
@@ -53,14 +46,14 @@ const PurchaseOrderViews = (props) => {
 
   useEffect(() => {
     fetchData();
-  }, [pName]);
+  }, [purchaseOrderData]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const product = await axiosInstance().get(`${purchaseOrder.api}/product/${pId}`);
-      const assets = await axiosInstance().get(`${purchaseOrder.api}/${pId}/assets`);
-      const manualEntry = await axiosInstance().get(`${purchaseOrder.api}/cost/${pId}`);
+      const product = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData?._id}`);
+      const assets = await axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData?._id}/assets`);
+      const manualEntry = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData?._id}`);
       const allProducts = product?.data?.data;
       const allManualEntry = manualEntry?.data?.data;
       const allSerializedAssets = assets?.data?.data?.serializedAsset;
@@ -69,14 +62,14 @@ const PurchaseOrderViews = (props) => {
       var xPosition = 0;
       var flow: any[] = [
         {
-          id: `${pId}`,
+          id: `${purchaseOrderData?._id}`,
           type: 'input',
           className: 'dark-node',
           sourcePosition: 'right',
           data: {
             ref_type: 'purchaseOrder',
-            ref_id: pId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pName ?? pName}</div>
+            ref_id: purchaseOrderData?._id,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{purchaseOrderData?.purchaseOrderNumber}</div>
           },
           position: { x: xPosition, y: 80 },
           style: customNodeStyles.purchaseOrder
@@ -105,8 +98,8 @@ const PurchaseOrderViews = (props) => {
           style: customNodeStyles.product
         });
         flowEdge.push({
-          id: `${pId}_${item?.productId}_${item?._id}_edge`,
-          source: `${pId}`,
+          id: `${purchaseOrderData?._id}_${item?.productId}_${item?._id}_edge`,
+          source: `${purchaseOrderData?._id}`,
           target: `${item?.productId}_${item?._id}`
         });
         yPosition += 80;
@@ -127,8 +120,8 @@ const PurchaseOrderViews = (props) => {
           style: customNodeStyles.product
         });
         flowEdge.push({
-          id: `${pId}_${item?._id}_edge`,
-          source: `${pId}`,
+          id: `${purchaseOrderData?._id}_${item?._id}_edge`,
+          source: `${purchaseOrderData?._id}`,
           target: `${item?._id}`
         });
         yPosition += 80;
@@ -160,7 +153,7 @@ const PurchaseOrderViews = (props) => {
           });
           assetYIdx += 1;
           flowEdge.push({
-            id: `${pId}_${item._id}_edge_asset_product`,
+            id: `${purchaseOrderData?._id}_${item._id}_edge_asset_product`,
             source: `${allProductId[item?.product?.optionValue]}`,
             target: `${item._id}`
           });
@@ -183,7 +176,7 @@ const PurchaseOrderViews = (props) => {
           });
           assetYIdx += 1;
           flowEdge.push({
-            id: `${pId}_${item._id}_edge_asset_product`,
+            id: `${purchaseOrderData?._id}_${item._id}_edge_asset_product`,
             source: `${allProductId[item?.product]}`,
             target: `${item._id}`
           });
@@ -192,17 +185,17 @@ const PurchaseOrderViews = (props) => {
 
       xPosition += 300;
       flow.push({
-        id: `${pId}_received`,
+        id: `${purchaseOrderData?._id}_received`,
         type: 'default',
         className: 'dark-node',
         sourcePosition: 'right',
         targetPosition: 'left',
         data: {
           ref_type: 'received',
-          ref_id: pId,
+          ref_id: purchaseOrderData?._id,
           label: (
             <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {pStatus === PURCHASE_ORDER_STATUS.closed || pStatus === PURCHASE_ORDER_STATUS.open ? pStatus : 'In-Progress'}
+              {purchaseOrderData?.status}
             </div>
           )
         },
@@ -213,61 +206,38 @@ const PurchaseOrderViews = (props) => {
         ?.filter((i) => !serialisedAssetInProduct[i?.productId])
         ?.map((item, pIdx) => {
           flowEdge.push({
-            id: `${pId}_${item}_received_edge`,
+            id: `${purchaseOrderData?._id}_${item}_received_edge`,
             source: `${item?.productId}_${item?._id}`,
-            target: `${pId}_received`
+            target: `${purchaseOrderData?._id}_received`
           });
         });
 
       allManualEntry?.map((item) => {
         flowEdge.push({
-          id: `${pId}_${item?._id}_received_edge`,
+          id: `${purchaseOrderData?._id}_${item?._id}_received_edge`,
           source: `${item?._id}`,
-          target: `${pId}_received`
+          target: `${purchaseOrderData?._id}_received`
         });
       });
       allSerializedAssets?.map((item, sIdx) => {
         flowEdge.push({
-          id: `${pId}_${item}_received_edge`,
+          id: `${purchaseOrderData?._id}_${item}_received_edge`,
           source: `${item?._id}`,
-          target: `${pId}_received`
+          target: `${purchaseOrderData?._id}_received`
         });
       });
       allSerialNumber?.map((item, sIdx) => {
         flowEdge.push({
-          id: `${pId}_${item}_received_edge`,
+          id: `${purchaseOrderData?._id}_${item}_received_edge`,
           source: `${item?._id}`,
-          target: `${pId}_received`
+          target: `${purchaseOrderData?._id}_received`
         });
       });
-
-      // if (pStatus === PURCHASE_ORDER_STATUS.closed) {
-      //   xPosition += 300;
-      //   flow.push({
-      //     id: `${pId}_closed`,
-      //     type: 'output',
-      //     className: 'dark-node',
-      //     sourcePosition: 'right',
-      //     targetPosition: 'left',
-      //     data: {
-      //       ref_type: 'purchaseOrder',
-      //       ref_id: pId,
-      //       label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pName ?? pName}</div>
-      //     },
-      //     position: { x: xPosition, y: 80 },
-      //     style: customDeliveredNodeStyle.closedPurchaseOrder
-      //   });
-      //   flowEdge.push({
-      //     id: `${pId}_closed_edge`,
-      //     source: `${pId}_received`,
-      //     target: `${pId}_closed`
-      //   });
-      // }
       if (flowEdge.length === 0) {
         flowEdge.push({
-          id: `${pId}_${pId}_edge`,
-          source: `${pId}`,
-          target: `${pId}_received`
+          id: `${purchaseOrderData?._id}_${purchaseOrderData?._id}_edge`,
+          source: `${purchaseOrderData?._id}`,
+          target: `${purchaseOrderData?._id}_received`
         });
       }
       setFlowData([...flow, ...flowEdge]);

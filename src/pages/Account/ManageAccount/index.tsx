@@ -55,27 +55,23 @@ export default function ManageAccountDialog(props) {
         .get(`/field?resource=${sidebarResource[accountResource]}`)
         .then(({ data: { data } }) => {
           const newFields = [];
-          data
-            .filter((d) => d.isCreate)
-            .map((_f) => newFields.push(_f.fieldData));
+          data.filter((d) => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
-          axiosInstance()
-            .get(`/${accountApi}/clone/${id}`)
-            .then(({ data: dataToClone }) => {
-              if (dataToClone) {
-                dataToClone.data.accountName = "";
-              }
-              setAccountData({
-                fields: newFields,
-                initialValues: dataToClone.data
-                  ? getObjKeysWithValues(dataToClone.data, newFields)
-                  : getObjKeys("", newFields),
-              });
-              setFormValues(dataToClone.data
+          axiosInstance().get(`/${accountApi}/clone/${id}`).then(({ data: dataToClone }) => {
+            if (dataToClone) {
+              dataToClone.data.accountName = "";
+            }
+            setAccountData({
+              fields: newFields,
+              initialValues: dataToClone.data
                 ? getObjKeysWithValues(dataToClone.data, newFields)
-                : getObjKeys("", newFields))
-              setTimeout(() => setLoading(false), 500);
-            })
+                : getObjKeys("", newFields),
+            });
+            setFormValues(dataToClone.data
+              ? getObjKeysWithValues(dataToClone.data, newFields)
+              : getObjKeys("", newFields))
+            setTimeout(() => setLoading(false), 500);
+          })
             .catch((error) => {
               setLoading(false);
             });

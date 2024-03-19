@@ -15,7 +15,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { QUOTATION_STATUS, quotation } from '../../../constants/helpers';
+import { MATERIAL_TYPE, QUOTATION_STATUS, quotation } from '../../../constants/helpers';
 
 const Quotation = ({
   rentalManagementData,
@@ -214,11 +214,9 @@ const Quotation = ({
       `${quotation.api}/additionalcost/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
     );
     const additionalCostData = additionalCost?.data?.data?.map((e) => {
-      const detail = e?.description;
       return {
         ...e,
-        type: e?.costType,
-        detail: detail,
+        type: MATERIAL_TYPE.manualEntry,
         parentId: null
       };
     });

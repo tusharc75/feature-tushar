@@ -84,6 +84,14 @@ export default function ManageContactDialog({
           Object.keys(referenceData)?.forEach((key) => {
             if (fieldsDataForCreate?.find((i) => i.fieldName === key)) {
               initialData[key] = referenceData[key];
+              if (key === 'accountName') {
+                fieldsDataForCreate?.forEach((e) => {
+                  if (e.fieldName === 'accountName') {
+                    e.disableOnEdit = true;
+                    e.isUneditable = true;
+                  }
+                });
+              }
             }
           });
         }
