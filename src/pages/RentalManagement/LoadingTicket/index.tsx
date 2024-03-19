@@ -248,9 +248,9 @@ const LoadingTicket = ({
           obj.rentalAssetStatus = element?.status;
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
             ? ele.qty === consumeQty
-              ? 'Consumed'
+              ? RENTAL_INTERNAL_ASSET_STATUS.consumed
               : consumeQty < ele.qty && consumeQty > 0
-                ? 'Partially Consumed'
+                ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
                 : element?.status
             : element?.status;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
@@ -880,32 +880,36 @@ const LoadingTicket = ({
         if (e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyCreated });
         }
-      } else if (action === rentalManagementActions.deliveredToCustomer) {
+      }
+      else if (action === rentalManagementActions.deliveredToCustomer) {
         if (!e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyDelivered });
         }
-      } else if (action === rentalManagementActions.replaceAsset) {
+      }
+      else if (action === rentalManagementActions.replaceAsset) {
         if (e?.type !== 'Asset') {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.productsCanNotReplace });
         } else if (!e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingDeliveredForReplace });
-        } else if (e?.status !== ASSET_STATUS.inUse) {
+        } else if (e?.status !== ASSET_STATUS.inUse || e?.rentalAssetStatus !== ASSET_STATUS.inUse) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplaceInUse });
         }
         // else if (!e?.isReplaceable) {
         //   errorMessages.push({ index: e.index, message: rentalManagementMessage.canNotReplaceInvoiceCreated });
         // }
-      } else if (action === rentalManagementActions.cancelInTransitLoadingTicket) {
+      }
+      else if (action === rentalManagementActions.cancelInTransitLoadingTicket) {
         if (!e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.indTransit) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.cancelInTransitLineItems });
         }
-      } else if (action === rentalManagementActions.cancelDeliveredLoadingTicket) {
+      }
+      else if (action === rentalManagementActions.cancelDeliveredLoadingTicket) {
         if (!e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
@@ -926,13 +930,15 @@ const LoadingTicket = ({
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.statusInUseCancelLoading });
         }
-        else if (
-          e?.type === 'Product' &&
+        else if (e?.type === 'Product' && [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed]?.includes(e?.rentalAssetStatus)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalProductConsumed });
+        }
+        else if (e?.type === 'Product' &&
           ![
             RENTAL_INTERNAL_ASSET_STATUS.inUse,
             RENTAL_INTERNAL_ASSET_STATUS.standBy,
             RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable,
-            RENTAL_INTERNAL_ASSET_STATUS.delivered
+            RENTAL_INTERNAL_ASSET_STATUS.delivered,
           ]?.includes(e?.rentalAssetStatus)
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusInUseCancelLoading });
@@ -1463,7 +1469,8 @@ const ActionButtonMenuItems = ({
             selectedRecords.filter(
               (e: any) =>
                 e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                [ASSET_STATUS.delivered, ASSET_STATUS.inUse, ASSET_STATUS.standByNotChargeable].includes(e?.status)
+                [ASSET_STATUS.delivered, ASSET_STATUS.inUse, ASSET_STATUS.standByNotChargeable].includes(e?.status) &&
+                [RENTAL_INTERNAL_ASSET_STATUS.delivered, RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable].includes(e?.rentalAssetStatus)
             ).length === selectedRecords.length &&
             checkUniqStatus() && (
               <MenuItem
@@ -1485,7 +1492,8 @@ const ActionButtonMenuItems = ({
             selectedRecords.filter(
               (e: any) =>
                 e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                [ASSET_STATUS.delivered, ASSET_STATUS.inUse, ASSET_STATUS.standBy].includes(e?.status)
+                [ASSET_STATUS.delivered, ASSET_STATUS.inUse, ASSET_STATUS.standBy].includes(e?.status) &&
+                [RENTAL_INTERNAL_ASSET_STATUS.delivered, RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy].includes(e?.rentalAssetStatus)
             ).length === selectedRecords.length &&
             checkUniqStatus() && (
               <MenuItem
@@ -1507,7 +1515,8 @@ const ActionButtonMenuItems = ({
             selectedRecords.filter(
               (e: any) =>
                 e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                [ASSET_STATUS.delivered, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable].includes(e?.status)
+                [ASSET_STATUS.delivered, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable].includes(e?.status) &&
+                [RENTAL_INTERNAL_ASSET_STATUS.delivered, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable].includes(e?.rentalAssetStatus)
             ).length === selectedRecords.length &&
             checkUniqStatus() && (
               <MenuItem
