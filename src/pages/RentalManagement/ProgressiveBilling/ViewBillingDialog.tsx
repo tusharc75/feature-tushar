@@ -7,7 +7,7 @@ import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_TYPE, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -228,8 +228,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
     if (additionalCostData?.length > 0) {
       additionalCostData?.forEach((element) => {
         element.index = rows.length + 1;
-        element.detail = element.costType;
-        element.type = 'manualEntry';
+        element.detail = element.detail;
+        element.description = element.description;
+        element.type = MATERIAL_TYPE.manualEntry;
         element.qtyDisplay = element.qty;
         element.materialId = element?._id;
         element.parentId = null;

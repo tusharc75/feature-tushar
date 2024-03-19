@@ -2017,6 +2017,7 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   complete: 'Complete',
   return: 'Return',
   consumed: 'Consumed',
+  partiallyConsumed: 'Partially Consumed',
   standBy: 'Stand By',
   standByNotChargeable: 'Stand By-Not Chargeable',
   delivered: 'Delivered'

@@ -1,4 +1,4 @@
-import { Box, MenuItem } from '@material-ui/core';
+import { Box, MenuItem, TextField } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import routes from '../../../components/Helpers/Routes';
 import { ASSET_APPROVAL_STATUS, gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import CancelIcon from '@material-ui/icons/Cancel';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import { Autocomplete } from '@material-ui/lab';
 
 const SerializedAssetStatusChangeRequest = () => {
 
@@ -33,6 +34,7 @@ const SerializedAssetStatusChangeRequest = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null });
   const [renderCount, setRenderCount] = useState(0);
   const [approveRejectRecord, setApproveRejectRecord] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState(ASSET_APPROVAL_STATUS.pending);
 
   useEffect(() => {
     fetchGridColumns();
@@ -42,7 +44,7 @@ const SerializedAssetStatusChangeRequest = () => {
     if (renderCount > 0) {
       fetchData();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedStatus]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -132,6 +134,10 @@ const SerializedAssetStatusChangeRequest = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
+    if (selectedStatus && selectedStatus!== '') {
+      deepFilters.push({ field: 'status', term: selectedStatus });
+    }
+
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -174,6 +180,12 @@ const SerializedAssetStatusChangeRequest = () => {
       });
   };
 
+  const statusOptions = [
+      { optionLabel: ASSET_APPROVAL_STATUS.pending, optionValue: ASSET_APPROVAL_STATUS.pending },
+      { optionLabel: ASSET_APPROVAL_STATUS.approved, optionValue: ASSET_APPROVAL_STATUS.approved },
+      { optionLabel: ASSET_APPROVAL_STATUS.rejected, optionValue: ASSET_APPROVAL_STATUS.rejected }
+  ]
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -212,6 +224,25 @@ const SerializedAssetStatusChangeRequest = () => {
                 Reject
               </MenuItem>
             </>
+          }
+          leftSideContents={
+            <Autocomplete
+              className={`lg:w-[230px] w-full`}
+              options={statusOptions}
+              getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+              getOptionSelected={(option: any, val) => option.optionValue === val}
+              value={
+                statusOptions?.filter((data) => data.optionValue === selectedStatus)?.length
+                  ? statusOptions.filter((data) => data.optionValue === selectedStatus)[0]
+                  : ''
+              }
+              onChange={(e, val) => {
+                setSelectedStatus(val && val.optionValue ? val.optionValue : '');
+              }}
+              renderInput={(params) => (
+                <TextField {...params} margin="none" size="small" name="status" label='Status' variant="outlined" fullWidth />
+              )}
+            />
           }
         />
         {columns ? (

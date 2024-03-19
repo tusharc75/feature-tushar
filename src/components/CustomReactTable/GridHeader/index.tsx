@@ -10,12 +10,11 @@ import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
-import { camelCaseToWords, createJsonDataForTableExport, getExcelColumnNameFromRange } from '../utils';
+import { camelCaseToWords, createJsonDataForTableExport, extractLastNumberFromDataRange, getExcelColumnNameFromRange } from '../utils';
 
 import moment from 'moment';
-import { ImportIcon } from 'src/assets/svg/svgIcons';
+import { ExportIcon } from 'src/assets/svg/svgIcons';
 import { dateTimeFormat } from 'src/constants/helpers';
-import GetAppIcon from '@material-ui/icons/GetApp';
 
 const GridHeader = ({
   resource,
@@ -34,7 +33,7 @@ const GridHeader = ({
   selectedReportView,
   expander,
   state,
-  exportTable = false
+  hideExportTable = false
 }) => {
   const { selectedRecords, loading, filters: customFilters, dataRows, page }: TInitialState = state;
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -52,22 +51,34 @@ const GridHeader = ({
   };
 
   const handleTableExport = () => {
-    const data = createJsonDataForTableExport(newColumns, dataRows);
+    const isFooterPresent = newColumns.some((c) => typeof c.Footer === 'function');
+
+    const data = createJsonDataForTableExport(newColumns, dataRows, isFooterPresent);
     if (!data) return;
     const wb = xlsx.utils.book_new();
     const ws = xlsx.utils.json_to_sheet(data);
 
-    // for table head style
-    for (const col of getExcelColumnNameFromRange(ws['!ref'])) {
+    const columns = getExcelColumnNameFromRange(ws['!ref']);
+    const lastRowNumber = extractLastNumberFromDataRange(ws['!ref']);
+    for (const col of columns) {
+      // For header style
       ws[`${col}1`].s = {
         font: {
           name: 'Calibri',
           bold: true
         }
       };
+      // For footer style
+      if (lastRowNumber && isFooterPresent) {
+        ws[`${col}${lastRowNumber}`].s = {
+          font: {
+            name: 'Calibri',
+            bold: true
+          }
+        };
+      }
     }
     const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
-
     xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
     xlsx.writeFile(wb, `${name}.xlsx`);
   };
@@ -139,8 +150,8 @@ const GridHeader = ({
               </Button>
             </HtmlTooltip>
           )}
-          {exportTable || isClientSideGrid ? (
-            <HtmlTooltip title={dataRows.length === 0 ? 'Add some data first' : 'Export table to excel'} placement="top" arrow>
+          {!hideExportTable && isClientSideGrid ? (
+            <HtmlTooltip title={dataRows.length === 0 ? 'No Data to Export' : 'Export to Excel'} placement="top" arrow>
               <span>
                 <IconButton
                   className={`refresh-arrange-button`}
@@ -151,7 +162,7 @@ const GridHeader = ({
                     handleTableExport();
                   }}
                 >
-                  <GetAppIcon fontSize='small' />
+                  <ExportIcon fontSize="small" />
                 </IconButton>
               </span>
             </HtmlTooltip>

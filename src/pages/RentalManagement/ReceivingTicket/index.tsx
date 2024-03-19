@@ -342,9 +342,9 @@ const ReceivingTicket = ({
           obj.parentName = element?.parentName;
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
             ? ele.qty === consumeQty
-              ? 'Consumed'
+              ? RENTAL_INTERNAL_ASSET_STATUS.consumed
               : consumeQty < ele.qty && consumeQty > 0
-                ? 'Partially Consumed'
+                ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
                 : ele.qty === (returnTicket?.qty || 0)
                   ? 'Returned'
                   : element?.status
@@ -400,9 +400,9 @@ const ReceivingTicket = ({
           obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
             ? qty === consumeQty
-              ? 'Consumed'
+              ? RENTAL_INTERNAL_ASSET_STATUS.consumed
               : consumeQty < qty && consumeQty > 0
-                ? 'Partially Consumed'
+                ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
                 : ''
             : element?.status;
           obj.currentLocation =
@@ -1925,7 +1925,7 @@ const ActionButtonMenuItems = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyAssetsCanBeRepaired });
         } else if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.delivered && e?.returnTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingOrReturnNotDelivered });
-        } else if (e.subleaseAsset) {
+        } else if (action === rentalManagementActions.createRepairJob && e.subleaseAsset) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.notSubleaseAsset });
         } else if (![ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.repairCanForThisAsset });
@@ -1939,9 +1939,12 @@ const ActionButtonMenuItems = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        } else if (![ASSET_STATUS.inUse, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status)) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
-        } else if (![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.complete].includes(e.rentalAssetStatus)) {
+        } else if (([ASSET_STATUS.inUse].includes(e.status)
+          && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus) ||
+          ([ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status)
+            && [RENTAL_INTERNAL_ASSET_STATUS.complete].includes(e.rentalAssetStatus)))) {
+        }
+        else {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
         }
       } else if (action === rentalManagementActions.swapInUseAssets) {

@@ -129,28 +129,33 @@ const AssignServiceDialog = ({
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-    const updatedFilters = [...deepFilters];
+    const updatedDeepFilters = [...deepFilters];
+    const updatedFilterByIds = [...filterByIds];
+
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {
         if (e?.field === 'preWork') {
           if (user?.user?.brandPolicy?.servicePrePost) {
-            updatedFilters.push(e);
+            updatedDeepFilters.push(e);
           }
         } else {
-          updatedFilters.push(e);
+          updatedDeepFilters.push(e);
         }
       });
     }
     if (extraFilterById && extraFilterById?.length) {
       extraFilterById?.forEach((e) => {
-        filterByIds.push(e);
+        updatedFilterByIds.push(e);
       });
     }
-    if (filterByIds?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    if (updatedFilterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
     }
-    if (updatedFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+    if (updatedDeepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
+    }
+    if (updatedDeepFilters?.length || updatedDeepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
