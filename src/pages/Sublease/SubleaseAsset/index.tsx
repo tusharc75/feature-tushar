@@ -340,6 +340,7 @@ const SerializedAsset = ({
           renderedFrom={renderedFrom}
           refreshGrid={fetchRecords}
           isClientSideGrid={true}
+          hideExportTable={true}
         />
       ) : (
         <Box p={2} height={500}>

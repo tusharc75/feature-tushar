@@ -641,7 +641,7 @@ const AddSerializedAsset = ({
                             setInuseAssetConfirmBox(true);
                           }}
                           variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          disabled={isAdding || checkUniqRentalJob()}
+                          disabled={isAdding || checkUniqRentalJob() || serializedProducts.some((d) => d?.qty < 0)}
                           className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
                           endIcon={isAdding && <CircularProgress size={20} />}
                         >
