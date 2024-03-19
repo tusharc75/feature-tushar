@@ -583,7 +583,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false, products: [] });
           }}
-          referenceType={'Transfer Asset'}
+          referenceType={transferAssetData?.rentalJob ? 'ReplaceAsset' : 'Transfer Asset'}
           replaceAssets={true}
           referenceData={{
             _id: transferAssetData?._id,
