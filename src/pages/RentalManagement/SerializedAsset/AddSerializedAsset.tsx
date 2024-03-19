@@ -81,6 +81,8 @@ const AddSerializedAsset = ({
   const [inuseAssetConfirmBox, setInuseAssetConfirmBox] = useState(false);
   const [certificateExpireAlert, setCertificateExpireAlert] = useState({ open: false, asset: '' });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 600;
     if (searchTimeout) {
@@ -425,7 +427,6 @@ const AddSerializedAsset = ({
 
   const handleAutoTransferAssets = () => {
     const assetsAdd: any = [];
-
     selectedProducts?.forEach((e: any) => {
       if (e.type === 'product') {
         let qty = e.realAssetQty - e.realAssetAssignedQty;
@@ -448,13 +449,16 @@ const AddSerializedAsset = ({
         }
       }
     });
-
+    setIsSubmitting(true)
     axiosInstance()
       .post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, { assets: assetsAdd, rentalJob: referenceData?._id })
       .then(({ data }) => {
+        setInuseAssetConfirmBox(false);
         handleSuccess();
+        setIsSubmitting(false)
       })
       .catch((error) => {
+        setIsSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -641,9 +645,9 @@ const AddSerializedAsset = ({
                             setInuseAssetConfirmBox(true);
                           }}
                           variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          disabled={isAdding || checkUniqRentalJob() || serializedProducts.some((d) => d?.qty < 0)}
+                          disabled={isSubmitting || checkUniqRentalJob() || serializedProducts.some((d) => d?.qty < 0)}
                           className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                          endIcon={isAdding && <CircularProgress size={20} />}
+                          endIcon={isSubmitting && <CircularProgress size={20} />}
                         >
                           {`Add to Job`}
                           {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
@@ -733,14 +737,13 @@ const AddSerializedAsset = ({
       {inuseAssetConfirmBox && (
         <ConfirmationDialog
           open={inuseAssetConfirmBox}
-          okBtnLoading={isAdding}
+          okBtnLoading={isSubmitting}
           message={`Do you want to move the assets to the new rental job?`}
           onClose={() => {
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
             handleAutoTransferAssets();
-            setInuseAssetConfirmBox(false);
           }}
         />
       )}

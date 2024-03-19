@@ -36,7 +36,6 @@ import {
   serializedAsset
 } from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
-import AdditionalCost from './AdditionalCost';
 import Invoice from './Invoice';
 import LoadingTicket from './LoadingTicket';
 import ManageRentalManagementDialog from './ManageRental';
@@ -631,26 +630,6 @@ const RentalManagementDetailsPage = () => {
                   setNextStep={setNextStep}
                   setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-1`}
-                  stepFullScreen={stepFullScreen}
-                  allowedToEdit={allowedToEdit}
-                  quotationApproved={
-                    quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
-                      ? true
-                      : false
-                  }
-                />
-              )}
-              {rentalSteps[currentStep]?.name === 'Add-on' && rentalManagementData && (
-                <AdditionalCost
-                  rentalManagementData={rentalManagementData}
-                  setNextStep={setNextStep}
-                  renderedFrom={`${renderedFrom}_grid-2`}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
