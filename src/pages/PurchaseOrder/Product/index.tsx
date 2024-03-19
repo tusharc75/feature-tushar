@@ -317,7 +317,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       } else {
         res.isValid = true;
       }
-      // res.hideSelection = item.actualReceived || item.rejectQuantity ? true : false;
+      res.hideSelection = item.actualReceived ? true : false;
       return res;
     });
     if (rows.length === 0) {
