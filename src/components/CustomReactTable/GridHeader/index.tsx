@@ -3,18 +3,36 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import xlsx from 'xlsx-js-style';
 import ArrangeView from '../ArrangeView';
 import DisplayFilters from '../DisplayFilters';
 import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
-import { camelCaseToWords, createJsonDataForTableExport, extractLastNumberFromDataRange, getExcelColumnNameFromRange } from '../utils';
 
-import moment from 'moment';
+import { Table } from '@tanstack/react-table';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
-import { dateTimeFormat } from 'src/constants/helpers';
+
+type GridHeaderProps = {
+  resource: any;
+  isClientSideGrid: any;
+  dispatch: any;
+  renderedFrom: any;
+  showOnlyShowFilteredRecordSwitch: any;
+  hideSelection: any;
+  showFilters: any;
+  table: Table<any>;
+  showArrangeView: any;
+  newColumns: any;
+  refreshGrid: any;
+  reportSave: any;
+  setSelectedReportView: any;
+  selectedReportView: any;
+  expander: any;
+  state: any;
+  handleTableExport: () => void;
+  hideExportTable: boolean;
+};
 
 const GridHeader = ({
   resource,
@@ -33,8 +51,9 @@ const GridHeader = ({
   selectedReportView,
   expander,
   state,
+  handleTableExport,
   hideExportTable = false
-}) => {
+}: GridHeaderProps) => {
   const { selectedRecords, loading, filters: customFilters, dataRows, page }: TInitialState = state;
   const isMobileView = useMediaQuery('(max-width:768px)');
 
@@ -48,39 +67,6 @@ const GridHeader = ({
 
   const handleFilterClose = () => {
     setIsFilterOpen(false);
-  };
-
-  const handleTableExport = () => {
-    const isFooterPresent = newColumns.some((c) => typeof c.Footer === 'function');
-
-    const data = createJsonDataForTableExport(newColumns, dataRows, isFooterPresent);
-    if (!data) return;
-    const wb = xlsx.utils.book_new();
-    const ws = xlsx.utils.json_to_sheet(data);
-
-    const columns = getExcelColumnNameFromRange(ws['!ref']);
-    const lastRowNumber = extractLastNumberFromDataRange(ws['!ref']);
-    for (const col of columns) {
-      // For header style
-      ws[`${col}1`].s = {
-        font: {
-          name: 'Calibri',
-          bold: true
-        }
-      };
-      // For footer style
-      if (lastRowNumber && isFooterPresent) {
-        ws[`${col}${lastRowNumber}`].s = {
-          font: {
-            name: 'Calibri',
-            bold: true
-          }
-        };
-      }
-    }
-    const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
-    xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
-    xlsx.writeFile(wb, `${name}.xlsx`);
   };
 
   return (
