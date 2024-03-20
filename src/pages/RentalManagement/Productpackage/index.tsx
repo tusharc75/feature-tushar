@@ -629,7 +629,7 @@ const Productpackage = ({
     if (data.depth != 0) {
       const rootParent = data.getParentRows()[0];
       if (rootParent?.original?.type === MATERIAL_TYPE.package) {
-        const allRows = rows.filter((ele) => ele.parentId === rows.parentId);
+        const allRows = rows.filter((ele) => ele.parentId === data.parentId);
         showSaveAndNext = data?.index < allRows.length - 1 ? true : false;
       } else {
         showSaveAndNext = false;
