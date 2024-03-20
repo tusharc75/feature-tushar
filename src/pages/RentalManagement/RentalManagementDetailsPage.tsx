@@ -33,7 +33,8 @@ import {
   deliveryTicket,
   rentalManagement,
   rentalManagementSteps,
-  serializedAsset
+  serializedAsset,
+  sidebarResource
 } from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
 import Invoice from './Invoice';
@@ -47,6 +48,7 @@ import RentalManagementViews from './RoadMapViews';
 import SerializedAsset from './SerializedAsset';
 import Services from './Services';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
+import Step from '../DynamicForm/Step';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -96,6 +98,7 @@ const RentalManagementDetailsPage = () => {
   const [versionNotClonned, setVersionNotClonned] = useState(false);
   const [reOpening, setReOpening] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -137,6 +140,7 @@ const RentalManagementDetailsPage = () => {
       getRentalManagementFields();
       fetchRentalManagementData();
       fetchQuotationData();
+      fetchPolicy()
     }
     if (!isOffline) {
       fetchAssetStatusRights();
@@ -251,6 +255,19 @@ const RentalManagementDetailsPage = () => {
       setRentalManagementData(data);
     } catch (error) {
       setLoadingDetails(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
@@ -546,6 +563,17 @@ const RentalManagementDetailsPage = () => {
               }
               {...a11yProps(1)}
             />
+            {resourceData && resourceData?.steps?.length && (
+              <Tab
+                className={'tabLayout'}
+                label={
+                  <div className="d-flex align-items-center tab-font">
+                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Others
+                  </div>
+                }
+                {...a11yProps(2)}
+              />
+            )}
             {displayProgressiveBillingTab && (
               <Tab
                 className={'tabLayout'}
@@ -554,7 +582,7 @@ const RentalManagementDetailsPage = () => {
                     <RiFlowChart className="mr-1" fontSize="inherit" /> Progressive Billing
                   </div>
                 }
-                {...a11yProps(2)}
+                {...a11yProps(3)}
               />
             )}
             {!isOffline && !(isMobile && !isTablet) && (
@@ -566,7 +594,7 @@ const RentalManagementDetailsPage = () => {
                     Views
                   </div>
                 }
-                {...a11yProps(3)}
+                {...a11yProps(4)}
               />
             )}
           </Tabs>
@@ -710,6 +738,15 @@ const RentalManagementDetailsPage = () => {
             </ContentFullScreen>
           </TabPanel>
           <TabPanel value={tabValue} index={2}>
+            <Step
+              resourceData={resourceData}
+              resourceId={id}
+              resource={sidebarResource.rentalManagement}
+              data={rentalManagementData}
+              allowedToEdit={allowedToEdit}
+          />
+        </TabPanel>
+          <TabPanel value={tabValue} index={3}>
             <Box>
               {displayProgressiveBillingTab ? (
                 <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={true} />
@@ -718,7 +755,7 @@ const RentalManagementDetailsPage = () => {
               )}
             </Box>
           </TabPanel>
-          <TabPanel value={tabValue} index={3}>
+          <TabPanel value={tabValue} index={4}>
             <Box>
               <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
             </Box>
