@@ -126,12 +126,7 @@ const RentalManagementDetailsPage = () => {
     history.push(`?tab=${newValue}`);
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
+
 
   useEffect(() => {
     if (id) {
@@ -533,20 +528,20 @@ const RentalManagementDetailsPage = () => {
         </Box>
         <Box className={`detail-container-v1`}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-            <CustomTab index={0} value={0} className={'tabLayout'} {...a11yProps(0)} >
+            <CustomTab index={0} value={0}  >
               Header
             </CustomTab>
-            <CustomTab index={1} value={1} className={'tabLayout'} {...a11yProps(1)} >
+            <CustomTab index={1} value={1}  >
               Details
             </CustomTab>
-            {resourceData && resourceData?.steps?.length &&
-              <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)} >
+            {resourceData && resourceData?.steps?.length > 0 &&
+              <CustomTab index={2} value={2}  >
                 Associations
               </CustomTab>}
-            {displayProgressiveBillingTab && <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)} >
+            {displayProgressiveBillingTab && <CustomTab index={3} value={3}  >
               Progressive Billing
             </CustomTab>}
-            {!isOffline && !(isMobile && !isTablet) && <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)} >
+            {!isOffline && !(isMobile && !isTablet) && <CustomTab index={4} value={4}  >
               Views
             </CustomTab>}
           </CustomTabs>
