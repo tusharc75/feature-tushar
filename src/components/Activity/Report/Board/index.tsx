@@ -17,7 +17,7 @@ import { CustomDialogTransition } from '../../../../constants/helpers';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { CreateTask } from '../../Task/CreateTask';
 import { CreateCase } from '../../Case/CreateCase';
-import { get_activity_resource } from '../../../Activity/Helpers/utils';
+import { get_activity_resource, get_dynamic_resource } from '../../../Activity/Helpers/utils';
 import { sidebarResource } from '../../../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
@@ -72,8 +72,26 @@ const Board = ({ type, filter }) => {
   const [click, setClick] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
+  const getResourceOptions = async () => {
+    const resource: any = [];
+    const dynamicResource = await get_dynamic_resource(true);
+    dynamicResource?.data?.forEach((_r) => {
+      if (permissions[camelCase(_r.resource)]?.isRead) {
+        resource.push({
+          optionLabel: _r.resource,
+          optionValue: camelCase(_r.resource),
+          dynamicResource: true,
+          primaryField: _r?.collaborateToolsField
+        });
+      }
+    });
+
+    setResourceOptions([...get_activity_resource(permissions), ...resource]);
+  };
+
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions));
+    getResourceOptions();
   }, []);
 
   useEffect(() => {
@@ -101,16 +119,32 @@ const Board = ({ type, filter }) => {
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
-      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue];
-      axiosInstance()
-        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
-        .then(({ data: { data } }) => {
-          setResourceData(data[lookupResource] || []);
-          setLoadingResources(false);
-        })
-        .catch((error) => {
-          setLoadingResources(false);
-        });
+      if (resource?.dynamicResource) {
+        axiosInstance()
+          .get(`dynamic-form`, {
+            headers: {
+              Resource: resource?.optionLabel
+            }
+          })
+          .then(({ data: { data } }) => {
+            setResourceData(data?.map((d) => ({ optionLabel: d[resource?.primaryField], optionValue: d?._id })) || []);
+            setLoadingResources(false);
+          })
+          .catch((error) => {
+            setLoadingResources(false);
+          });
+      } else {
+        const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue];
+        axiosInstance()
+          .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
+          .then(({ data: { data } }) => {
+            setResourceData(data[lookupResource] || []);
+            setLoadingResources(false);
+          })
+          .catch((error) => {
+            setLoadingResources(false);
+          });
+      }
 
       return () => {
         setSelectedResourceData(null);

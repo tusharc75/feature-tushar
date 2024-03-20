@@ -31,7 +31,10 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
   const handleSubmit = (values) => {
     setSubmitting(true);
     axiosInstance()
-      .put(`/sa-formbuilder/steps/setting/${resource}`, values)
+      .put(`/sa-formbuilder/steps/setting/${resource}`, {
+        ...values,
+        collaborateToolsField: values?.collaborateTools ? values?.collaborateToolsField : ''
+      })
       .then(({ data }) => {
         setSubmitting(false);
         onSuccess();
