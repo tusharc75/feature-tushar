@@ -75,7 +75,7 @@ const WorkOrderDetails = () => {
   }: any = useData();
 
   const [workOrderData, setWorkOrderData] = useState(null);
-  const [totalConsumablesCost, setTotalConsumablesCost] = useState(0);
+  const [totalConsumablesCost, setTotalConsumablesCost] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [workOrderFields, setWorkOrderFields] = useState([]);
@@ -174,10 +174,10 @@ const WorkOrderDetails = () => {
     axiosInstance()
       .get(`${routes.workOrder.path}/total-consumables-cost/${id}`)
       .then(({ data: { data } }) => {
-        setTotalConsumablesCost(data.cost);
+        setTotalConsumablesCost(data?.totalConsumablesCost);
       })
       .catch((err) => {
-        console.error("Error fetching totalConsumablesCost:", err);
+        toastConfig.setToastConfig(err);
       });
   };
 
@@ -520,29 +520,37 @@ const WorkOrderDetails = () => {
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
             )}
-          <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={4} xl={3}>
-                <div style={{ overflow: 'hidden' }} className="single-form-v1">
-                  <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
-                    <Box display="flex" alignItems="center">
-                      <Typography style={{ fontWeight: '600' }} className="form-label-style-v1" variant="subtitle2">
-                        {`Consumable Information`}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box className="formdata-v1" display="flex">
-                    <Box style={{ width: '100%' }}>
-                      <Box display="flex" justifyContent="space-between">
-                        <Typography className="table-head-v1">Total Consumables Cost</Typography>
-                        <Typography className="table-data-v1" style={{ borderTopWidth: '1px' }}>
-                          {`${totalConsumablesCost}`}
+            <Box pt={2}>
+              <Grid container spacing={2} >
+                <Grid item xs={12} sm={6} md={6} xl={6}>
+                  <div style={{ overflow: 'hidden' }} className="single-form-v1">
+                    <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
+                      <Box display="flex" alignItems="center">
+                        <Typography style={{ fontWeight: '600' }} className="form-label-style-v1" variant="subtitle2">
+                          {`Consumable Information`}
                         </Typography>
                       </Box>
                     </Box>
-                  </Box>
-                </div>
+                    {totalConsumablesCost !== null ?
+                      <Box className="formdata-v1" display="flex">
+                        <Box style={{ width: '100%' }}>
+                          <Box display="flex" justifyContent="space-between">
+                            <Typography className="table-head-v1">Total Consumables Cost</Typography>
+
+                            <Typography className="table-data-v1" style={{ borderTopWidth: '1px' }}>
+                              {`${totalConsumablesCost}`}
+                            </Typography>
+
+                          </Box>
+                        </Box>
+                      </Box>
+                      :
+                      <CommonSkeleton lenArray={[...Array(2).keys()]} />
+                    }
+                  </div>
+                </Grid>
               </Grid>
-          </Grid>
+            </Box>
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
