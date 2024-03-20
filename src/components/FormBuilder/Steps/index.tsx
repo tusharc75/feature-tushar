@@ -239,7 +239,7 @@ const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setOpenField,
         </Box>
       ) : (
         <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-          NO Steps
+          Steps not added yet!
         </Box>
       )}
     </div>

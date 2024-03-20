@@ -20,6 +20,7 @@ import Step from './Step';
 import { getResourceLabel } from 'src/constants/helpers';
 import PreviewDownload from 'src/components/PreviewDownload';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 
 const DynamicFormDetail = () => {
   const { route, id } = useParams();
@@ -189,42 +190,15 @@ const DynamicFormDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            value={0}
-            aria-controls="a11y-tabpanel-0"
-            id="a11y-tab-0"
-          />
-          {resourceData && resourceData?.steps?.length ? (
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                </div>
-              }
-              value={1}
-              aria-controls="a11y-tabpanel-1"
-              id="a11y-tab-1"
-            />
-          ) : null}
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab index={0} value={0}>
+            Header
+          </CustomTab>
+          {resourceData && resourceData?.steps?.length > 0 &&
+            <CustomTab index={1} value={1}>
+              Associations
+            </CustomTab>}
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
