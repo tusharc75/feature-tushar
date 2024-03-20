@@ -186,6 +186,14 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             }
           },
           {
+            accessor: 'type',
+            Header: 'Type',
+            width: 150,
+            show: true,
+            disabled: true,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.type}</p>
+          },
+          {
             accessor: 'detail',
             Header: 'Detail',
             width: 150,
