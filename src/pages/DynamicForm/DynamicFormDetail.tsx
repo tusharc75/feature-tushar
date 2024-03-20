@@ -19,6 +19,7 @@ import TabPanel from 'src/components/TabPanel';
 import Step from './Step';
 import { getResourceLabel } from 'src/constants/helpers';
 import PreviewDownload from 'src/components/PreviewDownload';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const DynamicFormDetail = () => {
   const { route, id } = useParams();
@@ -41,9 +42,7 @@ const DynamicFormDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [resourceData, setResourceData] = useState(null);
-
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
-
   const [tabValue, setTabValue] = useState(0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
@@ -179,6 +178,13 @@ const DynamicFormDetail = () => {
               </Button>
             )}
             {permissions[renderedFrom]?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            {resourceData?.collaborateTools && (
+              <ActivityButton
+                referenceId={detailData?._id}
+                resource={camelCase(resource)}
+                resourceLabel={detailData[resourceData?.collaborateToolsField]}
+              />
+            )}
           </Box>
         </Box>
       </Box>

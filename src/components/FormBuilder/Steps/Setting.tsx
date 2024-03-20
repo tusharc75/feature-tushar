@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel } from '@material-ui/core';
+import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { Form, Formik } from 'formik';
@@ -8,12 +8,25 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { Autocomplete } from '@material-ui/lab';
 
 const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
+  const [fields, setFields] = useState([]);
+
+  useEffect(() => {
+    fetchFields();
+  }, []);
+
+  const fetchFields = async () => {
+    const response = await axiosInstance().get(`/field?resource=${resource}`);
+    setFields(
+      response?.data?.data ? response?.data?.data?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName })) : []
+    );
+  };
 
   const handleSubmit = (values) => {
     setSubmitting(true);
@@ -34,6 +47,15 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
       });
   };
 
+  const validate = (values) => {
+    const errors = {};
+
+    if (values.collaborateTools && !values?.collaborateToolsField) {
+      errors['collaborateToolsField'] = 'please select Field';
+    }
+    return errors;
+  };
+
   return (
     <Dialog
       maxWidth="sm"
@@ -49,8 +71,11 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
     >
       <Formik
         initialValues={{
-          showStepsInList: resourceData.hasOwnProperty('showStepsInList') ? resourceData?.showStepsInList : false
+          showStepsInList: resourceData.hasOwnProperty('showStepsInList') ? resourceData?.showStepsInList : false,
+          collaborateTools: resourceData.hasOwnProperty('collaborateTools') ? resourceData?.collaborateTools : false,
+          collaborateToolsField: resourceData.hasOwnProperty('collaborateToolsField') ? resourceData?.collaborateToolsField : ''
         }}
+        validate={validate}
         onSubmit={handleSubmit}
       >
         {({ values, errors, setFieldValue, touched, submitForm }) => (
@@ -80,6 +105,51 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
                     label="Show Steps In List"
                   />
                 </Box>
+                <Box>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="collaborateTools"
+                        checked={values['collaborateTools']}
+                        onChange={(e) => {
+                          setFieldValue('collaborateTools', e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Collaborate Tools"
+                  />
+                </Box>
+                {values['collaborateTools'] && (
+                  <Box>
+                    <Autocomplete
+                      id="collaborateToolsField"
+                      options={fields}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      value={
+                        fields && fields?.filter((data) => data.optionValue === values['collaborateToolsField'])?.length
+                          ? fields && fields?.filter((data) => data.optionValue === values['collaborateToolsField'])[0]
+                          : ''
+                      }
+                      onChange={(e: any, value) => {
+                        setFieldValue('collaborateToolsField', value && value?.optionValue ? value.optionValue : '');
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          margin="dense"
+                          variant="outlined"
+                          label="Collaborate Tools Field"
+                          placeholder="Collaborate Tools Field"
+                          name="collaborateToolsField"
+                          required
+                          error={touched['collaborateToolsField'] && Boolean(errors['collaborateToolsField'])}
+                          helperText={touched['collaborateToolsField'] && errors['collaborateToolsField']}
+                        />
+                      )}
+                    />
+                  </Box>
+                )}
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
