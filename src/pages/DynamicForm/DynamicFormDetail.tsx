@@ -178,7 +178,7 @@ const DynamicFormDetail = () => {
               </Button>
             )}
             {permissions[renderedFrom]?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            {resourceData?.collaborateTools && (
+            {resourceData?.collaborateTools && detailData && (
               <ActivityButton
                 referenceId={detailData?._id}
                 resource={camelCase(resource)}
