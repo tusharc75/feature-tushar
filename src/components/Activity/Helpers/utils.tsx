@@ -1,3 +1,4 @@
+import axiosInstance from 'src/axios/axiosInstance';
 import { ACTIVITY_RESOURCE } from '../../../constants/helpers';
 import routes from '../../Helpers/Routes';
 
@@ -10,6 +11,11 @@ export const get_activity_resource = (permissions) => {
   }
   return data;
 };
+
+export const get_dynamic_resource = async (collaborateTools) => {
+  const { data } = await axiosInstance().get(`/sa-formbuilder/dynamic-resource?collaborateTools=${collaborateTools}`);
+  return data;
+}
 
 export const SubCaseColors = {
   'To Do': 'var(--danger-light)',
