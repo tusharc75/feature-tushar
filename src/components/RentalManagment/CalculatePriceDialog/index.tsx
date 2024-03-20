@@ -120,15 +120,6 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
                           />
                         </Grid>
                       </Grid>
-
-                      {/* <FormControl component="fieldset">
-                                            <RadioGroup row aria-label="pricing-condition" name={obj.productData?.materialId} value={value[obj.productData?.materialId] ?? null} onChange={(event) => handleChange(event, obj.productData?.materialId)}>
-                                                {obj.pricingConditionList?.map((price) => (
-                                                    // <FormControlLabel value={Number(price?.mrp)} labelPlacement="end" control={<Radio />} label={`${price?.conditionName} : ${getUniqueCurrencies().find((d) => d.currencyCode === price['currency'])?.symbolNative} ${price?.mrp}`} />
-                                                    <FormControlLabel value={price?.conditionId} labelPlacement="end" control={<Radio />} label={`${price?.conditionName}`} />
-                                                ))}
-                                            </RadioGroup>
-                                        </FormControl> */}
                     </Box>
                   </Box>
                 ))}
