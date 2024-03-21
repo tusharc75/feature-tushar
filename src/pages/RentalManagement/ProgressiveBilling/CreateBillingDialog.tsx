@@ -36,7 +36,6 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import AssetIotData from './AssetIotData';
 
 const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_create_invoice`;
@@ -57,8 +56,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
-  const [assetIotDataOpen, setAssetIotDataOpen] = useState({ open: false, asset: '', assetId: '' });
-  const [assetIotData, setAssetIotData] = useState([]);
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -103,7 +100,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         width: 200,
         disableFilters: true,
         Cell: ({ row }) =>
-          row.original['type'] ? (
+          row.original['type'] && row?.original['type'] !== 'assetIotData' ? (
             <p>
               {`${startCase(row.original?.type)} `}
               {row.original['type'] === 'product'
@@ -137,7 +134,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
               </span>
             </Box>
-            {row.original['type'] !== 'manualEntry' && (
+            {row.original['type'] !== 'manualEntry' && row.original['type'] !== 'assetIotData' && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -198,19 +195,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               }}
             >
               <EditIcon fontSize="small" color="primary" />
-            </IconButton>
-          )}
-
-          {row.original?.isAppliedBill && row?.original?.pricingMethod === 'Per Barrel' && (
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                console.log('rrrrrrr', row?.original)
-                setAssetIotDataOpen({ open: true, asset: row?.original?.detail, assetId: row?.original?._id });
-              }}
-            >
-              <InfoIcon fontSize="small" color="primary" />
             </IconButton>
           )}
         </>
@@ -450,7 +434,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'serializedAsset'
           ? _subRow?.inventoryDetail?.assetNumber
-          : _subRow?.packageDetail?.packageName;
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageName
+          : _subRow.type === 'assetIotData'
+          ? moment(_subRow?.date)?.format(dateFormat)
+          : '';
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription || ''
@@ -480,6 +468,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const handleApplyDate = async () => {
     let tempValues: any = { actualEndDate: endDate };
+    const childRows: any = [];
     var inUseStandByDays = [];
     if (user?.user?.brandPolicy?.assetDeliveredStatus) {
       const assetList: any = [];
@@ -517,7 +506,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         `${routes.rentalManagement.path}/${rentalManagementData?._id}/inventory/rental-unit-volume-utilization`,
         assetList?.map((d) => ({ asset: d?._id, fromDate: d?.manualStartDate, toDate: endDate }))
       );
-      setAssetIotData(rentalUnitVolum?.data?.data || []);
     }
 
     let rows: any = [];
@@ -595,7 +583,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         } else if (element.pricingMethod === 'Per Barrel') {
           const totalBBLs = rentalUnitVolum?.data?.data
             ?.find((r) => r?.asset === element?._id)
-            ?.data?.reduce((prevValue, currentValue) => prevValue + currentValue?.DailyTotalVolInBBLs, 0);
+            ?.data?.reduce((prevValue, currentValue) => prevValue + currentValue?.DailyEvapBBLs, 0);
 
           values['actualJobDuration'] = totalBBLs;
           if (priceFieldName) {
@@ -605,6 +593,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           }
 
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          childRows.push(
+            ...rentalUnitVolum?.data?.data
+              ?.find((r) => r?.asset === element?._id)
+              ?.data?.map((d) => ({ ...d, type: 'assetIotData', actualJobDuration: d?.DailyEvapBBLs, parentId: element?._id }))
+          );
         } else {
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         }
@@ -616,7 +609,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
 
     setMaterial(tempRows);
-    initializeTable(tempRows);
+    initializeTable([...tempRows, ...childRows]);
     setRowsApplied((prevState) => {
       let prevRowsApplied = prevState.filter((obj) => !rows.map((d) => d._id).includes(obj._id));
       return [...prevRowsApplied, ...rows];
@@ -866,15 +859,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           loading={isUpdating}
           isQtyOnly={true}
           isRateRequired={false}
-        />
-      )}
-      {assetIotDataOpen?.open && (
-        <AssetIotData
-          title={assetIotDataOpen?.asset}
-          data={assetIotData?.find((a) => a?.asset === assetIotDataOpen?.assetId)?.data || []}
-          onClose={() => {
-            setAssetIotDataOpen({ open: false, asset: '', assetId: '' });
-          }}
         />
       )}
     </Fragment>
