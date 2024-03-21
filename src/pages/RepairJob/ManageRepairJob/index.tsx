@@ -85,6 +85,13 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                 });
                 setLoading(false);
               } else {
+                if (data?.canEdit === false) {
+                  fieldsDataForUpdate?.forEach((e) => {
+                    if (['supplierAccount']?.includes(e?.fieldName)) {
+                      e.isUneditable = true;
+                    }
+                  });
+                }
                 axiosInstance()
                   .get(`${repairJob.api}/${repairJobId}/assets`)
                   .then(({ data: { data: assetData } }) => {
