@@ -104,7 +104,8 @@ const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxCompon
                 tabIndex={-1}
                 role="option"
                 aria-selected={false}
-                id="mui-48958-option-77"
+                key={React.isValidElement(data[index]) ? data[index]?.props?.children : index}
+                id={`mui-option-${index}`}
                 data-option-index="77"
                 aria-disabled="false"
               >
