@@ -333,7 +333,7 @@ const WorkOrderDetails = () => {
       id: 'Scrap Asset',
       type: 'button',
       visibilityInMobile: 'visible',
-      isVisible: Boolean(workOrderData?.serializedAsset && allowedToEdit && !workOrderData?.repairJob
+      isVisible: Boolean(workOrderData?.serializedAsset && allowedToEdit && !workOrderData?.currentRepairJob
         && workOrderData?.status !== WORK_ORDER_STATUS.completed),
       name: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
@@ -344,7 +344,7 @@ const WorkOrderDetails = () => {
       id: 'In-Progress',
       type: 'button',
       visibilityInMobile: 'inActionMenu',
-      isVisible: Boolean(allowedToEdit && !workOrderData?.repairJob && workOrderData?.status === WORK_ORDER_STATUS.onHold),
+      isVisible: Boolean(allowedToEdit && !workOrderData?.currentRepairJob && workOrderData?.status === WORK_ORDER_STATUS.onHold),
       onClick: () => updateJobStatus(WORK_ORDER_STATUS.inProgress),
       tooltip: `Change Status ${WORK_ORDER_STATUS.inProgress}`,
       name: WORK_ORDER_STATUS.inProgress,
@@ -376,7 +376,7 @@ const WorkOrderDetails = () => {
       type: 'button',
       visibilityInMobile: 'hidden',
       isVisible: Boolean(allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed
-        && !workOrderData?.repairJob && !workOrderData?.deleted && workOrderData?.canCreateWorkOrderVersion),
+        && !workOrderData?.currentRepairJob && !workOrderData?.deleted && workOrderData?.canCreateWorkOrderVersion),
       onClick: (e) => openAddActions(e),
       iconForMobile: false,
       endIcon: <ExpandMore fontSize="small" />,

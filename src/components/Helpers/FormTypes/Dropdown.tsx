@@ -1,9 +1,14 @@
-import { Box, Chip, Grid, IconButton, ListSubheader, TextField, makeStyles, useMediaQuery, useTheme } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Grid, IconButton, TextField, useMediaQuery } from '@material-ui/core';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import React, { Fragment, useEffect } from 'react';
+import { Autocomplete } from '@material-ui/lab';
+import { camelCase, has, isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { useData } from 'src/StateProvider/Provider';
-import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
+import axiosInstance from 'src/axios/axiosInstance';
+import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import routes from 'src/components/Helpers/Routes';
 import {
   customerAccount,
   customerContact,
@@ -12,30 +17,35 @@ import {
   supplierAccount,
   supplierContact
 } from 'src/constants/helpers';
+import ManageAccount from 'src/pages/Account/ManageAccount';
+import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
+import ManageCompetencyType from 'src/pages/CompetencyType/ManageCompetencyType';
+import ManageContactDialog from 'src/pages/Contact/ManageContact';
+import ManageDynamicForm from 'src/pages/DynamicForm/ManageDynamicForm';
+import ManageMarketSegmentDialog from 'src/pages/MarketSegment/ManageMarketSegmentDialog';
+import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
+import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
 import ManageWellMaster from 'src/pages/WellMaster/ManageWellMaster';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
-import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
-import ManageCompetencyType from 'src/pages/CompetencyType/ManageCompetencyType';
-import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
-import ManageAccount from 'src/pages/Account/ManageAccount';
-import ManageContactDialog from 'src/pages/Contact/ManageContact';
-import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
-import ManageMarketSegmentDialog from 'src/pages/MarketSegment/ManageMarketSegmentDialog';
-import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
-import { camelCase, has, isEmpty } from 'lodash';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
-import axiosInstance from 'src/axios/axiosInstance';
-import ManageDynamicForm from 'src/pages/DynamicForm/ManageDynamicForm';
-import routes from 'src/components/Helpers/Routes';
-import { ListChildComponentProps, VariableSizeList } from 'react-window';
+import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 
-function renderRow(props: ListChildComponentProps) {
-  const { data, index, style } = props;
+type renderRowProps = {
+  setSize: (index: number, height: number) => void;
+  containerWidth: number;
+  minHeight?: number;
+} & ListChildComponentProps;
+
+function RenderRow(props: renderRowProps) {
+  const { data, index, setSize, containerWidth, minHeight = 36 } = props;
+  const rowRef = useRef<HTMLSpanElement>(null);
+
+  React.useEffect(() => {
+    setSize(index, Math.max(Math.ceil(rowRef?.current.getBoundingClientRect().height), minHeight));
+  }, [setSize, index, containerWidth, minHeight]);
+
   return React.cloneElement(data[index], {
-    style: {
-      ...style
-    }
+    ref: rowRef
   });
 }
 
@@ -59,43 +69,58 @@ function useResetCache(data: any) {
 const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxComponent(props, ref) {
   const { children, ...other } = props;
   const itemData = React.Children.toArray(children);
-  const theme = useTheme();
-  const smUp = useMediaQuery(theme.breakpoints.up('sm'), { noSsr: true });
-  const itemSize = smUp ? 36 : 48;
+  const containerWidth = useRef<number>(1);
+  const isMobile = useMediaQuery('(max-width:600px)', { noSsr: true });
 
-  const getChildSize = (child: React.ReactNode) => {
-    const childrenLength = React.isValidElement(child) ? child?.props?.children?.length : 0;
-    if (childrenLength > itemSize) {
-      return Math.floor(childrenLength / itemSize) * itemSize;
-    }
-    return itemSize;
-  };
+  const sizeMap = useRef({});
+  const setSize = useCallback((index, size) => {
+    sizeMap.current = { ...sizeMap.current, [index]: size };
+    gridRef.current.resetAfterIndex(index);
+  }, []);
 
-  const getHeight = () => {
-    if (itemData?.length > 8) {
-      return 8 * itemSize;
-    }
-    return itemData.map(getChildSize).reduce((a, b) => a + b, 0) + 20;
-  };
+  const getSize = (index) => sizeMap.current[index] || 50;
 
   const gridRef = useResetCache(itemData?.length);
 
   return (
     <div ref={ref}>
       <OuterElementContext.Provider value={other}>
-        <VariableSizeList
-          itemData={itemData}
-          height={getHeight()}
-          width="100%"
-          ref={gridRef}
-          outerElementType={OuterElementType}
-          innerElementType="ul"
-          itemSize={(index) => getChildSize(itemData[index])}
-          overscanCount={5}
-          itemCount={itemData?.length}
-        >
-          {renderRow}
-        </VariableSizeList>
+        <div ref={(ref) => (ref?.offsetWidth ? (containerWidth.current = ref?.offsetWidth) : null)}>
+          <VariableSizeList
+            itemData={itemData}
+            height={isMobile ? 350 : 400}
+            width="100%"
+            ref={gridRef}
+            outerElementType={OuterElementType}
+            innerElementType="ul"
+            itemSize={getSize}
+            overscanCount={5}
+            itemCount={itemData?.length}
+          >
+            {({ data, index, style }) => (
+              <li
+                title={React.isValidElement(data[index]) ? data[index]?.props?.children : ''}
+                style={style}
+                tabIndex={-1}
+                role="option"
+                aria-selected={false}
+                id="mui-48958-option-77"
+                data-option-index="77"
+                aria-disabled="false"
+              >
+                <RenderRow
+                  data={data}
+                  minHeight={isMobile ? 35 : 36}
+                  index={index}
+                  setSize={setSize}
+                  containerWidth={containerWidth.current}
+                  style={style}
+                  key={index}
+                />
+              </li>
+            )}
+          </VariableSizeList>
+        </div>
       </OuterElementContext.Provider>
     </div>
   );
@@ -164,18 +189,17 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
     if (Array.isArray(values[fieldData?.fieldName])) {
       values[fieldData?.fieldName]?.forEach((ele) => {
         if (!optionsToShow?.find((e) => e.optionValue === ele)) {
-          const newAdd = options?.find((e) => e.optionValue === ele)
+          const newAdd = options?.find((e) => e.optionValue === ele);
           if (newAdd) {
-            optionsToShow.push(newAdd)
+            optionsToShow.push(newAdd);
           }
         }
-      })
-    }
-    else {
+      });
+    } else {
       if (!optionsToShow?.find((e) => e.optionValue === values[fieldData?.fieldName])) {
-        const newAdd = options?.find((e) => e.optionValue === values[fieldData?.fieldName])
+        const newAdd = options?.find((e) => e.optionValue === values[fieldData?.fieldName]);
         if (newAdd) {
-          optionsToShow.push(newAdd)
+          optionsToShow.push(newAdd);
         }
       }
     }
@@ -217,10 +241,10 @@ function Dropdown({
         lookupDependentOnField: fieldData?.lookupDependentOnField,
         lookupDependentOnFieldValue: _id,
         resource: lookupResource
-      }
-      axiosInstance().put('/field/add-field-lookup', data)
+      };
+      axiosInstance().put('/field/add-field-lookup', data);
     }
-  }
+  };
 
   // const [extraOptions, setExtraOptions] = useState([]);
   // const [loading, setLoading] = useState(false);
@@ -409,15 +433,16 @@ function Dropdown({
             {type === 'multiSelect' ? (
               <Autocomplete
                 {...rest}
+                limitTags={2}
                 multiple
                 disableCloseOnSelect={true}
                 options={[
-                  ...(dropdownOptions(option, values, fields, fieldData).length > 0
-                    ? [{ optionValue: 'selectAll', optionLabel: 'Select All' }]
-                    : []),
+                  ...(dropdownOptions(option, values, fields, fieldData).length > 0 ? [{ optionValue: 'selectAll', optionLabel: 'Select All' }] : []),
                   ...dropdownOptions(option, values, fields, fieldData)
                 ]}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                getOptionLabel={(option: any) => {
+                  return option ? option.optionLabel : '';
+                }}
                 ListboxComponent={ListboxComponent as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
                 value={
                   values[name]
@@ -425,39 +450,40 @@ function Dropdown({
                     : []
                 }
                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-                ChipProps={{
-                  style: {
-                    maxWidth: 330
-                  }
-                }}
+                // ChipProps={{
+                //   style: {
+                //     maxWidth: 330
+                //   }
+                // }}
                 onChange={
                   onChange
                     ? (e, value: any, reason) => {
-                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-                      if (isSelectedAll) {
-                        onChange(e, dropdownOptions(option, values, fields, fieldData), reason)
-                      }
-                      else {
-                        onChange(e, value, reason)
-                      }
-                    }
-                    : (e, value: any, reason) => {
-                      if (setFieldValue) {
                         const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-
                         if (isSelectedAll) {
-                          // If "Select All" is selected, set all other options as values
-                          setFieldValue(
-                            name,
-                            dropdownOptions(option, values, fields, fieldData)
-                              .map((item) => item.optionValue)
-                          );
+                          onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
                         } else {
-                          // Remove "Select All" if it was selected and set the values accordingly
-                          setFieldValue(name, value.map((val) => val.optionValue));
+                          onChange(e, value, reason);
                         }
                       }
-                    }
+                    : (e, value: any, reason) => {
+                        if (setFieldValue) {
+                          const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+
+                          if (isSelectedAll) {
+                            // If "Select All" is selected, set all other options as values
+                            setFieldValue(
+                              name,
+                              dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
+                            );
+                          } else {
+                            // Remove "Select All" if it was selected and set the values accordingly
+                            setFieldValue(
+                              name,
+                              value.map((val) => val.optionValue)
+                            );
+                          }
+                        }
+                      }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -474,9 +500,9 @@ function Dropdown({
                 )}
               />
             ) : (
-             
               <Autocomplete
                 {...rest}
+                limitTags={2}
                 disabled={fieldData?.isUneditable || rest?.disabled}
                 options={dropdownOptions(option, values, fields, fieldData, newAddressOptionList) || []}
                 getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
@@ -491,26 +517,26 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                      if (setFieldValue) {
-                        handleChange(name, val && val.optionValue ? val.optionValue : '');
-                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                        fieldChange?.forEach((val: any) => {
-                          setFieldValue(val.fieldName, val.value);
-                        });
-                        const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                        if (filterFields?.length) {
-                          filterFields?.forEach((ele: any) => {
-                            if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
-                              if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                              } else {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                              }
-                            }
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
                           });
+                          const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                          if (filterFields?.length) {
+                            filterFields?.forEach((ele: any) => {
+                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                                if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                                } else {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+                                }
+                              }
+                            });
+                          }
                         }
                       }
-                    }
                 }
                 selectOnFocus
                 clearOnBlur
@@ -1092,7 +1118,7 @@ function Dropdown({
                               [fieldData.lookupDependentOn]: values[fieldData?.lookupDependentOn] || ''
                             })
                           };
-                          addFieldOption(data?._id)
+                          addFieldOption(data?._id);
                           setOptionsList([tempNewOption, ...option]);
                           setNewAddressOptionList([...newAddressOptionList, tempNewOption]);
                           if (type === 'multiSelect') {
@@ -1156,55 +1182,57 @@ function Dropdown({
                 </>
               </>
             )}
-            {fieldData?.lookup && (!(camelCase(fieldData?.lookupResource) in routes)) && permissions[camelCase(fieldData?.lookupResource)]?.isCreate && (
-              <>
+            {fieldData?.lookup &&
+              !(camelCase(fieldData?.lookupResource) in routes) &&
+              permissions[camelCase(fieldData?.lookupResource)]?.isCreate && (
                 <>
-                  <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                    <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
-                      onClick={() => setLookupDialog(true)}
-                      size="small"
-                      color="primary"
-                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                    >
-                      <AddCircleIcon />
-                    </IconButton>
-                  </HtmlTooltip>
-                  {lookupDialog && (
-                    <ManageDynamicForm
-                      resource={fieldData?.lookupResource}
-                      id={null}
-                      isClone={false}
-                      onClose={() => setLookupDialog(false)}
-                      redirected={false}
-                      onSuccess={(data, primaryField) => {
-                        setLookupDialog(false);
-                        if (data?._id) {
-                          let tempNewOption = {
-                            default: true,
-                            optionLabel: primaryField ? data?.[primaryField?.fieldName] : '',
-                            optionValue: data?._id,
-                            order: option.length,
-                            ...(fieldData.lookupDependentOn && {
-                              [fieldData.lookupDependentOn]: data?.parentCategory || values[fieldData?.lookupDependentOn] || ''
-                            })
-                          };
-                          setOptionsList([tempNewOption, ...option]);
-                          if (type === 'multiSelect') {
-                            handleChange(
-                              name,
-                              tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
-                            );
-                          } else {
-                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                  <>
+                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                      <IconButton
+                        disabled={fieldData?.isUneditable || rest?.disabled}
+                        onClick={() => setLookupDialog(true)}
+                        size="small"
+                        color="primary"
+                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                      >
+                        <AddCircleIcon />
+                      </IconButton>
+                    </HtmlTooltip>
+                    {lookupDialog && (
+                      <ManageDynamicForm
+                        resource={fieldData?.lookupResource}
+                        id={null}
+                        isClone={false}
+                        onClose={() => setLookupDialog(false)}
+                        redirected={false}
+                        onSuccess={(data, primaryField) => {
+                          setLookupDialog(false);
+                          if (data?._id) {
+                            let tempNewOption = {
+                              default: true,
+                              optionLabel: primaryField ? data?.[primaryField?.fieldName] : '',
+                              optionValue: data?._id,
+                              order: option.length,
+                              ...(fieldData.lookupDependentOn && {
+                                [fieldData.lookupDependentOn]: data?.parentCategory || values[fieldData?.lookupDependentOn] || ''
+                              })
+                            };
+                            setOptionsList([tempNewOption, ...option]);
+                            if (type === 'multiSelect') {
+                              handleChange(
+                                name,
+                                tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                              );
+                            } else {
+                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                            }
                           }
-                        }
-                      }}
-                    />
-                  )}
+                        }}
+                      />
+                    )}
+                  </>
                 </>
-              </>
-            )}
+              )}
           </>
         )}
       </Grid>
