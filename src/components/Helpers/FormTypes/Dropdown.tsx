@@ -72,11 +72,13 @@ const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxCompon
   const containerWidth = useRef<number>(1);
   const isMobile = useMediaQuery('(max-width:600px)', { noSsr: true });
 
-  const sizeMap = useRef({});
+  const sizeMap = useRef<{ [key: number]: number }>({});
   const setSize = useCallback((index, size) => {
     sizeMap.current = { ...sizeMap.current, [index]: size };
     gridRef.current.resetAfterIndex(index);
   }, []);
+
+  const calcHeight = Object.values(sizeMap.current).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
   const getSize = (index) => sizeMap.current[index] || 50;
 
@@ -88,7 +90,7 @@ const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxCompon
         <div ref={(ref) => (ref?.offsetWidth ? (containerWidth.current = ref?.offsetWidth) : null)}>
           <VariableSizeList
             itemData={itemData}
-            height={isMobile ? 350 : 400}
+            height={Math.min(isMobile ? 350 : 400, calcHeight)}
             width="100%"
             ref={gridRef}
             outerElementType={OuterElementType}
