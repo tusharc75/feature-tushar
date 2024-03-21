@@ -1,8 +1,8 @@
-import { Box, Grid, IconButton, TextField, useMediaQuery } from '@material-ui/core';
+import { Box, Grid, IconButton, ListSubheader, TextField, useMediaQuery } from '@material-ui/core';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase, has, isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -71,6 +71,7 @@ const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxCompon
   const itemData = React.Children.toArray(children);
   const containerWidth = useRef<number>(1);
   const isMobile = useMediaQuery('(max-width:600px)', { noSsr: true });
+  const itemSize = isMobile ? 48 : 36;
 
   const sizeMap = useRef<{ [key: number]: number }>({});
   const setSize = useCallback((index, size) => {
@@ -78,7 +79,22 @@ const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxCompon
     gridRef.current.resetAfterIndex(index);
   }, []);
 
-  const calcHeight = Object.values(sizeMap.current).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+  const itemCount = itemData.length;
+
+  const getChildSize = (child: React.ReactNode) => {
+    if (React.isValidElement(child) && child.type === ListSubheader) {
+      return 48;
+    }
+
+    return itemSize;
+  };
+
+  const getHeight = () => {
+    if (itemCount > 8) {
+      return 8 * itemSize;
+    }
+    return itemData.map(getChildSize).reduce((a, b) => a + b, 0);
+  };
 
   const getSize = (index) => sizeMap.current[index] || 50;
 
@@ -90,7 +106,7 @@ const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxCompon
         <div ref={(ref) => (ref?.offsetWidth ? (containerWidth.current = ref?.offsetWidth) : null)}>
           <VariableSizeList
             itemData={itemData}
-            height={Math.min(isMobile ? 350 : 400, calcHeight)}
+            height={getHeight() + 2 * 6}
             width="100%"
             ref={gridRef}
             outerElementType={OuterElementType}
