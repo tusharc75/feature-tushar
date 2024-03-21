@@ -32,6 +32,7 @@ const ManageDynamicForm = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
 
   useEffect(() => {
     fetchFields();
@@ -200,6 +201,9 @@ const ManageDynamicForm = ({
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
+                    onImageUploadCompletePercentage={(completePercentage)=>{
+                      setUploadingImageOrFileProgress(completePercentage)
+                    }}
                   />
                 </Form>
               </CustomDialogContent>
@@ -216,7 +220,7 @@ const ManageDynamicForm = ({
                   Cancel
                 </Button>
                 <Button
-                  disabled={loading || submitting}
+                  disabled={uploadingImageOrFileProgress > 0 ||loading || submitting}
                   variant="contained"
                   color="primary"
                   type="submit"

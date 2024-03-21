@@ -376,7 +376,6 @@ const TransferAssetDetailPage = () => {
               )}
               {currentStep === 2 && transferAssetData && (
                 <ReceivingTicketGrid
-                  setTickets={setReceivingTickets}
                   currentStep={currentStep}
                   transferAssetId={id}
                   transferAssetData={transferAssetData}

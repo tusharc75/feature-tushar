@@ -5,10 +5,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { IoMdDownload } from 'react-icons/io';
-import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -33,7 +30,8 @@ import {
   deliveryTicket,
   rentalManagement,
   rentalManagementSteps,
-  serializedAsset
+  serializedAsset,
+  sidebarResource
 } from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
 import Invoice from './Invoice';
@@ -47,6 +45,8 @@ import RentalManagementViews from './RoadMapViews';
 import SerializedAsset from './SerializedAsset';
 import Services from './Services';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
+import Step from '../DynamicForm/Step';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -96,6 +96,7 @@ const RentalManagementDetailsPage = () => {
   const [versionNotClonned, setVersionNotClonned] = useState(false);
   const [reOpening, setReOpening] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -125,18 +126,14 @@ const RentalManagementDetailsPage = () => {
     history.push(`?tab=${newValue}`);
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
+
 
   useEffect(() => {
     if (id) {
       getRentalManagementFields();
       fetchRentalManagementData();
       fetchQuotationData();
+      fetchPolicy()
     }
     if (!isOffline) {
       fetchAssetStatusRights();
@@ -207,7 +204,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -251,6 +248,19 @@ const RentalManagementDetailsPage = () => {
       setRentalManagementData(data);
     } catch (error) {
       setLoadingDetails(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
@@ -329,8 +339,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
@@ -517,59 +527,24 @@ const RentalManagementDetailsPage = () => {
           </Box>
         </Box>
         <Box className={`detail-container-v1`}>
-          <Tabs
-            className="new-tab-container-v1"
-            value={tabValue}
-            onChange={handleMainTabChange}
-            textColor="primary"
-            TabIndicatorProps={{
-              style: {
-                display: 'none'
-              }
-            }}
-          >
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                </div>
-              }
-              {...a11yProps(0)}
-            />
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                </div>
-              }
-              {...a11yProps(1)}
-            />
-            {displayProgressiveBillingTab && (
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <RiFlowChart className="mr-1" fontSize="inherit" /> Progressive Billing
-                  </div>
-                }
-                {...a11yProps(2)}
-              />
-            )}
-            {!isOffline && !(isMobile && !isTablet) && (
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <RiFlowChart className="mr-1" fontSize="inherit" />
-                    Views
-                  </div>
-                }
-                {...a11yProps(3)}
-              />
-            )}
-          </Tabs>
+          <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+            <CustomTab index={0} value={0}  >
+              Header
+            </CustomTab>
+            <CustomTab index={1} value={1}  >
+              Details
+            </CustomTab>
+            {resourceData && resourceData?.steps?.length > 0 &&
+              <CustomTab index={2} value={2}  >
+                Associations
+              </CustomTab>}
+            {displayProgressiveBillingTab && <CustomTab index={3} value={3}  >
+              Progressive Billing
+            </CustomTab>}
+            {!isOffline && !(isMobile && !isTablet) && <CustomTab index={4} value={4}  >
+              Views
+            </CustomTab>}
+          </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             <Box>
               {!loadingDetails && rentalManagementData && rentalManagementFields.length > 0 ? (
@@ -613,12 +588,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -634,12 +609,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -710,6 +685,15 @@ const RentalManagementDetailsPage = () => {
             </ContentFullScreen>
           </TabPanel>
           <TabPanel value={tabValue} index={2}>
+            <Step
+              resourceData={resourceData}
+              resourceId={id}
+              resource={sidebarResource.rentalManagement}
+              data={rentalManagementData}
+              allowedToEdit={allowedToEdit}
+            />
+          </TabPanel>
+          <TabPanel value={tabValue} index={3}>
             <Box>
               {displayProgressiveBillingTab ? (
                 <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={true} />
@@ -718,7 +702,7 @@ const RentalManagementDetailsPage = () => {
               )}
             </Box>
           </TabPanel>
-          <TabPanel value={tabValue} index={3}>
+          <TabPanel value={tabValue} index={4}>
             <Box>
               <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
             </Box>
