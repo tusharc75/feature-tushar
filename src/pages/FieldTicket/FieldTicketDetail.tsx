@@ -148,8 +148,8 @@ const FieldTicketDetail = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const handleChangeStatus = async (status) => {
@@ -287,7 +287,7 @@ const FieldTicketDetail = () => {
                 handleChangeStatus={handleChangeStatus}
               />
             )}
-            {currentStep === 2 && fieldTicketData && (
+            {currentStep === 1 && fieldTicketData && (
               <Submit stepFullScreen={stepFullScreen} fieldTicketData={fieldTicketData} allowedToEdit={allowedToEdit} fetchData={fetchData} />
             )}
           </ContentFullScreen>
