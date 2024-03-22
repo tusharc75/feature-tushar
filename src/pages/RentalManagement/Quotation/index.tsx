@@ -424,7 +424,6 @@ const Quotation = ({
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      <PreviewDownload />
 
       {quotationData && showAllVersionStatus && (
         <Versions
