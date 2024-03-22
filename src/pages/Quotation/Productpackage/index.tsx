@@ -82,10 +82,13 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
 
   useEffect(() => {
     fetchFields();
+  }, [version]);
+
+  useEffect(() => {
     if (version) {
       fetchData();
     }
-  }, [version]);
+  }, [version, columns]);
 
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
@@ -475,7 +478,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         });
         if (saveAndNext) {
           const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
-          if(!row?.parentId){
+          if (!row?.parentId) {
             const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
             setRecordToUpdate(dataRows[rowIndex + 1]);
             if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
@@ -492,7 +495,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
               });
             }
-          }else{
+          } else {
             const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
             const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
             setRecordToUpdate(allSubRowData[subRowIdx + 1]);
@@ -501,7 +504,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
               isBulkedit: false,
               showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
             });
-          }    
+          }
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
@@ -590,12 +593,12 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
 
   const openMaterial = (row, rows) => {
     let showSaveAndNext;
-  if (row.depth != 0) {
+    if (row.depth != 0) {
       const allRows = rows.filter((ele) => ele.parentId === row.parentId);
       showSaveAndNext = row?.index < allRows.length - 1 ? true : false;
-  } else {
-    showSaveAndNext = row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false;
-  }
+    } else {
+      showSaveAndNext = row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false;
+    }
     if (row?.original?.type === MATERIAL_TYPE.manualEntry) {
       setShowCostDialog({ open: true, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
     } else {
@@ -756,7 +759,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       <>
         {quotationData?.type === QUOTATION_TYPE.rentalJob && (
           <MenuItem
-            disabled={(products.length || !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)) ? false : true}
+            disabled={products.length ? false : true}
             onClick={() => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, parentId: null });
             }}
