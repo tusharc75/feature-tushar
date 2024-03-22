@@ -15,7 +15,10 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { MATERIAL_TYPE, QUOTATION_STATUS, quotation } from '../../../constants/helpers';
+import { MATERIAL_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
+import { GiReceiveMoney } from 'react-icons/gi';
+import { VscVersions } from 'react-icons/vsc';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const Quotation = ({
   rentalManagementData,
@@ -103,12 +106,12 @@ const Quotation = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -168,22 +171,23 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow?.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow?.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName
-        }`;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = parent?.qty * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -227,24 +231,25 @@ const Quotation = ({
     const rows = [...rowsMaterial, ...additionalCostData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.type === 'package'
-              ? parent.packageDetail?.packageName
-              : parent.detail
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.type === 'package'
+          ? parent.packageDetail?.packageName
+          : parent.detail
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent?.description;
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent?.description;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -296,7 +301,7 @@ const Quotation = ({
         {allowedToEdit && (
           <>
             {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+            quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
               <Button
                 disabled={material
                   .filter((e) => e.parentId === null)
@@ -336,19 +341,56 @@ const Quotation = ({
                 {`Clone Version-${currentVersion}`}
               </Button>
             ) : null}
+            <Button
+              onClick={() => {
+                setShowQuotationSummaryDialog(true);
+              }}
+              variant="outlined"
+              size="small"
+              startIcon={<GiReceiveMoney />}
+              color="primary"
+            >
+              Summary
+            </Button>
+            <Button
+              variant={isMobile ? 'text' : 'outlined'}
+              color="primary"
+              size="small"
+              className={'btn-outline-v1'}
+              onClick={() => {
+                setShowAllVersionStatus(true);
+              }}
+              style={isMobile ? { color: '#43aeaa' } : {}}
+              startIcon={isMobile ? null : <VscVersions />}
+            >
+              {isMobile ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+            </Button>
           </>
         )}
       </>
     );
   };
 
-  const sendEmailProps = {
-    quotationData: quotationData,
-    versionId: quotationData?.versions[currentVersion]?._id,
-    currentVersion: currentVersion,
+  const previewDownloadProps = {
+    fileName: `${routes.quotation.title}-${quotationData?.quotationNumber}`,
+    resource: sidebarResource.quotation,
+    referenceId: quotationData?._id,
     columns: columns,
-    setShowAllVersionStatus: setShowAllVersionStatus,
-    setShowQuotationSummaryDialog: setShowQuotationSummaryDialog
+    isSendEmail: true,
+    isExcelDownload: true,
+    subject: `${user?.user?.brandName} Offer - ${quotationData?.quotationNumber}`,
+    extraQueryParams: { uniqueId: quotationData?.versions[currentVersion]?._id },
+    defaultColumns: [
+      'index',
+      'type',
+      'detail',
+      'description',
+      'qty',
+      `price_${quotationData?.currency?.toLowerCase()}`,
+      `totalPrice_${quotationData?.currency?.toLowerCase()}`,
+      `tax_${quotationData?.currency?.toLowerCase()}`,
+      `finalPrice_${quotationData?.currency?.toLowerCase()}`
+    ]
   };
 
   return (
@@ -357,9 +399,9 @@ const Quotation = ({
       <DetailsPageHeader
         isAddButtonVisible={false}
         isActionButtonVisible={false}
+        previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
         hasXpadding
-        sendEmailProps={sendEmailProps}
       />
       {columns ? (
         <Box zIndex={5}>
@@ -382,6 +424,8 @@ const Quotation = ({
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
+      <PreviewDownload />
+
       {quotationData && showAllVersionStatus && (
         <Versions
           onClose={() => setShowAllVersionStatus(false)}
