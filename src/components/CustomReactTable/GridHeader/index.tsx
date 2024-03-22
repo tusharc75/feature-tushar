@@ -3,21 +3,40 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import { useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import xlsx from 'xlsx-js-style';
 import ArrangeView from '../ArrangeView';
 import DisplayFilters from '../DisplayFilters';
 import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
-import { camelCaseToWords, createJsonDataForTableExport, getExcelColumnNameFromRange } from '../utils';
 
-import moment from 'moment';
+import { Table } from '@tanstack/react-table';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
-import { dateTimeFormat } from 'src/constants/helpers';
+
+type GridHeaderProps = {
+  resource: any;
+  isClientSideGrid: any;
+  dispatch: any;
+  renderedFrom: any;
+  showOnlyShowFilteredRecordSwitch: any;
+  hideSelection: any;
+  showFilters: any;
+  table: Table<any>;
+  showArrangeView: any;
+  newColumns: any;
+  refreshGrid: any;
+  reportSave: any;
+  setSelectedReportView: any;
+  selectedReportView: any;
+  expander: any;
+  state: any;
+  handleTableExport: () => void;
+  hideExportTable: boolean;
+};
 
 const GridHeader = ({
   resource,
+  isClientSideGrid,
   dispatch,
   renderedFrom,
   showOnlyShowFilteredRecordSwitch,
@@ -32,8 +51,9 @@ const GridHeader = ({
   selectedReportView,
   expander,
   state,
-  exportTable = false
-}) => {
+  handleTableExport,
+  hideExportTable = false
+}: GridHeaderProps) => {
   const { selectedRecords, loading, filters: customFilters, dataRows, page }: TInitialState = state;
   const isMobileView = useMediaQuery('(max-width:768px)');
 
@@ -47,27 +67,6 @@ const GridHeader = ({
 
   const handleFilterClose = () => {
     setIsFilterOpen(false);
-  };
-
-  const handleTableExport = () => {
-    const data = createJsonDataForTableExport(newColumns, dataRows);
-    if (!data) return;
-    const wb = xlsx.utils.book_new();
-    const ws = xlsx.utils.json_to_sheet(data);
-
-    // for table head style
-    for (const col of getExcelColumnNameFromRange(ws['!ref'])) {
-      ws[`${col}1`].s = {
-        font: {
-          name: 'Calibri',
-          bold: true
-        }
-      };
-    }
-    const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
-
-    xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
-    xlsx.writeFile(wb, `${name}.xlsx`);
   };
 
   return (
@@ -137,19 +136,21 @@ const GridHeader = ({
               </Button>
             </HtmlTooltip>
           )}
-          {exportTable ? (
-            <HtmlTooltip title="Export table to excel" placement="top" arrow>
-              <IconButton
-                className={`refresh-arrange-button`}
-                color="primary"
-                disabled={loading}
-                size="small"
-                onClick={() => {
-                  handleTableExport();
-                }}
-              >
-                <ExportIcon />
-              </IconButton>
+          {!hideExportTable && isClientSideGrid ? (
+            <HtmlTooltip title={dataRows.length === 0 ? 'No Data to Export' : 'Export to Excel'} placement="top" arrow>
+              <span>
+                <IconButton
+                  className={`refresh-arrange-button`}
+                  color="primary"
+                  disabled={loading || dataRows.length === 0}
+                  size="small"
+                  onClick={() => {
+                    handleTableExport();
+                  }}
+                >
+                  <ExportIcon fontSize="small" />
+                </IconButton>
+              </span>
             </HtmlTooltip>
           ) : null}
           {showArrangeView && (

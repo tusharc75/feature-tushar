@@ -162,8 +162,8 @@ const PurchaseOrderDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const updateStatus = (status) => {
@@ -343,7 +343,9 @@ const PurchaseOrderDetailsPage = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
           <Box>
-            <PurchaseOrderViews pName={purchaseOrderData?.purchaseOrderNumber} pId={id} pStatus={purchaseOrderData?.status} />
+            {purchaseOrderData &&
+              <PurchaseOrderViews purchaseOrderData={purchaseOrderData} />
+            }
           </Box>
         </TabPanel>
       </Box>

@@ -1,8 +1,8 @@
-import { isEmpty } from 'lodash';
+import { camelCase, flatMapDeep, isEmpty, startCase } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, dateTimeFormat, formatAmountWithCurrency } from 'src/constants/helpers';
+import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrencies } from 'src/constants/helpers';
 import { TColType } from './TableComponents/TableHelperComponents';
 
 export const childrenProperty = 'subRows';
@@ -85,10 +85,9 @@ export const getGridMetaDataFromLocalStorage = () => {
   try {
     const data = localStorage.getItem('gridMetaData');
     if (data && data !== 'undefined') {
-      return JSON.parse(data)
-    }
-    else {
-      return {}
+      return JSON.parse(data);
+    } else {
+      return {};
     }
   } catch (ex) {
     return {};
@@ -320,55 +319,18 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
   }
 };
 
-export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]) => {
-  const data = [];
-  if (!rowData || rowData.length === 0) return false;
-  const noCellData = '------';
-
-  for (let row of rowData) {
-    const temp = {};
-    for (let col of columns) {
-      let value = row[col.id];
-      switch (true) {
-        case ['action', 'selection', 'expander'].includes(col.id):
-          continue;
-        case Boolean(col.accessorFn):
-          value = col.accessorFn(row);
-          break;
-        case col.id === 'createdBy':
-          value = `${row?.createdBy || noCellData} • ${moment(row?.createdByDate?.slice(0, 10)).format(dateFormat)}`;
-          break;
-        case col.id === 'updatedBy':
-          value = `${row?.updatedBy || noCellData} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`;
-          break;
-        case col.type === 'date':
-          value = value ? moment(value).format(dateFormat) : noCellData;
-          break;
-        case col.type === 'dateTime':
-          value = value ? moment(value).format(dateTimeFormat) : noCellData;
-          break;
-        case col.type === 'checkBox':
-          value = Boolean(value) ? 'Yes' : 'No';
-          break;
-        case col.type === 'number':
-          value = value ?? 0;
-          break;
-        case col.type === 'currencyAmount':
-          value = formatAmountWithCurrency(col.currency, value)?.amountWithouCurrencyCode;
-          break;
-        default:
-          break;
-      }
-      temp[col.Header] = value || noCellData;
-    }
-    data.push(temp);
-    if (row[childrenProperty]) {
-      const tempData = createJsonDataForTableExport(columns, row[childrenProperty]);
-      if (tempData) data.push(...tempData);
-    }
+const flatDataRowsItem = (mem) => {
+  const member = { ...mem };
+  delete member[childrenProperty];
+  if (!mem[childrenProperty] || !mem[childrenProperty].length) {
+    return member;
   }
-  return data;
+  return [member, flatMapDeep(mem[childrenProperty], flatDataRowsItem)];
 };
+
+export function normalizeRowData(array) {
+  return flatMapDeep(array, flatDataRowsItem);
+}
 
 export function camelCaseToWords(s: string) {
   const result = s.replace(/([A-Z])/g, ' $1');
@@ -404,4 +366,10 @@ export function getExcelColumnNameFromRange(range) {
   }
 
   return res;
+}
+
+export function extractLastNumberFromDataRange(input: string): number | null {
+  const regex = /(\d+)(?!.*\d)/;
+  const match = input.match(regex);
+  return match ? parseInt(match[1], 10) : null;
 }

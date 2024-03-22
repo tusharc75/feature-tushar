@@ -83,12 +83,6 @@ const QuotationDetails = () => {
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
   const [canConvert, setCanConvert] = useState(false);
 
-  useEffect(() => {
-    if (tabValue !== tab) {
-      setTabValue(tab ? parseInt(tab) : 0);
-    }
-  }, [tab]);
-
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
@@ -656,16 +650,6 @@ const QuotationDetails = () => {
                   version={currentVersion}
                   allowedToEdit={allowedToEdit}
                   updateDOASetup={updateDOASetup}
-                />
-              )}
-              {stepNames[currentStep] === 'Manual Entry' && quotationData && (
-                <AdditionalCost
-                  quotationData={quotationData}
-                  setNextStep={setNextStep}
-                  renderedFrom={renderedFrom}
-                  version={currentVersion}
-                  allowedToEdit={allowedToEdit}
-                  stepFullScreen={stepFullScreen}
                 />
               )}
               {stepNames[currentStep] === 'Quote Builder' && quotationData && (

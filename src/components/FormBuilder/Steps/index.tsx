@@ -18,6 +18,7 @@ import ConfigureField from './ConfigureField';
 import ManageSteps from './ManageSteps';
 import _ from 'lodash';
 import Setting from './Setting';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const DND_NAME = 'Box';
 
@@ -26,6 +27,7 @@ const Steps = ({ resource }) => {
 
   const [resourceData, setResourceData] = useState(null);
   const [steps, setSteps] = useState(null);
+  const [stepsLoading, setStepsLoading] = useState(false);
   const [initialSteps, setInitialSteps] = useState(null);
   const [open, setOpen] = useState({ open: false, data: null });
   const [openField, setOpenField] = useState({ open: false, step: null });
@@ -35,6 +37,7 @@ const Steps = ({ resource }) => {
   const [openSetting, setOpenSetting] = useState(false);
 
   const fetchData = async () => {
+    setStepsLoading(true);
     axiosInstance()
       .get(`/sa-formbuilder/steps/${resource}`)
       .then(({ data: { data } }) => {
@@ -42,8 +45,10 @@ const Steps = ({ resource }) => {
         setResourceId(data?._id);
         setSteps(_.sortBy(data?.steps, 'order'));
         setInitialSteps(_.sortBy(data?.steps, 'order'));
+        setStepsLoading(false);
       })
       .catch((error) => {
+        setStepsLoading(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -125,7 +130,7 @@ const Steps = ({ resource }) => {
       </Box>
       <Box pt={2}>
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-          <RenderStepItems {...{ steps, setSteps, setOpen, setOpenField, setDeleteData, handleUpdateOrder }} />
+          <RenderStepItems {...{ steps, setSteps, stepsLoading, setOpen, setOpenField, setDeleteData, handleUpdateOrder }} />
         </DndProvider>
       </Box>
 
@@ -174,7 +179,7 @@ const Steps = ({ resource }) => {
             setOpenSetting(false);
           }}
           onSuccess={() => {
-            fetchData()
+            fetchData();
             setOpenSetting(false);
           }}
           resource={resource}
@@ -187,7 +192,7 @@ const Steps = ({ resource }) => {
 
 export default Steps;
 
-const RenderStepItems = ({ steps, setSteps, setOpen, setOpenField, setDeleteData, handleUpdateOrder }) => {
+const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setOpenField, setDeleteData, handleUpdateOrder }) => {
   const findStep = useCallback(
     (id: string) => {
       const card = steps.filter((c) => `${c._id}` === id)[0] as {
@@ -222,12 +227,21 @@ const RenderStepItems = ({ steps, setSteps, setOpen, setOpenField, setDeleteData
 
   return (
     <div className="grid grid-cols-1 gap-2" ref={drop}>
-      {steps &&
+      {steps && steps?.length ? (
         steps?.map((step, i) => {
           return (
             <SingleStep key={step._id} {...{ step, i, setSteps, setOpen, setOpenField, setDeleteData, moveStep, findStep, handleUpdateOrder }} />
           );
-        })}
+        })
+      ) : stepsLoading ? (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      ) : (
+        <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+          Steps not added yet!
+        </Box>
+      )}
     </div>
   );
 };
@@ -288,17 +302,19 @@ const SingleStep = ({ step, i, setOpen, setOpenField, setDeleteData, moveStep, f
                 <EditIcon fontSize="small" color={'primary'} />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title={'Add Fields'}>
-              <IconButton
-                size="small"
-                aria-label="Edit"
-                onClick={() => {
-                  setOpenField({ open: true, step: step });
-                }}
-              >
-                <BuildIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </HtmlTooltip>
+            {!step?.linkWithResource && (
+              <HtmlTooltip title={'Add Fields'}>
+                <IconButton
+                  size="small"
+                  aria-label="Edit"
+                  onClick={() => {
+                    setOpenField({ open: true, step: step });
+                  }}
+                >
+                  <BuildIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
             <HtmlTooltip title={'Delete'}>
               <IconButton
                 size="small"

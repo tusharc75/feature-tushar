@@ -5,7 +5,6 @@ import { setFieldsInAscendingOrder } from '../../constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
 
 const InputField = (props) => {
-
   const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, ...rest } = props;
 
   const [formsData, setFormsData] = useState([]);
@@ -132,8 +131,10 @@ const InputField = (props) => {
                         imageOrFileUploadCompletePercentage={
                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                             ? (completePercentage) => {
-                              onImageUploadCompletePercentage(completePercentage);
-                            }
+                                if (onImageUploadCompletePercentage) {
+                                  onImageUploadCompletePercentage(completePercentage);
+                                }
+                              }
                             : null
                         }
                         fields={fieldsData}

@@ -1203,6 +1203,10 @@ const routes = {
   dealDetail: {
     title: storedRoutes && storedRoutes.deals && storedRoutes.deals.title ? storedRoutes.deals?.title : sidebarResource.deals,
     path: '/deals/detail'
+  },
+  serializedAssetStatusChangeRequest: {
+    title: storedRoutes && storedRoutes.serializedAssetStatusChangeRequest && storedRoutes.serializedAssetStatusChangeRequest.title ? storedRoutes.serializedAssetStatusChangeRequest?.title : RESOURCE_LABEL.serializedAssetStatusChangeRequest,
+    path: '/serialized-asset-status-change-request'
   }
 };
 

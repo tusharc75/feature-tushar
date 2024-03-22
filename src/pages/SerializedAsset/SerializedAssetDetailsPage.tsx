@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import BuildIcon from '@material-ui/icons/Build';
@@ -23,7 +23,15 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, ASSET_STATUS, INVENTORY_HISTORY_TYPE, INVENTORY_OWNER_TYPE, repairJob, serializedAsset, sidebarResource } from '../../constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  ASSET_STATUS,
+  INVENTORY_HISTORY_TYPE,
+  INVENTORY_OWNER_TYPE,
+  repairJob,
+  serializedAsset,
+  sidebarResource
+} from '../../constants/helpers';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
 import AssetHistory from './AssetHistory';
 import CertificationHistory from './CertificationHistory';
@@ -31,6 +39,8 @@ import DepreciationHistory from './DepreciationHistory';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import ManageSendOutboundMessage from '../SendOutboundMessage/manageSendOutboundMessage';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import Step from '../DynamicForm/Step';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -63,6 +73,7 @@ const SerializedAssetDetailsPage = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -73,6 +84,7 @@ const SerializedAssetDetailsPage = () => {
   const fetchAllData = () => {
     fetchFields();
     fetchData();
+    fetchPolicy();
     fetchAssetStates();
   };
 
@@ -88,25 +100,22 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { ids: [id] });
       if (data.totalUtilization) {
-        data[`totalUtilizationHours`] = `${round(moment.duration(data?.totalUtilization).asHours())}:${Math.floor(moment.duration(data?.totalUtilization).asMinutes() % 60)}`;
-        delete data?.totalUtilization
+        data[`totalUtilizationHours`] = `${round(moment.duration(data?.totalUtilization).asHours())}:${Math.floor(
+          moment.duration(data?.totalUtilization).asMinutes() % 60
+        )}`;
+        delete data?.totalUtilization;
       }
       if (data.totalInUseTimeAfterLastRepair) {
-        data[`totalInUseTimeAfterLastRepairHours`] = `${round(moment.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(moment.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}`;
-        delete data?.totalInUseTimeAfterLastRepair
+        data[`totalInUseTimeAfterLastRepairHours`] = `${round(moment.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(
+          moment.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60
+        )}`;
+        delete data?.totalInUseTimeAfterLastRepair;
       }
       handleMainPoints(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const fetchData = async () => {
     setLoading(true);
@@ -148,6 +157,19 @@ const SerializedAssetDetailsPage = () => {
     }
   };
 
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const fetchFields = () => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
@@ -182,7 +204,7 @@ const SerializedAssetDetailsPage = () => {
       .put(`${serializedAsset.api}/remove`, { ids: [] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.serializedAsset.path}`)
+        history.push(`${routes.serializedAsset.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -199,8 +221,11 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
-    if ((o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap)
-      || o.optionValue === ASSET_STATUS.scrap || o.optionValue === ASSET_STATUS.lost) {
+    if (
+      (o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap) ||
+      o.optionValue === ASSET_STATUS.scrap ||
+      o.optionValue === ASSET_STATUS.lost
+    ) {
       setStatus(o.optionValue);
       setShowReasonDialog(true);
     } else {
@@ -211,7 +236,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -239,13 +264,13 @@ const SerializedAssetDetailsPage = () => {
         comment: obj?.reason ? obj?.reason : '',
         reference: { _id: assetDetails._id, type: INVENTORY_HISTORY_TYPE.serializedAssets }
       })
-      .then(() => {
+      .then(({ data }) => {
         setUpdateLoading(false);
         fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Status changed to ${obj?.status}`
+          message: data?.message
         });
       })
       .catch((error) => {
@@ -256,13 +281,13 @@ const SerializedAssetDetailsPage = () => {
 
   useEffect(() => {
     if (assetDetails) {
-      let tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]
+      let tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
       if (assetDetails.status === ASSET_STATUS.underReview) {
         tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
       } else if (assetDetails.status === ASSET_STATUS.scrap) {
         tempStatus = [ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
         if (assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
-          tempStatus.push(ASSET_STATUS.available)
+          tempStatus.push(ASSET_STATUS.available);
         }
       } else if (assetDetails.status === ASSET_STATUS.lost) {
         tempStatus = [ASSET_STATUS.available, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.scrap];
@@ -299,7 +324,7 @@ const SerializedAssetDetailsPage = () => {
                     className={'btn-outline-v1'}
                     size="small"
                     onClick={() => {
-                      setManageSendOutBoundMessageDialog(true)
+                      setManageSendOutBoundMessageDialog(true);
                     }}
                   >
                     Send Outbound Message
@@ -405,26 +430,29 @@ const SerializedAssetDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
-          <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Asset History</div>} {...a11yProps(1)} />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab index={0} value={0}>
+            Details
+          </CustomTab>
+          {resourceData && resourceData?.steps?.length && (
+            <CustomTab index={1} value={1}>
+              Associations
+            </CustomTab>
+          )}
+          <CustomTab index={2} value={2}>
+            Asset History
+          </CustomTab>
           {user?.user?.brandPolicy?.serializedAssetCertification && (
-            <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Certification History</div>} {...a11yProps(2)} />
+            <CustomTab index={3} value={3}>
+              Certification History
+            </CustomTab>
           )}
           {user?.user?.brandPolicy?.serializedAssetDepreciation && (
-            <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Depreciation History</div>} {...a11yProps(3)} />
+            <CustomTab index={4} value={4}>
+              Depreciation History
+            </CustomTab>
           )}
-        </Tabs>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {assetDetails && <DetailsPageHeader mainPoints={mainPoints} />}
           <Box>
@@ -447,9 +475,18 @@ const SerializedAssetDetailsPage = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <AssetHistory id={id} />
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={sidebarResource.serializedAsset}
+            data={assetDetails}
+            allowedToEdit={permissions?.serializedAsset?.isUpdate}
+          />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
+          <AssetHistory id={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
           <CertificationHistory
             id={id}
             canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
@@ -457,10 +494,8 @@ const SerializedAssetDetailsPage = () => {
             assetDetails={assetDetails}
           />
         </TabPanel>
-        <TabPanel value={tabValue} index={3}>
-          <DepreciationHistory
-            id={id}
-          />
+        <TabPanel value={tabValue} index={4}>
+          <DepreciationHistory id={id} />
         </TabPanel>
       </Box>
       {showConfirmBox && (

@@ -65,13 +65,15 @@ export const rentalManagementMessage = {
     statusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
     rentalStatusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
     statusURForCancelReceiving: 'Receiving Ticket can be cancelled only for Under Review assets',
-    rentalStatusCompleteCancelReceiving: 'Receiving Ticket can be cancelled only for Complete Rental assets',
+    rentalProductConsumed: 'Product already consumed',
+    rentalStatusCompleteCancelReceiving: 'Receiving Ticket can only be canceled for assets/consumables that have Complete/Return Rental Asset Status',
     repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
     repairSameWarehouse: `Selected assets must be in same ${routes.warehouse.title} to perform this action`,
     transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
+    transferRentalForAssetSame: 'Only all In-Use or Available/Under Review assets can be transfered at a time',
     onlySwapAssets: 'Only Assets can be swapped',
     onlySwapInUseAssets: 'Only In-Use assets can be swapped',
-    onlyAssetsCanBeRepaired: 'Only assets can be repaired'
+    onlyAssetsCanBeRepaired: 'Only assets can be repaired',
 };
 
 export const subleaseActions = {

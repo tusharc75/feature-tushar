@@ -18,21 +18,19 @@ import { FaDiceOne } from 'react-icons/fa';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 
-const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
+const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, handleUpdateCost, showSaveAndNext, loadingEdit }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [allFields, setAllFields] = useState([]);
-
+  const [saveAndNext, setSaveAndNext] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [costData]);
 
   const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
     const zipCode = billingAddress?.zipCode;
@@ -89,43 +87,14 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
   };
 
   const handleSubmit = (values) => {
-    setSubmitting(true);
     if (costData) {
-      axiosInstance()
-        .put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [{ ...getObjKeysWithValues(values, allFields), _id: costData._id }])
-        .then(({ data }) => {
-          setLoading(false);
-          onSuccess(data.data);
-          setSubmitting(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setLoading(false);
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
+      let returnData = [];
+      returnData = [{ ...getObjKeysWithValues(values, allFields), _id: costData._id }];
+      handleUpdateCost(returnData, saveAndNext);
     } else {
-      axiosInstance()
-        .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [{ ...getObjKeysWithValues(values, allFields) }])
-        .then(({ data }) => {
-          setLoading(false);
-          onSuccess(data.data);
-          setSubmitting(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setLoading(false);
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
+      let returnData = [];
+      returnData = [{ ...getObjKeysWithValues(values, allFields)}];
+      handleAddCost(returnData);
     }
   };
 
@@ -282,7 +251,6 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
                 <Button
                   size="small"
                   color="primary"
-                  disabled={submitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
@@ -290,14 +258,34 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
                 >
                   Cancel
                 </Button>
+                { showSaveAndNext && (
+                  <Button
+                    disabled={loadingEdit}
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm();
+                    }}
+                    endIcon={loadingEdit && <CircularProgress color="inherit" size={18} />}
+                  >
+                    {' '}
+                    Save & Next
+                  </Button>
+                )}
                 <Button
-                  disabled={loading || submitting}
+                  disabled={loadingEdit}
                   variant="contained"
                   color="primary"
                   size="small"
                   type="submit"
-                  onClick={submitForm}
-                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                  onClick={() => {
+                    setSaveAndNext(false);
+                    submitForm();
+                  }}
+                  endIcon={loadingEdit && <CircularProgress color="inherit" size={18} />}
                 >
                   Save
                 </Button>

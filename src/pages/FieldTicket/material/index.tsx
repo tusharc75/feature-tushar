@@ -18,12 +18,13 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
+import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { fetch_field_ticket_material_fields } from '../helper';
 import Consumables from './Consumables';
 import MaterialQtyDialog from './MaterialQtyDialog';
+import AddCostDialog from './AddCostDialog';
 
 const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeStatus }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
@@ -39,6 +40,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
+  const [costFields, setCostFields] = useState([]);
 
   const {
     state: { permissions }
@@ -47,10 +50,13 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
-
   const fetchFields = async () => {
     setColumns(null);
     var data = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+    let costData:any =  await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`)
+    costData = costData?.data?.data;
+    setCostFields(costData);
+    
     if (!allowedToEdit || fieldTicketData?.quotation) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
@@ -81,6 +87,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             {!allowedToEdit || fieldTicketData?.quotation ? (
               <p> {row.original.detail}</p>
             ) : (
+              row.original.detail ?
               <p
                 onClick={() => {
                   openMaterial(row, table.getRowModel().rows);
@@ -90,7 +97,9 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
               >
                 {row.original.detail}
               </p>
+              : <NoDataCell />
             )}
+            {row.original.type !== MATERIAL_TYPE.manualEntry && (
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -102,7 +111,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
               >
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
-            </Box>
+            </Box>)}
           </div>
         )
       },
@@ -159,7 +168,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                   aria-label="Delete"
                   disabled={!allowedToEdit}
                   onClick={() => {
-                    setDeleteData([{ id: row.original._id, service: row?.original?.materialId }]);
+                    setDeleteData([{ id: row.original._id, service: row?.original?.materialId, type: row?.original?.type }]);
                   }}
                 >
                   <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
@@ -178,12 +187,23 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     dispatch({ type: 'selection', selectedRecords: [] });
 
     const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=service`);
-    const data = response?.data?.data?.material;
+    const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
+    let costData = costResponse?.data?.data;
+    
+    costData = costData?.map((e: any) => {
+      return { ...e, type: MATERIAL_TYPE.manualEntry };
+    });
+  
+    const data = [...response?.data?.data?.material,...costData];
 
     data.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent?.serviceDetail?.serviceName}`;
-      parent.description = `${parent?.serviceDetail?.serviceDescription || ''}`;
+      parent.detail = parent.type === MATERIAL_TYPE.service 
+    ? (parent.serviceDetail?.serviceName || '')
+    : (parent.detail || '');
+      parent.description = `${parent.type===MATERIAL_TYPE.service 
+        ? parent?.serviceDetail?.serviceDescription || ''
+        : parent.description || ''}`;
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
       parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
@@ -201,12 +221,16 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   };
 
   const openMaterial = (data, rows) => {
-    setIsServiceEdit({
-      open: true,
-      data: data.original,
-      showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
-    });
-    setIsBulkEdit(false);
+    if (data?.original?.type === MATERIAL_TYPE.manualEntry) {
+      setShowCostDialog({ open: true, data: data.original, showSaveAndNext: data?.index < rows?.length - 1 ? true : false });
+    }else{
+      setIsServiceEdit({
+        open: true,
+        data: data.original,
+        showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
+      });
+      setIsBulkEdit(false);
+    }
   };
 
   useEffect(() => {
@@ -306,20 +330,85 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       });
   };
 
-  const handleDelete = (rows) => {
-    setDeleting(true);
+  const handleAddCost = (rows) => {
+    setUpdating(true);
     axiosInstance()
-      .put(`${fieldTicket.api}/${fieldTicketData?._id}/material/delete`, { ids: rows })
+      .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`,[...rows])
       .then(() => {
-        setDeleting(false);
         fetchMaterial();
-        setDeleteData(null);
+        setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+        setUpdating(false);
       })
       .catch((error) => {
-        setDeleting(false);
+        setUpdating(false);
         toastConfig.setToastConfig(error);
-        setDeleteData(null);
       });
+  };
+
+  const handleUpdateCost = (rows, saveAndNext = false) => {
+    setUpdating(true);
+    axiosInstance()
+      .put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`,  [...rows] )
+      .then(() => {
+        setUpdating(false);
+        fetchMaterial();
+        if (saveAndNext) {
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+            setShowCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+          } else {
+            setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+            setIsServiceEdit({
+              open: true,
+              data: dataRows[rowIndex + 1],
+              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+            });
+          }
+        } else {
+          setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+        }
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleDelete = (rows) => {
+    setDeleting(true);
+    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id);
+    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry);
+    const updatedProducts = products?.map(ele => ({
+      id: ele.id,
+      service: ele.service
+  }));
+    if (updatedProducts?.length) {
+      axiosInstance()
+        .put(`${fieldTicket.api}/${fieldTicketData?._id}/material/delete`, { ids: updatedProducts })
+        .then(() => {
+          setDeleting(false);
+          fetchMaterial();
+          setDeleteData(null);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
+        });
+    }
+    if (cost?.length) {
+      axiosInstance()
+        .put(`${routes?.fieldTicket?.path}/${fieldTicketData?._id}/cost/remove`, { ids: cost })
+        .then(() => {
+          fetchMaterial();
+          setDeleting(false);
+          setDeleteData(null);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
+        });
+    }
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
@@ -330,7 +419,20 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         fetchMaterial();
         if (saveAndNext) {
           const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
-          setIsServiceEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+          if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+            setIsServiceEdit({
+              open: false,
+              data: null,
+              showSaveAndNext: false
+            });
+            setShowCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+          } else {
+            setIsServiceEdit({
+              open: true,
+              data: dataRows[rowIndex + 1],
+              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+            });
+          }
         } else {
           setIsServiceEdit({ open: false, data: null, showSaveAndNext: false });
         }
@@ -356,8 +458,13 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       }
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
-    handleSaveData(rows);
+    if(updatedData?.type===MATERIAL_TYPE.manualEntry){
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
+      handleUpdateCost(rows);
+    }else{
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+      handleSaveData(rows);
+    }
   };
 
   const AddButtonMenuItems = () => {
@@ -379,6 +486,15 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             Add New Service
           </MenuItem>
         )}
+        {costFields?.length > 0 && (
+          <MenuItem
+            onClick={() => {
+              setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
+            }}
+          >
+            Add Manual Entry
+          </MenuItem>
+        )}
       </>
     );
   };
@@ -388,6 +504,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       <>
         <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
           <MenuItem
+            disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
             onClick={() => {
               setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
               setIsBulkEdit(true);
@@ -404,7 +521,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                 selectedRecords?.map((d) => {
                   return {
                     id: d?._id,
-                    service: d?.materialId
+                    service: d?.materialId,
+                    type: d?.type
                   };
                 })
               );
@@ -511,6 +629,19 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
+        />
+      )}
+      {showCostDialog.open && (
+        <AddCostDialog
+          onClose={() => {
+            setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+          }}
+          handleAddCost={handleAddCost}
+          handleUpdateCost={handleUpdateCost}
+          fieldTicketData={fieldTicketData}
+          costData={showCostDialog?.data}
+          showSaveAndNext={showCostDialog.showSaveAndNext}
+          loadingEdit={isUpdating}
         />
       )}
     </>

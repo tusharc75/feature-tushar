@@ -1,6 +1,6 @@
 import { Box, Button, IconButton, useMediaQuery } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { capitalize } from 'lodash';
+import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';
 import { useHistory } from 'react-router-dom';
@@ -11,10 +11,11 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import { prepareDataForGrid, quotation } from 'src/constants/helpers';
+import { MATERIAL_TYPE, prepareDataForGrid, quotation, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const QuoteBuilder = ({
   quotationData,
@@ -91,7 +92,7 @@ const QuoteBuilder = ({
           row.original['type'] ? (
             <div>
               <p className="text-truncate">
-                {row.original.type === 'serializedAsset' ? 'Asset' : `${capitalize(row.original.type)} `}
+                {row.original.type === 'serializedAsset' ? 'Asset' : `${startCase(row.original.type)} `}
                 {row.original['type'] === 'product'
                   ? row.original?.productDetail?.serializedProduct
                     ? '(Serialized)'
@@ -229,7 +230,7 @@ const QuoteBuilder = ({
         finalObject['parentId'] = null;
         finalObject['isValid'] = true;
         finalObject['hideSelection'] = false;
-        finalObject['type'] = item?.costType || 'Manual Entry';
+        finalObject['type'] = MATERIAL_TYPE.manualEntry;
         let res: any = {
           ...finalObject
         };
@@ -333,15 +334,6 @@ const QuoteBuilder = ({
       });
   };
 
-  const sendEmailProps = {
-    quotationData: quotationData,
-    versionId: versionData?._id,
-    currentVersion: version,
-    columns: columns,
-    hideSummary: true,
-    hideVersions: true
-  };
-
   const rightSideContents = () => {
     return (
       <>
@@ -398,12 +390,34 @@ const QuoteBuilder = ({
     );
   };
 
+  const previewDownloadProps = {
+    fileName: `${routes.quotation.title}-${quotationData?.quotationNumber}`,
+    resource: sidebarResource.quotation,
+    referenceId: quotationData?._id,
+    columns: columns,
+    isSendEmail: true,
+    isExcelDownload: true,
+    subject: `${user?.user?.brandName} Offer - ${quotationData?.quotationNumber}`,
+    extraQueryParams: { uniqueId: versionData?._id },
+    defaultColumns: [
+      'index',
+      'type',
+      'detail',
+      'description',
+      'qty',
+      `price_${quotationData?.currency?.toLowerCase()}`,
+      `totalPrice_${quotationData?.currency?.toLowerCase()}`,
+      `tax_${quotationData?.currency?.toLowerCase()}`,
+      `finalPrice_${quotationData?.currency?.toLowerCase()}`
+    ]
+  };
+
   return (
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={false}
         isActionButtonVisible={false}
-        sendEmailProps={sendEmailProps}
+        previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
         hasXpadding
       />
@@ -421,6 +435,7 @@ const QuoteBuilder = ({
             hideAction={true}
             isClientSideGrid={true}
             expander={true}
+            hideExportTable={true}
           />
         </Box>
       ) : (

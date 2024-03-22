@@ -1,14 +1,14 @@
 import { Chip, CircularProgress, Grid, TextField, Typography, ChipProps } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 import { useData } from '../StateProvider/Provider';
 import { SearchActivity } from '../axios/activity';
 import routes from './Helpers/Routes';
 import ActivityModelHandler from './Activity/ActivityModelHandler';
-import { get_activity_resource } from './Activity/Helpers/utils';
+import { get_activity_resource, get_dynamic_resource } from './Activity/Helpers/utils';
 
 const useStyles = makeStyles((theme) => ({
   chipStyle: {
@@ -63,20 +63,33 @@ export const SearchFilter = ({
   const [permissionsSearch, setPermissionsSearch] = React.useState([]);
 
   useEffect(() => {
+    setResource();
+  }, []);
+
+  const setResource = async () => {
     const resourceOptions = get_activity_resource(permissions);
     const data = [];
     resourceOptions.forEach((ele) => {
       data.push({ label: ele.optionLabel, type: ele.optionValue, name: 'All', isAll: true });
     });
     data.push({ label: 'my', type: 'my', name: user?._id, isAll: true });
+
+    const dynamicResource = await get_dynamic_resource(true);
+
+    dynamicResource?.data?.forEach((_r) => {
+      if (permissions[camelCase(_r.resource)]?.isRead) {
+        data.push({ label: _r.resource, type: camelCase(_r.resource), name: 'All', isAll: true });
+      }
+    });
+
     setPermissionsSearch(data);
-  }, []);
+  };
 
   const activityType = ['task', 'event', 'case', 'note', 'email', 'attachment'];
 
   useEffect(() => {
     filter?.forEach((e) => {
-      e.label = routes[e.type] ? routes[e.type].title : e.type;
+      e.label = routes[e.type] ? routes[e.type].title : startCase(e.type);
     });
     setValue(filter.filter((d) => permissionsSearch?.some((f) => f.type === d.type)));
   }, [filter, permissionsSearch]);

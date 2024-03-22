@@ -26,12 +26,15 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
 
   useEffect(() => {
     fetchFields();
   }, []);
 
   const fetchFields = () => {
+    setLoading(true)
     if (id) {
       axiosInstance()
         .get(`/dynamic-form/step/detail/${resourceId}/${stepId}/${id}`, {
@@ -44,6 +47,7 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
             fields: fields,
             values: getObjKeysWithValues(data, fields)
           });
+          setLoading(false)
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -53,6 +57,7 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
         fields: fields,
         values: getObjKeys('', fields)
       });
+      setLoading(false)
     }
   };
 
@@ -92,7 +97,7 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
         .post(
           `/dynamic-form/step/${resourceId}`,
 
-          { ...values, stepId },
+          [{ ...values, stepId }],
           {
             headers: {
               Resource: resource
@@ -173,6 +178,13 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
                                       setFieldValue={(name, value) => {
                                         setFieldValue(name, value);
                                       }}
+                                      imageOrFileUploadCompletePercentage={
+                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                          ? (completePercentage) => {
+                                            setUploadingImageOrFileProgress(completePercentage);
+                                          }
+                                          : null
+                                      }
                                       required={field.required}
                                       fullWidth
                                       isTooltip={field?.isTooltip || false}
@@ -203,7 +215,7 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
                   Cancel
                 </Button>
                 <Button
-                  disabled={submitting}
+                  disabled={uploadingImageOrFileProgress > 0 || loading || submitting}
                   variant="contained"
                   color="primary"
                   size="small"

@@ -15,7 +15,10 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { QUOTATION_STATUS, quotation } from '../../../constants/helpers';
+import { MATERIAL_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
+import { GiReceiveMoney } from 'react-icons/gi';
+import { VscVersions } from 'react-icons/vsc';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const Quotation = ({
   rentalManagementData,
@@ -214,11 +217,9 @@ const Quotation = ({
       `${quotation.api}/additionalcost/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
     );
     const additionalCostData = additionalCost?.data?.data?.map((e) => {
-      const detail = e?.description;
       return {
         ...e,
-        type: e?.costType,
-        detail: detail,
+        type: MATERIAL_TYPE.manualEntry,
         parentId: null
       };
     });
@@ -338,19 +339,56 @@ const Quotation = ({
                 {`Clone Version-${currentVersion}`}
               </Button>
             ) : null}
+            <Button
+              onClick={() => {
+                setShowQuotationSummaryDialog(true);
+              }}
+              variant="outlined"
+              size="small"
+              startIcon={<GiReceiveMoney />}
+              color="primary"
+            >
+              Summary
+            </Button>
+            <Button
+              variant={isMobile ? 'text' : 'outlined'}
+              color="primary"
+              size="small"
+              className={'btn-outline-v1'}
+              onClick={() => {
+                setShowAllVersionStatus(true);
+              }}
+              style={isMobile ? { color: '#43aeaa' } : {}}
+              startIcon={isMobile ? null : <VscVersions />}
+            >
+              {isMobile ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+            </Button>
           </>
         )}
       </>
     );
   };
 
-  const sendEmailProps = {
-    quotationData: quotationData,
-    versionId: quotationData?.versions[currentVersion]?._id,
-    currentVersion: currentVersion,
+  const previewDownloadProps = {
+    fileName: `${routes.quotation.title}-${quotationData?.quotationNumber}`,
+    resource: sidebarResource.quotation,
+    referenceId: quotationData?._id,
     columns: columns,
-    setShowAllVersionStatus: setShowAllVersionStatus,
-    setShowQuotationSummaryDialog: setShowQuotationSummaryDialog
+    isSendEmail: true,
+    isExcelDownload: true,
+    subject: `${user?.user?.brandName} Offer - ${quotationData?.quotationNumber}`,
+    extraQueryParams: { uniqueId: quotationData?.versions[currentVersion]?._id },
+    defaultColumns: [
+      'index',
+      'type',
+      'detail',
+      'description',
+      'qty',
+      `price_${quotationData?.currency?.toLowerCase()}`,
+      `totalPrice_${quotationData?.currency?.toLowerCase()}`,
+      `tax_${quotationData?.currency?.toLowerCase()}`,
+      `finalPrice_${quotationData?.currency?.toLowerCase()}`
+    ]
   };
 
   return (
@@ -359,9 +397,9 @@ const Quotation = ({
       <DetailsPageHeader
         isAddButtonVisible={false}
         isActionButtonVisible={false}
+        previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
         hasXpadding
-        sendEmailProps={sendEmailProps}
       />
       {columns ? (
         <Box zIndex={5}>
@@ -376,6 +414,7 @@ const Quotation = ({
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             expander={true}
+            hideExportTable={true}
           />
         </Box>
       ) : (
@@ -383,6 +422,7 @@ const Quotation = ({
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
+
       {quotationData && showAllVersionStatus && (
         <Versions
           onClose={() => setShowAllVersionStatus(false)}

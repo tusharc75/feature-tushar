@@ -764,7 +764,7 @@ const ActionMenuItems = ({
               handleStatusChange(status);
             }}
             disabled={
-              selectedRecords?.filter((o) => [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(o.status)
+              selectedRecords?.filter((o) => [ASSET_STATUS.available, ASSET_STATUS.underReview].includes(o.status)
                 || (ASSET_STATUS.scrap === o.status && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand)
               ).length === selectedRecords?.length
                 ? false : true
@@ -779,7 +779,7 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.needRepair);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.needRepair].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.needRepair, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
           >
             {`Status Change - ${ASSET_STATUS.needRepair}`}
           </MenuItem>
@@ -787,7 +787,7 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.needRecert);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.needRecert].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.needRecert, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
           >
             {`Status Change - ${ASSET_STATUS.needRecert}`}
           </MenuItem>
@@ -795,7 +795,7 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.scrap);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
           >
             {`Status Change - ${ASSET_STATUS.scrap}`}
           </MenuItem>
