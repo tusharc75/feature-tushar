@@ -26,6 +26,7 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
 import LeadTimeDialog from './LeadTimeDialog';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
+import { flattenArray } from 'src/constants/columns';
 
 const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
   const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
@@ -356,13 +357,25 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-          setRecordToUpdate(dataRows[rowIndex + 1]);
-          setIsProductEdit({
-            open: true,
-            isBulkedit: false,
-            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
-          });
+          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+          if(!row?.parentId){
+            const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+            setRecordToUpdate(dataRows[rowIndex + 1]);
+            setIsProductEdit({
+              open: true,
+              isBulkedit: false,
+              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+            });
+          }else{
+            const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
+            const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
+            setRecordToUpdate(allSubRowData[subRowIdx + 1]);
+            setIsProductEdit({
+              open: true,
+              isBulkedit: false,
+              showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
+            });
+          }
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
@@ -393,10 +406,17 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   };
 
   const handleOpen = (row, rows) => {
+    let showSaveAndNext;
+    if (row.depth != 0) {
+        const allRows = rows.filter((ele) => ele.parentId === row.parentId);
+        showSaveAndNext = row?.index < allRows.length - 1 ? true : false;
+    } else {
+      showSaveAndNext = row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false;
+    }
     setIsProductEdit({
       open: true,
       isBulkedit: false,
-      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+      showSaveAndNext: showSaveAndNext
     });
     setRecordToUpdate(row.original);
   };

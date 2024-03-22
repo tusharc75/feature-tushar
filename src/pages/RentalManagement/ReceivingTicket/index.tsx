@@ -13,7 +13,7 @@ import { groupBy, map, uniq } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiFillFilePdf } from 'react-icons/ai';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -41,6 +41,7 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
+  MATERIAL_TYPE,
   RENTAL_INTERNAL_ASSET_STATUS,
   REPAIR_JOB_STATUS,
   dateFormat,
@@ -341,9 +342,9 @@ const ReceivingTicket = ({
           obj.parentName = element?.parentName;
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
             ? ele.qty === consumeQty
-              ? 'Consumed'
+              ? RENTAL_INTERNAL_ASSET_STATUS.consumed
               : consumeQty < ele.qty && consumeQty > 0
-                ? 'Partially Consumed'
+                ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
                 : ele.qty === (returnTicket?.qty || 0)
                   ? 'Returned'
                   : element?.status
@@ -399,9 +400,9 @@ const ReceivingTicket = ({
           obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
             ? qty === consumeQty
-              ? 'Consumed'
+              ? RENTAL_INTERNAL_ASSET_STATUS.consumed
               : consumeQty < qty && consumeQty > 0
-                ? 'Partially Consumed'
+                ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
                 : ''
             : element?.status;
           obj.currentLocation =
@@ -918,8 +919,7 @@ const ReceivingTicket = ({
   const handleAddAssetsToRepairOrder = async (repairOrderData: any) => {
     let rows = selectedRecords.map((record: any) => ({
       materialId: record._id,
-      type: 'serializedAsset',
-      unit: '',
+      type: MATERIAL_TYPE.serializedAsset,
       qty: 1,
       parentId: null
     }));
@@ -1299,7 +1299,7 @@ const ReceivingTicket = ({
           type="button"
           size="small"
           disabled={downlodingFile || isOffline || uniqueReceivingTicket.length === 0}
-          startIcon={isMobile ? '' : <AiFillFilePdf />}
+          startIcon={isMobile ? '' : <VisibilityIcon />}
           style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
         >
           {downlodingFile ? 'Please wait...' : 'Preview'}
@@ -1925,7 +1925,7 @@ const ActionButtonMenuItems = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyAssetsCanBeRepaired });
         } else if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.delivered && e?.returnTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingOrReturnNotDelivered });
-        } else if (e.subleaseAsset) {
+        } else if (action === rentalManagementActions.createRepairJob && e.subleaseAsset) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.notSubleaseAsset });
         } else if (![ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.repairCanForThisAsset });
@@ -1939,9 +1939,12 @@ const ActionButtonMenuItems = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        } else if (![ASSET_STATUS.inUse, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status)) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
-        } else if (![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.complete].includes(e.rentalAssetStatus)) {
+        } else if (([ASSET_STATUS.inUse].includes(e.status)
+          && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus) ||
+          ([ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status)
+            && [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(e.rentalAssetStatus)))) {
+        }
+        else {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
         }
       } else if (action === rentalManagementActions.swapInUseAssets) {
@@ -1953,6 +1956,24 @@ const ActionButtonMenuItems = ({
         }
       }
     });
+    if (action === rentalManagementActions.transferToAnotherRental && errorMessages?.length === 0) {
+      if (records?.find((e) => [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))) {
+        if (records?.filter((e) => [ASSET_STATUS.inUse]?.includes(e.status)
+          && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))?.length !== records?.length) {
+          records?.forEach((e) => {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAssetSame });
+          })
+        }
+      }
+      else {
+        if (records?.filter((e) => [ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)
+          && [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return]?.includes(e.rentalAssetStatus))?.length !== records?.length) {
+          records?.forEach((e) => {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAssetSame });
+          })
+        }
+      }
+    }
     if (errorMessages?.length) {
       setOpenMessageDialog({ open: true, errorMessages: errorMessages });
       return true;

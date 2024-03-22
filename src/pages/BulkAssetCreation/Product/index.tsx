@@ -19,7 +19,7 @@ import { CHILD_RESOURCE, bulkAssetCreation, prepareDataForGrid } from 'src/const
 import { deleteDisable } from 'src/constants/messageHelpers';
 import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
 
-const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProduct, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
+const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -120,7 +120,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     axiosInstance()
       .get(`${bulkAssetCreation.api}/product/${bulkAssetCreationData._id}`)
       .then(({ data: { data } }) => {
-        setBulkAssetCreationProduct(JSON.parse(JSON.stringify(data)));
         let rows = data?.map((item, index) => {
           let finalObject = prepareDataForGrid(item);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === item._id);
@@ -211,8 +210,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 fontSize="small"
                 color={
                   (row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) &&
-                  allowedToEdit &&
-                  permissions?.bulkAssetCreation?.isUpdate
+                    allowedToEdit &&
+                    permissions?.bulkAssetCreation?.isUpdate
                     ? 'error'
                     : 'disabled'
                 }
@@ -268,6 +267,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
       .post(`${bulkAssetCreation.api}/product/${bulkAssetCreationData._id}/delete`, { ids: deleteBulkAssetCreationProduct })
       .then(() => {
         fetchBulkAssetCreationProduct();
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteBulkAssetCreationProduct([]);
         setLoadingButton(false);

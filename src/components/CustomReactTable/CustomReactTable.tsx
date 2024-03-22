@@ -13,7 +13,8 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import moment from 'moment';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -23,14 +24,26 @@ import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
 import { useDebounce } from 'src/hooks';
-import { gridPageSizes } from '../../constants/helpers';
+import xlsx from 'xlsx-js-style';
+import { dateTimeFormat, gridPageSizes } from '../../constants/helpers';
 import GridHeader from './GridHeader';
 import { fuzzyFilter, serverFilter } from './ReactTableHelpers';
 import Pagination from './TableComponents/Pagination';
 import TableComponent from './TableComponents/Table';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
-import { childrenProperty, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
+import {
+  camelCaseToWords,
+  childrenProperty,
+  extractLastNumberFromDataRange,
+  getExcelColumnNameFromRange,
+  getStickyColumnNames,
+  getUniqueDataByKey,
+  updateGridHiddenColumns,
+  useSkipper
+} from './utils';
+
+let exportTimeout;
 
 const CustomReactTable = ({
   columns,
@@ -55,7 +68,7 @@ const CustomReactTable = ({
   reportSave = false,
   virtualization = false,
   showArrangeView = true,
-  exportTable = false
+  hideExportTable = false
 }) => {
   const {
     currentEditingCellPosition,
@@ -108,6 +121,8 @@ const CustomReactTable = ({
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
   const [sortedColumns, setSortedColumns] = useState([]);
   const [getsorting, setSorting] = useState([]);
+  const [exportTableView, setExportTableView] = useState(false);
+  const tableRef = useRef<HTMLTableElement | null>(null);
 
   // initialize
   useEffect(() => {
@@ -375,11 +390,75 @@ const CustomReactTable = ({
     });
   }, [getsorting, isClientSideGrid, dispatch]);
 
+  const handleTableExport = () => {
+    clearTimeout(exportTimeout);
+    setExportTableView(true);
+    const isFooterPresent = newColumns.some((c) => typeof c.Footer === 'function');
+    exportTimeout = setTimeout(() => {
+      if (!tableRef.current) return;
+      const wb = xlsx.utils.book_new();
+      const ws = xlsx.utils.table_to_sheet(tableRef.current);
+
+      const columns = getExcelColumnNameFromRange(ws['!ref']);
+
+      const lastRowNumber = extractLastNumberFromDataRange(ws['!ref']);
+      for (const col of columns) {
+        // For header style
+        if (ws[`${col}1`]) {
+          ws[`${col}1`].s = {
+            font: {
+              name: 'Calibri',
+              bold: true
+            }
+          };
+        }
+        // For footer style
+        if (lastRowNumber && isFooterPresent) {
+          ws[`${col}${lastRowNumber}`].s = {
+            font: {
+              name: 'Calibri',
+              bold: true
+            }
+          };
+        }
+      }
+      const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
+      xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
+      xlsx.writeFile(wb, `${name}.xlsx`);
+      setExportTableView(false);
+    }, 0);
+  };
+
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
+      {exportTableView && (
+        <div className="hidden">
+          <TableComponent
+            ref={tableRef}
+            virtualization={virtualization}
+            state={state}
+            setWholeRowsCellColor={() => ''}
+            table={table}
+            dispatch={dispatch}
+            setCellValue={setCellValue}
+            submitInput={submitInput}
+            cellValue={cellValue}
+            resetField={resetField}
+            isClientSideGrid={isClientSideGrid}
+            reorder={reorder}
+            loading={loading}
+            exportTableView={true}
+            error={error}
+            height={height}
+          />
+        </div>
+      )}
+
       <div className="react-table-v8 ">
         <div className="table-container-v1" style={{ position: 'relative' }}>
           <GridHeader
+            handleTableExport={handleTableExport}
+            isClientSideGrid={isClientSideGrid}
             resource={resource}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -395,7 +474,7 @@ const CustomReactTable = ({
             selectedReportView={selectedReportView}
             state={state}
             expander={expander}
-            exportTable={exportTable}
+            hideExportTable={hideExportTable}
           />
           {!isMobileView && (
             <div className="relative">

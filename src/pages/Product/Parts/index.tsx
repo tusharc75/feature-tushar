@@ -150,7 +150,6 @@ function Parts({ id }) {
 
   const handleRemove = () => {
     setIsDeleting(true);
-    closeActions();
     const { data } = showConfirmBox;
     if (data.length > 1) {
       data.forEach((p: any) => {
@@ -237,7 +236,7 @@ function Parts({ id }) {
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem onClick={() => setOpenAssignProductDialog(true)}>Add Products</MenuItem>
+        <MenuItem onClick={() => setOpenAssignProductDialog(true)}>Add Existing Products</MenuItem>
       </>
     );
   };

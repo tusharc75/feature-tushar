@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
+import { isEqual, startCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -17,6 +17,8 @@ import { getLookupResource, getResourceField } from '../helper';
 const stepSchema = object().shape({
   stepName: string().required('Please enter Step name')
 });
+
+const MATERIAL_TYPE = ['product', 'service', 'package'];
 
 const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -61,6 +63,8 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
         multipleStepData: true,
         stepDataRequired: false,
         showInPdf: false,
+        linkWithMaterial: false,
+        linkedMaterial: [],
         linkWithResource: false,
         linkResourceName: '',
         linkResourceField: ''
@@ -116,6 +120,14 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
     if (values.linkWithResource && !values?.linkResourceName) {
       errors['linkResourceName'] = 'please select Resource';
     }
+
+    if (values.linkWithResource && !values?.linkResourceField) {
+      errors['linkResourceField'] = 'please select Field';
+    }
+
+    if (values.linkWithMaterial && !values?.linkedMaterial?.length) {
+      errors['linkedMaterial'] = 'please select Material';
+    }
     return errors;
   };
 
@@ -169,6 +181,52 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                   <FormControlLabel
                     control={
                       <Checkbox
+                        name="linkWithMaterial"
+                        disabled={values['linkWithResource']}
+                        checked={values['linkWithMaterial']}
+                        onChange={(e) => {
+                          setFieldValue('linkWithMaterial', e.target.checked);
+                          setFieldValue('linkedMaterial', []);
+                        }}
+                      />
+                    }
+                    label="Link With Material"
+                  />
+                </Box>
+                {values['linkWithMaterial'] && (
+                  <Box>
+                    <Autocomplete
+                      id="linkedMaterial"
+                      multiple
+                      disableCloseOnSelect
+                      options={MATERIAL_TYPE}
+                      getOptionLabel={(option: any) => (option ? startCase(option) : '')}
+                      getOptionSelected={(option: any, val) => option === val}
+                      value={values['linkedMaterial']}
+                      onChange={(e: any, value) => {
+                        setFieldValue('linkedMaterial', value);
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          margin="dense"
+                          variant="outlined"
+                          label="Linked Material"
+                          placeholder="Linked Material"
+                          name="linkedMaterial"
+                          required
+                          error={touched['linkedMaterial'] && Boolean(errors['linkedMaterial'])}
+                          helperText={touched['linkedMaterial'] && errors['linkedMaterial']}
+                        />
+                      )}
+                    />
+                  </Box>
+                )}
+                <Box>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        disabled={values['linkWithMaterial']}
                         name="linkWithResource"
                         checked={values['linkWithResource']}
                         onChange={(e) => {
@@ -233,6 +291,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                             variant="outlined"
                             label="Resource Field"
                             placeholder="Resource Field"
+                            required
                             InputProps={{
                               ...params.InputProps,
                               endAdornment: (
@@ -242,6 +301,8 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                                 </React.Fragment>
                               )
                             }}
+                            error={touched['linkResourceField'] && Boolean(errors['linkResourceField'])}
+                            helperText={touched['linkResourceField'] && errors['linkResourceField']}
                           />
                         )}
                       />

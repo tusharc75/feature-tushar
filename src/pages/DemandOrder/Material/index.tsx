@@ -428,7 +428,6 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
               state={state}
               dispatch={dispatch}
               refreshGrid={fetchData}
-              exportTable={true}
             />
           </Box>
         </>

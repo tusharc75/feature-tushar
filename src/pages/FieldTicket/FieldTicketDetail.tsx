@@ -25,7 +25,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
-import AddCost from './AddCost';
 import ManageFieldTicket from './ManageFieldTicket';
 import Submit from './Submit';
 import Material from './material';
@@ -149,8 +148,8 @@ const FieldTicketDetail = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const handleChangeStatus = async (status) => {
@@ -289,9 +288,6 @@ const FieldTicketDetail = () => {
               />
             )}
             {currentStep === 1 && fieldTicketData && (
-              <AddCost fieldTicketData={fieldTicketData} allowedToEdit={allowedToEdit} setNextStep={setNextStep} />
-            )}
-            {currentStep === 2 && fieldTicketData && (
               <Submit stepFullScreen={stepFullScreen} fieldTicketData={fieldTicketData} allowedToEdit={allowedToEdit} fetchData={fetchData} />
             )}
           </ContentFullScreen>

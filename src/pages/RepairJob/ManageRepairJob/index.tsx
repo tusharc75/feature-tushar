@@ -54,10 +54,10 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
 
   useEffect(() => {
     setLoading(true);
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.repairJob}`)
+    axiosInstance().get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
-        const hideFields = ['rentalJob', 'actualEndDate']
+        const hideFields = ['rentalJob', 'actualEndDate', 'workOrder']
+
         data = data.filter((obj) => !hideFields?.includes(obj?.fieldData?.fieldName));
 
         data?.forEach((e) => {
@@ -90,7 +90,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                   .then(({ data: { data: assetData } }) => {
                     if (assetData.length) {
                       fieldsDataForUpdate?.forEach((e) => {
-                        if (e.fieldName === 'warehouse') {
+                        if (['supplierAccount','warehouse']?.includes(e?.fieldName)) {
                           e.disableOnEdit = true;
                           e.isUneditable = true;
                         }
@@ -134,10 +134,16 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
               initialData['afeNumber'] = referenceData?.afeNumber;
             }
           }
-          if (referenceData?.warehouse) {
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'warehouse')) {
-              initialData['warehouse'] = referenceData?.warehouse;
-            }
+          if (referenceData?.warehouse && fieldsDataForCreate.some((e) => e.fieldName === 'warehouse')) {
+            initialData['warehouse'] = referenceData?.warehouse;
+          }
+          if (referenceType === sidebarResource.workOrder) {
+            initialData['workOrder'] = referenceData?.workOrder;
+            fieldsDataForCreate?.forEach((e) => {
+              if (['warehouse']?.includes(e?.fieldName)) {
+                e.isUneditable = true;
+              }
+            });
           }
           setInitialData({
             fields: fieldsDataForCreate,

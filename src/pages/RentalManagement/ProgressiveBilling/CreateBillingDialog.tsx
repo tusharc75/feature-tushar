@@ -392,7 +392,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             : parent.type === 'serializedAsset'
               ? parent?.inventoryDetail?.assetNumber
               : parent.type === 'manualEntry'
-                ? parent?.costType
+                ? parent?.detail
                 : parent.packageDetail?.packageName;
       parent.description =
         parent.type === 'product'

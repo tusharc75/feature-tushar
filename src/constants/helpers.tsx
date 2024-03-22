@@ -54,7 +54,6 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const rentalManagementSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
   { name: 'Add Services', title: 'Services', icon: 'add' },
-  { name: 'Add-on', title: 'Add-on', icon: 'add' },
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
   { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
@@ -64,7 +63,6 @@ export const rentalManagementSteps: stepInterface[] = [
 
 export const fieldTicketSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
   { name: 'Submit', title: 'Submit', icon: 'end' }
 ];
 
@@ -117,7 +115,6 @@ export const sublease_InterCompany_Steps: stepInterface[] = [
 
 export const quotationProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
   { name: 'Quote Builder', title: 'Builder', icon: 'quote' },
   { name: 'DOA', title: 'DOA', icon: 'doa' },
   { name: 'Quote Approval', title: 'Approval', icon: 'approval' },
@@ -365,9 +362,10 @@ export const sidebarResource = {
   triggerNotificationMaster: 'Trigger Notification Master',
   deals: 'Deals',
   triggerNotificationHistory: 'Trigger Notification History',
-  userAttendance : 'User Attendance',
+  userAttendance: 'User Attendance',
   dataLists: 'Data Lists',
-  assetsReceiving : 'Assets Receiving'
+  assetsReceiving: 'Assets Receiving',
+  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
 };
 
 export const primaryFields = {
@@ -511,7 +509,8 @@ export const RESOURCE_LABEL = {
   triggerNotificationHistory: 'Trigger Notification History',
   userAttendance: 'User Attendance',
   dataList: 'Data List',
-  dataListitems: 'Data List Items'
+  dataListitems: 'Data List Items',
+  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
 };
 
 export const CHILD_RESOURCE = {
@@ -1077,21 +1076,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -2017,6 +2016,7 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   complete: 'Complete',
   return: 'Return',
   consumed: 'Consumed',
+  partiallyConsumed: 'Partially Consumed',
   standBy: 'Stand By',
   standByNotChargeable: 'Stand By-Not Chargeable',
   delivered: 'Delivered'
@@ -2955,4 +2955,10 @@ export function clamp(val: number, min: number, max: number) {
 
 export const getResourceLabel = (resource, user) => {
   return user?.role?.selectedEntity?.resource?.find((e) => e.name === resource)?.resourceLabel || resource
+}
+
+export const ASSET_APPROVAL_STATUS = {
+  approved: 'Approved',
+  rejected: 'Rejected',
+  pending: 'Pending',
 }

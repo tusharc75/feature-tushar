@@ -34,7 +34,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ShowDoaData from 'src/components/ShowDoaData';
 import ShowQuoteStatus from 'src/components/ShowQuoteStatus';
 import Steps, { getIndex } from 'src/components/Steps';
-import AdditionalCost from './AdditionalCost';
 import ManualReponseDialog from './ManualRespondDialog';
 import QuotationSummeryDialog from './QuotationSummeryDialog';
 import QuoteBuilder from './QuoteBuilder';
@@ -82,12 +81,6 @@ const QuotationDetails = () => {
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
   const [canConvert, setCanConvert] = useState(false);
-
-  useEffect(() => {
-    if (tabValue !== tab) {
-      setTabValue(tab ? parseInt(tab) : 0);
-    }
-  }, [tab]);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -656,16 +649,6 @@ const QuotationDetails = () => {
                   version={currentVersion}
                   allowedToEdit={allowedToEdit}
                   updateDOASetup={updateDOASetup}
-                />
-              )}
-              {stepNames[currentStep] === 'Manual Entry' && quotationData && (
-                <AdditionalCost
-                  quotationData={quotationData}
-                  setNextStep={setNextStep}
-                  renderedFrom={renderedFrom}
-                  version={currentVersion}
-                  allowedToEdit={allowedToEdit}
-                  stepFullScreen={stepFullScreen}
                 />
               )}
               {stepNames[currentStep] === 'Quote Builder' && quotationData && (
