@@ -120,7 +120,9 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
       });
 
       if (workOrders.length > 0) xPosition += 300;
+      const allWorkOrders = []
       workOrders?.map((workOrder, index) => {
+        allWorkOrders.push(`${workOrder._id}`);
         flow.push({
           id: `${workOrder._id}`,
           sourcePosition: 'right',
@@ -130,7 +132,7 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
             ref_type: 'workorder',
             ref_id: workOrder?._id,
             label: (
-              <HtmlTooltip arrow placement="top" title={'Workorder'}>
+              <HtmlTooltip arrow placement="top" title={'Work Order'}>
                 <div>
                   <Typography style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} variant="body2">
                     {workOrder.workOrderNumber || ''}
@@ -178,6 +180,10 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
         });
         loadingTicket?.assets?.map((ele) => {
           const workOrder = workOrders?.find((e) => e.serializedAsset === ele.asset);
+          const index = allWorkOrders?.indexOf(workOrder?._id);
+          if (index > -1) {
+            allWorkOrders?.splice(index, 1);
+          }
           flowEdge.push({
             id: `asset-loading-${ele.asset}-${loadingTicket._id}`,
             source: workOrder?._id,
@@ -210,6 +216,14 @@ const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus 
           position: { x: xPosition, y: 80 },
           style: customNodeStyles.repairOrderClosed
         });
+        allWorkOrders?.map((woId) => {
+          flowEdge.push({
+            id: `repairOrder-closed-${woId}-${repairOrderId}`,
+            source: woId,
+            target: `${repairOrderId}-closed`,
+            arrowHeadType: 'arrow'
+          });
+         })
         allLoadingTicket?.map((loadingTicket) => {
           flowEdge.push({
             id: `repairOrder-closed-${loadingTicket._id}-${repairOrderId}`,
