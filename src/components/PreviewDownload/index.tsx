@@ -8,6 +8,7 @@ import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import { isTablet } from 'react-device-detect';
 
 function PreviewDownload({
   resource,
