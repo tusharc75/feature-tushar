@@ -94,7 +94,7 @@ const ManageRepairOrder = ({
           } else {
             if (isAnyMaterial) {
               fieldsDataForUpdate?.forEach((e) => {
-                if (e.fieldName === 'customerAccount') {
+                if (['customerAccount', 'warehouse']?.includes(e.fieldName)) {
                   e.disableOnEdit = true;
                 }
               })

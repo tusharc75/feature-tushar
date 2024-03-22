@@ -13,7 +13,7 @@ import { groupBy, map, uniq } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiFillFilePdf } from 'react-icons/ai';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -1299,7 +1299,7 @@ const ReceivingTicket = ({
           type="button"
           size="small"
           disabled={downlodingFile || isOffline || uniqueReceivingTicket.length === 0}
-          startIcon={isMobile ? '' : <AiFillFilePdf />}
+          startIcon={isMobile ? '' : <VisibilityIcon />}
           style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
         >
           {downlodingFile ? 'Please wait...' : 'Preview'}
