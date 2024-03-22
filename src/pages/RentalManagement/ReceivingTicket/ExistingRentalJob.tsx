@@ -126,7 +126,11 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     });
 
     if (assetsAdd.length !== productInventory.filter((e) => e.type === 'Asset').length) {
-      alert('Product is not same');
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: `Assets selected more than the assigned quantity in other rental`
+      });
       return;
     }
 
