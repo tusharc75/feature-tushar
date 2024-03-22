@@ -24,7 +24,6 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
 import { ACTIVITY_RESOURCE, INVOICE_STATUS, SALES_ORDER_STATUS, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
-import AdditionalCost from './AdditionalCost';
 import Invoice from './Invoice';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import Material from './Material';
@@ -313,17 +312,9 @@ const SalesOrderDetails = () => {
               />
             )}
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[1].name && salesOrderData && (
-              <AdditionalCost
-                salesOrderData={salesOrderData}
-                setNextStep={setNextStep}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={allowedToEdit}
-              />
-            )}
-            {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[2].name && salesOrderData && (
               <Process salesOrderData={salesOrderData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
             )}
-            {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[3].name && salesOrderData && (
+            {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[2].name && salesOrderData && (
               <Invoice salesOrderData={salesOrderData} setNextStep={setNextStep} updateJobStatus={updateJobStatus} stepFullScreen={stepFullScreen} />
             )}
           </ContentFullScreen>
