@@ -110,7 +110,7 @@ const WarehouseDetailsPage = () => {
           <Box className="control-buttons-v1">
             {warehouseData ? (
               <>
-                {permissions?.warehouse?.isUpdate && (
+                {permissions?.warehouse?.isUpdate && !warehouseData?.deleted && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     size="small"
@@ -120,7 +120,7 @@ const WarehouseDetailsPage = () => {
                     {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
-                {permissions?.warehouse?.isDelete && (
+                {permissions?.warehouse?.isDelete && !warehouseData?.deleted && (
                   <span title={id ? "Primarily selected warehouse can't be deleted" : 'Permanently delete this warehouse'}>
                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                   </span>
