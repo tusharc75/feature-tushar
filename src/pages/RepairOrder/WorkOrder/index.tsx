@@ -672,10 +672,10 @@ const WorkOrder = ({
       _subRow.isValid = true;
 
       _subRow.canDelete = false;
+      if (_subRow.type === MATERIAL_TYPE.product) {
+        _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty ? false : true;
+      }
       if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
-        if (_subRow.type === MATERIAL_TYPE.product) {
-          _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty ? false : true;
-        }
         if (_subRow.type === MATERIAL_TYPE.service) {
           _subRow.canDelete = _subRow?.status === WORKORDER_SERVICE_STATUS.pending ? true : false;
         }
@@ -686,16 +686,12 @@ const WorkOrder = ({
           _subRow.canDelete = false;
         }
       }
-
       _subRow.hideSelection = false;
-      // if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed || !_subRow.canDelete) {
-      //   _subRow.hideSelection = true;
-      // }
     });
-    if (subRows.length === 0 && parent.type === 'package') {
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (parent.type === MATERIAL_TYPE.package) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return orderBy(subRows, ['type'], ['desc']);
