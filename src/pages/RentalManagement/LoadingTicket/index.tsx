@@ -9,7 +9,6 @@ import InfoIcon from '@material-ui/icons/Info';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { groupBy, isEqual, map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { AiFillFilePdf } from 'react-icons/ai';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { Link } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
@@ -51,6 +50,7 @@ import AddSerializedAsset from '../SerializedAsset/AddSerializedAsset';
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import { getRentalDeliveryTicket, getRentalProductAssets, uniqueProduct } from './../rentalOfflineHelper';
 import DateDialog from './DateDialog';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -988,9 +988,9 @@ const LoadingTicket = ({
               type="button"
               size="small"
               disabled={downlodingFile || isOffline || uniqueLoadingTicket.length === 0}
-              startIcon={isMobile ? null : <AiFillFilePdf />}
+              startIcon={isMobile ? null : <VisibilityIcon />}
             >
-              {isMobile ? downlodingFile ? <CircularProgress size={20} /> : <AiFillFilePdf /> : downlodingFile ? 'Please wait...' : 'Preview PDF'}
+              {isMobile ? downlodingFile ? <CircularProgress size={20} /> : <VisibilityIcon /> : downlodingFile ? 'Please wait...' : 'Preview'}
             </Button>
           </span>
         </HtmlTooltip>
