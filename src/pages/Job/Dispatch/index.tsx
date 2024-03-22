@@ -8,10 +8,10 @@ import { isMobile, isTablet } from 'react-device-detect';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
-import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -196,13 +196,13 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
           color="primary"
           type="button"
           size="small"
-          startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
+          startIcon={isMobile && !isTablet ? '' : <VisibilityIcon />}
           disabled={pdfLoading}
           onClick={(e) => {
             handleViewPdf('view', 'PDF');
           }}
         >
-          {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : pdfLoading === 'view' ? 'Please wait...' : 'Preview'}
+          {isMobile && !isTablet ? <VisibilityIcon /> : pdfLoading === 'view' ? 'Please wait...' : 'Preview'}
         </Button>
         <>
           <Button
