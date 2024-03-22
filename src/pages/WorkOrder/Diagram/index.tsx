@@ -6,7 +6,8 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import ShowPdf from './ShowPdf';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiDownload } from 'react-icons/bi';
+
+import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
@@ -38,7 +39,9 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
 
   const fetchData = async () => {
     axiosInstance()
-      .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}&version=${currentVersion}`)
+      .get(
+        `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}&version=${currentVersion}`
+      )
       .then(({ data: { data } }) => {
         const expend: any = {};
         setRowData(data);
@@ -117,7 +120,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
             variant="contained"
             className="no-shadow dark:[background:var(--dark-secondary)_!important]"
             color="inherit"
-            endIcon={<BiDownload />}
+            endIcon={<DownloadIcon />}
           >
             Download
           </Button>
@@ -151,10 +154,11 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                   return (
                     <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${expended[file?._id]
-                          ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                          : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
-                          }`}
+                        className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                            : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                        }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -170,7 +174,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                             </Typography>
                           </Box>
                         </div>
-                        {!fromVersions &&
+                        {!fromVersions && (
                           <div className="flex gap-2">
                             <HtmlTooltip title="Edit" placement="top" arrow>
                               <IconButton
@@ -215,7 +219,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                               </IconButton>
                             </HtmlTooltip>
                           </div>
-                        }
+                        )}
                       </div>
                       <Collapse in={expended[file?._id]}>
                         <div className="border border-[var(--common-border-color)]">
@@ -324,9 +328,10 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
               { type: resource, referenceId: referenceId, version: currentVersion, access: true },
               {
                 type: workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? ACTIVITY_RESOURCE.repairOrder : ACTIVITY_RESOURCE.productionOrder,
-                referenceId: workOrderData?.type === WORK_ORDER_TYPE.repairOrder ?
-                  workOrderData?.repairOrder?.optionValue || workOrderData?.repairOrder :
-                  workOrderData?.productionOrder?.optionValue || workOrderData?.productionOrder,
+                referenceId:
+                  workOrderData?.type === WORK_ORDER_TYPE.repairOrder
+                    ? workOrderData?.repairOrder?.optionValue || workOrderData?.repairOrder
+                    : workOrderData?.productionOrder?.optionValue || workOrderData?.productionOrder,
                 access: true
               }
             ]}
@@ -353,7 +358,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
           }}
         />
       )}
-    </Box >
+    </Box>
   );
 };
 

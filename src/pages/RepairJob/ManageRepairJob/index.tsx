@@ -90,7 +90,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                   .then(({ data: { data: assetData } }) => {
                     if (assetData.length) {
                       fieldsDataForUpdate?.forEach((e) => {
-                        if (e.fieldName === 'warehouse') {
+                        if (['supplierAccount','warehouse']?.includes(e?.fieldName)) {
                           e.disableOnEdit = true;
                           e.isUneditable = true;
                         }
