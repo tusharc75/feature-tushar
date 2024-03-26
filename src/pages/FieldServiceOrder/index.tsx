@@ -23,6 +23,7 @@ import ManageServiceOrder from './ManageServiceOrder';
 import { clearAll, deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { fieldServiceOfflineUpdate } from './Services/OfflineHelper';
+import HideWhenOffline from 'src/components/HideWhenOffline';
 
 let serviceOrderTimeout;
 
@@ -160,35 +161,39 @@ const ServiceOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.fieldServiceOrder?.isCreate ? 'Clone' : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              disabled={permissions?.fieldServiceOrder?.isCreate ? false : true}
-              onClick={() => {
-                setShowManageDialog({ open: true, isClone: true, idToClone: row?.original._id });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color={permissions?.fieldServiceOrder?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        <HideWhenOffline>
+          <HtmlTooltip title={permissions?.fieldServiceOrder?.isCreate ? 'Clone' : cloneDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                disabled={permissions?.fieldServiceOrder?.isCreate ? false : true}
+                onClick={() => {
+                  setShowManageDialog({ open: true, isClone: true, idToClone: row?.original._id });
+                }}
+              >
+                <FileCopyIcon fontSize="small" color={permissions?.fieldServiceOrder?.isCreate ? 'primary' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </HideWhenOffline>
+        <HideWhenOffline>
+          <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={row?.original?.canDelete ? false : true}
+                onClick={() => {
+                  setDeleteRecord(row.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </HideWhenOffline>
       </>
     )
   };
@@ -343,7 +348,7 @@ const ServiceOrder = () => {
           onSearch={handleSearch}
           // rightSideContents
           isActionButtonVisible={true}
-          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          // actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
@@ -372,8 +377,7 @@ const ServiceOrder = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-              deleteRecord?.fieldServiceOrderNumber || ''
+            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.fieldServiceOrderNumber || ''
               } ? `}
             onClose={() => {
               setDeleteRecord(null);

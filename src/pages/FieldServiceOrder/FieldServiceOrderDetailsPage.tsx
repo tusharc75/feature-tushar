@@ -69,6 +69,12 @@ const ServiceOrderDetailsPage = () => {
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
+    if (isOffline) {
+      setSteps(serviceOrderSteps.filter((s) => s.name !== 'Field Ticket Invoice'));
+    }
+  }, [isOffline]);
+
+  useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
       if (history.action === 'PUSH') {
@@ -147,6 +153,7 @@ const ServiceOrderDetailsPage = () => {
   };
 
   const updateProcessStatus = async (processStatus) => {
+    if(isOffline) return;
     axiosInstance()
       .put(`${fieldServiceOrder.api}/${id}/process-status`, { processStatus: processStatus })
       .then(({ data }) => {
@@ -194,6 +201,7 @@ const ServiceOrderDetailsPage = () => {
   };
 
   const handleChangeStatus = (status) => {
+    if(isOffline) return;
     axiosInstance()
       .patch(`${routes.fieldServiceOrder.path}/status/${serviceOrderData._id}`, { status: status })
       .then(({ data: { data } }) => {
@@ -275,7 +283,7 @@ const ServiceOrderDetailsPage = () => {
             }
             {...a11yProps(1)}
           />
-          {!(isMobile && !isTablet) && (
+          {!(isMobile && !isTablet) && !isOffline && (
             <Tab
               className={'tabLayout'}
               label={

@@ -19,6 +19,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
+import HideWhenOffline from 'src/components/HideWhenOffline';
 
 
 const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, handleChangeStatus }) => {
@@ -97,7 +98,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
       dispatch({ type: 'selection', selectedRecords: [] });
       let data, count;
 
-      if(isOffline) {
+      if (isOffline) {
         data = await findAll(objectStore.fieldTicket);
         data = data?.filter((d) => d?.fieldServiceOrder?.optionValue === serviceOrderData?._id);
         count = data.length;
@@ -204,37 +205,41 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             </IconButton>
           </span>
         </HtmlTooltip>
-        {!serviceOrderData?.quotation &&
-          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
+        <HideWhenOffline>
+          {!serviceOrderData?.quotation &&
+            <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
+              <span>
+                <IconButton
+                  disabled={permissions?.fieldTicket?.isCreate ? false : true}
+                  size="small"
+                  aria-label="Clone"
+                  onClick={() => {
+                    setOpenDialog({ open: true, isClone: true, id: row?.original?._id });
+                  }}
+                >
+                  <FileCopyIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          }
+        </HideWhenOffline>
+        <HideWhenOffline>
+          <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
             <span>
               <IconButton
-                disabled={permissions?.fieldTicket?.isCreate ? false : true}
+                disabled={row?.original?.canDelete ? false : true}
                 size="small"
-                aria-label="Clone"
+                aria-label="Delete"
                 onClick={() => {
-                  setOpenDialog({ open: true, isClone: true, id: row?.original?._id });
+                  setDeleteRecord([row?.original?._id]);
+                  setShowDeleteConfirmBox(true);
                 }}
               >
-                <FileCopyIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
+                <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
-        }
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
-          <span>
-            <IconButton
-              disabled={row?.original?.canDelete ? false : true}
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord([row?.original?._id]);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        </HideWhenOffline>
       </>
     )
   };
@@ -274,7 +279,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit && !serviceOrderData?.quotation}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={true}
+        isActionButtonVisible={!isOffline}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 }}
         hasXpadding
