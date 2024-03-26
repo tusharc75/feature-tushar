@@ -18,7 +18,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import IconButton from '@material-ui/core/IconButton';
 import ChangeFieldNameDialogue from './ChangeFieldNameDialogue';
 
-const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField, handleClose, section, setSection, sectionId }) => {
+const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField, handleChange }) => {
   const [isInitialUpdated, setIsInitialUpdated] = useState({
     MultipleFormula: false,
     Currency: false,
@@ -72,12 +72,8 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
       </Grid>
       {changeFieldNamePopup && (
         <ChangeFieldNameDialogue 
-        setFieldValue={setFieldValue} 
         fieldData={fieldData} 
-        handleClose={handleClose} 
-        section = {section}
-        setSection = {setSection}
-        sectionId = {sectionId}
+        handleChange = {handleChange}
         >
         </ChangeFieldNameDialogue>
       )}

@@ -14,7 +14,7 @@ const FieldSchema = object().shape({
   fieldName: string().required('Please enter field Name')
 });
 
-const ChangeFieldNameDialogue = ({ setFieldValue, fieldData, handleClose, section, setSection, sectionId }) => {
+const ChangeFieldNameDialogue = ({ fieldData, handleChange }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -34,14 +34,8 @@ const ChangeFieldNameDialogue = ({ setFieldValue, fieldData, handleClose, sectio
   //   handleClose();
   // };
   const handleSave = (values) => {
-    const updatedFieldData = {
-      ...fieldData,
-      fieldName: values.fieldName
-    };
-  
-    
-    let updatedSection = section.map(row => {
-      if (row.sectionId.toString() === sectionId.toString()) {
+    let updatedSection = handleChange.section ? handleChange.section.map(row => {
+      if (row.sectionId.toString() === handleChange.sectionId.toString()) {
         return {
           ...row,
           field: row.field.map(ele => {
@@ -56,10 +50,10 @@ const ChangeFieldNameDialogue = ({ setFieldValue, fieldData, handleClose, sectio
         };
       }
       return row;
-    });
+    }) : [];
 
-    setSection(updatedSection);
-    handleClose();
+    handleChange.setSection(updatedSection);
+    handleChange.handleClose();
   };
   
 
@@ -97,7 +91,7 @@ const ChangeFieldNameDialogue = ({ setFieldValue, fieldData, handleClose, sectio
             <CustomDialogHeader
               title={`${values['fieldName']} - ${FieldList[fieldData?.type?.toUpperCase()]?.label} Properties`}
               onClose={() => {
-                if (isEqual(values, initialValues)) handleClose();
+                if (isEqual(values, initialValues)) handleChange.handleClose();
                 setShowConfirmDialog(true);
               }}
               isMinimized={!fullScreen}
@@ -132,7 +126,7 @@ const ChangeFieldNameDialogue = ({ setFieldValue, fieldData, handleClose, sectio
               <Button
                 size="small"
                 onClick={() => {
-                  if (isEqual(values, initialValues)) handleClose();
+                  if (isEqual(values, initialValues)) handleChange.handleClose();
                   setShowConfirmDialog(true);
                 }}
                 color="primary"
@@ -154,7 +148,7 @@ const ChangeFieldNameDialogue = ({ setFieldValue, fieldData, handleClose, sectio
                 }}
                 onClose={() => {
                   setShowConfirmDialog(false);
-                  handleClose();
+                  handleChange.handleClose();
                 }}
               />
             ) : null}
