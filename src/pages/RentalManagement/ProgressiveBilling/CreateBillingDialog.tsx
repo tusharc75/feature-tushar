@@ -100,7 +100,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         width: 200,
         disableFilters: true,
         Cell: ({ row }) =>
-          row.original['type'] && row?.original['type'] !== 'assetIotData' ? (
+          row.original['type'] && row?.original['type'] !== 'other' ? (
             <p>
               {`${startCase(row.original?.type)} `}
               {row.original['type'] === 'product'
@@ -134,7 +134,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
               </span>
             </Box>
-            {row.original['type'] !== 'manualEntry' && row.original['type'] !== 'assetIotData' && (
+            {row.original['type'] !== 'manualEntry' && row.original['type'] !== 'other' && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -186,7 +186,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {row.original.isEditable && (
+          { row?.original['type'] !== 'other' && row.original.isEditable && (
             <IconButton
               size="small"
               aria-label="Details"
@@ -436,7 +436,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           ? _subRow?.inventoryDetail?.assetNumber
           : _subRow.type === 'package'
           ? _subRow?.packageDetail?.packageName
-          : _subRow.type === 'assetIotData'
+          : _subRow.type === 'other'
           ? moment(_subRow?.date)?.format(dateFormat)
           : '';
       _subRow.description =
@@ -504,9 +504,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     if (assetList?.length) {
       rentalUnitVolum = await axiosInstance().post(
         `${routes.rentalManagement.path}/${rentalManagementData?._id}/inventory/rental-unit-volume-utilization`,
-        assetList?.map((d) => ({ asset: d?._id, fromDate: d?.manualStartDate, toDate: endDate }))
+        assetList?.map((d) => ({ asset: d?._id, fromDate: moment(d?.manualStartDate).format('MM/DD/YYYY'), toDate: moment(endDate).format('MM/DD/YYYY') }))
       );
     }
+    
 
     let rows: any = [];
     selectedRecords?.forEach((element) => {
@@ -596,7 +597,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           childRows.push(
             ...rentalUnitVolum?.data?.data
               ?.find((r) => r?.asset === element?._id)
-              ?.data?.map((d) => ({ ...d, type: 'assetIotData', actualJobDuration: d?.DailyEvapBBLs, parentId: element?._id }))
+              ?.data?.map((d) => ({ ...d, type: 'other', actualJobDuration: d?.DailyEvapBBLs, parentId: element?._id }))
           );
         } else {
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
@@ -612,7 +613,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     initializeTable([...tempRows, ...childRows]);
     setRowsApplied((prevState) => {
       let prevRowsApplied = prevState.filter((obj) => !rows.map((d) => d._id).includes(obj._id));
-      return [...prevRowsApplied, ...rows];
+      return [...prevRowsApplied, ...rows, ...childRows];
     });
     setAppliedDate(true);
   };
@@ -653,6 +654,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         delete element?.description;
       }
     });
+
     setUpdating(true);
     axiosInstance()
       .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
