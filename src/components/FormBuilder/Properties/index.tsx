@@ -545,6 +545,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         errors={errors}
                         module={module}
                         isCalculativeField={isCalculativeField}
+                        handleClose={handleClose}
+                        section = {section}
+                        setSection = {setSection}
+                        sectionId = {sectionId}
                       />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
