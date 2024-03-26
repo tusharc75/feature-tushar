@@ -474,19 +474,19 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     setTabValue(newValue);
   };
 
-  // const handleChange = () =>{
-  //     return {handleClose, section, setSection, sectionId};
-  // }
-  const handleChange = (setSectionFunction, handleCloseFunction) => {
-    return {
-      handleClose: handleCloseFunction,
-      section,
-      setSection: setSectionFunction,
-      sectionId
-    };
+  const handleChangeFieldName = (values) => {
+    let data = [...section];
+    data.forEach((row) => {
+      if (row.sectionId.toString() === sectionId.toString()) {
+        row.field.forEach((ele) => {
+          if (ele._id.toString() === values?._id?.toString()) {
+            ele.fieldName = values?.fieldName;
+          }
+        });
+      }
+    });
+    setSection(data);
   };
-  
-  
 
   return (
     <Dialog
@@ -559,7 +559,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         errors={errors}
                         module={module}
                         isCalculativeField={isCalculativeField}
-                        handleChange = {handleChange(setSection, handleClose)}
+                        handleChangeFieldName={handleChangeFieldName}
                       />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
