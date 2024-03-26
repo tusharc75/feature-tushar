@@ -31,6 +31,8 @@ import ServiceOrderViews from './RoadMapViews';
 import Services from './Services';
 import Technician from './Technician';
 import TechnicianDispatch from './TechnicianDispatch';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findOne, objectStore } from '../../constants/indexdbhelper';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -63,6 +65,8 @@ const ServiceOrderDetailsPage = () => {
 
   const [steps, setSteps] = useState(serviceOrderSteps);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -112,8 +116,12 @@ const ServiceOrderDetailsPage = () => {
   const fetchServiceOrderData = async () => {
     try {
       let data;
-      const response: any = await axiosInstance().get(`${fieldServiceOrder.api}/${id}`);
-      data = response?.data?.data;
+      if (isOffline) {
+        data = await findOne(objectStore.fieldServiceOrder, id);
+      } else {
+        const response: any = await axiosInstance().get(`${fieldServiceOrder.api}/${id}`);
+        data = response?.data?.data;
+      }
       setLoadingDetails(false);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
@@ -149,14 +157,20 @@ const ServiceOrderDetailsPage = () => {
 
   const getServiceOrderFields = async () => {
     try {
-      const response: any = await axiosInstance().get(`/field/field-policy?resource=${sidebarResource.fieldServiceOrder}`);
-      response?.data?.data?.field.some((o) => {
+      let data: any;
+      if (isOffline) {
+        data = await findOne(objectStore.resource, objectStore.fieldServiceOrder);
+      } else {
+        const response = await axiosInstance().get(`/field/field-policy?resource=${sidebarResource.fieldServiceOrder}`);
+        data = response?.data?.data?.field;
+      }
+      data?.some((o) => {
         if (o?.fieldData?.fieldName === 'status') {
           setStatusOptions([...o.fieldData.option]);
           return true;
         }
       });
-      setServiceOrderFields(response?.data?.data.field);
+      setServiceOrderFields(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }

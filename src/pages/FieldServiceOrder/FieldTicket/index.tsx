@@ -17,6 +17,9 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
+
 
 const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, handleChangeStatus }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -32,6 +35,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const [columns, setColumns] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchGridColumns();
@@ -41,83 +45,93 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
     fetchData();
   }, [selectedEntity, serviceOrderData]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.fieldTicket}`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
-        newColumns?.forEach((o) => {
-          if (o.accessor === 'fieldTicketNumber') {
-            o.cell = ({ row }) =>
-              row?.original?.fieldTicketNumber ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <h5
-                    className="link text-truncate"
+  const fetchGridColumns = async () => {
+    try {
+      let data;
+      if (isOffline) {
+        data = await findOne(objectStore.resource, objectStore.fieldTicket);
+      } else {
+        const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
+        data = response?.data?.data;
+      }
+      const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
+      newColumns?.forEach((o) => {
+        if (o.accessor === 'fieldTicketNumber') {
+          o.cell = ({ row }) =>
+            row?.original?.fieldTicketNumber ? (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <h5
+                  className="link text-truncate"
+                  onClick={() => {
+                    setOpenDialog({ open: true, isClone: false, id: row?.original?._id });
+                  }}
+                >
+                  {row?.original?.fieldTicketNumber}
+                </h5>
+                <Box ml={1}>
+                  <IconButton
+                    size="small"
                     onClick={() => {
-                      setOpenDialog({ open: true, isClone: false, id: row?.original?._id });
+                      window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
                     }}
                   >
-                    {row?.original?.fieldTicketNumber}
-                  </h5>
-                  <Box ml={1}>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
-                      }}
-                    >
-                      <OpenInNewIcon fontSize="small" color="primary" />
-                    </IconButton>
-                  </Box>
-                </div>
-              ) : (
-                <NoDataCell />
-              );
-          }
-        });
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </Box>
+              </div>
+            ) : (
+              <NoDataCell />
+            );
+        }
       });
+      setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    }
   };
 
-  const fetchData = () => {
-    setNextStep(false);
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
+  const fetchData = async () => {
+    try {
+      setNextStep(false);
+      dispatch({ type: 'loading', loading: true });
+      dispatch({ type: 'selection', selectedRecords: [] });
+      let data, count;
 
-    const queryString = getQueryString();
-    axiosInstance()
-      .get(`${routes.fieldTicket.path}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data?.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          finalObject['allowedToEdit'] =
-            isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
-          finalObject['canDelete'] =
-            u?.canDelete &&
-            permissions?.fieldTicket?.isDelete &&
-            u?.owner?.optionValue === user?.user?._id &&
-            ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
-          let res = {
-            ...finalObject
-          };
-          return res;
-        });
-        dispatch({
-          type: 'initialize',
-          data: rows,
-          count: count
-        });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-        setNextStep(true);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
+      if(isOffline) {
+        data = await findAll(objectStore.fieldTicket);
+        data = data?.filter((d) => d?.fieldServiceOrder?.optionValue === serviceOrderData?._id);
+        count = data.length;
+      } else {
+        const queryString = getQueryString();
+        const response = await axiosInstance().get(`${routes.fieldTicket.path}${queryString}`);
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      let rows = data?.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+        var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+        finalObject['allowedToEdit'] =
+          isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        finalObject['canDelete'] =
+          u?.canDelete &&
+          permissions?.fieldTicket?.isDelete &&
+          u?.owner?.optionValue === user?.user?._id &&
+          ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        let res = {
+          ...finalObject
+        };
+        return res;
       });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+      setNextStep(true);
+      dispatch({ type: 'loading', loading: false });
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    }
   };
 
   const getQueryString = (isExport = false) => {
