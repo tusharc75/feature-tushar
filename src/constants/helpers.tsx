@@ -2957,3 +2957,9 @@ export const ASSET_APPROVAL_STATUS = {
   rejected: 'Rejected',
   pending: 'Pending',
 }
+
+export const STEPS_STYLE = {
+  list: 'List',
+  step: 'Step',
+  sideBar: 'Side Bar',
+}
