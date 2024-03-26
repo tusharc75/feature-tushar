@@ -474,6 +474,20 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     setTabValue(newValue);
   };
 
+  // const handleChange = () =>{
+  //     return {handleClose, section, setSection, sectionId};
+  // }
+  const handleChange = (setSectionFunction, handleCloseFunction) => {
+    return {
+      handleClose: handleCloseFunction,
+      section,
+      setSection: setSectionFunction,
+      sectionId
+    };
+  };
+  
+  
+
   return (
     <Dialog
       maxWidth="md"
@@ -545,6 +559,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         errors={errors}
                         module={module}
                         isCalculativeField={isCalculativeField}
+                        handleChange = {handleChange(setSection, handleClose)}
                       />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
