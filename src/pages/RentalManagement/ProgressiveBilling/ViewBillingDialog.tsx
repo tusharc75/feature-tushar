@@ -7,7 +7,7 @@ import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, MATERIAL_TYPE, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_TYPE, dateFormat, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -23,6 +23,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import moment from 'moment';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess }) => {
 
@@ -79,7 +80,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           sticky: isMobile || isTablet ? 'none' : 'left',
           disabled: true,
           Cell: ({ row }) =>
-            row.original['type'] ? (
+            row.original['type'] && row.original['type'] !== 'other' ? (
               <p>
                 {`${startCase(row.original?.type)} `}
                 {row.original['type'] === 'product'
@@ -110,7 +111,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
               <p className="text-truncate" title={row.original?.detail}>
                 {row.original?.detail}
               </p>
-              {row.original['type'] !== 'manualEntry' && (
+              {row.original['type'] !== 'manualEntry' && row.original['type'] !== 'other' && (
                 <Box ml={1}>
                   <IconButton
                     size="small"
@@ -154,7 +155,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
         canDrag: false,
         Cell: ({ row }) => (
           <Grid container spacing={1}>
-            {row.original.isEditable && row.original.qty > 1 && (
+            {row.original['type'] !== 'other' && row.original.isEditable && row.original.qty > 1 && (
               <>
                 <IconButton
                   size="small"
@@ -168,18 +169,23 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                 <Box ml={1} />
               </>
             )}
-            <IconButton
-              disabled={!invoiceData?.isLatestInvoice}
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                getNestedSubRows(obj, row.original);
-                setViewBillDialogConfirm({ open: true, rows: obj });
-              }}
-            >
-              <Delete color={invoiceData?.isLatestInvoice ? 'error' : 'disabled'} />
-            </IconButton>
+            {
+              row.original['type'] !== 'other' && (
+                <IconButton
+                disabled={!invoiceData?.isLatestInvoice}
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  getNestedSubRows(obj, row.original);
+                  setViewBillDialogConfirm({ open: true, rows: obj });
+                }}
+              >
+                <Delete color={invoiceData?.isLatestInvoice ? 'error' : 'disabled'} />
+              </IconButton>
+              )
+            }
+           
           </Grid>
         )
       });
@@ -252,7 +258,11 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === 'serializedAsset'
             ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.serviceDetail?.serviceName
+            : _subRow?.type === 'service'
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.type === 'other'
+            ? moment(_subRow?.date)?.format(dateFormat)
+            : ''
         }`;
       _subRow.description =
         _subRow.type === 'service'
@@ -265,7 +275,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                 ? _subRow.serializedAssetDetail?.product?.productDescription || ''
                 : '';
       _subRow.isEditable = false;
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.qtyDisplay = _subRow?.type === 'other' ? '' : `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.hideSelection = _subRow?.type === 'other' ? true : false
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
