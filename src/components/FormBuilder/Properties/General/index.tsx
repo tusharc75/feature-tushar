@@ -16,16 +16,17 @@ import { MinMax } from '../../AddField/minMax';
 import { fieldLabelToFieldName } from '../../../../constants/helpers';
 import SettingsIcon from '@material-ui/icons/Settings';
 import IconButton from '@material-ui/core/IconButton';
-import ChangeFieldNameDialogue from './ChangeFieldNameDialogue';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import FieldNameDialog from './FieldNameDialog';
 
-const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField, handleChange }) => {
+const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField, handleChangeFieldName }) => {
   const [isInitialUpdated, setIsInitialUpdated] = useState({
     MultipleFormula: false,
     Currency: false,
     Converter: false
   });
   const [lookupResource, setLookupResource] = useState([]);
-  const [changeFieldNamePopup, setchangeFieldNamePopup] = useState(false);
+  const [changeFieldNameDialog, setChangeFieldNameDialog] = useState(false);
 
   useEffect(() => {
     getLookupList();
@@ -37,13 +38,13 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
   };
 
   const handleClick = () => {
-    setchangeFieldNamePopup(true);
-  }  
-  
+    setChangeFieldNameDialog(true);
+  }
+
   return (
     <Box>
       <Grid container spacing={1}>
-        <Grid item xs={10} md={6} sm={6}>
+        <Grid item xs={10} md={10} sm={10}>
           <TextField
             variant="outlined"
             type="text"
@@ -61,21 +62,29 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
             }}
           />
         </Grid>
-        <Grid item xs={2} md={6} sm={6} container justify="flex-end">
-                <IconButton
-                  aria-label="setting"
-                  onClick={handleClick}
-                >
-                  <SettingsIcon fontSize="small" />
-                </IconButton>
-          </Grid>  
+        <Grid item xs={2} md={2} sm={2} container justify="flex-end">
+          <HtmlTooltip title='Change Field Name'>
+            <IconButton
+              aria-label="setting"
+              onClick={handleClick}
+              size='small'
+            >
+              <SettingsIcon color='primary' fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        </Grid>
       </Grid>
-      {changeFieldNamePopup && (
-        <ChangeFieldNameDialogue 
-        fieldData={fieldData} 
-        handleChange = {handleChange}
-        >
-        </ChangeFieldNameDialogue>
+      {changeFieldNameDialog && (
+        <FieldNameDialog
+          fieldData={fieldData}
+          handleSave={(data) => {
+            setChangeFieldNameDialog(false)
+            handleChangeFieldName(data)
+          }}
+          handleClose={() => {
+            setChangeFieldNameDialog(false)
+          }}
+        />
       )}
       <Box>
         <Grid container>
