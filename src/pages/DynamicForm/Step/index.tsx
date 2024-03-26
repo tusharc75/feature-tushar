@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import View from './View';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { STEPS_STYLE } from 'src/constants/helpers';
 
 const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
   const [steps, setSteps] = useState(null);
@@ -25,9 +26,8 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
 
   return (
     <>
-      {steps &&
-        steps?.length &&
-        (!resourceData?.showStepsInList ? (
+      {steps && steps?.length &&
+        (resourceData?.stepsStyle === STEPS_STYLE.step ? (
           <>
             <Steps
               isNextStep={false}
