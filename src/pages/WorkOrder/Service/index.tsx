@@ -165,7 +165,19 @@ const Service = ({
               }
             }
           } else {
-            element.clickable = true;
+            if (!completed) {
+              if (
+                allowedToEdit ||
+                element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) ||
+                (!element?.assignedUsers?.length && element?.competencies?.filter((e) => user?.competencies?.includes(e))?.length)
+              ) {
+                element.clickable = true;
+              } else {
+                element.clickable = false;
+              }
+            } else {
+              element.clickable = false;
+            }
           }
         });
 
@@ -551,7 +563,8 @@ const Service = ({
                     setShowConfirmBox,
                     servicesButtons: servicesButtons,
                     isMobile: false,
-                    initialTabIndex: prevOrder.current
+                    initialTabIndex: prevOrder.current,
+                    completed
                   }}
                 />
               </Grid>
@@ -621,7 +634,8 @@ const Service = ({
                   setShowConfirmBox,
                   servicesButtons: servicesButtons,
                   isMobile: true,
-                  initialTabIndex: prevOrder.current
+                  initialTabIndex: prevOrder.current, 
+                  completed
                 }}
               />
             </div>
@@ -664,7 +678,7 @@ const Service = ({
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
               {allowedToEdit && resource === sidebarResource.workOrder && (
                 <MenuItem
-                  disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
+                  disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed ? false : true}
                   onClick={() => {
                     setUserAssignDialog(true);
                     setAnchorEl(null);
@@ -715,7 +729,7 @@ const Service = ({
               {resource === sidebarResource.workOrder && (
                 <MenuItem
                   disabled={
-                    allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status)
+                    allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed
                       ? false
                       : true
                   }
@@ -829,13 +843,13 @@ const Service = ({
                   setOpenProperties(true);
                   setAnchorEl(null);
                 }}
-                disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
+                disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
               >
                 Properties
               </MenuItem>
               {resource === sidebarResource.workOrder && (
                 <MenuItem
-                  disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
+                  disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
                   onClick={() => {
                     handleRemoveService(selectedService?.uniqueId);
                     setAnchorEl(null);
