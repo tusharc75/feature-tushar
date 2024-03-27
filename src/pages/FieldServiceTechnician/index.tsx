@@ -51,7 +51,6 @@ const FieldServiceTechnician = () => {
   const [viewFieldTicket, setViewFieldTicket] = useState({ open: false, data: null });
 
   const { generateColumns } = useColumns();
-  const [originalData, setOriginalData] = useState([]);
 
   useEffect(() => {
     fetchColumns();
@@ -83,10 +82,7 @@ const FieldServiceTechnician = () => {
               aria-label="Add"
               disabled={permissions?.fieldTicket?.isCreate ? false : true}
               onClick={() => {
-                const data = originalData?.find((e) => e._id === row?.original?._id)
-                if (data) {
-                  setOpenDialog({ open: true, data: data });
-                }
+                setOpenDialog({ open: true, data: row?.original?.orignalData });
               }}
             >
               <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
@@ -100,10 +96,7 @@ const FieldServiceTechnician = () => {
                 size="small"
                 aria-label="View"
                 onClick={() => {
-                  const data = originalData?.find((e) => e._id === row?.original?._id)
-                  if (data) {
-                    setViewFieldTicket({ open: true, data: data });
-                  }
+                  setViewFieldTicket({ open: true, data: row?.original?.orignalData });
                 }}
               >
                 <VisibilityIcon fontSize="small" color="primary" />
@@ -135,9 +128,9 @@ const FieldServiceTechnician = () => {
     axiosInstance()
       .get(`${fieldServiceOrder.api}${queryString}`)
       .then(({ data: { data, count } }) => {
-        setOriginalData(data)
         let rows = data?.map((u) => {
-          let finalObject = prepareDataForGrid(u);
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject.orignalData = u;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
