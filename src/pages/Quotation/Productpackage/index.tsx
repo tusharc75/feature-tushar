@@ -367,6 +367,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct || false;
+      _subRow.qtyDisplay = _subRow.qty * parent.qty;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -707,7 +708,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         parentId: m._id,
         product: m.materialId,
         productName: m?.detail,
-        qty: m.qty - (alreadyAssets?.length || 0)
+        qty: m.qtyDisplay - (alreadyAssets?.length || 0)
       };
     });
     setProducts([...products?.filter((e) => e.qty > 0)]);
