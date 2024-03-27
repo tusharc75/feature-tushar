@@ -16,6 +16,7 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [expended, setExpended] = useState({});
   const [nextStep, setNextStep] = useState(false);
+  const [index, setIndex] = useState({});
 
   useEffect(() => {
     resourceData?.steps?.forEach((step) => {
@@ -23,6 +24,14 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
     });
     setSteps(_.sortBy(resourceData?.steps, 'order'));
   }, [resourceData]);
+  
+  useEffect(() => {
+    if(steps?.length && resourceData?.stepsStyle === STEPS_STYLE.sideBar)setIndex(steps[0]);
+  },[steps]);
+
+  const handleClick = (step) => {
+    setIndex(step);
+  };
 
   return (
     <>
@@ -50,7 +59,36 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
               />
             </ContentFullScreen>
           </>
-        ) : (
+        ) : (resourceData?.stepsStyle === STEPS_STYLE.sideBar ? (
+        <Grid>
+          <Grid style={{ display: 'flex'}}>
+            <Grid style={{ marginRight: '20px',border: '1px solid black', borderRadius: '10px', padding:'12px'}}
+              className={`overflow-x-hidden overflow-y-auto max-h-[calc(100vh-300px)]` }>      
+              {steps?.map((step, i) => {
+                return (
+                  <Box mt={2} key={i} onClick={() => handleClick(step)}
+                    style={{border: step === index ? '1px solid blue' : '1px solid black',borderRadius: '2px',cursor: 'pointer'}}>
+                    <Box padding="5px">
+                      <Typography variant="subtitle2">{step?.stepName}</Typography>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Grid>
+            <Grid className={`overflow-x-hidden overflow-y-auto max-h-[calc(100vh-300px)]`}>
+                <View
+                  step={index}
+                  allowedToEdit={allowedToEdit}
+                  data={data}
+                  resource={resource}
+                  resourceId={resourceId}
+                  setNextStep={setNextStep}
+                  stepFullScreen={stepFullScreen}
+                />
+            </Grid>
+          </Grid>
+        </Grid>)
+        :
           <>
             {steps?.map((step, i) => {
               return (
