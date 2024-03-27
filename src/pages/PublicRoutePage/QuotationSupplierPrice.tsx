@@ -383,6 +383,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       onClick={(e: any) => (e.target.value = null)}
       id="importFromExcel"
       name="importFromExcel"
+      className="sr-only"
       onChange={uploadData}
       accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
       style={{
