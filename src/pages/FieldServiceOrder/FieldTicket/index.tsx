@@ -193,7 +193,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={row?.original?.allowedToEdit ? 'Edit' : 'You can not Delete'}>
+        <HtmlTooltip title={row?.original?.allowedToEdit ? 'Edit' : 'You can not Edit'}>
           <span>
             <IconButton
               disabled={row?.original?.allowedToEdit ? false : true}

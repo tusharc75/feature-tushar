@@ -17,7 +17,8 @@ import {
   setFieldsInAscendingOrder,
   yupSchema,
   GenerateResourceLineNumber,
-  QUOTATION_TYPE
+  QUOTATION_TYPE,
+  QUOTATION_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -84,6 +85,13 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
             setLoading(false);
           } else {
             setSalesDetails(data);
+            if (data?.canEdit === false) {
+              fieldsDataForUpdate?.forEach((e) => {
+                if (['customerAccount', 'warehouse', 'type']?.includes(e?.fieldName)) {
+                  e.isUneditable = true;
+                }
+              });
+            }
             setInitialData({
               fields: fieldsDataForUpdate,
               values: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -98,7 +106,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
         initialData['quotationNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
           fieldsDataForCreate?.forEach((field) => {
-            if(referenceData[field.fieldName]) {
+            if (referenceData[field.fieldName]) {
               field.isUneditable = true;
             }
           });
@@ -107,7 +115,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
               initialData[key] = referenceData[key];
             }
           }
-          
+
         }
         setInitialData({
           fields: fieldsDataForCreate,
@@ -165,7 +173,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                 toastConfig.setToastConfig(error);
               });
           } else {
-            if(renderedFrom !== routes.projectSales.title) history.push(`${routes.quotationDetail.path}/${data._id}`);   
+            if (renderedFrom !== routes.projectSales.title) history.push(`${routes.quotationDetail.path}/${data._id}`);
             setLoading(false);
             onSuccess(data);
             toastConfig.setToastConfig({

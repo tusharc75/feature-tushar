@@ -56,8 +56,6 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
               }}
             >
               <CustomRenderCell value={row.original?.invoiceNumber} />
-
-
             </span>
             <Box ml={1}>
               <IconButton
@@ -213,6 +211,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
+            hideSelection={true}
           />
         ) : (
           <Box p={2} height={500}>
