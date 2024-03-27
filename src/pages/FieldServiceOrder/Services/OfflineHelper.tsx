@@ -14,6 +14,5 @@ export const fieldServiceOfflineUpdate = async (ids) => {
         return true
     }
     catch (e) {
-        console.log(e);
     }
 };
