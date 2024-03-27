@@ -5,7 +5,7 @@ import { backendApi } from '../../config';
 import { Box, Button, Divider, makeStyles } from '@material-ui/core';
 import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { sortBy } from 'lodash';
+import { sortBy, startCase } from 'lodash';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -156,18 +156,18 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             item?.type === MATERIAL_TYPE.product
               ? item?.productDetail?.productName
               : item?.type === MATERIAL_TYPE.service
-              ? item?.serviceDetail?.serviceName
-              : item?.type === MATERIAL_TYPE.package
-              ? item?.packageDetail?.packageName
-              : '';
+                ? item?.serviceDetail?.serviceName
+                : item?.type === MATERIAL_TYPE.package
+                  ? item?.packageDetail?.packageName
+                  : '';
           res.description =
             item?.type === MATERIAL_TYPE.product
               ? item?.productDetail?.productDescription
               : item?.type === MATERIAL_TYPE.service
-              ? item?.serviceDetail?.serviceDescription
-              : item?.type === MATERIAL_TYPE.package
-              ? item?.packageDetail?.packageDescription
-              : '';
+                ? item?.serviceDetail?.serviceDescription
+                : item?.type === MATERIAL_TYPE.package
+                  ? item?.packageDetail?.packageDescription
+                  : '';
           res.subRows = generateNestedData(data?.materials, res);
           return res;
         });
@@ -191,7 +191,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             width: 150,
             show: true,
             disabled: true,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.type}</p>
+            Cell: ({ row }) => <p className="text-truncate">{startCase(row?.original?.type)}</p>
           },
           {
             accessor: 'detail',
@@ -239,18 +239,18 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow?.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.type === 'package'
-          ? _subRow?.packageDetail?.packageName
-          : '';
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.type === 'package'
+              ? _subRow?.packageDetail?.packageName
+              : '';
       _subRow.description =
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow?.type === 'service'
-          ? _subRow?.serviceDetail?.serviceDescription
-          : _subRow?.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : '';
+            ? _subRow?.serviceDetail?.serviceDescription
+            : _subRow?.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription
+              : '';
 
       _subRow.subRows = generateNestedData(material, _subRow);
     });
