@@ -64,12 +64,12 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
           </>
         ) : resourceData?.stepsStyle === STEPS_STYLE.sideBar ? (
           <>
-            <div className={`grid ${isExpanded ? 'grid-cols-[300px_1fr]' : 'grid-cols-[100px_1fr]'} gap-3 transition-[all] duration-200`}>
+            <div className={`grid ${isExpanded ? 'grid-cols-[300px_1fr]' : 'grid-cols-[100px_1fr]'} gap-3 transition-[all] duration-300`}>
               <div className={`overflow-x-hidden overflow-y-auto max-h-[calc(100vh-300px)] container-with-border p-[20px]`}>
                 <div className={`${isExpanded ? 'ml-auto' : 'mx-auto'} mb-2 max-w-fit`}>
                   <IconButton size="small" onClick={() => setIsExpanded((prev) => !prev)}>
                     <KeyboardArrowLeft
-                      className="transition-all duration-200 data-[expanded=false]:[transform:rotate(180deg)]"
+                      className="transition-all duration-300 data-[expanded=false]:[transform:rotate(180deg)]"
                       data-expanded={isExpanded}
                     />
                   </IconButton>
@@ -87,7 +87,7 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
                         <span className="bg-[var(--dark-secondary,var(--primary))] text-white w-[20px] h-[20px] text-center rounded-full text-[10px] leading-[20px] flex-shrink-0">
                           {i + 1}
                         </span>
-                        <Typography variant="subtitle2" className={`${isExpanded ? '' : 'sr-only'} transition-all duration-200 line-clamp-1`}>
+                        <Typography variant="subtitle2" className={`${isExpanded ? '' : 'sr-only'} transition-all duration-300 line-clamp-1`}>
                           {step?.stepName}
                         </Typography>
                       </div>
