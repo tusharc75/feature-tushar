@@ -4214,3 +4214,11 @@ body .btn-outline-red-v1 {
     }
   }
 }
+
+[data-mode='light'] {
+  .MuiDrawer-root {
+    .MuiToolbar-root.MuiToolbar-regular.MuiToolbar-gutters {
+      background-color: white;
+    }
+  }
+}
