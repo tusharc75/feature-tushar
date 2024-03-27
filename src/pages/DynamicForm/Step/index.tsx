@@ -81,7 +81,9 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
                       title={step?.stepName}
                       onClick={() => handleClick(step)}
                       data-active={index === step}
-                      className={`p-[18px] [border:1px_solid_var(--common-border-color)] first:rounded-t-md last:rounded-b-md cursor-pointer data-[active=true]:[border:1px_solid_var(--dark-active-border-color,#298B88)]`}
+                      className={`p-[18px] [border:1px_solid_var(--common-border-color)] ${
+                        i === 0 ? 'rounded-t-md' : ''
+                      } last:rounded-b-md cursor-pointer data-[active=true]:[border:1px_solid_var(--dark-active-border-color,#298B88)]`}
                     >
                       <div className="flex gap-2">
                         <span className="bg-[var(--dark-secondary,var(--primary))] text-white w-[20px] h-[20px] text-center rounded-full text-[10px] leading-[20px] flex-shrink-0">
