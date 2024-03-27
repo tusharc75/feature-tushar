@@ -19,7 +19,7 @@ import ManageSteps from './ManageSteps';
 import _ from 'lodash';
 import Setting from './Setting';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import Action from './Action';
+import Actions from './Actions';
 
 const DND_NAME = 'Box';
 
@@ -119,7 +119,6 @@ const Steps = ({ resource }) => {
         <Box>
           <HtmlTooltip title={'Setting'}>
             <IconButton
-              size="small"
               aria-label="Setting"
               onClick={() => {
                 setOpenSetting(true);
@@ -128,10 +127,9 @@ const Steps = ({ resource }) => {
               <SettingIcon fontSize="small" color={'primary'} />
             </IconButton>
           </HtmlTooltip>
-          <HtmlTooltip title={'Action'}>
+          <HtmlTooltip title={'Actions'}>
             <IconButton
-              size="small"
-              aria-label="Action"
+              aria-label="Actions"
               onClick={() => {
                 setOpenAction(true);
               }}
@@ -199,9 +197,8 @@ const Steps = ({ resource }) => {
           resourceData={resourceData}
         />
       )}
-
       {openAction && (
-        <Action
+        <Actions
           onClose={() => {
             setOpenAction(false);
           }}
