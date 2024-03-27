@@ -301,7 +301,7 @@ const ServiceOrder = () => {
     return (
       <>
         <MenuItem
-          disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+          disabled={selectedRecords.every((e) => e.canDelete) ? selectedRecords?.length ? false : true : true}
           onClick={() => {
             setShowDeleteConfirmBox(true);
           }}
