@@ -15,6 +15,9 @@ import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, gridLoadingTimeout, prepareD
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import FieldTicketTable from './FieldTicketTable';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findAll, objectStore } from 'src/constants/indexdbhelper';
+import HideWhenOffline from 'src/components/HideWhenOffline';
 
 const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, handleChangeStatus }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,50 +31,54 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchData();
   }, [selectedEntity, serviceOrderData]);
 
-  const fetchData = () => {
-    setNextStep(false);
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
+  const fetchData = async () => {
+    try {
+      setNextStep(false);
+      dispatch({ type: 'loading', loading: true });
+      dispatch({ type: 'selection', selectedRecords: [] });
+      let data, count;
 
-    const queryString = getQueryString();
-    axiosInstance()
-      .get(`${routes.fieldTicket.path}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data?.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          finalObject['allowedToEdit'] =
-            isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
-          finalObject['canDelete'] =
-            u?.canDelete &&
-            permissions?.fieldTicket?.isDelete &&
-            u?.owner?.optionValue === user?.user?._id &&
-            ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
-          let res = {
-            ...finalObject
-          };
-          return res;
-        });
-        dispatch({
-          type: 'initialize',
-          data: rows,
-          count: count
-        });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-        setNextStep(true);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
+      if (isOffline) {
+        data = await findAll(objectStore.fieldTicket);
+        data = data?.filter((d) => d?.fieldServiceOrder?.optionValue === serviceOrderData?._id);
+        count = data.length;
+      } else {
+        const queryString = getQueryString();
+        const response = await axiosInstance().get(`${routes.fieldTicket.path}${queryString}`);
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      let rows = data?.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+        var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+        finalObject['allowedToEdit'] =
+          isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        finalObject['canDelete'] =
+          u?.canDelete &&
+          permissions?.fieldTicket?.isDelete &&
+          u?.owner?.optionValue === user?.user?._id &&
+          ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        let res = {
+          ...finalObject
+        };
+        return res;
       });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+      setNextStep(true);
+      dispatch({ type: 'loading', loading: false });
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    }
   };
 
   const getQueryString = (isExport = false) => {
@@ -144,37 +151,41 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             </IconButton>
           </span>
         </HtmlTooltip>
-        {!serviceOrderData?.quotation && (
-          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
+        <HideWhenOffline>
+          {!serviceOrderData?.quotation &&
+            <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
+              <span>
+                <IconButton
+                  disabled={permissions?.fieldTicket?.isCreate ? false : true}
+                  size="small"
+                  aria-label="Clone"
+                  onClick={() => {
+                    setOpenDialog({ open: true, isClone: true, id: row?.original?._id });
+                  }}
+                >
+                  <FileCopyIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          }
+        </HideWhenOffline>
+        <HideWhenOffline>
+          <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
             <span>
               <IconButton
-                disabled={permissions?.fieldTicket?.isCreate ? false : true}
+                disabled={row?.original?.canDelete ? false : true}
                 size="small"
-                aria-label="Clone"
+                aria-label="Delete"
                 onClick={() => {
-                  setOpenDialog({ open: true, isClone: true, id: row?.original?._id });
+                  setDeleteRecord([row?.original?._id]);
+                  setShowDeleteConfirmBox(true);
                 }}
               >
-                <FileCopyIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
+                <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
-        )}
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
-          <span>
-            <IconButton
-              disabled={row?.original?.canDelete ? false : true}
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord([row?.original?._id]);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        </HideWhenOffline>
       </>
     )
   };
@@ -214,7 +225,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit && !serviceOrderData?.quotation}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={true}
+        isActionButtonVisible={!isOffline}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 }}
         hasXpadding
@@ -227,6 +238,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
         dispatch={dispatch}
         fetchData={fetchData}
         height={'calc(100vh - 393px)'}
+        isOffline={isOffline}
       />
       {openDialog.open && (
         <ManageFieldTicket

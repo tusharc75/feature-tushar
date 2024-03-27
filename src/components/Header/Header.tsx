@@ -495,7 +495,14 @@ const Header = () => {
                       onClick={openEntitiesMenu}
                       className={`${styles.flexAlignCenter} poppins max-w-[200px]`}
                     >
-                      <span className={'poppins line-clamp-1'}>{curEntity && curEntity.entityName}</span>
+                      {curEntity?.entityLogo ? (
+                        <>
+                          <img src={curEntity.entityLogo} alt={curEntity ? curEntity.entityName : ''} className="max-h-[44px]" />
+                        </>
+                      ) : (
+                        <span className={'poppins line-clamp-1'}>{curEntity && curEntity.entityName}</span>
+                      )}
+
                       <Box component="span" mr={1} />
                       <ExpandMore />
                     </Box>
