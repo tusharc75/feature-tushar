@@ -17,7 +17,8 @@ import {
   setFieldsInAscendingOrder,
   yupSchema,
   GenerateResourceLineNumber,
-  QUOTATION_TYPE
+  QUOTATION_TYPE,
+  QUOTATION_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -84,6 +85,20 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
             setLoading(false);
           } else {
             setSalesDetails(data);
+            if (data?.canEdit === false) {
+              fieldsDataForUpdate?.forEach((e) => {
+                if (['warehouse','type']?.includes(e?.fieldName)) {
+                  e.isUneditable = true;
+                }
+              });
+            }
+            if(data?.status==QUOTATION_STATUS.sentToCustomer){
+              fieldsDataForUpdate?.forEach((e) => {
+                if (['customerAccount','warehouse']?.includes(e?.fieldName)) {
+                  e.isUneditable = true;
+                }
+              });
+            }
             setInitialData({
               fields: fieldsDataForUpdate,
               values: getObjKeysWithValues(data, fieldsDataForUpdate)
