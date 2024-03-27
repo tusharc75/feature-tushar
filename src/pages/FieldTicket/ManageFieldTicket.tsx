@@ -94,7 +94,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           setCloneHeading(fieldTicketNumber);
           tempData = rest;
         } else {
-          if (referenceData && renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
+          if (referenceData && renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0` || renderedFrom === `${camelCase(routes?.fieldServiceTechnician.title)}_craete_${camelCase(routes?.fieldTicket?.title)}`) {
             fields?.forEach((e) => {
               if (e.fieldName === 'fieldServiceOrder') {
                 e.disableOnEdit = true;
@@ -113,7 +113,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
-          if (renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
+          if (renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0` || renderedFrom === `${camelCase(routes?.fieldServiceTechnician.title)}_craete_${camelCase(routes?.fieldTicket?.title)}`) {
             fieldsDataForCreate?.forEach((e) => {
               if (e.fieldName === 'fieldServiceOrder') {
                 tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;

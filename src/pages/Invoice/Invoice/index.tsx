@@ -13,7 +13,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
-import { INVOICE_STATUS, invoice, sidebarResource } from '../../../constants/helpers';
+import { INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from '../../../constants/helpers';
 
 const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.invoice.title)}_Invoice`;
@@ -76,22 +76,24 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
             row?.original?.type ? (
               <div className="d-flex gap-2 align-items-center">
                 <p className="text-truncate">{row.original.detail}</p>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === 'service') {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'serializedAsset') {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
+                {![MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.other]?.includes(row.original['type']) && (
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      if (row.original.type === MATERIAL_TYPE.service) {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                      } else if (row.original.type === MATERIAL_TYPE.product) {
+                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                      } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                      } else {
+                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                      }
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                )}
               </div>
             ) : (
               <NoDataCell />
@@ -126,21 +128,21 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =
-        parent.type === 'product'
+        parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
-          : parent.type === 'package'
-          ? parent.packageDetail?.packageName
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.serviceDetail?.serviceName;
+          : parent.type === MATERIAL_TYPE.package
+            ? parent.packageDetail?.packageName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail?.assetNumber
+              : parent.serviceDetail?.serviceName;
       parent.description =
-        parent.type === 'product'
+        parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDescription
-          : parent?.serviceDetail?.serviceDescription;
+          : parent.type === MATERIAL_TYPE.package
+            ? parent?.packageDetail?.packageDescription
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent?.serializedAssetDetail?.product?.productDescription
+              : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -153,21 +155,23 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.serviceDetail?.serviceName;
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow.serializedAssetDetail.assetNumber
+              : _subRow.type === MATERIAL_TYPE.service
+                ? _subRow.serviceDetail?.serviceName : _subRow?.detail;
       _subRow.description =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow.type === 'serializedAsset'
-          ? parent.description
-          : _subRow?.serviceDetail?.serviceDescription;
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? parent.description
+              : _subRow.type === MATERIAL_TYPE.service ?
+                _subRow?.serviceDetail?.serviceDescription : '';
       _subRow.qty = _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
     });

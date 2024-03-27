@@ -1,29 +1,29 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
+import FieldTicketTable from './FieldTicketTable';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findAll, objectStore } from 'src/constants/indexdbhelper';
+import HideWhenOffline from 'src/components/HideWhenOffline';
 
 const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, handleChangeStatus }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
-  const { generateColumns } = useColumns();
 
   const [openDialog, setOpenDialog] = useState({ open: false, isClone: false, id: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -31,93 +31,54 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [columns, setColumns] = useState(null);
-
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchData();
   }, [selectedEntity, serviceOrderData]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.fieldTicket}`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
-        newColumns?.forEach((o) => {
-          if (o.accessor === 'fieldTicketNumber') {
-            o.cell = ({ row }) =>
-              row?.original?.fieldTicketNumber ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <h5
-                    className="link text-truncate"
-                    onClick={() => {
-                      setOpenDialog({ open: true, isClone: false, id: row?.original?._id });
-                    }}
-                  >
-                    {row?.original?.fieldTicketNumber}
-                  </h5>
-                  <Box ml={1}>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
-                      }}
-                    >
-                      <OpenInNewIcon fontSize="small" color="primary" />
-                    </IconButton>
-                  </Box>
-                </div>
-              ) : (
-                <NoDataCell />
-              );
-          }
-        });
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+  const fetchData = async () => {
+    try {
+      setNextStep(false);
+      dispatch({ type: 'loading', loading: true });
+      dispatch({ type: 'selection', selectedRecords: [] });
+      let data, count;
+
+      if (isOffline) {
+        data = await findAll(objectStore.fieldTicket);
+        data = data?.filter((d) => d?.fieldServiceOrder?.optionValue === serviceOrderData?._id);
+        count = data.length;
+      } else {
+        const queryString = getQueryString();
+        const response = await axiosInstance().get(`${routes.fieldTicket.path}${queryString}`);
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      let rows = data?.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+        var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+        finalObject['allowedToEdit'] =
+          isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        finalObject['canDelete'] =
+          u?.canDelete &&
+          permissions?.fieldTicket?.isDelete &&
+          u?.owner?.optionValue === user?.user?._id &&
+          ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        let res = {
+          ...finalObject
+        };
+        return res;
       });
-  };
-
-  const fetchData = () => {
-    setNextStep(false);
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
-
-    const queryString = getQueryString();
-    axiosInstance()
-      .get(`${routes.fieldTicket.path}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data?.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          finalObject['allowedToEdit'] =
-            isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
-          finalObject['canDelete'] =
-            u?.canDelete &&
-            permissions?.fieldTicket?.isDelete &&
-            u?.owner?.optionValue === user?.user?._id &&
-            ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
-          let res = {
-            ...finalObject
-          };
-          return res;
-        });
-        dispatch({
-          type: 'initialize',
-          data: rows,
-          count: count
-        });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-        setNextStep(true);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
-      });
+      }, gridLoadingTimeout);
+      setNextStep(true);
+      dispatch({ type: 'loading', loading: false });
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    }
   };
 
   const getQueryString = (isExport = false) => {
@@ -190,37 +151,41 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             </IconButton>
           </span>
         </HtmlTooltip>
-        {!serviceOrderData?.quotation &&
-          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
+        <HideWhenOffline>
+          {!serviceOrderData?.quotation &&
+            <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
+              <span>
+                <IconButton
+                  disabled={permissions?.fieldTicket?.isCreate ? false : true}
+                  size="small"
+                  aria-label="Clone"
+                  onClick={() => {
+                    setOpenDialog({ open: true, isClone: true, id: row?.original?._id });
+                  }}
+                >
+                  <FileCopyIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          }
+        </HideWhenOffline>
+        <HideWhenOffline>
+          <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
             <span>
               <IconButton
-                disabled={permissions?.fieldTicket?.isCreate ? false : true}
+                disabled={row?.original?.canDelete ? false : true}
                 size="small"
-                aria-label="Clone"
+                aria-label="Delete"
                 onClick={() => {
-                  setOpenDialog({ open: true, isClone: true, id: row?.original?._id });
+                  setDeleteRecord([row?.original?._id]);
+                  setShowDeleteConfirmBox(true);
                 }}
               >
-                <FileCopyIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
+                <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
-        }
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
-          <span>
-            <IconButton
-              disabled={row?.original?.canDelete ? false : true}
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord([row?.original?._id]);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        </HideWhenOffline>
       </>
     )
   };
@@ -260,26 +225,21 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit && !serviceOrderData?.quotation}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={true}
+        isActionButtonVisible={!isOffline}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 }}
         hasXpadding
       />
-      {columns ? (
-        <CustomReactTable
-          height={'calc(100vh - 393px)'}
-          columns={columns}
-          state={state}
-          dispatch={dispatch}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchData}
-          isClientSideGrid={true}
-        />
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+      <FieldTicketTable
+        renderedFrom={renderedFrom}
+        ActionsRenderer={ActionsRenderer}
+        setOpenDialog={setOpenDialog}
+        state={state}
+        dispatch={dispatch}
+        fetchData={fetchData}
+        height={'calc(100vh - 393px)'}
+        isOffline={isOffline}
+      />
       {openDialog.open && (
         <ManageFieldTicket
           id={openDialog.id}

@@ -8,7 +8,8 @@ export const objectStore = {
   repairJob: 'Repair Job',
   offlineDataSync: 'offlineDataSync',
   fieldServiceTechnician: 'fieldServiceTechnician',
-  fieldTicket: 'fieldTicket'
+  fieldTicket: 'fieldTicket',
+  fieldServiceOrder : 'fieldServiceOrder',
 };
 
 export const setUpindexDB = () => {

@@ -40,7 +40,7 @@ const AssignSerializedAssetDialog = ({
   const [products, setProducts] = useState([]);
   const [checkMTRValidation, setCheckMTRValidation] = useState(false);
   const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
-  const [isSubmitting,setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -60,7 +60,7 @@ const AssignSerializedAssetDialog = ({
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data: { data } }) => {
-        if(reference==='rentalJob') setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
+        if (reference === 'rentalJob') setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         setColumns([...newColumns, ...getStaticFields()]);
       });
@@ -130,6 +130,9 @@ const AssignSerializedAssetDialog = ({
       deepFilter = `${deepFilter}&quotation=true`;
       const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
       deepFilter = `${deepFilter}&date=${JSON.stringify(dateFilter)}`;
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
     }
     if (reference === 'supplier') {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
@@ -267,14 +270,14 @@ const AssignSerializedAssetDialog = ({
             loading: isAssigning,
             text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
           }}
-          addButtonOnclick={()=>{
+          addButtonOnclick={() => {
             if (checkMTRValidation) {
               if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
                 setMtrConfirmBox(true);
-              }else{
+              } else {
                 handleAdd();
               }
-            }else{
+            } else {
               handleAdd();
             }
           }}
