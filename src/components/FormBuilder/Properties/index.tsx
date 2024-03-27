@@ -474,6 +474,20 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     setTabValue(newValue);
   };
 
+  const handleChangeFieldName = (values) => {
+    let data = [...section];
+    data.forEach((row) => {
+      if (row.sectionId.toString() === sectionId.toString()) {
+        row.field.forEach((ele) => {
+          if (ele._id.toString() === values?._id?.toString()) {
+            ele.fieldName = values?.fieldName;
+          }
+        });
+      }
+    });
+    setSection(data);
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -545,6 +559,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         errors={errors}
                         module={module}
                         isCalculativeField={isCalculativeField}
+                        handleChangeFieldName={handleChangeFieldName}
                       />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
