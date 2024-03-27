@@ -90,7 +90,6 @@ export const jobProcessSteps: stepInterface[] = [
 
 export const salesOrderProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'manualEntry' },
   { name: 'Process', title: 'Process', icon: 'process' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
@@ -913,17 +912,13 @@ export const SCHEDULE_FREQUENCY = ['Hourly', 'Daily', 'Weekly', 'Monthly'];
 export const FREQUENCY_WEEKS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
-  //let selectedEntity = localStorage.getItem("selectedEntity")
-  //let isCreate = (val === "") ? true : false
+
+  let user = JSON.parse(localStorage.getItem("userData"))
 
   const obj = {};
   for (const key of arr) {
-    let value = key.isDefaultValue ? key.defaultValue : val;
-
-    //let isEntityField = key?.fieldName === "entity"
-    // if (isEntityField && selectedEntity && isCreate) {
-    //   value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
-    // }
+    let value = key.isDefaultValue ? key.defaultValue === 'Current User' && user?.user?._id ? user?.user?._id :
+      key.defaultValue : val;
 
     if (key.type === 'dropDown') {
       let option = key.option?.find((data: any) => data.default === true);
@@ -2742,7 +2737,8 @@ export const MATERIAL_TYPE = {
   service: 'service',
   package: 'package',
   serializedAsset: 'serializedAsset',
-  manualEntry: 'manualEntry'
+  manualEntry: 'manualEntry',
+  other: 'other'
 };
 
 export const MATERIAL_SUB_TYPE = {
@@ -2961,4 +2957,10 @@ export const ASSET_APPROVAL_STATUS = {
   approved: 'Approved',
   rejected: 'Rejected',
   pending: 'Pending',
+}
+
+export const STEPS_STYLE = {
+  list: 'List',
+  step: 'Step',
+  sideBar: 'Side Bar',
 }

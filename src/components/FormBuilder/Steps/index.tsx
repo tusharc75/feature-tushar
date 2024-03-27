@@ -19,6 +19,7 @@ import ManageSteps from './ManageSteps';
 import _ from 'lodash';
 import Setting from './Setting';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import Actions from './Actions';
 
 const DND_NAME = 'Box';
 
@@ -35,6 +36,7 @@ const Steps = ({ resource }) => {
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
+  const [openAction, setOpenAction] = useState(false);
 
   const fetchData = async () => {
     setStepsLoading(true);
@@ -117,13 +119,22 @@ const Steps = ({ resource }) => {
         <Box>
           <HtmlTooltip title={'Setting'}>
             <IconButton
-              size="small"
               aria-label="Setting"
               onClick={() => {
                 setOpenSetting(true);
               }}
             >
               <SettingIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title={'Actions'}>
+            <IconButton
+              aria-label="Actions"
+              onClick={() => {
+                setOpenAction(true);
+              }}
+            >
+              <BuildIcon fontSize="small" color={'primary'} />
             </IconButton>
           </HtmlTooltip>
         </Box>
@@ -181,6 +192,19 @@ const Steps = ({ resource }) => {
           onSuccess={() => {
             fetchData();
             setOpenSetting(false);
+          }}
+          resource={resource}
+          resourceData={resourceData}
+        />
+      )}
+      {openAction && (
+        <Actions
+          onClose={() => {
+            setOpenAction(false);
+          }}
+          onSuccess={() => {
+            fetchData();
+            setOpenAction(false);
           }}
           resource={resource}
           resourceData={resourceData}
