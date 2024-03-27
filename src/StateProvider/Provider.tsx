@@ -42,7 +42,7 @@ export const Provider = ({ children }) => {
     else if (token && localStorage.getItem("userData")) {
       const data = JSON.parse(localStorage.getItem("userData"))
       data?.entity?.forEach((element) => {
-        element.resource = element.resource?.filter((e) => e.name === "Rental Management")
+        element.resource = element.resource?.filter((e) => e.name === "Rental Management" || e.name === "Field Service Order")
       })
       dispatch({ type: SET_USER, payload: data });
       let prevSelectedEntity = localStorage.getItem("selectedEntity")
