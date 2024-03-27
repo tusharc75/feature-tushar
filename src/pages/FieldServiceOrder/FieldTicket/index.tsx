@@ -1,33 +1,29 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
+import FieldTicketTable from './FieldTicketTable';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
+import { findAll, objectStore } from 'src/constants/indexdbhelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-
 
 const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, handleChangeStatus }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
-  const { generateColumns } = useColumns();
 
   const [openDialog, setOpenDialog] = useState({ open: false, isClone: false, id: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -35,61 +31,11 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [columns, setColumns] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
-
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
 
   useEffect(() => {
     fetchData();
   }, [selectedEntity, serviceOrderData]);
-
-  const fetchGridColumns = async () => {
-    try {
-      let data;
-      if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.fieldTicket);
-      } else {
-        const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
-        data = response?.data?.data;
-      }
-      const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
-      newColumns?.forEach((o) => {
-        if (o.accessor === 'fieldTicketNumber') {
-          o.cell = ({ row }) =>
-            row?.original?.fieldTicketNumber ? (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <h5
-                  className="link text-truncate"
-                  onClick={() => {
-                    setOpenDialog({ open: true, isClone: false, id: row?.original?._id });
-                  }}
-                >
-                  {row?.original?.fieldTicketNumber}
-                </h5>
-                <Box ml={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </Box>
-              </div>
-            ) : (
-              <NoDataCell />
-            );
-        }
-      });
-      setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-    } catch (e) {
-      toastConfig.setToastConfig(e);
-    }
-  };
 
   const fetchData = async () => {
     try {
@@ -284,21 +230,16 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
         actionButtonProps={{ disabled: selectedRecords.length === 0 }}
         hasXpadding
       />
-      {columns ? (
-        <CustomReactTable
-          height={'calc(100vh - 393px)'}
-          columns={columns}
-          state={state}
-          dispatch={dispatch}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchData}
-          isClientSideGrid={true}
-        />
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+      <FieldTicketTable
+        renderedFrom={renderedFrom}
+        ActionsRenderer={ActionsRenderer}
+        setOpenDialog={setOpenDialog}
+        state={state}
+        dispatch={dispatch}
+        fetchData={fetchData}
+        height={'calc(100vh - 393px)'}
+        isOffline={isOffline}
+      />
       {openDialog.open && (
         <ManageFieldTicket
           id={openDialog.id}
