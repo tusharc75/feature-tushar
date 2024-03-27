@@ -156,18 +156,18 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             item?.type === MATERIAL_TYPE.product
               ? item?.productDetail?.productName
               : item?.type === MATERIAL_TYPE.service
-                ? item?.serviceDetail?.serviceName
-                : item?.type === MATERIAL_TYPE.package
-                  ? item?.packageDetail?.packageName
-                  : '';
+              ? item?.serviceDetail?.serviceName
+              : item?.type === MATERIAL_TYPE.package
+              ? item?.packageDetail?.packageName
+              : '';
           res.description =
             item?.type === MATERIAL_TYPE.product
               ? item?.productDetail?.productDescription
               : item?.type === MATERIAL_TYPE.service
-                ? item?.serviceDetail?.serviceDescription
-                : item?.type === MATERIAL_TYPE.package
-                  ? item?.packageDetail?.packageDescription
-                  : '';
+              ? item?.serviceDetail?.serviceDescription
+              : item?.type === MATERIAL_TYPE.package
+              ? item?.packageDetail?.packageDescription
+              : '';
           res.subRows = generateNestedData(data?.materials, res);
           return res;
         });
@@ -239,18 +239,18 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow?.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.type === 'package'
-              ? _subRow?.packageDetail?.packageName
-              : '';
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageName
+          : '';
       _subRow.description =
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow?.type === 'service'
-            ? _subRow?.serviceDetail?.serviceDescription
-            : _subRow?.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription
-              : '';
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription
+          : '';
 
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -395,8 +395,8 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
   );
 
   return (
-    <>
-      <Box display="flex" pt={1} justifyContent="flex-end">
+    <div className="p-2">
+      <Box display="flex" className="pb-2" justifyContent="flex-end">
         <Box mx={1} />
         {!isSubmited && (
           <Button
@@ -466,7 +466,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
           </Box>
         </>
       )}
-    </>
+    </div>
   );
 };
 

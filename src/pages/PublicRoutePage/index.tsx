@@ -122,74 +122,72 @@ const PublicRoutePage = () => {
   }, [resourceData?.referenceIdType]);
 
   return (
-    <div className="h-screen w-screen">
-      <Grid container className={classes.header}>
-        <Grid item container xs={6} md={6} sm={6} justify={'flex-start'}>
-          <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
-        </Grid>
-        <Grid item container xs={6} md={6} sm={6} justify={'flex-end'}>
-          <h2 style={{ paddingTop: '10px', paddingRight: '10px', color: 'white', textAlign: 'right' }}>
-            {referenceType === 'QuotationCustomer' || referenceType === 'RentalJob' ? 'Customer Portal' : 'Supplier Portal'}
-          </h2>
-        </Grid>
-      </Grid>
-      {passwordVerification ? (
-        <Box style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
-          <Box style={{ marginTop: '50px', width: '400px' }} boxShadow={3}>
-            <Grid spacing={1} style={{ padding: '10px', display: 'flex', justifyContent: 'center' }} container>
-              <Grid item xs={12} sm={12} md={12}>
-                <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={'Authentication Required'}>
-                  Authentication Required
-                </h1>
+    <div className="h-screen w-screen max-w-[100vw] overflow-hidden block m-0">
+      <div className={`${classes.header} flex items-center justify-between`}>
+        <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
+        <h2 style={{ paddingTop: '10px', paddingRight: '10px', color: 'white', textAlign: 'right' }}>
+          {referenceType === 'QuotationCustomer' || referenceType === 'RentalJob' ? 'Customer Portal' : 'Supplier Portal'}
+        </h2>
+      </div>
+      <div className="max-h-[calc(100vh-54px)] max-w-[calc(100vw-10px)] overflow-auto">
+        {passwordVerification ? (
+          <Box style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
+            <Box style={{ marginTop: '50px', width: '400px' }} boxShadow={3}>
+              <Grid spacing={1} style={{ padding: '10px', display: 'flex', justifyContent: 'center' }} container>
+                <Grid item xs={12} sm={12} md={12}>
+                  <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={'Authentication Required'}>
+                    Authentication Required
+                  </h1>
+                </Grid>
+                <Grid item xs={10} sm={10} md={10}>
+                  <TextField
+                    id="outlined-full-width"
+                    margin="normal"
+                    variant="outlined"
+                    InputLabelProps={{
+                      shrink: true
+                    }}
+                    label="Password"
+                    name="Password"
+                    type="password"
+                    placeholder="Please enter password"
+                    onChange={(e) => setPassword(e.target.value)}
+                    fullWidth
+                    size="small"
+                  />
+                </Grid>
+                <Grid item xs={10} sm={10} md={10}>
+                  <Button style={{ marginBottom: '20px' }} variant="contained" color="primary" size="medium" fullWidth onClick={fetchResourceData}>
+                    Submit
+                  </Button>
+                </Grid>
               </Grid>
-              <Grid item xs={10} sm={10} md={10}>
-                <TextField
-                  id="outlined-full-width"
-                  margin="normal"
-                  variant="outlined"
-                  InputLabelProps={{
-                    shrink: true
-                  }}
-                  label="Password"
-                  name="Password"
-                  type="password"
-                  placeholder="Please enter password"
-                  onChange={(e) => setPassword(e.target.value)}
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={10} sm={10} md={10}>
-                <Button style={{ marginBottom: '20px' }} variant="contained" color="primary" size="medium" fullWidth onClick={fetchResourceData}>
-                  Submit
-                </Button>
-              </Grid>
-            </Grid>
+            </Box>
           </Box>
-        </Box>
-      ) : !valid ? (
-        <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={' Thanks for your submission'}>
-          Link is expired or already used
-        </h1>
-      ) : loading || resourceData ? (
-        resourceData?.referenceIdType === 'Quotes' ? (
-          <QuoteSupplierPrice quoteData={resourceData} openAuthId={id} />
-        ) : resourceData?.referenceIdType === 'Quotation' ? (
-          <QuotationSupplierPrice quotationData={resourceData} openAuthId={id} />
-        ) : resourceData?.referenceIdType === 'QuotationCustomer' ? (
-          <QuotationCustomerAccept openAuthId={id} />
-        ) : resourceData?.referenceIdType === sidebarResource.irtTicket ? (
-          <IrtTicket openAuthId={id} openAuthData={resourceData?.data} />
+        ) : !valid ? (
+          <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={' Thanks for your submission'}>
+            Link is expired or already used
+          </h1>
+        ) : loading || resourceData ? (
+          resourceData?.referenceIdType === 'Quotes' ? (
+            <QuoteSupplierPrice quoteData={resourceData} openAuthId={id} />
+          ) : resourceData?.referenceIdType === 'Quotation' ? (
+            <QuotationSupplierPrice quotationData={resourceData} openAuthId={id} />
+          ) : resourceData?.referenceIdType === 'QuotationCustomer' ? (
+            <QuotationCustomerAccept openAuthId={id} />
+          ) : resourceData?.referenceIdType === sidebarResource.irtTicket ? (
+            <IrtTicket openAuthId={id} openAuthData={resourceData?.data} />
+          ) : (
+            <Box p={2}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )
         ) : (
           <Box p={2}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        )
-      ) : (
-        <Box p={2}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+        )}
+      </div>
     </div>
   );
 };
