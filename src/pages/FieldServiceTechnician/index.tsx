@@ -8,25 +8,22 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomContainer from 'src/components/CustomContainer';
-import { CustomDialogTransition, fieldServiceOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { fieldServiceOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import AddIcon from '@material-ui/icons/Add';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import { cloneDisable } from 'src/constants/messageHelpers';
 import ManageFieldTicket from '../FieldTicket/ManageFieldTicket';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import FieldTicketTable from '../FieldServiceOrder/FieldTicket/FieldTicketTable';
 import ViewFieldTicketDialog from './ViewFieldTicketDialog';
+import NoteAddIcon from '@material-ui/icons/NoteAdd';
 
 let serchtimeTimeout;
 
 const FieldServiceTechnician = () => {
+
   const types = [
     {
       key: `My ${routes.fieldServiceTechnician.title}`,
@@ -42,7 +39,7 @@ const FieldServiceTechnician = () => {
   const renderedFrom = camelCase(routes?.fieldServiceTechnician.title);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions }
   }: any = useData();
   const { type }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
@@ -54,6 +51,7 @@ const FieldServiceTechnician = () => {
   const [viewFieldTicket, setViewFieldTicket] = useState({ open: false, data: null });
 
   const { generateColumns } = useColumns();
+  const [originalData, setOriginalData] = useState([]);
 
   useEffect(() => {
     fetchColumns();
@@ -61,10 +59,8 @@ const FieldServiceTechnician = () => {
 
   const fetchColumns = async () => {
     let data;
-
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
     data = response?.data?.data;
-
     const newColumns = generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -80,33 +76,41 @@ const FieldServiceTechnician = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Create Field Ticket' : cloneDisable}>
+        <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Add"
               disabled={permissions?.fieldTicket?.isCreate ? false : true}
               onClick={() => {
-                setOpenDialog({ open: true, data: row?.original });
+                const data = originalData?.find((e) => e._id === row?.original?._id)
+                if (data) {
+                  setOpenDialog({ open: true, data: data });
+                }
               }}
             >
-              <AddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
+              <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title="View Field Ticket">
-          <span>
-            <IconButton
-              size="small"
-              aria-label="View"
-              onClick={() => {
-                setViewFieldTicket({ open: true, data: row?.original });
-              }}
-            >
-              <VisibilityIcon fontSize="small" color="primary" />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        <Box pl={1}>
+          <HtmlTooltip title={`View ${routes.fieldTicket.title}`}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="View"
+                onClick={() => {
+                  const data = originalData?.find((e) => e._id === row?.original?._id)
+                  if (data) {
+                    setViewFieldTicket({ open: true, data: data });
+                  }
+                }}
+              >
+                <VisibilityIcon fontSize="small" color="primary" />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </Box>
       </>
     )
   };
@@ -131,6 +135,7 @@ const FieldServiceTechnician = () => {
     axiosInstance()
       .get(`${fieldServiceOrder.api}${queryString}`)
       .then(({ data: { data, count } }) => {
+        setOriginalData(data)
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           return finalObject;
@@ -203,7 +208,6 @@ const FieldServiceTechnician = () => {
           isActionButtonVisible={false}
           isAddButtonVisible={false}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -222,56 +226,38 @@ const FieldServiceTechnician = () => {
           </Box>
         )}
       </CustomContainer>
-
       {openDialog.open && (
         <ManageFieldTicket
           id={null}
           isClone={false}
           onClose={() => setOpenDialog({ open: false, data: null })}
           referenceData={{
-            customerAccount: openDialog?.data?.customerAccountId || '',
-            billingAddress: openDialog?.data?.billingAddressId || '',
-            shippingAddress: openDialog?.data?.shippingAddressId || '',
-            fieldServiceOrder: openDialog?.data?._id || '',
-            warehouse: openDialog?.data?.warehouseId || '',
-            wellName: openDialog?.data?.wellNameId || '',
-            wellNumber: openDialog?.data?.wellNumberId
-              ? openDialog?.data?.restwellNumber
-                ? [
-                    { optionLabel: openDialog?.data?.wellNumber || '', optionValue: openDialog?.data?.wellNumberId || '' },
-                    ...openDialog?.data?.restwellNumber
-                  ]?.map((m) => m?.optionValue)
-                : [openDialog?.data?.wellNumberId]
-              : [],
+            fieldServiceOrder: openDialog?.data?._id,
+            warehouse: openDialog?.data?.warehouse?.optionValue || '',
+            wellName: openDialog?.data?.wellName?.optionValue || '',
+            wellNumber: openDialog?.data?.wellNumber?.map((m) => m.optionValue) || [],
             numberOfWells: openDialog?.data?.numberOfWells,
             estimateStartDate: openDialog?.data?.estimateStartDate || '',
             estimateEndDate: openDialog?.data?.estimateEndDate || '',
-            taxCode: openDialog?.data?.taxCodeId || '',
-            pricingCondition: openDialog?.data?.pricingConditionId || '',
-            collaborator: openDialog?.data?.collaboratorId
-              ? openDialog?.data?.restcollaborator
-                ? [
-                    { optionLabel: openDialog?.data?.collaborator || '', optionValue: openDialog?.data?.collaboratorId || '' },
-                    ...openDialog?.data?.restwellNumber
-                  ]?.map((m) => m?.optionValue)
-                : [openDialog?.data?.collaboratorId]
-              : []
+            customerAccount: openDialog?.data?.customerAccount?.optionValue || '',
+            billingAddress: openDialog?.data?.billingAddress?.optionValue || '',
+            shippingAddress: openDialog?.data?.shippingAddress?.optionValue || '',
+            taxCode: openDialog?.data?.taxCode?.optionValue || '',
+            pricingCondition: openDialog?.data?.pricingCondition?.optionValue || '',
+            collaborator: openDialog?.data?.collaborator?.map((m) => m.optionValue) || []
           }}
           onSuccess={() => {
             setOpenDialog({ open: false, data: null });
             fetchData();
           }}
-          renderedFrom={`${renderedFrom}_craete_${camelCase(routes.fieldTicket.title)}`}
         />
       )}
-
       {viewFieldTicket.open && (
         <ViewFieldTicketDialog
           onClose={() => {
             setViewFieldTicket({ open: false, data: null });
           }}
           serviceOrderData={viewFieldTicket?.data}
-          renderedFrom={`${renderedFrom}_craete_${camelCase(routes.fieldTicket.title)}`}
         />
       )}
     </section>

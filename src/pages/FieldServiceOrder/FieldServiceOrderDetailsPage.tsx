@@ -156,7 +156,7 @@ const ServiceOrderDetailsPage = () => {
   };
 
   const updateProcessStatus = async (processStatus) => {
-    if(isOffline) return;
+    if (isOffline) return;
     axiosInstance()
       .put(`${fieldServiceOrder.api}/${id}/process-status`, { processStatus: processStatus })
       .then(({ data }) => {
@@ -204,7 +204,7 @@ const ServiceOrderDetailsPage = () => {
   };
 
   const handleChangeStatus = (status) => {
-    if(isOffline) return;
+    if (isOffline) return;
     axiosInstance()
       .patch(`${routes.fieldServiceOrder.path}/status/${serviceOrderData._id}`, { status: status })
       .then(({ data: { data } }) => {
@@ -325,9 +325,9 @@ const ServiceOrderDetailsPage = () => {
               <FieldTicket
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-0`}
                 allowedToEdit={allowedToEdit}
                 handleChangeStatus={handleChangeStatus}
+                resource={sidebarResource.fieldServiceOrder}
               />
             )}
             {/* {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
@@ -379,7 +379,10 @@ const ServiceOrderDetailsPage = () => {
               />
             )} */}
             {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
-              <Invoices resourceId={serviceOrderData?._id} resource={sidebarResource.fieldTicket} invoiceFieldName="fieldServiceOrder" />
+              <Invoices
+                resourceId={serviceOrderData?._id}
+                resource={sidebarResource.fieldTicket}
+                invoiceFieldName="fieldServiceOrder" />
             )}
           </ContentFullScreen>
         </TabPanel>
