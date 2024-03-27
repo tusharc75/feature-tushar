@@ -87,14 +87,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
             setSalesDetails(data);
             if (data?.canEdit === false) {
               fieldsDataForUpdate?.forEach((e) => {
-                if (['warehouse','type']?.includes(e?.fieldName)) {
-                  e.isUneditable = true;
-                }
-              });
-            }
-            if(data?.status==QUOTATION_STATUS.sentToCustomer){
-              fieldsDataForUpdate?.forEach((e) => {
-                if (['customerAccount','warehouse']?.includes(e?.fieldName)) {
+                if (['customerAccount', 'warehouse', 'type']?.includes(e?.fieldName)) {
                   e.isUneditable = true;
                 }
               });
@@ -113,7 +106,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
         initialData['quotationNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
           fieldsDataForCreate?.forEach((field) => {
-            if(referenceData[field.fieldName]) {
+            if (referenceData[field.fieldName]) {
               field.isUneditable = true;
             }
           });
@@ -122,7 +115,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
               initialData[key] = referenceData[key];
             }
           }
-          
+
         }
         setInitialData({
           fields: fieldsDataForCreate,
@@ -180,7 +173,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                 toastConfig.setToastConfig(error);
               });
           } else {
-            if(renderedFrom !== routes.projectSales.title) history.push(`${routes.quotationDetail.path}/${data._id}`);   
+            if (renderedFrom !== routes.projectSales.title) history.push(`${routes.quotationDetail.path}/${data._id}`);
             setLoading(false);
             onSuccess(data);
             toastConfig.setToastConfig({
