@@ -235,20 +235,27 @@ const FieldServiceTechnician = () => {
             fieldServiceOrder: openDialog?.data?._id || '',
             warehouse: openDialog?.data?.warehouseId || '',
             wellName: openDialog?.data?.wellNameId || '',
-            wellNumber:
-              [{ optionLabel: openDialog?.data?.wellNumber, optionValue: openDialog?.data?.wellNumberId }, ...openDialog?.data?.restwellNumber]?.map(
-                (m) => m?.optionValue
-              ) || [],
+            wellNumber: openDialog?.data?.wellNumberId
+              ? openDialog?.data?.restwellNumber
+                ? [
+                    { optionLabel: openDialog?.data?.wellNumber || '', optionValue: openDialog?.data?.wellNumberId || '' },
+                    ...openDialog?.data?.restwellNumber
+                  ]?.map((m) => m?.optionValue)
+                : [openDialog?.data?.wellNumberId]
+              : [],
             numberOfWells: openDialog?.data?.numberOfWells,
             estimateStartDate: openDialog?.data?.estimateStartDate || '',
             estimateEndDate: openDialog?.data?.estimateEndDate || '',
             taxCode: openDialog?.data?.taxCodeId || '',
             pricingCondition: openDialog?.data?.pricingConditionId || '',
-            collaborator:
-              [
-                { optionLabel: openDialog?.data?.collaborator, optionValue: openDialog?.data?.collaboratorId },
-                ...openDialog?.data?.restcollaborator
-              ]?.map((m) => m?.optionValue) || []
+            collaborator: openDialog?.data?.collaboratorId
+              ? openDialog?.data?.restcollaborator
+                ? [
+                    { optionLabel: openDialog?.data?.collaborator || '', optionValue: openDialog?.data?.collaboratorId || '' },
+                    ...openDialog?.data?.restwellNumber
+                  ]?.map((m) => m?.optionValue)
+                : [openDialog?.data?.collaboratorId]
+              : []
           }}
           onSuccess={() => {
             setOpenDialog({ open: false, data: null });

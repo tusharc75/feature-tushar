@@ -90,6 +90,7 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData, rende
             dispatch={dispatch}
             fetchData={fetchData}
             height={'calc(100vh - 200px)'}
+            isOffline={false}
           />
         </CustomDialogContent>
         <CustomDialogFooter>
@@ -110,20 +111,27 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData, rende
             fieldServiceOrder: serviceOrderData?._id || '',
             warehouse: serviceOrderData?.warehouseId || '',
             wellName: serviceOrderData?.wellNameId || '',
-            wellNumber:
-              [{ optionLabel: serviceOrderData?.wellNumber, optionValue: serviceOrderData?.wellNumberId }, ...serviceOrderData?.restwellNumber]?.map(
-                (m) => m?.optionValue
-              ) || [],
+            wellNumber: serviceOrderData?.wellNumberId
+              ? serviceOrderData?.restwellNumber
+                ? [
+                    { optionLabel: serviceOrderData?.wellNumber || '', optionValue: serviceOrderData?.wellNumberId || '' },
+                    ...serviceOrderData?.restwellNumber
+                  ]?.map((m) => m?.optionValue)
+                : [serviceOrderData?.wellNumberId]
+              : [],
             numberOfWells: serviceOrderData?.numberOfWells,
             estimateStartDate: serviceOrderData?.estimateStartDate || '',
             estimateEndDate: serviceOrderData?.estimateEndDate || '',
             taxCode: serviceOrderData?.taxCodeId || '',
             pricingCondition: serviceOrderData?.pricingConditionId || '',
-            collaborator:
-              [
-                { optionLabel: serviceOrderData?.collaborator, optionValue: serviceOrderData?.collaboratorId },
-                ...serviceOrderData?.restcollaborator
-              ]?.map((m) => m?.optionValue) || []
+            collaborator: serviceOrderData?.collaboratorId
+              ? serviceOrderData?.restcollaborator
+                ? [
+                    { optionLabel: serviceOrderData?.collaborator || '', optionValue: serviceOrderData?.collaboratorId || '' },
+                    ...serviceOrderData?.restwellNumber
+                  ]?.map((m) => m?.optionValue)
+                : [serviceOrderData?.collaboratorId]
+              : []
           }}
           onSuccess={() => {
             setOpenDialog({ open: false, isClone: false, id: null });
