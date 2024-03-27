@@ -20,10 +20,13 @@ import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
+import { camelCase } from 'lodash';
 
 
-const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, handleChangeStatus }) => {
+const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChangeStatus, resource }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const renderedFrom = camelCase(routes?.fieldTicket.title);
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -112,8 +115,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
         let finalObject = prepareDataForGrid(u);
         finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
         var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-        finalObject['allowedToEdit'] =
-          isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        finalObject['allowedToEdit'] = isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
         finalObject['canDelete'] =
           u?.canDelete &&
           permissions?.fieldTicket?.isDelete &&
@@ -191,7 +193,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={row?.original?.allowedToEdit ? 'Edit' : 'You can not Delete'}>
+        <HtmlTooltip title={row?.original?.allowedToEdit ? 'Edit' : 'You can not Edit'}>
           <span>
             <IconButton
               disabled={row?.original?.allowedToEdit ? false : true}
@@ -276,23 +278,25 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
 
   return (
     <Fragment>
-      <DetailsPageHeader
-        isAddButtonVisible={allowedToEdit && !serviceOrderData?.quotation}
-        addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={!isOffline}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-        hasXpadding
-      />
+      {resource === sidebarResource.fieldServiceOrder &&
+        <DetailsPageHeader
+          isAddButtonVisible={allowedToEdit && !serviceOrderData?.quotation}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={!isOffline}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+          hasXpadding
+        />}
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 393px)'}
+          height={resource === sidebarResource.fieldServiceOrder ? 'calc(100vh - 393px)' : 'calc(100vh - 200px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           isClientSideGrid={true}
+          hideAction={resource === sidebarResource.fieldServiceOrder ? false : true}
         />
       ) : (
         <Box p={2} height={500}>
@@ -326,7 +330,6 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             setOpenDialog({ open: false, isClone: false, id: null });
             fetchData();
           }}
-          renderedFrom={renderedFrom}
         />
       )}
       {showDeleteConfirmBox && (

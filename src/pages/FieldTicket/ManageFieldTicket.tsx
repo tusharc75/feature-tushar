@@ -22,7 +22,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
 
-const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false, renderedFrom = '' }) => {
+const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
     state: { user }
   }: any = useData();
@@ -93,8 +93,9 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           rest.status = FIELD_TICKET_STATUS.new;
           setCloneHeading(fieldTicketNumber);
           tempData = rest;
-        } else {
-          if (referenceData && renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
+        }
+        else {
+          if (referenceData) {
             fields?.forEach((e) => {
               if (e.fieldName === 'fieldServiceOrder') {
                 e.disableOnEdit = true;
@@ -113,23 +114,17 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
-          if (renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
-            fieldsDataForCreate?.forEach((e) => {
-              if (e.fieldName === 'fieldServiceOrder') {
-                tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
-                e.disableOnEdit = true;
-                e.isUneditable = true;
-              }
-            });
-
-            if (referenceData) {
-              for (const key in referenceData) {
-                if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
-                  tempInitialData[key] = referenceData[key];
-                }
-              }
+          for (const key in referenceData) {
+            if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+              tempInitialData[key] = referenceData[key];
             }
           }
+          fieldsDataForCreate?.forEach((e) => {
+            if (e.fieldName === 'fieldServiceOrder') {
+              e.disableOnEdit = true;
+              e.isUneditable = true;
+            }
+          });
         }
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           tempInitialData['currency'] = user.user?.brandCurrency;
