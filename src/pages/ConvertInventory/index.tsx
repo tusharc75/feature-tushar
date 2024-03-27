@@ -230,7 +230,7 @@ const ConvertInventory = () => {
         <ListingPageHeader
           leftSideContents={
             <LeftSideContents
-              {...{ warehouseOptions, warehouseId, setWarehouseId, setStorageLocationId, user, storageLocationOptions, storageLocationId }}
+              {...{ warehouseOptions, warehouseId, setWarehouseId, setStorageLocationId, user, storageLocationOptions, storageLocationId, dispatch }}
             />
           }
           searchValue={search}
@@ -285,7 +285,8 @@ const LeftSideContents = ({
   setStorageLocationId,
   user,
   storageLocationOptions,
-  storageLocationId
+  storageLocationId,
+  dispatch
 }) => {
   return (
     <>
@@ -303,6 +304,7 @@ const LeftSideContents = ({
         }
         onChange={(e, val) => {
           if (val !== null) {
+            dispatch({ type: 'selection', selectedRecords: [] });
             setWarehouseId(val && val.optionValue ? val.optionValue : '');
             setStorageLocationId(null);
           }
