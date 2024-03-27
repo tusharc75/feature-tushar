@@ -33,7 +33,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   const fetchFields = async () => {
     const productResult = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
     const data = productResult?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
     newColumns.unshift(
       {
         accessor: 'qty',
