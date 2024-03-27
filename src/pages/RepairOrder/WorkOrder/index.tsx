@@ -628,7 +628,8 @@ const WorkOrder = ({
         if ((repairOrderData?.type === REPAIR_ORDER_TYPE.internal &&
           rows?.every((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed) ||
           (repairOrderData?.type === REPAIR_ORDER_TYPE.external &&
-            rows?.some((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed)))) {
+            rows?.every((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed))
+          || (repairOrderData?.type === REPAIR_ORDER_TYPE.external && user?.brandPolicy?.repairOrderPrice))) {
           setNextStep(true);
         } else {
           setNextStep(false);

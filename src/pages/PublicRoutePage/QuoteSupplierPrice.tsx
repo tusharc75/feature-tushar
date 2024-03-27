@@ -65,7 +65,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
-  const { generateColumns } = useColumns()
+  const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
   const [productData, setProductData] = useState([]);
@@ -148,10 +148,13 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
         let tempProductData = [];
         data.products?.forEach((ele) => {
           ele?.fields?.forEach((e) => {
-            const currencyField: any = e?.type === 'currencyAmount' ? {
-              ...ele,
-              fieldName: ele.fieldName + '_' + quoteData.currency.toLowerCase()
-            } : {};
+            const currencyField: any =
+              e?.type === 'currencyAmount'
+                ? {
+                    ...ele,
+                    fieldName: ele.fieldName + '_' + quoteData.currency.toLowerCase()
+                  }
+                : {};
 
             rows.forEach((data) => {
               if (data[currencyField?.fieldName]) {
@@ -168,7 +171,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                 setProductData(tempProductData);
               }
             });
-          })
+          });
           const filteredFields = ele?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName) || data?.displayColumns.includes(e.fieldName));
           const newColumns = generateColumns(renderedFrom, filteredFields, null, false, quoteData.currency);
           columns = [...columns, ...newColumns];
@@ -191,8 +194,8 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
   };
 
   const onCellValueChanged = (data, row) => {
-    const col = Object.keys(data)[0]
-    const value = data[col]
+    const col = Object.keys(data)[0];
+    const value = data[col];
     let tempFieldsNumber = [];
     let productIndex = productData.findIndex((d) => d.uniqueId === row?.uniqueId);
     let tempData = {
@@ -326,7 +329,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
 
   return (
     <>
-      <Box display="flex" pt={1} justifyContent="flex-end">
+      <Box display="flex" p={1} justifyContent="flex-end">
         <Box mx={1} />
         {!isSubmited && (
           <Button
@@ -375,7 +378,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   columns={columns}
-                  onSelect={() => { }}
+                  onSelect={() => {}}
                   state={state}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}
@@ -385,7 +388,6 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                   isClientSideGrid={false}
                   hideAction={false}
                   hideSelection={false}
-
                 />
               ) : (
                 <Box p={2} height={500}>
