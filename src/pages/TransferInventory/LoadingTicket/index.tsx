@@ -286,17 +286,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
 
   const handelCancelDeliveredTicket = () => {
     setOkBtnLoading(true);
-    const loadingTicketId = uniq(
-      map(
-        selectedRecords?.filter((e) => e?.loadingTicketId),
-        'loadingTicketId'
-      )
-    );
+    const loadingTicketId = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
     if (loadingTicketId.length) {
       let data = {};
       data['_ids'] = loadingTicketId;
-      axiosInstance()
-        .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
+      axiosInstance().post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
           setOkBtnLoading(false);
           setShowConformationCancleTicket(false);
@@ -359,7 +353,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                   }}
                   disabled={
                     selectedRecords.length &&
-                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length
+                      selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length
                       ? false
                       : true
                   }
