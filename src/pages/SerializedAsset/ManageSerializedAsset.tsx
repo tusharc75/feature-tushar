@@ -89,7 +89,7 @@ const ManageSerializedAsset = ({
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
                 oldValues.status = fieldsDataForUpdate?.find((e) => e.fieldName === 'status')?.defaultValue || ASSET_STATUS.new;
-                oldValues.assetNumber = fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
+                oldValues.assetNumber = data.assetNumberType === ASSET_NUMBER_TYPE.manual ? '' : fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
@@ -149,6 +149,9 @@ const ManageSerializedAsset = ({
             if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === 'currentLocation')) {
               createValues['currentLocation'] = warehouseAddress?.address;
             }
+          }
+          if (createValues['assetNumberType'] === ASSET_NUMBER_TYPE.manual) {
+            createValues['assetNumber'] = '';
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
