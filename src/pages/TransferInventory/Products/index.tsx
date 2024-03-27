@@ -412,7 +412,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
             setAddInventoryDialog(true);
           }}
         >
-          {`Add Products`}
+          {`Add Existing Products`}
         </MenuItem>
       </>
     );
@@ -423,7 +423,6 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       <>
         <MenuItem
           onClick={() => {
-            closeActions();
             setShowConfirmBox(true);
             setRemoveData(selectedRecords?.filter((e) => !e?.hideSelection)?.map((inv: any) => inv?.productId));
           }}
