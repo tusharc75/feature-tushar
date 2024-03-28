@@ -217,6 +217,7 @@ const QuoteBuilder = ({
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
+      parent.hideSelection = parent?.fieldTicketCreated ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
     });
 
@@ -232,7 +233,7 @@ const QuoteBuilder = ({
           Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
         finalObject['parentId'] = null;
         finalObject['isValid'] = true;
-        finalObject['hideSelection'] = false;
+        finalObject['hideSelection'] = item?.fieldTicketCreated ? true : false;
         finalObject['type'] = MATERIAL_TYPE.manualEntry;
         let res: any = {
           ...finalObject
@@ -295,6 +296,7 @@ const QuoteBuilder = ({
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = true;
+      _subRow.hideSelection = _subRow?.fieldTicketCreated ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -425,6 +427,7 @@ const QuoteBuilder = ({
 
   const addFieldTicketMaterial = async (data) => {
     try {
+      let materialIds = [], costIds = [];
       if (selectedRecords?.filter((e) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service])?.length) {
         var fieldTicketMaterialField = await fetch_field_ticket_material_fields(data?.currency);
         const material = []
@@ -436,17 +439,20 @@ const QuoteBuilder = ({
             }
           }
           material.push({ materialId: e.materialId, type: e.type, ...getObjKeysWithValues(e, fieldTicketMaterialField), ...extraData });
+          materialIds.push(e._id);
         })
-        await axiosInstance().post(`${fieldTicket.api}/${data?._id}/material`, { material: material, notAddserviceProduct: true })
+        await axiosInstance().post(`${fieldTicket.api}/${data?._id}/material`, { material: material, notAddserviceProduct: true });
       }
       if (selectedRecords?.filter((e) => [MATERIAL_TYPE.manualEntry])?.length) {
         var fieldTicketCostField = await fetch_field_ticket_cost_fields(data?.currency);
         const manualEntry = []
         selectedRecords?.filter((e) => [MATERIAL_TYPE.manualEntry].includes(e.type))?.forEach((e: any) => {
           manualEntry.push({ ...getObjKeysWithValues(e, fieldTicketCostField) });
+          costIds.push(e._id);
         })
-        await axiosInstance().post(`${fieldTicket.api}/${data?._id}/cost`, manualEntry)
+        await axiosInstance().post(`${fieldTicket.api}/${data?._id}/cost`, manualEntry);
       }
+      if(materialIds.length || costIds.length) await axiosInstance().post(`${quotation.api}/set-field-ticket-created/${versionData?._id}`, { material: materialIds, cost: costIds });
       setFieldTicketDialog({ open: false, data: null });
       fetchData()
     }

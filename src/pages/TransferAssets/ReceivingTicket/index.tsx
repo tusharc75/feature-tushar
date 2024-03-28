@@ -27,7 +27,6 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 interface ReceivingGridProps {
-  fetchAssets: any;
   permissions: any;
   transferAssetData: any;
   transferAssetId: string | any;
@@ -44,7 +43,6 @@ interface ReceivingGridProps {
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const {
     permissions,
-    fetchAssets,
     transferAssetId,
     transferAssetData,
     setNextStep,
@@ -204,12 +202,42 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     }
   }, [transferAssetId]);
 
+  const fetchAssets = () =>
+    new Promise((resolve, reject) => {
+      axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetId}`).then(({ data: { data } }) => {
+        data = [
+          ...data?.assets?.map((d: any) => ({
+            ...d,
+            productDescription: d?.product?.optionLabel ?? '',
+            productId: d?.product?.optionValue ?? '',
+            isChecked: false
+          }))
+        ];
+        resolve(data);
+      })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+
+  const fetchLoadingTickets = () =>
+    new Promise((resolve, reject) => {
+      axiosInstance()
+        .get(`${routes.deliveryTicket.path}/typewise?referenceType=Transfer Asset&referenceId=${transferAssetId}`)
+        .then(({ data: { data } }) => {
+          resolve(data);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+
   const fetchAssetsData = async (forceRefresh) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     await fetchFields();
     try {
-      let assetData = await fetchAssets(forceRefresh);
+      let assetData: any = await fetchAssets();
       let ticketData: any = await fetchLoadingTickets();
       const loadingTicket = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.loading);
       const receivingTicket = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.receiving);
@@ -245,17 +273,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     }
   };
 
-  const fetchLoadingTickets = () =>
-    new Promise((resolve, reject) => {
-      axiosInstance()
-        .get(`${routes.deliveryTicket.path}/typewise?referenceType=Transfer Asset&referenceId=${transferAssetId}`)
-        .then(({ data: { data } }) => {
-          resolve(data);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
 
   useEffect(() => {
     if (selectedRecords.length > 0) {
