@@ -1,6 +1,6 @@
 import { Box, Typography } from '@material-ui/core';
 import { kebabCase } from 'lodash';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
@@ -15,6 +15,7 @@ import routes from 'src/components/Helpers/Routes';
 import { isSectionVisible } from 'src/components/Sidebar/utils';
 import Chart from './Chart';
 import { assignIconAndText, groupByKey } from './helpers';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -27,6 +28,7 @@ function Dashboard() {
   } = useData();
   const [sections, setSections] = useState([]);
   const [objBySectionName, setObjBySectionName] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     let arr = [];
@@ -68,7 +70,8 @@ function Dashboard() {
         <div className={styles.main}>
           <div className={styles.leftContainer}>
             <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
-            <Chart />
+            {!isOffline &&
+              <Chart />}
           </div>
           <div className={styles.rightContainer}>
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
