@@ -18,6 +18,7 @@ import {
   ASSET_STATUS,
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   INVENTORY_OWNER_TYPE,
   SUBLEASE_STATUS,
@@ -27,6 +28,7 @@ import {
   sublease
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const SerializedAsset = ({
   subleaseData,
@@ -226,40 +228,51 @@ const SerializedAsset = ({
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-          fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
-          resource: sidebarResource.sublease,
-          referenceId: subleaseData?._id,
-          columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
-          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-        }
+        fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
+        resource: sidebarResource.sublease,
+        referenceId: subleaseData?._id,
+        columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
+        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+      }
       : null;
 
   const rightSideContents = () => {
     return (
       <>
         {allowedToEdit && (
-          <ImportExportLinks
-            permissions={permissions?.packages}
+          <ImportExportMenu
+            permissions={permissions?.serializedAsset}
             module={routes.serializedAsset.title}
             api={`${serializedAsset.api}/custom-template`}
             afterImportCompleted={() => {
               fetchRecords();
             }}
             isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows.length}
-            ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
             isDownloadExcel={false}
-            isBackgroundWhite={true}
-            small
+            ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
           />
+          // <ImportExportLinks
+          //   permissions={permissions?.serializedAsset}
+          //   module={routes.serializedAsset.title}
+          //   api={`${serializedAsset.api}/custom-template`}
+          //   afterImportCompleted={() => {
+          //     fetchRecords();
+          //   }}
+          //   isExportAllOrSomeFeature={true}
+          //   total={rowCount}
+          //   recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows.length}
+          //   ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
+          //   isDownloadExcel={false}
+          //   isBackgroundWhite={true}
+          //   small
+          // />
         )}
         {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
           <>
             {selectedRecords.length > 0 &&
-            selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-            checkUniqWarehouse() &&
-            currentStep === 1 ? (
+              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+              checkUniqWarehouse() &&
+              currentStep === 1 ? (
               <Tooltip title="Send to Supplier">
                 <Button
                   variant={'contained'}
@@ -293,6 +306,7 @@ const SerializedAsset = ({
                     if (subleaseData?.processor?.optionValue) {
                       data['processor'] = subleaseData?.processor?.optionValue;
                     }
+                    data['status'] = DELIVERY_TICKET_STATUS.delivered;
                     setShowTicketDialog({ open: true, data: data });
                   }}
                 >
@@ -330,7 +344,6 @@ const SerializedAsset = ({
         rightSideContents={rightSideContents()}
         hasXpadding
       />
-
       {columns ? (
         <CustomReactTable
           height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
