@@ -11,6 +11,7 @@ import { Autocomplete } from '@material-ui/lab';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';
+import { isArray } from 'lodash';
 
 export default function Notifications({ onClose, onSuccess, resource, resourceData }) {
   const toastConfig = useContext(CustomToastContext);
@@ -77,7 +78,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const handleSubmit = async (values) => {
     setSubmitting(true);
     axiosInstance()
-      .put(`/sa-formbuilder/steps/notifications/${resource}`, values)
+      .put(`/sa-formbuilder/steps/notifications/${resource}`, values?.notifications || [])
       .then(({ data }) => {
         setSubmitting(false);
         onSuccess();
@@ -94,17 +95,26 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   };
 
   const validate = (values) => {
-    let errors: any = {};
-    if (values.length > 0) {
-      values.map((d) => {
+    const errors: any = {};
+    if (values?.notifications?.length > 0) {
+      values?.notifications?.forEach((d, i) => {
         if (!d.field) {
-          errors['field'] = 'Field is required';
+          if (!errors?.notifications) {
+            errors['notifications'] = [];
+          }
+          errors.notifications[i] = { field: 'Field is required' };
         }
         if (!d.rule) {
-          errors['rule'] = 'Rule is required';
+          if (!errors?.notifications) {
+            errors['notifications'] = [];
+          }
+          errors.notifications[i] = { ...errors.notifications[i], rule: 'Rule is required' };
         }
         if (!d.notificationUser) {
-          errors['notificationUser'] = 'Notification User is required';
+          if (!errors?.notifications) {
+            errors['notifications'] = [];
+          }
+          errors.notifications[i] = { ...errors.notifications[i], notificationUser: 'Notification User is required' };
         }
       });
     }
@@ -124,8 +134,8 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
         }
       }}
     >
-      <Formik initialValues={initialValues} enableReinitialize={true} onSubmit={() => {}}>
-        {({ values }) => (
+      <Formik initialValues={initialValues} enableReinitialize={true} validate={validate} onSubmit={handleSubmit}>
+        {({ values, submitForm, touched, errors }) => (
           <>
             <CustomDialogHeader
               onClose={onClose}
@@ -194,8 +204,18 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         placeholder="Field"
                                         name="field"
                                         required
-                                        error={validate([data])?.field}
-                                        helperText={validate([data])?.field ? 'Field is required' : ''}
+                                        error={
+                                          touched?.notifications &&
+                                          touched?.notifications[index]?.field &&
+                                          errors?.notifications &&
+                                          Boolean(errors?.notifications[index]?.field)
+                                        }
+                                        helperText={
+                                          touched?.notifications &&
+                                          touched?.notifications[index]?.field &&
+                                          errors?.notifications &&
+                                          errors?.notifications[index]?.field
+                                        }
                                       />
                                     )}
                                   />
@@ -226,8 +246,18 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         placeholder="Rule"
                                         name="rule"
                                         required
-                                        error={validate([data])?.rule}
-                                        helperText={validate([data])?.rule ? 'Rule is required' : ''}
+                                        error={
+                                          touched?.notifications &&
+                                          touched?.notifications[index]?.rule &&
+                                          errors?.notifications &&
+                                          Boolean(errors?.notifications[index]?.rule)
+                                        }
+                                        helperText={
+                                          touched?.notifications &&
+                                          touched?.notifications[index]?.rule &&
+                                          errors?.notifications &&
+                                          errors?.notifications[index]?.rule
+                                        }
                                       />
                                     )}
                                   />
@@ -258,8 +288,18 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         placeholder="Notification User"
                                         name="notificationUser"
                                         required
-                                        error={validate([data])?.notificationUser}
-                                        helperText={validate([data])?.notificationUser ? 'Notification User is required' : ''}
+                                        error={
+											touched?.notifications &&
+											touched?.notifications[index]?.notificationUser &&
+											errors?.notifications &&
+											Boolean(errors?.notifications[index]?.notificationUser)
+										  }
+										  helperText={
+											touched?.notifications &&
+											touched?.notifications[index]?.notificationUser &&
+											errors?.notifications &&
+											errors?.notifications[index]?.notificationUser
+										  }
                                       />
                                     )}
                                   />
@@ -342,15 +382,16 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                 color="primary"
                 size="small"
                 type="submit"
-                onClick={() => {
-                  if (
-                    !validate(values.notifications).field &&
-                    !validate(values.notifications).rule &&
-                    !validate(values.notifications).notificationUser
-                  ) {
-                    handleSubmit(values?.notifications);
-                  }
-                }}
+                onClick={submitForm}
+                // onClick={() => {
+                //   if (
+                //     !validate(values.notifications).field &&
+                //     !validate(values.notifications).rule &&
+                //     !validate(values.notifications).notificationUser
+                //   ) {
+                //     handleSubmit(values?.notifications);
+                //   }
+                // }}
                 endIcon={submitting && <CircularProgress color="inherit" size={18} />}
               >
                 Save
