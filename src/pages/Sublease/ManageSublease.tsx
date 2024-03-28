@@ -88,7 +88,14 @@ const ManageSublease = ({
                 }
                 if (data?.canEdit === false) {
                   fieldsDataForUpdate?.forEach((e) => {
-                    if (['type','supplierAccount','warehouse','toWarehouse','fromWarehouse']?.includes(e?.fieldName)) {
+                    if (['type', 'supplierAccount', 'warehouse', 'fromWarehouse']?.includes(e?.fieldName)) {
+                      e.isUneditable = true;
+                    }
+                  })
+                }
+                if (data?.ticketCreated) {
+                  fieldsDataForUpdate?.forEach((e) => {
+                    if (['toWarehouse']?.includes(e?.fieldName)) {
                       e.isUneditable = true;
                     }
                   })
