@@ -86,10 +86,17 @@ const ManageSublease = ({
                 if (data?.actualEndDate && data?.actualEndDate === '') {
                   fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !['actualEndDate'].includes(obj.fieldName));
                 }
-                if (![SUBLEASE_STATUS.new, SUBLEASE_STATUS.inProgress].includes(data?.status)) {
+                if (data?.canEdit === false) {
                   fieldsDataForUpdate?.forEach((e) => {
-                    if (e.fieldName === 'supplierAccount') {
-                      e.disableOnEdit = true;
+                    if (['type', 'supplierAccount', 'warehouse', 'fromWarehouse']?.includes(e?.fieldName)) {
+                      e.isUneditable = true;
+                    }
+                  })
+                }
+                if (data?.ticketCreated) {
+                  fieldsDataForUpdate?.forEach((e) => {
+                    if (['toWarehouse']?.includes(e?.fieldName)) {
+                      e.isUneditable = true;
                     }
                   })
                 }
