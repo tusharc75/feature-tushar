@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
-import { Box, Button, Dialog, IconButton } from '@material-ui/core';
+import { Box, Button, Dialog, IconButton, MenuItem } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -19,6 +19,9 @@ import { cloneDisable } from 'src/constants/messageHelpers';
 import ManageFieldTicket from '../FieldTicket/ManageFieldTicket';
 import ViewFieldTicketDialog from './ViewFieldTicketDialog';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { clearAll, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import { fieldServiceOfflineUpdate } from '../FieldServiceOrder/Services/OfflineHelper';
 
 let serchtimeTimeout;
 
@@ -51,6 +54,7 @@ const FieldServiceTechnician = () => {
   const [viewFieldTicket, setViewFieldTicket] = useState({ open: false, data: null });
 
   const { generateColumns } = useColumns();
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchColumns();
@@ -58,8 +62,15 @@ const FieldServiceTechnician = () => {
 
   const fetchColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
-    data = response?.data?.data;
+    if (isOffline) {
+      data = await findOne(objectStore.resource, objectStore.fieldServiceOrder);
+    } else {
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
+      data = response?.data?.data;
+    }
+    try {
+      insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
+    } catch (e) { }
     const newColumns = generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -123,26 +134,30 @@ const FieldServiceTechnician = () => {
   }, [page, limit, filters, sorting, showFilteredRecordsOnly, selectedType]);
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
-    axiosInstance()
-      .get(`${fieldServiceOrder.api}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data?.map((u) => {
-          let finalObject: any = prepareDataForGrid(u);
-          finalObject.orignalData = u;
-          return finalObject;
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      })
-      .finally(() => {
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+    try {
+      dispatch({ type: 'loading', loading: true });
+      let data, count;
+      if (isOffline) {
+        data = await findAll(objectStore.fieldServiceOrder);
+        count = data?.length || 0;
+      } else {
+        const queryString = getQueryString();
+        const response = await axiosInstance().get(`${fieldServiceOrder.api}${queryString}`);
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      let rows = data?.map((u) => {
+        let finalObject: any = prepareDataForGrid(u);
+        finalObject.orignalData = u;
+        return finalObject;
       });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    }  
   };
 
   const getQueryString = (isExport = false) => {
@@ -185,6 +200,35 @@ const FieldServiceTechnician = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
+  const handleAddOffline = async () => {
+    const data: any = [];
+    selectedRecords.forEach((element) => {
+      data.push(element._id);
+    });
+    await fieldServiceOfflineUpdate(data);
+    axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
+    });
+    dispatch({ type: 'selection', selectedRecords: [] });
+  };
+
+
+  const handleRemoveoffline = async () => {
+    await clearAll(objectStore.fieldServiceOrder);
+    await clearAll(objectStore.fieldTicket);
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
+          Add Offline
+        </MenuItem>
+        <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -198,8 +242,9 @@ const FieldServiceTechnician = () => {
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={false}
+          isActionButtonVisible={true}
           isAddButtonVisible={false}
+          actionMenuItems={<ActionMenuItems />}
         />
         {columns ? (
           <CustomReactTable

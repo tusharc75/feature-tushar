@@ -19,7 +19,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [fields, setFields] = useState([]);
-  const [notificationUserField, setNotificationUserField] = useState([]);
+  const [notificationUser, setNotificationUserField] = useState([]);
   const RULE = [
     {
       optionLabel: 'Less Then Current Date',
@@ -39,7 +39,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
         rule: '',
         sendMail: true,
         sendNotification: true,
-        notificationUserField: '',
+        notificationUser: '',
         message: ''
       });
     } else {
@@ -103,8 +103,8 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
         if (!d.rule) {
           errors['rule'] = 'Rule is required';
         }
-        if (!d.notificationUserField) {
-          errors['notificationUserField'] = 'Notification User Field is required';
+        if (!d.notificationUser) {
+          errors['notificationUser'] = 'Notification User is required';
         }
       });
     }
@@ -159,10 +159,10 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                       <>
                         {values?.notifications?.map((data, index) => (
                           <Box mb={2} border={1} borderColor="var(--common-border-color)">
-                            <Box textAlign={'right'}>
+                            <Box textAlign={'right'} p={1}>
                               <HtmlTooltip title="Remove">
                                 <IconButton size="small" aria-label="remove" onClick={() => addRemove(values, 'remove', index)}>
-                                  <RemoveCircleOutlineIcon fontSize="small" />
+                                  <RemoveCircleOutlineIcon fontSize="small" color="primary" />
                                 </IconButton>
                               </HtmlTooltip>
                             </Box>
@@ -222,7 +222,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         {...params}
                                         margin="dense"
                                         variant="outlined"
-                                        label="rule"
+                                        label="Rule"
                                         placeholder="Rule"
                                         name="rule"
                                         required
@@ -230,6 +230,56 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         helperText={validate([data])?.rule ? 'Rule is required' : ''}
                                       />
                                     )}
+                                  />
+                                </Grid>
+                                <Grid item md={4} lg={4} sm={6} xs={12}>
+                                  <Autocomplete
+                                    id="notificationUser"
+                                    options={notificationUser}
+                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                                    getOptionSelected={(option: any, val) => option?.fieldName === val}
+                                    value={
+                                      notificationUser && notificationUser.filter((f) => f?.fieldName === data?.notificationUser).length
+                                        ? notificationUser && notificationUser.filter((f) => f?.fieldName === data?.notificationUser)[0]
+                                        : ''
+                                    }
+                                    onChange={(e, val) => {
+                                      arrayHelpers.replace(index, {
+                                        ...values?.notifications[index],
+                                        ['notificationUser']: val && val?.fieldName ? val?.fieldName : ''
+                                      });
+                                    }}
+                                    renderInput={(params) => (
+                                      <TextField
+                                        {...params}
+                                        margin="dense"
+                                        variant="outlined"
+                                        label="Notification User"
+                                        placeholder="Notification User"
+                                        name="notificationUser"
+                                        required
+                                        error={validate([data])?.notificationUser}
+                                        helperText={validate([data])?.notificationUser ? 'Notification User is required' : ''}
+                                      />
+                                    )}
+                                  />
+                                </Grid>
+                                <Grid item md={12} lg={12} sm={12} xs={12}>
+                                  <TextField
+                                    fullWidth
+                                    label="Message"
+                                    variant="outlined"
+                                    type="text"
+                                    size="small"
+                                    name="message"
+                                    placeholder="Message"
+                                    value={data.message}
+                                    onChange={(e) => {
+                                      arrayHelpers.replace(index, {
+                                        ...values?.notifications[index],
+                                        ['message']: e.target.value
+                                      });
+                                    }}
                                   />
                                 </Grid>
                                 <Grid item md={4} lg={4} sm={6} xs={12}>
@@ -272,58 +322,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                     />
                                   </Box>
                                 </Grid>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
-                                  <Autocomplete
-                                    id="notificationUserField"
-                                    options={notificationUserField}
-                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                                    getOptionSelected={(option: any, val) => option?.fieldName === val}
-                                    value={
-                                      notificationUserField &&
-                                      notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
-                                        ? notificationUserField &&
-                                          notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField)[0]
-                                        : ''
-                                    }
-                                    onChange={(e, val) => {
-                                      arrayHelpers.replace(index, {
-                                        ...values?.notifications[index],
-                                        ['notificationUserField']: val && val?.fieldName ? val?.fieldName : ''
-                                      });
-                                    }}
-                                    renderInput={(params) => (
-                                      <TextField
-                                        {...params}
-                                        margin="dense"
-                                        variant="outlined"
-                                        label="NotificationUserField"
-                                        placeholder="NotificationUserField"
-                                        name="notificationUserField"
-                                        required
-                                        error={validate([data])?.notificationUserField}
-                                        helperText={validate([data])?.notificationUserField ? 'Notification User Field is required' : ''}
-                                      />
-                                    )}
-                                  />
-                                </Grid>
-                                <Grid item md={4} lg={4} sm={6} xs={12}>
-                                  <TextField
-                                    fullWidth
-                                    label="Message"
-                                    variant="outlined"
-                                    type="text"
-                                    size="small"
-                                    name="message"
-                                    placeholder="Message"
-                                    value={data.message}
-                                    onChange={(e) => {
-                                      arrayHelpers.replace(index, {
-                                        ...values?.notifications[index],
-                                        ['message']: e.target.value
-                                      });
-                                    }}
-                                  />
-                                </Grid>
                               </Grid>
                             </Box>
                           </Box>
@@ -348,7 +346,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                   if (
                     !validate(values.notifications).field &&
                     !validate(values.notifications).rule &&
-                    !validate(values.notifications).notificationUserField
+                    !validate(values.notifications).notificationUser
                   ) {
                     handleSubmit(values?.notifications);
                   }
