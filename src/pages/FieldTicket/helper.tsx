@@ -9,6 +9,13 @@ export const fetch_field_ticket_material_fields = async (currency) => {
     return data;
 }
 
+export const fetch_field_ticket_cost_fields = async (currency) => {
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`);
+    let data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
+    return data;
+}
+
 export const fetch_field_ticket_submit_fields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketSubmit}`);
     const data = response?.data?.data;

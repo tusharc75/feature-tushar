@@ -5,7 +5,7 @@ import { backendApi } from '../../config';
 import { Box, Button, Divider, makeStyles } from '@material-ui/core';
 import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { sortBy } from 'lodash';
+import { sortBy, startCase } from 'lodash';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -191,7 +191,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             width: 150,
             show: true,
             disabled: true,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.type}</p>
+            Cell: ({ row }) => <p className="text-truncate">{startCase(row?.original?.type)}</p>
           },
           {
             accessor: 'detail',
@@ -383,6 +383,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       onClick={(e: any) => (e.target.value = null)}
       id="importFromExcel"
       name="importFromExcel"
+      className="sr-only"
       onChange={uploadData}
       accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
       style={{
@@ -395,8 +396,8 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
   );
 
   return (
-    <>
-      <Box display="flex" pt={1} justifyContent="flex-end">
+    <div className="p-2">
+      <Box display="flex" className="pb-2" justifyContent="flex-end">
         <Box mx={1} />
         {!isSubmited && (
           <Button
@@ -466,7 +467,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
           </Box>
         </>
       )}
-    </>
+    </div>
   );
 };
 

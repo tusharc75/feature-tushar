@@ -113,7 +113,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
               <p className="text-truncate">{row.original?.detail}</p>
             )}
 
-            {row?.original?.type !== 'service' && row.original.type !== 'serializedAsset' && (
+            {[MATERIAL_TYPE.product, MATERIAL_TYPE.package]?.includes(row?.original?.type) && (
               <>
                 <Box ml={1} className="d-flex align-items-center">
                   {row.original?.subRows?.length > 0 && (
@@ -123,7 +123,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
                     <HtmlTooltip title="Add ">
                       <IconButton
                         onClick={(event) => {
-                          if (row.original.type === 'product' && row.original.productDetail.serializedProduct) {
+                          if (row.original.type === MATERIAL_TYPE.product && row.original.productDetail.serializedProduct) {
                             setAddchildDialog({
                               open: true,
                               parentId: row.original?._id,
@@ -151,24 +151,26 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
                 </Box>
               </>
             )}
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'serializedAsset') {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+            {![MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.other]?.includes(row.original['type']) && (
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === MATERIAL_TYPE.service) {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            )}
           </div>
         )
       },
@@ -234,26 +236,26 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
     data = response?.data?.data;
     let rows = data.material.filter((e) => !e.parentId);
-    assignedAssets = data.material.filter((e) => e.type === 'serializedAsset' && e.parentId);
+    assignedAssets = data.material.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.parentId);
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =
-        parent.type === 'product'
+        parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
-          : parent.type === 'package'
-          ? parent.packageDetail?.packageName
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.serviceDetail?.serviceName;
+          : parent.type === MATERIAL_TYPE.package
+            ? parent.packageDetail?.packageName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail?.assetNumber
+              : parent.serviceDetail?.serviceName;
       parent.description =
-        parent.type === 'product'
+        parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDescription
-          : parent?.serviceDetail?.serviceDescription;
+          : parent.type === MATERIAL_TYPE.package
+            ? parent?.packageDetail?.packageDescription
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent?.serializedAssetDetail?.product?.productDescription
+              : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.assetQty = assignedAssets.filter((i) => i.parentId === parent._id).length;
       parent.isValid = parent['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -273,21 +275,23 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.serviceDetail?.serviceName;
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow.serializedAssetDetail.assetNumber
+              : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName :
+                _subRow?.detail;
       _subRow.description =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow.type === 'serializedAsset'
-          ? parent.description
-          : _subRow?.serviceDetail?.serviceDescription;
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? parent.description :
+              _subRow.type === MATERIAL_TYPE.service ?
+                _subRow?.serviceDetail?.serviceDescription : '';
       _subRow.isValid = _subRow['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -309,7 +313,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   const handleAdd = async (rows) => {
     setIsAdding(true);
     const material: any = [];
-    if (addDialog.type === 'serializedAsset' && addDialog.parentId) {
+    if (addDialog.type === MATERIAL_TYPE.serializedAsset && addDialog.parentId) {
       rows?.forEach((e) => {
         material.push(e);
       });
@@ -444,7 +448,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           <MenuItem
             color="primary"
             onClick={() => {
-              setAddDialog({ open: true, type: 'product', parentId: null });
+              setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
             }}
           >
             {`Add Existing Products`}
@@ -455,7 +459,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           <MenuItem
             color="primary"
             onClick={() => {
-              setAddDialog({ open: true, type: 'package', parentId: null });
+              setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
           >
             {`Add Existing Packages`}
@@ -465,7 +469,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           <MenuItem
             color="primary"
             onClick={() => {
-              setAddDialog({ open: true, type: 'service', parentId: null });
+              setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
             }}
           >
             {`Add Existing Services`}
@@ -474,7 +478,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         <MenuItem
           color="primary"
           onClick={() => {
-            setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
+            setAddDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, parentId: null });
           }}
         >
           {`Add Existing Assets`}
@@ -593,7 +597,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           <MenuList>
             <MenuItem
               onClick={() => {
-                setAddDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
+                setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: addchildDialog.parentId });
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct: false });
               }}
             >
@@ -601,7 +605,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
             </MenuItem>
             <MenuItem
               onClick={() => {
-                setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
+                setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: addchildDialog.parentId });
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct: false });
               }}
             >
@@ -609,7 +613,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
             </MenuItem>
             <MenuItem
               onClick={() => {
-                setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
+                setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: addchildDialog.parentId });
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct: false });
               }}
             >
@@ -618,7 +622,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
             {addchildDialog.isSerializedProduct && (
               <MenuItem
                 onClick={() => {
-                  setAddDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId });
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, parentId: addchildDialog.parentId });
                   setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct: false });
                 }}
               >
@@ -628,7 +632,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           </MenuList>
         </Popover>
       )}
-      {addDialog.open && addDialog.type === 'product' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
         <AssignProductDialog
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(d) => {
@@ -637,7 +641,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           isSubmitting={isAdding}
         />
       )}
-      {addDialog.open && addDialog.type === 'service' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
@@ -646,7 +650,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           isSubmitting={isAdding}
         />
       )}
-      {addDialog.open && addDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
@@ -655,7 +659,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           isSubmitting={isAdding}
         />
       )}
-      {addDialog.open && addDialog.type === 'serializedAsset' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.serializedAsset && (
         <AssignSerializedAssetDialog
           reference={'invoice'}
           handleClose={() => {
@@ -663,13 +667,13 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
             setAssetAssignedProduct([]);
           }}
           ids={flattenArray(dataRows)
-            ?.filter((e) => e.type === 'serializedAsset')
+            ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
             ?.map((e) => e.materialId)}
           handleSucess={(rows) => {
             if (addDialog.parentId) {
               handleAdd(
                 rows?.map((e) => {
-                  return { materialId: e.asset, type: 'serializedAsset', parentId: e._id };
+                  return { materialId: e.asset, type: MATERIAL_TYPE.serializedAsset, parentId: e._id };
                 })
               );
             } else {

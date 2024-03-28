@@ -355,7 +355,6 @@ const ProductBuilder = (props) => {
       fields = extractFields(fields);
       setaddFieldData({ section: section, fields: fields });
       setIsAddField(true);
-      setAnchorEl(null);
     }
   };
 
