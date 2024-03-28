@@ -229,19 +229,6 @@ const ProductDetailsPage = () => {
     }
   };
 
-  const handleConvertSerialized = () => {
-    axiosInstance()
-      .post(`${product.api}/non-serialized-to-serialized`, { products: [id] })
-      .then(() => {
-        setShowConfirmBoxConvert(false);
-        getProductFieldsAndData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setShowConfirmBoxConvert(false);
-      });
-  };
-
   function a11yProps(index: any) {
     return {
       id: `main-tab-${index}`,
@@ -424,32 +411,6 @@ const ProductDetailsPage = () => {
                                         <Typography>No Record Found</Typography>
                                       </Box>
                                     )}
-                                    {permissions?.product?.isUpdate &&
-                                      permissions?.serializedAsset?.isCreate &&
-                                      productData?.serializedProduct === false && (
-                                        <Box pt={1}>
-                                          <Button
-                                            variant={'outlined'}
-                                            color="primary"
-                                            onClick={() => {
-                                              setShowConfirmBoxConvert(true);
-                                            }}
-                                            size="small"
-                                          >
-                                            Convert to Serialized Product
-                                          </Button>
-                                          {showConfirmBoxConvert && (
-                                            <ConfirmationDialog
-                                              open={showConfirmBoxConvert}
-                                              message={`Are you sure you want to convert serialized product ?`}
-                                              onClose={() => {
-                                                setShowConfirmBoxConvert(false);
-                                              }}
-                                              onOk={handleConvertSerialized}
-                                            />
-                                          )}
-                                        </Box>
-                                      )}
                                   </Box>
                                 ) : (
                                   [1, 2].map((i) => (
