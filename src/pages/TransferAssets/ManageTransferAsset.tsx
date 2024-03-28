@@ -29,8 +29,6 @@ interface Props {
   onClose?: any;
   onSuccess?: any;
   number?: string;
-  isEditable?: boolean;
-  isMainInfoEditable?: boolean;
   referenceType?: string;
   referenceId?: string;
   referenceData?: any;
@@ -46,8 +44,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
     onClose,
     onSuccess,
     number = '',
-    isEditable = false,
-    isMainInfoEditable = false,
     referenceType = null,
     referenceId = null,
     referenceData = null
@@ -97,6 +93,22 @@ const ManageTransferAsset: FC<Props> = (props) => {
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
                 });
               } else {
+                if (data?.canEdit === false) {
+                  fieldsDataForUpdate?.forEach((e) => {
+                    if (['transferType', 'transferFromPlant']?.includes(e?.fieldName)) {
+                      e.isUneditable = true;
+                      e.disableOnEdit = true;
+                    }
+                  });
+                }
+                if (data?.ticketCreated) {
+                  fieldsDataForUpdate?.forEach((e) => {
+                    if (['transfertoPlant', 'plantShipTo', 'transfertoSupplier', 'supplierShipTo', 'transfertoCustomer', 'customerShipTo']?.includes(e?.fieldName)) {
+                      e.isUneditable = true;
+                      e.disableOnEdit = true;
+                    }
+                  });
+                }
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -295,7 +307,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       <Grid item xs={12} sm={6} md={6}>
                                         <FormTypes
                                           {...field}
-                                          disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
+                                          disabled={Boolean(transferAssetId) && field.disableOnEdit}
                                           values={values}
                                           hidelookupAddButton={true}
                                           errors={errors}
@@ -322,7 +334,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                       <Grid key={index2} item xs={12} sm={6} md={6}>
                                         <FormTypes
                                           {...field}
-                                          disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
+                                          disabled={Boolean(transferAssetId) && field.disableOnEdit}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
@@ -356,7 +368,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   <Grid item xs={12} sm={6} md={6}>
                                     <FormTypes
                                       {...field}
-                                      disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
+                                      disabled={Boolean(transferAssetId) && field.disableOnEdit}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -382,7 +394,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   <Grid item xs={12} sm={6} md={6}>
                                     <FormTypes
                                       {...field}
-                                      disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
+                                      disabled={Boolean(transferAssetId) && field.disableOnEdit}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -407,7 +419,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                   <FormTypes
                                     {...field}
-                                    disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
+                                    disabled={Boolean(transferAssetId) && field.disableOnEdit}
                                     values={values}
                                     errors={errors}
                                     touched={touched}
@@ -449,7 +461,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                   <FormTypes
                                     {...field}
-                                    disabled={Boolean(transferAssetId) && (isEditable || field.disableOnEdit)}
+                                    disabled={Boolean(transferAssetId) && field.disableOnEdit}
                                     values={values}
                                     hidelookupAddButton={true}
                                     errors={errors}
