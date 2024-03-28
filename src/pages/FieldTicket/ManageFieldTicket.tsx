@@ -71,10 +71,10 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         data = response?.data?.data;
       }
 
-      data = data?.filter((e) => !['quotation', 'invoice'].includes(e?.fieldData?.fieldName));
+      const allFields = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
 
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const fieldsDataForCreate = data.filter((obj) => obj.isCreate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
 
       if (id) {
         let mainData;
@@ -115,7 +115,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
           for (const key in referenceData) {
-            if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+            if (referenceData[key] && allFields?.some((e) => e.fieldName === key)) {
               tempInitialData[key] = referenceData[key];
             }
           }
