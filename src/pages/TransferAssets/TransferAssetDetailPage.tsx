@@ -46,9 +46,6 @@ const TransferAssetDetailPage = () => {
   const [isNextStep, setNextStep] = useState(true);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [transferAssetFields, setTransferAssetFields] = useState([]);
-  const [existingAssets, setExistingAssets] = useState([]);
-  const [loadingTickets, setLoadingTickets] = useState([]);
-  const [receivingTickets, setReceivingTickets] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isTransferEnded, setTransferIsEnded] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -83,7 +80,6 @@ const TransferAssetDetailPage = () => {
   useEffect(() => {
     if (id) {
       fetchTransferAssetData();
-      fetchAssets(true);
     }
   }, [id]);
 
@@ -209,32 +205,7 @@ const TransferAssetDetailPage = () => {
       });
   };
 
-  const fetchAssets = (forceRefresh) =>
-    new Promise((resolve, reject) => {
-      if (existingAssets.length > 0 && !forceRefresh) {
-        resolve(existingAssets);
-      }
 
-      if (existingAssets.length === 0 || forceRefresh) {
-        axiosInstance()
-          .get(`${routes.transferAsset.path}/get-asset/${id}`)
-          .then(({ data: { data } }) => {
-            data = [
-              ...data?.assets?.map((d: any) => ({
-                ...d,
-                productDescription: d?.product?.optionLabel ?? '',
-                productId: d?.product?.optionValue ?? '',
-                isChecked: false
-              }))
-            ];
-            setExistingAssets(data);
-            resolve(data);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      }
-    });
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -358,13 +329,11 @@ const TransferAssetDetailPage = () => {
               )}
               {currentStep === 1 && transferAssetData && (
                 <LoadingTicketGrid
-                  setTickets={setLoadingTickets}
                   currentStep={currentStep}
                   transferAssetId={id}
                   transferAssetData={transferAssetData}
                   permissions={permissions}
                   setNextStep={setNextStep}
-                  setExistingAssets={setExistingAssets}
                   setTransferIsEnded={setTransferIsEnded}
                   updateTransferStatus={updateTransferStatus}
                   isTransferEnded={isTransferEnded}
@@ -379,7 +348,6 @@ const TransferAssetDetailPage = () => {
                   currentStep={currentStep}
                   transferAssetId={id}
                   transferAssetData={transferAssetData}
-                  fetchAssets={fetchAssets}
                   permissions={permissions}
                   setNextStep={setNextStep}
                   setTransferIsEnded={setTransferIsEnded}
@@ -414,8 +382,6 @@ const TransferAssetDetailPage = () => {
       {/* Manage Transfer Asset Data */}
       {openUpdateDialog && (
         <ManageTransferAsset
-          isEditable={existingAssets.length > 0}
-          isMainInfoEditable={currentStep >= 1 && (loadingTickets.length > 0 || receivingTickets.length > 0)}
           number={transferAssetData?.transferAssetNumber}
           isClone={false}
           transferAssetId={id}

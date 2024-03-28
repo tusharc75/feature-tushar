@@ -38,8 +38,6 @@ interface LoadingGridProps {
   transferAssetId: string | any;
   setNextStep: any;
   currentStep: number;
-  setTickets?: any;
-  setExistingAssets?: any;
   setTransferIsEnded?: any;
   updateTransferStatus?: any;
   isTransferEnded: boolean;
@@ -54,9 +52,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     permissions,
     transferAssetId,
     transferAssetData,
-    setTickets,
     setNextStep,
-    setExistingAssets,
     setTransferIsEnded,
     updateTransferStatus,
     isTransferEnded,
@@ -288,7 +284,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           ...finalObject
         };
       });
-      setExistingAssets(assetData);
       dispatch({ type: 'initialize', data: assetData, count: assetData?.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -302,7 +297,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         .get(`${routes.deliveryTicket.path}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}&referenceId=${transferAssetId}`)
         .then(({ data: { data } }) => {
           resolve(data);
-          setTickets(data);
         })
         .catch((err) => {
           reject(err);
