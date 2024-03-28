@@ -163,25 +163,27 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
               </Box>
             ) : null}
             {![MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.manualEntry]?.includes(row.original.type) && (
-              <Box ml={1}>
-                <HtmlTooltip title="Add ">
-                  <IconButton
-                    onClick={(event) =>
-                      setAddchildDialog({
-                        open: true,
-                        parentId: row.original?._id,
-                        parentType: row.original.type,
-                        serializedProduct: row.original?.serializedProduct,
-                        top: event.clientY,
-                        bottom: event.clientX
-                      })
-                    }
-                    size="small"
-                  >
-                    <Add color="disabled" fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
+              quotationData?.type === QUOTATION_TYPE.fieldJob &&
+                row.original.type === MATERIAL_TYPE.product ? null :
+                <Box ml={1}>
+                  <HtmlTooltip title="Add ">
+                    <IconButton
+                      onClick={(event) =>
+                        setAddchildDialog({
+                          open: true,
+                          parentId: row.original?._id,
+                          parentType: row.original.type,
+                          serializedProduct: row.original?.serializedProduct,
+                          top: event.clientY,
+                          bottom: event.clientX
+                        })
+                      }
+                      size="small"
+                    >
+                      <Add color="disabled" fontSize="small" />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
             )}
             {row.original.type !== MATERIAL_TYPE.manualEntry && (
               <Box ml={1}>
@@ -1037,16 +1039,17 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 Add Existing Packages
               </MenuItem>
             )}
-            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null : (
-              <MenuItem
-                onClick={() => {
-                  setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
-                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-                }}
-              >
-                Add Existing Services
-              </MenuItem>
-            )}
+            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null :
+              quotationData?.type === QUOTATION_TYPE.fieldJob ? null : (
+                <MenuItem
+                  onClick={() => {
+                    setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
+                    setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                  }}
+                >
+                  Add Existing Services
+                </MenuItem>
+              )}
           </MenuList>
         </Popover>
       )}
