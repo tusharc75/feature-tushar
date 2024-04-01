@@ -300,18 +300,16 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
   const handleApplyDate = async () => {
     let tempValues: any = { actualEndDate: endDate };
-
+    let newEndDate=  moment(endDate).toISOString()
     const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData[0]?._id}/invoice/material-end-date-qty?resource=${resource}`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
     let rows: any = [];
     selectedRecords.forEach((element) => {
       element.invalidDate = false;
-
       const product = invoicedProducts?.material?.find((p) => p._id === element._id);
-
-      const productStartDateTime = new Date(new Date(element.actualStartDate).toLocaleDateString()).getTime();
-      const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
+      const productStartDateTime = new Date(element.actualStartDate).getTime();
+      const selectedEndDateTime = new Date(newEndDate).getTime();
 
       if (selectedEndDateTime < productStartDateTime) {
         element.invalidDate = true;
