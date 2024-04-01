@@ -503,7 +503,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     if (assetList?.length) {
       rentalUnitVolum = await axiosInstance().post(
         `${routes.rentalManagement.path}/${rentalManagementData?._id}/inventory/rental-unit-volume-utilization`,
-        assetList?.map((d) => ({ asset: d?._id, fromDate: moment(d?.manualStartDate).format('MM/DD/YYYY'), toDate: moment(endDate).format('MM/DD/YYYY') }))
+        assetList?.map((d) => ({ asset: d?._id, fromDate: moment(d?.actualStartDate).format('MM/DD/YYYY'), toDate: moment(endDate).format('MM/DD/YYYY') }))
       );
     }
 
