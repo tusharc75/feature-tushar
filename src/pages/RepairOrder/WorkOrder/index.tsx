@@ -389,7 +389,7 @@ const WorkOrder = ({
               <HtmlTooltip title="Add Products/Consumables">
                 <IconButton
                   size="small"
-                  disabled={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? false : true}
+                  // disabled={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? false : true}
                   aria-label="Add Products/Consumables"
                   onClick={() => {
                     var ids = [];
@@ -407,7 +407,8 @@ const WorkOrder = ({
                 >
                   <AddCircleOutlineIcon
                     fontSize="small"
-                    color={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? 'primary' : 'disabled'}
+                    // color={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? 'primary' : 'disabled'}
+                    color={'primary'}
                   />
                 </IconButton>
               </HtmlTooltip>
@@ -595,7 +596,7 @@ const WorkOrder = ({
 
       parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
-        parent.hideSelection = true;
+        // parent.hideSelection = true;
         parent.serviceStatus = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);

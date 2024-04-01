@@ -570,7 +570,7 @@ const WorkOrderDetails = () => {
         <TabPanel value={tabValue} index={2}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && !completed}
+              allowedToEdit={allowedToEdit && (workOrderData?.status === WORK_ORDER_STATUS.completed || !completed)}
               isCreate={true}
               service={null}
               uniqueId={null}
