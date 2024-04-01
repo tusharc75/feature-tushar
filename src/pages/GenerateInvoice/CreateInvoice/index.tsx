@@ -307,14 +307,14 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     let rows: any = [];
     selectedRecords.forEach((element) => {
       element.invalidDate = false;
-      const product = invoicedProducts?.material?.find((p) => p._id === element._id);
+      const product = invoicedProducts?.find((p) => p._id === element._id);
       const productStartDateTime = new Date(element.actualStartDate).getTime();
       const selectedEndDateTime = new Date(newEndDate).getTime();
 
       if (selectedEndDateTime < productStartDateTime) {
         element.invalidDate = true;
       } else if (product) {
-        const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
+        const productEndDateTime = new Date(product?.endDate).getTime();
         if (selectedEndDateTime < productEndDateTime) {
           element.invalidDate = true;
         } else {
@@ -323,7 +323,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       }
 
       if (element?.manualEndDate) {
-        const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
+        const productManualEndDate = new Date(element?.manualEndDate).getTime();
         if (selectedEndDateTime > productManualEndDate) {
           tempValues.actualEndDate = element?.manualEndDate;
         }
