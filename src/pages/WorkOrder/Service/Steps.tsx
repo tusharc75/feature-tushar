@@ -37,6 +37,7 @@ import DiagramDialog from '../Diagram/DiagramDialog';
 import ServiceFieldValueDialig from './ServiceFielValuedDialig';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import routes from 'src/components/Helpers/Routes';
 
 export interface StepDataInterface {
   _id: string;
@@ -190,7 +191,9 @@ const Steps = ({
   stepSubmitedData,
   handelClose = null,
   minHeightClass = null,
-  isMobile
+  isMobile,
+  setShowManageRepairJobDialog = null,
+  setRepairJobReceiveConfirmation = null
 }) => {
   const workOrderId = workOrderData?._id;
   const classes = useStyles();
@@ -819,6 +822,35 @@ const Steps = ({
   const leftSideContents = useMemo(() => {
     return (
       <>
+        {resource === sidebarResource.workOrderTechnician &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          (workOrderData?.currentRepairJob ? (
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              onClick={(e) => {
+                if (setRepairJobReceiveConfirmation) {
+                  setRepairJobReceiveConfirmation(true);
+                }
+              }}
+            >
+              Receive Asset From Supplier
+            </Button>
+          ) : (
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              onClick={(e) => {
+                if (setShowManageRepairJobDialog) {
+                  setShowManageRepairJobDialog(true);
+                }
+              }}
+            >
+              {`Create ${routes?.repairJob.title}`}
+            </Button>
+          ))}
         {resource === sidebarResource.workOrderTechnician && workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
           <ThemeButton
             color="primary"
@@ -834,7 +866,7 @@ const Steps = ({
         )}
       </>
     );
-  }, [resource, workOrderData?.type]);
+  }, [resource, workOrderData?.type, workOrderData?.currentRepairJob]);
 
   const rightSideContents = useMemo(() => {
     return (

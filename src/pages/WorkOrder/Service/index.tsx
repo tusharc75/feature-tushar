@@ -48,7 +48,9 @@ const Service = ({
   resource,
   defaultSelectedService,
   setDefaultSelectedService,
-  minHeightClass = null
+  minHeightClass = null,
+  setShowManageRepairJobDialog = null,
+  setRepairJobReceiveConfirmation = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -603,6 +605,8 @@ const Service = ({
                         stepSubmitedData={stepSubmitedData}
                         minHeightClass={minHeightClass}
                         isMobile={mobScreen}
+                        setShowManageRepairJobDialog={setShowManageRepairJobDialog}
+                        setRepairJobReceiveConfirmation={setRepairJobReceiveConfirmation}
                       />
                     ) : (
                       <Quotation />
