@@ -116,6 +116,12 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
           }
           errors.notifications[i] = { ...errors.notifications[i], notificationUser: 'Notification User is required' };
         }
+        if (!d.message) {
+          if (!errors?.notifications) {
+            errors['notifications'] = [];
+          }
+          errors.notifications[i] = { ...errors.notifications[i], message: 'Message is required' };
+        }
       });
     }
     return errors;
@@ -289,17 +295,17 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         name="notificationUser"
                                         required
                                         error={
-											touched?.notifications &&
-											touched?.notifications[index]?.notificationUser &&
-											errors?.notifications &&
-											Boolean(errors?.notifications[index]?.notificationUser)
-										  }
-										  helperText={
-											touched?.notifications &&
-											touched?.notifications[index]?.notificationUser &&
-											errors?.notifications &&
-											errors?.notifications[index]?.notificationUser
-										  }
+                                          touched?.notifications &&
+                                          touched?.notifications[index]?.notificationUser &&
+                                          errors?.notifications &&
+                                          Boolean(errors?.notifications[index]?.notificationUser)
+                                        }
+                                        helperText={
+                                          touched?.notifications &&
+                                          touched?.notifications[index]?.notificationUser &&
+                                          errors?.notifications &&
+                                          errors?.notifications[index]?.notificationUser
+                                        }
                                       />
                                     )}
                                   />
@@ -320,6 +326,18 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         ['message']: e.target.value
                                       });
                                     }}
+                                    error={
+                                      touched?.notifications &&
+                                      touched?.notifications[index]?.message &&
+                                      errors?.notifications &&
+                                      Boolean(errors?.notifications[index]?.message)
+                                    }
+                                    helperText={
+                                      touched?.notifications &&
+                                      touched?.notifications[index]?.message &&
+                                      errors?.notifications &&
+                                      errors?.notifications[index]?.message
+                                    }
                                   />
                                 </Grid>
                                 <Grid item md={4} lg={4} sm={6} xs={12}>
@@ -383,15 +401,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                 size="small"
                 type="submit"
                 onClick={submitForm}
-                // onClick={() => {
-                //   if (
-                //     !validate(values.notifications).field &&
-                //     !validate(values.notifications).rule &&
-                //     !validate(values.notifications).notificationUser
-                //   ) {
-                //     handleSubmit(values?.notifications);
-                //   }
-                // }}
                 endIcon={submitting && <CircularProgress color="inherit" size={18} />}
               >
                 Save
