@@ -20,7 +20,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [fields, setFields] = useState([]);
-  const [notificationUser, setNotificationUserField] = useState([]);
+  const [notificationUserField, setNotificationUserField] = useState([]);
   const RULE = [
     {
       optionLabel: 'Less Then Current Date',
@@ -40,7 +40,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
         rule: '',
         sendMail: true,
         sendNotification: true,
-        notificationUser: '',
+        notificationUserField: '',
         message: ''
       });
     } else {
@@ -110,11 +110,17 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
           }
           errors.notifications[i] = { ...errors.notifications[i], rule: 'Rule is required' };
         }
-        if (!d.notificationUser) {
+        if (!d.notificationUserField) {
           if (!errors?.notifications) {
             errors['notifications'] = [];
           }
-          errors.notifications[i] = { ...errors.notifications[i], notificationUser: 'Notification User is required' };
+          errors.notifications[i] = { ...errors.notifications[i], notificationUserField: 'Notification User Field is required' };
+        }
+        if (!d.message) {
+          if (!errors?.notifications) {
+            errors['notifications'] = [];
+          }
+          errors.notifications[i] = { ...errors.notifications[i], message: 'Message is required' };
         }
       });
     }
@@ -264,19 +270,19 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                 </Grid>
                                 <Grid item md={4} lg={4} sm={6} xs={12}>
                                   <Autocomplete
-                                    id="notificationUser"
-                                    options={notificationUser}
+                                    id="notificationUserField"
+                                    options={notificationUserField}
                                     getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
                                     getOptionSelected={(option: any, val) => option?.fieldName === val}
                                     value={
-                                      notificationUser && notificationUser.filter((f) => f?.fieldName === data?.notificationUser).length
-                                        ? notificationUser && notificationUser.filter((f) => f?.fieldName === data?.notificationUser)[0]
+                                      notificationUserField && notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
+                                        ? notificationUserField && notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField)[0]
                                         : ''
                                     }
                                     onChange={(e, val) => {
                                       arrayHelpers.replace(index, {
                                         ...values?.notifications[index],
-                                        ['notificationUser']: val && val?.fieldName ? val?.fieldName : ''
+                                        ['notificationUserField']: val && val?.fieldName ? val?.fieldName : ''
                                       });
                                     }}
                                     renderInput={(params) => (
@@ -284,22 +290,22 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         {...params}
                                         margin="dense"
                                         variant="outlined"
-                                        label="Notification User"
-                                        placeholder="Notification User"
-                                        name="notificationUser"
+                                        label="Notification User Field"
+                                        placeholder="Notification User Field"
+                                        name="notificationUserField"
                                         required
                                         error={
-											touched?.notifications &&
-											touched?.notifications[index]?.notificationUser &&
-											errors?.notifications &&
-											Boolean(errors?.notifications[index]?.notificationUser)
-										  }
-										  helperText={
-											touched?.notifications &&
-											touched?.notifications[index]?.notificationUser &&
-											errors?.notifications &&
-											errors?.notifications[index]?.notificationUser
-										  }
+                                          touched?.notifications &&
+                                          touched?.notifications[index]?.notificationUserField &&
+                                          errors?.notifications &&
+                                          Boolean(errors?.notifications[index]?.notificationUserField)
+                                        }
+                                        helperText={
+                                          touched?.notifications &&
+                                          touched?.notifications[index]?.notificationUserField &&
+                                          errors?.notifications &&
+                                          errors?.notifications[index]?.notificationUserField
+                                        }
                                       />
                                     )}
                                   />
@@ -320,6 +326,18 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         ['message']: e.target.value
                                       });
                                     }}
+                                    error={
+                                      touched?.notifications &&
+                                      touched?.notifications[index]?.message &&
+                                      errors?.notifications &&
+                                      Boolean(errors?.notifications[index]?.message)
+                                    }
+                                    helperText={
+                                      touched?.notifications &&
+                                      touched?.notifications[index]?.message &&
+                                      errors?.notifications &&
+                                      errors?.notifications[index]?.message
+                                    }
                                   />
                                 </Grid>
                                 <Grid item md={4} lg={4} sm={6} xs={12}>
@@ -383,15 +401,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                 size="small"
                 type="submit"
                 onClick={submitForm}
-                // onClick={() => {
-                //   if (
-                //     !validate(values.notifications).field &&
-                //     !validate(values.notifications).rule &&
-                //     !validate(values.notifications).notificationUser
-                //   ) {
-                //     handleSubmit(values?.notifications);
-                //   }
-                // }}
                 endIcon={submitting && <CircularProgress color="inherit" size={18} />}
               >
                 Save
