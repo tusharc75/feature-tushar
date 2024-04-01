@@ -343,9 +343,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           let materialData: any = { ...e };
 
           let pMethod = materialData?.pricingMethod?.split(',') || [];
-          pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
+          pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(m));
 
-          if (!['Per Day', 'Per Week', 'Per Month'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
+          if (!['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
             let tempTotalPrevQty = invoiceData
               .map((obj) => {
                 let tempQty = obj.material?.find((ele) => ele._id === materialData._id)?.qty;
