@@ -251,26 +251,12 @@ const SerializedAsset = ({
             isDownloadExcel={false}
             ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
           />
-          // <ImportExportLinks
-          //   permissions={permissions?.serializedAsset}
-          //   module={routes.serializedAsset.title}
-          //   api={`${serializedAsset.api}/custom-template`}
-          //   afterImportCompleted={() => {
-          //     fetchRecords();
-          //   }}
-          //   isExportAllOrSomeFeature={true}
-          //   total={rowCount}
-          //   recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows.length}
-          //   ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
-          //   isDownloadExcel={false}
-          //   isBackgroundWhite={true}
-          //   small
-          // />
         )}
         {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
           <>
             {selectedRecords.length > 0 &&
-              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand
+                && [ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)).length === selectedRecords.length &&
               checkUniqWarehouse() &&
               currentStep === 1 ? (
               <Tooltip title="Send to Supplier">
