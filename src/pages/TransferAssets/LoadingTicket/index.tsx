@@ -74,6 +74,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
+  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false);
+  const [okBtnLoading, setOkBtnLoading] = useState(false);
 
   useEffect(() => {
     if (transferAssetId) {
@@ -123,8 +125,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     backgroundColor: row?.original?.isReplaced
                       ? COLOUR_MASTER.replaceAssetColor.background
                       : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
-                        ? COLOUR_MASTER.lostAssets.background
-                        : ''
+                      ? COLOUR_MASTER.lostAssets.background
+                      : ''
                   }}
                 >
                   <p> {row.original?.assetNumber}</p>
@@ -391,6 +393,37 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       });
   };
 
+  const cancelDeliveredTicket = () => {
+    setOkBtnLoading(true);
+    const loadingTicketId = uniq(map(selectedRecords, 'loadingTicketId'));
+    const ticketIds: any = [];
+    loadingTicketId?.forEach((e) => {
+      if (e && e !== undefined) {
+        ticketIds.push(e);
+      }
+    });
+    if (ticketIds.length) {
+      let data = {};
+      data['_ids'] = ticketIds;
+      axiosInstance()
+        .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
+        .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Cancelled Successfully`
+          });
+          fetchAssetsData();
+        })
+        .catch((error) => {
+          setOkBtnLoading(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   const previewDownloadProps = {
     fileName: `${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`,
     resource: sidebarResource.transferAsset,
@@ -450,6 +483,14 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           Create Loading Ticket
         </MenuItem>
         <MenuItem
+          disabled={selectedRecords.length === 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('loadingTicket')).length <= 0}
+          onClick={() => {
+            setShowConformationCancleTicket(true);
+          }}
+        >
+          Cancel Loading Ticket
+        </MenuItem>
+        <MenuItem
           disabled={
             !canReceive ||
             selectedRecords.length === 0 ||
@@ -489,8 +530,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         </MenuItem>
 
         {permissions?.transferAsset?.isUpdate &&
-          selectedRecords.length &&
-          selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+        selectedRecords.length &&
+        selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
           selectedRecords?.length ? (
           <MenuItem
             onClick={() => {
@@ -586,7 +627,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           isAdding={replaceLoading}
           selectedProducts={addSerializedAssetDialog.products}
           filterByPlant={transferAssetData?.transferFromPlant}
-
         />
       )}
       {showReplaceReason.open && (
@@ -596,6 +636,18 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           handleSucess={(data) => {
             handleReplaceAsset(data?.reason);
           }}
+        />
+      )}
+
+      {showConformationCancleTicket && (
+        <ConfirmationDialog
+          open={showConformationCancleTicket}
+          message={`This action will cancel the complete Loading Ticket(s). Are you sure?`}
+          onClose={() => {
+            setShowConformationCancleTicket(false);
+          }}
+          onOk={cancelDeliveredTicket}
+          okBtnLoading={okBtnLoading}
         />
       )}
     </Fragment>
