@@ -546,7 +546,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     let rows: any = [{ ...rowData, ...updatedData }];
     if (rowData?.type === MATERIAL_TYPE.manualEntry) {
       rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
-      console.log(rows)
       handleSaveCostData(rows[0]);
     } else {
       rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
