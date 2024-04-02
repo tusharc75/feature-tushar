@@ -183,6 +183,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
+    setRowsApplied([]);
 
     const referenceIds = resourceData?.map((d) => d._id);
     const { data: { data: data } } = await axiosInstance().get(`${routes?.generateInvoice.path}/material?resource=${resource}&referenceIds=${JSON.stringify(referenceIds)}`);
@@ -502,7 +503,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                 variant="contained"
                 color="primary"
                 size="small"
-                disabled={progressiveBilling ? isUpdating || !appliedDate || rowsApplied.some((d) => d.invalidDate === true) : false}
+                disabled={progressiveBilling ? isUpdating || !appliedDate || !rowsApplied?.length || rowsApplied.some((d) => d.invalidDate === true) : false}
                 onClick={() => {
                   handleCreateInvoice();
                 }}
