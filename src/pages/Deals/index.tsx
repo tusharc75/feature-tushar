@@ -7,7 +7,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
-import { prepareDataForGrid } from '../../constants/helpers';
+import { prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 
@@ -34,6 +34,10 @@ const Deals = () => {
     useEffect(() => {
         fetchDeals();
     }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, search]);
+
+    useEffect(() => {
+        dispatch({ type: 'filter', filters: { dealstage: { filter: ['Proposal Sent', 'Contract Signed', 'Renewal Sent', 'Renewal Signed'] } } });
+    }, []);
 
     const fetchGridColumns = async () => {
         axiosInstance().get(`/field?resource=Deals`).then(({ data: { data } }) => {
@@ -106,6 +110,7 @@ const Deals = () => {
                         refreshGrid={fetchDeals}
                         showOnlyShowFilteredRecordSwitch={false}
                         showFilters={true}
+                        resource={sidebarResource.deals}
                     />
                 ) : (
                     <Box p={2} height={500}>
