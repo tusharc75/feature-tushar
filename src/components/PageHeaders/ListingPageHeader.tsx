@@ -1,15 +1,14 @@
 import { Button, ButtonProps, CircularProgress, Menu, useMediaQuery } from '@material-ui/core';
-import { AddOutlined, ExpandMore, TouchApp } from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import queryString from 'query-string';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import { FaCircleChevronDown } from 'react-icons/fa6';
 import { useHistory } from 'react-router-dom';
-import SearchBox from '../Helpers/SearchBox';
-import HideWhenOffline from '../HideWhenOffline';
 import { SearchFilter } from 'src/components/SearchFilter';
 import HtmlTooltip from '../CustomTooltipTitle';
-import { FaCircleChevronDown } from 'react-icons/fa6';
-import { SEARCH, useStore } from 'src/StateProvider/fastContext';
+import SearchBox from '../Helpers/SearchBox';
+import HideWhenOffline from '../HideWhenOffline';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -68,8 +67,6 @@ const ListingPageHeader = ({
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const [locationKeys, setLocationKeys] = useState([]);
-
-  const [searchQuery, setStore] = useStore((store) => store[SEARCH]);
 
   const {
     tooltip: actionButtonTooltip,
@@ -190,8 +187,8 @@ const ListingPageHeader = ({
               <SearchBox
                 className={`max-[600px]:hidden`}
                 containerProps={{ className: 'max-[600px]:hidden' }}
-                onChange={(e) => setStore({ [SEARCH]: e.target.value.trim() })}
-                value={searchQuery}
+                onChange={onSearch}
+                value={searchValue}
               />
             </HideWhenOffline>
           ) : null}
