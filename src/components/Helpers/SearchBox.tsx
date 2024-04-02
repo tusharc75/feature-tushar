@@ -12,17 +12,7 @@ type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
 };
 
 function SearchBox({ onChange, value, size, width, placeholder, className, containerProps = {}, ...otherProps }: SerachBoxProps) {
-  const [inputvalue, setInputValue] = useState<string>(value ?? '');
   const { className: containerClassName, ...restOfContainerProps } = containerProps;
-
-  const debouncedInputDispatch = debounce((e) => {
-    onChange(e);
-  }, 1000);
-
-  const onChangeWrapper = (e) => {
-    setInputValue(e.target.value);
-    debouncedInputDispatch(e);
-  };
 
   return (
     <>
@@ -33,8 +23,8 @@ function SearchBox({ onChange, value, size, width, placeholder, className, conta
         <FiSearch style={{ color: '#737373' }} className="absolute top-1/2 [transform:translateY(-50%)] left-[10px]" />
         <input
           title={'search'}
-          value={inputvalue}
-          onChange={onChangeWrapper}
+          value={value}
+          onChange={onChange}
           placeholder={placeholder || 'Search..'}
           type={'search'}
           className={`${className} sm:max-w-[300px] sm:min-w-[150px] min-w-0 w-full flex-grow small-searchbar bg-transparent dark:bg-[var(--dark-secondary)] shadow-none [border:1px_solid_var(--common-border-color)] focus:[outline:1px_solid_var(--new-theme-color)] focus-within:[outline:1px_solid_var(--new-theme-color)] dark:text-white outline-transparent rounded-[4px] placeholder:text-[#737373] h-[32px] p-[10px_5px_10px_32px] `}

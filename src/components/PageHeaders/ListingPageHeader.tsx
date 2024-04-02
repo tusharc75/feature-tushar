@@ -9,6 +9,7 @@ import HideWhenOffline from '../HideWhenOffline';
 import { SearchFilter } from 'src/components/SearchFilter';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { FaCircleChevronDown } from 'react-icons/fa6';
+import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -67,6 +68,8 @@ const ListingPageHeader = ({
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const [locationKeys, setLocationKeys] = useState([]);
+
+  const [searchQuery, setStore] = useStore((store) => store[SEARCH]);
 
   const {
     tooltip: actionButtonTooltip,
@@ -187,8 +190,8 @@ const ListingPageHeader = ({
               <SearchBox
                 className={`max-[600px]:hidden`}
                 containerProps={{ className: 'max-[600px]:hidden' }}
-                onChange={onSearch}
-                value={searchValue}
+                onChange={(e) => setStore({ [SEARCH]: e.target.value.trim() })}
+                value={searchQuery}
               />
             </HideWhenOffline>
           ) : null}
