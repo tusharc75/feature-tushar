@@ -31,7 +31,8 @@ class ErrorBoundary extends React.Component<any, any> {
         <div className={styles.main}>
           <div style={{ textAlign: 'center' }} className={styles.submain}>
             <div className={styles.vector}>
-              <img src={errorImage} />
+              {/* tesing */}
+              <img src={errorImage} className="max-[1366px]:sr-only" />
             </div>
             <Typography style={{ fontWeight: 600 }} variant="h2" component="h2" className={styles.error}>
               Something went wrong!
