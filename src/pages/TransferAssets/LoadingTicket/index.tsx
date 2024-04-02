@@ -74,7 +74,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
-  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false);
+  const [showConformationDeliverdCancleTicket, setShowConformationDeliverdCancleTicket] = useState({open: false, type: null});
   const [okBtnLoading, setOkBtnLoading] = useState(false);
 
   useEffect(() => {
@@ -125,8 +125,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     backgroundColor: row?.original?.isReplaced
                       ? COLOUR_MASTER.replaceAssetColor.background
                       : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
-                      ? COLOUR_MASTER.lostAssets.background
-                      : ''
+                        ? COLOUR_MASTER.lostAssets.background
+                        : ''
                   }}
                 >
                   <p> {row.original?.assetNumber}</p>
@@ -393,23 +393,40 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       });
   };
 
+  const handelCancleTickets = () => {
+    setOkBtnLoading(true);
+    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+    if (loadingTicketIds.length) {
+      axiosInstance()
+        .put(`${deliveryTicket.api}/revert`, { ids: loadingTicketIds })
+        .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationDeliverdCancleTicket({ open: false, type: '' });
+          fetchAssetsData();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Cancelled Successfully`
+          });
+        })
+        .catch((error) => {
+          setOkBtnLoading(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   const cancelDeliveredTicket = () => {
     setOkBtnLoading(true);
-    const loadingTicketId = uniq(map(selectedRecords, 'loadingTicketId'));
-    const ticketIds: any = [];
-    loadingTicketId?.forEach((e) => {
-      if (e && e !== undefined) {
-        ticketIds.push(e);
-      }
-    });
-    if (ticketIds.length) {
+    const loadingTicketId = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
+    if (loadingTicketId.length) {
       let data = {};
-      data['_ids'] = ticketIds;
+      data['_ids'] = loadingTicketId;
       axiosInstance()
         .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
           setOkBtnLoading(false);
-          setShowConformationCancleTicket(false);
+          setShowConformationDeliverdCancleTicket({open: false, type: null});
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -483,12 +500,21 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           Create Loading Ticket
         </MenuItem>
         <MenuItem
-          disabled={selectedRecords.length === 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('loadingTicket')).length <= 0}
+          disabled={selectedRecords.length && selectedRecords?.every(r => r?.hasOwnProperty('loadingTicketId') && r?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit) ? false : true}
           onClick={() => {
-            setShowConformationCancleTicket(true);
+            setShowConformationDeliverdCancleTicket({open: true, type: 'Non-Delivered'});
           }}
         >
-          Cancel Loading Ticket
+          Cancel In-Transit Loading Ticket(s)
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords.length && selectedRecords.filter((e) =>
+            e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length ? false : true}
+          onClick={() => {
+            setShowConformationDeliverdCancleTicket({open: true, type: 'Delivered'});
+          }}
+        >
+          Cancel Deliverd Loading Ticket(s)
         </MenuItem>
         <MenuItem
           disabled={
@@ -530,8 +556,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         </MenuItem>
 
         {permissions?.transferAsset?.isUpdate &&
-        selectedRecords.length &&
-        selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+          selectedRecords.length &&
+          selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
           selectedRecords?.length ? (
           <MenuItem
             onClick={() => {
@@ -639,14 +665,20 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         />
       )}
 
-      {showConformationCancleTicket && (
+      {showConformationDeliverdCancleTicket.open && (
         <ConfirmationDialog
-          open={showConformationCancleTicket}
+          open={showConformationDeliverdCancleTicket.open}
           message={`This action will cancel the complete Loading Ticket(s). Are you sure?`}
           onClose={() => {
-            setShowConformationCancleTicket(false);
+            setShowConformationDeliverdCancleTicket({open: false, type: null});
           }}
-          onOk={cancelDeliveredTicket}
+          onOk={()=>{
+            if(showConformationDeliverdCancleTicket.type === 'Delivered'){
+              cancelDeliveredTicket()
+            } else {
+              handelCancleTickets()
+            }
+          }}
           okBtnLoading={okBtnLoading}
         />
       )}
