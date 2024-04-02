@@ -79,7 +79,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       });
 
     if (tempSortedColumns) setSortedColumns(tempSortedColumns);
-  }, [columnOrder, columns, stickycolumns.stickyColumns]);
+  }, [columnOrder, columns, stickycolumns?.stickyColumns]);
 
   useEffect(() => {
     if (isFirstRender.current && sortedColumns.length > 0 && visibleColumns) {
