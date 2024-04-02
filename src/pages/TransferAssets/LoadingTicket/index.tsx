@@ -74,6 +74,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
+  const [showConformationDeliverdCancleTicket, setShowConformationDeliverdCancleTicket] = useState(false);
+  const [okBtnLoading, setOkBtnLoading] = useState(false);
 
   useEffect(() => {
     if (transferAssetId) {
@@ -391,6 +393,31 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       });
   };
 
+  const cancelDeliveredTicket = () => {
+    setOkBtnLoading(true);
+    const loadingTicketId = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
+    if (loadingTicketId.length) {
+      let data = {};
+      data['_ids'] = loadingTicketId;
+      axiosInstance()
+        .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
+        .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationDeliverdCancleTicket(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Cancelled Successfully`
+          });
+          fetchAssetsData();
+        })
+        .catch((error) => {
+          setOkBtnLoading(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   const previewDownloadProps = {
     fileName: `${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`,
     resource: sidebarResource.transferAsset,
@@ -448,6 +475,15 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           }}
         >
           Create Loading Ticket
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords.length && selectedRecords.filter((e) =>
+            e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length ? false : true}
+          onClick={() => {
+            setShowConformationDeliverdCancleTicket(true);
+          }}
+        >
+          Cancel Deliverd Loading Ticket
         </MenuItem>
         <MenuItem
           disabled={
@@ -586,7 +622,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           isAdding={replaceLoading}
           selectedProducts={addSerializedAssetDialog.products}
           filterByPlant={transferAssetData?.transferFromPlant}
-
         />
       )}
       {showReplaceReason.open && (
@@ -596,6 +631,18 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           handleSucess={(data) => {
             handleReplaceAsset(data?.reason);
           }}
+        />
+      )}
+
+      {showConformationDeliverdCancleTicket && (
+        <ConfirmationDialog
+          open={showConformationDeliverdCancleTicket}
+          message={`This action will cancel the complete Loading Ticket(s). Are you sure?`}
+          onClose={() => {
+            setShowConformationDeliverdCancleTicket(false);
+          }}
+          onOk={cancelDeliveredTicket}
+          okBtnLoading={okBtnLoading}
         />
       )}
     </Fragment>

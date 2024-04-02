@@ -236,7 +236,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
         disableFilters: true,
         disableSortBy: true,
         canDrag: false,
-        cell: ({ row, table }: any) => (
+        Cell: ({ row, table }: any) => (
           <>
             <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
               <IconButton

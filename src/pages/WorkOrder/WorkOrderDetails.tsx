@@ -6,7 +6,7 @@ import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiFoodMenu } from 'react-icons/bi';
-import { FaDoorClosed, FaWpforms } from 'react-icons/fa';
+import { FaDoorClosed, FaWpforms, FaDoorOpen } from 'react-icons/fa';
 import { IoHandRightSharp } from 'react-icons/io5';
 import { LuPackageCheck } from 'react-icons/lu';
 import { RiFileShredFill, RiFlowChart } from 'react-icons/ri';
@@ -95,6 +95,7 @@ const WorkOrderDetails = () => {
   const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -218,6 +219,25 @@ const WorkOrderDetails = () => {
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+      });
+  };
+
+  const reOpenWorkOrder = () => {
+    setIsSubmitting(true)
+    axiosInstance().put(`${workOrder.api}/re-open`, { _id: id })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchWorkOrderData();
+        setIsSubmitting(false)
+        setShowReopenConfirmation(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false)
       });
   };
 
@@ -370,6 +390,16 @@ const WorkOrderDetails = () => {
       iconForMobile: <FaDoorClosed />,
       tooltip: 'Complete Work Order',
       name: 'Close'
+    },
+    {
+      id: 'Re-Open',
+      type: 'button',
+      visibilityInMobile: 'visible',
+      isVisible: Boolean(allowedToEdit && workOrderData?.canReopen && workOrderData?.status === WORK_ORDER_STATUS.completed),
+      onClick: () => { setShowReopenConfirmation(true) },
+      iconForMobile: <FaDoorOpen />,
+      tooltip: 'Re-Open Work Order',
+      name: 'Re-Open'
     },
     {
       id: 'Create Version',
@@ -570,7 +600,7 @@ const WorkOrderDetails = () => {
         <TabPanel value={tabValue} index={2}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && !completed}
+              allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
               isCreate={true}
               service={null}
               uniqueId={null}
@@ -584,7 +614,7 @@ const WorkOrderDetails = () => {
         <TabPanel value={tabValue} index={3}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && !completed}
+              allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
               isCreate={true}
               service={null}
               uniqueId={null}
@@ -691,6 +721,17 @@ const WorkOrderDetails = () => {
             setRepairJobReceiveConfirmation(false);
           }}
           onOk={handleReceiveAssetInRepairJob}
+          okBtnLoading={isSubmitting}
+        />
+      )}
+      {showReopenConfirmation && (
+        <ConfirmationDialog
+          open={showReopenConfirmation}
+          message={`Are you sure you want to re-open work order ?`}
+          onClose={() => {
+            setShowReopenConfirmation(false);
+          }}
+          onOk={reOpenWorkOrder}
           okBtnLoading={isSubmitting}
         />
       )}

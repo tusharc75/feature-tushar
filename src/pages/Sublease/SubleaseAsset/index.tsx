@@ -256,7 +256,7 @@ const SerializedAsset = ({
           <>
             {selectedRecords.length > 0 &&
               selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand
-                && [ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)).length === selectedRecords.length &&
+                && [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)).length === selectedRecords.length &&
               checkUniqWarehouse() &&
               currentStep === 1 ? (
               <Tooltip title="Send to Supplier">
