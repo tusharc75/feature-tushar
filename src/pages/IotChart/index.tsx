@@ -14,34 +14,19 @@ import routes from 'src/components/Helpers/Routes';
 import { serializedAsset } from '../../constants/helpers';
 import cardStyle from '../ReportMaster/index.module.scss';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import { uniqBy } from 'lodash';
 
 function IotChart() {
   const toastConfig = useContext(CustomToastContext);
 
-  const [rowsData, setRowsData] = useState(null);
   const [assetLocation, setAssetLocation] = useState(null);
   const [search, setSearch] = useState('');
   const [showAsset, setShowAsset] = useState(null);
+  const [showLocation, setShowLocation] = useState(null);
 
   useEffect(() => {
-    if (showAsset) {
-      fetchData();
-    } else {
-      fetchAssetLocation();
-    }
-  }, [search, showAsset]);
-
-  const fetchData = () => {
-    const queryString = getQueryString();
-    axiosInstance()
-      .get(`/iot-chart${serializedAsset.api}${queryString}`)
-      .then(({ data }) => {
-        setRowsData(data.data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
+    fetchAssetLocation();
+  }, [search]);
 
   const fetchAssetLocation = () => {
     let api = `/iot-chart${serializedAsset.api}-location`;
@@ -56,26 +41,6 @@ function IotChart() {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  };
-
-  const getQueryString = () => {
-    const filterByIds = [];
-    let deepFilter = `?page=${0}&limit=${100}`;
-    if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
-    }
-    if (showAsset) {
-      filterByIds.push({
-        field: 'currentLocation',
-        term: { $in: [showAsset] }
-      });
-    }
-
-    if (filterByIds?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-    }
-
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
 
   const handleSearch = (e) => {
@@ -94,17 +59,11 @@ function IotChart() {
       icon: ['#68C82E', '#03640D'],
       iconGradient: ['#68C82E', '#03640D', '#68C82E'],
       gradient: ['#68C82E', '#03640D']
-    },
-    {
-      main: '#FFFAEC',
-      icon: ['#FAC94B', '#FF9B04'],
-      iconGradient: ['#FAC94B', '#FF9B04', '#FAC94B'],
-      gradient: ['#FAC94B', '#FF9B04']
     }
   ];
 
   const LeftSideContent = () => {
-    return showAsset ? (
+    return showLocation || showAsset ? (
       <Button
         size="small"
         variant="outlined"
@@ -112,6 +71,9 @@ function IotChart() {
         disableElevation
         onClick={() => {
           setShowAsset(null);
+          if (!showAsset) {
+            setShowLocation(null);
+          }
           setSearch('');
         }}
         startIcon={<MdChevronLeft />}
@@ -128,32 +90,58 @@ function IotChart() {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          // toggleButtonList
-          // onToggle
-          // selectedType
-          // setSelectedType
           leftSideContents={<LeftSideContent />}
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={false}
-          // actionButtonProps
-          // actionMenuItems
-          // addButtonProps
-          // addButtonOnclick
           isAddButtonVisible={false}
-          // setQueryString
         />
-        {!showAsset ? (
-          assetLocation ? (
+        {!showLocation && !showAsset ? (
+          uniqBy(assetLocation, 'region.optionValue')?.filter((r: any) => !!r?.region)?.length ? (
             <Box className={cardStyle.reportGrid}>
-              {assetLocation?.map((location) => {
+              {uniqBy(assetLocation, 'region.optionValue')
+                ?.filter((r: any) => !!r?.region)
+                ?.map((region: any) => {
+                  return (
+                    <div key={region?.region?.optionValue} className={cardStyle.singleCard}>
+                      <DashBoardCardShell
+                        darkThemeBackgroundColor="var(--dark-secondary)"
+                        background={'#fff'}
+                        className={cardStyle.cardInner}
+                        gradientColors={assetLocation?.some((a) => a?.region?.optionValue === region?.region?.optionValue && a?.assets?.some((asset) => asset?.redAlert))
+                          ? colours[0]?.gradient
+                          : colours[1]?.gradient
+                        }
+                        minHeight={false}
+                        onClick={() => {
+                          setShowLocation(region?.region?.optionValue);
+                          setSearch('');
+                        }}
+                      >
+                        <MyLocationIcon className={`absolute -top-[10px] left-[18px]`} />
+                        <Typography variant="h6">{region?.region?.optionLabel}</Typography>
+                      </DashBoardCardShell>
+                    </div>
+                  );
+                })}
+            </Box>
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )
+        ) : showLocation && !showAsset ? (
+          <Box className={cardStyle.reportGrid}>
+            {assetLocation
+              ?.filter((location) => location?.region?.optionValue === showLocation)
+              ?.map((location) => {
                 return (
                   <div key={location?._id} className={cardStyle.singleCard}>
                     <DashBoardCardShell
                       darkThemeBackgroundColor="var(--dark-secondary)"
                       background={'#fff'}
                       className={cardStyle.cardInner}
+                      gradientColors={location?.assets?.some((asset) => asset?.redAlert) ? colours[0]?.gradient : colours[1]?.gradient}
                       minHeight={false}
                       onClick={() => {
                         setShowAsset(location?._id);
@@ -166,38 +154,39 @@ function IotChart() {
                   </div>
                 );
               })}
+          </Box>
+        ) : showAsset ? (
+          assetLocation?.find((a) => a?._id === showAsset)?.assets?.length ? (
+            <Box className={cardStyle.reportGrid}>
+              {assetLocation
+                ?.find((a) => a?._id === showAsset)
+                ?.assets?.map((asset, i) => {
+                  return (
+                    <div key={i} className={cardStyle.singleCard}>
+                      <Link to={`${routes.iotChart.path}/${asset?.optionValue}`}>
+                        <DashBoardCardShell
+                          darkThemeBackgroundColor="var(--dark-secondary)"
+                          background={'#fff'}
+                          gradientColors={asset?.redAlert ? colours[0]?.gradient : colours[1]?.gradient}
+                          className={cardStyle.cardInner}
+                          minHeight={false}
+                        >
+                          <DataPointsIcon
+                            colors={asset?.redAlert ? colours[0]?.iconGradient : colours[1]?.iconGradient}
+                            className={`absolute -top-[23px] left-[18px]`}
+                          />
+                          <Typography variant="h6">{asset?.optionLabel}</Typography>
+                        </DashBoardCardShell>
+                      </Link>
+                    </div>
+                  );
+                })}
             </Box>
           ) : (
             <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )
-        ) : rowsData ? (
-          <Box className={cardStyle.reportGrid}>
-            {rowsData?.map((asset, i) => {
-              var colors = colours[0];
-              if (asset?.runningStatus) {
-                colors = colours[1];
-              }
-              return (
-                <div key={i} className={cardStyle.singleCard}>
-                  <Link to={`${routes.iotChart.path}/${asset?._id}`}>
-                    <DashBoardCardShell
-                      darkThemeBackgroundColor="var(--dark-secondary)"
-                      background={'#fff'}
-                      gradientColors={colors.gradient}
-                      className={cardStyle.cardInner}
-                      minHeight={false}
-                    >
-                      <DataPointsIcon colors={colors.iconGradient} className={`absolute -top-[23px] left-[18px]`} />
-                      <Typography variant="h6">{asset?.assetNumber}</Typography>
-                      <Typography variant="body2">{asset?.currentLocation?.optionLabel}</Typography>
-                    </DashBoardCardShell>
-                  </Link>
-                </div>
-              );
-            })}
-          </Box>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
