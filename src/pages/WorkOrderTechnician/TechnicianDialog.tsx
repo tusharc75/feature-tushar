@@ -2,14 +2,12 @@ import { Box, Dialog, Typography, Grid } from '@material-ui/core';
 import routes from 'src/components/Helpers/Routes';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { useData } from 'src/StateProvider/Provider';
-import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, repairJob, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, WORK_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useContext, useEffect, useState } from 'react';
 import Service from '../WorkOrder/Service';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ManageRepairJob from '../RepairJob/ManageRepairJob';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const TechnicianDialog = ({ handleClose, workOrderId, uniqueId, canPerform }) => {
   const {
