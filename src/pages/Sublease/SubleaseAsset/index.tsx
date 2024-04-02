@@ -249,6 +249,7 @@ const SerializedAsset = ({
             }}
             isExportAllOrSomeFeature={true}
             isDownloadExcel={false}
+            recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows?.length}
             ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
           />
         )}

@@ -17,9 +17,10 @@ function SearchBox({ onChange, value, size, width, placeholder, className, conta
 
   const debouncedInputDispatch = debounce((e) => {
     onChange(e);
-  }, 1000);
+  }, 300);
 
   const onChangeWrapper = (e) => {
+    debouncedInputDispatch.cancel();
     setInputValue(e.target.value);
     debouncedInputDispatch(e);
   };

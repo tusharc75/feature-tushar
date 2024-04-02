@@ -74,7 +74,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
-  const [showConformationDeliverdCancleTicket, setShowConformationDeliverdCancleTicket] = useState(false);
+  const [showConformationDeliverdCancleTicket, setShowConformationDeliverdCancleTicket] = useState({open: false, type: null});
   const [okBtnLoading, setOkBtnLoading] = useState(false);
 
   useEffect(() => {
@@ -393,6 +393,29 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       });
   };
 
+  const handelCancleTickets = () => {
+    setOkBtnLoading(true);
+    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+    if (loadingTicketIds.length) {
+      axiosInstance()
+        .put(`${deliveryTicket.api}/revert`, { ids: loadingTicketIds })
+        .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationDeliverdCancleTicket({ open: false, type: '' });
+          fetchAssetsData();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Cancelled Successfully`
+          });
+        })
+        .catch((error) => {
+          setOkBtnLoading(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   const cancelDeliveredTicket = () => {
     setOkBtnLoading(true);
     const loadingTicketId = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
@@ -403,7 +426,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
           setOkBtnLoading(false);
-          setShowConformationDeliverdCancleTicket(false);
+          setShowConformationDeliverdCancleTicket({open: false, type: null});
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -477,13 +500,21 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           Create Loading Ticket
         </MenuItem>
         <MenuItem
+          disabled={selectedRecords.length && selectedRecords?.every(r => r?.hasOwnProperty('loadingTicketId') && r?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit) ? false : true}
+          onClick={() => {
+            setShowConformationDeliverdCancleTicket({open: true, type: 'Non-Delivered'});
+          }}
+        >
+          Cancel In-Transit Loading Ticket(s)
+        </MenuItem>
+        <MenuItem
           disabled={selectedRecords.length && selectedRecords.filter((e) =>
             e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length ? false : true}
           onClick={() => {
-            setShowConformationDeliverdCancleTicket(true);
+            setShowConformationDeliverdCancleTicket({open: true, type: 'Delivered'});
           }}
         >
-          Cancel Deliverd Loading Ticket
+          Cancel Deliverd Loading Ticket(s)
         </MenuItem>
         <MenuItem
           disabled={
@@ -634,14 +665,20 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         />
       )}
 
-      {showConformationDeliverdCancleTicket && (
+      {showConformationDeliverdCancleTicket.open && (
         <ConfirmationDialog
-          open={showConformationDeliverdCancleTicket}
+          open={showConformationDeliverdCancleTicket.open}
           message={`This action will cancel the complete Loading Ticket(s). Are you sure?`}
           onClose={() => {
-            setShowConformationDeliverdCancleTicket(false);
+            setShowConformationDeliverdCancleTicket({open: false, type: null});
           }}
-          onOk={cancelDeliveredTicket}
+          onOk={()=>{
+            if(showConformationDeliverdCancleTicket.type === 'Delivered'){
+              cancelDeliveredTicket()
+            } else {
+              handelCancleTickets()
+            }
+          }}
           okBtnLoading={okBtnLoading}
         />
       )}
