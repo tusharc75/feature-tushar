@@ -32,7 +32,7 @@ class ErrorBoundary extends React.Component<any, any> {
           <div style={{ textAlign: 'center' }} className={styles.submain}>
             <div className={styles.vector}>
               {/* tesing */}
-              <img src={errorImage} className="max-[1366px]:sr-only" />
+              <img src={errorImage} className="mx-auto max-w-[200px] sm:max-w-[250px] md:max-w-[300px] xl:max-w-full " alt="Something Went Wrong " />
             </div>
             <Typography style={{ fontWeight: 600 }} variant="h2" component="h2" className={styles.error}>
               Something went wrong!
@@ -56,7 +56,6 @@ class ErrorBoundary extends React.Component<any, any> {
         </div>
       );
     }
-
     return this.props.children;
   }
 }

@@ -58,7 +58,7 @@ const ItemTypes = {
 };
 
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
-  const { onClose, columns, updateGridHiddenColumns, renderedFrom, dispatch, state, stickycolumns } = props;
+  const { onClose, columns = [], updateGridHiddenColumns, renderedFrom, dispatch, state, stickycolumns } = props;
   const { visibleColumns, columnOrder } = state;
   const isFirstRender = useRef(true);
 
@@ -74,11 +74,11 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   React.useEffect(() => {
     const tempSortedColumns = columns
       .filter((c) => !stickycolumns.stickyColumns.includes(c.id))
-      .toSorted((a: any, b: any) => {
+      ?.toSorted((a: any, b: any) => {
         return columnOrder?.indexOf(a.id) - columnOrder?.indexOf(b.id);
       });
 
-    setSortedColumns(tempSortedColumns);
+    if (tempSortedColumns) setSortedColumns(tempSortedColumns);
   }, [columnOrder, columns, stickycolumns.stickyColumns]);
 
   useEffect(() => {
