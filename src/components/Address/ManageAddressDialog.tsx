@@ -63,7 +63,6 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
   }, []);
 
   const handleSubmit = (values) => {
-    // const {zipCodePostalCode, stateProvince, ...restValues} = values
     setLoading(true);
     if (addressData) {
       values._id = addressData._id;
@@ -182,19 +181,14 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
 
   useEffect(() => {
     if (!addressDetail || !latLngChangedManually || (!addressDetail?.latitude && !addressDetail?.longitude)) return;
-
     if (addressDetail?.latitude && addressDetail?.longitude) {
       const latLng = new google.maps.LatLng(addressDetail?.latitude, addressDetail?.longitude);
       onCordChange(latLng);
     }
-
     return () => latLngChangedManually && setLatLngChangedManually(false);
   }, [addressDetail?.latitude, addressDetail?.longitude]);
 
-  /**
-   * Get Full Address from Grocode
-   * @param latLng Google Position Geo-Coordinates
-   */
+
   const onCordChange = (latLng: google.maps.LatLng) => {
     if (!formikRef.current || !window.google) return;
 
@@ -250,85 +244,80 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form noValidate>
-                  {formsData &&
-                    formsData.map((form, index1) => {
-                      return form.name ? (
-                        <div key={index1}>
-                          <div className={'detail-box-content'}>
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                          </div>
-                          <Box marginY={2}>
-                            <Grid spacing={3} container>
-                              {form.sectionFields.map((field, index2) => (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
-                                  {
-                                    <FormTypes
-                                      // {...rest}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                      onChange={
-                                        field.fieldName === 'fullAddress'
-                                          ? (_, val) => {
-                                              if (typeof val !== 'object') return;
-                                              getFullAddress(val);
-                                              if (!val?.place_id) {
-                                                setAddressDetail(null);
-                                              }
-                                            }
-                                          : (e: React.ChangeEvent<HTMLInputElement>) => {
-                                              const { name, value } = e.target;
-
-                                              if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
-
-                                              setAddressDetail((prevState: any) => ({
-                                                ...prevState,
-                                                [name]: value
-                                              }));
-                                              setLatLngChangedManually(true);
-                                            }
-                                      }
-                                    />
-                                  }
-                                </Grid>
-                              ))}
+                  {formsData && formsData.map((form, index1) => {
+                    return <div key={index1}>
+                      <div className={'detail-box-content'}>
+                        <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                        <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                      </div>
+                      <Box marginY={2}>
+                        <Grid spacing={3} container>
+                          {form.sectionFields.map((field, index2) => (
+                            <Grid key={index2} item xs={12} sm={6} md={6}>
+                              {
+                                ['fullAddress', 'streetAddress', 'city', 'state', 'zipCode', 'country', 'country', 'latitude', 'longitude',
+                                  'state/Province', 'zipCode/PostalCode'].includes(field.fieldName) ?
+                                  <FormTypes
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    imageOrFileUploadCompletePercentage={null}
+                                    setFieldValue={setFieldValue}
+                                    fieldData={field}
+                                    onChange={
+                                      field.fieldName === 'fullAddress'
+                                        ? (_, val) => {
+                                          if (typeof val !== 'object') return;
+                                          getFullAddress(val);
+                                          if (!val?.place_id) {
+                                            setAddressDetail(null);
+                                          }
+                                        }
+                                        : (e: React.ChangeEvent<HTMLInputElement>) => {
+                                          const { name, value } = e.target;
+                                          if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+                                          setAddressDetail((prevState: any) => ({
+                                            ...prevState,
+                                            [name]: value
+                                          }));
+                                          setLatLngChangedManually(true);
+                                        }}
+                                  />
+                                  :
+                                  <FormTypes
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    imageOrFileUploadCompletePercentage={null}
+                                    setFieldValue={setFieldValue}
+                                    fieldData={field}
+                                    allFields={initialData.fields}
+                                  />
+                              }
                             </Grid>
-                          </Box>
-                        </div>
-                      ) : (
-                        form.sectionFields.map((field) => (
-                          <FormTypes
-                            // {...rest}
-                            values={values}
-                            errors={errors}
-                            touched={touched}
-                            label={field.fieldLabel}
-                            name={field.fieldName}
-                            type={field.type}
-                            options={field.option}
-                            setFieldValue={setFieldValue}
-                            required={field.required}
-                            fullWidth
-                            isTooltip={field?.isTooltip || false}
-                            tooltipMessage={field?.tooltipMessage}
-                            size="small"
-                            style={{ visibility: 'hidden' }}
-                          />
-                        ))
-                      );
-                    })}
+                          ))}
+                        </Grid>
+                      </Box>
+                    </div>
+                  })}
                 </Form>
                 <div>
                   <p>Drag or click to select new coordinates</p>
