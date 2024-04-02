@@ -72,9 +72,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [isMinimized, setMinimized] = React.useState(true);
 
   React.useEffect(() => {
-    const tempSortedColumns = columns
+    const tempSortedColumns = [...columns]
       .filter((c) => !stickycolumns?.stickyColumns?.includes(c.id))
-      ?.toSorted((a: any, b: any) => {
+      ?.sort((a: any, b: any) => {
         return columnOrder?.indexOf(a.id) - columnOrder?.indexOf(b.id);
       });
 
