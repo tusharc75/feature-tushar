@@ -90,21 +90,11 @@ function IotChart() {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          // toggleButtonList
-          // onToggle
-          // selectedType
-          // setSelectedType
           leftSideContents={<LeftSideContent />}
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={false}
-          // actionButtonProps
-          // actionMenuItems
-          // addButtonProps
-          // addButtonOnclick
           isAddButtonVisible={false}
-          // setQueryString
         />
         {!showLocation && !showAsset ? (
           uniqBy(assetLocation, 'region.optionValue')?.filter((r: any) => !!r?.region)?.length ? (
@@ -118,12 +108,9 @@ function IotChart() {
                         darkThemeBackgroundColor="var(--dark-secondary)"
                         background={'#fff'}
                         className={cardStyle.cardInner}
-                        gradientColors={
-                          assetLocation?.some(
-                            (a) => a?.region?.optionValue === region?.region?.optionValue && a?.assets?.some((asset) => asset?.redAlert)
-                          )
-                            ? colours[0]?.gradient
-                            : colours[1]?.gradient
+                        gradientColors={assetLocation?.some((a) => a?.region?.optionValue === region?.region?.optionValue && a?.assets?.some((asset) => asset?.redAlert))
+                          ? colours[0]?.gradient
+                          : colours[1]?.gradient
                         }
                         minHeight={false}
                         onClick={() => {
@@ -131,6 +118,7 @@ function IotChart() {
                           setSearch('');
                         }}
                       >
+                        <MyLocationIcon className={`absolute -top-[10px] left-[18px]`} />
                         <Typography variant="h6">{region?.region?.optionLabel}</Typography>
                       </DashBoardCardShell>
                     </div>
