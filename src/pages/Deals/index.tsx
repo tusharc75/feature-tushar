@@ -79,12 +79,12 @@ const Deals = () => {
     const fetchDeals = async () => {
         dispatch({ type: 'loading', loading: true });
         const queryString = getQueryString();
-        axiosInstance().get(`${routes.deals.path}${queryString}`).then(({ data: { data, count } }) => {
-            let rows = data?.map((u) => {
+        axiosInstance().get(`${routes.deals.path}${queryString}`).then(({ data: { data } }) => {
+            let rows = data?.data?.map((u) => {
                 let finalObject: any = prepareDataForGrid(u, user);
                 return finalObject;
             });
-            dispatch({ type: 'initialize', data: rows, count: count });
+            dispatch({ type: 'initialize', data: rows, count: data?.count });
             dispatch({ type: 'loading', loading: false });
         })
             .catch((err) => {
