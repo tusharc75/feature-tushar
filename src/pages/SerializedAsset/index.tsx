@@ -161,11 +161,11 @@ const SerializedAsset = () => {
             o.cell = ({ row }) => (
               <div
                 style={{
-                  backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                    row?.original?.status
-                  )
+                  backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
                     ? COLOUR_MASTER.lostAssets.background
-                    : ''
+                    : ((row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0) ||
+                      row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status)) ?
+                      COLOUR_MASTER.lostAssets.background : ''
                 }}
               >
                 <Link
@@ -183,6 +183,19 @@ const SerializedAsset = () => {
                       </HtmlTooltip>
                     </Box>
                   ))}
+                {/* Below is brand Specifc for Estis */}
+                {row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0 &&
+                  <Box ml={1}>
+                    <HtmlTooltip title="Unit is assigned to multiple deals">
+                      <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                    </HtmlTooltip>
+                  </Box>}
+                {row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status) &&
+                  <Box ml={1}>
+                    <HtmlTooltip title="Manager Plus Status Conflict - Status is other than Active,Committed">
+                      <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                    </HtmlTooltip>
+                  </Box>}
               </div>
             );
           }
