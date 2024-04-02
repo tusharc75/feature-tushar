@@ -137,7 +137,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
           if (referenceData?.warehouse && fieldsDataForCreate.some((e) => e.fieldName === 'warehouse')) {
             initialData['warehouse'] = referenceData?.warehouse;
           }
-          if (referenceType === sidebarResource.workOrder) {
+          if (referenceType === sidebarResource.workOrder || referenceType === sidebarResource.workOrderTechnician) {
             initialData['workOrder'] = referenceData?.workOrder;
             fieldsDataForCreate?.forEach((e) => {
               if (['warehouse']?.includes(e?.fieldName)) {
