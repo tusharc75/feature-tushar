@@ -6,7 +6,7 @@ import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiFoodMenu } from 'react-icons/bi';
-import { FaDoorClosed, FaWpforms } from 'react-icons/fa';
+import { FaDoorClosed, FaWpforms, FaDoorOpen } from 'react-icons/fa';
 import { IoHandRightSharp } from 'react-icons/io5';
 import { LuPackageCheck } from 'react-icons/lu';
 import { RiFileShredFill, RiFlowChart } from 'react-icons/ri';
@@ -221,6 +221,21 @@ const WorkOrderDetails = () => {
       });
   };
 
+  const reOpenWorkOrder = () => {
+    axiosInstance().put(`${workOrder.api}/re-open`, {_id: id})
+      .then(({ data: { data } }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data
+        });
+        fetchWorkOrderData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   function a11yProps(index: any) {
     return {
       id: `main-tab-${index}`,
@@ -370,6 +385,16 @@ const WorkOrderDetails = () => {
       iconForMobile: <FaDoorClosed />,
       tooltip: 'Complete Work Order',
       name: 'Close'
+    },
+    {
+      id: 'Re-Open',
+      type: 'button',
+      visibilityInMobile: 'visible',
+      isVisible: Boolean(allowedToEdit && workOrderData?.status === WORK_ORDER_STATUS.completed),
+      onClick: () => reOpenWorkOrder(),
+      iconForMobile: <FaDoorOpen />,
+      tooltip: 'Re-Open Work Order',
+      name: 'Re-Open'
     },
     {
       id: 'Create Version',
@@ -570,7 +595,7 @@ const WorkOrderDetails = () => {
         <TabPanel value={tabValue} index={2}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && !completed}
+              allowedToEdit={allowedToEdit && (workOrderData?.status === WORK_ORDER_STATUS.completed || !completed)}
               isCreate={true}
               service={null}
               uniqueId={null}
