@@ -361,8 +361,6 @@ const RenderListItem = (props: ItemProps) => {
 
   const opacity = isDragging ? 0 : 1;
 
-  // drop(ref);
-
   return ['left', 'right']?.includes(column?.sticky) ? (
     <div className="d-none"></div>
   ) : (
