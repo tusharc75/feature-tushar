@@ -957,22 +957,15 @@ const WorkOrder = ({
     );
   };
 
-  const isCompleted = (records) => {
-    let disabled = false;
-    records?.forEach(r => {
-      if(r?.workOrder && r?.workOrder?.status === WORK_ORDER_STATUS.completed){
-        disabled = true;
-        return;
-      }
-    });
-    return disabled;
+  const isWorkOrderCompleted = (data) => {
+    return data?.some(e => e?.workOrder && e?.workOrder?.status === WORK_ORDER_STATUS.completed);;
   }
 
   const actionButtonMenuItems = () => {
     return (
       <>
         <MenuItem
-          disabled={selectedRecords?.every((d) => d?.workOrder) ? isCompleted(selectedRecords) : true}
+          disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
           onClick={() => {
             setAddServicesDialog({ open: true, new: false });
           }}
@@ -980,7 +973,7 @@ const WorkOrder = ({
           Add Existing Services
         </MenuItem>
         <MenuItem
-          disabled={selectedRecords?.every((d) => d?.workOrder) ? isCompleted(selectedRecords) : true}
+          disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
           onClick={() => {
             setAddServicesDialog({ open: true, new: true });
           }}
@@ -988,7 +981,8 @@ const WorkOrder = ({
           Add New Service
         </MenuItem>
         <MenuItem
-          disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? isCompleted(selectedRecords) : true}
+          disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 && !isWorkOrderCompleted(selectedRecords)
+            ? false : true}
           onClick={() => {
             setUserAssignDialog(true);
           }}
@@ -997,7 +991,7 @@ const WorkOrder = ({
         </MenuItem>
         {allowedToEdit && permissions?.workStations?.isRead && (
           <MenuItem
-            disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? isCompleted(selectedRecords) : true}
+            disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 && !isWorkOrderCompleted(selectedRecords) ? false : true}
             onClick={() => {
               setWorkStationAssignDialog(true);
             }}
@@ -1034,7 +1028,8 @@ const WorkOrder = ({
           onClick={() => {
             setArrangeView(true);
           }}
-          disabled={checkUniqWorkOrder() && selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length ? isCompleted(selectedRecords) : true}
+          disabled={checkUniqWorkOrder() && selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords)
+            ? false : true}
         >
           Arrange Services
         </MenuItem>
@@ -1047,7 +1042,8 @@ const WorkOrder = ({
             selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
-              ? isCompleted(selectedRecords)
+              && !isWorkOrderCompleted(selectedRecords)
+              ? false
               : true
           }
         >
@@ -1072,15 +1068,14 @@ const WorkOrder = ({
         <MenuItem
           disabled={
             selectedRecords?.length && selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)
-              ? isCompleted(selectedRecords)
-              : true
+              && !isWorkOrderCompleted(selectedRecords) ? false : true
           }
           onClick={() => {
             setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
           }}
         >
           Revert Service
-        </MenuItem>
+        </MenuItem >
         <MenuItem
           onClick={() => {
             setIsBulkEdit(true);
@@ -1089,7 +1084,7 @@ const WorkOrder = ({
               data: selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
             });
           }}
-          disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 ? isCompleted(selectedRecords) : true}
+          disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 && !isWorkOrderCompleted(selectedRecords) ? false : true}
         >
           Bulk Edit
         </MenuItem>
