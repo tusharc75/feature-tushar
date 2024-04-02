@@ -74,7 +74,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
           }
           return d;
         });
-        if (resource === sidebarResource.user) {
+        if ([sidebarResource.user, sidebarResource.employeeMaster]?.includes(resource)) {
           modifiedColumn?.forEach((e) => {
             if (e.fieldName === 'firstName') {
               e.fieldName = 'concatedName';
@@ -83,7 +83,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
             }
           });
           modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName');
-        } else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact || resource === sidebarResource.lead) {
+        } else if ([sidebarResource.customerContact, sidebarResource.supplierContact, sidebarResource.lead]?.includes(resource)) {
           modifiedColumn?.forEach((e) => {
             if (e.fieldName === 'firstName') {
               e.fieldName = 'concatedName';
