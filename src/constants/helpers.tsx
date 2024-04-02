@@ -122,7 +122,6 @@ export const quotationProcessSteps: stepInterface[] = [
 
 export const invoiceProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'manualEntry' },
   { name: 'Ready To Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
