@@ -1,21 +1,22 @@
 import { useContext, useState } from 'react';
-import { Box,Typography, Button, CircularProgress,TextField } from '@material-ui/core';
+import { Box, Typography, Button, CircularProgress, TextField } from '@material-ui/core';
 import styles from '../profilePage.module.scss';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 
 export default function UiPreference({ user, onSuccess }) {
+
   const toastConfig = useContext(CustomToastContext);
   const [isUpdating, setUpdating] = useState(false);
-  const [isEdit,setIsEdit]=  useState(false);
-  const [ui,setUi]=  useState("All");
+  const [isEdit, setIsEdit] = useState(false);
+  const [ui, setUi] = useState("All");
 
   const updateUiPref = () => {
     setUpdating(true);
     let dataObj = {
       _id: user,
-      uiPreference:{byDefaultRecord:ui},
+      uiPreference: { byDefaultRecord: ui },
     };
     axiosInstance()
       .put(`/user/ui-preference`, dataObj)
@@ -34,9 +35,11 @@ export default function UiPreference({ user, onSuccess }) {
         setUpdating(false);
       });
   };
-  const handleChangeUi = (_,value) => {
+  
+  const handleChangeUi = (_, value) => {
     setUi(value);
   };
+
   const uiOptions: string[] = ["All", "My"];
   return (
     <>
@@ -45,51 +48,52 @@ export default function UiPreference({ user, onSuccess }) {
       </div>
       <Box style={{ padding: '8px' }}>
         <div className="header-panel">
-            <Autocomplete
-                  style={{ width: 250 }}
-                  value={ui}
-                  onChange={handleChangeUi}
-                  options={uiOptions}
-                  getOptionLabel={(option) => option}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      margin='none'
-                      size='small'
-                      label='By Default Record'
-                      variant='outlined'
-                    />
-                  )}
-                />
           <div className="flex flex-wrap gap-[8px] justify-end">
             {isEdit && (
-            <Button
-              disabled={isUpdating}
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => {
-                updateUiPref();
-              }}
-            >
-              {isUpdating && <CircularProgress size={22} />}
-              Update
-            </Button>
+              <Button
+                disabled={isUpdating}
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  updateUiPref();
+                }}
+              >
+                {isUpdating && <CircularProgress size={22} />}
+                Update
+              </Button>
             )}
             {!isEdit && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => {
-                setIsEdit(!isEdit)
-              }}
-            >
-              {isUpdating && <CircularProgress size={22} />}
-              Edit
-            </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  setIsEdit(!isEdit)
+                }}
+              >
+                {isUpdating && <CircularProgress size={22} />}
+                Edit
+              </Button>
             )}
           </div>
+          <Box pt={3}>
+            <Autocomplete
+              value={ui}
+              onChange={handleChangeUi}
+              options={uiOptions}
+              getOptionLabel={(option) => option}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  margin='none'
+                  size='small'
+                  label='By Default Record'
+                  variant='outlined'
+                />
+              )}
+            />
+          </Box>
         </div>
       </Box>
     </>
