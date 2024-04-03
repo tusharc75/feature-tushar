@@ -75,7 +75,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
           Cell: ({ row }) =>
             row?.original?.type ? (
               <div className="d-flex gap-2 align-items-center">
-                <p className="text-truncate">{row.original.detail}</p>
+               {row?.original?.detail ? <p className="text-truncate">{row.original.detail}</p> : <NoDataCell />}
                 {![MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.other]?.includes(row.original['type']) && (
                   <IconButton
                     size="small"
