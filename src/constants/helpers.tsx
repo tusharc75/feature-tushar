@@ -122,7 +122,6 @@ export const quotationProcessSteps: stepInterface[] = [
 
 export const invoiceProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'manualEntry' },
   { name: 'Ready To Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
@@ -905,7 +904,8 @@ export const profileMenuItems = {
   notification: 2,
   setting: 3,
   users: 4,
-  securityPrivacy: 5
+  securityPrivacy: 5,
+  uiPreference:6
 };
 
 export const SCHEDULE_FREQUENCY = ['Hourly', 'Daily', 'Weekly', 'Monthly'];

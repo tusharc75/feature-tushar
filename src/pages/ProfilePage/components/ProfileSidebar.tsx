@@ -18,6 +18,12 @@ export default function Sidebar({ onItemClick, activeLink, userData, onFetchUser
             show: true,
             icon: <IoMdNotificationsOutline size={20} />,
             id: profileMenuItems.notification
+        },
+        {
+            label: "UI Preference",
+            show: true,
+            icon: <IoMdNotificationsOutline size={20} />,
+            id: profileMenuItems.uiPreference
         }
         // ,{
         //     label: "Security and Privacy",
