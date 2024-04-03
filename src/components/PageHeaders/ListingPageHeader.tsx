@@ -125,7 +125,10 @@ const ListingPageHeader = ({
     if (isMobile) {
       return (
         <>
-          <span className={`${loading ? 'sr-only' : ''} flex items-center`}>{mobileIcon}</span>
+          <span className={`${loading ? 'sr-only' : ''} flex items-center`}>
+            {mobileIcon}
+            {iconText ? iconText : null}
+          </span>
           <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} `} />
         </>
       );

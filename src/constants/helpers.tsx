@@ -904,7 +904,8 @@ export const profileMenuItems = {
   notification: 2,
   setting: 3,
   users: 4,
-  securityPrivacy: 5
+  securityPrivacy: 5,
+  uiPreference:6
 };
 
 export const SCHEDULE_FREQUENCY = ['Hourly', 'Daily', 'Weekly', 'Monthly'];
