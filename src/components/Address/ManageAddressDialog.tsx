@@ -19,7 +19,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 
-const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
+const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, referenceData = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -51,9 +51,22 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
             values: getObjKeysWithValues(addressData, fieldsEditData)
           });
         } else {
+          const tempInitialData: any = getObjKeys('', fieldsCreateData);
+          if (referenceData) {
+            for (const key in referenceData) {
+              if (referenceData[key] && fieldsCreateData?.some((e) => e.fieldName === key)) {
+                tempInitialData[key] = referenceData[key];
+                // const field = fieldsCreateData?.find((f) => f?.fieldName === key);
+                // if (field) {
+                //   field.disableOnEdit = true;
+                //   field.isUneditable = true;
+                // }
+              }
+            }
+          }
           setInitialData({
             fields: fieldsCreateData,
-            values: getObjKeys('', fieldsCreateData)
+            values: tempInitialData
           });
         }
       })
