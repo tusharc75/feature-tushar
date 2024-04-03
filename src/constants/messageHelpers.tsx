@@ -101,6 +101,7 @@ export const subleaseMessage = {
     receivingNotDeliverd: 'Receiving Ticket is not delivered',
     receivingAlreadyCreated: 'Receiving Ticket Already Created',
 
-    sendToSupplier: 'New , Available and Under Review status only can send to supplier',
-    uniqWarehouse: 'only uniq warehouse can send to supplier',
+    assetStatusSendSupplier: 'Only New,Available and Under Review asset status can send to supplier',
+    assetsIsWithCustomer: 'Asset(s) are at customer location',
+    assetsAlradyReturned: 'Asset(s) are already returned to supplier',
 };
