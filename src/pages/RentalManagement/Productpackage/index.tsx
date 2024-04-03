@@ -255,7 +255,7 @@ const Productpackage = ({
               row.original.hideSelection ? (
                 <HtmlTooltip
                   title={
-                    row.original?.assetQty ? 'Asset is already assigned' : row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''
+                    row.original?.assetQty ? (row?.original?.productDetail?.serializedProduct ? 'Asset is already assigned' : 'Serial Number is already assigned') : row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''
                   }
                 >
                   <span>
@@ -323,7 +323,7 @@ const Productpackage = ({
 
     rows = [...products, ...packages, ...additionalCosts];
 
-    const isPriceRequired = allFields.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
 
     rows.forEach((parent, i) => {
