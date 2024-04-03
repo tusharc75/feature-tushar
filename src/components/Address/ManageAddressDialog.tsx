@@ -19,7 +19,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 
-const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, isNewAddressWithAddressData = false }) => {
+const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, referenceData = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -46,17 +46,15 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, isNewAddr
         const fieldsCreateData = data.filter((d) => d.isCreate).map((d: any) => d.fieldData);
         const fieldsEditData = data.filter((d) => d.isUpdate).map((d: any) => d.fieldData);
         if (addressData) {
-          if(isNewAddressWithAddressData){
-            setInitialData({
-              fields: fieldsEditData,
-              values: getObjKeysWithValues(addressData, fieldsCreateData)
-            });
-          } else {
-            setInitialData({
-              fields: fieldsEditData,
-              values: getObjKeysWithValues(addressData, fieldsEditData)
-            });
-          }
+          setInitialData({
+            fields: fieldsEditData,
+            values: getObjKeysWithValues(addressData, fieldsEditData)
+          });
+        } else if (referenceData){
+          setInitialData({
+            fields: fieldsCreateData,
+            values: getObjKeysWithValues(referenceData, fieldsCreateData)
+          });
         } else {
           setInitialData({
             fields: fieldsCreateData,
@@ -71,7 +69,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, isNewAddr
 
   const handleSubmit = (values) => {
     setLoading(true);
-    if (addressData && !isNewAddressWithAddressData) {
+    if (addressData) {
       values._id = addressData._id;
       axiosInstance()
         .put(`${address.addressApi}`, values)
@@ -238,7 +236,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, isNewAddr
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={addressData && !isNewAddressWithAddressData ? 'Edit Address' : 'Add Address'}
+                title={addressData ? 'Edit Address' : 'Add Address'}
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
