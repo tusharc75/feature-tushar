@@ -905,7 +905,7 @@ export const profileMenuItems = {
   setting: 3,
   users: 4,
   securityPrivacy: 5,
-  uiPreference:6
+  uiPreference: 6
 };
 
 export const SCHEDULE_FREQUENCY = ['Hourly', 'Daily', 'Weekly', 'Monthly'];
@@ -2963,4 +2963,26 @@ export const STEPS_STYLE = {
   list: 'List',
   step: 'Step',
   sideBar: 'Side Bar',
+}
+
+
+export const cloneResourceData = (fromFields, toFields, data) => {
+  const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName));
+  const result: any = {}
+  overlappingFields?.forEach((e) => {
+    if (data[e?.fieldName]) {
+      if (e?.lookup) {
+        if (e?.type === 'dropDown') {
+          result[e?.fieldName] = data[e?.fieldName]?.optionValue || ''
+        }
+        else {
+          result[e?.fieldName] = isArray(data[e?.fieldName]) ? data[e?.fieldName]?.map((m) => m.optionValue) : []
+        }
+      }
+      else {
+        result[e?.fieldName] = data[e?.fieldName]
+      }
+    }
+  })
+  return result;
 }
