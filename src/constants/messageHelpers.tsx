@@ -100,8 +100,9 @@ export const subleaseMessage = {
     receivingAlreadyDelivered: 'Receiving Ticket is already delivered',
     receivingNotDeliverd: 'Receiving Ticket is not delivered',
     receivingAlreadyCreated: 'Receiving Ticket Already Created',
+    receivingStatus: 'Receiving Ticket is Only create for New,Available and Under Review assets',
 
     assetStatusSendSupplier: 'Only New,Available and Under Review asset status can send to supplier',
-    assetsIsWithCustomer: 'Asset(s) are at customer location',
-    assetsAlradyReturned: 'Asset(s) are already returned to supplier',
+    assetsIsWithCustomer: 'Assets are at customer location',
+    assetsAlradyReturned: 'Assets are already returned to supplier',
 };
