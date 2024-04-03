@@ -153,7 +153,7 @@ export default function ProfilePage(props) {
               ) : activeItem === profileMenuItems.notification ? (
                 <NotificationPreference notificationPreferenceData={notificationPreferenceData} user={userData._id} onSuccess={fetchUserData} />
               ) : activeItem === profileMenuItems.uiPreference ? (
-                <UiPreference user={userData._id} onSuccess={fetchUserData}/>
+                <UiPreference user1={userData._id} onSuccess={fetchUserData}/>
               ) : activeItem === profileMenuItems.setting ? (
                 <Paper className={classes.paper}>setting</Paper>
               ) : activeItem === profileMenuItems.users ? (
