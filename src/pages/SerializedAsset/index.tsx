@@ -777,7 +777,8 @@ const ActionMenuItems = ({
               handleStatusChange(status);
             }}
             disabled={
-              selectedRecords?.filter((o) => [ASSET_STATUS.available, ASSET_STATUS.underReview].includes(o.status)
+              selectedRecords?.filter((o) => [ASSET_STATUS.available, ASSET_STATUS.underReview,
+              ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(o.status)
                 || (ASSET_STATUS.scrap === o.status && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand)
               ).length === selectedRecords?.length
                 ? false : true
