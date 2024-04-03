@@ -707,10 +707,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         uniqProduct.push(element);
       }
     });
+    
     setOrderDialog((prevState) => {
       return {
         ...prevState,
-        products: uniqProduct
+        products: uniqProduct?.filter((e) => e.assetsCount)
       };
     });
 
