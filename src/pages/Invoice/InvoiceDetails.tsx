@@ -26,7 +26,6 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
 import { ACTIVITY_RESOURCE, CHILD_RESOURCE, INVOICE_STATUS, invoice, invoiceProcessSteps, sidebarResource } from '../../constants/helpers';
-import AdditionalCost from './AdditionalCost';
 import CreditMemo from './CreditMemo';
 import Invoice from './Invoice';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
@@ -351,9 +350,6 @@ const InvoiceDetails = () => {
                     />
                   )}
                   {currentStep === 1 && invoiceData && (
-                    <AdditionalCost invoiceData={invoiceData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
-                  )}
-                  {currentStep === 2 && invoiceData && (
                     <Invoice
                       invoiceData={invoiceData}
                       setNextStep={setNextStep}
