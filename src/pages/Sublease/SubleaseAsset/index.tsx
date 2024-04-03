@@ -244,12 +244,12 @@ const SerializedAsset = ({
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-          fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
-          resource: sidebarResource.sublease,
-          referenceId: subleaseData?._id,
-          columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
-          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-        }
+        fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
+        resource: sidebarResource.sublease,
+        referenceId: subleaseData?._id,
+        columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
+        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+      }
       : null;
 
   const rightSideContents = () => {
@@ -290,18 +290,15 @@ const SerializedAsset = ({
 
   const validateAction = () => {
     const errorMessages = [];
-    var records = [...selectedRecords];
-
-    if (!checkUniqWarehouse()) {
-      errorMessages.push({ index: 0, message: subleaseMessage.uniqWarehouse });
-    }
-
-    records?.forEach((e, i) => {
-      if (
-        e.currentOwnerType != INVENTORY_OWNER_TYPE.brand ||
-        ![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)
-      ) {
-        errorMessages.push({ index: e.index, message: subleaseMessage.sendToSupplier });
+    selectedRecords?.forEach((e, i) => {
+      if (e.currentOwnerType === INVENTORY_OWNER_TYPE.supplierAccount) {
+        errorMessages.push({ index: e.index, message: subleaseMessage.assetsAlradyReturned });
+      }
+      else if (e.currentOwnerType === INVENTORY_OWNER_TYPE.customerAccount) {
+        errorMessages.push({ index: e.index, message: subleaseMessage.assetsIsWithCustomer });
+      }
+      else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
+        errorMessages.push({ index: e.index, message: subleaseMessage.assetStatusSendSupplier });
       }
     });
     if (errorMessages?.length) {
@@ -315,7 +312,8 @@ const SerializedAsset = ({
     return (
       <>
         <MenuItem
-          disabled={SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) ? false : true}
+          disabled={SUBLEASE_STATUS.completed != subleaseData?.status &&
+            checkUniqWarehouse() && (allowedToEdit || isProcessor) ? false : true}
           onClick={() => {
             if (!validateAction()) {
               const data = {};
