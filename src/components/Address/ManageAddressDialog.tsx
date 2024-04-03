@@ -50,15 +50,23 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
             fields: fieldsEditData,
             values: getObjKeysWithValues(addressData, fieldsEditData)
           });
-        } else if (referenceData){
-          setInitialData({
-            fields: fieldsCreateData,
-            values: getObjKeysWithValues(referenceData, fieldsCreateData)
-          });
         } else {
+          const tempInitialData: any = getObjKeys('', fieldsCreateData);
+          if (referenceData) {
+            for (const key in referenceData) {
+              if (referenceData[key] && fieldsCreateData?.some((e) => e.fieldName === key)) {
+                tempInitialData[key] = referenceData[key];
+                // const field = fieldsCreateData?.find((f) => f?.fieldName === key);
+                // if (field) {
+                //   field.disableOnEdit = true;
+                //   field.isUneditable = true;
+                // }
+              }
+            }
+          }
           setInitialData({
             fields: fieldsCreateData,
-            values: getObjKeys('', fieldsCreateData)
+            values: tempInitialData
           });
         }
       })
