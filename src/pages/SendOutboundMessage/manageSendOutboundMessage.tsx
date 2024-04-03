@@ -209,23 +209,25 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                         )}
                       />
                     </Grid>
-                    <Grid item md={12} lg={12} sm={12}>
-                      <TextField
-                        margin="dense"
-                        name="messageValue"
-                        label="Value"
-                        variant="outlined"
-                        error={touched['messageValue'] && Boolean(errors['messageValue'])}
-                        helperText={touched['messageValue'] && errors['messageValue']}
-                        required={true}
-                        type='number'
-                        fullWidth
-                        onChange={(e) => {
-                          setFieldValue('messageValue', e.target.value);
-                        }}
-                        value={values['messageValue']}
-                      />
-                    </Grid>
+                    {values['messageType'] === 'Set Parameter' && (
+                      <Grid item md={12} lg={12} sm={12}>
+                        <TextField
+                          margin="dense"
+                          name="messageValue"
+                          label="Value"
+                          variant="outlined"
+                          error={touched['messageValue'] && Boolean(errors['messageValue'])}
+                          helperText={touched['messageValue'] && errors['messageValue']}
+                          required={true}
+                          type="number"
+                          fullWidth
+                          onChange={(e) => {
+                            setFieldValue('messageValue', e.target.value);
+                          }}
+                          value={values['messageValue']}
+                        />
+                      </Grid>
+                    )}
                   </Grid>
                 </Form>
               </CustomDialogContent>
