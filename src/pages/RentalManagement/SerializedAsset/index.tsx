@@ -694,7 +694,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         _id: m.materialId,
         unit: m.unit,
         serialized: m.serializedProduct,
-        assetsCount: m.serializedProduct ? m.realAssetQty - m.realAssetAssignedQty : m.assetQty
+        assetsCount: m.realAssetQty - m.realAssetAssignedQty
       };
     });
 
@@ -707,7 +707,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         uniqProduct.push(element);
       }
     });
-    
+
     setOrderDialog((prevState) => {
       return {
         ...prevState,

@@ -64,6 +64,13 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                 setCloneHeading(baNumber);
                 setLoading(false);
               } else {
+                if (data?.canEdit === false) {
+                  fieldsDataForUpdate?.forEach((e) => {
+                    if (['warehouse', 'supplierAccount']?.includes(e?.fieldName)) {
+                      e.isUneditable = true;
+                    }
+                  });
+                }
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
