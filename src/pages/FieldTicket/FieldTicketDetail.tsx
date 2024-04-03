@@ -44,7 +44,7 @@ const FieldTicketDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(1);
   const { isOffline } = useContext(CustomOfflineContext);
 
   const [currentStep, setCurrentStep] = useState(0);
