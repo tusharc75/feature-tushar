@@ -19,7 +19,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 
-const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
+const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, isNewAddressWithAddressData = false }) => {
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -46,10 +46,17 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
         const fieldsCreateData = data.filter((d) => d.isCreate).map((d: any) => d.fieldData);
         const fieldsEditData = data.filter((d) => d.isUpdate).map((d: any) => d.fieldData);
         if (addressData) {
-          setInitialData({
-            fields: fieldsEditData,
-            values: getObjKeysWithValues(addressData, fieldsEditData)
-          });
+          if(isNewAddressWithAddressData){
+            setInitialData({
+              fields: fieldsEditData,
+              values: getObjKeysWithValues(addressData, fieldsCreateData)
+            });
+          } else {
+            setInitialData({
+              fields: fieldsEditData,
+              values: getObjKeysWithValues(addressData, fieldsEditData)
+            });
+          }
         } else {
           setInitialData({
             fields: fieldsCreateData,
@@ -64,7 +71,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
 
   const handleSubmit = (values) => {
     setLoading(true);
-    if (addressData) {
+    if (addressData && !isNewAddressWithAddressData) {
       values._id = addressData._id;
       axiosInstance()
         .put(`${address.addressApi}`, values)
@@ -231,7 +238,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={addressData ? 'Edit Address' : 'Add Address'}
+                title={addressData && !isNewAddressWithAddressData ? 'Edit Address' : 'Add Address'}
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);

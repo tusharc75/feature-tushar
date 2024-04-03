@@ -1150,6 +1150,8 @@ function Dropdown({
                           }
                         }
                       }}
+                      addressData={{region: values['region']}}
+                      isNewAddressWithAddressData={true}
                     />
                   )}
                 </>
