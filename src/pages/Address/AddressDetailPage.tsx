@@ -142,53 +142,23 @@ const AddressDetailPage = () => {
             ) : (
               <DetailsPage data={addressData} fields={addressFields} />
             )}
-            {addressData?.latitude && addressData?.longitude && (
+            {(addressData?.latitude && addressData?.longitude) && (
               <Box height={400} width={'100%'} borderRadius={4} overflow="hidden" marginTop={2}>
                 <GoogleMap
                   options={{
-                    disableDefaultUI: true,
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
-                    mapTypeControlOptions: {
-                      style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
-                    },
-                    styles: [
-                      {
-                        featureType: 'water',
-                        stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
-                      },
-                      { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
-                      {
-                        featureType: 'road',
-                        stylers: [{ saturation: -100 }, { lightness: 45 }]
-                      },
-                      {
-                        featureType: 'road.highway',
-                        stylers: [{ visibility: 'simplified' }]
-                      },
-
-                      { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-                      { featureType: 'poi', stylers: [{ visibility: 'off' }] }
-                    ],
+                    streetViewControl: true,
                     gestureHandling: 'cooperative'
                   }}
                   mapContainerStyle={{
-                    minHeight: '500px',
                     height: '100%',
                     maxWidth: '600px',
                     minWidth: '100%'
                   }}
-                  center={
-                    addressData?.latitude && addressData?.longitude
-                      ? new google.maps.LatLng(addressData?.latitude, addressData?.longitude)
-                      : new google.maps.LatLng(37.09, -95.713)
-                  }
-                  zoom={4}
+                  center={new google.maps.LatLng(addressData?.latitude, addressData?.longitude)}
+                  zoom={15}
                 >
-                  {addressData?.latitude && addressData?.longitude && (
-                    <Marker
-                      position={new google.maps.LatLng(addressData?.latitude, addressData?.longitude)}
-                    />
-                  )}
+                  <Marker position={new google.maps.LatLng(addressData?.latitude, addressData?.longitude)} />
                 </GoogleMap>
               </Box>
             )}
