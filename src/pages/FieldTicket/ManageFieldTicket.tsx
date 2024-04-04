@@ -256,26 +256,26 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   }
 
   const fetchFieldServiceOrderData = async (fieldServiceOrderId) => {
+
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
     const fieldServiceOrderFields = response?.data?.data;
 
-    const {
-      data: { data }
-    } = await axiosInstance().get(`${fieldServiceOrder.api}/${fieldServiceOrderId}`);
+    const { data: { data } } = await axiosInstance().get(`${fieldServiceOrder.api}/${fieldServiceOrderId}`);
 
-    const referenceData: any = cloneResourceData(
-      fieldServiceOrderFields?.map((e) => e?.fieldData),
-      initialData?.fields,
-      data
-    );
+    const referenceData: any = cloneResourceData(fieldServiceOrderFields?.map((e) => e?.fieldData), initialData?.fields, data);
+
     const tempInitialData = getObjKeys('', initialData?.fields);
+    tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(initialData?.fields);
     tempInitialData['fieldServiceOrder'] = fieldServiceOrderId;
+    if (initialData?.fields?.some((e) => e.fieldName === 'currency')) {
+      tempInitialData['currency'] = user.user?.brandCurrency;
+    }
     for (const key in referenceData) {
       tempInitialData[key] = referenceData[key];
     }
     setInitialData({
-      fields: initialData.fields,
-      values: getObjKeysWithValues(tempInitialData, initialData.fields)
+      fields: initialData?.fields,
+      values: tempInitialData
     });
   };
 
@@ -301,7 +301,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
         >
-          {({ values, errors, setFieldValue, touched, submitForm }) => (
+          {({ values, errors, setFieldValue, touched, submitForm, setValues }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
@@ -356,8 +356,10 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                                             }
                                           }
                                         }
-                                        if (name === 'fieldServiceOrder') {
-                                          fetchFieldServiceOrderData(value);
+                                        else if (name === 'fieldServiceOrder') {
+                                          if (value) {
+                                            fetchFieldServiceOrderData(value);
+                                          }
                                         }
                                       }}
                                       required={field.required}

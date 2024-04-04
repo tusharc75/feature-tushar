@@ -314,7 +314,7 @@ const QuoteBuilder = ({
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: sendMail ? 'Sent to Customer Sucessfully' : 'Processed Successfully'
+          message: sendMail ? 'Sent to Customer Successfully' : 'Processed Successfully'
         });
       })
       .catch((error) => {
@@ -330,7 +330,7 @@ const QuoteBuilder = ({
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'DOA Sended Sucessfully'
+          message: 'DOA Sended Successfully'
         });
       })
       .catch((err) => {

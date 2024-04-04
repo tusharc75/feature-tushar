@@ -84,6 +84,7 @@ const SerializedAsset = () => {
     const cencelToken = axios.CancelToken.source();
     fetchData(cencelToken);
     return () => cencelToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     page,
     search,
