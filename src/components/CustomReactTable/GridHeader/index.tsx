@@ -83,12 +83,17 @@ const GridHeader = ({
           .then(({ data: { data } }) => {
             const defaultFilter = data.filter((d) => d.default)[0];
             setSelectedFilter(defaultFilter);
-            const deepFilter = {
-              ...createFilterModel(defaultFilter.filterValue, columns)
-              // ...(defaultFilter.sortBy ? { sortBy: defaultFilter.sortBy } : {}),
-              // ...(defaultFilter.orderBy ? { orderBy: defaultFilter.orderBy } : {})
-            };
-            if (defaultFilter) dispatch({ type: 'filter', filters: deepFilter });
+            const deepFilter = createFilterModel(defaultFilter.filterValue, columns);
+            if (defaultFilter) {
+              dispatch({ type: 'filter', filters: deepFilter });
+              if (defaultFilter.sortBy) {
+                dispatch({
+                  type: 'sort',
+                  sorting: [{ colId: defaultFilter.sortBy, sort: defaultFilter.orderBy ?? 'asc' }],
+                  loading: isClientSideGrid ? false : true
+                });
+              }
+            }
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
