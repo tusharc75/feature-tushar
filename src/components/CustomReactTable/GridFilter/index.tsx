@@ -19,7 +19,7 @@ import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import FormTypes from '../../Helpers/FormTypes';
-import { fetchFieldOptions } from '../utils';
+import { createFilterModel, fetchFieldOptions } from '../utils';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const toastConfig = useContext(CustomToastContext);
@@ -62,7 +62,6 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
       .get(`/user-resource-filter?resource=${resource}`)
       .then(({ data: { data } }) => {
         setUserFilters(data);
-        // console.log(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -128,91 +127,9 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
     }
   };
 
-  const createFilterModel = () => {
-    const filterModel = new Map();
-    const colNames = Object.keys(formValues);
-
-    for (const col of coloums) {
-      const fieldName = col?.fieldName;
-
-      if (
-        !(colNames.includes(fieldName) || colNames.includes(`from_${fieldName}`) || colNames.includes(`to_${fieldName}`)) &&
-        (col.type !== 'dateTime' || col.type !== 'date')
-      ) {
-        continue;
-      }
-
-      switch (col.type) {
-        case 'singleLine':
-        case 'multiLine':
-        case 'email':
-        case 'mobileNumber':
-        case 'currency':
-        case 'lookUpDisplay':
-          if (formValues[fieldName]) {
-            filterModel.set(fieldName, { filter: formValues[fieldName] });
-          }
-          break;
-        case 'year':
-          if (formValues[fieldName]) {
-            filterModel.set(fieldName, { filter: moment(new Date(formValues[fieldName])).format('YYYY') });
-          }
-          break;
-        case 'multiSelect':
-        case 'dropDown':
-          if (col.lookup && formValues[fieldName]) {
-            const options = coloums?.find((item) => item.fieldName == fieldName)?.option || [];
-            if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
-              filterModel.set(fieldName, {
-                operator: 'OR',
-                condition1: {
-                  filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
-                }
-              });
-            }
-          } else if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
-            filterModel.set(fieldName, { filter: formValues[fieldName] });
-          }
-          break;
-        case 'dateTime':
-        case 'date':
-          const from = `from_${fieldName}`;
-          const to = `to_${fieldName}`;
-
-          const fromDate = formValues[from] ? formValues[from] : null;
-          const toDate = formValues[to] ? formValues[to] : null;
-
-          if (fromDate || toDate) {
-            filterModel.set(fieldName, {
-              filter: {
-                from: fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null,
-                to: toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
-              }
-            });
-          }
-          break;
-        case 'checkBox':
-          if (formValues[fieldName] === true || formValues[fieldName] === false) {
-            filterModel.set(fieldName, { filter: formValues[fieldName] === true ? 'Yes' : 'No' });
-          }
-          break;
-        case 'location':
-          if (formValues[fieldName]?.length > 0) {
-            filterModel.set(fieldName, { filter: formValues[fieldName] });
-          }
-          break;
-        default:
-          // Handle unexpected column types.
-          console.warn('Unknown column type:', col.type);
-      }
-    }
-
-    return Object.fromEntries(filterModel);
-  };
-
   const handleApplyFilter = () => {
     setCurrentFomValue(formValues || {});
-    dispatch({ type: 'filter', filters: createFilterModel() });
+    dispatch({ type: 'filter', filters: createFilterModel(formValues, coloums) });
     setSelectedFilter(selectedUserFilter || null);
     handleClose();
   };
@@ -464,6 +381,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
           handleClose={() => {
             setIsSaveFilter({ open: false, data: null });
           }}
+          columns={coloums}
           resource={resource}
           handleSucess={() => {
             setIsSaveFilter({ open: false, data: null });

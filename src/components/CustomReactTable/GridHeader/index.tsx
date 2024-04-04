@@ -1,6 +1,6 @@
 import { Button, IconButton, useMediaQuery } from '@material-ui/core';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from '../ArrangeView';
@@ -9,9 +9,13 @@ import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
+import { sidebarResource } from 'src/constants/helpers';
 
 import { Table } from '@tanstack/react-table';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
+import { createFilterModel, fetchFieldOptions } from '../utils';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
 
 type GridHeaderProps = {
   resource: any;
@@ -54,6 +58,7 @@ const GridHeader = ({
   handleTableExport,
   hideExportTable = false
 }: GridHeaderProps) => {
+  const toastConfig = useContext(CustomToastContext);
   const { selectedRecords, loading, filters: customFilters, dataRows, page }: TInitialState = state;
   const isMobileView = useMediaQuery('(max-width:768px)');
 
@@ -68,6 +73,27 @@ const GridHeader = ({
   const handleFilterClose = () => {
     setIsFilterOpen(false);
   };
+
+  useEffect(() => {
+    const applyDefaultFilter = async () => {
+      try {
+        const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
+        axiosInstance()
+          .get(`/user-resource-filter?resource=${resource}`)
+          .then(({ data: { data } }) => {
+            const defaultFilter = data.filter((d) => d.default)[0];
+            setSelectedFilter(defaultFilter);
+            if (defaultFilter) dispatch({ type: 'filter', filters: createFilterModel(defaultFilter.filterValue, columns) });
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
+      } catch (error) {
+        toastConfig.setToastConfig(error);
+      }
+    };
+    applyDefaultFilter();
+  }, []);
 
   return (
     <div className={`flex items-center justify-between my-[8px] gap-[8px] flex-wrap`}>
