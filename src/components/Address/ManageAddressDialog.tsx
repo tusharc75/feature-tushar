@@ -18,8 +18,14 @@ import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, referenceData = null }) => {
+
+  const {
+    state: { user }
+  }: any = useData();
+
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -27,7 +33,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [latLngChangedManually, setLatLngChangedManually] = useState(false);
-  const [addressDetail, setAddressDetail] = useState(null);
+  const [addressDetail, setAddressDetail] = useState(addressData);
 
   const formikRef = {
     current: null
@@ -56,11 +62,6 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
             for (const key in referenceData) {
               if (referenceData[key] && fieldsCreateData?.some((e) => e.fieldName === key)) {
                 tempInitialData[key] = referenceData[key];
-                // const field = fieldsCreateData?.find((f) => f?.fieldName === key);
-                // if (field) {
-                //   field.disableOnEdit = true;
-                //   field.isUneditable = true;
-                // }
               }
             }
           }
@@ -205,13 +206,20 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
   const onCordChange = (latLng: google.maps.LatLng) => {
     if (!formikRef.current || !window.google) return;
 
-    const geocoder = new window.google.maps.Geocoder();
-
-    geocoder.geocode({ location: latLng }, (result, status) => {
-      if (status === google.maps.GeocoderStatus.OK) {
-        setFullAddressFields(result[1]);
-      }
-    });
+    if (user?.user?.brandPolicy?.disableMapPinChangeAddress) {
+      let fullAddress: any = { ...initialData.values };
+      fullAddress.latitude = latLng?.lat()?.toString();
+      fullAddress.longitude = latLng?.lng()?.toString();
+      setAddressDetail(fullAddress);
+    }
+    else {
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ location: latLng }, (result, status) => {
+        if (status === google.maps.GeocoderStatus.OK) {
+          setFullAddressFields(result[1]);
+        }
+      });
+    }
   };
 
   return (
@@ -338,45 +346,20 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                     <GoogleMap
                       onClick={(position) => onCordChange(position.latLng)}
                       options={{
-                        disableDefaultUI: true,
                         mapTypeId: google.maps.MapTypeId.ROADMAP,
-                        mapTypeControlOptions: {
-                          style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
-                        },
-                        styles: [
-                          {
-                            featureType: 'water',
-                            stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
-                          },
-                          { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
-                          {
-                            featureType: 'road',
-                            stylers: [{ saturation: -100 }, { lightness: 45 }]
-                          },
-                          {
-                            featureType: 'road.highway',
-                            stylers: [{ visibility: 'simplified' }]
-                          },
-
-                          { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-                          { featureType: 'poi', stylers: [{ visibility: 'off' }] }
-                        ],
                         gestureHandling: 'cooperative'
                       }}
                       mapContainerStyle={{
-                        minHeight: '500px',
                         height: '100%',
                         maxWidth: '600px',
                         minWidth: '100%'
                       }}
-                      // onLoad={onLoad}
-                      // onUnmount={onUnmount}
                       center={
                         addressDetail?.latitude && addressDetail?.longitude
                           ? new google.maps.LatLng(addressDetail?.latitude, addressDetail?.longitude)
                           : new google.maps.LatLng(37.09, -95.713)
                       }
-                      zoom={4}
+                      zoom={15}
                     >
                       {addressDetail?.latitude && addressDetail?.longitude && (
                         <Marker

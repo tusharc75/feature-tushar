@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef, useContext, Fragment } from 'react';
 import { Button, Checkbox, Dialog, FormControlLabel, TextField } from '@material-ui/core';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import { Autocomplete } from '@material-ui/lab';
+import { Form, Formik } from 'formik';
+import { Fragment, useContext, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import { boolean, object, string } from 'yup';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomButton from '../Helpers/CustomButton';
-import { Form, Formik } from 'formik';
-import { object, string, boolean } from 'yup';
-import { Autocomplete } from '@material-ui/lab';
 
 const schema = object().shape({
   title: string().required('Please enter title'),

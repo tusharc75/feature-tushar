@@ -391,6 +391,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
           }}
           filterData={isSaveFilter.data}
           filterValue={formValues}
+          fieldsData = {coloums}
         />
       )}
     </MuiPickersUtilsProvider>
