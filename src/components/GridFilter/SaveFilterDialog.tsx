@@ -1,4 +1,4 @@
-import { Button, Checkbox, Dialog, FormControlLabel, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Dialog, FormControlLabel, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { Form, Formik } from 'formik';
 import { Fragment, useContext, useState } from 'react';
@@ -9,6 +9,7 @@ import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomButton from '../Helpers/CustomButton';
+import { startCase } from 'lodash';
 
 const schema = object().shape({
   title: string().required('Please enter title'),
@@ -106,10 +107,6 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
           <Fragment>
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                <FormControlLabel
-                  control={<Checkbox checked={values['default']} onChange={(e) => setFieldValue('default', e.target.checked)} name="default" />}
-                  label="Set this filter as default"
-                />
                 <TextField
                   fullWidth
                   margin="dense"
@@ -122,11 +119,25 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                   onChange={(e) => {
                     setFieldValue('title', e.target.value);
                   }}
+                  error={touched['title'] && Boolean(errors['title'])}
+                  helperText={touched['title'] && errors['title']}
                 />
                 <FormControlLabel
-                  control={<Checkbox checked={values['sorting']} onChange={(e) => setFieldValue('sorting', e.target.checked)} name="sorting" />}
-                  label="Enable Sorting"
+                  control={<Checkbox checked={values['default']}
+                    onChange={(e) => setFieldValue('default', e.target.checked)}
+                    name="default" />}
+                  label="Set this as default"
                 />
+                {values['default'] &&
+                  <Box>
+                    <FormControlLabel
+                      control={<Checkbox
+                        checked={values['sorting']}
+                        onChange={(e) => setFieldValue('sorting', e.target.checked)} name="sorting" />}
+                      label="Default Sorting"
+                    />
+                  </Box>
+                }
                 {values['sorting'] && columns.length && (
                   <div className="flex flex-wrap gap-2 my-2">
                     <Autocomplete
@@ -160,6 +171,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                       value={values['orderBy']}
                       id="order-by"
                       options={orderByOptions}
+                      getOptionLabel={(option: any) => startCase(option)}
                       style={{ flexGrow: 1, minWidth: 200 }}
                       renderInput={(params) => (
                         <TextField
