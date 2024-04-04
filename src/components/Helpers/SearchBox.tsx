@@ -1,9 +1,6 @@
-import React, { memo, useState } from 'react';
-// import { Search } from '@material-ui/icons';
-// import PropTypes from 'prop-types';
-// import { isMobile, isTablet } from 'react-device-detect';
-import { debounce } from 'lodash';
+import React, { memo, useEffect, useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
+import { useDebounce } from 'src/hooks';
 
 type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   width?: string;
@@ -13,17 +10,21 @@ type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
 
 function SearchBox({ onChange, value, size, width, placeholder, className, containerProps = {}, ...otherProps }: SerachBoxProps) {
   const [inputvalue, setInputValue] = useState<string>(value ?? '');
+  const [event, setEvent] = useState<React.ChangeEvent<HTMLInputElement>>();
   const { className: containerClassName, ...restOfContainerProps } = containerProps;
-
-  const debouncedInputDispatch = debounce((e) => {
-    onChange(e);
-  }, 300);
+  const debouncedEvent = useDebounce(event, 800);
 
   const onChangeWrapper = (e) => {
-    debouncedInputDispatch.cancel();
     setInputValue(e.target.value);
-    debouncedInputDispatch(e);
+    setEvent(e);
   };
+
+  useEffect(() => {
+    if (debouncedEvent) {
+      onChange(debouncedEvent);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedEvent]);
 
   return (
     <>
