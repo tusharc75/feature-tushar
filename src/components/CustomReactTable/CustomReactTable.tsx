@@ -82,7 +82,8 @@ const CustomReactTable = ({
     filters: customFilters,
     error,
     visibleColumns,
-    columnOrder
+    columnOrder,
+    sorting
   }: TInitialState = state;
 
   const {
@@ -389,6 +390,11 @@ const CustomReactTable = ({
       });
     });
   }, [getsorting, isClientSideGrid, dispatch]);
+
+  useEffect(() => {
+    if (sorting.length === 0 || getsorting.length) return;
+    setSorting([{ id: sorting[0].colId, desc: sorting[0].sort === 'desc' }]);
+  }, [sorting, getsorting]);
 
   const handleTableExport = () => {
     clearTimeout(exportTimeout);
