@@ -168,7 +168,7 @@ export default function UiPreference({ user1, onSuccess }) {
                   </Box>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                  <Button size="small" color="primary" disabled={submitting}>
+                  <Button size="small" color="primary" disabled={submitting} onClick={onClose}>
                     Cancel
                   </Button>
                   <Button
