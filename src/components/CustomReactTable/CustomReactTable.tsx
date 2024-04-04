@@ -393,9 +393,9 @@ const CustomReactTable = ({
 
   useEffect(() => {
     if (sorting.length === 0 || getsorting.length) return;
-    if (sorting[0].sort === 'desc') return;
+    if (sorting[0].sort === 'desc' && getsorting.some((c) => c.id === sorting[0].colId)) return;
     setSorting([{ id: sorting[0].colId, desc: sorting[0].sort === 'desc' }]);
-  }, [sorting, getsorting]);
+  }, [sorting]);
 
   const handleTableExport = () => {
     clearTimeout(exportTimeout);
