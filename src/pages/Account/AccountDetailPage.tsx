@@ -43,6 +43,7 @@ import RelatedContacts from './RelatedContacts';
 import SupplierItems from './SupplierItems';
 import Warehouse from './Warehouse';
 import accountClass from './account.module.scss';
+import Step from '../DynamicForm/Step';
 
 function DisplayData({ label, value, icon, highlightsHead = false }) {
   return (
@@ -133,6 +134,7 @@ export default function AccountDetailPage(props) {
     colorPalette: null
   });
   const [formValues, setFormValues] = useState({});
+  const [resourceData, setResourceData] = useState(null);
 
   let filteredAccountFields = accountFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
   let { id } = useParams();
@@ -181,6 +183,7 @@ export default function AccountDetailPage(props) {
     setTabValue(0);
     fetchAccountData();
     fetchRelatedData();
+    fetchPolicy();
   }, [id]);
 
   useEffect(() => {
@@ -378,6 +381,19 @@ export default function AccountDetailPage(props) {
     getAccountFields(data);
     setLoading(false);
     initializeGraphData();
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource[accountResource]}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleMainPonts = (data) => {
@@ -813,6 +829,9 @@ export default function AccountDetailPage(props) {
                   className="tabLayout"
                 />
               )}
+              {resourceData && resourceData?.steps?.length && (
+                <Tab label={<div className="tab-font">Associations</div>} aria-controls="a11y-tabpanel-4" id="a11y-tab-4" className="tabLayout" />
+              )}
             </Tabs>
             <TabPanel value={tabValue} index={0}>
               <Box>
@@ -1029,6 +1048,15 @@ export default function AccountDetailPage(props) {
                 <Warehouse reference={accountResource} api={accountApi} id={id} />
               </TabPanel>
             )}
+            <TabPanel value={tabValue} index={4}>
+              <Step
+                resourceData={resourceData}
+                resourceId={id}
+                resource={sidebarResource[accountResource]}
+                data={accountData}
+                allowedToEdit={permissions[accountResource]?.isUpdate}
+              />
+            </TabPanel>
           </>
         )}
       </Box>
