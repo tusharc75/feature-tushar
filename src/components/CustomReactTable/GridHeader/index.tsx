@@ -98,7 +98,8 @@ const GridHeader = ({
       }
     };
     applyDefaultFilter();
-  }, [resource, dispatch, toastConfig]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resource]);
 
   return (
     <div className={`flex items-center justify-between my-[8px] gap-[8px] flex-wrap`}>
