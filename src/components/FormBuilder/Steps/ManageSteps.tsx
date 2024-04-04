@@ -67,7 +67,8 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
         linkedMaterial: [],
         linkWithResource: false,
         linkResourceName: '',
-        linkResourceField: ''
+        linkResourceField: '',
+        readOnly: false
       });
     }
   }, [data]);
@@ -305,6 +306,20 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                             helperText={touched['linkResourceField'] && errors['linkResourceField']}
                           />
                         )}
+                      />
+                    </Box>
+                    <Box>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="readOnly"
+                            checked={values['readOnly']}
+                            onChange={(e) => {
+                              setFieldValue('readOnly', e.target.checked);
+                            }}
+                          />
+                        }
+                        label="Read Only"
                       />
                     </Box>
                   </>
