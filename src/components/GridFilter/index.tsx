@@ -208,8 +208,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
           type: 'contains',
           filter: moment(new Date(formValues[fieldName])).format('YYYY')
         };
-      }
-      else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
+      } else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
         const options = coloums?.find((item) => item.fieldName == fieldName)?.option || [];
         if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
           filterModel[fieldName] = {
@@ -260,8 +259,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
             filter: formValues[fieldName] === true ? 'Yes' : 'No'
           };
         }
-      }
-      else if (col.type === 'location') {
+      } else if (col.type === 'location') {
         if (formValues[fieldName]?.length > 0) {
           filterModel[fieldName] = {
             filterType: 'text',
@@ -429,8 +427,8 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
                                 betweenDate && betweenDate[`from_${field.fieldName}`]
                                   ? betweenDate[`from_${field.fieldName}`]
                                   : formValues[`from_${field.fieldName}`]
-                                    ? formValues[`from_${field.fieldName}`]
-                                    : new Date()
+                                  ? formValues[`from_${field.fieldName}`]
+                                  : new Date()
                               }
                             />
                           </Grid>
@@ -478,7 +476,14 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
           >
             {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
           </Button>
-          <Button disabled={isEmpty(formValues) ? true : false} onClick={handleApplyFilter} size="small" className="no-shadow" color="primary" variant="contained">
+          <Button
+            disabled={isEmpty(formValues) ? true : false}
+            onClick={handleApplyFilter}
+            size="small"
+            className="no-shadow"
+            color="primary"
+            variant="contained"
+          >
             Apply Now
           </Button>
         </CustomDialogFooter>
@@ -496,6 +501,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
           handleClose={() => {
             setIsSaveFilter({ open: false, data: null });
           }}
+          columns={coloums}
           resource={resource}
           handleSucess={() => {
             setIsSaveFilter({ open: false, data: null });
