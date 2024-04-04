@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useContext, Fragment } from 'react';
-import { Button, Dialog, TextField } from '@material-ui/core';
+import { Button, Dialog, TextField, Checkbox, FormControlLabel, Grid } from '@material-ui/core';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
@@ -13,18 +14,46 @@ const schema = object().shape({
     title: string().required('Please enter title'),
 });
 
-function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, filterData }) {
+const SORTING_OPTIONS = [
+    {
+        optionLabel:'Asc',
+        optionValue: 'asc',
+    },
+    {
+        optionLabel: 'Desc',
+        optionValue: 'desc'
+    }
+]
 
+function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, filterData, fieldsData }) {
     const toastConfig = useContext(CustomToastContext);
     const [loading, setLoading] = useState(false);
+    const [allFields,setAllFields] = useState([]);
+
+    useEffect(()=>{
+       const updatedFields = fieldsData?.map((field)=>{
+        return {
+            optionLabel: field?.fieldLabel,
+            optionValue: field?.fieldName,
+            order: field?.order,
+            id: field?._id
+        }
+       })
+       setAllFields(updatedFields);
+    },[])
 
     const handleSubmit = (values) => {
         const data = {
             title: values?.title,
+            default: values?.default ?? false,
+            sorting: values?.sorting ?? false,
+            sortBy: values?.sortBy ?? '',
+            orderBy: values?.orderBy ?? '',
             resource: resource,
             filterValue: filterValue
         };
         setLoading(true)
+
         if (filterData) {
             axiosInstance().put(`/user-resource-filter`, { ...data, _id: filterData?._id })
                 .then(({ data }) => {
@@ -75,7 +104,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
             showRequiredLabel={true}
         />
         <Formik
-            initialValues={{ title: filterData?.title || "" }}
+            initialValues={filterData}
             validateOnMount
             validationSchema={schema}
             onSubmit={handleSubmit}
@@ -97,6 +126,61 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                                     setFieldValue('title', e.target.value);
                                 }}
                             />
+                            <FormControlLabel
+                                control={
+                                   <Checkbox
+                                     name="default"
+                                     checked={values['default']}
+                                     onChange={(e) => {
+                                    setFieldValue('default', e.target.checked);
+                                    }}
+                                    color="primary"
+                                    />
+                                    }
+                                label="Default"
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                      name="sorting"
+                                      checked={values['sorting']}
+                                      onChange={(e) => {
+                                        setFieldValue('sorting', e.target.checked);
+                                      }}
+                                     color="primary"
+                                    />
+                                }
+                                label="Sorting"
+                            />
+                            
+                            {allFields && values['sorting'] && (
+                             <Grid container spacing={2}>
+                                <Grid item xs={6} >
+                               <Autocomplete
+                                   id="sort-by"
+                                   options={allFields}
+                                   renderInput={(params) => <TextField {...params} required variant="outlined" label="Sort By" margin="dense" />}
+                                   getOptionLabel={(option) => option?.optionLabel}
+                                   onChange={(e, val) => {
+                                   setFieldValue('sortBy', val);
+                                   }}
+                                   value={values["sortBy"]}
+                                />
+                                </Grid>
+                                <Grid item xs={6} >
+                                <Autocomplete
+                                   id="order-by"
+                                   options={SORTING_OPTIONS}
+                                   renderInput={(params) => <TextField {...params} required variant="outlined" label="Order By" margin="dense" />}
+                                   getOptionLabel={(option) => option?.optionLabel}
+                                   onChange={(e, val) => {
+                                      setFieldValue('orderBy', val);
+                                   }}
+                                   value={values["orderBy"]}
+                                 />
+                                 </Grid>
+                                </Grid>
+                                )}
                         </Form>
                     </CustomDialogContent>
                     <CustomDialogFooter>

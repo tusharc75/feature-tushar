@@ -21,19 +21,10 @@ import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import FormTypes from '../../Helpers/FormTypes';
 import { fetchFieldOptions } from '../utils';
 
-function GridFilter({
-  resource,
-  handleClose,
-  setSelectedFilter,
-  selectedFilter,
-  currentFomValue,
-  setCurrentFomValue,
-  customFilters,
-  dispatch,
-}) {
+function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const toastConfig = useContext(CustomToastContext);
   const [formValues, setFormValues] = useState({});
-  const [coloums, setColoums] = useState(null)
+  const [coloums, setColoums] = useState(null);
   const [userFilters, setUserFilters] = useState([]);
   const [selectedUserFilter, setSelectedUserFilter] = useState(null);
 
@@ -60,7 +51,7 @@ function GridFilter({
   const fetchAllColumns = async () => {
     try {
       const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
-      setColoums(columns)
+      setColoums(columns);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -71,6 +62,7 @@ function GridFilter({
       .get(`/user-resource-filter?resource=${resource}`)
       .then(({ data: { data } }) => {
         setUserFilters(data);
+        // console.log(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -481,6 +473,7 @@ function GridFilter({
           }}
           filterData={isSaveFilter.data}
           filterValue={formValues}
+          fieldsData = {coloums}
         />
       )}
     </MuiPickersUtilsProvider>
