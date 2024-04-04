@@ -83,7 +83,12 @@ const GridHeader = ({
           .then(({ data: { data } }) => {
             const defaultFilter = data.filter((d) => d.default)[0];
             setSelectedFilter(defaultFilter);
-            if (defaultFilter) dispatch({ type: 'filter', filters: createFilterModel(defaultFilter.filterValue, columns) });
+            const deepFilter = {
+              ...createFilterModel(defaultFilter.filterValue, columns)
+              // ...(defaultFilter.sortBy ? { sortBy: defaultFilter.sortBy } : {}),
+              // ...(defaultFilter.orderBy ? { orderBy: defaultFilter.orderBy } : {})
+            };
+            if (defaultFilter) dispatch({ type: 'filter', filters: deepFilter });
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -93,7 +98,7 @@ const GridHeader = ({
       }
     };
     applyDefaultFilter();
-  }, []);
+  }, [resource, dispatch, toastConfig]);
 
   return (
     <div className={`flex items-center justify-between my-[8px] gap-[8px] flex-wrap`}>
