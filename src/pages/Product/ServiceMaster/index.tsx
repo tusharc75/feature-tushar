@@ -207,7 +207,7 @@ const ServiceMaster = (props: Props) => {
       canDrag: false,
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'end' }}>
-          {permissions?.product?.isUpdate && serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency') && (
+          {permissions?.product?.isUpdate && row?.original?.type === 'Service' && serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency') && (
             <HtmlTooltip title="Edit Frequency">
               <IconButton
                 size="small"
