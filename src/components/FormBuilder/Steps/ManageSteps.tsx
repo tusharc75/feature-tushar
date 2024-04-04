@@ -56,7 +56,18 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
 
   useEffect(() => {
     if (data) {
-      setInitialValues(data);
+      setInitialValues({
+        stepName: data?.stepName,
+        multipleStepData: data?.multipleStepData || false,
+        stepDataRequired: data?.stepDataRequired || false,
+        showInPdf: data?.showInPdf || false,
+        linkWithMaterial: data?.linkWithMaterial || false,
+        linkedMaterial: data?.linkedMaterial || [],
+        linkWithResource: data?.linkWithResource || false,
+        linkResourceName: data?.linkResourceName || '',
+        linkResourceField: data?.linkResourceField || '',
+        readOnly: data?.readOnly || false
+      });
     } else {
       setInitialValues({
         stepName: '',
@@ -76,9 +87,6 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (data?._id) {
-      delete values?._id;
-      delete values?.order;
-      delete values?.fields;
       axiosInstance()
         .put(`/sa-formbuilder/steps/${resourceId}`, { ...values, stepId: data?._id })
         .then(({ data }) => {
