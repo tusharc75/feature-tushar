@@ -393,6 +393,7 @@ const CustomReactTable = ({
 
   useEffect(() => {
     if (sorting.length === 0 || getsorting.length) return;
+    if (sorting[0].sort === 'desc') return;
     setSorting([{ id: sorting[0].colId, desc: sorting[0].sort === 'desc' }]);
   }, [sorting, getsorting]);
 
