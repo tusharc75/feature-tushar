@@ -17,21 +17,36 @@ export default function UiPreference({ user1, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
   const [isUpdating, setUpdating] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [ui, setUi] = useState("All");
   const [openDialog,setOpenDialog]=useState(false);
   const [initialValues, setInitialValues] = useState({ data: [] });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
+  const [resources, setResources] = useState([]);
 
   const {
     state: { user }
   }: any = useData();
   
   useEffect(()=>{
-    setInitialValues({data:user.role.selectedEntity.resource.map(res=>{
-      return ({resource:res.name,type:"All"})
+    setInitialValues({data:resources.map(res=>{
+      return ({resource:res,type:"All"})
     })})
-  },[user.role.selectedEntity.resource])
+  },[resources])
+
+  useEffect(()=>{
+    fetchResourceData()
+  },[])
+
+  const fetchResourceData = () => {
+    axiosInstance()
+      .get(`/user/my-ui-preference`)
+      .then(({ data: { data } }) => {
+        setResources(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const updateUiPref = (values) => {
     setSubmitting(true);
@@ -104,7 +119,7 @@ export default function UiPreference({ user1, onSuccess }) {
               <>
                 <CustomDialogHeader
                   onClose={onClose}
-                  title={'Resources'}
+                  title={'By Default Records'}
                   isMinimized={!fullScreen}
                   onMinimizeMaximize={() => {
                     setFullScreen((prevState) => !prevState);
@@ -120,35 +135,31 @@ export default function UiPreference({ user1, onSuccess }) {
                         render={(arrayHelpers) => (
                           <>
                             {values?.data?.map((data, index) => (
-                              <Box mb={2} border={1} borderColor="var(--common-border-color)">
-                                <Box p={2} pt={1}>
-                                  <Grid container spacing={2}>
-                                    <Grid item md={4} lg={4} sm={6} xs={12}>{data.resource}</Grid>
-                                    <Grid item md={4} lg={4} sm={6} xs={12}>
-                                      <Autocomplete
-                                        value={data.type}
-                                        onChange={(e, val) => {
-                                          arrayHelpers.replace(index, {
-                                            ...values?.data[index],
-                                            ['type']: val
-                                          });
-                                        }}
-                                        options={uiOptions}
-                                        getOptionLabel={(option) => option}
-                                        renderInput={(params) => (
-                                          <TextField
-                                            {...params}
-                                            margin='none'
-                                            size='small'
-                                            label='By Default Record'
-                                            variant='outlined'
-                                          />
-                                        )}
-                                      />
-                                      </Grid>
-                                  </Grid>
-                                </Box>
-                              </Box>
+                              <tr>
+                                <td>{data.resource}</td>
+                                <td>
+                                  <Autocomplete
+                                  value={data.type}
+                                  onChange={(e, val) => {
+                                    arrayHelpers.replace(index, {
+                                      ...values?.data[index],
+                                      ['type']: val
+                                    });
+                                  }}
+                                  options={uiOptions}
+                                  getOptionLabel={(option) => option}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      margin='none'
+                                      size='small'
+                                      // label='By Default Record'
+                                      variant='outlined'
+                                    />
+                                  )}
+                                />
+                                </td>
+                              </tr>
                             ))}
                           </>
                         )}
