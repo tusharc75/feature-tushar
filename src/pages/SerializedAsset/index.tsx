@@ -320,7 +320,6 @@ const SerializedAsset = () => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-    console.log({ filterByIds, deepFilters });
 
     if (warehouse?.optionValue) {
       filterByIds.push({ field: 'warehouse', term: warehouse?.optionValue });
