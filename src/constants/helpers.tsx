@@ -2984,5 +2984,10 @@ export const cloneResourceData = (fromFields, toFields, data) => {
       }
     }
   })
+
+  delete result?.owner;
+  delete result?.pdfTemplate;
+  delete result?.status;
+
   return result;
 }
