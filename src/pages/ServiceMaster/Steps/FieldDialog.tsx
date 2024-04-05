@@ -11,9 +11,10 @@ import { uniq, map } from 'lodash';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 
-const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, reference = '', fields = null, notEditable = false }) => {
-
-  const { state: { user } }: any = useData();
+const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, reference = '', fields = null, notEditable = false }) => {
+  const {
+    state: { user }
+  }: any = useData();
 
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
@@ -21,7 +22,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
   const [section, setSection] = React.useState([]);
   const [deleteField, setDeleteField] = React.useState([]);
 
-  React.useEffect(() => {
+  const fetchFieldsData = async () => {
     if (reference === 'workOrder') {
       const _data = [];
       const _section = uniq(map(fields, 'sectionName'));
@@ -38,14 +39,15 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
           sectionName: 'New Section 1',
           srno: 1,
           field: []
-        })
+        });
       }
       setSection(_data);
     } else {
-      axiosInstance()
-        .get(`${serviceMaster.api}/fields/${serviceId}/${stepIds[0]}`)
-        .then(({ data: { data } }) => {
-          const _data = [];
+      const _data = [];
+      if (stepIds?.length) {
+        try {
+          const response = await axiosInstance().get(`${serviceMaster.api}/fields/${serviceIds[0]}/${stepIds[0]}`);
+          const data = response.data.data;
           const _section = uniq(map(data, 'sectionName'));
           _section.forEach((element: any, index: number) => {
             _data.push({
@@ -54,20 +56,24 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
               field: data?.filter((el: any) => el.sectionName === element)
             });
           });
-          if (_data?.length === 0) {
-            _data.push({
-              sectionId: parseInt((Math.random() * 100000).toString()),
-              sectionName: 'New Section 1',
-              srno: 1,
-              field: []
-            })
-          }
-          setSection(_data);
-        })
-        .catch((err) => {
+        } catch (err) {
           toastConfig.setToastConfig(err);
+        }
+      }
+      if (_data.length === 0) {
+        _data.push({
+          sectionId: parseInt((Math.random() * 100000).toString()),
+          sectionName: 'New Section 1',
+          srno: 1,
+          field: []
         });
+      }
+      setSection(_data);
     }
+  };
+
+  React.useEffect(() => {
+    fetchFieldsData();
   }, []);
 
   const handleSave = async () => {
@@ -88,16 +94,15 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
         data.push(_field_data);
       });
     });
-    const errorFields = []
-    const fieldNameMap: any = []
+    const errorFields = [];
+    const fieldNameMap: any = [];
     data?.forEach((e) => {
       if (fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)) {
-        errorFields.push(fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)?.fieldLabel)
+        errorFields.push(fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)?.fieldLabel);
+      } else {
+        fieldNameMap.push({ fieldName: e.fieldName, fieldLabel: e.fieldLabel });
       }
-      else {
-        fieldNameMap.push({ fieldName: e.fieldName, fieldLabel: e.fieldLabel })
-      }
-    })
+    });
     if (errorFields?.length) {
       toastConfig.setToastConfig({
         open: true,
@@ -110,7 +115,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
       handleSucess(data);
     } else {
       axiosInstance()
-        .post(`${serviceMaster.api}/fields/${serviceId}`, { stepIds: stepIds, fields: data })
+        .post(`${serviceMaster.api}/fields`, { serviceIds, stepIds, fields: data })
         .then(({ data }) => {
           handleSucess();
           toastConfig.setToastConfig({
@@ -190,7 +195,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
         <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
           Close
         </Button>
-        {reference === 'workOrder' && notEditable ? null :
+        {reference === 'workOrder' && notEditable ? null : (
           <Button
             variant="contained"
             size="small"
@@ -200,7 +205,8 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
             endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
           >
             Save
-          </Button>}
+          </Button>
+        )}
       </CustomDialogFooter>
     </Dialog>
   );
