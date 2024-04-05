@@ -35,7 +35,7 @@ const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
                 return ({
                     resource: e.resource,
                     resourceLabel: e.resourceLabel,
-                    type: userRecord[e.resource] || "All"
+                    type: userRecord[e.resource] || "My"
                 })
             })
         })

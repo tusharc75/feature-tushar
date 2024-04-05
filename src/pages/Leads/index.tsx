@@ -19,7 +19,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { gridLoadingTimeout, lead, prepareDataForGrid, processFieldName, sidebarResource } from '../../constants/helpers';
+import { getDefaultMyRecordType, gridLoadingTimeout, lead, prepareDataForGrid, processFieldName, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
@@ -45,7 +45,7 @@ const Leads = () => {
     state: { user, selectedEntity, permissions }
   }: any = useData();
   const { generateColumns } = useColumns();
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.lead));
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [okButtonLoading, setOkButtonLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -434,6 +434,7 @@ const Leads = () => {
     );
   };
 
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -514,9 +515,8 @@ const Leads = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${
-              deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
-            }?`}
+            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
