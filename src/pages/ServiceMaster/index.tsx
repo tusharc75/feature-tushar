@@ -17,6 +17,7 @@ import { gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource 
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageServiceMaster from './ManageServiceMaster';
+import FieldDialog from './Steps/FieldDialog';
 
 let searchTimeout;
 
@@ -34,6 +35,7 @@ const ServiceMaster = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const [openFieldDialog, setOpenFieldDialog] = useState({open : false, serviceIds: []});
 
   const [columns, setColumns] = useState(null);
 
@@ -207,6 +209,14 @@ const ServiceMaster = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
+        <MenuItem
+          disabled={!selectedRecords?.length}
+          onClick={() => {
+            setOpenFieldDialog({ open: true, serviceIds: selectedRecords?.map((e) => e._id) });
+          }}
+        >
+          Add Bulk Fields
+        </MenuItem>
       </>
     );
   };
@@ -318,6 +328,18 @@ const ServiceMaster = () => {
           onSuccess={() => {
             fetchData();
             setShowManageDialog({ open: false, isClone: false, idToClone: null });
+          }}
+        />
+      )}
+      {openFieldDialog.open && (
+        <FieldDialog
+          serviceIds={openFieldDialog.serviceIds}
+          handleClose={() => {
+            setOpenFieldDialog({ open: false, serviceIds: [] });
+          }}
+          handleSucess={() => {
+            setOpenFieldDialog({ open: false, serviceIds: [] });
+            fetchData();
           }}
         />
       )}
