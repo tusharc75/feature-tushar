@@ -474,7 +474,6 @@ const Leads = () => {
             setIsOpen({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.lead?.isCreate}
-          synchronizeType
         />
 
         {columns ? (

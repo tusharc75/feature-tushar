@@ -228,7 +228,6 @@ const TermsAndCondition = () => {
           }}
           isAddButtonVisible={permissions?.termsAndConditions?.isCreate}
           setQueryString={false}
-          synchronizeType={false}
         />
 
         {columns ? (

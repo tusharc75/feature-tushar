@@ -282,7 +282,6 @@ const SupportTicket = () => {
           }}
           isAddButtonVisible
           setQueryString
-          synchronizeType
         />
 
         {columns ? (

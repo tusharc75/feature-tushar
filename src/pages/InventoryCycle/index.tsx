@@ -248,7 +248,6 @@ const InventoryCycle = () => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={true}
-          // synchronizeType
         />
 
         {columns ? (

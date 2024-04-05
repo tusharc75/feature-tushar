@@ -254,7 +254,6 @@ const PadMaster = () => {
           }}
           isAddButtonVisible={permissions?.padMaster?.isCreate}
           setQueryString
-          synchronizeType
         />
 
         {columns ? (

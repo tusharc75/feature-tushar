@@ -369,7 +369,6 @@ const ProjectSales: FC = () => {
             setIsOpen({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.projectSales?.isCreate}
-          synchronizeType
         />
 
         {columns ? (
