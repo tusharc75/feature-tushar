@@ -392,9 +392,8 @@ const Steps = ({ serviceId }) => {
       )}
       {stepFieldsDialog.open && (
         <FieldDialog
-          serviceId={serviceId}
+          serviceIds={[serviceId]}
           stepIds={stepFieldsDialog.stepIds}
-          steps={[]}
           handleClose={() => {
             setStepFieldsDialog({ open: false, stepIds: [] });
           }}
