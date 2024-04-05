@@ -2444,6 +2444,12 @@ export const REPORT_LIST = [
     permission: 'serializedAsset',
     key: 'standardReport',
     type: 'inUsedSerializedAsset'
+  },
+  {
+    title: 'Fleet Report',
+    permission: 'deals',
+    key: 'standardReport',
+    type: 'dealUnitField'
   }
 ];
 
