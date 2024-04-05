@@ -19,7 +19,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { PLANNING_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { PLANNING_STATUS, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManagePlanning from './ManagePlanning';
@@ -55,9 +55,8 @@ const Planning = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showConverConfirmBox, setShowConverConfirmBox] = useState({ open: false, id: null, planningNumber: '' });
-  const { type }: any = queryString.parse(history.location.search);
   const [selectedPlanningType, setSelectedPlanningType] = useState(history.location.state);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.planning));
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {

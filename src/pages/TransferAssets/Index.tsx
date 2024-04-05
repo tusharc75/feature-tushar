@@ -18,7 +18,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferAsset } from 'src/constants/helpers';
+import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferAsset } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageTransferAsset from './ManageTransferAsset';
 
@@ -35,6 +35,9 @@ const TransferAsset = () => {
   ];
 
   let renderedFrom = camelCase(routes?.transferAsset.title);
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [showManageTransferAssetDialog, setShowManageTransferAssetDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -45,12 +48,9 @@ const TransferAsset = () => {
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const history = useHistory();
-  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  let { referenceId, referenceType }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.transferAsset));
 
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
   const { generateColumns } = useColumns();
 
   useEffect(() => {
