@@ -2991,3 +2991,24 @@ export const cloneResourceData = (fromFields, toFields, data) => {
 
   return result;
 }
+
+export const getDefaultMyRecordType = (user, resource) => {
+  const userByDefaultRecord = user?.uiPreference?.byDefaultRecord
+  if (isArray(userByDefaultRecord)) {
+    const byDefaultRecord = userByDefaultRecord?.find((e) => e.resource === resource)
+    if (byDefaultRecord) {
+      if (byDefaultRecord?.type === 'All') {
+        return 2
+      }
+      else {
+        return 1
+      }
+    }
+    else {
+      return 1;
+    }
+  }
+  else {
+    return 1;
+  }
+}

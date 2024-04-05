@@ -101,7 +101,7 @@ const ListingPageHeader = ({
 
   useEffect(() => {
     const { type }: any = queryString.parse(history.location.search);
-    if (synchronizeType && setSelectedType) setSelectedType(type ? parseInt(type) : 1);
+    if (type && setSelectedType) setSelectedType(parseInt(type));
 
     return history.listen((location) => {
       if (history.action === 'PUSH') {
@@ -181,9 +181,8 @@ const ListingPageHeader = ({
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
         <div
-          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${
-            !isLeftSidePresent && isMobile ? '-mt-2' : ''
-          }`}
+          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
+            }`}
         >
           {onSearch ? (
             <HideWhenOffline>
