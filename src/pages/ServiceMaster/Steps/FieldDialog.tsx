@@ -77,6 +77,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
   }, []);
 
   const handleSave = async () => {
+    setSubmitting(true);
     let data = [];
     let order = 0;
     section.forEach((_section) => {
@@ -109,10 +110,12 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
         type: 'error',
         message: `Field ${errorFields?.toString()} duplicate`
       });
+      setSubmitting(false);
       return false;
     }
     if (reference === 'workOrder') {
       handleSucess(data);
+      setSubmitting(false);
     } else {
       axiosInstance()
         .post(`${serviceMaster.api}/fields`, { serviceIds, stepIds, fields: data })
@@ -123,9 +126,11 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
             message: data.message,
             severity: 'success'
           });
+          setSubmitting(false);
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);
+          setSubmitting(false);
         });
     }
   };
