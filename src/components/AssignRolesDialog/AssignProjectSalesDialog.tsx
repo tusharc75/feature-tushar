@@ -167,7 +167,6 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
               isActionButtonVisible={false}
               isAddButtonVisible={false}
               setQueryString={false}
-              synchronizeType={false}
             />
 
             <List style={{ padding: 0 }}>

@@ -23,6 +23,7 @@ import routes from '../../components/Helpers/Routes';
 import {
   QUOTATION_TYPE,
   customerAccount,
+  getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
   quotation,
@@ -52,7 +53,7 @@ const Quotation = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.quotation));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -386,7 +387,6 @@ const Quotation = () => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.quotation?.isCreate}
-          synchronizeType
         />
 
         {columns ? (

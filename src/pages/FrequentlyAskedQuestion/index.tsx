@@ -252,7 +252,6 @@ const FrequentlyAskedQuestion = () => {
           }}
           isAddButtonVisible={permissions?.frequentlyAskedQuestion?.isCreate}
           setQueryString={false}
-          synchronizeType={false}
         />
 
         {columns ? (

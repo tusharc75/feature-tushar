@@ -23,6 +23,7 @@ import {
   customerAccount,
   customerContact,
   formatAmountWithCurrency,
+  getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
   quoteBuilder,
@@ -58,7 +59,7 @@ const QuoteBuilders = () => {
     state: { user, selectedEntity, permissions }
   }: any = useData();
   const { generateColumns } = useColumns();
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.quoteBuilder));
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
@@ -567,7 +568,6 @@ const QuoteBuilders = () => {
             setshowCreateQuoteDialog(true);
           }}
           isAddButtonVisible={permissions?.quoteBuilder?.isCreate}
-          synchronizeType={true}
         />
         {columns ? (
           <CustomReactTable

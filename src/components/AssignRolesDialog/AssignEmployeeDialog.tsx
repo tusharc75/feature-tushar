@@ -224,7 +224,6 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
               addButtonOnclick={handleSubmit}
               isAddButtonVisible
               setQueryString={false}
-              synchronizeType={false}
             />
 
             <CustomReactTable

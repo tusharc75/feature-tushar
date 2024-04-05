@@ -145,7 +145,6 @@ const AssignRolesDialog = ({ rolesDialogOpen, onSuccess, handleCloseDialog, user
               isActionButtonVisible={false}
               isAddButtonVisible={false}
               setQueryString={false}
-              synchronizeType={false}
             />
             <List style={{ padding: 0 }}>
               {roles.map((role) => (

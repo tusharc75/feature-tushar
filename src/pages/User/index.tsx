@@ -733,7 +733,6 @@ const User: FC = () => {
             }}
             isAddButtonVisible
             setQueryString={false}
-            synchronizeType={false}
           />
 
           {columns ? (

@@ -16,7 +16,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { customerAccount, gridLoadingTimeout, prepareDataForGrid, repairJob, sidebarResource, supplierAccount } from '../../constants/helpers';
+import { customerAccount, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, repairJob, sidebarResource, supplierAccount } from '../../constants/helpers';
 import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -44,8 +44,8 @@ const RepairJob = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  let { referenceId, referenceType }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.repairJob));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);

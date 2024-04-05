@@ -220,7 +220,6 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
             text: selectedRecords?.filter((e) => !e?.hideSelection).length > 0 ? `(${selectedRecords?.filter((e) => !e?.hideSelection).length})` : ''
           }}
           setQueryString={false}
-          synchronizeType={false}
         />
 
         {columns ? (

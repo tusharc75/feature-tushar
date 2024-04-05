@@ -17,7 +17,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { PRODUCTION_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, productionOrder, sidebarResource } from '../../constants/helpers';
+import { PRODUCTION_ORDER_STATUS, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, productionOrder, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageProductionOrder from './ManageProductionOrder';
@@ -40,7 +40,6 @@ const ProductionOrder = () => {
   ];
 
   const history = useHistory();
-  let { type }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -49,7 +48,7 @@ const ProductionOrder = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.productionOrder));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -286,7 +285,6 @@ const ProductionOrder = () => {
           }}
           isAddButtonVisible
           setQueryString
-          synchronizeType
         />
 
         {columns ? (
