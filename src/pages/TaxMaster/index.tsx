@@ -243,7 +243,6 @@ const TaxMaster = () => {
           }}
           isAddButtonVisible={permissions?.taxMaster?.isCreate}
           setQueryString={false}
-          synchronizeType={false}
         />
 
         {columns ? (

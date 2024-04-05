@@ -488,7 +488,6 @@ export default function Contact(props) {
           addButtonProps={{ disabled: !contactPermissions?.isCreate }}
           addButtonOnclick={clickCreateNew}
           isAddButtonVisible={true}
-          synchronizeType
         />
 
         {columns ? (

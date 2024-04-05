@@ -567,7 +567,6 @@ const QuoteBuilders = () => {
             setshowCreateQuoteDialog(true);
           }}
           isAddButtonVisible={permissions?.quoteBuilder?.isCreate}
-          synchronizeType={true}
         />
         {columns ? (
           <CustomReactTable

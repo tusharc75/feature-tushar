@@ -132,7 +132,6 @@ const AssignOpportunityDialog = ({ opportunityDialogOpen, onSuccess, handleClose
               isActionButtonVisible={false}
               isAddButtonVisible={false}
               setQueryString={false}
-              synchronizeType={false}
               searchValue={search}
               onSearch={handleSearch}
             />

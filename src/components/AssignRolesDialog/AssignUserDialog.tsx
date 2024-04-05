@@ -114,7 +114,6 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
               isActionButtonVisible={false}
               isAddButtonVisible={false}
               setQueryString={false}
-              synchronizeType={false}
             />
           </>
         ) : (

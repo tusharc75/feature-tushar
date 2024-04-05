@@ -402,7 +402,6 @@ const Email = () => {
             }}
             isAddButtonVisible={true}
             setQueryString
-            synchronizeType
           />
         )}
         {columns ? (

@@ -240,7 +240,6 @@ const TransferInventory = () => {
             setShowManageTransferInventoryDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.transferInventory?.isCreate}
-          // synchronizeType
         />
 
         {columns ? (
