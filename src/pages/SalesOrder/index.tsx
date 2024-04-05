@@ -17,7 +17,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { customerAccount, gridLoadingTimeout, prepareDataForGrid, salesOrder, sidebarResource, supplierAccount } from '../../constants/helpers';
+import { customerAccount, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, salesOrder, sidebarResource, supplierAccount } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
@@ -40,7 +40,6 @@ const SalesOrder = () => {
   ];
 
   const history = useHistory();
-  let { type }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -49,7 +48,7 @@ const SalesOrder = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.salesOrder));
   const [columns, setColumns] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -358,7 +357,6 @@ const SalesOrder = () => {
             setShowManageSalesOrderDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={true}
-          synchronizeType
         />
 
         {columns ? (
