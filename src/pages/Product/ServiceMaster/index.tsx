@@ -1,6 +1,7 @@
 import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -24,6 +25,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
 import { product, serviceMaster } from 'src/constants/helpers';
 import AssignStepDialog from './AssignStepDialog/Index';
+import FrequencyDialog from './FrequencyDialog';
 
 interface Props {
   renderedFrom: string;
@@ -43,6 +45,7 @@ const ServiceMaster = (props: Props) => {
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const [orignalData, setOrignalData] = useState([]);
+  const [frequencyDialog, setFrequencyDialog] = useState({ open: false, data: null });
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -147,6 +150,17 @@ const ServiceMaster = (props: Props) => {
         editable: permissions?.product?.isUpdate ? true : false,
         Cell: ({ row }) => (row.original?.qty ? <p>{row.original?.qty}</p> : <NoDataCell />)
       },
+      ...(serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency')
+        ? [
+            {
+              accessor: 'frequency',
+              Header: 'Frequency',
+              width: 150,
+              minWidth: 150,
+              Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
+            }
+          ]
+        : []),
       {
         accessor: 'stepName',
         Header: 'Step Name',
@@ -185,14 +199,27 @@ const ServiceMaster = (props: Props) => {
     columns.push({
       accessor: 'action',
       Header: 'Actions',
-      width: 130,
-      minWidth: 130,
+      width: 150,
+      minWidth: 150,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'end' }}>
+          {permissions?.product?.isUpdate && row?.original?.type === 'Service' && serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency') && (
+            <HtmlTooltip title="Edit Frequency">
+              <IconButton
+                size="small"
+                aria-label="Edit"
+                onClick={() => {
+                  setFrequencyDialog({ open: true, data: row?.original });
+                }}
+              >
+                <EditIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
           {permissions?.product?.isUpdate && row?.original?.type === 'Service' && (
             <HtmlTooltip title="Add Consumables">
               <IconButton
@@ -610,6 +637,19 @@ const ServiceMaster = (props: Props) => {
               };
             });
             handleAssignConsumable(data);
+          }}
+        />
+      )}
+      {frequencyDialog?.open && (
+        <FrequencyDialog
+          serviceData={frequencyDialog?.data}
+          productId={id}
+          onClose={() => {
+            setFrequencyDialog({ open: false, data: null });
+          }}
+          onSuccess={() => {
+            fetchData()
+            setFrequencyDialog({ open: false, data: null });
           }}
         />
       )}

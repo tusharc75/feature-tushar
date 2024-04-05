@@ -49,7 +49,7 @@ function reducer(state: TInitialState, action: TActios) {
       return {
         ...state,
         search: action.search,
-        loading: action.search.trim() !== '' ? action.loading ?? true : false
+        loading: false
       };
     case 'pageChange':
       return {
