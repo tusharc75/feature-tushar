@@ -20,7 +20,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid, rentalManagement, serializedAsset, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, rentalManagement, serializedAsset, sidebarResource } from 'src/constants/helpers';
 import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -50,14 +50,13 @@ const RentalManagement = () => {
   ];
 
   const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
   const [renderCount, setRenderCount] = useState(0);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.rentalManagement));
   const [columns, setColumns] = useState(null);
   const [showManageRentalManagementDialog, setShowManageRentalManagementDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [singleRentalManagementDelete, setSingleRentalManagementDelete] = useState({
