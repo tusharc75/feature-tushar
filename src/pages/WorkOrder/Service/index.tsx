@@ -603,6 +603,7 @@ const Service = ({
                         stepSubmitedData={stepSubmitedData}
                         minHeightClass={minHeightClass}
                         isMobile={mobScreen}
+                        fetchWorkOrderData={fetchWorkOrderData}
                       />
                     ) : (
                       <Quotation />

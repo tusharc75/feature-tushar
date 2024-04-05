@@ -122,7 +122,6 @@ export const quotationProcessSteps: stepInterface[] = [
 
 export const invoiceProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'manualEntry' },
   { name: 'Ready To Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
@@ -905,7 +904,8 @@ export const profileMenuItems = {
   notification: 2,
   setting: 3,
   users: 4,
-  securityPrivacy: 5
+  securityPrivacy: 5,
+  uiPreference: 6
 };
 
 export const SCHEDULE_FREQUENCY = ['Hourly', 'Daily', 'Weekly', 'Monthly'];
@@ -2963,4 +2963,52 @@ export const STEPS_STYLE = {
   list: 'List',
   step: 'Step',
   sideBar: 'Side Bar',
+}
+
+
+export const cloneResourceData = (fromFields, toFields, data) => {
+  const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName));
+  const result: any = {}
+  overlappingFields?.forEach((e) => {
+    if (data[e?.fieldName]) {
+      if (e?.lookup) {
+        if (e?.type === 'dropDown') {
+          result[e?.fieldName] = data[e?.fieldName]?.optionValue || ''
+        }
+        else {
+          result[e?.fieldName] = isArray(data[e?.fieldName]) ? data[e?.fieldName]?.map((m) => m.optionValue) : []
+        }
+      }
+      else {
+        result[e?.fieldName] = data[e?.fieldName]
+      }
+    }
+  })
+
+  delete result?.owner;
+  delete result?.pdfTemplate;
+  delete result?.status;
+
+  return result;
+}
+
+export const getDefaultMyRecordType = (user, resource) => {
+  const userByDefaultRecord = user?.uiPreference?.byDefaultRecord
+  if (isArray(userByDefaultRecord)) {
+    const byDefaultRecord = userByDefaultRecord?.find((e) => e.resource === resource)
+    if (byDefaultRecord) {
+      if (byDefaultRecord?.type === 'All') {
+        return 2
+      }
+      else {
+        return 1
+      }
+    }
+    else {
+      return 1;
+    }
+  }
+  else {
+    return 1;
+  }
 }

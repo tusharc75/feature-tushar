@@ -6,6 +6,7 @@ import ProfileSidebar from './components/ProfileSidebar';
 import { profileMenuItems } from '../../constants/helpers';
 import ManageProfile from './components/ManageProfile';
 import NotificationPreference from './components/NotificationPreference';
+import UiPreference from './components/UiPreference';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomContainer from '../../components/CustomContainer';
@@ -151,6 +152,8 @@ export default function ProfilePage(props) {
                 />
               ) : activeItem === profileMenuItems.notification ? (
                 <NotificationPreference notificationPreferenceData={notificationPreferenceData} user={userData._id} onSuccess={fetchUserData} />
+              ) : activeItem === profileMenuItems.uiPreference ? (
+                <UiPreference userData={userData} onSuccess={fetchUserData}/>
               ) : activeItem === profileMenuItems.setting ? (
                 <Paper className={classes.paper}>setting</Paper>
               ) : activeItem === profileMenuItems.users ? (

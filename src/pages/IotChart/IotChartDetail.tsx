@@ -7,7 +7,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import Analysis from './Analysis';
 import axiosInstance from 'src/axios/axiosInstance';
-import { ACTIVITY_RESOURCE, serializedAsset } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, serializedAsset, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import Current from './Current';
@@ -18,6 +18,7 @@ import Alarms from './Alarms';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { useData } from 'src/StateProvider/Provider';
 import ManageSendOutboundMessage from '../SendOutboundMessage/manageSendOutboundMessage';
+import Step from '../DynamicForm/Step';
 
 const IotChartDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,8 +34,10 @@ const IotChartDetail = () => {
   const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
   const [deviceTemplate, setDeviceTemplate] = useState(null);
   const [manageSendOutBoundMessageDialog, setManageSendOutBoundMessageDialog] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
+    fetchPolicy();
     fetchData();
   }, [assetId]);
 
@@ -64,6 +67,19 @@ const IotChartDetail = () => {
       } = await axiosInstance().get(`/iot-chart${serializedAsset.api}/${assetId}`);
       setAssetData(data);
       setDeviceTemplate(data?.deviceTemplates?._id);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -142,12 +158,29 @@ const IotChartDetail = () => {
             />
             <Tab className={'tabLayout'} value={3} label={<div className="d-flex align-items-center tab-font">Alarms</div>} {...a11yProps(3)} />
             <Tab className={'tabLayout'} value={4} label={<div className="d-flex align-items-center tab-font">Status</div>} {...a11yProps(4)} />
+            {resourceData && resourceData?.steps?.length && (
+              <Tab
+                className={'tabLayout'}
+                value={5}
+                label={<div className="d-flex align-items-center tab-font">Associations</div>}
+                {...a11yProps(5)}
+              />
+            )}
           </Tabs>
           {tabValue === 0 && <Current deviceTemplate={deviceTemplate} assetId={assetId} />}
           {/* {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />} */}
           {tabValue === 2 && <PerformanceAnalysis deviceTemplate={deviceTemplate} assetId={assetId} dataPoints={dataPoints} />}
           {tabValue === 3 && <Alarms deviceTemplate={deviceTemplate} assetId={assetId} />}
           {tabValue === 4 && <Status assetId={assetId} dataPoints={dataPoints} />}
+          {tabValue === 5 && (
+            <Step
+              resourceData={resourceData}
+              resourceId={assetId}
+              resource={sidebarResource.serializedAsset}
+              data={assetData}
+              allowedToEdit={permissions?.serializedAsset?.isUpdate}
+            />
+          )}
         </Box>
       ) : (
         <Box p={2} height={500}>

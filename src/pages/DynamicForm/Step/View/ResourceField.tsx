@@ -49,50 +49,54 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen
       );
       setColumns([
         ...newColumns,
-        {
-          accessor: 'action',
-          Header: 'Actions',
-          minWidth: 100,
-          width: 110,
-          sticky: 'right',
-          disableFilters: true,
-          disableSortBy: true,
-          canDrag: false,
-          Cell: ({ row }) => (
-            <>
-              <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                <span>
-                  <IconButton
-                    size="small"
-                    aria-label="Edit"
-                    disabled={allowedToEdit ? false : true}
-                    onClick={() => {
-                      setOpen({ open: true, id: row?.original?._id });
-                    }}
-                  >
-                    <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip>
+        ...(step?.readOnly
+          ? []
+          : [
+              {
+                accessor: 'action',
+                Header: 'Actions',
+                minWidth: 100,
+                width: 110,
+                sticky: 'right',
+                disableFilters: true,
+                disableSortBy: true,
+                canDrag: false,
+                Cell: ({ row }) => (
+                  <>
+                    <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Edit"
+                          disabled={allowedToEdit ? false : true}
+                          onClick={() => {
+                            setOpen({ open: true, id: row?.original?._id });
+                          }}
+                        >
+                          <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
 
-              <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
-                <span>
-                  <IconButton
-                    size="small"
-                    aria-label="Delete"
-                    disabled={allowedToEdit ? false : true}
-                    onClick={() => {
-                      setDeleteRecord(row?.original);
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip>
-            </>
-          )
-        }
+                    <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Delete"
+                          disabled={allowedToEdit ? false : true}
+                          onClick={() => {
+                            setDeleteRecord(row?.original);
+                            setShowDeleteConfirmBox(true);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                  </>
+                )
+              }
+            ])
       ]);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -201,7 +205,7 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen
 
   return (
     <>
-      {allowedToEdit && (
+      {allowedToEdit && !step?.readOnly && (
         <DetailsPageHeader
           isAddButtonVisible={false}
           isActionButtonVisible={true}
@@ -232,6 +236,8 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen
             renderedFrom={`${renderedFrom}_${step?.stepName}`}
             refreshGrid={fetchData}
             resource={step?.linkResourceName}
+            hideSelection={step?.readOnly}
+            hideAction={step?.readOnly}
           />
         ) : (
           <Box p={2} height={500}>

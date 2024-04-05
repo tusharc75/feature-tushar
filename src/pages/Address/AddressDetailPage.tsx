@@ -13,6 +13,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 
 const AddressDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -140,6 +141,26 @@ const AddressDetailPage = () => {
               </Grid>
             ) : (
               <DetailsPage data={addressData} fields={addressFields} />
+            )}
+            {(addressData?.latitude && addressData?.longitude) && (
+              <Box height={400} width={'100%'} borderRadius={4} overflow="hidden" marginTop={2}>
+                <GoogleMap
+                  options={{
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    streetViewControl: true,
+                    gestureHandling: 'cooperative'
+                  }}
+                  mapContainerStyle={{
+                    height: '100%',
+                    maxWidth: '600px',
+                    minWidth: '100%'
+                  }}
+                  center={new google.maps.LatLng(addressData?.latitude, addressData?.longitude)}
+                  zoom={15}
+                >
+                  <Marker position={new google.maps.LatLng(addressData?.latitude, addressData?.longitude)} />
+                </GoogleMap>
+              </Box>
             )}
           </Box>
         </Box>

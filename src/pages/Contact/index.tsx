@@ -51,7 +51,7 @@ export default function Contact(props) {
     contact: { contactApi, contactResource, contactPermission, contactRoute },
     account
   } = props;
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(2);
   const [contactId, setContactId] = useState('');
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });

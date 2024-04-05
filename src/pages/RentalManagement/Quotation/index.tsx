@@ -472,21 +472,21 @@ const RenderQuotationMessage = ({ quotationData, currentVersion, isMobile }) => 
       <Box display="flex" sx={{ flexBasis: isMobile ? '100%' : '', justifyContent: 'center' }}>
         {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
           <div className="d-flex align-items-center justify-content-center m-1 text-center">
-            <FcClock size={25} />
+            <FcClock size={25} className="text-[var(--primary)]" />
             <Typography style={{ color: '#00acc1', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
               Quotation has been sent to customer
             </Typography>
           </div>
         ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
           <div className="d-flex align-items-center justify-content-center m-1 text-center">
-            <FcOk size={25} />
+            <FcOk size={25} className="text-[var(--primary)]" />
             <Typography style={{ color: '#28a745', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
               Quotation has been accepted by customer
             </Typography>
           </div>
         ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
           <div className="d-flex align-items-center justify-content-center m-1 text-center">
-            <FcCancel size={25} />
+            <FcCancel size={25} className="text-[var(--primary)]" />
             <Typography style={{ color: '#dc3545', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
               Quotation has been rejected by customer
             </Typography>

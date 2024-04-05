@@ -9,7 +9,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, transferAsset, transferAssetSteps } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, TRANSFER_ASSET_STATUS, transferAsset, transferAssetSteps } from 'src/constants/helpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import queryString from 'query-string';
 import AssetsGrid from './AssetGrid';
@@ -56,6 +56,7 @@ const TransferAssetDetailPage = () => {
 
   const [stepNames, setStepNames] = useState([]);
   const [stepList, setStepList] = useState([]);
+  const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -211,6 +212,7 @@ const TransferAssetDetailPage = () => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
   };
+
   function a11yProps(index: any) {
     return {
       id: `main-tab-${index}`,
@@ -220,10 +222,15 @@ const TransferAssetDetailPage = () => {
 
   const updateTransferStatus = (status) => {
     axiosInstance()
-      .put(`${routes.transferAsset.path}/${id}/status`, {
-        status
+      .put(`${routes.transferAsset.path}/${id}/status`, { status })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchTransferAssetData()
       })
-      .then(() => fetchTransferAssetData())
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -238,10 +245,23 @@ const TransferAssetDetailPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
-              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                onClick={handleOpenUpdateDialog}
+                className={'btn-outline-v1'}>
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
               </Button>
             )}
+            {/* {permissions?.transferAsset?.isUpdate && allowedToEdit && transferAssetData?.status === TRANSFER_ASSET_STATUS.completed && (
+              <Button
+                variant={'contained'}
+                onClick={() => {
+                  setShowReopenConfirmation(true)
+                }}
+                className={'btn-outline-v1'}>
+                {'Re-Open'}
+              </Button>
+            )} */}
             <ActivityButton
               referenceId={transferAssetData?._id}
               resource={ACTIVITY_RESOURCE.transferAsset}
@@ -392,6 +412,20 @@ const TransferAssetDetailPage = () => {
             fetchTransferAssetData();
             setOpenUpdateDialog(false);
           }}
+        />
+      )}
+      {showReopenConfirmation && (
+        <ConfirmationDialog
+          open={showReopenConfirmation}
+          message={`Are you sure you want to re-open ?`}
+          onClose={() => {
+            setShowReopenConfirmation(false);
+          }}
+          onOk={() => {
+            updateTransferStatus(TRANSFER_ASSET_STATUS.inProgress)
+            setShowReopenConfirmation(false);
+          }}
+          okBtnLoading={false}
         />
       )}
     </Box>

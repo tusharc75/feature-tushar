@@ -3,6 +3,7 @@ import reducer, { initialState } from "./reducer";
 import axios from 'axios'
 import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "./actionTypes";
 import axiosInstance from "./../axios/axiosInstance";
+import { sidebarResource } from "src/constants/helpers";
 
 const StateContext = createContext(null);
 
@@ -42,7 +43,8 @@ export const Provider = ({ children }) => {
     else if (token && localStorage.getItem("userData")) {
       const data = JSON.parse(localStorage.getItem("userData"))
       data?.entity?.forEach((element) => {
-        element.resource = element.resource?.filter((e) => e.name === "Rental Management" || e.name === "Field Service Order")
+        element.resource = element.resource?.filter((e) => [sidebarResource.rentalManagement,
+        sidebarResource.fieldServiceOrder, sidebarResource.fieldServiceTechnician]?.includes(e.name))
       })
       dispatch({ type: SET_USER, payload: data });
       let prevSelectedEntity = localStorage.getItem("selectedEntity")

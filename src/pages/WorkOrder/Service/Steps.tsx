@@ -8,6 +8,7 @@ import {
   getChipColor,
   getObjKeys,
   getObjKeysWithValues,
+  repairJob,
   setFieldsInAscendingOrder,
   sidebarResource,
   WORK_ORDER_TYPE,
@@ -37,6 +38,8 @@ import DiagramDialog from '../Diagram/DiagramDialog';
 import ServiceFieldValueDialig from './ServiceFielValuedDialig';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import routes from 'src/components/Helpers/Routes';
+import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
 
 export interface StepDataInterface {
   _id: string;
@@ -190,7 +193,8 @@ const Steps = ({
   stepSubmitedData,
   handelClose = null,
   minHeightClass = null,
-  isMobile
+  isMobile,
+  fetchWorkOrderData = null
 }) => {
   const workOrderId = workOrderData?._id;
   const classes = useStyles();
@@ -235,6 +239,10 @@ const Steps = ({
   const [loadingStep, setLoadingStep] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState(false);
+  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState(false);
+  const [isSubmittingReceavingAsset, setIsSubmittingReceavingAsset] = useState(false);
 
   useEffect(() => {
     if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService.uniqueId) && selectedService.uniqueId) {
@@ -816,9 +824,74 @@ const Steps = ({
     isStepsAllowToPerform = true;
   }
 
+  const handleAddAssetInRepairJob = (data) => {
+    axiosInstance()
+      .put(`${repairJob.api}/add-assets-create-ticket`, {
+        repairJob: data?._id,
+        assets: workOrderData?.serializedAsset ? [workOrderData?.serializedAsset?.optionValue] : []
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowManageRepairJobDialog(false);
+        if (fetchWorkOrderData) fetchWorkOrderData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleReceiveAssetInRepairJob = () => {
+    setIsSubmittingReceavingAsset(true);
+    axiosInstance()
+      .put(`${repairJob.api}/receive-assets-complete`, { repairJob: workOrderData?.currentRepairJob?.optionValue || workOrderData?.currentRepairJob })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setRepairJobReceiveConfirmation(false);
+        setIsSubmittingReceavingAsset(false);
+        if (fetchWorkOrderData) fetchWorkOrderData();
+      })
+      .catch((error) => {
+        setIsSubmittingReceavingAsset(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const leftSideContents = useMemo(() => {
     return (
       <>
+        {resource === sidebarResource.workOrderTechnician &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          (workOrderData?.currentRepairJob ? (
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              onClick={(e) => {
+                setRepairJobReceiveConfirmation(true);
+              }}
+            >
+              Receive Asset From Supplier
+            </Button>
+          ) : (
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              onClick={(e) => {
+                setShowManageRepairJobDialog(true);
+              }}
+            >
+              {`Create ${routes?.repairJob.title}`}
+            </Button>
+          ))}
         {resource === sidebarResource.workOrderTechnician && workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
           <ThemeButton
             color="primary"
@@ -834,7 +907,7 @@ const Steps = ({
         )}
       </>
     );
-  }, [resource, workOrderData?.type]);
+  }, [resource, workOrderData?.type, workOrderData?.currentRepairJob]);
 
   const rightSideContents = useMemo(() => {
     return (
@@ -1781,6 +1854,30 @@ const Steps = ({
           handleClose={() => {
             setShowDrawing(false);
           }}
+        />
+      )}
+      {showManageRepairJobDialog && (
+        <ManageRepairJob
+          onClose={() => setShowManageRepairJobDialog(false)}
+          onSuccess={(data) => {
+            handleAddAssetInRepairJob(data);
+          }}
+          referenceType={sidebarResource.workOrderTechnician}
+          referenceData={{
+            warehouse: workOrderData?.warehouse?.optionValue,
+            workOrder: workOrderData?._id
+          }}
+        />
+      )}
+      {repairJobReceiveConfirmation && (
+        <ConfirmationDialog
+          open={repairJobReceiveConfirmation}
+          message={`Are you sure you want to receive asset?`}
+          onClose={() => {
+            setRepairJobReceiveConfirmation(false);
+          }}
+          onOk={handleReceiveAssetInRepairJob}
+          okBtnLoading={isSubmittingReceavingAsset}
         />
       )}
     </>

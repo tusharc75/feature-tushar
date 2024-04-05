@@ -7,7 +7,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
-import { prepareDataForGrid } from '../../constants/helpers';
+import { prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 
@@ -34,6 +34,10 @@ const Deals = () => {
     useEffect(() => {
         fetchDeals();
     }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, search]);
+
+    useEffect(() => {
+        dispatch({ type: 'filter', filters: { dealstage: { filter: ['Proposal Sent', 'Contract Signed', 'Renewal Sent', 'Renewal Signed'] } } });
+    }, []);
 
     const fetchGridColumns = async () => {
         axiosInstance().get(`/field?resource=Deals`).then(({ data: { data } }) => {
@@ -75,12 +79,12 @@ const Deals = () => {
     const fetchDeals = async () => {
         dispatch({ type: 'loading', loading: true });
         const queryString = getQueryString();
-        axiosInstance().get(`${routes.deals.path}${queryString}`).then(({ data: { data, count } }) => {
-            let rows = data?.map((u) => {
+        axiosInstance().get(`${routes.deals.path}${queryString}`).then(({ data: { data } }) => {
+            let rows = data?.data?.map((u) => {
                 let finalObject: any = prepareDataForGrid(u, user);
                 return finalObject;
             });
-            dispatch({ type: 'initialize', data: rows, count: count });
+            dispatch({ type: 'initialize', data: rows, count: data?.count });
             dispatch({ type: 'loading', loading: false });
         })
             .catch((err) => {
@@ -106,6 +110,7 @@ const Deals = () => {
                         refreshGrid={fetchDeals}
                         showOnlyShowFilteredRecordSwitch={false}
                         showFilters={true}
+                        resource={sidebarResource.deals}
                     />
                 ) : (
                     <Box p={2} height={500}>
