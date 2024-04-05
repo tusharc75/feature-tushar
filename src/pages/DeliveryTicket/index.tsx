@@ -17,7 +17,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { DELIVERY_FROM_TO_TYPE, deliveryTicket, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { DELIVERY_FROM_TO_TYPE, deliveryTicket, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import { findAll, findOne, objectStore } from '../../constants/indexdbhelper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -39,12 +39,12 @@ const DeliveryTicket = () => {
   let renderedFrom = camelCase(routes?.deliveryTicket.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
+  let { referenceId, referenceType }: any = queryString.parse(history.location.search);
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
   const { generateColumns } = useColumns();
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.deliveryTicket));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -355,7 +355,6 @@ const DeliveryTicket = () => {
             onSearch={handleSearch}
             isActionButtonVisible={false}
             isAddButtonVisible={false}
-            synchronizeType
           />
 
           {columns ? (

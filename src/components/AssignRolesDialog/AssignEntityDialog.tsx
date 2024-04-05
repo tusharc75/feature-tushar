@@ -367,7 +367,6 @@ const AssignEntityDialog = ({
                   isActionButtonVisible={false}
                   isAddButtonVisible={false}
                   setQueryString={false}
-                  synchronizeType={false}
                   searchValue={search}
                   onSearch={handleSearch}
                 />

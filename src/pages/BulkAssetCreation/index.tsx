@@ -18,7 +18,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { bulkAssetCreation, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { bulkAssetCreation, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 
@@ -34,6 +34,9 @@ const BulkAssetCreation = () => {
     }
   ];
   let renderedFrom = camelCase(routes.bulkAssetCreation?.title);
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -43,13 +46,10 @@ const BulkAssetCreation = () => {
   const [columns, setColumns] = useState(null);
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
+  let { referenceId, referenceType }: any = queryString.parse(history.location.search);
 
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.bulkAssetCreation));
 
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
   const { generateColumns } = useColumns();
 
   useEffect(() => {

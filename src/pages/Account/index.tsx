@@ -31,7 +31,7 @@ import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageAccountDialog from './ManageAccount/index';
@@ -71,7 +71,7 @@ export default function Account(props) {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource[accountResource]));
   const [accountId, setAccountId] = useState(null);
   const [openAddPlantsDialog, setOpenAddPlantsDialog] = React.useState(false);
   const [showEntityDialog, setShowEntityDialog] = useState(false);

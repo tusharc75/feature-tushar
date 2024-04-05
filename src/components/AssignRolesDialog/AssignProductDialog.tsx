@@ -252,7 +252,6 @@ const AssignProductDialog = ({
             }}
             isAddButtonVisible
             setQueryString={false}
-            synchronizeType={false}
           />
 
           {pricingCondition && (

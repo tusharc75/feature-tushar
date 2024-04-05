@@ -35,7 +35,6 @@ type ListingPageHeaderProps = {
   addButtonOnclick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   isAddButtonVisible: boolean;
   setQueryString?: boolean;
-  synchronizeType?: boolean;
 } & React.ComponentProps<'div'>;
 
 const ListingPageHeader = ({
@@ -61,7 +60,6 @@ const ListingPageHeader = ({
   isActionButtonVisible,
   actionButtonProps = {},
   actionMenuItems,
-  synchronizeType = false
 }: ListingPageHeaderProps) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const history = useHistory();

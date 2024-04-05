@@ -283,7 +283,6 @@ const AssignSerializedAssetDialog = ({
           }}
           isAddButtonVisible
           setQueryString={false}
-          synchronizeType={false}
         />
 
         {products.length > 0 && products.some((s) => s.qty < 0) ? (
