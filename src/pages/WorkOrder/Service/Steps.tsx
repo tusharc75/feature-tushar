@@ -11,6 +11,7 @@ import {
   repairJob,
   setFieldsInAscendingOrder,
   sidebarResource,
+  WORK_ORDER_STATUS,
   WORK_ORDER_TYPE,
   workOrder,
   WORKORDER_SERVICE_STATUS,
@@ -867,7 +868,9 @@ const Steps = ({
   const leftSideContents = useMemo(() => {
     return (
       <>
-        {resource === sidebarResource.workOrderTechnician &&
+        {permissions?.repairJob?.isCreate &&
+          resource === sidebarResource.workOrderTechnician &&
+          workOrderData?.status !== WORK_ORDER_STATUS.completed &&
           workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
           (workOrderData?.currentRepairJob ? (
             <Button
