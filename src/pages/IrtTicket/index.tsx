@@ -19,8 +19,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { cloneDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageIrtTicket from './ManageIrtTicket';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const IrtTicket = () => {
   const renderedFrom = camelCase(routes?.irtTicket.title);
@@ -49,13 +48,13 @@ const IrtTicket = () => {
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const fetchIrtTicketData = async () => {
+  const fetchIrtTicketData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
       let data: any = [],
         count;
-      const response: any = await axiosInstance().get(`/irt-ticket${queryString}`);
+      const response: any = await axiosInstance().get(`/irt-ticket${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.data?.count;
       let rows = data?.data.map((u) => {
@@ -105,16 +104,6 @@ const IrtTicket = () => {
     }
     return deepFilter;
   };
-
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchIrtTicketData();
-    }, millisec);
-  }, [search]);
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
@@ -196,8 +185,10 @@ const IrtTicket = () => {
   }, []);
 
   useEffect(() => {
-    fetchIrtTicketData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchIrtTicketData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const showConfirmBox = () => {
     if (selectedRecords?.find((d) => d.canDelete === false)) {

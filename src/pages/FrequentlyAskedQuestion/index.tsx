@@ -19,8 +19,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const FrequentlyAskedQuestion = () => {
   const renderedFrom = camelCase(routes?.frequentlyAskedQuestion.title);
@@ -48,13 +47,13 @@ const FrequentlyAskedQuestion = () => {
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const fetchFrequentlyAskedQuestionData = async () => {
+  const fetchFrequentlyAskedQuestionData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
       let data: any = [],
         count;
-      const response: any = await axiosInstance().get(`/frequently-asked-question${queryString}`);
+      const response: any = await axiosInstance().get(`/frequently-asked-question${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.data?.count;
       let rows = data?.data.map((u) => {
@@ -73,16 +72,6 @@ const FrequentlyAskedQuestion = () => {
       toastConfig.setToastConfig(error);
     }
   };
-
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchFrequentlyAskedQuestionData();
-    }, millisec);
-  }, [search]);
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
@@ -200,8 +189,10 @@ const FrequentlyAskedQuestion = () => {
   }, []);
 
   useEffect(() => {
-    fetchFrequentlyAskedQuestionData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchFrequentlyAskedQuestionData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const actionButtonMenuItems = () => {
     return (
