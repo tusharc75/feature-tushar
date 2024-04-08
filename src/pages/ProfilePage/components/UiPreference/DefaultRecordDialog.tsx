@@ -78,10 +78,6 @@ const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
             });
     };
 
-    const filteredData = initialValues?.data.filter(data => {
-        return data.resourceLabel.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-
     const handleSearch = (e) => {
         setSearchQuery(e.target.value)
     };
@@ -115,7 +111,9 @@ const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
                         <CustomDialogContent>
                             <Form>
                                 <Grid container justifyContent="flex-end">
-                                    <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={searchQuery}
+                                    <SearchBox onChange={(e)=>{
+                                        handleSearch(e)
+                                    }} className="terms_header_search_bar" width="300px" value={searchQuery}
                                     />
                                 </Grid>
                                 <TableContainer component={Paper}>
@@ -130,7 +128,7 @@ const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
                                             <FieldArray
                                                 name="data"
                                                 render={(arrayHelpers) => (
-                                                    filteredData?.map((data, index) => (
+                                                    values.data?.filter(d=>d.resourceLabel.toLowerCase().includes(searchQuery.toLowerCase())).map((data, index) => (
                                                         <TableRow key={data.resource}  >
                                                             <TableCell >
                                                                 {data.resourceLabel}
@@ -143,6 +141,13 @@ const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
                                                                             ...values?.data[index],
                                                                             ['type']: val
                                                                         });
+                                                                        const res=initialValues.data;
+                                                                        res.forEach(r=>{
+                                                                            if(r.resource===data.resource){
+                                                                                r.type=val;
+                                                                            }
+                                                                            })
+                                                                        setInitialValues({data:res})
                                                                     }}
                                                                     disableClearable
                                                                     options={recordOptions}
