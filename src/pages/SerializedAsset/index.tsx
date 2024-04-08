@@ -38,6 +38,7 @@ import {
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
+import moment from 'moment';
 
 const SerializedAsset = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -155,9 +156,13 @@ const SerializedAsset = () => {
                   )
                     ? COLOUR_MASTER.lostAssets.background
                     : (row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0) ||
-                      (row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status))
-                    ? COLOUR_MASTER.lostAssets.background
-                    : ''
+                      (row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status)) ||
+                      (row?.original?.availabilityDate && row?.original?.contractDate
+                        && new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime()
+                      ) ||
+                      (row?.original?.status === 'COMMITTED' && !row?.original?.contractDate)
+                      ? COLOUR_MASTER.lostAssets.background
+                      : ''
                 }}
               >
                 <Link
@@ -186,6 +191,21 @@ const SerializedAsset = () => {
                 {row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status) && (
                   <Box ml={1}>
                     <HtmlTooltip title="Manager Plus Status Conflict - Status is other than Active,Committed">
+                      <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                    </HtmlTooltip>
+                  </Box>
+                )}
+                {row?.original?.availabilityDate && row?.original?.contractDate
+                  && new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime() && (
+                    <Box ml={1}>
+                      <HtmlTooltip title="Unit is not ready for the deal">
+                        <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                      </HtmlTooltip>
+                    </Box>
+                  )}
+                {row?.original?.status === 'COMMITTED' && !row?.original?.contractDate && (
+                  <Box ml={1}>
+                    <HtmlTooltip title="Contract Start Date has not set">
                       <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
                     </HtmlTooltip>
                   </Box>
@@ -292,14 +312,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-            ![
-              ASSET_STATUS.new,
-              ASSET_STATUS.available,
-              ASSET_STATUS.lost,
-              ASSET_STATUS.customerPossession,
-              ASSET_STATUS.onPO,
-              ASSET_STATUS.scrap
-            ]?.includes(u?.status)
+              ![
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.lost,
+                ASSET_STATUS.customerPossession,
+                ASSET_STATUS.onPO,
+                ASSET_STATUS.scrap
+              ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -559,9 +579,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

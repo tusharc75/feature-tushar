@@ -18,8 +18,7 @@ import { editDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import ManageData from './ManageData';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const DataList = () => {
   const renderedFrom = camelCase(routes?.dataList.title);
@@ -106,24 +105,16 @@ const DataList = () => {
   };
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, showFilteredRecordsOnly]);
 
-  useEffect(() => {
-      fetchData();
-  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
-
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes?.dataList?.path}${queryString}`)
+      .get(`${routes?.dataList?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let count = data?.count
         let rows = data?.data?.map((u) => {
