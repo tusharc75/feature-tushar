@@ -75,7 +75,7 @@ const GridHeader = ({
   };
 
   useEffect(() => {
-    if (!resource) return;
+    if (!resource || !showFilters) return;
     const applyDefaultFilter = async () => {
       try {
         const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
