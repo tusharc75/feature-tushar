@@ -118,7 +118,7 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
                   <Accordion
                     expanded={expended[`${step?._id}`]}
                     className="accordOpportunity"
-                    onChange={() => setExpended({ ...expended, [`${step?._id}`]: !expended[`${step?._id}`] })}
+                    onChange={() => setExpended((prev) => ({ ...prev, [`${step?._id}`]: !prev[`${step?._id}`] }))}
                   >
                     <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
                       <Grid container className="pos_rel">
