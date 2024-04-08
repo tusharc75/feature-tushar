@@ -75,9 +75,11 @@ const GridHeader = ({
   };
 
   useEffect(() => {
+    if (!resource) return;
     const applyDefaultFilter = async () => {
       try {
         const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
+        if (columns.length === 0) return;
         axiosInstance()
           .get(`/user-resource-filter?resource=${resource}`)
           .then(({ data: { data } }) => {
