@@ -18,8 +18,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageServiceMaster from './ManageServiceMaster';
 import FieldDialog from './Steps/FieldDialog';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const ServiceMaster = () => {
   const renderedFrom = camelCase(routes?.serviceMaster.title);
@@ -35,7 +34,7 @@ const ServiceMaster = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [openFieldDialog, setOpenFieldDialog] = useState({open : false, serviceIds: []});
+  const [openFieldDialog, setOpenFieldDialog] = useState({ open: false, serviceIds: [] });
 
   const [columns, setColumns] = useState(null);
 
@@ -44,18 +43,10 @@ const ServiceMaster = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -140,11 +131,11 @@ const ServiceMaster = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${serviceMaster.api}${queryString}`)
+      .get(`${serviceMaster.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
@@ -248,9 +239,8 @@ const ServiceMaster = () => {
             },
             {
               title: 'Step Export',
-              api: `${serviceMaster.api}/steps/unknown/template?export=true${
-                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-              }`,
+              api: `${serviceMaster.api}/steps/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                }`,
               type: 'export'
             },
             {
@@ -265,9 +255,8 @@ const ServiceMaster = () => {
             },
             {
               title: 'Consumable Export',
-              api: `${serviceMaster.api}/product/unknown/template?export=true${
-                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-              }`,
+              api: `${serviceMaster.api}/product/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                }`,
               type: 'export'
             },
             {
