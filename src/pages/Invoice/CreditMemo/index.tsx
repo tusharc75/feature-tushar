@@ -140,8 +140,9 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     const query = `?filterById=${JSON.stringify([{ field: 'invoice', term: { $in: [invoiceData?._id] } }])}&&filterType=and`
     axiosInstance().get(`${routes?.creditMemo.path}${query}`)
       .then(({ data: { data } }) => {
-        let rows = data?.data?.map((u) => {
+        let rows = data?.data?.map((u, i) => {
           let finalObject = prepareDataForGrid(u, user);
+          finalObject['index'] = i + 1;
           return finalObject;
         })
 

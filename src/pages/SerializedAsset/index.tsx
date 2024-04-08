@@ -37,8 +37,8 @@ import {
 } from '../../constants/helpers';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
+import moment from 'moment';
 
 const SerializedAsset = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -76,29 +76,19 @@ const SerializedAsset = () => {
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [status, setStatus] = useState('');
-  const [renderCount, setRenderCount] = useState(0);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    if (renderCount > 0) {
-      fetchData();
-    } else setRenderCount((preCount) => preCount + 1);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     page,
+    search,
     limit,
     filters,
     sorting,
@@ -165,7 +155,14 @@ const SerializedAsset = () => {
                     row?.original?.status
                   )
                     ? COLOUR_MASTER.lostAssets.background
-                    : ''
+                    : (row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0) ||
+                      (row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status)) ||
+                      (row?.original?.availabilityDate && row?.original?.contractDate
+                        && new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime()
+                      ) ||
+                      (row?.original?.status === 'COMMITTED' && !row?.original?.contractDate)
+                      ? COLOUR_MASTER.lostAssets.background
+                      : ''
                 }}
               >
                 <Link
@@ -183,6 +180,36 @@ const SerializedAsset = () => {
                       </HtmlTooltip>
                     </Box>
                   ))}
+                {/* Below is brand Specifc for Estis */}
+                {row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0 && (
+                  <Box ml={1}>
+                    <HtmlTooltip title="Unit is assigned to multiple deals">
+                      <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                    </HtmlTooltip>
+                  </Box>
+                )}
+                {row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status) && (
+                  <Box ml={1}>
+                    <HtmlTooltip title="Manager Plus Status Conflict - Status is other than Active,Committed">
+                      <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                    </HtmlTooltip>
+                  </Box>
+                )}
+                {row?.original?.availabilityDate && row?.original?.contractDate
+                  && new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime() && (
+                    <Box ml={1}>
+                      <HtmlTooltip title="Unit is not ready for the deal">
+                        <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                      </HtmlTooltip>
+                    </Box>
+                  )}
+                {row?.original?.status === 'COMMITTED' && !row?.original?.contractDate && (
+                  <Box ml={1}>
+                    <HtmlTooltip title="Contract Start Date has not set">
+                      <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                    </HtmlTooltip>
+                  </Box>
+                )}
               </div>
             );
           }
@@ -273,12 +300,12 @@ const SerializedAsset = () => {
     )
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${serializedAsset.api}${queryString}`)
+      .get(`${serializedAsset.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
@@ -764,10 +791,13 @@ const ActionMenuItems = ({
               handleStatusChange(status);
             }}
             disabled={
-              selectedRecords?.filter((o) => [ASSET_STATUS.available, ASSET_STATUS.underReview].includes(o.status)
-                || (ASSET_STATUS.scrap === o.status && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand)
+              selectedRecords?.filter(
+                (o) =>
+                  [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(o.status) ||
+                  (ASSET_STATUS.scrap === o.status && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand)
               ).length === selectedRecords?.length
-                ? false : true
+                ? false
+                : true
             }
           >
             {`Status Change - ${status}`}
@@ -779,7 +809,11 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.needRepair);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.needRepair, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={
+              selectedRecords?.filter((o) => ![ASSET_STATUS.needRepair, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+                ? false
+                : true
+            }
           >
             {`Status Change - ${ASSET_STATUS.needRepair}`}
           </MenuItem>
@@ -787,7 +821,11 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.needRecert);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.needRecert, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={
+              selectedRecords?.filter((o) => ![ASSET_STATUS.needRecert, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+                ? false
+                : true
+            }
           >
             {`Status Change - ${ASSET_STATUS.needRecert}`}
           </MenuItem>
@@ -795,7 +833,11 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.scrap);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={
+              selectedRecords?.filter((o) => ![ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+                ? false
+                : true
+            }
           >
             {`Status Change - ${ASSET_STATUS.scrap}`}
           </MenuItem>

@@ -75,7 +75,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
       <div className="relative rounded-lg bg-[white] dark:bg-[var(--dark-primary)]">
         {/* Loader */}
         {loading || error ? (
-          <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px]">
+          <div className=" absolute inset-0 z-10 [backdrop-filter:blur(var(--table-loader-bg-blur,_2px))_!important] flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] ">
             <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
               {error ? (
                 <>
@@ -234,7 +234,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                 })
               : !loading &&
                 !error && (
-                  <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px] rounded-lg">
+                  <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] [backdrop-filter:blur(var(--table-loader-bg-blur,_2px))_!important] rounded-lg">
                     <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg">
                       <p>No Data Found.</p>
                     </div>

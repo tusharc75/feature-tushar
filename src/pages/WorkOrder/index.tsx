@@ -14,7 +14,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { WORK_ORDER_STATUS, WORK_ORDER_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
+import { WORK_ORDER_STATUS, WORK_ORDER_TYPE, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkOrder from './ManageWorkOrder';
@@ -38,12 +38,11 @@ const WorkOrder = () => {
   let renderedFrom = camelCase(routes?.workOrder.title);
 
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const history = useHistory();
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.workOrder));
   const { generateColumns } = useColumns();
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);

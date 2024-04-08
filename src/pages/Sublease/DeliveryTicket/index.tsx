@@ -14,6 +14,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import {
+  ASSET_STATUS,
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
@@ -143,37 +144,37 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
       },
       ...(ticketType === DELIVERY_TICKET_TYPE.receiving
         ? [
-            {
-              accessor: `ReceivingTicket`,
-              Header: `Receiving Ticket`,
-              width: 200,
-              Cell: ({ row }) =>
-                row?.original[`ReceivingTicket`] ? (
-                  <div style={{ display: 'flex' }}>
-                    <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
-                    <Box ml={1}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
-                        }}
-                      >
-                        <OpenInNewIcon fontSize="small" color="primary" />
-                      </IconButton>
-                    </Box>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            },
-            {
-              accessor: `ReceivingTicketStatus`,
-              Header: `Receiving Ticket Status`,
-              width: 200,
-              Cell: ({ row }) =>
-                row?.original[`ReceivingTicketStatus`] ? <p className="text-truncate">{row?.original[`ReceivingTicketStatus`]}</p> : <NoDataCell />
-            }
-          ]
+          {
+            accessor: `ReceivingTicket`,
+            Header: `Receiving Ticket`,
+            width: 200,
+            Cell: ({ row }) =>
+              row?.original[`ReceivingTicket`] ? (
+                <div style={{ display: 'flex' }}>
+                  <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          },
+          {
+            accessor: `ReceivingTicketStatus`,
+            Header: `Receiving Ticket Status`,
+            width: 200,
+            Cell: ({ row }) =>
+              row?.original[`ReceivingTicketStatus`] ? <p className="text-truncate">{row?.original[`ReceivingTicketStatus`]}</p> : <NoDataCell />
+          }
+        ]
         : [])
     ];
     coloum = [...coloum];
@@ -313,17 +314,23 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         if (e.hasOwnProperty('LoadingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
         }
-      } else if (action === subleaseActions.createReceivingTicket) {
+      }
+      else if (action === subleaseActions.createReceivingTicket) {
         if (e.hasOwnProperty('ReceivingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyCreated });
         }
-      } else if (action === subleaseActions.deliveredToWarehouse) {
+        else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
+          errorMessages.push({ index: e.index, message: subleaseMessage.receivingStatus });
+        }
+      }
+      else if (action === subleaseActions.deliveredToWarehouse) {
         if (!e.hasOwnProperty('LoadingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.loadingNotCreated });
         } else if (e?.LoadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyDelivered });
         }
-      } else if (action === subleaseActions.receivedToWarehouse) {
+      }
+      else if (action === subleaseActions.receivedToWarehouse) {
         if (!e.hasOwnProperty('ReceivingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingNotCreated });
         } else if (e?.ReceivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {

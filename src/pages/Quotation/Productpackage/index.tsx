@@ -333,6 +333,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
               ? parent?.packageDetail?.packageDescription || ''
               : parent.description;
       parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
+      parent.qtyDisplay = parent.qty;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;

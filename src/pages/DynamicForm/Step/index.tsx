@@ -64,7 +64,7 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
           </>
         ) : resourceData?.stepsStyle === STEPS_STYLE.sideBar ? (
           <>
-            <div className={`grid ${isExpanded ? 'grid-cols-[300px_1fr]' : 'grid-cols-[100px_1fr]'} gap-3 transition-[all] duration-300`}>
+            <div className={`grid ${isExpanded ? 'md:grid-cols-[300px_1fr]' : 'md:grid-cols-[100px_1fr]'} gap-3 transition-[all] duration-300`}>
               <div className={`overflow-x-hidden overflow-y-auto max-h-[calc(100vh-300px)] container-with-border p-[20px]`}>
                 <div className={`${isExpanded ? 'ml-auto' : 'mx-auto'} mb-2 max-w-fit`}>
                   <IconButton size="small" onClick={() => setIsExpanded((prev) => !prev)}>
@@ -97,7 +97,7 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
                   );
                 })}
               </div>
-              <div className={`overflow-x-hidden overflow-y-auto container-with-border max-h-[calc(100vh-300px)] p-[20px]`}>
+              <div className={`overflow-x-hidden overflow-y-auto container-with-border  p-[20px]`}>
                 <View
                   step={index}
                   allowedToEdit={allowedToEdit}
@@ -118,7 +118,7 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
                   <Accordion
                     expanded={expended[`${step?._id}`]}
                     className="accordOpportunity"
-                    onChange={() => setExpended({ ...expended, [`${step?._id}`]: !expended[`${step?._id}`] })}
+                    onChange={() => setExpended((prev) => ({ ...prev, [`${step?._id}`]: !prev[`${step?._id}`] }))}
                   >
                     <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
                       <Grid container className="pos_rel">

@@ -58,7 +58,7 @@ const ItemTypes = {
 };
 
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
-  const { onClose, columns, updateGridHiddenColumns, renderedFrom, dispatch, state, stickycolumns } = props;
+  const { onClose, columns = [], updateGridHiddenColumns, renderedFrom, dispatch, state, stickycolumns } = props;
   const { visibleColumns, columnOrder } = state;
   const isFirstRender = useRef(true);
 
@@ -72,14 +72,14 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [isMinimized, setMinimized] = React.useState(true);
 
   React.useEffect(() => {
-    const tempSortedColumns = columns
-      .filter((c) => !stickycolumns.stickyColumns.includes(c.id))
-      .toSorted((a: any, b: any) => {
+    const tempSortedColumns = [...columns]
+      .filter((c) => !stickycolumns?.stickyColumns?.includes(c.id))
+      ?.sort((a: any, b: any) => {
         return columnOrder?.indexOf(a.id) - columnOrder?.indexOf(b.id);
       });
 
-    setSortedColumns(tempSortedColumns);
-  }, [columnOrder, columns, stickycolumns.stickyColumns]);
+    if (tempSortedColumns) setSortedColumns(tempSortedColumns);
+  }, [columnOrder, columns, stickycolumns?.stickyColumns]);
 
   useEffect(() => {
     if (isFirstRender.current && sortedColumns.length > 0 && visibleColumns) {
@@ -360,14 +360,20 @@ const RenderListItem = (props: ItemProps) => {
   });
 
   const opacity = isDragging ? 0 : 1;
-  drag(drop(ref));
 
   return ['left', 'right']?.includes(column?.sticky) ? (
     <div className="d-none"></div>
   ) : (
-    <div ref={ref} style={{ opacity }} data-handler-accessor={handlerId}>
+    <div
+      ref={(target) => {
+        ref.current = target;
+        drop(target);
+      }}
+      style={{ opacity }}
+      data-handler-accessor={handlerId}
+    >
       <ListItem divider disableGutters disabled={column.disabled}>
-        <ListItemIcon className={`${classes.cursor} pl-2`}>
+        <ListItemIcon className={`${classes.cursor} pl-2`} ref={drag}>
           <DragHandle />
         </ListItemIcon>
         <ListItemText id={column.accessor} primary={column.header || startCase(column?.accessor)} />

@@ -10,7 +10,17 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, FIELD_TICKET_STATUS, GenerateResourceLineNumber, RESOURCE_LABEL, serviceMaster, setFieldsInAscendingOrder, sidebarResource } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  FIELD_TICKET_STATUS,
+  GenerateResourceLineNumber,
+  RESOURCE_LABEL,
+  cloneResourceData,
+  fieldServiceOrder,
+  serviceMaster,
+  setFieldsInAscendingOrder,
+  sidebarResource
+} from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
@@ -245,6 +255,29 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     return errors;
   }
 
+  const fetchFieldServiceOrderData = async (fieldServiceOrderId) => {
+
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
+    const fieldServiceOrderFields = response?.data?.data;
+
+    const { data: { data } } = await axiosInstance().get(`${fieldServiceOrder.api}/${fieldServiceOrderId}`);
+
+    const referenceData: any = cloneResourceData(fieldServiceOrderFields?.map((e) => e?.fieldData), initialData?.fields, data);
+
+    const tempInitialData = getObjKeys('', initialData?.fields);
+    tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(initialData?.fields);
+    tempInitialData['fieldServiceOrder'] = fieldServiceOrderId;
+    if (initialData?.fields?.some((e) => e.fieldName === 'currency')) {
+      tempInitialData['currency'] = user.user?.brandCurrency;
+    }
+    for (const key in referenceData) {
+      tempInitialData[key] = referenceData[key];
+    }
+    setInitialData({
+      fields: initialData?.fields,
+      values: tempInitialData
+    });
+  };
 
   return (
     <Dialog
@@ -261,8 +294,14 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       }}
     >
       {initialData.fields.length ? (
-        <Formik validate={validate} initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
-          {({ values, errors, setFieldValue, touched, submitForm }) => (
+        <Formik
+          validate={validate}
+          initialValues={initialData.values}
+          enableReinitialize={true}
+          validationSchema={yupSchema(initialData.fields)}
+          onSubmit={handleSubmit}
+        >
+          {({ values, errors, setFieldValue, touched, submitForm, setValues }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
@@ -315,6 +354,11 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                                             } else {
                                               setFieldValue('numberOfWells', 0);
                                             }
+                                          }
+                                        }
+                                        else if (name === 'fieldServiceOrder') {
+                                          if (value) {
+                                            fetchFieldServiceOrderData(value);
                                           }
                                         }
                                       }}

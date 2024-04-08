@@ -1,14 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import queryString from 'query-string';
-import { Box, Button, Dialog, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomContainer from 'src/components/CustomContainer';
-import { fieldServiceOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { GenerateResourceLineNumber, cloneResourceData, fieldServiceOrder, getObjKeys, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -16,7 +14,6 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import { cloneDisable } from 'src/constants/messageHelpers';
-import ManageFieldTicket from '../FieldTicket/ManageFieldTicket';
 import ViewFieldTicketDialog from './ViewFieldTicketDialog';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
@@ -27,34 +24,20 @@ let serchtimeTimeout;
 
 const FieldServiceTechnician = () => {
 
-  const types = [
-    {
-      key: `My ${routes.fieldServiceTechnician.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes.fieldServiceTechnician.title}`,
-      value: 2
-    }
-  ];
-
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.fieldServiceTechnician.title);
-  const history = useHistory();
   const {
     state: { user, permissions }
   }: any = useData();
-  const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [columns, setColumns] = useState(null);
-  const [openDialog, setOpenDialog] = useState({ open: false, data: null });
   const [viewFieldTicket, setViewFieldTicket] = useState({ open: false, data: null });
 
   const { generateColumns } = useColumns();
   const { isOffline } = useContext(CustomOfflineContext);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchColumns();
@@ -71,53 +54,90 @@ const FieldServiceTechnician = () => {
     try {
       insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
     } catch (e) { }
-    const newColumns = generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-  };
-
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Add"
-              disabled={permissions?.fieldTicket?.isCreate ? false : true}
-              onClick={() => {
-                setOpenDialog({ open: true, data: row?.original?.orignalData });
-              }}
-            >
-              <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-        <Box pl={1}>
-          <HtmlTooltip title={`View ${routes.fieldTicket.title}`}>
+    const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
+    newColumns.push({
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
             <span>
               <IconButton
                 size="small"
-                aria-label="View"
+                aria-label="Add"
+                disabled={permissions?.fieldTicket?.isCreate && !isSubmitting ? false : true}
                 onClick={() => {
-                  setViewFieldTicket({ open: true, data: row?.original?.orignalData });
+                  handleCreateFieldTicket(row?.original?.orignalData, data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData))
                 }}
               >
-                <VisibilityIcon fontSize="small" color="primary" />
+                <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && !isSubmitting ? 'primary' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
-        </Box>
-      </>
-    )
+          <Box pl={1}>
+            <HtmlTooltip title={`View ${routes.fieldTicket.title}`}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="View"
+                  onClick={() => {
+                    setViewFieldTicket({ open: true, data: row?.original?.orignalData });
+                  }}
+                >
+                  <VisibilityIcon fontSize="small" color="primary" />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </Box>
+        </>
+      )
+    })
+    setColumns(newColumns);
   };
+
+  const handleCreateFieldTicket = async (data, fieldServiceOrderFields) => {
+    setIsSubmitting(true)
+    var fieldTicketField: any = []
+    if (isOffline) {
+      fieldTicketField = await findOne(objectStore.resource, objectStore.fieldTicket);
+    } else {
+      const response = await axiosInstance().get('/field?resource=Field Ticket');
+      fieldTicketField = response?.data?.data;
+    }
+    fieldTicketField = fieldTicketField?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
+
+    const tempInitialData = getObjKeys('', fieldTicketField);
+    tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldTicketField);
+    const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, data)
+    for (const key in referenceData) {
+      tempInitialData[key] = referenceData[key];
+    }
+    if (fieldTicketField?.some((e) => e.fieldName === 'currency')) {
+      tempInitialData['currency'] = user.user?.brandCurrency;
+    }
+    tempInitialData['fieldServiceOrder'] = data?._id;
+
+    axiosInstance().post(`${routes.fieldTicket?.path}`, tempInitialData).then(({ data }) => {
+      window.open(`${routes.fieldTicket.path}/detail/${data?.data?._id}`)
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      setIsSubmitting(false)
+
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false)
+      });
+  }
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -131,7 +151,7 @@ const FieldServiceTechnician = () => {
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, showFilteredRecordsOnly, selectedType]);
+  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const fetchData = async () => {
     try {
@@ -157,7 +177,7 @@ const FieldServiceTechnician = () => {
       }, gridLoadingTimeout);
     } catch (e) {
       toastConfig.setToastConfig(e);
-    }  
+    }
   };
 
   const getQueryString = (isExport = false) => {
@@ -165,11 +185,6 @@ const FieldServiceTechnician = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
-
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -192,10 +207,6 @@ const FieldServiceTechnician = () => {
     return deepFilter;
   };
 
-  const onTypeChange = (event, type) => {
-    dispatch({ type: 'pageChange', page: 0 });
-  };
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -211,7 +222,6 @@ const FieldServiceTechnician = () => {
     });
     dispatch({ type: 'selection', selectedRecords: [] });
   };
-
 
   const handleRemoveoffline = async () => {
     await clearAll(objectStore.fieldServiceOrder);
@@ -236,10 +246,6 @@ const FieldServiceTechnician = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          toggleButtonList={types}
-          onToggle={onTypeChange}
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={true}
@@ -254,7 +260,7 @@ const FieldServiceTechnician = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-            resource={sidebarResource.fieldServiceTechnician}
+            resource={sidebarResource.fieldServiceOrder}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
           />
@@ -264,32 +270,6 @@ const FieldServiceTechnician = () => {
           </Box>
         )}
       </CustomContainer>
-      {openDialog.open && (
-        <ManageFieldTicket
-          id={null}
-          isClone={false}
-          onClose={() => setOpenDialog({ open: false, data: null })}
-          referenceData={{
-            fieldServiceOrder: openDialog?.data?._id,
-            warehouse: openDialog?.data?.warehouse?.optionValue || '',
-            wellName: openDialog?.data?.wellName?.optionValue || '',
-            wellNumber: openDialog?.data?.wellNumber?.map((m) => m.optionValue) || [],
-            numberOfWells: openDialog?.data?.numberOfWells,
-            estimateStartDate: openDialog?.data?.estimateStartDate || '',
-            estimateEndDate: openDialog?.data?.estimateEndDate || '',
-            customerAccount: openDialog?.data?.customerAccount?.optionValue || '',
-            billingAddress: openDialog?.data?.billingAddress?.optionValue || '',
-            shippingAddress: openDialog?.data?.shippingAddress?.optionValue || '',
-            taxCode: openDialog?.data?.taxCode?.optionValue || '',
-            pricingCondition: openDialog?.data?.pricingCondition?.optionValue || '',
-            collaborator: openDialog?.data?.collaborator?.map((m) => m.optionValue) || []
-          }}
-          onSuccess={() => {
-            setOpenDialog({ open: false, data: null });
-            fetchData();
-          }}
-        />
-      )}
       {viewFieldTicket.open && (
         <ViewFieldTicketDialog
           onClose={() => {

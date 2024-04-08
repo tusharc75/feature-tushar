@@ -18,7 +18,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
-import { fieldServiceOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { fieldServiceOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import ManageServiceOrder from './ManageServiceOrder';
 import { clearAll, deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
@@ -46,8 +46,7 @@ const ServiceOrder = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.fieldServiceOrder));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });

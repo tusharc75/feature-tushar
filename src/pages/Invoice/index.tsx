@@ -16,7 +16,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { customerAccount, gridLoadingTimeout, invoice, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
+import { customerAccount, getDefaultMyRecordType, gridLoadingTimeout, invoice, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
@@ -42,7 +42,7 @@ const Invoice = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.invoice));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -317,7 +317,6 @@ const Invoice = () => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.invoice?.isCreate}
-          synchronizeType
         />
         {columns ? (
           <CustomReactTable

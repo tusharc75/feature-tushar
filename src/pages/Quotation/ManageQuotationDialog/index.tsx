@@ -87,7 +87,11 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
             setSalesDetails(data);
             if (data?.canEdit === false) {
               fieldsDataForUpdate?.forEach((e) => {
-                if (['customerAccount', 'warehouse', 'type']?.includes(e?.fieldName)) {
+                if (['warehouse', 'type']?.includes(e?.fieldName)) {
+                  e.isUneditable = true;
+                }
+                if (['customerAccount']?.includes(e?.fieldName) &&
+                  [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(data?.status)) {
                   e.isUneditable = true;
                 }
               });
