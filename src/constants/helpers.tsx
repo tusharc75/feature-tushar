@@ -364,6 +364,7 @@ export const sidebarResource = {
   dataLists: 'Data Lists',
   assetsReceiving: 'Assets Receiving',
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
+  units: 'Units',
 };
 
 export const primaryFields = {

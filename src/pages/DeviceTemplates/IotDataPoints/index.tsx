@@ -17,8 +17,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import ManageIotDataPoints from 'src/pages/IotDataPoints/ManageIotDataPoints';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 export default function IotDataPoints({ deviceTemplate }) {
   const renderedFrom = `${camelCase(routes?.iotDataPoints.title)}_iotDataPoints`;
@@ -41,8 +40,10 @@ export default function IotDataPoints({ deviceTemplate }) {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -121,21 +122,11 @@ export default function IotDataPoints({ deviceTemplate }) {
     )
   };
 
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes?.iotDataPoints?.path}${queryString}`)
+      .get(`${routes?.iotDataPoints?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
