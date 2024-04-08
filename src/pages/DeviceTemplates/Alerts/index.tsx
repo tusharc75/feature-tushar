@@ -17,8 +17,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import ManageDeviceTemplateAlert from 'src/pages/DeviceTemplatesAlert/ManageDeviceTemplateAlert';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 export default function Alerts({ deviceTemplate }) {
   const renderedFrom = `${camelCase(routes?.deviceTemplateAlert.title)}_alerts`;
@@ -40,18 +39,10 @@ export default function Alerts({ deviceTemplate }) {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
-
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -131,12 +122,12 @@ export default function Alerts({ deviceTemplate }) {
     )
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes?.deviceTemplateAlert?.path}${queryString}`)
+      .get(`${routes?.deviceTemplateAlert?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data }) => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
