@@ -2320,6 +2320,12 @@ export const REPORT_LIST = [
     type: 'dynamic'
   },
   {
+    title: sidebarResource.quotation,
+    permission: 'quotation',
+    key: 'quotation',
+    type: 'dynamic'
+  },
+  {
     title: sidebarResource.salesOrder,
     permission: 'salesOrder',
     key: 'salesOrder',
@@ -2450,12 +2456,6 @@ export const REPORT_LIST = [
     permission: 'deals',
     key: 'standardReport',
     type: 'dealUnitField'
-  },
-  {
-    title: sidebarResource.quotation,
-    permission: 'quotation',
-    key: 'quotation',
-    type: 'dynamic'
   }
 ];
 
