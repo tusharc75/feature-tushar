@@ -88,7 +88,6 @@ const FieldTicketDetail = () => {
         const response = await axiosInstance().get(`${routes.fieldTicket.path}/${id}`);
         data = response?.data?.data;
       }
-      setFieldTicketData(data);
       if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.readyToInvoice, FIELD_TICKET_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(fieldTicketSteps?.length - 1);
       } else {
@@ -100,6 +99,7 @@ const FieldTicketDetail = () => {
       }
       setAllowedToEdit(permissions?.fieldTicket?.isUpdate && isAllowedToEdit);
       setAllowedToDelete(permissions?.fieldTicket?.isDelete && data.owner.optionValue === user?.user?._id && data?.canDelete);
+      setFieldTicketData(data);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
