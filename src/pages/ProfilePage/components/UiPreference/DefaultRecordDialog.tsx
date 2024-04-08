@@ -11,6 +11,8 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isArray } from 'lodash';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import Grid from '@material-ui/core/Grid';
 
 const recordOptions: string[] = ["All", "My"];
 
@@ -21,6 +23,7 @@ const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [resources, setResources] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const userByDefaultRecord = userData?.uiPreference?.byDefaultRecord
@@ -75,6 +78,13 @@ const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
             });
     };
 
+    const filteredData = initialValues?.data.filter(data => {
+        return data.resourceLabel.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+
+    const handleSearch = (e) => {
+        setSearchQuery(e.target.value)
+    };
     return (<Dialog
         maxWidth="md"
         fullScreen={fullScreen}
@@ -104,6 +114,10 @@ const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
                         />
                         <CustomDialogContent>
                             <Form>
+                                <Grid container justifyContent="flex-end">
+                                    <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={searchQuery}
+                                    />
+                                </Grid>
                                 <TableContainer component={Paper}>
                                     <Table aria-label="simple table">
                                         <TableHead>
@@ -116,7 +130,7 @@ const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
                                             <FieldArray
                                                 name="data"
                                                 render={(arrayHelpers) => (
-                                                    values?.data?.map((data, index) => (
+                                                    filteredData?.map((data, index) => (
                                                         <TableRow key={data.resource}  >
                                                             <TableCell >
                                                                 {data.resourceLabel}
