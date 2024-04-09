@@ -16,8 +16,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, termsAndCondit
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageTermsAndCondition from './ManageTermsAndCondition';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const TermsAndCondition = () => {
   const renderedFrom = camelCase(routes?.termsAndConditions.title);
@@ -43,18 +42,10 @@ const TermsAndCondition = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -139,12 +130,12 @@ const TermsAndCondition = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${termsAndCondition.api}${queryString}`)
+      .get(`${termsAndCondition.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {

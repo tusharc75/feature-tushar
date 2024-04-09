@@ -17,8 +17,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageTriggerNotificationMaster from './ManageTriggerNotificationMaster';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const TriggerNotificationMaster = () => {
   const renderedFrom = camelCase(routes?.triggerNotificationMaster.title);
@@ -97,23 +96,13 @@ const TriggerNotificationMaster = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      let millisec = Object.keys(search).length > 0 ? 600 : 5;
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-      searchTimeout = setTimeout(() => {
-        fetchData();
-      }, millisec);
-    }
-  }, [search]);
-
-  useEffect(() => {
-    if (renderCount > 0) {
-      fetchData();
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
     } else {
       setRenderCount(renderCount + 1);
     }
-  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
+  }, [search, page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -143,12 +132,12 @@ const TriggerNotificationMaster = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes?.triggerNotificationMaster?.path}${queryString}`)
+      .get(`${routes?.triggerNotificationMaster?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
