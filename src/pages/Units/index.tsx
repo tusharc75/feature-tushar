@@ -344,7 +344,7 @@ const Units = () => {
           {checkedFilter && (
             <div className={`px-2 py-2 [border-top:1px_solid_var(--common-border-color)]`}>
               <ThemeButton iconForMobile={<Close />} startIcon={<Close />} onClick={() => setCheckedFilter(null)}>
-                Clear all filter
+                Clear all filters
               </ThemeButton>
             </div>
           )}
