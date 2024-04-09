@@ -18,8 +18,7 @@ import { getResourceLabel, gridLoadingTimeout, prepareDataForGrid } from '../../
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageDynamicForm from './ManageDynamicForm';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const DynamicForm = () => {
   const { route } = useParams();
@@ -53,18 +52,10 @@ const DynamicForm = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -149,7 +140,7 @@ const DynamicForm = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
@@ -157,7 +148,8 @@ const DynamicForm = () => {
       .get(`dynamic-form/${queryString}`, {
         headers: {
           Resource: resource
-        }
+        },
+        cancelToken: cancelTokenSource?.token
       })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {

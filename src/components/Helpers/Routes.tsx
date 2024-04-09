@@ -1207,7 +1207,15 @@ const routes = {
   serializedAssetStatusChangeRequest: {
     title: storedRoutes && storedRoutes.serializedAssetStatusChangeRequest && storedRoutes.serializedAssetStatusChangeRequest.title ? storedRoutes.serializedAssetStatusChangeRequest?.title : RESOURCE_LABEL.serializedAssetStatusChangeRequest,
     path: '/serialized-asset-status-change-request'
-  }
+  },
+  units: {
+    title: storedRoutes && storedRoutes.units && storedRoutes.units.title ? storedRoutes.units?.title : sidebarResource.units,
+    path: '/units'
+  },
+  unitDetail: {
+    title: storedRoutes && storedRoutes.units && storedRoutes.units.title ? storedRoutes.units?.title : sidebarResource.units,
+    path: '/units/detail'
+  },
 };
 
 export default routes;

@@ -256,6 +256,8 @@ import DataListDetail from './pages/DataList/dataListdetail';
 import Deals from './pages/Deals';
 import DealDetail from './pages/Deals/dealDetail';
 import SerializedAssetStatusChangeRequest from './pages/SerializedAsset/SerializedAssetStatusChangeRequest';
+import Units from './pages/Units';
+import UnitDetail from './pages/Units/UnitDetail';
 
 
 var notificationInterval: any = null;
@@ -1131,6 +1133,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.serializedAssetStatusChangeRequest.path}`}>
               <SerializedAssetStatusChangeRequest />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.units.path}>
+              <Units />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.unitDetail.path}/:id`}>
+              <UnitDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
