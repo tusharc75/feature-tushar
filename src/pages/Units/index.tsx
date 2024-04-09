@@ -32,7 +32,7 @@ const getWarningList = (row?: any) => {
       icon,
       title: 'Unit is assigned to multiple deals',
       label: 'Unit is assigned to multiple deals',
-      isVIsible: row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0
+      isVisible: row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0
     },
     {
       key: 2,
@@ -40,7 +40,7 @@ const getWarningList = (row?: any) => {
       icon,
       label: 'Manager Plus Status Conflict',
       title: 'Manager Plus Status Conflict - Status is other than Active,Committed',
-      isVIsible: row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status)
+      isVisible: row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status)
     },
     {
       key: 3,
@@ -48,7 +48,7 @@ const getWarningList = (row?: any) => {
       icon,
       title: 'Unit is not ready for the deal',
       label: 'Unit is not ready for the deal',
-      isVIsible:
+      isVisible:
         row?.original?.availabilityDate &&
         row?.original?.contractDate &&
         new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime()
@@ -59,7 +59,7 @@ const getWarningList = (row?: any) => {
       icon,
       title: 'Contract Start Date has not set',
       label: 'Contract Start Date has not set',
-      isVIsible: row?.original?.status === 'COMMITTED' && !row?.original?.contractDate
+      isVisible: row?.original?.status === 'COMMITTED' && !row?.original?.contractDate
     }
   ];
 
@@ -104,7 +104,7 @@ const Units = () => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, checkedFilter]);
 
   const getWarnings = useCallback((row: any) => {
-    const warningList = getWarningList(row).filter((d) => d.isVIsible);
+    const warningList = getWarningList(row).filter((d) => d.isVisible);
     return warningList;
   }, []);
 
@@ -128,10 +128,10 @@ const Units = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                        <Box ml={1}>
-                          <HtmlTooltip title={w.title}>{w.icon}</HtmlTooltip>
-                        </Box>
-                      ))
+                      <Box ml={1}>
+                        <HtmlTooltip title={w.title}>{w.icon}</HtmlTooltip>
+                      </Box>
+                    ))
                     : null}
                 </div>
               );
