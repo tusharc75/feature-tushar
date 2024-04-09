@@ -155,14 +155,7 @@ const SerializedAsset = () => {
                     row?.original?.status
                   )
                     ? COLOUR_MASTER.lostAssets.background
-                    : (row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0) ||
-                      (row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status)) ||
-                      (row?.original?.availabilityDate && row?.original?.contractDate
-                        && new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime()
-                      ) ||
-                      (row?.original?.status === 'COMMITTED' && !row?.original?.contractDate)
-                      ? COLOUR_MASTER.lostAssets.background
-                      : ''
+                    : ''
                 }}
               >
                 <Link
@@ -180,36 +173,6 @@ const SerializedAsset = () => {
                       </HtmlTooltip>
                     </Box>
                   ))}
-                {/* Below is brand Specifc for Estis */}
-                {row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0 && (
-                  <Box ml={1}>
-                    <HtmlTooltip title="Unit is assigned to multiple deals">
-                      <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
-                    </HtmlTooltip>
-                  </Box>
-                )}
-                {row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status) && (
-                  <Box ml={1}>
-                    <HtmlTooltip title="Manager Plus Status Conflict - Status is other than Active,Committed">
-                      <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
-                    </HtmlTooltip>
-                  </Box>
-                )}
-                {row?.original?.availabilityDate && row?.original?.contractDate
-                  && new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime() && (
-                    <Box ml={1}>
-                      <HtmlTooltip title="Unit is not ready for the deal">
-                        <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
-                      </HtmlTooltip>
-                    </Box>
-                  )}
-                {row?.original?.status === 'COMMITTED' && !row?.original?.contractDate && (
-                  <Box ml={1}>
-                    <HtmlTooltip title="Contract Start Date has not set">
-                      <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
-                    </HtmlTooltip>
-                  </Box>
-                )}
               </div>
             );
           }
