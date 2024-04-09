@@ -13,6 +13,7 @@ import routes from './../../components/Helpers/Routes';
 import { Link, useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import WarningIcon from '@material-ui/icons/Warning';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 
 const Deals = () => {
@@ -21,10 +22,10 @@ const Deals = () => {
     const toastConfig = useContext(CustomToastContext);
 
     const { state, dispatch } = useTableReducer();
-    const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+    const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, rowCount } = state;
 
     const {
-        state: { user, selectedEntity }
+        state: { user, selectedEntity, permissions }
     }: any = useData();
 
     const [columns, setColumns] = useState(null);
@@ -121,6 +122,22 @@ const Deals = () => {
         <section className="main-container-v1">
             <div className="headerbox-v1">
                 <CustomBreadCrumbs routes={[routes.deals]} />
+                <ImportExportLinks
+                    permissions={permissions?.deals}
+                    module={routes.deals.title}
+                    api={'/deals'}
+                    afterImportCompleted={() => {
+                        fetchDeals();
+                    }}
+                    isExportAllOrSomeFeature={true}
+                    total={rowCount}
+                    recordsToExport={selectedRecords?.length}
+                    ids={selectedRecords?.map((obj) => obj._id)}
+                    onExportToExcelSuccess={() => {
+                        fetchDeals();
+                    }}
+                    additionalParams={getQueryString(true)}
+                />
             </div>
             <CustomContainer>
                 {columns ? (

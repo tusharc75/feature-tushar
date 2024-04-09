@@ -21,8 +21,7 @@ import routes from './../../components/Helpers/Routes';
 import CardView from './CardView';
 import ManageTrailerMaster from './ManageTrailerMaster';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const TrailerMaster = () => {
   const renderedFrom = camelCase(routes?.trailerMaster.title);
@@ -49,18 +48,10 @@ const TrailerMaster = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -145,12 +136,12 @@ const TrailerMaster = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes?.trailerMaster.path}${queryString}`)
+      .get(`${routes?.trailerMaster.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         setCardViewData(data?.data);
         let count = data?.count;
