@@ -26,8 +26,7 @@ import HistoryDialog from './History/historyDialog';
 import SerialNumberDialog from './SerialNumber/SerialNumberDialog';
 import SettingsDialog from './SettingsDialog';
 import SoftHoldDialog from './SoftHold';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const InventoryProduct = () => {
   const renderedFrom = camelCase(routes?.productInventory.title);
@@ -67,19 +66,14 @@ const InventoryProduct = () => {
     getPlants();
   }, [selectedEntity]);
 
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
+
 
   useEffect(() => {
-    fetchData();
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [
+    search,
     plantId,
     storageLocationId,
     page,
@@ -301,12 +295,12 @@ const InventoryProduct = () => {
     )
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     if (plantId) {
       const queryString = getQueryString();
       axiosInstance()
-        .get(`${productInventory.api}${queryString}`)
+        .get(`${productInventory.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data }) => {
           let rows = data.data?.map((u) => {
             let finalObject = prepareDataForGrid(u);

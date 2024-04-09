@@ -365,6 +365,7 @@ export const sidebarResource = {
   assetsReceiving: 'Assets Receiving',
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
   units: 'Units',
+  workOrderPlanning: 'Work Order Planning',
 };
 
 export const primaryFields = {
@@ -2456,7 +2457,7 @@ export const REPORT_LIST = [
     title: 'Fleet Report',
     permission: 'deals',
     key: 'standardReport',
-    type: 'dealUnitField'
+    type: 'fleetReport'
   }
 ];
 

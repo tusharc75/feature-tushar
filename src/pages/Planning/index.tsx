@@ -23,7 +23,7 @@ import { PLANNING_STATUS, getDefaultMyRecordType, gridLoadingTimeout, prepareDat
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManagePlanning from './ManagePlanning';
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const Planning = () => {
   const renderedFrom = camelCase(routes?.planning.title);
@@ -64,18 +64,10 @@ const Planning = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    fetchData();
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -206,12 +198,12 @@ const Planning = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes?.planning?.path}${queryString}`)
+      .get(`${routes?.planning?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {

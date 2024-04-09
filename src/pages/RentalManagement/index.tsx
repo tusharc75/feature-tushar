@@ -27,8 +27,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const RentalManagement = () => {
   const renderedFrom = camelCase(routes?.rentalManagement.title);
@@ -75,20 +74,12 @@ const RentalManagement = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
     if (renderCount > 0) {
-      fetchData();
+      const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const extraColumns = [
     {
@@ -241,7 +232,7 @@ const RentalManagement = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
@@ -249,7 +240,7 @@ const RentalManagement = () => {
       let data: any = [],
         count;
       if (!isOffline) {
-        const response: any = await axiosInstance().get(`${rentalManagement.api}${queryString}`);
+        const response: any = await axiosInstance().get(`${rentalManagement.api}${queryString}`,{ cancelToken: cancelTokenSource?.token });
         data = response?.data?.data;
         count = response?.data?.count;
       } else {

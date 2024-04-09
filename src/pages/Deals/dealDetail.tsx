@@ -11,7 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import Material from './Material';
-import Assets from './Assets';
+import Units from './Units';
 
 const DealDetail = () => {
 
@@ -96,7 +96,7 @@ const DealDetail = () => {
                         className={'tabLayout'}
                         label={
                             <div className="d-flex align-items-center tab-font">
-                                <BiFoodMenu className="mr-1" fontSize="inherit" /> Assets
+                                <BiFoodMenu className="mr-1" fontSize="inherit" /> {routes.units.title}
                             </div>
                         }
                         value={2}
@@ -119,7 +119,7 @@ const DealDetail = () => {
                     <Material dealId={id} />
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
-                    <Assets dealId={id} />
+                    <Units dealData={dealData} />
                 </TabPanel>
             </Box>
         </Box>

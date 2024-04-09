@@ -27,8 +27,7 @@ import ApprovalProcessDialog from './ApprovalProcessDialog';
 import GenerateAutoPassword from './GenerateAutoPassword';
 import ManageUserDialog from './ManageUserDialog';
 import UserSetupDialog from './UserSetupDialog';
-
-let searchTimeout: ReturnType<typeof setTimeout>;
+import axios, { CancelTokenSource } from 'axios';
 
 const User: FC = () => {
   const renderedFrom = camelCase(routes?.user.title);
@@ -219,21 +218,12 @@ const User: FC = () => {
   };
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    searchTimeout = setTimeout(() => {
-      fetchUsers();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
     if (renderCount > 0) {
-      fetchUsers();
+    const cencelToken = axios.CancelToken.source();
+    fetchUsers(cencelToken);
+    return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, entityRoleRedirectDetails, showFilteredRecordsOnly]);
+  }, [search, page, limit, filters, sorting, entityRoleRedirectDetails, showFilteredRecordsOnly]);
 
   const fetchLoggedInUserRole = async () => {
     let roleIds = [];
@@ -269,12 +259,12 @@ const User: FC = () => {
       });
   };
 
-  const fetchUsers = () => {
+  const fetchUsers = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`/user${queryString}`)
+      .get(`/user${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           const { createdBy, updatedBy, role, entities, ...restProperties } = u;

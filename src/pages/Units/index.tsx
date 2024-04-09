@@ -9,7 +9,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { COLOUR_MASTER, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageUnit from './ManageUnit';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -17,13 +17,16 @@ import { deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import { Link } from 'react-router-dom';
+import WarningIcon from '@material-ui/icons/Warning';
 
 const Units = () => {
+
   const renderedFrom = camelCase(routes?.units.title);
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { permissions, selectedEntity, user }
+    state: { permissions, selectedEntity }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
@@ -44,11 +47,69 @@ const Units = () => {
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  const fetchColumns = async () => {
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.units}`);
-    const data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.unitDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+  const fetchColumns = () => {
+    axiosInstance().get(`/field?resource=${sidebarResource?.units}`).then(({ data: { data } }) => {
+      const newColumns = generateColumns(renderedFrom, data, routes.unitDetail.path, true);
+      newColumns?.forEach((o) => {
+        if (o?.accessor === 'unitNumber') {
+          o.cell = ({ row }) => (
+            <div
+              style={{
+                backgroundColor: (row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0) ||
+                  (row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status)) ||
+                  (row?.original?.availabilityDate && row?.original?.contractDate
+                    && new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime()
+                  ) ||
+                  (row?.original?.status === 'COMMITTED' && !row?.original?.contractDate)
+                  ? COLOUR_MASTER.lostAssets.background
+                  : ''
+              }}
+            >
+              <Link
+                className="link text-truncate"
+                title={row?.original?.unitNumber}
+                to={`${routes.unitDetail.path}/${row?.original?._id}`}
+              >
+                {row?.original?.unitNumber}
+              </Link>
+              {row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0 && (
+                <Box ml={1}>
+                  <HtmlTooltip title="Unit is assigned to multiple deals">
+                    <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                  </HtmlTooltip>
+                </Box>
+              )}
+              {row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status) && (
+                <Box ml={1}>
+                  <HtmlTooltip title="Manager Plus Status Conflict - Status is other than Active,Committed">
+                    <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                  </HtmlTooltip>
+                </Box>
+              )}
+              {row?.original?.availabilityDate && row?.original?.contractDate
+                && new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime() && (
+                  <Box ml={1}>
+                    <HtmlTooltip title="Unit is not ready for the deal">
+                      <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                    </HtmlTooltip>
+                  </Box>
+                )}
+              {row?.original?.status === 'COMMITTED' && !row?.original?.contractDate && (
+                <Box ml={1}>
+                  <HtmlTooltip title="Contract Start Date has not set">
+                    <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                  </HtmlTooltip>
+                </Box>
+              )}
+            </div>
+          );
+        }
+      });
+      setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const ActionsRenderer = {
@@ -84,25 +145,22 @@ const Units = () => {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
-    axiosInstance()
-      .get(`${routes?.units.path}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data?.map((u: any) => {
-          let finalObject: any = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.units?.isDelete;
-          return {
-            ...finalObject
-          };
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
-      })
-      .finally(() => {
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+    axiosInstance().get(`${routes?.units.path}${queryString}`).then(({ data: { data, count } }) => {
+      let rows = data?.map((u: any) => {
+        let finalObject: any = prepareDataForGrid(u);
+        finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+        finalObject['canDelete'] = permissions?.units?.isDelete;
+        return {
+          ...finalObject
+        };
       });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const getQueryString = (isExport = false) => {
@@ -215,7 +273,6 @@ const Units = () => {
           }}
           isAddButtonVisible={permissions?.units?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -245,7 +302,6 @@ const Units = () => {
             }}
           />
         )}
-
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
