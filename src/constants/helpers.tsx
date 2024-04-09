@@ -2457,7 +2457,7 @@ export const REPORT_LIST = [
     title: 'Fleet Report',
     permission: 'deals',
     key: 'standardReport',
-    type: 'dealUnitField'
+    type: 'fleetReport'
   }
 ];
 
