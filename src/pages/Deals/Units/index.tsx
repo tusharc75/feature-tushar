@@ -39,7 +39,7 @@ const Units = ({ dealData }) => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    axiosInstance().get(`${routes.units.path}?getById=${encodeURIComponent(JSON.stringify(dealData?.assets))}`).then(({ data: { data } }) => {
+    axiosInstance().get(`${routes.units.path}?getById=${encodeURIComponent(JSON.stringify(dealData?.units))}`).then(({ data: { data } }) => {
       let rows = data?.map((u, i) => {
         let finalObject: any = prepareDataForGrid(u, user);
         return finalObject;
