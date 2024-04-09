@@ -258,6 +258,7 @@ import DealDetail from './pages/Deals/dealDetail';
 import SerializedAssetStatusChangeRequest from './pages/SerializedAsset/SerializedAssetStatusChangeRequest';
 import Units from './pages/Units';
 import UnitDetail from './pages/Units/UnitDetail';
+import WorkOrderPlanning from './pages/WorkOrderPlanning';
 
 
 var notificationInterval: any = null;
@@ -1139,6 +1140,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.unitDetail.path}/:id`}>
               <UnitDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.workOrderPlanning.path}>
+              <WorkOrderPlanning />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

@@ -1216,6 +1216,10 @@ const routes = {
     title: storedRoutes && storedRoutes.units && storedRoutes.units.title ? storedRoutes.units?.title : sidebarResource.units,
     path: '/units/detail'
   },
+  workOrderPlanning: {
+    title: storedRoutes && storedRoutes.workOrderPlanning && storedRoutes.workOrderPlanning.title ? storedRoutes.workOrderPlanning?.title : sidebarResource.workOrderPlanning,
+    path: '/work-order-planning'
+  },
 };
 
 export default routes;
