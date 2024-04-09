@@ -9,7 +9,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import { prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 
-const Assets = ({ dealId }) => {
+const Units = ({ dealData }) => {
 
   const renderedFrom = camelCase(`${routes?.deals.title}_assets`);
   const toastConfig = useContext(CustomToastContext);
@@ -27,8 +27,8 @@ const Assets = ({ dealId }) => {
   }, []);
 
   const fetchFields = async () => {
-    axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`).then(({ data: { data } }) => {
-      const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
+    axiosInstance().get(`/field?resource=${sidebarResource.units}`).then(({ data: { data } }) => {
+      const newColumns = generateColumns(renderedFrom, data, routes.unitDetail.path);
       setColumns([...newColumns, ...getStaticFields()]);
       fetchData();
     })
@@ -39,7 +39,7 @@ const Assets = ({ dealId }) => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    axiosInstance().get(`${routes.deals.path}/asset/${dealId}`).then(({ data: { data } }) => {
+    axiosInstance().get(`${routes.units.path}?getById=${encodeURIComponent(JSON.stringify(dealData?.assets))}`).then(({ data: { data } }) => {
       let rows = data?.map((u, i) => {
         let finalObject: any = prepareDataForGrid(u, user);
         return finalObject;
@@ -51,7 +51,7 @@ const Assets = ({ dealId }) => {
       toastConfig.setToastConfig(err);
     });
   };
-
+  
   return (
     <Fragment>
       {columns ? (
@@ -77,4 +77,4 @@ const Assets = ({ dealId }) => {
   );
 };
 
-export default Assets;
+export default Units;
