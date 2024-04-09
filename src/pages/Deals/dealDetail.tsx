@@ -12,6 +12,9 @@ import TabPanel from '../../components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import Material from './Material';
 import Units from './Units';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { camelCase } from 'lodash';
+import { sidebarResource } from 'src/constants/helpers';
 
 const DealDetail = () => {
 
@@ -56,6 +59,11 @@ const DealDetail = () => {
             <Box className="headerbox-v1">
                 <Box className="nav-v1">
                     <CustomBreadCrumbs routes={[routes.deals, { title: dealData?.dealname }]} />
+                </Box>
+                <Box className="controls-v1">
+                    <Box className="control-buttons-v1">
+                        <ActivityButton referenceId={dealData?._id} resource={camelCase(sidebarResource.deals)} resourceLabel={dealData?.dealname} />
+                    </Box>
                 </Box>
             </Box>
             <Box className="detail-container-v1">

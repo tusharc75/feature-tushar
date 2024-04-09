@@ -16,6 +16,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
 import ManageUnit from './ManageUnit';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { camelCase } from 'lodash';
 
 const UnitDetail = () => {
   const { id } = useParams();
@@ -111,6 +113,7 @@ const UnitDetail = () => {
               </Button>
             )}
             {permissions?.units?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            <ActivityButton referenceId={unitData?._id} resource={camelCase(sidebarResource.units)} resourceLabel={unitData?.unitNumber} />
           </Box>
         </Box>
       </Box>
