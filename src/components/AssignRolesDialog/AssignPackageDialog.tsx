@@ -11,8 +11,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids = [], isSubmitting = false, hideQty = false }) => {
   const renderedFrom = `${camelCase(routes.packages?.title)}_Assign`;
@@ -46,13 +45,9 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
   ];
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
@@ -70,11 +65,11 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
       });
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${packages.api}${queryString}`)
+      .get(`${packages.api}${queryString}`,{ cancelToken: cancelTokenSource?.token })
       .then(({ data }) => {
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);

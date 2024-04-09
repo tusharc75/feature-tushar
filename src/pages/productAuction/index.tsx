@@ -18,8 +18,7 @@ import { gridLoadingTimeout, prepareDataForGrid, productAuction, sidebarResource
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageProductAuction from './ManageProductAuction';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const ProductAuction = () => {
   const renderedFrom = camelCase(routes?.productAuction.title);
@@ -46,18 +45,10 @@ const ProductAuction = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -142,12 +133,12 @@ const ProductAuction = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${productAuction.api}${queryString}`)
+      .get(`${productAuction.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);

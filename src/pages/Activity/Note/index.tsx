@@ -12,8 +12,7 @@ import ActivityModelHandler from '../../../components/Activity/ActivityModelHand
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
-import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
-
+import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../../constants/helpers';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Autocomplete } from '@material-ui/lab';
@@ -50,12 +49,13 @@ const Note = () => {
   const [noteId, setNoteId] = useState(undefined);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [columns, setColumns] = useState(null);
-  const { selectedRecords } = state;
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
+
+  const { page, limit, search, filters, sorting, selectedRecords } = state;
 
   useEffect(() => {
     setResourceOptions(get_activity_resource(permissions));
@@ -74,16 +74,18 @@ const Note = () => {
         disabled: true,
         primaryField: true,
         Cell: ({ row }) => (
-          <span
-            className={permissions?.note?.isUpdate ? 'link cursor-pointer' : ''}
-            onClick={() => {
-              if (permissions?.note?.isUpdate) {
-                handleActivityOpen(row.original);
-              }
-            }}
-          >
-            {row.original?.name}
-          </span>
+          <div>
+            <span
+              className={permissions?.note?.isUpdate ? 'link cursor-pointer' : ''}
+              onClick={() => {
+                if (permissions?.note?.isUpdate) {
+                  handleActivityOpen(row.original);
+                }
+              }}
+            >
+              {row.original?.name}
+            </span>
+          </div>
         )
       },
       {
@@ -95,7 +97,7 @@ const Note = () => {
         filter: false,
         sortable: false,
         Cell: ({ row }) => (
-          <>
+          <div>
             {row.original?.relatedTo && row.original?.relatedTo?.length > 0 ? (
               row.original?.relatedTo.map((d) => {
                 return (
@@ -111,7 +113,7 @@ const Note = () => {
             ) : (
               <NoDataCell />
             )}
-          </>
+          </div>
         )
       },
       {
@@ -120,7 +122,7 @@ const Note = () => {
         filter: false,
         sortable: false,
         show: true,
-        Cell: ({ row }) => <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(row.original?.createdByDate)}</span>
+        Cell: ({ row }) => <div>{displayDate(row.original?.createdByDate)}</div>
       },
       {
         accessor: 'updatedByDate',
@@ -130,7 +132,7 @@ const Note = () => {
         show: true,
         Cell: ({ row }) =>
           row.original?.updatedByDate ? (
-            <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(row.original?.updatedByDate)}</span>
+            <div>{displayDate(row.original?.updatedByDate)}</div>
           ) : (
             <NoDataCell />
           )
@@ -138,6 +140,7 @@ const Note = () => {
     ];
     setColumns([...column, ActionsRenderer]);
   };
+
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -212,47 +215,17 @@ const Note = () => {
     setIsNew(false);
   };
 
-  const NameRenderer = (params) => (
-    <span
-      className={permissions?.note?.isUpdate ? 'link cursor-pointer' : ''}
-      onClick={() => {
-        if (permissions?.note?.isUpdate) {
-          handleActivityOpen(params.data);
-        }
-      }}
-    >
-      {params.value}
-    </span>
-  );
+  useEffect(() => {
+    if (filter) {
+      fetchData();
+    }
+  }, [page, limit, filters, filter, sorting, search]);
 
-  const ReferenceRenderer = (params) => (
-    <>
-      {params.value && params.value?.length > 0 ? (
-        params.value.map((d) => {
-          return (
-            <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
-              <p> {d.name}</p>
-              <IconButton className="ml-3" size="small" onClick={() => window.open(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-              <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
-            </div>
-          );
-        })
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const CreatedAtDateRenderer = (params) => <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(params.value)}</span>;
-
-  const UpdatedAtDateRenderer = (params) =>
-    params.value ? <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(params.value)}</span> : <NoDataCell />;
 
   const fetchData = async () => {
+    const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-    await GetNotes(JSON.stringify(filter))
+    await GetNotes(JSON.stringify(filter), queryString)
       .then(({ data }) => {
         let rows = data.map((u) => {
           const { createdBy, updatedBy, ...restProperties } = u;
@@ -281,6 +254,34 @@ const Note = () => {
       });
   };
 
+  const getQueryString = () => {
+    let deepFilter = `&page=${page}&limit=${limit}`;
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).forEach((field) => {
+        if (filters[field].filter.toLowerCase() === 'me') {
+          filters[field].filter = user?.user?.email;
+        }
+        updatedFilters.push({
+          field: field,
+          term: filters[field].filter
+        });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+    return deepFilter;
+  };
+
   const handleDeleteNote = async () => {
     if (deleteRecord.id || selectedRecords.length > 0) {
       setOkButtonLoading(true);
@@ -296,7 +297,6 @@ const Note = () => {
           setIsConformDialogVisible(false);
           setOkButtonLoading(false);
           setDeleteRecord({ id: null, name: null });
-
           fetchData();
         })
         .catch((error) => {
@@ -447,7 +447,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            // noteData={noteData}
+          // noteData={noteData}
           />
         </Dialog>
       )}

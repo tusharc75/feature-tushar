@@ -60,6 +60,13 @@ const ManageUnit = ({ onClose, onSuccess, id = null }) => {
       if (id) {
         const response = await axiosInstance().get(`${routes?.units?.path}/${id}`);
         const data = response?.data?.data;
+        if (!['IDLE', 'MIDLAND SHOP REPAIR']?.includes(data?.status)) {
+          fieldsDataForUpdate?.forEach((e) => {
+            if (['yard']?.includes(e?.fieldName)) {
+              e.isUneditable = true;
+            }
+          });
+        }
         setInitialData({
           fields: fieldsDataForUpdate,
           values: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -121,12 +128,6 @@ const ManageUnit = ({ onClose, onSuccess, id = null }) => {
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
   }, [initialData.fields]);
 
-  function validate(values) {
-    const errors = {};
-
-    return errors;
-  }
-
   return (
     <Dialog
       maxWidth="md"
@@ -143,7 +144,6 @@ const ManageUnit = ({ onClose, onSuccess, id = null }) => {
     >
       {initialData.fields.length ? (
         <Formik
-          validate={validate}
           initialValues={initialData.values}
           enableReinitialize={true}
           validationSchema={yupSchema(initialData.fields)}
@@ -156,9 +156,8 @@ const ManageUnit = ({ onClose, onSuccess, id = null }) => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id ? `Update ${initialData.values?.unitNumber ? `(${initialData.values?.unitNumber})` : ''}` : `Create ${routes?.units?.title}`
-                }`}
+                title={`${id ? `Update ${initialData.values?.unitNumber ? `(${initialData.values?.unitNumber})` : ''}` : `Create ${routes?.units?.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

@@ -18,8 +18,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManagePayrollPolicy from './ManagePayrollPolicy';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const PayrollPolicy = () => {
   const renderedFrom = camelCase(routes?.payrollPolicy.title);
@@ -98,23 +97,13 @@ const PayrollPolicy = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      let millisec = Object.keys(search).length > 0 ? 600 : 5;
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-      searchTimeout = setTimeout(() => {
-        fetchData();
-      }, millisec);
-    }
-  }, [search]);
-
-  useEffect(() => {
-    if (renderCount > 0) {
-      fetchData();
+      const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
     } else {
       setRenderCount(renderCount + 1);
     }
-  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
+  }, [search, page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -144,12 +133,12 @@ const PayrollPolicy = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes?.payrollPolicy?.path}${queryString}`)
+      .get(`${routes?.payrollPolicy?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);

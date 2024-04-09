@@ -78,8 +78,8 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
       <Formik
         initialValues={{
           stepsStyle: resourceData?.stepsStyle || STEPS_STYLE.list,
-          collaborateTools: resourceData.hasOwnProperty('collaborateTools') ? resourceData?.collaborateTools : false,
-          collaborateToolsField: resourceData.hasOwnProperty('collaborateToolsField') ? resourceData?.collaborateToolsField : ''
+          collaborateTools: resourceData?.collaborateTools || false,
+          collaborateToolsField: resourceData?.collaborateToolsField || ''
         }}
         validate={validate}
         onSubmit={handleSubmit}
