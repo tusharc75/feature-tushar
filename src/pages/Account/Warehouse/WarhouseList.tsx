@@ -13,8 +13,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import SearchBox from '../../../components/Helpers/SearchBox';
 import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAddingWarehouse, assignedWarehouse }) => {
   const renderedFrom = camelCase(routes?.warehouse?.title);
@@ -33,24 +32,16 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchMaterial();
-    }, millisec);
-  }, [search]);
+    const cencelToken = axios.CancelToken.source();
+    fetchMaterial(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  useEffect(() => {
-    fetchMaterial();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
-
-  const fetchMaterial = () => {
+  const fetchMaterial = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${api}${queryString}`)
+      .get(`${api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(isCustomer ? u?.warehouseDetail : u);

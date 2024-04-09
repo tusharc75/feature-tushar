@@ -38,8 +38,7 @@ import {
   transferAsset
 } from '../../../constants/helpers';
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const AddSerializedAsset = ({
   isAdding,
@@ -84,13 +83,9 @@ const AddSerializedAsset = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 600;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchAssets();
-    }, millisec);
+    const cencelToken = axios.CancelToken.source();
+    fetchAssets(cencelToken)
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedWarehouse, selectedProduct, tabValue]);
 
   useEffect(() => {
@@ -157,7 +152,7 @@ const AddSerializedAsset = ({
     setSerializedProducts(tempProducts);
   }, [selectedRecords]);
 
-  const fetchAssets = () => {
+  const fetchAssets = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
 
     let queryString = getQueryString();
@@ -179,7 +174,7 @@ const AddSerializedAsset = ({
       api = `${serializedAsset.api}${queryString}`;
     }
     axiosInstance()
-      .get(api)
+      .get(api,{ cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         const rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
