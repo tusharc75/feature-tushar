@@ -11,8 +11,7 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const AssignSerializedAssetDialog = ({
   reference,
@@ -47,13 +46,9 @@ const AssignSerializedAssetDialog = ({
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedProduct]);
 
   const fetchGridColumns = () => {
@@ -66,7 +61,7 @@ const AssignSerializedAssetDialog = ({
       });
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     let queryString = getQueryString();
     if (selectedProducts.length > 0) {
@@ -81,7 +76,7 @@ const AssignSerializedAssetDialog = ({
       queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterByIdType=or`;
     }
     axiosInstance()
-      .get(`${serializedAsset.api}${queryString}`)
+      .get(`${serializedAsset.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data }) => {
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
