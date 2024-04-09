@@ -16,8 +16,7 @@ import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { dateTimeFormat, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import ManageSendOutboundMessage from './manageSendOutboundMessage';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const SendOutboundMessage = () => {
   const renderedFrom = camelCase(routes?.sendOutboundMessage?.title);
@@ -95,27 +94,20 @@ const SendOutboundMessage = () => {
       });
   }, []);
 
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
 
   useEffect(() => {
     if (renderCount > 1) {
-      fetchData();
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedEntity, selectedSerializedAsset]);
+  }, [search, page, limit, filters, sorting, selectedEntity, selectedSerializedAsset]);
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`/iot-out-bound-message${queryString}`)
+      .get(`/iot-out-bound-message${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         const rows = data?.map((d) => {
           delete d?.outboundMessageDetail?._id;
