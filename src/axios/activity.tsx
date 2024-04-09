@@ -1,6 +1,4 @@
-//import api from './axios'
 import api from './axiosInstance'
-import { getSearchQuery } from '../services/util'
 
 export const GetUsers = async () => {
     const { data } = await api().get(`/activity/user`);
@@ -167,7 +165,7 @@ export const GetReferenceName = async (referenceType, referenceId) => {
 };
 
 export const GetNotes = async (filter, params = null) => {
-    let apiUrl = `/activity/notes?filter=${filter}`
+    let apiUrl = `/note?filter=${filter}`
     if (params) apiUrl = `${apiUrl}${params}`
     const { data } = await api().get(apiUrl);
     return data;
