@@ -1,7 +1,6 @@
 import { Box } from '@material-ui/core';
 import { camelCase } from 'lodash';
-import moment from 'moment';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -9,12 +8,9 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
-
-let searchTimeout;
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
 
 const WorkOrderPlanning = () => {
   const renderedFrom = camelCase(routes?.workOrderPlanning.title);
@@ -28,61 +24,19 @@ const WorkOrderPlanning = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const columns = [
-    {
-      accessor: 'createDate',
-      Header: 'Create Date',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) =>
-        row.original?.createDate ? <p className="text-truncate">{moment(row?.original?.createDate)?.format(dateTimeFormat)}</p> : <NoDataCell />
-    },
-    {
-      accessor: 'status',
-      Header: 'Status',
-      Cell: ({ row }) => {
-        return row.original?.status ? <p className="text-truncate">{row.original.status}</p> : <NoDataCell />;
-      }
-    },
-    {
-      accessor: 'completedDate',
-      Header: 'Completed Date',
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) =>
-        row.original?.completedDate ? <p className="text-truncate">{moment(row?.original?.completedDate)?.format(dateTimeFormat)}</p> : <NoDataCell />
-    },
-    {
-      accessor: 'asset',
-      Header: 'Asset',
-      Cell: ({ row }) => {
-        return row.original?.asset ? (
-          <div>
-            <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original?.assetId}`} target="_blank">
-              {row.original?.asset}
-            </a>
-          </div>
-        ) : (
-          <NoDataCell />
-        );
-      }
-    },
-    {
-      accessor: 'service',
-      Header: 'Service',
-      Cell: ({ row }) => {
-        return row.original?.service ? (
-          <div>
-            <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`} target="_blank">
-              {row.original?.service}
-            </a>
-          </div>
-        ) : (
-          <NoDataCell />
-        );
-      }
-    }
-  ];
+  const [columns, setColumns] = useState(null);
+
+  const fetchColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrderPlanning}`);
+    data = response?.data?.data;
+    const newColumns = generateColumns(renderedFrom, data, null, true);
+    setColumns([...newColumns]);
+  };
+
+  useEffect(() => {
+    fetchColumns();
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -121,14 +75,20 @@ const WorkOrderPlanning = () => {
 
     axiosInstance()
       .get(`${workOrder.api}/work-order-planning${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          return finalObject;
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
-      })
+      .then(
+        ({
+          data: {
+            data: { data, count }
+          }
+        }) => {
+          let rows = data.map((u) => {
+            let finalObject = prepareDataForGrid(u, user);
+            finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+            return finalObject;
+          });
+          dispatch({ type: 'initialize', data: rows, count: count });
+        }
+      )
       .catch((error) => {
         toastConfig.setToastConfig(error);
       })
@@ -158,9 +118,9 @@ const WorkOrderPlanning = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            refreshGrid={() => {}}
+            refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            showFilters={false}
+            showFilters={true}
             resource={sidebarResource.workOrderPlanning}
             hideAction={true}
           />
