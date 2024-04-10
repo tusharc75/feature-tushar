@@ -1,33 +1,31 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Box, IconButton, MenuItem, Menu, FormControlLabel, Checkbox, FormGroup } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import WarningIcon from '@material-ui/icons/Warning';
 import { camelCase } from 'lodash';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import WarningFilter from 'src/components/WarningFilter';
 import { COLOUR_MASTER, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import axiosInstance from 'src/axios/axiosInstance';
-import ManageUnit from './ManageUnit';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { deleteDisable } from 'src/constants/messageHelpers';
-import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import { Link } from 'react-router-dom';
-import WarningIcon from '@material-ui/icons/Warning';
-import { BiFilterAlt } from 'react-icons/bi';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { Close } from '@material-ui/icons';
+import ManageUnit from './ManageUnit';
+import axios, { CancelTokenSource } from 'axios';
 
 const getWarningList = (row?: any) => {
   const icon = <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />;
   const list = [
     {
-      key: 1,
       warningFilter: 1,
       icon,
       title: 'Unit is assigned to multiple deals',
@@ -35,7 +33,6 @@ const getWarningList = (row?: any) => {
       isVisible: row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0
     },
     {
-      key: 2,
       warningFilter: 2,
       icon,
       label: 'Manager Plus Status Conflict',
@@ -43,7 +40,6 @@ const getWarningList = (row?: any) => {
       isVisible: row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status)
     },
     {
-      key: 3,
       warningFilter: 3,
       icon,
       title: 'Unit is not ready for the deal',
@@ -54,7 +50,6 @@ const getWarningList = (row?: any) => {
         new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime()
     },
     {
-      key: 4,
       warningFilter: 4,
       icon,
       title: 'Contract Start Date has not set',
@@ -82,25 +77,19 @@ const Units = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const { generateColumns } = useColumns();
-
-  // Warnings
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [checkedFilter, setCheckedFilter] = useState<null | number>(null);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  // end of Warnings
 
   useEffect(() => {
     fetchColumns();
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+
+    return () => cencelToken.cancel();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, checkedFilter]);
 
   const getWarnings = useCallback((row: any) => {
@@ -128,10 +117,12 @@ const Units = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                      <Box ml={1}>
-                        <HtmlTooltip title={w.title}>{w.icon}</HtmlTooltip>
-                      </Box>
-                    ))
+                        <Box ml={1} key={w.warningFilter}>
+                          <HtmlTooltip title={w.title} placement="top" arrow>
+                            {w.icon}
+                          </HtmlTooltip>
+                        </Box>
+                      ))
                     : null}
                 </div>
               );
@@ -175,11 +166,11 @@ const Units = () => {
     )
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes?.units.path}${queryString}`)
+      .get(`${routes?.units.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
@@ -280,79 +271,6 @@ const Units = () => {
     );
   };
 
-  const rightSideContents = useMemo(() => {
-    const warnings = getWarningList();
-    return (
-      <>
-        <span className="relative">
-          <span className={`flex h-[6px] w-[6px] absolute -top-[3px] -left-[3px] z-10 ${checkedFilter ? '' : 'sr-only'}`}>
-            <span className="absolute -top-[3px] -left-[3px] animate-ping inline-flex rounded-full bg-sky-400 opacity-75 h-3 w-3"></span>
-            <span className="inline-flex rounded-full  bg-sky-500 w-full h-full"></span>
-          </span>
-          <ThemeButton
-            size="small"
-            tooltip="Filter data by warnings"
-            variant="outlined"
-            iconForMobile={<BiFilterAlt />}
-            startIcon={<BiFilterAlt />}
-            onClick={handleClick}
-          >
-            Warnings
-          </ThemeButton>
-        </span>
-        <Menu
-          id="simple-menu"
-          anchorEl={anchorEl}
-          keepMounted
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-          getContentAnchorEl={null}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right'
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right'
-          }}
-        >
-          <h6 className="text-center px-2 py-2 text-[16px] font-semibold [border-bottom:1px_solid_var(--common-border-color)]">
-            Filter Items by warning
-          </h6>
-          <FormGroup>
-            {warnings.map((w) => (
-              <MenuItem key={w.key} dense>
-                <FormControlLabel
-                  value="end"
-                  control={
-                    <Checkbox
-                      color="primary"
-                      checked={checkedFilter === w.warningFilter}
-                      name={`${w.key}`}
-                      onChange={(e) => {
-                        const isChecked = checkedFilter === w.warningFilter ? null : w.warningFilter;
-                        setCheckedFilter(isChecked);
-                      }}
-                    />
-                  }
-                  label={w.label}
-                  labelPlacement="end"
-                />
-              </MenuItem>
-            ))}
-          </FormGroup>
-          {checkedFilter && (
-            <div className={`px-2 py-2 [border-top:1px_solid_var(--common-border-color)]`}>
-              <ThemeButton iconForMobile={<Close />} startIcon={<Close />} onClick={() => setCheckedFilter(null)}>
-                Clear all filters
-              </ThemeButton>
-            </div>
-          )}
-        </Menu>
-      </>
-    );
-  }, [anchorEl, checkedFilter]);
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -381,7 +299,7 @@ const Units = () => {
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          rightSideContents={rightSideContents}
+          rightSideContents={<WarningFilter checkedFilter={checkedFilter} setCheckedFilter={setCheckedFilter} warnings={getWarningList()} />}
           addButtonOnclick={() => {
             setOpen({ open: true, id: null });
           }}
