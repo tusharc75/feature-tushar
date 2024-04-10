@@ -332,7 +332,7 @@ const WorkOrderDetails = () => {
       type: 'button',
       visibilityInMobile: 'visible',
       isVisible: permissions?.repairJob?.isCreate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder
-        && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.currentRepairJob ? true : false,
+        && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.currentRepairJob ? true : false,
       name: `Create ${routes?.repairJob.title}`,
       tooltip: `Create ${routes?.repairJob.title}`,
       onClick: () => setShowManageRepairJobDialog({ open: true }),
@@ -405,7 +405,7 @@ const WorkOrderDetails = () => {
       id: 'Create Version',
       type: 'button',
       visibilityInMobile: 'hidden',
-      isVisible: Boolean(allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed
+      isVisible: Boolean(allowedToEdit && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
         && !workOrderData?.currentRepairJob && !workOrderData?.deleted && workOrderData?.canCreateWorkOrderVersion),
       onClick: (e) => openAddActions(e),
       iconForMobile: false,
