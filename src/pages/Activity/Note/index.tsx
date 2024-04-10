@@ -1,32 +1,31 @@
 import { Chip, Dialog, IconButton, MenuItem, TextField } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
+import { Delete as DeleteIcon } from '@material-ui/icons';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { Autocomplete } from '@material-ui/lab';
+
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../../StateProvider/Provider';
-import { GetReferenceName } from '../../../axios/activity';
-import axiosInstance from '../../../axios/axiosInstance';
-import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
-import { CreateNote } from '../../../components/Activity/Note/CreateNote';
-import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
-import CustomContainer from '../../../components/CustomContainer';
-import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../../constants/helpers';
-import { Delete as DeleteIcon } from '@material-ui/icons';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { Autocomplete } from '@material-ui/lab';
-import { camelCase } from 'lodash';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { deleteDisable } from 'src/constants/messageHelpers';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
+import { CreateNote } from '../../../components/Activity/Note/CreateNote';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
+import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { displayDate } from '../../../constants/helpers';
+import { CustomDialogTransition, displayDate, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
 
 const Note = () => {
@@ -161,8 +160,9 @@ const Note = () => {
 
   useEffect(() => {
     if (referenceType) {
-      GetReferenceName(referenceType, referenceId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
+        .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
         .catch((err) => {
@@ -207,7 +207,7 @@ const Note = () => {
 
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
-    fetchData(cancelToken);
+    if (filter) fetchData(cancelToken);
     return () => cancelToken.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, filters, filter, sorting, search]);
@@ -253,7 +253,7 @@ const Note = () => {
       const updatedFilters = [];
 
       Object.keys(filters).forEach((field) => {
-        if (filters[field].filter.toLowerCase() === 'me') {
+        if (filters[field].filter?.toLowerCase() === 'me') {
           filters[field].filter = user?.user?.email;
         }
         updatedFilters.push({
@@ -462,8 +462,8 @@ const LeftSideContents = ({
   return (
     <>
       <Autocomplete
-        options={resourceOptions}
-        getOptionLabel={(option) => option.optionLabel}
+        options={resourceOptions || []}
+        getOptionLabel={(option) => option.optionLabel || ''}
         className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
         value={resource}
         size="small"
@@ -491,10 +491,10 @@ const LeftSideContents = ({
       {resource && resourceData && (
         <Autocomplete
           disabled={loadingResources}
-          options={resourceData}
+          options={resourceData || []}
           fullWidth
           className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
-          getOptionLabel={(option: any) => option.optionLabel}
+          getOptionLabel={(option: any) => option.optionLabel || ''}
           getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
           value={selectedResourceData}
           onChange={(event, newValue) => {

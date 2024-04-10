@@ -150,10 +150,10 @@ export const GetRoadmap = async (type, filter) => {
   return data;
 };
 
-export const GetReferenceName = async (referenceType, referenceId) => {
-  const { data } = await api().get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`);
-  return data;
-};
+// export const GetReferenceName = async (referenceType, referenceId) => {
+//   const { data } = await api().get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`);
+//   return data;
+// };
 
 // export const GetNotes = async (filter, params = null) => {
 //   console.log({ filter });
@@ -163,17 +163,17 @@ export const GetReferenceName = async (referenceType, referenceId) => {
 //   return data;
 // };
 
-export const GetEmails = async (filter, params = null) => {
-  let apiUrl = `/email/my?filter=${filter}`;
-  if (params) apiUrl = `${apiUrl}${params}`;
-  const { data } = await api().get(apiUrl);
-  return data;
-};
+// export const GetEmails = async (filter, params = null) => {
+//   let apiUrl = `/email/my?filter=${filter}`;
+//   if (params) apiUrl = `${apiUrl}${params}`;
+//   const { data } = await api().get(apiUrl);
+//   return data;
+// };
 
-export const GetComment = async (referenceId) => {
-  const { data } = await api().get(`/comment/${referenceId}`);
-  return data;
-};
+// export const GetComment = async (referenceId) => {
+//   const { data } = await api().get(`/comment/${referenceId}`);
+//   return data;
+// };
 
 export const PostComment = async (inputData) => {
   const { data } = await api().post('/comment', inputData);

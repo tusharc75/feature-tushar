@@ -1,9 +1,9 @@
 import queryString from 'query-string';
 import { Fragment, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import axiosInstance from 'src/axios/axiosInstance';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { useData } from '../../StateProvider/Provider';
-import { GetReferenceName } from '../../axios/activity';
 import Board from '../../components/Activity/Report/Board';
 import Roadmap from '../../components/Activity/Report/Roadmap';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -29,8 +29,9 @@ const Activity = ({ type }) => {
 
   useEffect(() => {
     if (referenceType) {
-      GetReferenceName(referenceType, referenceId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
+        .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
         .catch((err) => {});
