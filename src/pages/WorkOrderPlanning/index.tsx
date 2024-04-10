@@ -1,5 +1,5 @@
 import { Box, MenuItem, TextField } from '@material-ui/core';
-import { camelCase } from 'lodash';
+import { camelCase, map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -10,7 +10,7 @@ import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
+import { ASSET_STATUS, INVENTORY_OWNER_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
 import ManageRepairOrder from '../RepairOrder/ManageRepairOrder';
 import { Autocomplete } from '@material-ui/lab';
 
@@ -95,6 +95,13 @@ const WorkOrderPlanning = () => {
           let rows = data.map((u) => {
             let finalObject = prepareDataForGrid(u, user);
             finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+            finalObject['asset'] = u?.asset?.assetNumber;
+            finalObject['assetId'] = u?.asset?._id;
+            finalObject['warehouse'] = u?.asset?.warehouse;
+            finalObject['warehouseId'] = u?.asset?.warehouseId;
+            finalObject['assetStatus'] = u?.asset?.status;
+            finalObject['currentOwnerType'] = u?.asset?.currentOwnerType;
+            finalObject['ownerType'] = u?.asset?.ownerType;
             return finalObject;
           });
           dispatch({ type: 'initialize', data: rows, count: count });
@@ -145,11 +152,37 @@ const WorkOrderPlanning = () => {
     );
   };
 
+  const checkUniqWarehouse = () => {
+    if (selectedRecords.length === 0) {
+      return false;
+    } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   const ActionMenuItems = () => {
     return (
       <>
         <MenuItem
-          disabled={selectedRecords.some((r) => r?.repairOrderId)}
+          disabled={
+            selectedRecords.some((r) => r?.repairOrderId) ||
+            selectedRecords?.some(
+              (r) =>
+                ![
+                  ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.scrap,
+                  ASSET_STATUS.underReview,
+                  ASSET_STATUS.needRepair,
+                  ASSET_STATUS.needRecert,
+                  ASSET_STATUS.customerPossession
+                ].includes(r?.assetStatus)
+            ) ||
+            selectedRecords.some((r) => r?.currentOwnerType != INVENTORY_OWNER_TYPE.brand) ||
+            !checkUniqWarehouse()
+          }
           onClick={() => {
             setOpenRepairOrderDialog(true);
           }}
@@ -205,6 +238,7 @@ const WorkOrderPlanning = () => {
               setOpenRepairOrderDialog(false);
             }}
             referenceType={'workOrderPlanning'}
+            referenceData={{warehouse: selectedRecords[0]?.warehouseId}}
           />
         )}
       </CustomContainer>
