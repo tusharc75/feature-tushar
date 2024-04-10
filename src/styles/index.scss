@@ -2222,6 +2222,20 @@ svg.MuiSvgIcon-root {
   }
 }
 
+.MuiTabScrollButton-root.Mui-disabled {
+  opacity: 0.8 !important;
+  pointer-events: none;
+  @apply bg-[#e5e5e5] dark:bg-[var(--dark-secondary)];
+  [data-mode='dark'] & {
+    opacity: 0.5 !important;
+  }
+}
+.MuiTabScrollButton-root {
+  border: 1px solid var(--common-border-color) !important;
+  border-radius: 5px !important;
+  margin-bottom: -1px !important;
+}
+
 @media all and (max-width: 1024px) {
   .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
     padding-right: 25px;
@@ -2241,7 +2255,7 @@ svg.MuiSvgIcon-root {
     }
 
     .MuiTabScrollButton-root.Mui-disabled {
-      opacity: 0.2;
+      opacity: 0.7;
       pointer-events: none;
     }
 

@@ -1,21 +1,23 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
 import Box from '@material-ui/core/Box';
+import Dialog from '@material-ui/core/Dialog';
 import Grid from '@material-ui/core/Grid';
-import { CreateTask } from './CreateTask';
-import { GetTask, DeleteTask } from '../../../axios/activity';
-import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import Dialog from '@material-ui/core/Dialog';
+import axios, { CancelTokenSource } from 'axios';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import { useData } from '../../../StateProvider/Provider';
+import { DeleteTask } from '../../../axios/activity';
+import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
+import ActivityLoader from '../../Helpers/ActivityLoader';
 import { ListRelatedTo } from '../Helpers/ListRelatedTo';
 import { ViewAll } from '../Helpers/ViewAll';
-import ActivityLoader from '../../Helpers/ActivityLoader';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
-import { useData } from '../../../StateProvider/Provider';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { CreateTask } from './CreateTask';
 
 export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -31,13 +33,17 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    fetchTask();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchTask(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchTask = async () => {
+  const fetchTask = async (cancelTokenSource?: CancelTokenSource) => {
     setLoading(true);
-    await GetTask(JSON.stringify(relatedTo))
-      .then(({ data }) => {
+    axiosInstance()
+      .get(`/task?relatedTo=${JSON.stringify(relatedTo)}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         setTask(data);
         onSetCount('Task', data.length);
         setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
