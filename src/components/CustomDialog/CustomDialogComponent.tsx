@@ -20,7 +20,7 @@ function CustomDialogComponent({ title, open, onClose, children }) {
       aria-labelledby="form-dialog-title"
       fullScreen={isMobile || isTablet}
       fullWidth
-      PaperProps={{ style: { background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff' } }}
+      PaperProps={{ style: { background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff' }, className: 'overscroll-contain' }}
     >
       {title && <CustomDialogHeader title={title} onClose={onClose}></CustomDialogHeader>}
 
