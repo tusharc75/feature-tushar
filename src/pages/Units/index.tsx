@@ -48,13 +48,6 @@ const getWarningList = (row?: any) => {
         row?.original?.availabilityDate &&
         row?.original?.contractDate &&
         new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime()
-    },
-    {
-      warningFilter: 4,
-      icon,
-      title: 'Contract Start Date has not set',
-      label: 'Contract Start Date has not set',
-      isVisible: row?.original?.status === 'COMMITTED' && !row?.original?.contractDate
     }
   ];
 
@@ -117,12 +110,12 @@ const Units = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                        <Box ml={1} key={w.warningFilter}>
-                          <HtmlTooltip title={w.title} placement="top" arrow>
-                            {w.icon}
-                          </HtmlTooltip>
-                        </Box>
-                      ))
+                      <Box ml={1} key={w.warningFilter}>
+                        <HtmlTooltip title={w.title} placement="top" arrow>
+                          {w.icon}
+                        </HtmlTooltip>
+                      </Box>
+                    ))
                     : null}
                 </div>
               );
