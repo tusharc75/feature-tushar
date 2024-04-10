@@ -129,6 +129,17 @@ const ManageRepairOrder = ({
             initialData['type'] = REPAIR_ORDER_TYPE.internal;
           }
         }
+        if(referenceType === 'workOrderPlanning'){
+          if (referenceData?.warehouse) {
+            fieldsDataForCreate?.forEach((e) => {
+              if (e.fieldName === 'warehouse') {
+                initialData['warehouse'] = referenceData?.warehouse;
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
+            });
+          }
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData

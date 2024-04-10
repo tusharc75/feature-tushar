@@ -1,5 +1,5 @@
-import { Box } from '@material-ui/core';
-import { camelCase } from 'lodash';
+import { Box, MenuItem, TextField } from '@material-ui/core';
+import { camelCase, map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -10,7 +10,9 @@ import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
+import { ASSET_STATUS, INVENTORY_OWNER_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
+import ManageRepairOrder from '../RepairOrder/ManageRepairOrder';
+import { Autocomplete } from '@material-ui/lab';
 
 const WorkOrderPlanning = () => {
   const renderedFrom = camelCase(routes?.workOrderPlanning.title);
@@ -24,7 +26,11 @@ const WorkOrderPlanning = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
+  const statusOption = ['Pending', 'Completed'];
+
   const [columns, setColumns] = useState(null);
+  const [openRepairOrderDialog, setOpenRepairOrderDialog] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('Pending');
 
   const fetchColumns = async () => {
     let data;
@@ -40,7 +46,7 @@ const WorkOrderPlanning = () => {
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, search, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, search, sorting, selectedEntity, showFilteredRecordsOnly, selectedStatus]);
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -48,6 +54,11 @@ const WorkOrderPlanning = () => {
       deepFilter = `?`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (selectedStatus) {
+      deepFilters.push({ field: 'status', term: selectedStatus });
+    }
+
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -84,6 +95,13 @@ const WorkOrderPlanning = () => {
           let rows = data.map((u) => {
             let finalObject = prepareDataForGrid(u, user);
             finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+            finalObject['asset'] = u?.asset?.assetNumber;
+            finalObject['assetId'] = u?.asset?._id;
+            finalObject['warehouse'] = u?.asset?.warehouse;
+            finalObject['warehouseId'] = u?.asset?.warehouseId;
+            finalObject['assetStatus'] = u?.asset?.status;
+            finalObject['currentOwnerType'] = u?.asset?.currentOwnerType;
+            finalObject['ownerType'] = u?.asset?.ownerType;
             return finalObject;
           });
           dispatch({ type: 'initialize', data: rows, count: count });
@@ -99,8 +117,80 @@ const WorkOrderPlanning = () => {
       });
   };
 
+  const addMaterial = async (repairOrder) => {
+    axiosInstance()
+      .post(`${workOrder.api}/work-order-planning/material`, {
+        repairOrderId: repairOrder?._id,
+        material: selectedRecords?.map((r) => ({ asset: r?.assetId, _id: r?._id }))
+      })
+      .then((res) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
+  };
+
+  const LeftSideContent = () => {
+    return (
+      <Autocomplete
+        options={statusOption}
+        style={{ minWidth: '300px' }}
+        value={selectedStatus}
+        getOptionLabel={(option) => option || ''}
+        getOptionSelected={(option: any, val: any) => option === val}
+        onChange={(_, newVal) => {
+          setSelectedStatus(newVal ? newVal : 'Pending');
+        }}
+        renderInput={(params) => <TextField {...params} margin="dense" label="Status" name="status" variant="outlined" />}
+      />
+    );
+  };
+
+  const checkUniqWarehouse = () => {
+    if (selectedRecords.length === 0) {
+      return false;
+    } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={
+            selectedRecords.some((r) => r?.repairOrderId) ||
+            selectedRecords?.some(
+              (r) =>
+                ![
+                  ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.scrap,
+                  ASSET_STATUS.underReview,
+                  ASSET_STATUS.needRepair,
+                  ASSET_STATUS.needRecert,
+                  ASSET_STATUS.customerPossession
+                ].includes(r?.assetStatus)
+            ) ||
+            selectedRecords.some((r) => r?.currentOwnerType != INVENTORY_OWNER_TYPE.brand) ||
+            !checkUniqWarehouse()
+          }
+          onClick={() => {
+            setOpenRepairOrderDialog(true);
+          }}
+        >
+          {`Create ${routes.repairOrder.title}`}
+        </MenuItem>
+      </>
+    );
   };
 
   return (
@@ -109,7 +199,15 @@ const WorkOrderPlanning = () => {
         <CustomBreadCrumbs routes={[routes.workOrderPlanning]} />
       </div>
       <CustomContainer>
-        <ListingPageHeader searchValue={search} onSearch={handleSearch} isActionButtonVisible={false} isAddButtonVisible={false} />
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isAddButtonVisible={false}
+          leftSideContents={<LeftSideContent />}
+          isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionMenuItems={<ActionMenuItems />}
+        />
 
         {columns ? (
           <CustomReactTable
@@ -128,6 +226,20 @@ const WorkOrderPlanning = () => {
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
+        )}
+
+        {openRepairOrderDialog && (
+          <ManageRepairOrder
+            onClose={() => {
+              setOpenRepairOrderDialog(false);
+            }}
+            onSuccess={(data) => {
+              addMaterial(data);
+              setOpenRepairOrderDialog(false);
+            }}
+            referenceType={'workOrderPlanning'}
+            referenceData={{warehouse: selectedRecords[0]?.warehouseId}}
+          />
         )}
       </CustomContainer>
     </section>
