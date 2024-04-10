@@ -5,20 +5,20 @@ export const GetUsers = async () => {
   return data;
 };
 
-export const GetTask = async (relatedTo) => {
-  const { data } = await api().get(`/task?relatedTo=${relatedTo}`);
-  return data;
-};
+// export const GetTask = async (relatedTo) => {
+//   const { data } = await api().get(`/task?relatedTo=${relatedTo}`);
+//   return data;
+// };
 
-export const GetTaskDetail = async (taskId) => {
-  const { data } = await api().get(`/task/${taskId}`);
-  return data;
-};
+// export const GetTaskDetail = async (taskId) => {
+//   const { data } = await api().get(`/task/${taskId}`);
+//   return data;
+// };
 
-export const CreateNewTask = async (inputData) => {
-  const { data } = await api().post('/task', inputData);
-  return data;
-};
+// export const CreateNewTask = async (inputData) => {
+//   const { data } = await api().post('/task', inputData);
+//   return data;
+// };
 
 export const UpdateTask = async (taskId, inputData) => {
   const { data } = await api().put(`/task/${taskId}`, inputData);
