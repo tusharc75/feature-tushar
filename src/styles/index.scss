@@ -2225,6 +2225,14 @@ svg.MuiSvgIcon-root {
 .MuiTabScrollButton-root.Mui-disabled {
   opacity: 0.8 !important;
   pointer-events: none;
+  @apply bg-[#e5e5e5] dark:bg-[var(--dark-secondary)];
+  [data-mode='dark'] & {
+    opacity: 0.5 !important;
+  }
+}
+.MuiTabScrollButton-root {
+  border: 1px solid var(--common-border-color) !important;
+  border-radius: 5px !important;
 }
 
 @media all and (max-width: 1024px) {
