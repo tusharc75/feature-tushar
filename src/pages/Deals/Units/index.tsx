@@ -9,7 +9,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import { prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 
-const Assets = ({ dealId }) => {
+const Units = ({ dealData }) => {
 
   const renderedFrom = camelCase(`${routes?.deals.title}_assets`);
   const toastConfig = useContext(CustomToastContext);
@@ -27,8 +27,8 @@ const Assets = ({ dealId }) => {
   }, []);
 
   const fetchFields = async () => {
-    axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`).then(({ data: { data } }) => {
-      const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
+    axiosInstance().get(`/field?resource=${sidebarResource.units}`).then(({ data: { data } }) => {
+      const newColumns = generateColumns(renderedFrom, data, routes.unitDetail.path);
       setColumns([...newColumns, ...getStaticFields()]);
       fetchData();
     })
@@ -38,18 +38,23 @@ const Assets = ({ dealId }) => {
   };
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    axiosInstance().get(`${routes.deals.path}/asset/${dealId}`).then(({ data: { data } }) => {
-      let rows = data?.map((u, i) => {
-        let finalObject: any = prepareDataForGrid(u, user);
-        return finalObject;
+    if (dealData?.units?.length) {
+      dispatch({ type: 'loading', loading: true });
+      axiosInstance().get(`${routes.units.path}?getById=${encodeURIComponent(JSON.stringify(dealData?.units))}`).then(({ data: { data } }) => {
+        let rows = data?.map((u, i) => {
+          let finalObject: any = prepareDataForGrid(u, user);
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
+      }).catch((err) => {
+        dispatch({ type: 'loading', loading: false });
+        toastConfig.setToastConfig(err);
       });
-      dispatch({ type: 'initialize', data: rows, count: rows?.length });
-      dispatch({ type: 'loading', loading: false });
-    }).catch((err) => {
-      dispatch({ type: 'loading', loading: false });
-      toastConfig.setToastConfig(err);
-    });
+    }
+    else {
+      dispatch({ type: 'initialize', data: [], count: 0 });
+    }
   };
 
   return (
@@ -77,4 +82,4 @@ const Assets = ({ dealId }) => {
   );
 };
 
-export default Assets;
+export default Units;

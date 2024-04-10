@@ -11,7 +11,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import { MATERIAL_TYPE, QUOTATION_STATUS, QUOTATION_TYPE, fieldServiceOrder, fieldTicket, prepareDataForGrid, quotation, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, MATERIAL_TYPE, QUOTATION_STATUS, QUOTATION_TYPE, fieldServiceOrder, fieldTicket, prepareDataForGrid, quotation, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -32,7 +32,8 @@ const QuoteBuilder = ({
   versionData,
   allowedToEdit,
   renderedFrom,
-  DOAData = []
+  DOAData = [],
+  setReserveAssetWarning
 }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const toastConfig = useContext(CustomToastContext);
@@ -299,6 +300,13 @@ const QuoteBuilder = ({
       _subRow.hideSelection = _subRow?.fieldTicketCreated ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
+    for(const _subRow of subRows) {
+      let assetStatus = _subRow?.serializedAssetDetail?.status;
+      if (quotationData?.type === QUOTATION_TYPE.rentalJob && _subRow.type === MATERIAL_TYPE.serializedAsset && assetStatus !== ASSET_STATUS.new && assetStatus !== ASSET_STATUS.available && assetStatus !== ASSET_STATUS.underReview) {
+        setReserveAssetWarning(true);
+        break;
+      }
+    }
     return subRows;
   };
 

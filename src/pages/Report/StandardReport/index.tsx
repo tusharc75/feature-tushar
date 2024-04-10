@@ -83,26 +83,20 @@ const Report = () => {
             setLoadingColumns(true);
             let columns = [];
             let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${type}/column`);
-            const customRendererTypes = ['reference', 'creditDebit', 'date', 'creditDebitType'];
             let newColumns = generateColumns(type, columnFields);
             newColumns?.forEach(o => {
-                const fieldType = columnFields?.find(c => c?.fieldData?.fieldName === o?.accessor)?.type;
-                if (customRendererTypes?.includes(fieldType)) {
-                    switch (fieldType) {
-                        case 'reference':
-                            o.cell = ({ row }) => ReferenceRenderer(row);
-                            o.disableFilters = true;
-                            o.disableSortBy = true;
-                            break;
-                        case 'creditDebit':
-                            o.cell = ({ row }) => CreditDebitRenderer(row)
-                            o.disableFilters = true;
-                            o.disableSortBy = true;
-                            break;
-                        case 'creditDebitType':
-                            o.cell = ({ row }) => CreditDebitTypeRenderer(row);
-                            break;
+                if (type === "inventory-history") {
+                    if (o?.accessor === 'type') {
+                        o.cell = ({ row }) => CreditDebitTypeRenderer(row)
                     }
+                    if (o?.accessor === 'qty') {
+                        o.cell = ({ row }) => CreditDebitRenderer(row)
+                    }
+                }
+                if (o?.accessor === 'reference') {
+                    o.cell = ({ row }) => ReferenceRenderer(row);
+                    o.disableFilters = true;
+                    o.disableSortBy = true;
                 }
                 if (o?.accessor === 'serialNumber') {
                     o.cell = ({ row }) => SerialNumberRenderer(row)

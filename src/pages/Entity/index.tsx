@@ -20,8 +20,7 @@ import { entity, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarR
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageEntity from './ManageEntity';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const Entity: FC = () => {
   const renderedFrom = camelCase(routes?.entity.title);
@@ -49,17 +48,6 @@ const Entity: FC = () => {
   const { entityResource, entityApi } = entity;
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    searchTimeout = setTimeout(() => {
-      fetchEntity();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
     fetchLoggedInUserRole();
   }, []);
 
@@ -85,9 +73,11 @@ const Entity: FC = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchEntity();
+    const cencelToken = axios.CancelToken.source();
+    fetchEntity(cencelToken);
+    return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
+  }, [search, page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   useEffect(() => {
     if (selectedRecords?.length === 1) {
@@ -231,12 +221,12 @@ const Entity: FC = () => {
     return deepFilter;
   };
 
-  const fetchEntity = () => {
+  const fetchEntity = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${entityApi}${queryString}`)
+      .get(`${entityApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           return prepareDataForGrid(u);

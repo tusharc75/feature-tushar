@@ -10,7 +10,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
-import { GetReferenceName } from '../../../axios/activity';
 import axiosInstance from '../../../axios/axiosInstance';
 import ManageAttachment from '../../../components/Activity/Attachments/ManageAttachment';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
@@ -26,6 +25,7 @@ import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutli
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SendIcon from '@material-ui/icons/Send';
 import PreviewIcon from '@material-ui/icons/Visibility';
+import axios, { CancelTokenSource } from 'axios';
 import _ from 'lodash';
 import mime from 'mime';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
@@ -289,8 +289,9 @@ export default function Attachment() {
 
   useEffect(() => {
     if (referenceType) {
-      GetReferenceName(referenceType, referenceId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
+        .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
         .catch((err) => {
@@ -302,9 +303,11 @@ export default function Attachment() {
   }, [referenceId]);
 
   useEffect(() => {
-    if (filter) {
-      fetchAttachments();
-    }
+    const cancelToken = axios.CancelToken.source();
+    if (filter) fetchAttachments(cancelToken);
+    return () => cancelToken.cancel();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, filter, filters, sorting]);
 
   useEffect(() => {
@@ -517,7 +520,7 @@ export default function Attachment() {
     return deepFilter;
   };
 
-  const fetchAttachments = async () => {
+  const fetchAttachments = async (cancelTokenSource?: CancelTokenSource) => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
@@ -525,7 +528,7 @@ export default function Attachment() {
     }
     let api = `/attachment?graphLookup=0&relatedTo=${JSON.stringify(filter)}${queryString}`;
     axiosInstance()
-      .get(api)
+      .get(api, { cancelToken: cancelTokenSource?.token })
       .then(
         ({
           data: {
@@ -867,8 +870,8 @@ const LeftSideContents = ({
     <>
       <Autocomplete
         limitTags={1}
-        options={resourceOptions}
-        getOptionLabel={(option) => option.optionLabel}
+        options={resourceOptions || []}
+        getOptionLabel={(option) => option.optionLabel || ''}
         className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
         fullWidth
         value={resource}
@@ -897,9 +900,9 @@ const LeftSideContents = ({
         <Autocomplete
           limitTags={1}
           disabled={loadingResources}
-          options={resourceData}
+          options={resourceData || []}
           className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
-          getOptionLabel={(option: any) => option.optionLabel}
+          getOptionLabel={(option: any) => option.optionLabel || ''}
           getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
           value={selectedResourceData}
           onChange={(event, newValue) => {

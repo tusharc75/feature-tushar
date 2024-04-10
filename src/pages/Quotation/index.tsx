@@ -32,8 +32,7 @@ import {
 } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-
-let quotationTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const Quotation = () => {
   const types = [
@@ -116,21 +115,12 @@ const Quotation = () => {
   };
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (quotationTimeout) {
-      clearTimeout(quotationTimeout);
-    }
-
-    quotationTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
     if (renderCount > 0) {
-      fetchData();
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
+  }, [page,search, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
 
   const handleDelete = () => {
     setIsSubmitting(true);
@@ -268,12 +258,12 @@ const Quotation = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${quotation.api}${queryString}`)
+      .get(`${quotation.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);

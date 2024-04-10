@@ -11,7 +11,10 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import Material from './Material';
-import Assets from './Assets';
+import Units from './Units';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { camelCase } from 'lodash';
+import { sidebarResource } from 'src/constants/helpers';
 
 const DealDetail = () => {
 
@@ -57,6 +60,11 @@ const DealDetail = () => {
                 <Box className="nav-v1">
                     <CustomBreadCrumbs routes={[routes.deals, { title: dealData?.dealname }]} />
                 </Box>
+                <Box className="controls-v1">
+                    <Box className="control-buttons-v1">
+                        <ActivityButton referenceId={dealData?._id} resource={camelCase(sidebarResource.deals)} resourceLabel={dealData?.dealname} />
+                    </Box>
+                </Box>
             </Box>
             <Box className="detail-container-v1">
                 <Tabs
@@ -96,7 +104,7 @@ const DealDetail = () => {
                         className={'tabLayout'}
                         label={
                             <div className="d-flex align-items-center tab-font">
-                                <BiFoodMenu className="mr-1" fontSize="inherit" /> Assets
+                                <BiFoodMenu className="mr-1" fontSize="inherit" /> {routes.units.title}
                             </div>
                         }
                         value={2}
@@ -119,7 +127,7 @@ const DealDetail = () => {
                     <Material dealId={id} />
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
-                    <Assets dealId={id} />
+                    <Units dealData={dealData} />
                 </TabPanel>
             </Box>
         </Box>
