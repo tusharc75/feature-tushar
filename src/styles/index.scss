@@ -2233,6 +2233,7 @@ svg.MuiSvgIcon-root {
 .MuiTabScrollButton-root {
   border: 1px solid var(--common-border-color) !important;
   border-radius: 5px !important;
+  margin-bottom: -1px !important;
 }
 
 @media all and (max-width: 1024px) {
