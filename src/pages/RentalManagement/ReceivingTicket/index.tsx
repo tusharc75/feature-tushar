@@ -304,15 +304,15 @@ const ReceivingTicket = ({
       products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'));
       products?.forEach((element) => {
         var qty = element.qty;
-        var consumeQty = 0;
-        consumeProducts
-          ?.filter((e) => e.product === element.materialId)
-          ?.forEach((e) => {
-            consumeQty = consumeQty + e.qty;
-          });
+
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
           const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
+
+          var consumeQty = 0;
+          consumeProducts?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)?.forEach((e) => {
+            consumeQty = consumeQty + e.qty
+          });
 
           const obj: any = {};
           obj.uniqueId = element._id;
@@ -389,7 +389,7 @@ const ReceivingTicket = ({
           obj.qty = qty;
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
-          obj.consumeQty = consumeQty;
+          obj.consumeQty = 0;
           obj.returnQty = 0;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
@@ -398,13 +398,7 @@ const ReceivingTicket = ({
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
           obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
-          obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
-            ? qty === consumeQty
-              ? RENTAL_INTERNAL_ASSET_STATUS.consumed
-              : consumeQty < qty && consumeQty > 0
-                ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
-                : ''
-            : element?.status;
+          obj.rentalAssetStatus = element?.productDetail?.serializedProduct ? element?.status : '';
           obj.currentLocation =
             element?.currentLocation?.optionValue ||
             rentalManagementData?.shippingAddress?.optionValue ||
@@ -1023,11 +1017,11 @@ const ReceivingTicket = ({
     const products = [];
     if (data) {
       selectedRecords?.forEach((e) => {
-        products.push({ product: e.materialId, qty: parseInt(data.qty) });
+        products.push({ product: e.materialId, loadingTicketId: e.loadingTicketId, qty: parseInt(data.qty) });
       });
     } else {
       selectedRecords?.forEach((e) => {
-        products.push({ product: e.materialId, qty: parseInt(e.qty) });
+        products.push({ product: e.materialId, loadingTicketId: e.loadingTicketId, qty: parseInt(e.qty) - parseInt(e.consumeQty || 0) });
       });
     }
     setOkBtnLoading(true);
