@@ -2222,6 +2222,11 @@ svg.MuiSvgIcon-root {
   }
 }
 
+.MuiTabScrollButton-root.Mui-disabled {
+  opacity: 0.8 !important;
+  pointer-events: none;
+}
+
 @media all and (max-width: 1024px) {
   .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
     padding-right: 25px;
@@ -2241,7 +2246,7 @@ svg.MuiSvgIcon-root {
     }
 
     .MuiTabScrollButton-root.Mui-disabled {
-      opacity: 0.2;
+      opacity: 0.7;
       pointer-events: none;
     }
 

@@ -6,7 +6,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
-import { GetNotes, GetReferenceName } from '../../../axios/activity';
+import { GetReferenceName } from '../../../axios/activity';
 import axiosInstance from '../../../axios/axiosInstance';
 import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
@@ -27,6 +27,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { displayDate } from '../../../constants/helpers';
+import axios, { CancelTokenSource } from 'axios';
 
 const Note = () => {
   const renderedFrom = camelCase(routes?.activityNote.title);
@@ -130,12 +131,7 @@ const Note = () => {
         filter: false,
         sortable: false,
         show: true,
-        Cell: ({ row }) =>
-          row.original?.updatedByDate ? (
-            <div>{displayDate(row.original?.updatedByDate)}</div>
-          ) : (
-            <NoDataCell />
-          )
+        Cell: ({ row }) => (row.original?.updatedByDate ? <div>{displayDate(row.original?.updatedByDate)}</div> : <NoDataCell />)
       }
     ];
     setColumns([...column, ActionsRenderer]);
@@ -198,12 +194,6 @@ const Note = () => {
     }
   }, [resource]);
 
-  useEffect(() => {
-    if (filter) {
-      fetchData();
-    }
-  }, [filter]);
-
   const handleClose = () => {
     setShowCreateDialog(false);
     setIsNew(false);
@@ -216,17 +206,19 @@ const Note = () => {
   };
 
   useEffect(() => {
-    if (filter) {
-      fetchData();
-    }
+    const cancelToken = axios.CancelToken.source();
+    fetchData(cancelToken);
+    return () => cancelToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, filters, filter, sorting, search]);
 
-
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-    await GetNotes(JSON.stringify(filter), queryString)
-      .then(({ data }) => {
+    let apiUrl = `/note?filter=${JSON.stringify(filter)}${queryString}`;
+    axiosInstance()
+      .get(apiUrl, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           const { createdBy, updatedBy, ...restProperties } = u;
           let res = {
@@ -447,7 +439,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-          // noteData={noteData}
+            // noteData={noteData}
           />
         </Dialog>
       )}
