@@ -110,6 +110,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       ...(resource === sidebarResource.fieldTicket ? [{
         accessor: 'fieldTicketNumber',
         Header: 'Field Ticket',
+        disabled: true,
         Cell: ({ row }) =>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p className="text-truncate">{row.original.fieldTicketNumber}</p>
