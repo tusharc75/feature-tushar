@@ -213,7 +213,7 @@ const SerializedAssetStatusChangeRequest = () => {
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.approved });
+                  setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.rejected });
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length && permissions?.serializedAsset?.isUpdate
