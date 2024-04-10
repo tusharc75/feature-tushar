@@ -33,9 +33,15 @@ const getWarningList = (row?: any) => {
       title: 'Unit is assigned to multiple deals',
       label: 'Unit is assigned to multiple deals',
       isVisible: row?.original?.unitInOtherDeal
+    },
+    {
+      warningFilter: 3,
+      icon,
+      title: 'Contract Start Date has not set',
+      label: 'Contract Start Date has not set',
+      isVisible: row?.original?.dealstage === 'Contract Signed' && !row?.original?.start_set_date
     }
   ];
-
   return list;
 };
 
@@ -95,12 +101,12 @@ const Deals = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                        <Box ml={1} key={w.warningFilter}>
-                          <HtmlTooltip title={w.title} placement="top" arrow>
-                            {w.icon}
-                          </HtmlTooltip>
-                        </Box>
-                      ))
+                      <Box ml={1} key={w.warningFilter}>
+                        <HtmlTooltip title={w.title} placement="top" arrow>
+                          {w.icon}
+                        </HtmlTooltip>
+                      </Box>
+                    ))
                     : null}
                 </div>
               );
