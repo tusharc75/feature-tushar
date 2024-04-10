@@ -32,9 +32,10 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import AssignUnassignResourceDialog from './AssignUnassignResource';
 import CreateRole from './CreateRole';
+import axios, { CancelTokenSource } from 'axios';
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
-let searchTimeout;
+
 
 const Roles: FC = () => {
   const renderedFrom = camelCase(routes.role.title);
@@ -174,20 +175,12 @@ const Roles: FC = () => {
   ];
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchRoles();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
     if (renderCount > 0) {
-      fetchRoles();
+    const cencelToken = axios.CancelToken.source();
+    fetchRoles(cencelToken);
+    return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting]);
+  }, [search, page, limit, selectedType, filters, sorting]);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&type=2`;
@@ -215,12 +208,12 @@ const Roles: FC = () => {
     return deepFilter;
   };
 
-  const fetchRoles = async () => {
+  const fetchRoles = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`/role/${queryString}`)
+      .get(`/role/${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);

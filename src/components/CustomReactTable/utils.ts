@@ -1,8 +1,7 @@
-import { camelCase, flatMapDeep, isEmpty, startCase } from 'lodash';
+import { flatMapDeep, isEmpty } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrencies } from 'src/constants/helpers';
 import { TColType } from './TableComponents/TableHelperComponents';
 
 export const childrenProperty = 'subRows';
@@ -346,13 +345,15 @@ export function alphaToNum(alpha) {
   }
   return num - 1;
 }
-export function numToAlpha(num) {
-  let alpha = '';
+
+export function numToAlpha(num: any) {
+  let alpha: any = '';
   for (; num >= 0; num = parseInt(num / 26, 10) - 1) {
     alpha = String.fromCharCode((num % 26) + 0x41) + alpha;
   }
   return alpha;
 }
+
 export function getExcelColumnNameFromRange(range) {
   let res = [],
     rangeNum = range.split(':').map(function (val) {

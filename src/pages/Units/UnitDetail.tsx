@@ -1,0 +1,178 @@
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaWpforms } from 'react-icons/fa';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
+import routes from 'src/components/Helpers/Routes';
+import { sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
+import ManageUnit from './ManageUnit';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { camelCase } from 'lodash';
+
+const UnitDetail = () => {
+  const { id } = useParams();
+  const history = useHistory();
+  const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { permissions, user }
+  }: any = useData();
+
+  const [unitData, setUnitData] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [fields, setFields] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+
+  useEffect(() => {
+    if (id) {
+      fetchFields();
+      fetchData();
+    }
+  }, [id]);
+
+  const fetchFields = async () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource?.units}`)
+      .then(({ data }) => {
+        setFields(data.data?.filter((field) => field.isRead));
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`${routes.units.path}/${id}`);
+      setUnitData(data);
+      setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const handleDelete = () => {
+    if (id) {
+      axiosInstance()
+        .put(`${routes?.units?.path}/remove`, { ids: [id] })
+        .then(({ data }) => {
+          setShowConfirmBox(false);
+
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
+          history.push(`${routes.units.path}`);
+        })
+        .catch((err) => {
+          setShowConfirmBox(false);
+        });
+    } else {
+      setShowConfirmBox(false);
+    }
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const closeDialog = () => {
+    setOpen(false);
+  };
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  return (
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={[routes.units, { title: unitData?.unitNumber }]} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {permissions?.units?.isUpdate && (
+              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpen}>
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
+              </Button>
+            )}
+            {permissions?.units?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            <ActivityButton referenceId={unitData?._id} resource={camelCase(sidebarResource.units)} resourceLabel={unitData?.unitNumber} />
+          </Box>
+        </Box>
+      </Box>
+      <Box className="detail-container-v1">
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              height: 0
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            value={0}
+            aria-controls="a11y-tabpanel-0"
+            id="a11y-tab-0"
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={unitData} fields={fields} />
+          )}
+        </TabPanel>
+      </Box>
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete ${routes?.trailerMaster?.title?.toLowerCase()} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+      {open && (
+        <ManageUnit
+          id={id}
+          onClose={closeDialog}
+          onSuccess={() => {
+            closeDialog();
+            fetchData();
+          }}
+        />
+      )}
+    </Box>
+  );
+};
+
+export default UnitDetail;

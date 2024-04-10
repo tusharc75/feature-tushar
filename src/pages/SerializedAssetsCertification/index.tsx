@@ -27,8 +27,8 @@ import {
 } from '../../constants/helpers';
 import CertificateHistoryDialog from './CertificateHistoryDialog';
 import IssueCertificateDialog from './IssueCertificateDialog';
+import axios, { CancelTokenSource } from 'axios';
 
-let searchTimeout;
 const SerializedAssetsCertification = () => {
   const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
   const toastConfig = useContext(CustomToastContext);
@@ -60,16 +60,6 @@ const SerializedAssetsCertification = () => {
     fetchGridColumns();
   }, []);
 
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
   const fetchAssetsOption = () => {
     axiosInstance()
       .get(`${serializedAssetsCertification.api}/asset`)
@@ -87,8 +77,10 @@ const SerializedAssetsCertification = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity, selectedAsset]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity, selectedAsset]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -98,11 +90,11 @@ const SerializedAssetsCertification = () => {
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${serializedAssetsCertification.api}${queryString}`)
+      .get(`${serializedAssetsCertification.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data }) => {
         let rows = data?.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u, user);

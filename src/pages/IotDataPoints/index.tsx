@@ -19,8 +19,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import ManageIotDataPoints from './ManageIotDataPoints';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const IotDataPoints = () => {
   const renderedFrom = camelCase(routes?.iotDataPoints.title);
@@ -47,12 +46,12 @@ const IotDataPoints = () => {
       });
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes?.iotDataPoints?.path}${queryString}`)
+      .get(`${routes?.iotDataPoints?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
@@ -199,19 +198,10 @@ const IotDataPoints = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
-
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const ActionMenuItems = () => {
     return (
