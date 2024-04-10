@@ -57,7 +57,6 @@ const ManageDataList = ({ onClose, onSuccess, isEdit = false, id = null ,dataLis
             isTooltip: false,
             option: [],
             order: 1,
-            required: false,
             tooltipMessage: '',
             sectionName: 'Data list',
             type: 'multiLine',
