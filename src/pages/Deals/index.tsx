@@ -49,7 +49,10 @@ const Deals = () => {
             newColumns?.forEach((o) => {
                 if (o?.accessor === 'dealname') {
                     o.cell = ({ row }) => (
-                        <div style={{ backgroundColor: ['Expired'].includes(row?.original?.contractStatus) ? COLOUR_MASTER.lostAssets.background : '' }}     >
+                        <div style={{
+                            backgroundColor: ['Expired'].includes(row?.original?.contractStatus)
+                                || row?.original?.unitInOtherDeal ? COLOUR_MASTER.lostAssets.background : ''
+                        }}     >
                             <Link
                                 className="link text-truncate"
                                 title={row?.original?.dealname}
@@ -60,6 +63,13 @@ const Deals = () => {
                             {['Expired'].includes(row?.original?.contractStatus) && (
                                 <Box ml={1}>
                                     <HtmlTooltip title="Deal Expired">
+                                        <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+                                    </HtmlTooltip>
+                                </Box>
+                            )}
+                            {row?.original?.unitInOtherDeal && (
+                                <Box ml={1}>
+                                    <HtmlTooltip title="Unit is assigned to multiple deals">
                                         <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
                                     </HtmlTooltip>
                                 </Box>
