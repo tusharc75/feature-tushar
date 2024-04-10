@@ -299,8 +299,14 @@ const QuoteBuilder = ({
       _subRow.isValid = true;
       _subRow.hideSelection = _subRow?.fieldTicketCreated ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
-      if (quotationData?.type === QUOTATION_TYPE.rentalJob && _subRow.type === MATERIAL_TYPE.serializedAsset && _subRow?.serializedAssetDetail?.status === ASSET_STATUS.reserved) setReserveAssetWarning(true);
     });
+    for(const _subRow of subRows) {
+      let assetStatus = _subRow?.serializedAssetDetail?.status;
+      if (quotationData?.type === QUOTATION_TYPE.rentalJob && _subRow.type === MATERIAL_TYPE.serializedAsset && assetStatus !== ASSET_STATUS.new && assetStatus !== ASSET_STATUS.available && assetStatus !== ASSET_STATUS.underReview) {
+        setReserveAssetWarning(true);
+        break;
+      }
+    }
     return subRows;
   };
 
