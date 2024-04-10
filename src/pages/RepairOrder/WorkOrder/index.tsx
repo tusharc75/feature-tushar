@@ -389,7 +389,6 @@ const WorkOrder = ({
               <HtmlTooltip title="Add Products/Consumables">
                 <IconButton
                   size="small"
-                  // disabled={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? false : true}
                   aria-label="Add Products/Consumables"
                   onClick={() => {
                     var ids = [];
@@ -595,16 +594,16 @@ const WorkOrder = ({
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
       parent.hideSelection = false;
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
-        // parent.hideSelection = true;
-        parent.serviceStatus = parent?.workOrder?.status;
+      parent.workOrderStatus = parent?.workOrder?.status;
+      if (parent.workOrderStatus === WORK_ORDER_STATUS.completed) {
+        parent.serviceStatus = parent.workOrderStatus;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
+      if (parent.workOrderStatus === WORK_ORDER_STATUS.new) {
         parent.canAutoCompleteWorkOrder = true;
       }
       parent.canDelete = false;
-      if (parent?.subRows?.length === 0 && parent?.workOrder && parent?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+      if (parent?.subRows?.length === 0 && parent?.workOrder && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(parent.workOrderStatus)) {
         parent.canDelete = true;
       }
     });
@@ -669,6 +668,7 @@ const WorkOrder = ({
       _subRow.preWork = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.preWork : false;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
+      _subRow.workOrderStatus = parent?.workOrderStatus;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
       _subRow.isValid = true;
@@ -677,7 +677,7 @@ const WorkOrder = ({
       if (_subRow.type === MATERIAL_TYPE.product) {
         _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty ? false : true;
       }
-      if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+      if (![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(_subRow?.workOrder?.status)) {
         if (_subRow.type === MATERIAL_TYPE.service) {
           _subRow.canDelete = _subRow?.status === WORKORDER_SERVICE_STATUS.pending ? true : false;
         }
@@ -877,7 +877,9 @@ const WorkOrder = ({
   };
 
   const isDisabledCompleteService = () => {
-    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.includes(e?.status));
+    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service
+      && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(e?.workOrderStatus)
+      && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.includes(e?.status));
     if (records?.length === 0) {
       return true;
     }
@@ -958,7 +960,7 @@ const WorkOrder = ({
   };
 
   const isWorkOrderCompleted = (data) => {
-    return data?.some(e => e?.workOrder && e?.workOrder?.status === WORK_ORDER_STATUS.completed);;
+    return data?.some(e => [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(e.workOrderStatus));
   }
 
   const actionButtonMenuItems = () => {
@@ -1067,7 +1069,9 @@ const WorkOrder = ({
         </MenuItem>
         <MenuItem
           disabled={
-            selectedRecords?.length && selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)
+            selectedRecords?.length && selectedRecords?.some((e) =>
+              e.type === MATERIAL_TYPE.service
+              && e.status !== WORKORDER_SERVICE_STATUS.pending)
               && !isWorkOrderCompleted(selectedRecords) ? false : true
           }
           onClick={() => {

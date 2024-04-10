@@ -164,7 +164,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
                   {row?.original[e?.fieldName]}
                 </p>
               )}
-              <Box ml={1}>
+              <Box ml={1} flexShrink={0}>
                 <IconButton
                   size="small"
                   onClick={() => {

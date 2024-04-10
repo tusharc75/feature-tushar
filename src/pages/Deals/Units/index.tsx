@@ -38,20 +38,25 @@ const Units = ({ dealData }) => {
   };
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    axiosInstance().get(`${routes.units.path}?getById=${encodeURIComponent(JSON.stringify(dealData?.units))}`).then(({ data: { data } }) => {
-      let rows = data?.map((u, i) => {
-        let finalObject: any = prepareDataForGrid(u, user);
-        return finalObject;
+    if (dealData?.units?.length) {
+      dispatch({ type: 'loading', loading: true });
+      axiosInstance().get(`${routes.units.path}?getById=${encodeURIComponent(JSON.stringify(dealData?.units))}`).then(({ data: { data } }) => {
+        let rows = data?.map((u, i) => {
+          let finalObject: any = prepareDataForGrid(u, user);
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
+      }).catch((err) => {
+        dispatch({ type: 'loading', loading: false });
+        toastConfig.setToastConfig(err);
       });
-      dispatch({ type: 'initialize', data: rows, count: rows?.length });
-      dispatch({ type: 'loading', loading: false });
-    }).catch((err) => {
-      dispatch({ type: 'loading', loading: false });
-      toastConfig.setToastConfig(err);
-    });
+    }
+    else {
+      dispatch({ type: 'initialize', data: [], count: 0 });
+    }
   };
-  
+
   return (
     <Fragment>
       {columns ? (

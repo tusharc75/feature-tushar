@@ -74,13 +74,14 @@ const QuotationDetails = () => {
   const [currVersionId, setCurrVersionId] = useState(null);
   const [sentToCustomer, setSentToCustomer] = useState(false);
 
-  const [convertConfirmBox, setConvertConfirmBox] = useState(false);
+  const [convertConfirmBox, setConvertConfirmBox] = useState({open : false, warning : null});
   const [renewal, setRenewal] = useState(false);
   const [releaseConfirm, setReleaseConfirm] = useState(false);
 
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
   const [canConvert, setCanConvert] = useState(false);
+  const [reserveAssetWarning, setReserveAssetWarning] = useState(false);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -337,7 +338,7 @@ const QuotationDetails = () => {
       .post(`${quotation.api}/convert`, { quotationId: quotationData._id, versionId: currVersionId })
       .then(({ data: { data } }) => {
         fetchQuotationData();
-        setConvertConfirmBox(false);
+        setConvertConfirmBox({open : false, warning : null});
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -501,7 +502,7 @@ const QuotationDetails = () => {
                   {allowedToEdit && canConvert && (
                     <MenuItem
                       onClick={() => {
-                        setConvertConfirmBox(true);
+                        setConvertConfirmBox({open : true, warning : reserveAssetWarning ? 'Asset(s) are not available, should we allow to convert without asset(s) ?' : null});
                         closeActionsAction();
                       }}
                     >
@@ -663,6 +664,7 @@ const QuotationDetails = () => {
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
+                  setReserveAssetWarning={setReserveAssetWarning}
                 />
               )}
               {stepNames[currentStep] === 'DOA' && quotationData && (
@@ -679,6 +681,7 @@ const QuotationDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-3`}
                   sentToCustomer={sentToCustomer}
                   DOAData={DOAData}
+                  setReserveAssetWarning={setReserveAssetWarning}
                 />
               )}
               {stepNames[currentStep] === 'Quote Approval' && quotationData && (
@@ -694,6 +697,7 @@ const QuotationDetails = () => {
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
+                  setReserveAssetWarning={setReserveAssetWarning}
                 />
               )}
               {stepNames[currentStep] === 'End' && quotationData && (
@@ -708,6 +712,7 @@ const QuotationDetails = () => {
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
+                  setReserveAssetWarning={setReserveAssetWarning}
                 />
               )}
             </ContentFullScreen>
@@ -798,12 +803,12 @@ const QuotationDetails = () => {
           onOk={handleRelease}
         />
       )}
-      {convertConfirmBox && (
+      {convertConfirmBox.open && (
         <ConfirmationDialog
-          open={convertConfirmBox}
-          message={`Are you sure you want to convert quotation : ${quotationData?.quotationNumber} ?`}
+          open={convertConfirmBox.open}
+          message={convertConfirmBox?.warning ? convertConfirmBox?.warning : `Are you sure you want to convert quotation : ${quotationData?.quotationNumber} ?`}
           onClose={() => {
-            setConvertConfirmBox(false);
+            setConvertConfirmBox({open : false, warning : null});
           }}
           onOk={handleConvert}
         />

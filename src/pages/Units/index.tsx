@@ -1,27 +1,60 @@
-import { useContext, useEffect, useState } from 'react';
 import { Box, IconButton, MenuItem } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import WarningIcon from '@material-ui/icons/Warning';
 import { camelCase } from 'lodash';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import WarningFilter from 'src/components/WarningFilter';
 import { COLOUR_MASTER, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import axiosInstance from 'src/axios/axiosInstance';
-import ManageUnit from './ManageUnit';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { deleteDisable } from 'src/constants/messageHelpers';
-import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import { Link } from 'react-router-dom';
-import WarningIcon from '@material-ui/icons/Warning';
+import ManageUnit from './ManageUnit';
+import axios, { CancelTokenSource } from 'axios';
+
+const getWarningList = (row?: any) => {
+  const icon = <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />;
+  const list = [
+    {
+      warningFilter: 1,
+      icon,
+      title: 'Unit is assigned to multiple deals',
+      label: 'Unit is assigned to multiple deals',
+      isVisible: row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0
+    },
+    {
+      warningFilter: 2,
+      icon,
+      label: 'Manager Plus Status Conflict',
+      title: 'Manager Plus Status Conflict - Status is other than Active,Committed',
+      isVisible: row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status)
+    },
+    {
+      warningFilter: 3,
+      icon,
+      title: 'Unit is not ready for the deal',
+      label: 'Unit is not ready for the deal',
+      isVisible:
+        row?.original?.availabilityDate &&
+        row?.original?.contractDate &&
+        new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime()
+    }
+  ];
+
+  return list;
+};
 
 const Units = () => {
-
   const renderedFrom = camelCase(routes?.units.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -36,77 +69,61 @@ const Units = () => {
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-
   const { generateColumns } = useColumns();
+  const [checkedFilter, setCheckedFilter] = useState<null | number>(null);
 
   useEffect(() => {
     fetchColumns();
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+
+    return () => cencelToken.cancel();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, checkedFilter]);
+
+  const getWarnings = useCallback((row: any) => {
+    const warningList = getWarningList(row).filter((d) => d.isVisible);
+    return warningList;
+  }, []);
 
   const fetchColumns = () => {
-    axiosInstance().get(`/field?resource=${sidebarResource?.units}`).then(({ data: { data } }) => {
-      const newColumns = generateColumns(renderedFrom, data, routes.unitDetail.path, true);
-      newColumns?.forEach((o) => {
-        if (o?.accessor === 'unitNumber') {
-          o.cell = ({ row }) => (
-            <div
-              style={{
-                backgroundColor: (row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0) ||
-                  (row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status)) ||
-                  (row?.original?.availabilityDate && row?.original?.contractDate
-                    && new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime()
-                  ) ||
-                  (row?.original?.status === 'COMMITTED' && !row?.original?.contractDate)
-                  ? COLOUR_MASTER.lostAssets.background
-                  : ''
-              }}
-            >
-              <Link
-                className="link text-truncate"
-                title={row?.original?.unitNumber}
-                to={`${routes.unitDetail.path}/${row?.original?._id}`}
-              >
-                {row?.original?.unitNumber}
-              </Link>
-              {row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0 && (
-                <Box ml={1}>
-                  <HtmlTooltip title="Unit is assigned to multiple deals">
-                    <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
-                  </HtmlTooltip>
-                </Box>
-              )}
-              {row?.original?.secondaryStatus === 'Allocated' && !['ACTIVE', 'COMMITTED']?.includes(row?.original?.status) && (
-                <Box ml={1}>
-                  <HtmlTooltip title="Manager Plus Status Conflict - Status is other than Active,Committed">
-                    <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
-                  </HtmlTooltip>
-                </Box>
-              )}
-              {row?.original?.availabilityDate && row?.original?.contractDate
-                && new Date(row?.original?.availabilityDate)?.getTime() > new Date(row?.original?.contractDate)?.getTime() && (
-                  <Box ml={1}>
-                    <HtmlTooltip title="Unit is not ready for the deal">
-                      <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
-                    </HtmlTooltip>
-                  </Box>
-                )}
-              {row?.original?.status === 'COMMITTED' && !row?.original?.contractDate && (
-                <Box ml={1}>
-                  <HtmlTooltip title="Contract Start Date has not set">
-                    <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
-                  </HtmlTooltip>
-                </Box>
-              )}
-            </div>
-          );
-        }
-      });
-      setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-    })
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource?.units}`)
+      .then(({ data: { data } }) => {
+        const newColumns = generateColumns(renderedFrom, data, routes.unitDetail.path, true);
+        newColumns?.forEach((o) => {
+          if (o?.accessor === 'unitNumber') {
+            o.cell = ({ row }) => {
+              const warnings = getWarnings(row);
+              return (
+                <div
+                  style={{
+                    backgroundColor: warnings.length > 0 ? COLOUR_MASTER.lostAssets.background : ''
+                  }}
+                >
+                  <Link className="link text-truncate" title={row?.original?.unitNumber} to={`${routes.unitDetail.path}/${row?.original?._id}`}>
+                    {row?.original?.unitNumber}
+                  </Link>
+                  {warnings?.length > 0
+                    ? warnings.map((w) => (
+                      <Box ml={1} key={w.warningFilter}>
+                        <HtmlTooltip title={w.title} placement="top" arrow>
+                          {w.icon}
+                        </HtmlTooltip>
+                      </Box>
+                    ))
+                    : null}
+                </div>
+              );
+            };
+          }
+        });
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -142,25 +159,28 @@ const Units = () => {
     )
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance().get(`${routes?.units.path}${queryString}`).then(({ data: { data, count } }) => {
-      let rows = data?.map((u: any) => {
-        let finalObject: any = prepareDataForGrid(u);
-        finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-        finalObject['canDelete'] = permissions?.units?.isDelete;
-        return {
-          ...finalObject
-        };
+    axiosInstance()
+      .get(`${routes?.units.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u: any) => {
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['canDelete'] = permissions?.units?.isDelete;
+          return {
+            ...finalObject
+          };
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-      dispatch({ type: 'initialize', data: rows, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const getQueryString = (isExport = false) => {
@@ -168,6 +188,10 @@ const Units = () => {
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
+    if (checkedFilter) {
+      deepFilter = `${deepFilter}&warningFilter=${checkedFilter}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -268,6 +292,7 @@ const Units = () => {
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
+          rightSideContents={<WarningFilter checkedFilter={checkedFilter} setCheckedFilter={setCheckedFilter} warnings={getWarningList()} />}
           addButtonOnclick={() => {
             setOpen({ open: true, id: null });
           }}

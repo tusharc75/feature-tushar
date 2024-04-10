@@ -8,16 +8,17 @@ import { BiTask } from 'react-icons/bi';
 import { BsBriefcase } from 'react-icons/bs';
 import { VscCalendar } from 'react-icons/vsc';
 import { useHistory } from 'react-router-dom';
+import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
-import { GetBoard, GetReferenceName } from '../../../axios/activity';
+import { GetBoard } from '../../../axios/activity';
 import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
 import { CreateCase } from '../../../components/Activity/Case/CreateCase';
 import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
-import { SearchFilter } from '../../../components/SearchFilter';
 import { CreateTask } from '../../../components/Activity/Task/CreateTask';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
 import routes from '../../../components/Helpers/Routes';
+import { SearchFilter } from '../../../components/SearchFilter';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import MyCalendar from './MyCalendar';
 
@@ -62,8 +63,9 @@ const BigCalendar = () => {
 
   useEffect(() => {
     if (referenceType) {
-      GetReferenceName(referenceType, referenceId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
+        .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
         .catch((err) => {});
