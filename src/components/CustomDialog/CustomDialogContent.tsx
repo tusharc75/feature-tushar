@@ -14,12 +14,15 @@ function CustomDialogContent({ children, style = {}, ...others }: DialogContentP
   const [themeColor] = useAppTheme();
   return (
     <React.Fragment>
-      <DialogContent style={{ ...style, background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff' }} {...others}>
+      <DialogContent
+        className="!max-h-[calc(100svh-110px)]"
+        style={{ ...style, background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff' }}
+        {...others}
+      >
         {children}
       </DialogContent>
     </React.Fragment>
   );
 }
-
 
 export default CustomDialogContent;
