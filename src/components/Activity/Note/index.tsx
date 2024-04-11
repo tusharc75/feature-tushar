@@ -1,21 +1,22 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
 import Box from '@material-ui/core/Box';
+import Dialog from '@material-ui/core/Dialog';
 import Grid from '@material-ui/core/Grid';
-import { CreateNote } from './CreateNote';
-import { GetNote, DeleteNote } from '../../../axios/activity';
-import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import Dialog from '@material-ui/core/Dialog';
+import axios, { CancelTokenSource } from 'axios';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import { useData } from '../../../StateProvider/Provider';
+import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
+import ActivityLoader from '../../Helpers/ActivityLoader';
 import { ListRelatedTo } from '../Helpers/ListRelatedTo';
 import { ViewAll } from '../Helpers/ViewAll';
-import ActivityLoader from '../../Helpers/ActivityLoader';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
-import { useData } from '../../../StateProvider/Provider';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { CreateNote } from './CreateNote';
 
 export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -31,13 +32,17 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    fetchNote();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchNote(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchNote = async () => {
+  const fetchNote = async (cancelTokenSource?: CancelTokenSource) => {
     setLoading(true);
-    await GetNote(JSON.stringify(relatedTo))
-      .then(({ data }) => {
+    axiosInstance()
+      .get(`/note?relatedTo=${JSON.stringify(relatedTo)}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         setNotes(data);
         onSetCount('Note', data.length);
         setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
@@ -67,8 +72,9 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
 
   const handleDelete = (event) => {
     event.stopPropagation();
-    DeleteNote(noteId)
-      .then((data) => {
+    axiosInstance()
+      .delete(`/note/${noteId}`)
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -96,7 +102,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     <Box className="activityDetailBox">
       {loading ? (
         <ActivityLoader />
-      ) : notes.length ? (
+      ) : notes?.length ? (
         <Fragment>
           {notes.slice(0, 5).map((_note, index) => (
             <Box key={_note._id} className="activity">

@@ -1,41 +1,41 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
-import PropTypes from 'prop-types';
-import {
-  Breadcrumbs,
-  Typography,
-  Box,
-  Grid,
-  Button,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  TextField,
-  Divider,
-  Link,
-  CircularProgress,
-  Select
-} from '@material-ui/core';
-import { UserDropdown } from '../Helpers/userDropdown';
-import statusList from '../Helpers/statusList';
-import { Formik, Form } from 'formik';
-import { object, string } from 'yup';
-import moment from 'moment';
 import DateUtils from '@date-io/date-fns';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { GetCaseDetail, CreateNewCase, UpdateCase } from '../../../axios/activity';
-import { Comment } from '../Comment';
-import { RelatedToDispay } from '../Helpers/RelatedToDispay';
+import {
+  Box,
+  Breadcrumbs,
+  Button,
+  CircularProgress,
+  Divider,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
+} from '@material-ui/core';
 import TableChartIcon from '@material-ui/icons/TableChart';
-import { SubCase } from './SubCase';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import axios, { CancelTokenSource } from 'axios';
+import { Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import moment from 'moment';
+import PropTypes from 'prop-types';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { object, string } from 'yup';
+import { useData } from '../../../StateProvider/Provider';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { useData } from '../../../StateProvider/Provider';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { dateFormatForInputControl } from '../../../constants/helpers';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { isEqual } from 'lodash';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { Comment } from '../Comment';
+import { RelatedToDispay } from '../Helpers/RelatedToDispay';
+import statusList from '../Helpers/statusList';
+import { UserDropdown } from '../Helpers/userDropdown';
+import { SubCase } from './SubCase';
 
 const CaseSchema = object().shape({
   name: string().required('Please enter case name'),
@@ -60,13 +60,17 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    fetchCaseDetail();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchCaseDetail(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const fetchCaseDetail = async () => {
+  const fetchCaseDetail = async (cancelTokenSource?: CancelTokenSource) => {
     if (id) {
-      await GetCaseDetail(id)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/case/${id}`, { cancelToken: cancelTokenSource?.token })
+        .then(({ data: { data } }) => {
           if (data?.assignee && data?.assignee !== '') {
             if (typeof data?.assignee === 'string') {
               data['assignee'] = [{ userId: data?.assignee }];
@@ -100,8 +104,9 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
     setSubmitting(true);
     values.relatedTo = relatedTo;
     if (id) {
-      UpdateCase(id, values)
-        .then((data) => {
+      axiosInstance()
+        .put(`/case/${id}`, values)
+        .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -116,8 +121,9 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
         });
     } else {
       values.parentId = null;
-      CreateNewCase(values)
-        .then((data) => {
+      axiosInstance()
+        .post('/case', values)
+        .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',

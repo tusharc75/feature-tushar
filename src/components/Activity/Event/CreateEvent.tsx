@@ -1,28 +1,33 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
-import PropTypes from 'prop-types';
-import { Box, Grid, Button, TextField, Typography, CircularProgress, useMediaQuery } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-import { ArrowRightAlt } from '@material-ui/icons';
-import { Formik, Form } from 'formik';
-import { MuiPickersUtilsProvider, KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
+import { useAccount, useMsal } from '@azure/msal-react';
 import MomentUtils from '@date-io/moment';
-import { object, string } from 'yup';
-import moment from 'moment';
+import { Box, Button, CircularProgress, Grid, TextField, Typography, useMediaQuery } from '@material-ui/core';
+import { ArrowRightAlt } from '@material-ui/icons';
+import { Autocomplete } from '@material-ui/lab';
+import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import axios, { CancelTokenSource } from 'axios';
+import { Form, Formik } from 'formik';
 import { isEmpty } from 'lodash';
-import { GetEventDetail, CreateNewEvent, UpdateEvent, DeleteEvent } from '../../../axios/activity';
-import { UserDropdown } from '../Helpers/userDropdown';
-import { RelatedToDispay } from '../Helpers/RelatedToDispay';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import moment from 'moment';
+import PropTypes from 'prop-types';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { object, string } from 'yup';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import getAzureAcessToken from '../../Azure/getAzureAccessToken';
-import { useAccount, useMsal } from '@azure/msal-react';
-import axiosInstance from '../../../axios/axiosInstance';
-import { useData } from '../../../StateProvider/Provider';
-import Loader from '../../Loader';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { dateFormat, sidebarResource } from '../../../constants/helpers';
+import getAzureAcessToken from '../../Azure/getAzureAccessToken';
+import Loader from '../../Loader';
+import { RelatedToDispay } from '../Helpers/RelatedToDispay';
+import { UserDropdown } from '../Helpers/userDropdown';
 import { get_activity_resource } from '../Helpers/utils';
+
+const CreateNewEvent = async (inputData) => {
+  const { data } = await axiosInstance().post('/event', inputData);
+  return data;
+};
 
 const EventSchema = object().shape({
   name: string().required('Please enter event name').min(3, 'Too Short'),
@@ -57,13 +62,17 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
   }, []);
 
   useEffect(() => {
-    fetchEventDetail();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchEventDetail(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
-  const fetchEventDetail = async () => {
+  const fetchEventDetail = async (cancelTokenSource?: CancelTokenSource) => {
     if (eventId) {
-      await GetEventDetail(eventId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/event/${eventId}`, { cancelToken: cancelTokenSource?.token })
+        .then(({ data: { data } }) => {
           setInitialValues(data);
         })
         .catch((err) => {});
@@ -122,8 +131,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
       values.graphToken = await getAzureAcessToken(instance);
     }
     if (eventId) {
-      UpdateEvent(eventId, values)
-        .then((data) => {
+      axiosInstance()
+        .put(`/event/${eventId}`, values)
+        .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -470,8 +480,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                     size="small"
                     style={{ color: 'red', borderColor: 'red' }}
                     onClick={() =>
-                      DeleteEvent(eventId)
-                        .then((data) => {
+                      axiosInstance()
+                        .delete(`/event/${eventId}`)
+                        .then(({ data }) => {
                           toastConfig.setToastConfig({
                             open: true,
                             type: 'success',

@@ -26,7 +26,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { object, string } from 'yup';
 import { useData } from '../../../StateProvider/Provider';
-import { UpdateTask } from '../../../axios/activity';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -116,8 +115,9 @@ export const CreateTask = ({
     setSubmitting(true);
     values.relatedTo = relatedTo;
     if (id) {
-      UpdateTask(id, values)
-        .then((data) => {
+      axiosInstance()
+        .put(`/task/${id}`, values)
+        .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
