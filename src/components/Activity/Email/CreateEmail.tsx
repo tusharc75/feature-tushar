@@ -1,47 +1,39 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
-import { Formik, Form } from 'formik';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { useAccount, useMsal } from '@azure/msal-react';
 import DateUtils from '@date-io/date-fns';
-import TextField from '@material-ui/core/TextField';
-import { object, string, array } from 'yup';
-import { GetEmailDetail, CreateNewEmail, UpdateEmail } from '../../../axios/activity';
-import moment from 'moment';
-import { RelatedToDispay } from '../Helpers/RelatedToDispay';
-import RichTextEditor from 'react-rte';
-import { makeStyles } from '@material-ui/core/styles';
+import { CircularProgress, FormControlLabel, Switch } from '@material-ui/core';
+import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
 import Chip from '@material-ui/core/Chip';
 import Divider from '@material-ui/core/Divider';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import { makeStyles } from '@material-ui/core/styles';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import axios, { CancelTokenSource } from 'axios';
+import { Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import moment from 'moment';
 import PropTypes from 'prop-types';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { CircularProgress, IconButton } from '@material-ui/core';
-import { useAccount, useMsal } from '@azure/msal-react';
-import getAzureAcessToken from '../../Azure/getAzureAccessToken';
-import { purchaseOrder, validations, rentalManagement, sidebarResource } from '../../../constants/helpers';
-import DeleteIcon from '@material-ui/icons/Delete';
-import GetAppIcon from '@material-ui/icons/GetApp';
-import { GoArrowDown } from 'react-icons/go';
-import emailStyles from '../../../pages/Activity/Email/email.module.scss';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import ImagePreview from './ImagePreview';
-import { Paper, FormControlLabel, Switch } from '@material-ui/core';
-import Skeleton from '@material-ui/lab/Skeleton';
-import ImageAttachments from './ImageAttachments';
-import { imageUploadMaxSize, dateTimeFormat } from '../../../constants/helpers';
-import { fileIcons } from './FileIcons';
-import { useData } from '../../../StateProvider/Provider';
-import TinyMce from '../../../components/TinyMCE';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { isEqual, values } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import RichTextEditor from 'react-rte';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { array, object, string } from 'yup';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import TinyMce from '../../../components/TinyMCE';
+import { dateTimeFormat, imageUploadMaxSize, sidebarResource, validations } from '../../../constants/helpers';
+import getAzureAcessToken from '../../Azure/getAzureAccessToken';
+import { RelatedToDispay } from '../Helpers/RelatedToDispay';
+import ImageAttachments from './ImageAttachments';
+import ImagePreview from './ImagePreview';
 
 // const emailSchemaHelper = array()
 //   .transform(function (value, originalValue) {
@@ -146,7 +138,10 @@ export const CreateEmail = ({
   }, [qouteBuilderAttachments?.length]);
 
   useEffect(() => {
-    fetchEmailDetail();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchEmailDetail(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkImageUrl = (url) => {
@@ -172,11 +167,12 @@ export const CreateEmail = ({
       });
   };
 
-  const fetchEmailDetail = async () => {
+  const fetchEmailDetail = async (cancelTokenSource?: CancelTokenSource) => {
     if (emailId) {
       setLoading(true);
-      await GetEmailDetail(emailId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/email/${emailId}`, { cancelToken: cancelTokenSource?.token })
+        .then(({ data: { data } }) => {
           if (data.attachments && data.attachments.length) {
             let otherAttachments = [];
             let filteredAttachments = data.attachments.filter((url) => {
@@ -227,7 +223,8 @@ export const CreateEmail = ({
       }
 
       if (emailId) {
-        UpdateEmail(emailId, values)
+        axiosInstance()
+          .put(`/email/${emailId}`, values)
           .then(() => {
             handleClose();
           })
@@ -236,8 +233,9 @@ export const CreateEmail = ({
           });
       } else {
         setSending(true);
-        CreateNewEmail(payload)
-          .then((data) => {
+        axiosInstance()
+          .post('/email', payload)
+          .then(({ data }) => {
             toastConfig.setToastConfig({
               open: true,
               type: 'success',

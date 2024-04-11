@@ -87,8 +87,9 @@ export const Comment = ({ referenceId }) => {
     let data: any = {};
     data.referenceId = referenceId;
     data.content = value;
-    PostComment(data)
-      .then(({ data }) => {
+    axiosInstance()
+      .post('/comment', data)
+      .then(() => {
         setValue('');
         fetchComment();
       })

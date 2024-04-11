@@ -1,21 +1,22 @@
-import React, { useState, useEffect, Fragment } from 'react';
 import Box from '@material-ui/core/Box';
+import Dialog from '@material-ui/core/Dialog';
 import Grid from '@material-ui/core/Grid';
-import { CreateEmail } from './CreateEmail';
-import { ViewEmail } from './ViewEmail';
-import { GetEmail, DeleteEmail } from '../../../axios/activity';
-import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import Dialog from '@material-ui/core/Dialog';
+import axios, { CancelTokenSource } from 'axios';
+import React, { Fragment, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import axiosInstance from 'src/axios/axiosInstance';
+import { useData } from '../../../StateProvider/Provider';
+import { CustomDialogTransition } from '../../../constants/helpers';
+import ActivityLoader from '../../Helpers/ActivityLoader';
 import { ListRelatedTo } from '../Helpers/ListRelatedTo';
 import { ViewAll } from '../Helpers/ViewAll';
-import { useData } from '../../../StateProvider/Provider';
-import ActivityLoader from '../../Helpers/ActivityLoader';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../../constants/helpers';
+import { CreateEmail } from './CreateEmail';
+import { ViewEmail } from './ViewEmail';
 
 export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [openViewEmail, setOpenViewEmail] = useState(false);
@@ -31,13 +32,16 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
-    fetchEmail();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchEmail(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchEmail = async () => {
+  const fetchEmail = async (cancelTokenSource?: CancelTokenSource) => {
     try {
       setLoading(true);
-      const emails = await GetEmail(JSON.stringify(relatedTo));
+      const { data: emails } = await axiosInstance().get(`/email?relatedTo=${JSON.stringify(relatedTo)}`, { cancelToken: cancelTokenSource?.token });
       if (emails.data && emails.data.length > 0) {
         emails.data = emails.data.filter((obj) => {
           let isAllowedToShow = false;
@@ -81,8 +85,9 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
 
   const handleDelete = (event) => {
     event.stopPropagation();
-    DeleteEmail(emailId)
-      .then(({ data }) => {
+    axiosInstance()
+      .delete(`/email/${emailId}`)
+      .then(() => {
         setAnchorEl(null);
         fetchEmail();
         handleActivityRefresh();

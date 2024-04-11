@@ -42,7 +42,6 @@ type DialogContentPropsExtended = DialogContentProps & {
 };
 
 function CustomDialogContent({ children, style = {}, isFooterPresent = true, ...others }: DialogContentPropsExtended) {
-  console.log(isFooterPresent);
   const vh = useViewportDynamicHeight();
   const [themeColor] = useAppTheme();
   return (
