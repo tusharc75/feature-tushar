@@ -1,24 +1,22 @@
-import { useState, useEffect } from 'react';
-import { Box, Grid, Typography, Tooltip, Dialog, TextField, IconButton } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Dialog, IconButton, TextField, Tooltip, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { Add } from '@material-ui/icons';
+import { Autocomplete } from '@material-ui/lab';
+import axios, { CancelTokenSource } from 'axios';
+import { camelCase, isEqual } from 'lodash';
+import { useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
-import { isEqual, kebabCase } from 'lodash';
-import { isMobile, isTablet } from 'react-device-detect';
-import { camelCase } from 'lodash';
-import statusList from '../../Helpers/statusList';
-import { GetBoard } from '../../../../axios/activity';
 import { useData } from '../../../../StateProvider/Provider';
-import { Add } from '@material-ui/icons';
-import { BoardList } from './BoardList';
-import { CustomDialogTransition } from '../../../../constants/helpers';
 import axiosInstance from '../../../../axios/axiosInstance';
-import { CreateTask } from '../../Task/CreateTask';
-import { CreateCase } from '../../Case/CreateCase';
+import { CustomDialogTransition, sidebarResource } from '../../../../constants/helpers';
 import { get_activity_resource, get_dynamic_resource } from '../../../Activity/Helpers/utils';
-import { sidebarResource } from '../../../../constants/helpers';
+import { CreateCase } from '../../Case/CreateCase';
+import statusList from '../../Helpers/statusList';
+import { CreateTask } from '../../Task/CreateTask';
+import { BoardList } from './BoardList';
 
 const useStyles = makeStyles((theme) => ({
   block: {
@@ -95,12 +93,16 @@ const Board = ({ type, filter }) => {
   }, []);
 
   useEffect(() => {
-    fetchBoard();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchBoard(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, filter]);
 
-  const fetchBoard = () => {
-    GetBoard(type, JSON.stringify(filter))
-      .then(({ data }) => {
+  const fetchBoard = (cancelTokenSource?: CancelTokenSource) => {
+    axiosInstance()
+      .get(`/activity/board?type=${type}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         setActivities(data);
         setLoading(false);
       })
