@@ -12,10 +12,12 @@ const DialogActions = withStyles((theme) => ({
   }
 }))(MuiDialogActions);
 
-function CustomDialogFooter({ children, ...others }: CustomDialogFooterProps) {
+function CustomDialogFooter({ children, className = '', ...others }: CustomDialogFooterProps) {
   return (
     <React.Fragment>
-      <DialogActions {...others}>{children}</DialogActions>
+      <DialogActions className={`${className} overscroll-contain`} {...others}>
+        {children}
+      </DialogActions>
     </React.Fragment>
   );
 }

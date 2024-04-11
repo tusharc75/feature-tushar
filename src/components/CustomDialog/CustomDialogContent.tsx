@@ -2,6 +2,7 @@ import React from 'react';
 import { withStyles } from '@material-ui/core';
 import MuiDialogContent, { DialogContentProps } from '@material-ui/core/DialogContent';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { CSSProperties } from '@material-ui/core/styles/withStyles';
 
 const DialogContent = withStyles((theme) => ({
   root: {
@@ -10,16 +11,51 @@ const DialogContent = withStyles((theme) => ({
   }
 }))(MuiDialogContent);
 
+const useViewportDynamicHeight = () => {
+  const [height, setHeight] = React.useState(0);
+
+  React.useEffect(() => {
+    const setHeightFunc = () => {
+      if (window.visualViewport) {
+        const vh = window.visualViewport.height;
+        setHeight(vh);
+        document.body.style.height = `${vh}px`;
+        document.getElementsByTagName('html')[0].style.height = `${vh}px`;
+        document.getElementsByTagName('html')[0].style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+      }
+    };
+    setHeightFunc();
+    window?.visualViewport?.addEventListener('resize', setHeightFunc);
+    return () => {
+      document?.body?.removeAttribute?.('style');
+      document?.getElementsByTagName('html')[0]?.removeAttribute?.('style');
+      window?.visualViewport?.removeEventListener('resize', setHeightFunc);
+    };
+  }, []);
+  return height;
+};
+
 function CustomDialogContent({ children, style = {}, ...others }: DialogContentProps) {
+  const vh = useViewportDynamicHeight();
   const [themeColor] = useAppTheme();
   return (
     <React.Fragment>
-      <DialogContent style={{ ...style, background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff' }} {...others}>
+      <DialogContent
+        className="max-h-[calc(var(--vh)-110px)] max-[560px]:max-h-[calc(var(--vh)-99px)] overscroll-contain min-h-[250px]"
+        style={
+          {
+            ...style,
+            background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff',
+            '--vh': `${vh}px`
+          } as CSSProperties
+        }
+        {...others}
+      >
         {children}
       </DialogContent>
     </React.Fragment>
   );
 }
-
 
 export default CustomDialogContent;

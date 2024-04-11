@@ -17,7 +17,7 @@ import { camelCase } from 'lodash';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
-const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
+const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = null }) => {
   const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -227,6 +227,9 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
           }}
           onSuccess={() => {
             setViewInvoiceDialog({ open: false, invoice: null });
+            if(fetchParentData){
+              fetchParentData()
+            }
             fetchData();
           }}
           resource={resource}

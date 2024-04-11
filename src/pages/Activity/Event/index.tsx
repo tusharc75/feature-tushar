@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useCallback, useContext, Fragment } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
 import moment from 'moment';
-import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
-import { useData } from '../../../StateProvider/Provider';
-import MyCalendar from '../Calendar/MyCalendar';
-import { GetBoard, GetReferenceName } from '../../../axios/activity';
-import Layout from '../../../components/Layout';
-import CustomContainer from '../../../components/CustomContainer';
-import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
-import { SearchFilter } from '../../../components/SearchFilter';
-import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
+import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import { GetBoard } from '../../../axios/activity';
+import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
+import CustomContainer from '../../../components/CustomContainer';
+import { SearchFilter } from '../../../components/SearchFilter';
+import MyCalendar from '../Calendar/MyCalendar';
 
 const Event = () => {
   const history = useHistory();
@@ -27,12 +27,13 @@ const Event = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [events, setEvents] = useState([]);
   const parsed = queryString.parse(history.location.search);
-  const { referenceType, referenceId, activityType, activityId } = parsed;
+  const { referenceType, referenceId } = parsed;
 
   useEffect(() => {
     if (referenceType) {
-      GetReferenceName(referenceType, referenceId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
+        .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
         .catch((err) => {});
