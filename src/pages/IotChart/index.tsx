@@ -135,7 +135,7 @@ function IotChart() {
                             }}
                           >
                             <MyLocationIcon className={`absolute -top-[10px] left-[18px]`} />
-                            <Chip label="Location" color="primary" className={`absolute -top-[-10px] right-[10px]`} />
+                            <Chip label="Region" color="primary" className={`absolute -top-[-10px] right-[10px]`} />
                             <Typography variant="h6">{region?.region?.optionLabel}</Typography>
                           </DashBoardCardShell>
                         </div>
@@ -166,7 +166,7 @@ function IotChart() {
                           }}
                         >
                           <MyLocationIcon className={`absolute -top-[10px] left-[18px]`} />
-                          <Chip label="Region" color="primary" className={`absolute -top-[-10px] right-[10px]`} />
+                          <Chip label="Location" color="primary" className={`absolute -top-[-10px] right-[10px]`} />
                           <Typography variant="h6">{location?.currentLocation}</Typography>
                         </DashBoardCardShell>
                       </div>

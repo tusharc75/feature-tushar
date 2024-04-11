@@ -202,7 +202,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -337,8 +337,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
@@ -433,7 +433,7 @@ const RentalManagementDetailsPage = () => {
                       color="primary"
                       size="small"
                       onClick={() => {
-                        window.open(`${routes.iotChart.path}?referenceData=${rentalManagementData?.shippingAddress?.optionValue}`, '_blank');
+                        history.push(`${routes.iotChart.path}?referenceData=${rentalManagementData?.shippingAddress?.optionValue}`)
                       }}
                     >
                       {`View ${routes.iotChart.title}`}

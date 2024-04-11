@@ -166,18 +166,19 @@ const RentalManagement = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.iotChart?.isRead && (
-          <HtmlTooltip title={`View ${routes.iotChart.title}`}>
-            <span>
-              <IconButton size="small" color="inherit" onClick={() => {}}>
-                <VisibilityIcon color="primary" fontSize="small" onClick={() => {
-                  window.open(`${routes.iotChart.path}?referenceData=${row?.original?.shippingAddressId}`, '_blank')
-                }} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        )}
         <HideWhenOffline>
+          {permissions?.iotChart?.isRead && (
+            <HtmlTooltip title={`View ${routes.iotChart.title}`}>
+              <IconButton
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  history.push(`${routes.iotChart.path}?referenceData=${row?.original?.shippingAddressId}`)
+                }}>
+                <VisibilityIcon color="primary" fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
           <HtmlTooltip title={permissions?.rentalManagement?.isCreate ? 'Clone' : cloneDisable}>
             <span>
               <IconButton
@@ -535,9 +536,8 @@ const RentalManagement = () => {
         {singleRentalManagementDelete.show && (
           <ConfirmationDialog
             open={singleRentalManagementDelete.show}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
-              singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-            }?`}
+            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+              }?`}
             onClose={() =>
               setSingleRentalManagementDelete({
                 id: null,
