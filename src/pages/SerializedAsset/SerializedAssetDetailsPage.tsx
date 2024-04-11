@@ -322,7 +322,7 @@ const SerializedAssetDetailsPage = () => {
                       history.push(`${routes.iotChart.path}/${assetDetails?._id}`);
                     }}
                   >
-                    View Data
+                    View IOT Data
                   </Button>
                 )}
                 {permissions?.sendOutboundMessage?.isCreate && (
