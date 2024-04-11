@@ -119,6 +119,19 @@ const Report = () => {
       data,
       routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
     );
+    if (resourceStartCase === 'Quotation') {
+      newColumns.push({
+        accessor: 'versionComment',
+        Header: 'Version Comment',
+        show: true,
+        disabled: false,
+        Cell: ({ row }) => (
+          <>
+            <h5 className="text-truncate">{row.original['versionComment'] ? row.original['versionComment'] : <NoDataCell />}</h5>
+          </>
+        )
+      });
+    }
     columns = [...newColumns, ...getStaticFields()];
     if (resourceStartCase === 'Purchase Order') {
       columns.splice(1, 0, {
@@ -168,19 +181,6 @@ const Report = () => {
         Cell: ({ row }) => (
           <>
             <h5 className="text-truncate">{row.original['totalConsumablesCost'] ? row.original['totalConsumablesCost'] : <NoDataCell />}</h5>
-          </>
-        )
-      });
-    }
-    if (resourceStartCase === 'Quotation') {
-      columns.push({
-        accessor: 'versionComment',
-        Header: 'Version Comment',
-        show: true,
-        disabled: false,
-        Cell: ({ row }) => (
-          <>
-            <h5 className="text-truncate">{row.original['versionComment'] ? row.original['versionComment'] : <NoDataCell />}</h5>
           </>
         )
       });
