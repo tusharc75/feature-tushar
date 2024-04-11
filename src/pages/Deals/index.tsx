@@ -16,6 +16,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import WarningFilter from 'src/components/WarningFilter';
 import axios, { CancelTokenSource } from 'axios';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 const getWarningList = (row?: any) => {
   const icon = <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />;
@@ -101,12 +102,12 @@ const Deals = () => {
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                      <Box ml={1} key={w.warningFilter}>
-                        <HtmlTooltip title={w.title} placement="top" arrow>
-                          {w.icon}
-                        </HtmlTooltip>
-                      </Box>
-                    ))
+                        <Box ml={1} key={w.warningFilter}>
+                          <HtmlTooltip title={w.title} placement="top" arrow>
+                            {w.icon}
+                          </HtmlTooltip>
+                        </Box>
+                      ))
                     : null}
                 </div>
               );
@@ -171,6 +172,10 @@ const Deals = () => {
       });
   };
 
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -193,9 +198,13 @@ const Deals = () => {
         />
       </div>
       <CustomContainer>
-        <div className="flex justify-end pb-[18px]">
-          <WarningFilter checkedFilter={checkedFilter} setCheckedFilter={setCheckedFilter} warnings={getWarningList()} />
-        </div>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={false}
+          isAddButtonVisible={false}
+          rightSideContents={<WarningFilter checkedFilter={checkedFilter} setCheckedFilter={setCheckedFilter} warnings={getWarningList()} />}
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
