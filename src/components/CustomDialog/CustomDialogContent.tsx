@@ -42,17 +42,15 @@ type DialogContentPropsExtended = DialogContentProps & {
 };
 
 function CustomDialogContent({ children, style = {}, isFooterPresent = true, ...others }: DialogContentPropsExtended) {
-  console.log(isFooterPresent);
   const vh = useViewportDynamicHeight();
   const [themeColor] = useAppTheme();
   return (
     <React.Fragment>
       <DialogContent
-        className={`${
-          isFooterPresent
+        className={`${isFooterPresent
             ? 'max-h-[calc(var(--vh)-110px)] max-[560px]:max-h-[calc(var(--vh)-99px)]'
             : 'max-h-[calc(var(--vh)-55px)] max-[560px]:max-h-[calc(var(--vh)-45px)]'
-        } overscroll-contain ${isTablet || isMobile ? 'min-h-[250px]' : ''}`}
+          } overscroll-contain ${isTablet || isMobile ? 'min-h-[250px]' : ''}`}
         style={
           {
             ...style,

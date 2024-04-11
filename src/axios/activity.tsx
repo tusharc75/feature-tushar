@@ -156,7 +156,6 @@ export const GetRoadmap = async (type, filter) => {
 // };
 
 // export const GetNotes = async (filter, params = null) => {
-//   console.log({ filter });
 //   let apiUrl = `/note?filter=${filter}`;
 //   if (params) apiUrl = `${apiUrl}${params}`;
 //   const { data } = await api().get(apiUrl);
