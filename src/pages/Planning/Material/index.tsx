@@ -52,7 +52,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [planningData]);
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.planningMaterial}`);
