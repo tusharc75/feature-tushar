@@ -9,8 +9,15 @@ const FullScreenChart = ({ close, chart, filterData, globalFilters, selectedDash
   return (
     <Dialog open onClose={close} fullScreen>
       <CustomDialogHeader title={'Full Screen Chart'} onClose={close} showRequiredLabel={false} />
-      <CustomDialogContent>
-        <ChartTypes fetchDashboards={fetchDashboards} selectedDashboardId={selectedDashboardId} fullScreen={true} chart={chart} filterData={filterData} globalFilters={globalFilters} />
+      <CustomDialogContent isFooterPresent={false}>
+        <ChartTypes
+          fetchDashboards={fetchDashboards}
+          selectedDashboardId={selectedDashboardId}
+          fullScreen={true}
+          chart={chart}
+          filterData={filterData}
+          globalFilters={globalFilters}
+        />
       </CustomDialogContent>
     </Dialog>
   );

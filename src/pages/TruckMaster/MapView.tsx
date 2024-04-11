@@ -123,7 +123,7 @@ const MapView = ({ handleClose, lat, lng }) => {
         }}
         showRequiredLabel={false}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         {pathCoordinates?.length ? (
           <Box width={'100%'} height={'100%'} overflow="hidden" borderRadius={1}>
             <GoogleMap

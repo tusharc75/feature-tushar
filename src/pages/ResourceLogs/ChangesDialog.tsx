@@ -10,7 +10,6 @@ import moment from 'moment';
 import { camelCase, capitalize } from 'lodash';
 
 const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
-
   const [fullScreen, setFullScreen] = useState(true);
 
   return (
@@ -32,7 +31,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
         title={`Changes`}
         onClose={onClose}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <div className="p-3">
           {changes?.length ? (
             <TableContainer component={Paper}>
@@ -58,7 +57,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 <p
                                   className="link text-truncate"
                                   title={data?.oldValue?.label}
-                                  onClick = { () => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)}
+                                  onClick={() => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)}
                                 >
                                   {data?.oldValue?.label}
                                 </p>
@@ -77,7 +76,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 <p
                                   className="link text-truncate"
                                   title={data?.newValue?.label}
-                                  onClick = { () => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}
+                                  onClick={() => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}
                                 >
                                   {data?.newValue?.label}
                                 </p>
@@ -95,8 +94,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                     </Typography>
                                   );
                                 })
-                              ) :
-                              (
+                              ) : (
                                 data?.newValue
                               )
                             ) : (
@@ -110,9 +108,10 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                 </TableBody>
               </Table>
             </TableContainer>
-          ) : 
-          <NoDataCell />}
-          {operations?.length ?
+          ) : (
+            <NoDataCell />
+          )}
+          {operations?.length ? (
             <TableContainer component={Paper}>
               <Table aria-label="customized table">
                 <TableHead>
@@ -129,7 +128,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                         <TableCell>{capitalize(o?.type)}</TableCell>
                         <TableCell>{`${o?.label} (${capitalize(o?.referenceType)})`}</TableCell>
                         <TableCell>
-                          {o?.changes?.length ?
+                          {o?.changes?.length ? (
                             <TableContainer component={Paper}>
                               <Table aria-label="customized table">
                                 <TableHead>
@@ -141,57 +140,66 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 </TableHead>
                                 <TableBody>
                                   {o?.changes?.map((data: any, index: any) => {
-                                    return (data?.fieldLabel && (
-                                      <TableRow key={index}>
-                                        <TableCell>{data?.fieldLabel}</TableCell>
-                                        <TableCell>
-                                          {data?.oldValue ? (
-                                            data?.type === 'date' ? (
-                                              moment(data?.oldValue).format(dateFormat)
-                                            ) : data?.type === 'dropDown' && data?.lookup ? (
-                                              <p
-                                                className="link text-truncate"
-                                                title={data?.oldValue?.label}
-                                                onClick = { () => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)}
-                                              >
-                                                {data?.oldValue?.label}
-                                              </p>
+                                    return (
+                                      data?.fieldLabel && (
+                                        <TableRow key={index}>
+                                          <TableCell>{data?.fieldLabel}</TableCell>
+                                          <TableCell>
+                                            {data?.oldValue ? (
+                                              data?.type === 'date' ? (
+                                                moment(data?.oldValue).format(dateFormat)
+                                              ) : data?.type === 'dropDown' && data?.lookup ? (
+                                                <p
+                                                  className="link text-truncate"
+                                                  title={data?.oldValue?.label}
+                                                  onClick={() =>
+                                                    window.open(
+                                                      `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`
+                                                    )
+                                                  }
+                                                >
+                                                  {data?.oldValue?.label}
+                                                </p>
+                                              ) : (
+                                                data?.oldValue
+                                              )
                                             ) : (
-                                              data?.oldValue
-                                            )
-                                          ) : (
-                                            <NoDataCell />
-                                          )}
-                                        </TableCell>
-                                        <TableCell>
-                                          {data?.newValue ? (
-                                            data?.type === 'date' ? (
-                                              moment(data?.newValue).format(dateFormat)
-                                            ) : data?.type === 'dropDown' && data?.lookup ? (
-                                              <p
-                                                className="link text-truncate"
-                                                title={data?.newValue?.label}
-                                                onClick = { () => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}
-                                              >
-                                                {data?.newValue?.label}
-                                              </p>
+                                              <NoDataCell />
+                                            )}
+                                          </TableCell>
+                                          <TableCell>
+                                            {data?.newValue ? (
+                                              data?.type === 'date' ? (
+                                                moment(data?.newValue).format(dateFormat)
+                                              ) : data?.type === 'dropDown' && data?.lookup ? (
+                                                <p
+                                                  className="link text-truncate"
+                                                  title={data?.newValue?.label}
+                                                  onClick={() =>
+                                                    window.open(
+                                                      `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`
+                                                    )
+                                                  }
+                                                >
+                                                  {data?.newValue?.label}
+                                                </p>
+                                              ) : (
+                                                data?.newValue
+                                              )
                                             ) : (
-                                              data?.newValue
-                                            )
-                                          ) : (
-                                            <NoDataCell />
-                                          )}
-                                        </TableCell>
-                                      </TableRow>
-                                    )
+                                              <NoDataCell />
+                                            )}
+                                          </TableCell>
+                                        </TableRow>
+                                      )
                                     );
                                   })}
                                 </TableBody>
                               </Table>
                             </TableContainer>
-                            :
+                          ) : (
                             <NoDataCell />
-                          }
+                          )}
                         </TableCell>
                       </TableRow>
                     );
@@ -199,7 +207,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                 </TableBody>
               </Table>
             </TableContainer>
-            : null}
+          ) : null}
         </div>
       </CustomDialogContent>
     </Dialog>

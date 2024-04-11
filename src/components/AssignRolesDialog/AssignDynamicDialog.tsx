@@ -213,7 +213,7 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
         showRequiredLabel={false}
         onClose={handleClose}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
