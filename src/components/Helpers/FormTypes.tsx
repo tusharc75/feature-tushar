@@ -834,6 +834,46 @@ const FormTypes = (props) => {
           }}
         />
       </InfoLabel>
+    ) : type === 'currencyNumber' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          label={getLabel(label)}
+          name={name}
+          required={required}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          ref={inputNumberRef}
+          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
+          InputProps={{
+            inputComponent: CustomFormat as any,
+            inputProps: {
+              allowNegative: false,
+              onValueChange: (values) => {
+                handleChange(name, values.value);
+              },
+              selectedCurrencyCode: selectedCurrencyCode
+            },
+            startAdornment: (
+              <InputAdornment position="start">
+                {result(
+                  find(getUniqueCurrencies(), function (obj) {
+                    return obj.currencyCode === "USD";
+                  }),
+                  'symbolNative'
+                )}
+              </InputAdornment>
+            ),
+          }}
+        />
+      </InfoLabel>
     ) : type === 'percent' ? (
       <InfoLabel
         info={tooltipMessage}
