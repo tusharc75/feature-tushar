@@ -172,6 +172,19 @@ const Report = () => {
         )
       });
     }
+    if (resourceStartCase === 'Quotation') {
+      columns.push({
+        accessor: 'versionComment',
+        Header: 'Version Comment',
+        show: true,
+        disabled: false,
+        Cell: ({ row }) => (
+          <>
+            <h5 className="text-truncate">{row.original['versionComment'] ? row.original['versionComment'] : <NoDataCell />}</h5>
+          </>
+        )
+      });
+    }
     columns?.forEach((e) => {
       e.editable = false;
     });
