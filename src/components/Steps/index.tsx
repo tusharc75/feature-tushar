@@ -64,7 +64,6 @@ const Steps = ({
   }, [activeStep]);
 
   // for mobile view, add class to body to compenset for mobile stepper floating height
-
   useEffect(() => {
     if (isMobile && !isTablet) {
       document.body.classList.add('has-mobile-step');
