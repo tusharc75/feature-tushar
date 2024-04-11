@@ -62,11 +62,11 @@ const Comments = ({ uniqueId }) => {
           </IconButton>
         </HtmlTooltip>
       </div>
-      <CustomDialogContent style={{ padding: '18px 24px 12px', marginTop: '3px' }}>
+      <CustomDialogContent style={{ padding: '18px 24px 12px', marginTop: '3px' }} isFooterPresent={false}>
         {data ? (
           <div>
             {data.map((item: any) => (
-              <div key={item._id} className='mb-4 border border-[var(--common-border-color)] p-2'>
+              <div key={item._id} className="mb-4 border border-[var(--common-border-color)] p-2">
                 <div key={item._id} className="md:mb-[26px]">
                   <div className="flex mt-[9px] gap-[10px] justify-between flex-wrap text-[13px] text-[var(--primary-text)] mb-4 ">
                     <p>
@@ -74,7 +74,7 @@ const Comments = ({ uniqueId }) => {
                       <span className="text-[#969696] dark:text-gray-400 ml-2">{moment(item.date).format(dateTimeFormat)}</span>
                     </p>
                   </div>
-                  <div className="flex flex-wrap md:gap-[32px] gap-4 items-start justify-between"    >
+                  <div className="flex flex-wrap md:gap-[32px] gap-4 items-start justify-between">
                     <div
                       className="max-image"
                       dangerouslySetInnerHTML={{

@@ -171,7 +171,7 @@ const AssignProductDialog = ({
     if (updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
     }
- 
+
     if (updatedDeepFilters?.length || updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
@@ -230,7 +230,7 @@ const AssignProductDialog = ({
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title={`Add ${routes.product.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <>
           <ListingPageHeader
             searchValue={search}

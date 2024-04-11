@@ -122,11 +122,9 @@ function ViewLogs({ fieldTicketData, handleClose }) {
     setColumns([...column, ...newColumns, actionColumn]);
   };
 
-
-
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    
+
     const { data } = await axiosInstance().get(`${fieldTicket.api}/view-logs/${fieldTicketData?._id}`);
     data?.data.forEach((d) => {
       const invoice = d?.invoice;
@@ -136,7 +134,6 @@ function ViewLogs({ fieldTicketData, handleClose }) {
       d.user = user?.optionLabel;
       d.userId = user?.optionValue;
     });
-
 
     dispatch({ type: 'initialize', data: data?.data, count: data?.data?.length });
     dispatch({ type: 'loading', loading: false });
@@ -165,7 +162,7 @@ function ViewLogs({ fieldTicketData, handleClose }) {
           showRequiredLabel={false}
           showManimizeMaximize={true}
         />
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           {columns ? (
             <Box p={2}>
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>

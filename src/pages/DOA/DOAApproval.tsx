@@ -8,13 +8,7 @@ import { Box, Button, Dialog, Grid, IconButton, Tooltip, Typography, useMediaQue
 import { GiVintageRobot } from 'react-icons/gi';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import PerformanceTuningImg from '../../assets/PerformanceTuning.png';
-import {
-  CustomDialogTransition,
-  formatAmountWithCurrency,
-  defaultActivityShow,
-  quoteBuilder,
-  sidebarResource
-} from '../../constants/helpers';
+import { CustomDialogTransition, formatAmountWithCurrency, defaultActivityShow, quoteBuilder, sidebarResource } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -26,7 +20,6 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const DOAApproval = () => {
-
   const {
     state: {
       user: { user: currentUser }
@@ -62,7 +55,6 @@ const DOAApproval = () => {
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [columns, setColumnData] = useState([]);
 
-
   useEffect(() => {
     if (id) {
       fetchQuote();
@@ -80,7 +72,7 @@ const DOAApproval = () => {
       .get('/quote-builder/getQuotefromDOAId/' + id)
       .then(({ data }) => {
         setQuoteData(data.quote);
-        setVersionData(data?.version)
+        setVersionData(data?.version);
         setProductBuilderId(data?.version?.productBuilderId);
         setQData(data);
         if (data?.version?.status !== 'Sent for DOA') {
@@ -91,7 +83,6 @@ const DOAApproval = () => {
         setToastConfig(err);
       });
   };
-
 
   const QuoteStatusChange = (accepted, signature, comment) => {
     if (accepted !== 'Rejected') {
@@ -144,7 +135,7 @@ const DOAApproval = () => {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -188,7 +179,12 @@ const DOAApproval = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: 'DOA Requests', path: '/doa-request' }, { title: QData ? `${QData?.quoteName} (V-${versionData?.versionNumber})` : '' }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { title: 'DOA Requests', path: '/doa-request' },
+              { title: QData ? `${QData?.quoteName} (V-${versionData?.versionNumber})` : '' }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -199,11 +195,13 @@ const DOAApproval = () => {
               columns={columns}
               hideDetailButton={true}
               extraQueryParams={{ uniqueId: versionData?._id }}
-              defaultColumns={['productName',
+              defaultColumns={[
+                'productName',
                 'unit',
                 'qty',
                 `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-                `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`]}
+                `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+              ]}
             />
             <Tooltip title="AI Suggestion" arrow placement="top">
               <IconButton
@@ -327,10 +325,10 @@ const DOAApproval = () => {
             }}
             showManimizeMaximize={true}
           />
-          <CustomDialogContent>
+          <CustomDialogContent isFooterPresent={false}>
             <div className="text-align-center">
               <Typography variant="h4">Under Construction </Typography>
-              <img src={`${PerformanceTuningImg}`} style={{ height: '300px' }} />
+              <img src={`${PerformanceTuningImg}`} alt="" style={{ height: '300px' }} />
             </div>
           </CustomDialogContent>
         </Dialog>

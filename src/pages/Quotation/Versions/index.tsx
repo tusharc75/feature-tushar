@@ -178,7 +178,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
         showManimizeMaximize={true}
         showRequiredLabel={false}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         {columns ? (
           <CustomReactTable
             height={fullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
