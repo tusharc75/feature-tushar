@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Grid, useTheme, Button, Box } from '@material-ui/core';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isArray, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdFilterList } from 'react-icons/md';
@@ -302,10 +302,17 @@ const Report = () => {
               term: selectedData[key].value ? 'Yes' : 'No'
             });
           } else {
-            deepFilter.push({
-              field: key,
-              term: selectedData[key].value?.map((d: any) => d.optionValue)
-            });
+            if(Array.isArray(selectedData[key].value)){
+              deepFilter.push({
+                field: key,
+                term: selectedData[key].value?.map((d: any) => d.optionValue)
+              });
+            }else{
+              deepFilter.push({
+                field: key,
+                term: selectedData[key].value
+              });
+            }  
           }
         });
 
