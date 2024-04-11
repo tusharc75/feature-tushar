@@ -296,7 +296,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     <>
       <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
         <CustomDialogHeader title={`History - ${productName}`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ? (
               <CustomReactTable

@@ -253,18 +253,18 @@ export const CreateEmail = ({
             toastConfig.setToastConfig(err);
           });
       }
-    } catch (e) { }
+    } catch (e) {}
   };
 
   const handleSendEmail = async (values) => {
     setSending(true);
     relatedTo = [
       {
-        'type': referenceType,
-        'referenceId': id,
-        'access': true
+        type: referenceType,
+        referenceId: id,
+        access: true
       }
-    ]
+    ];
     const body = {
       email: values.to,
       versionNumber: versionNumber,
@@ -352,7 +352,7 @@ export const CreateEmail = ({
   };
 
   const handleDeleteQuoteBuilderOtherAttachment = (name) => {
-    setQuoteBuilderOtherAttachments(quoteBuilderOtherAttachments.filter((o) => o?.name !== (name?.name || name) ));
+    setQuoteBuilderOtherAttachments(quoteBuilderOtherAttachments.filter((o) => o?.name !== (name?.name || name)));
   };
 
   const classes = useStyles();
@@ -674,7 +674,7 @@ export const CreateEmail = ({
           )}
         </Formik>
       ) : (
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>

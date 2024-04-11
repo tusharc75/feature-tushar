@@ -41,7 +41,7 @@ const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) 
         }}
         showManimizeMaximize={true}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} index={0}>
             History

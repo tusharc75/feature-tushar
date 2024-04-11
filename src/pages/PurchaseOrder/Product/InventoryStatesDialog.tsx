@@ -57,7 +57,7 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
         title={'Explore Inventory'}
         onClose={onClose}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <div className="p-3">
           {inventoryData && irtTicketData ? (
             <TableContainer component={Paper}>

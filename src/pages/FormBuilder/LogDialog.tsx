@@ -27,7 +27,7 @@ const LogDialog = ({ open, onClose, log }) => {
         title={`Log`}
         onClose={onClose}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <div className="p-3">
           <TableContainer component={Paper}>
             <Table aria-label="customized table">

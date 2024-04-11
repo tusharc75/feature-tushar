@@ -205,7 +205,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   return (
     <Dialog open fullScreen fullWidth onClose={close}>
       <CustomDialogHeader title="Add Product" onClose={close} showRequiredLabel={false} />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
