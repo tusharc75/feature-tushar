@@ -189,7 +189,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
         onClose={handleClose}
         style={{ textTransform: 'capitalize' }}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         {keys ? (
           keys?.length > 0 ? (
             <Box className={styles.main}>

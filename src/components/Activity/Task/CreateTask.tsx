@@ -414,7 +414,7 @@ export const CreateTask = ({
           )}
         </Formik>
       ) : (
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Loader minHeight="500px" text="Loading..." />
         </CustomDialogContent>
       )}

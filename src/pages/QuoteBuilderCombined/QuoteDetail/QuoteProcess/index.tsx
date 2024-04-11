@@ -889,7 +889,7 @@ export default function QuoteProcess(props) {
             }}
             showManimizeMaximize={true}
           />
-          <CustomDialogContent>
+          <CustomDialogContent isFooterPresent={false}>
             <div className="text-align-center">
               <Typography variant="h4">Under Construction </Typography>
               <img alt="image" src={`${PerformanceTuningImg}`} style={{ height: '300px' }} />
@@ -938,7 +938,7 @@ export default function QuoteProcess(props) {
             showManimizeMaximize={true}
             showRequiredLabel={false}
           />
-          <CustomDialogContent>
+          <CustomDialogContent isFooterPresent={false}>
             <Grid item className="quoteHeader">
               <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
                 <span className="quoteAmount" title={totalProfit.fullFormatAmount}>
