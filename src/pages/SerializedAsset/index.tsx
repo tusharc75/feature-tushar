@@ -260,6 +260,7 @@ const SerializedAsset = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
+        {permissions?.iotChart?.isRead && (
         <HtmlTooltip title="View IOT Data">
           <span>
             <IconButton
@@ -272,6 +273,7 @@ const SerializedAsset = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
+      )}
       </>
     )
   };
