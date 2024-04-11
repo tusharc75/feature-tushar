@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers';
@@ -97,10 +97,54 @@ const ConfigureField = ({ resourceId, step = null, handleClose, handleSucess }) 
     }
   };
 
+
+  const handleExportFields = () => {
+    var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(section));
+    var dlAnchorElem = document.getElementById('downloadAnchorElem');
+    dlAnchorElem.setAttribute('href', dataStr);
+    dlAnchorElem.setAttribute('download', 'step_fields.json');
+    dlAnchorElem.click();
+  };
+
+  const handleImportFields = (e) => {
+    e.preventDefault();
+    var files = e.target.files,
+      f = files[0];
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var data: any = e.target.result;
+      setSection(JSON.parse(data));
+    };
+    reader.readAsBinaryString(f);
+  };
+
   return (
     <Dialog open aria-labelledby="customized-dialog-title" onClose={handleClose} TransitionComponent={CustomDialogTransition} fullWidth fullScreen>
       <CustomDialogHeader showRequiredLabel={false} title={`Fields Configuration ${step?.stepName}`} onClose={handleClose} />
       <CustomDialogContent>
+        <Box display="flex" justifyContent="flex-end">
+          <Box pb={1}>
+            <label htmlFor="importFieldStepsFormBuilder" className="cursor-pointer mr-3">
+              Import Fields
+              <input
+                onClick={(e: any) => (e.target.value = null)}
+                id="importFieldStepsFormBuilder"
+                name="importFieldStepsFormBuilder"
+                onChange={handleImportFields}
+                style={{
+                  opacity: '0',
+                  display: 'none',
+                  zIndex: -1
+                }}
+                type="file"
+              />
+            </label>
+            <label className="cursor-pointer mr-3" onClick={handleExportFields}>
+              Export Fields
+            </label>
+            <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
+          </Box>
+        </Box>
         <FormBuilder
           section={section}
           setSection={setSection}
