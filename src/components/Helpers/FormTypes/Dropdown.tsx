@@ -650,7 +650,8 @@ function Dropdown({
                             optionLabel: data.wellName,
                             optionValue: data._id,
                             order: option.length,
-                            customerAccount: data?.customerAccount
+                            customerAccount: data?.customerAccount,
+                            address: data?.address
                           };
                           setOptionsList([tempNewOption, ...option]);
                           if (fieldData.lookupDependentOn) {

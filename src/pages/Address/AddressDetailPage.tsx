@@ -62,23 +62,20 @@ const AddressDetailPage = () => {
       });
   };
 
-  const handleDeleteWarehouse = () => {
-    if (id) {
-      if (permissions?.address?.isDelete) {
-        axiosInstance()
-          .put(`/address/remove`, { ids: [id] })
-          .then(({ data }) => {
-            setShowConfirmBox(false);
-
-            history.push(`${routes.address.path}`);
-          })
-          .catch((err) => {
-            setShowConfirmBox(false);
-          });
-      }
-    } else {
-      setShowConfirmBox(false);
-    }
+  const handleDeleteAddress = () => {
+    axiosInstance().put(`/address/remove`, { ids: [id] })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowConfirmBox(false);
+        history.push(`${routes.address.path}`);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const handleOpenUpdateDialog = () => {
@@ -108,7 +105,7 @@ const AddressDetailPage = () => {
           onClose={() => {
             setShowConfirmBox(false);
           }}
-          onOk={handleDeleteWarehouse}
+          onOk={handleDeleteAddress}
         />
       )}
       <Box className="main-container-v1">
