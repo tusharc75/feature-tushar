@@ -382,7 +382,9 @@ const ServiceOrderDetailsPage = () => {
               <Invoices
                 resourceId={serviceOrderData?._id}
                 resource={sidebarResource.fieldTicket}
-                invoiceFieldName="fieldServiceOrder" />
+                invoiceFieldName="fieldServiceOrder"
+                fetchParentData={fetchServiceOrderData}
+                />
             )}
           </ContentFullScreen>
         </TabPanel>
