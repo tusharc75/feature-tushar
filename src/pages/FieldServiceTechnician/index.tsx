@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -6,7 +6,16 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomContainer from 'src/components/CustomContainer';
-import { GenerateResourceLineNumber, cloneResourceData, fieldServiceOrder, getObjKeys, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import {
+  GenerateResourceLineNumber,
+  SERVICE_ORDER_STATUS,
+  cloneResourceData,
+  fieldServiceOrder,
+  getObjKeys,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from 'src/constants/helpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -19,13 +28,19 @@ import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { clearAll, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { fieldServiceOfflineUpdate } from '../FieldServiceOrder/Services/OfflineHelper';
+import axios, { CancelTokenSource } from 'axios';
+import { Apps, FormatListNumbered } from '@material-ui/icons';
+import FieldTicket from '../FieldServiceOrder/FieldTicket';
 
 let serchtimeTimeout;
 
-const FieldServiceTechnician = () => {
+type Views = 'card' | 'table';
 
+const FieldServiceTechnician = () => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.fieldServiceTechnician.title);
+  const [view, setView] = useState<Views>('card');
+  const [selectedData, setSelectedData] = useState(null);
   const {
     state: { user, permissions }
   }: any = useData();
@@ -39,21 +54,26 @@ const FieldServiceTechnician = () => {
   const { isOffline } = useContext(CustomOfflineContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+
   useEffect(() => {
-    fetchColumns();
+    const cancelToken = axios.CancelToken.source();
+    fetchColumns(cancelToken);
+    return () => cancelToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchColumns = async () => {
+  const fetchColumns = async (cancelToken?: CancelTokenSource) => {
     let data;
     if (isOffline) {
       data = await findOne(objectStore.resource, objectStore.fieldServiceOrder);
     } else {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`, { cancelToken: cancelToken.token });
       data = response?.data?.data;
     }
     try {
       insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
-    } catch (e) { }
+    } catch (e) {}
     const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
     newColumns.push({
       accessor: 'action',
@@ -63,6 +83,7 @@ const FieldServiceTechnician = () => {
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
+      isVisible: false,
       canDrag: false,
       Cell: ({ row }) => (
         <>
@@ -73,7 +94,10 @@ const FieldServiceTechnician = () => {
                 aria-label="Add"
                 disabled={permissions?.fieldTicket?.isCreate && !isSubmitting ? false : true}
                 onClick={() => {
-                  handleCreateFieldTicket(row?.original?.orignalData, data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData))
+                  handleCreateFieldTicket(
+                    row?.original?.orignalData,
+                    data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
+                  );
                 }}
               >
                 <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && !isSubmitting ? 'primary' : 'disabled'} />
@@ -97,24 +121,24 @@ const FieldServiceTechnician = () => {
           </Box>
         </>
       )
-    })
+    });
     setColumns(newColumns);
   };
 
   const handleCreateFieldTicket = async (data, fieldServiceOrderFields) => {
-    setIsSubmitting(true)
-    var fieldTicketField: any = []
+    setIsSubmitting(true);
+    var fieldTicketField: any = [];
     if (isOffline) {
       fieldTicketField = await findOne(objectStore.resource, objectStore.fieldTicket);
     } else {
       const response = await axiosInstance().get('/field?resource=Field Ticket');
       fieldTicketField = response?.data?.data;
     }
-    fieldTicketField = fieldTicketField?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
+    fieldTicketField = fieldTicketField?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
 
     const tempInitialData = getObjKeys('', fieldTicketField);
     tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldTicketField);
-    const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, data)
+    const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, data);
     for (const key in referenceData) {
       tempInitialData[key] = referenceData[key];
     }
@@ -123,21 +147,22 @@ const FieldServiceTechnician = () => {
     }
     tempInitialData['fieldServiceOrder'] = data?._id;
 
-    axiosInstance().post(`${routes.fieldTicket?.path}`, tempInitialData).then(({ data }) => {
-      window.open(`${routes.fieldTicket.path}/detail/${data?.data?._id}`)
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-      setIsSubmitting(false)
-
-    })
+    axiosInstance()
+      .post(`${routes.fieldTicket?.path}`, tempInitialData)
+      .then(({ data }) => {
+        window.open(`${routes.fieldTicket.path}/detail/${data?.data?._id}`);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setIsSubmitting(false);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       });
-  }
+  };
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -217,9 +242,11 @@ const FieldServiceTechnician = () => {
       data.push(element._id);
     });
     await fieldServiceOfflineUpdate(data);
-    axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
-      insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
-    });
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.fieldTicket}`)
+      .then(({ data: { data } }) => {
+        insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
+      });
     dispatch({ type: 'selection', selectedRecords: [] });
   };
 
@@ -239,31 +266,92 @@ const FieldServiceTechnician = () => {
     );
   };
 
+  const onRowClick = (row) => {
+    if (!selectedData || row._id !== selectedData._id) {
+      setSelectedData(row);
+      var isAllowedToEdit = [...(row?.orignalData?.collaborator ?? []), row?.orignalData?.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
+      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status));
+    } else {
+      setSelectedData(null);
+      setAllowedToEdit(false);
+    }
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: routes.fieldServiceTechnician.title }]} />
       </div>
+
       <CustomContainer>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={true}
           isAddButtonVisible={false}
+          rightSideContents={<ViewButtons setView={setView} view={view} />}
           actionMenuItems={<ActionMenuItems />}
         />
         {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            resource={sidebarResource.fieldServiceOrder}
-            showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
-          />
+          view === 'card' ? (
+            <div className="grid md:grid-cols-[400px_1fr] grid-cols-1 gap-4">
+              <div className="container-with-border p-[20px]">
+                <CustomReactTable
+                  height={'calc(100vh - 200px)'}
+                  showOnlyMobileView={true}
+                  columns={columns}
+                  state={state}
+                  dispatch={dispatch}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchData}
+                  resource={sidebarResource.fieldServiceOrder}
+                  showOnlyShowFilteredRecordSwitch={false}
+                  showFilters={true}
+                  hideSelection={true}
+                  setWholeRowsCellColor={(row) =>
+                    row._id === selectedData?._id
+                      ? '!bg-[var(--new-theme-color)] [&_h6>span:first-child]:[color:white_!important] transition-bg duration-300'
+                      : ' transition-bg duration-300'
+                  }
+                  onRowClick={onRowClick}
+                />
+              </div>
+              <div className="container-with-border p-[20px]">
+                {selectedData ? (
+                  <FieldTicket
+                    serviceOrderData={selectedData?.orignalData}
+                    setNextStep={() => {}}
+                    allowedToEdit={allowedToEdit}
+                    handleChangeStatus={() => {}}
+                    resource={sidebarResource.fieldServiceTechnician}
+                    enableGlobalSearch={false}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <h6 className="text-xl text-gray-400">Please select a record</h6>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                showOnlyMobileView={false}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                resource={sidebarResource.fieldServiceOrder}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+              />
+            </>
+          )
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -283,3 +371,24 @@ const FieldServiceTechnician = () => {
 };
 
 export default FieldServiceTechnician;
+
+const ViewButtons = ({ setView, view }) => {
+  return (
+    <>
+      <HtmlTooltip title={'Card View'} placement="top" arrow enterTouchDelay={0}>
+        <span>
+          <IconButton size="small" onClick={() => setView('card')} disabled={view === 'card'}>
+            <Apps color="primary" className={`${view === 'card' ? ' opacity-45' : ''}`} />
+          </IconButton>
+        </span>
+      </HtmlTooltip>
+      <HtmlTooltip title={'List View'} placement="top" arrow enterTouchDelay={0}>
+        <span>
+          <IconButton size="small" onClick={() => setView('table')} disabled={view === 'table'}>
+            <FormatListNumbered color="primary" className={`${view === 'table' ? ' opacity-45' : ''}`} />
+          </IconButton>
+        </span>
+      </HtmlTooltip>
+    </>
+  );
+};

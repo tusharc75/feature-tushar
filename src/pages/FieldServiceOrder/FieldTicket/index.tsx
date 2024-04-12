@@ -22,8 +22,7 @@ import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { camelCase } from 'lodash';
 
-
-const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChangeStatus, resource }) => {
+const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChangeStatus, resource, enableGlobalSearch = true }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const renderedFrom = camelCase(routes?.fieldTicket.title);
@@ -115,7 +114,8 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
         let finalObject = prepareDataForGrid(u);
         finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
         var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-        finalObject['allowedToEdit'] = isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        finalObject['allowedToEdit'] =
+          isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
         finalObject['canDelete'] =
           u?.canDelete &&
           permissions?.fieldTicket?.isDelete &&
@@ -208,7 +208,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
           </span>
         </HtmlTooltip>
         <HideWhenOffline>
-          {!serviceOrderData?.quotation &&
+          {!serviceOrderData?.quotation && (
             <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
               <span>
                 <IconButton
@@ -223,7 +223,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
                 </IconButton>
               </span>
             </HtmlTooltip>
-          }
+          )}
         </HideWhenOffline>
         <HideWhenOffline>
           <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
@@ -245,8 +245,6 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
       </>
     )
   };
-
-  
 
   const addButtonMenuItems = () => {
     return (
@@ -280,7 +278,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
 
   return (
     <Fragment>
-      {resource === sidebarResource.fieldServiceOrder &&
+      {resource === sidebarResource.fieldServiceOrder && (
         <DetailsPageHeader
           isAddButtonVisible={allowedToEdit && !serviceOrderData?.quotation}
           addButtonMenuItems={addButtonMenuItems()}
@@ -288,7 +286,8 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
           actionButtonMenuItems={actionButtonMenuItems()}
           actionButtonProps={{ disabled: selectedRecords.length === 0 }}
           hasXpadding
-        />}
+        />
+      )}
       {columns ? (
         <CustomReactTable
           height={resource === sidebarResource.fieldServiceOrder ? 'calc(100vh - 393px)' : 'calc(100vh - 200px)'}
@@ -297,6 +296,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
+          enableGlobalSearch={enableGlobalSearch}
           isClientSideGrid={true}
           hideAction={resource === sidebarResource.fieldServiceOrder ? false : true}
         />
