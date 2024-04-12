@@ -63,6 +63,18 @@ const Steps = ({
     handleScroll();
   }, [activeStep]);
 
+  // for mobile view, add class to body to compenset for mobile stepper floating height
+  useEffect(() => {
+    if (isMobile && !isTablet) {
+      document.body.classList.add('has-mobile-step');
+      return () => {
+        document.body.classList.remove('has-mobile-step');
+      };
+    } else {
+      return () => {};
+    }
+  }, [isMobile && !isTablet]);
+
   const handleScroll = () => {
     if (containerRef.current) {
       const container = containerRef.current;
@@ -87,10 +99,11 @@ const Steps = ({
     <div>
       {isMobile && !isTablet ? (
         <MobileSteps
-          stepName={`${activeStep + 1 > steps.length || isStepEnded
-            ? 'Completed'
-            : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
-            }`}
+          stepName={`${
+            activeStep + 1 > steps.length || isStepEnded
+              ? 'Completed'
+              : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
+          }`}
           nextButton={
             <Button
               size="small"
@@ -208,9 +221,8 @@ const Steps = ({
             )}
           </Box>
         </Box>
-      )
-      }
-    </div >
+      )}
+    </div>
   );
 };
 

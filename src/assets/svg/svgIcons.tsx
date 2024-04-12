@@ -10,10 +10,21 @@ interface svgInterfaceWithSize extends svgInterface {
   size?: number;
 }
 
-export const DOAApproved: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
+export const DOAApproved: React.FC<svgInterfaceWithSize> = ({ size = 22, width = 22, height = 22, ...others }) => {
   return (
     <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">
       <path stroke="currentcolor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.143" d="M2.5 7.643l3 3 6-6.429"></path>
+    </svg>
+  );
+};
+
+export const IOTIcon: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="currentcolor" viewBox="0 0 100 100" {...others}>
+      <path
+        d="M441 930c-53-13-113-61-139-112-19-37-32-50-61-59-74-24-126-79-142-150-18-80 29-166 115-212 39-21 53-22 286-22s247 1 286 22c130 70 158 210 60 308-24 24-59 46-84 53-31 10-46 20-53 40-17 45-58 91-98 112-45 23-123 32-170 20zm195-226c59-28 89-57 80-79-11-28-33-27-81 7-44 31-51 33-135 33s-91-2-135-33c-48-33-70-35-81-7-8 20 10 41 62 71 84 49 198 52 290 8zm-47-83c46-24 65-46 57-66-8-21-39-19-78 5-18 11-49 20-68 20s-50-9-68-20c-39-24-70-26-78-5-14 37 66 84 144 85 33 0 67-7 91-19zm-45-82c32-15 41-38 22-58-12-12-20-12-41-3-19 9-31 9-50 0-21-9-29-9-41 3-41 42 46 87 110 58zM287 334c-4-4-7-38-7-76 0-79-11-86-58-38-34 33-67 38-111 15-74-38-54-152 30-170 31-7 83 15 92 40 4 9 19 15 40 15 61 0 68 13 65 120-3 87-5 95-23 98-12 2-24 0-28-4zM477 334c-4-4-7-24-7-45 0-28-7-45-30-67-61-62-25-157 60-157 84 0 121 95 61 156-22 22-31 41-33 72-2 33-7 43-23 45-12 2-24 0-28-4zM667 334c-4-4-7-49-7-100 0-103 7-114 70-114 18 0 33-6 37-15 9-25 61-47 92-40 84 18 104 132 30 170-44 23-77 18-111-15-47-47-57-41-60 43-3 64-5 72-23 75-12 2-24 0-28-4z"
+        transform="matrix(.1 0 0 -.1 0 100)"
+      ></path>
     </svg>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Grid, useTheme, Button, Box } from '@material-ui/core';
 import { camelCase } from 'lodash';
-import axios from 'axios';
+import axios, { CancelTokenSource } from 'axios';
 import { MdDescription, MdFilterList } from 'react-icons/md';
 import styles from '../../Leads/Header.module.scss';
 import routes from '../../../components/Helpers/Routes';
@@ -19,10 +19,9 @@ import CustomFilter from './CustomFilter';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 
-let cancelTokenSource = null;
 
 const IotReport = () => {
-  const theme = useTheme();
+
   const toastConfig = React.useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity }
@@ -57,9 +56,11 @@ const IotReport = () => {
 
   React.useEffect(() => {
     if (showGrid) {
-      fetchResourceData();
+      const cencelToken = axios.CancelToken.source();
+      fetchResourceData(cencelToken);
+      return () => cencelToken.cancel();
     }
-  }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
+  }, [page, sorting, limit, filters, pageSizes, showGrid]);
 
   const handleColumns = (cols) => {
     let columns = [];
@@ -98,44 +99,25 @@ const IotReport = () => {
     setColumns([...columns]);
   };
 
-  React.useEffect(() => {
-    if (showGrid) {
-      fetchResourceData();
-    }
-  }, [filterQuery]);
-
-  const fetchResourceData = () => {
-    setLoadingData(true);
-    setColumns(null);
+  const fetchResourceData = (cancelTokenSource?: CancelTokenSource) => {
     let filterQuery = getFilter();
-    if (cancelTokenSource) {
-      cancelTokenSource.cancel();
-    }
-    cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
-
     let api = seletedReport?.api + filterQuery;
-    axiosInstance()
-      .get(api, {
-        cancelToken: cancelTokenSource.token
-      })
-      .then(({ data: responseData }) => {
-        const { data, count, columns } = responseData?.data;
-        handleColumns(columns);
-        const processedData = data.map((item, index) => {
-          const finalObject: any = prepareDataForGrid(item);
-          if (!finalObject?._id) {
-            finalObject._id = index?.toString();
-          }
-          return finalObject;
-        });
-        dispatch({ type: 'initialize', data: processedData, count: count });
-        setLoadingData(false);
-        setShowGrid(true);
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
+    axiosInstance().get(api, { cancelToken: cancelTokenSource?.token }).then(({ data: responseData }) => {
+      const { data, count, columns } = responseData?.data;
+      handleColumns(columns);
+      const processedData = data.map((item, index) => {
+        const finalObject: any = prepareDataForGrid(item);
+        if (!finalObject?._id) {
+          finalObject._id = index?.toString();
+        }
+        return finalObject;
+      });
+      dispatch({ type: 'initialize', data: processedData, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    })
       .catch((err) => {
         if (!axios.isCancel(err)) {
           setTimeout(() => {
@@ -198,6 +180,11 @@ const IotReport = () => {
         toastConfig.setToastConfig(err);
       });
   };
+
+  const handleSubmit = (data) => {
+    setFilterQuery(data);
+    setShowGrid(true);
+  }
 
   return (
     <div className="main-container-v1">
@@ -264,10 +251,9 @@ const IotReport = () => {
         </div>
         <CustomFilter
           field={[{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...seletedReport?.filters]}
-          setFilterQuery={setFilterQuery}
-          showGrid={showGrid}
           loadingData={loadingData}
-          setShowGrid={setShowGrid}
+          handleSubmit={handleSubmit}
+          open={!showGrid}
         />
         <div>
           {columns ? (

@@ -66,6 +66,12 @@ import Signature from './FormTypes/Signature';
 import { Image } from '@material-ui/icons';
 import DataList from './FormTypes/DataList';
 
+type MultiFileType = {
+  fileName: string;
+  size: string | number;
+};
+type ReturnMultiFileType = string | void | MultiFileType;
+
 const filter = createFilterOptions();
 
 interface NumberFormatCustomProps {
@@ -390,10 +396,11 @@ const FormTypes = (props) => {
     return label ? (label.length > 35 ? label.substr(0, 35) + '...' : label) : '';
   };
 
-  const handleUploadFile = (ev, isMultiple = false) => {
+  const handleUploadFile = async (ev, isMultiple = false) => {
     if (ev.target.files && ev.target.files.length) {
       let files = ev.target.files;
-      // const file = ev.target.files[0];
+
+      let urls: any = values[name] ? values[name] : [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -405,8 +412,24 @@ const FormTypes = (props) => {
           });
           break;
         }
-        getFileUrl(file, isMultiple);
+        let url: ReturnMultiFileType;
+        try {
+          url = await getFileUrl(file, isMultiple);
+        } catch (error) {
+          setToastConfig({
+            open: true,
+            type: 'error',
+            message: error.message
+          });
+        }
+        if (!url) return;
+        if (isMultiple) {
+          urls.push(url);
+        } else {
+          urls = url;
+        }
       }
+      setFieldValue(name, urls);
       ev.target.value = '';
     }
   };
@@ -470,8 +493,62 @@ const FormTypes = (props) => {
       });
   };
 
+  // const getFileUrl = (file, isMultiple = false) => {
+  //   setFileUploadProgress(0);
+  //   let formData = new FormData();
+  //   formData.append('file', file);
+  //   setFileUploading(true);
+  //   let uploadUrl = usePublicUrlforFileUpload ? '/user/upload-public' : uploadFileUrl ? uploadFileUrl : '/user/upload';
+  //   if (imageOrFileUploadCompletePercentage) {
+  //     imageOrFileUploadCompletePercentage(1);
+  //   }
+  //   axiosInstance()
+  //     .post(uploadUrl, formData, {
+  //       headers: { 'Content-Type': 'multipart/form-data' },
+  //       onUploadProgress: (pE) => {
+  //         const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
+  //         setFileUploadProgress(completedPercent);
+
+  //         if (completedPercent === 100) {
+  //           setTimeout(() => {
+  //             setFileUploadProgress(0);
+  //           }, 4000);
+  //         }
+  //       }
+  //     })
+  //     .then(({ data }) => {
+  //       if (imageOrFileUploadCompletePercentage) {
+  //         imageOrFileUploadCompletePercentage(0);
+  //       }
+  //       if (uploadFileUrl) {
+  //         onAppendData(data);
+  //       } else {
+  //         // if (isMultiple) {
+  //         //   let currentData = values[name] ? values[name] : [];
+  //         //   setFieldValue(name, [...currentData, { fileName: usePublicUrlforFileUpload ? data.fileUrl : data.fileName, size: file.size }]);
+  //         // } else {
+  //         //   setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
+  //         // }
+  //         if (isMultiple) {
+  //           return { fileName: usePublicUrlforFileUpload ? data.fileUrl : data.fileName, size: file.size };
+  //         } else {
+  //           return usePublicUrlforFileUpload ? data.fileUrl : data.fileName;
+  //         }
+  //       }
+  //       setFileUploading(false);
+  //     })
+  //     .catch((err) => {
+  //       setFileUploading(false);
+  //       setToastConfig(err);
+  //       setFileUploadProgress(0);
+  //       if (imageOrFileUploadCompletePercentage) {
+  //         imageOrFileUploadCompletePercentage(0);
+  //       }
+  //     });
+  // };
+
   // for private upload
-  const getFileUrl = (file, isMultiple = false) => {
+  const getFileUrl = async (file, isMultiple = false): Promise<ReturnMultiFileType> => {
     setFileUploadProgress(0);
     let formData = new FormData();
     formData.append('file', file);
@@ -480,8 +557,8 @@ const FormTypes = (props) => {
     if (imageOrFileUploadCompletePercentage) {
       imageOrFileUploadCompletePercentage(1);
     }
-    axiosInstance()
-      .post(uploadUrl, formData, {
+    try {
+      const { data } = await axiosInstance().post(uploadUrl, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (pE) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
@@ -493,31 +570,28 @@ const FormTypes = (props) => {
             }, 4000);
           }
         }
-      })
-      .then(({ data }) => {
-        if (imageOrFileUploadCompletePercentage) {
-          imageOrFileUploadCompletePercentage(0);
-        }
-        if (uploadFileUrl) {
-          onAppendData(data);
-        } else {
-          if (isMultiple) {
-            let currentData = values[name] ? values[name] : [];
-            setFieldValue(name, [...currentData, { fileName: usePublicUrlforFileUpload ? data.fileUrl : data.fileName, size: file.size }]);
-          } else {
-            setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
-          }
-        }
-        setFileUploading(false);
-      })
-      .catch((err) => {
-        setFileUploading(false);
-        setToastConfig(err);
-        setFileUploadProgress(0);
-        if (imageOrFileUploadCompletePercentage) {
-          imageOrFileUploadCompletePercentage(0);
-        }
       });
+      if (imageOrFileUploadCompletePercentage) {
+        imageOrFileUploadCompletePercentage(0);
+      }
+      if (uploadFileUrl) {
+        onAppendData(data);
+      } else {
+        if (isMultiple) {
+          return { fileName: usePublicUrlforFileUpload ? data.fileUrl : data.fileName, size: file.size };
+        } else {
+          return usePublicUrlforFileUpload ? data.fileUrl : data.fileName;
+        }
+      }
+    } catch (error) {
+      setToastConfig(error);
+    } finally {
+      setFileUploadProgress(0);
+      if (imageOrFileUploadCompletePercentage) {
+        imageOrFileUploadCompletePercentage(0);
+      }
+      setFileUploading(false);
+    }
   };
 
   const addFieldOption = (optionData) => {
@@ -2196,7 +2270,8 @@ const FormTypes = (props) => {
       </Fragment>
     ) : type === 'fileUpload' ? (
       <Fragment>
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="center" pb={1}>
+          <Typography color="textSecondary">{label}</Typography>
           {isTooltip && Boolean(tooltipMessage) && (
             <Fragment>
               <IconButton size="small">
@@ -2204,9 +2279,11 @@ const FormTypes = (props) => {
                   <InfoIcon color="disabled" />
                 </HtmlTooltip>
               </IconButton>
-              <Box mr={1} />
+              <Box mr={2} />
             </Fragment>
           )}
+        </Box>
+        <Box display="flex" alignItems="center">
           <input
             disabled={isFileUploading || !canEdit}
             id={name}
@@ -2228,7 +2305,7 @@ const FormTypes = (props) => {
               className="normal-case"
               startIcon={isFileUploading && <CircularProgress size={15} />}
             >
-              {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
+              {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
             </Button>
           </label>
           {showErrorMessage ? (
@@ -2244,7 +2321,6 @@ const FormTypes = (props) => {
           {doNotShowUploadedFile ? null : (
             <>
               <Box ml={1} />
-
               <Box flex="1" className="text-truncate">
                 <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
                   {isFileUploading
@@ -2274,18 +2350,22 @@ const FormTypes = (props) => {
       </Fragment>
     ) : type === 'multiFileUpload' ? (
       <Fragment>
+        <Box display="flex" alignItems="center" pb={1}>
+          <Typography color="textSecondary">{label}</Typography>
+          {isTooltip && Boolean(tooltipMessage) && (
+            <Fragment>
+              <IconButton size="small">
+                <HtmlTooltip title={tooltipMessage}>
+                  <InfoIcon color="disabled" />
+                </HtmlTooltip>
+              </IconButton>
+              <Box mr={2} />
+            </Fragment>
+          )}
+        </Box>
         <Box display="flex" alignItems="center">
           <Grid container spacing={1} alignItems="center">
             <Grid item xs={12} sm={12} md={12}>
-              {/* <Typography color="textSecondary">{label}</Typography> */}
-              {isTooltip && Boolean(tooltipMessage) && (
-                <IconButton size="small">
-                  <HtmlTooltip title={tooltipMessage}>
-                    <InfoIcon color="disabled" />
-                  </HtmlTooltip>
-                </IconButton>
-              )}
-              <Box mr={1} />
               <input
                 disabled={isFileUploading || !canEdit}
                 id={name}
@@ -2531,9 +2611,9 @@ const FormTypes = (props) => {
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
         <Typography color="textSecondary">{label}</Typography>
-        <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple type="file" onChange={readImageFile} />
+        <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple={false} type="file" onChange={readImageFile} />
         <label htmlFor="multiple-images-button">
-          <Button disabled={readingImage} variant="contained" color="primary" component="span">
+          <Button disabled={readingImage} variant="contained" color="primary" component="span" size={'small'}>
             Upload
           </Button>
         </label>
