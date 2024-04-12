@@ -88,7 +88,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
 const FieldServiceTechnician = () => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.fieldServiceTechnician.title);
-  const [view, setView] = useState<Views>('card');
+  const [view, setView] = useState<Views>('table');
   const [selectedData, setSelectedData] = useState(null);
   const [colData, setColData] = useState(null);
   const {
@@ -110,7 +110,6 @@ const FieldServiceTechnician = () => {
     const cancelToken = axios.CancelToken.source();
     fetchColumns(cancelToken);
     return () => cancelToken.cancel();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchColumns = async (cancelToken?: CancelTokenSource) => {
@@ -123,7 +122,7 @@ const FieldServiceTechnician = () => {
     }
     try {
       insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
-    } catch (e) {}
+    } catch (e) { }
     setColData(data);
     const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
     newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }));
@@ -290,7 +289,6 @@ const FieldServiceTechnician = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: routes.fieldServiceTechnician.title }]} />
       </div>
-
       <CustomContainer>
         <ListingPageHeader
           searchValue={search}
@@ -328,9 +326,9 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => {}}
+                    setNextStep={() => { }}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => {}}
+                    handleChangeStatus={() => { }}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
                   />
