@@ -21,6 +21,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { camelCase } from 'lodash';
+import axios, { CancelTokenSource } from 'axios';
 
 const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChangeStatus, resource, enableGlobalSearch = true }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,7 +46,10 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cancleToken = axios.CancelToken.source();
+    fetchData(cancleToken);
+    return () => cancleToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEntity, serviceOrderData]);
 
   const fetchGridColumns = async () => {
@@ -93,7 +97,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelToken: CancelTokenSource) => {
     try {
       setNextStep(false);
       dispatch({ type: 'loading', loading: true });
@@ -106,7 +110,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
         count = data.length;
       } else {
         const queryString = getQueryString();
-        const response = await axiosInstance().get(`${routes.fieldTicket.path}${queryString}`);
+        const response = await axiosInstance().get(`${routes.fieldTicket.path}${queryString}`, { cancelToken: cancelToken.token });
         data = response?.data?.data;
         count = response?.data?.count;
       }
