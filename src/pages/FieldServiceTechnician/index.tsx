@@ -318,7 +318,7 @@ const FieldServiceTechnician = () => {
                   hideSelection={true}
                   setWholeRowsCellColor={(row) =>
                     row._id === selectedData?._id
-                      ? '!bg-[var(--new-theme-color)] [&_h6>span:first-child]:[color:white_!important] transition-bg duration-300'
+                      ? ' [box-shadow:inset_0px_0px_0px_3px_var(--new-theme-color)_!important]  transition-bg duration-300'
                       : ' transition-bg duration-300'
                   }
                   onRowClick={onRowClick}
