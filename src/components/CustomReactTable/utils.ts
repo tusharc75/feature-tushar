@@ -9,7 +9,6 @@ export const childrenProperty = 'subRows';
 export const gridFilterParser = (filters) => {
   const filterByIds: any = [];
   const deepFilters: any = [];
-console.log('filters', filters)
   if (!isEmpty(filters)) {
     Object.keys(filters).forEach((field) => {
       if (filters[field].operator && filters[field].condition1) {

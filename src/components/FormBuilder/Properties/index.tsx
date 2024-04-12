@@ -273,7 +273,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     }
                   }
                 });
-              ele.option = values.option;
+              ele.option = fieldData?.dataList ? [] : values.option;
             }
             if (
               fieldData.type === 'decimal' ||

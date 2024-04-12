@@ -13,16 +13,19 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
   const [inputValues, setInputValues] = useState('');
 
   useEffect(() => {
-    if (fieldData?.option?.length > 0 && values[name]) {
+    if (values[`${name}_dataList`] && values[name]) {
       let option: any = [];
-      if (type === 'multiSelect' && values[name]?.length > 0) {
-        option = fieldData?.option?.filter((o) => values[name].includes(o?.optionValue));
+      if (type === 'multiSelect') {
+        if (values[`${name}_dataList`]?.length > 0 && values[name]?.length > 0) {
+          option = values[`${name}_dataList`];
+        }
       } else {
-        option = fieldData?.option?.filter((o) => o?.optionValue === values[name]);
+        option = [values[`${name}_dataList`]];
       }
       setDefaultOptions(option);
     }
-  }, [fieldData?.option]);
+    delete values[`${name}_dataList`]
+  }, []);
 
   const fetchOptions = useCallback(
     debounce(async (searchKey: string = '', page: number = 0) => {
@@ -92,9 +95,13 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
                 disableCloseOnSelect={true}
                 options={uniqBy([...options, ...defaultOptions], 'optionValue')}
                 getOptionLabel={(option: any) => {
-                  return option ? option.optionLabel : '';
+                  return option ? option?.optionLabel : '';
                 }}
-                value={values[name] ? uniqBy([...options, ...defaultOptions], 'optionValue')?.filter((data: any) => values[name].includes(data.optionValue)) : []}
+                value={
+                  values[name]
+                    ? uniqBy([...options, ...defaultOptions], 'optionValue')?.filter((data: any) => values[name].includes(data.optionValue))
+                    : []
+                }
                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                 onChange={(e, val: any) => {
                   setFieldValue(name, val ? val.map((val) => val?.optionValue) : []);
