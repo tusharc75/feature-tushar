@@ -309,7 +309,7 @@ export default function useColumns() {
               <p className="text-truncate">{row?.original?.[fieldName] ? <p>{row?.original?.[fieldName]}</p> : <NoDataCell />}</p>
             )
         });
-      } else if (field?.lookup) {
+      } else if (field?.lookup || field?.dataList) {
         column.push({
           ...commonFieldData,
           accessorFn: (original) => {

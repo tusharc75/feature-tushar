@@ -9,7 +9,7 @@ export const childrenProperty = 'subRows';
 export const gridFilterParser = (filters) => {
   const filterByIds: any = [];
   const deepFilters: any = [];
-
+console.log('filters', filters)
   if (!isEmpty(filters)) {
     Object.keys(filters).forEach((field) => {
       if (filters[field].operator && filters[field].condition1) {
@@ -407,7 +407,7 @@ export const createFilterModel = (formValues, coloums) => {
         break;
       case 'multiSelect':
       case 'dropDown':
-        if (col.lookup && formValues[fieldName]) {
+        if ((col.lookup || col.dataList) && formValues[fieldName]) {
           const options = coloums?.find((item) => item.fieldName == fieldName)?.option || [];
           if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
             filterModel.set(fieldName, {

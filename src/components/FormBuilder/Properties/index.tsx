@@ -56,6 +56,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.lookup = false;
         values.lookupResource = null;
       }
+      if (!values.dataList) {
+        values.dataList = false;
+        values.dataListId = null;
+      }
       if (
         !values.isColumnEditable &&
         fieldData.resource === 'Rental Management Product' &&
@@ -211,6 +215,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.addBulkOptions = values.addBulkOptions;
             ele.lookup = values.lookup || false;
             ele.lookupResource = values.lookup ? values.lookupResource : '';
+            ele.dataList = values.dataList || false;
+            ele.dataListId = values.dataList ? values.dataListId : '';
             ele.entityWiseLookup = values?.entityWiseLookup || false;
             ele.isMinMaxValue = values?.isMinMaxValue || false;
             ele.minValue = values?.minValue || 0;
@@ -438,6 +444,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
     if (values.lookup && !values.lookupResource) {
       errors['lookupResource'] = 'Please select Lopkup Resource.';
+    }
+
+    if (values.dataList && !values.dataListId) {
+      errors['dataListId'] = 'Please select Data List.';
     }
 
     if (values?.isMinMaxValue) {
