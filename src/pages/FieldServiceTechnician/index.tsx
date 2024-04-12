@@ -32,15 +32,65 @@ import axios, { CancelTokenSource } from 'axios';
 import { Apps, FormatListNumbered } from '@material-ui/icons';
 import FieldTicket from '../FieldServiceOrder/FieldTicket';
 
-let serchtimeTimeout;
-
 type Views = 'card' | 'table';
+
+const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }) => {
+  return {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Add"
+              disabled={permissions?.fieldTicket?.isCreate && !isSubmitting ? false : true}
+              onClick={() => {
+                handleCreateFieldTicket(
+                  row?.original?.orignalData,
+                  data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
+                );
+              }}
+            >
+              <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && !isSubmitting ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        {view === 'table' && (
+          <Box>
+            <HtmlTooltip title={`View ${routes.fieldTicket.title}`}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="View"
+                  onClick={() => {
+                    setViewFieldTicket({ open: true, data: row?.original?.orignalData });
+                  }}
+                >
+                  <VisibilityIcon fontSize="small" color="primary" />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </Box>
+        )}
+      </>
+    )
+  };
+};
 
 const FieldServiceTechnician = () => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.fieldServiceTechnician.title);
   const [view, setView] = useState<Views>('card');
   const [selectedData, setSelectedData] = useState(null);
+  const [colData, setColData] = useState(null);
   const {
     state: { user, permissions }
   }: any = useData();
@@ -74,54 +124,9 @@ const FieldServiceTechnician = () => {
     try {
       insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
     } catch (e) {}
+    setColData(data);
     const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
-    newColumns.push({
-      accessor: 'action',
-      Header: 'Actions',
-      minWidth: 100,
-      width: 100,
-      sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      isVisible: false,
-      canDrag: false,
-      Cell: ({ row }) => (
-        <>
-          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Add"
-                disabled={permissions?.fieldTicket?.isCreate && !isSubmitting ? false : true}
-                onClick={() => {
-                  handleCreateFieldTicket(
-                    row?.original?.orignalData,
-                    data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
-                  );
-                }}
-              >
-                <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && !isSubmitting ? 'primary' : 'disabled'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-          <Box pl={1}>
-            <HtmlTooltip title={`View ${routes.fieldTicket.title}`}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="View"
-                  onClick={() => {
-                    setViewFieldTicket({ open: true, data: row?.original?.orignalData });
-                  }}
-                >
-                  <VisibilityIcon fontSize="small" color="primary" />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          </Box>
-        </>
-      )
-    });
+    newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }));
     setColumns(newColumns);
   };
 
@@ -275,6 +280,13 @@ const FieldServiceTechnician = () => {
     }
   };
 
+  const handleViewChange = (view: Views) => {
+    setView(view);
+    const updatedColumns = columns.filter((c) => c.accessor !== 'action');
+    updatedColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData }));
+    setColumns(updatedColumns);
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -287,7 +299,7 @@ const FieldServiceTechnician = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           isAddButtonVisible={false}
-          rightSideContents={<ViewButtons setView={setView} view={view} />}
+          rightSideContents={<ViewButtons handleViewChange={handleViewChange} view={view} />}
           actionMenuItems={<ActionMenuItems />}
         />
         {columns ? (
@@ -367,19 +379,19 @@ const FieldServiceTechnician = () => {
 
 export default FieldServiceTechnician;
 
-const ViewButtons = ({ setView, view }) => {
+const ViewButtons = ({ view, handleViewChange }) => {
   return (
     <>
       <HtmlTooltip title={'Card View'} placement="top" arrow enterTouchDelay={0}>
         <span>
-          <IconButton size="small" onClick={() => setView('card')} disabled={view === 'card'}>
+          <IconButton size="small" onClick={() => handleViewChange('card')} disabled={view === 'card'}>
             <Apps color="primary" className={`${view === 'card' ? ' opacity-45' : ''}`} />
           </IconButton>
         </span>
       </HtmlTooltip>
       <HtmlTooltip title={'List View'} placement="top" arrow enterTouchDelay={0}>
         <span>
-          <IconButton size="small" onClick={() => setView('table')} disabled={view === 'table'}>
+          <IconButton size="small" onClick={() => handleViewChange('table')} disabled={view === 'table'}>
             <FormatListNumbered color="primary" className={`${view === 'table' ? ' opacity-45' : ''}`} />
           </IconButton>
         </span>
