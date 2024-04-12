@@ -51,7 +51,7 @@ export default function Current({ deviceTemplate, assetId }) {
   const fetchData = async () => {
     setCurrentData(null);
     axiosInstance()
-      .get(`/report/iot/current-status`, {
+      .get(`/report/iot-current-status`, {
         params: {
           asset: assetId
         }
@@ -67,7 +67,7 @@ export default function Current({ deviceTemplate, assetId }) {
   const fetchErrorData = async () => {
     setErrorData(null);
     axiosInstance()
-      .get(`/report/iot/alerts?asset=${assetId}`)
+      .get(`/report/iot-alerts?asset=${assetId}`)
       .then(({ data: { data } }) => {
         setErrorData(
           data

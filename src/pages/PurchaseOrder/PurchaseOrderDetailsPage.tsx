@@ -266,21 +266,21 @@ const PurchaseOrderDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} {...a11yProps(0)}>
+          <CustomTab index={0} value={0}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Header
           </CustomTab>
           {purchaseOrderData?.deleted ? null : (
-            <CustomTab index={1} {...a11yProps(1)}>
+            <CustomTab index={1} value={1}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
             </CustomTab>
           )}
           {purchaseOrderData?.deleted ? null : (
-            <CustomTab index={3} {...a11yProps(3)}>
+            <CustomTab index={3} value={2}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Invoice
             </CustomTab>
           )}
-          {purchaseOrderData?.deleted && isMobile && !isTablet ? null : (
-            <CustomTab className={'tabLayout'} index={2} {...a11yProps(2)}>
+          {purchaseOrderData?.deleted || (isMobile && !isTablet) ? null : (
+            <CustomTab index={3} value={3}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
