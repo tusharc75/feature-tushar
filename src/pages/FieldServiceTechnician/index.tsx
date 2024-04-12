@@ -303,7 +303,7 @@ const FieldServiceTechnician = () => {
         {columns ? (
           view === 'card' ? (
             <div className="grid md:grid-cols-[400px_1fr] grid-cols-1 gap-4">
-              <div className="container-with-border p-[20px]">
+              <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   showOnlyMobileView={true}
