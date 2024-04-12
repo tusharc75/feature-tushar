@@ -469,8 +469,6 @@ export default function NewCreateQuotePdfTemplate() {
     }
   };
 
-  console.log(hasPermissionToUpdate);
-
   return initialValues && pdfResourceOption ? (
     <>
       <DeviceMessage />
