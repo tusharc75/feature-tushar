@@ -24,7 +24,7 @@ const Alarms = ({ deviceTemplate, assetId }) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`/report/iot/alerts${queryString}`)
+      .get(`/report/iot-alerts${queryString}`)
       .then(({ data: { data, count } }) => {
         dispatch({ type: 'initialize', data: data, count: count });
         setTimeout(() => {

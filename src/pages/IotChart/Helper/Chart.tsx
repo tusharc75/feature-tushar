@@ -159,7 +159,7 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
   }, [themeColor]);
 
   const fetchData = () => {
-    let api = `/report/iot/data-points`;
+    let api = `/report/iot-data-points`;
     let param = {
       asset: assetId,
       from_date: new Date(dateFilters.from).toISOString(),
@@ -243,7 +243,7 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
 
   const fetchAlert = () => {
     if (alarm) {
-      let api = `/report/iot/alerts?asset=${assetId}&from_date=${new Date(dateFilters.from).toISOString()}&to_date=${new Date(
+      let api = `/report/iot-alerts?asset=${assetId}&from_date=${new Date(dateFilters.from).toISOString()}&to_date=${new Date(
         dateFilters.to
       ).toISOString()}`;
 
