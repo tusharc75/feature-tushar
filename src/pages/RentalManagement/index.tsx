@@ -36,6 +36,7 @@ import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { IOTIcon } from 'src/assets/svg/svgIcons';
 
 const RentalManagement = () => {
   const renderedFrom = camelCase(routes?.rentalManagement.title);
@@ -168,18 +169,21 @@ const RentalManagement = () => {
       <>
         <HideWhenOffline>
           {permissions?.iotChart?.isRead && (
-            <HtmlTooltip title={`View ${routes.iotChart.title}`}>
-              <IconButton
-                color="inherit"
-                size="small"
-                onClick={() => {
-                  history.push(`${routes.iotChart.path}?referenceData=${row?.original?.shippingAddressId}`)
-                }}>
-                <VisibilityIcon color="primary" fontSize="small" />
-              </IconButton>
+            <HtmlTooltip title={`View ${routes.iotChart.title}`} placement="top" arrow enterTouchDelay={0}>
+              <span>
+                <IconButton
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    history.push(`${routes.iotChart.path}?referenceData=${row?.original?.shippingAddressId}`);
+                  }}
+                >
+                  <IOTIcon size={20} />
+                </IconButton>
+              </span>
             </HtmlTooltip>
           )}
-          <HtmlTooltip title={permissions?.rentalManagement?.isCreate ? 'Clone' : cloneDisable}>
+          <HtmlTooltip title={permissions?.rentalManagement?.isCreate ? 'Clone' : cloneDisable} placement="top" arrow enterTouchDelay={0}>
             <span>
               <IconButton
                 size="small"
@@ -193,7 +197,7 @@ const RentalManagement = () => {
               </IconButton>
             </span>
           </HtmlTooltip>
-          <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable}>
+          <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable} placement="top" arrow enterTouchDelay={0}>
             <span>
               <IconButton
                 size="small"
@@ -536,8 +540,9 @@ const RentalManagement = () => {
         {singleRentalManagementDelete.show && (
           <ConfirmationDialog
             open={singleRentalManagementDelete.show}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-              }?`}
+            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
+              singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+            }?`}
             onClose={() =>
               setSingleRentalManagementDelete({
                 id: null,
