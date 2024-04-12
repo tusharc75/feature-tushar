@@ -93,8 +93,22 @@ const InputField = (props) => {
                       key={field.fieldName}
                       item
                       xs={12}
-                      sm={field.type === 'imageUpload' || field.type === 'fileUpload' ? 12 : 6}
-                      md={field.type === 'imageUpload' || field.type === 'fileUpload' ? 12 : 6}
+                      sm={
+                        field.type === 'imageUpload' ||
+                        field.type === 'fileUpload' ||
+                        field.type === 'multiImageUpload' ||
+                        field.type === 'multiFileUpload'
+                          ? 12
+                          : 6
+                      }
+                      md={
+                        field.type === 'imageUpload' ||
+                        field.type === 'fileUpload' ||
+                        field.type === 'multiImageUpload' ||
+                        field.type === 'multiFileUpload'
+                          ? 12
+                          : 6
+                      }
                     >
                       <FormTypes
                         {...rest}
@@ -114,19 +128,19 @@ const InputField = (props) => {
                         onChange={
                           field.fieldName === 'currency'
                             ? (e, val) => {
-                              if (val && val.currencyCode) {
-                                setFieldValue(field.fieldName, val.currencyCode);
-                                setCurrencySymbol(val.symbolNative);
-                              } else {
-                                setFieldValue(field.fieldName, '');
-                                setCurrencySymbol(null);
+                                if (val && val.currencyCode) {
+                                  setFieldValue(field.fieldName, val.currencyCode);
+                                  setCurrencySymbol(val.symbolNative);
+                                } else {
+                                  setFieldValue(field.fieldName, '');
+                                  setCurrencySymbol(null);
+                                }
                               }
-                            }
                             : field.type === 'dropDown'
-                              ? (e, val) => {
+                            ? (e, val) => {
                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
                               }
-                              : null
+                            : null
                         }
                         imageOrFileUploadCompletePercentage={
                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
