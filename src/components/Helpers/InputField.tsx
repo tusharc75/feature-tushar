@@ -93,8 +93,22 @@ const InputField = (props) => {
                       key={field.fieldName}
                       item
                       xs={12}
-                      sm={field.type === 'imageUpload' || field.type === 'fileUpload' || field.type === 'multiImageUpload' ? 12 : 6}
-                      md={field.type === 'imageUpload' || field.type === 'fileUpload' || field.type === 'multiImageUpload' ? 12 : 6}
+                      sm={
+                        field.type === 'imageUpload' ||
+                        field.type === 'fileUpload' ||
+                        field.type === 'multiImageUpload' ||
+                        field.type === 'multiFileUpload'
+                          ? 12
+                          : 6
+                      }
+                      md={
+                        field.type === 'imageUpload' ||
+                        field.type === 'fileUpload' ||
+                        field.type === 'multiImageUpload' ||
+                        field.type === 'multiFileUpload'
+                          ? 12
+                          : 6
+                      }
                     >
                       <FormTypes
                         {...rest}
