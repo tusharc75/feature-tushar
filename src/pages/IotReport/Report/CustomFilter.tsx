@@ -1,9 +1,8 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   CircularProgress,
   Box,
   Button,
-  Chip,
   Dialog,
   FormControl,
   Grid,
@@ -27,11 +26,10 @@ import DialogContent from '@material-ui/core/DialogContent';
 import { useHistory } from 'react-router-dom';
 import routes from './../../../components/Helpers/Routes';
 import { List } from '@material-ui/icons';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
+const CustomFilter = ({ field, loadingData, handleSubmit, open }) => {
+
   const history = useHistory();
-  const { setToastConfig } = useContext(CustomToastContext);
   const [formValues, setFormValues] = useState({});
   const [selectedResources, setSelectedResources] = useState([]);
   let [resourceOptions, setResourceOptions] = useState(null);
@@ -45,7 +43,7 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
   const [error, setError] = useState(null);
 
   const setDefaultResource = (val = []) => {
-    const resource = ['asset', 'date', 'interval'];
+    const resource = ['asset', 'date', 'interval', 'dataPointsCategory'];
     setSelectedResources([...field?.filter((f) => resource.includes(f?.fieldName)), ...val?.filter((f) => !resource.includes(f?.fieldName))]);
   };
 
@@ -53,8 +51,6 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
     setDefaultResource();
   }, []);
 
-  //selectedResources represents the main filter array
-  //selectedData is an object with keys as the filter and value as the sub filter values
 
   useEffect(() => {
     if (!selectedData) return;
@@ -92,7 +88,7 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
         if (page > 0 && response.data.data?.length > 0) {
           setCurrentPage(page);
         }
-      const optionsData: any = {};
+        const optionsData: any = {};
         [...field]
           .filter((d: any) => d.type === 'dropDown' || d.type === 'multiSelect' || d.type === 'date' || d.type === 'checkBox')
           .map((d: any) => {
@@ -264,7 +260,7 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
 
   const validate = (formValues: any) => {
     const error: any = {};
-    if (!formValues?.asset || formValues?.asset?.optionLabel !=inputValues['asset']) {
+    if (!formValues?.asset || formValues?.asset?.optionLabel != inputValues['asset']) {
       error['asset'] = 'Asset is required';
     }
     if (!formValues?.from_date) {
@@ -513,11 +509,11 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
                                     getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
                                     value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
                                     onChange={(e, val) => {
-                                      handleSelectFilter(field?.type,field?.fieldName, val);
-                                      if(field?.multiple){
+                                      handleSelectFilter(field?.type, field?.fieldName, val);
+                                      if (field?.multiple) {
                                         setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: '' }));
-                                      }else{
-                                        setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: val.optionLabel })); 
+                                      } else {
+                                        setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: val.optionLabel }));
                                       }
                                     }}
                                     size="small"
@@ -527,6 +523,7 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
                                         label={field?.fieldLabel}
                                         variant="outlined"
                                         name={field?.fieldName}
+                                        required={field?.required}
                                         InputProps={{
                                           ...params.InputProps,
                                           endAdornment: (

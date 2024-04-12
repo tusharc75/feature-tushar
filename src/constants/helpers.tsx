@@ -2299,6 +2299,7 @@ export const IOT_REPORT_LIST = [
         lookup: true,
         type: 'dropDown',
         multiple: true,
+        required: true,
         _id: '5'
       },
       {
