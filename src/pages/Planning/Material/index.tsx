@@ -23,10 +23,10 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 
-const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData }) => {
+const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData, setReserveAssetWarning }) => {
   const {
     state: { user, permissions }
   }: any = useData();
@@ -266,26 +266,33 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow.type === 'package'
+          : _subRow.type === MATERIAL_TYPE.package
           ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'serializedAsset'
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
           ? _subRow.assetDetail.assetNumber
           : _subRow.serviceDetail?.serviceName;
       _subRow.description =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
-          : _subRow.type === 'package'
+          : _subRow.type === MATERIAL_TYPE.package
           ? _subRow?.packageDetail?.packageDescription
-          : _subRow.type === 'serializedAsset'
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
           ? parent.description
           : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
-      _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
+      _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === MATERIAL_TYPE.serializedAsset)?.length;
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
+    for(const _subRow of subRows) {
+      let assetStatus = _subRow?.assetDetail?.status;
+      if (planningData?.type === 'Rental Job' && _subRow.type === MATERIAL_TYPE.serializedAsset && assetStatus !== ASSET_STATUS.new && assetStatus !== ASSET_STATUS.available && assetStatus !== ASSET_STATUS.underReview) {
+        setReserveAssetWarning(true);
+        break;
+      }
+    }
     return subRows;
   };
 
@@ -399,7 +406,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
 
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
-    const flatArray = selectedRecords.filter((f) => f?.type === 'product' && f?.productDetail?.serializedProduct && f?.qty > f?.assetQty);
+    const flatArray = selectedRecords.filter((f) => f?.type === MATERIAL_TYPE.product && f?.productDetail?.serializedProduct && f?.qty > f?.assetQty);
     return flatArray.length === 0;
   };
 

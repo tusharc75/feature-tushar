@@ -40,6 +40,7 @@ const PlanningDetail = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [reserveAssetWarning, setReserveAssetWarning] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -218,6 +219,7 @@ const PlanningDetail = () => {
               allowedToEdit={allowedToEdit && permissions?.planning?.isUpdate ? true : false}
               planningData={planningData}
               fetchPlanningData={fetchData}
+              setReserveAssetWarning={setReserveAssetWarning}
             />
           )}
         </TabPanel>
@@ -235,7 +237,7 @@ const PlanningDetail = () => {
       {showConverConfirmBox && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
+          message={reserveAssetWarning? 'Asset(s) are not available, should we allow to convert without asset(s) ?' : `Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
           onClose={() => {
             setShowConverConfirmBox(false);
           }}

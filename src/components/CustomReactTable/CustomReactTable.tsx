@@ -68,7 +68,10 @@ const CustomReactTable = ({
   reportSave = false,
   virtualization = false,
   showArrangeView = true,
-  hideExportTable = false
+  hideExportTable = false,
+  showOnlyMobileView = false,
+  onRowClick = null,
+  enableGlobalSearch = true
 }) => {
   const {
     currentEditingCellPosition,
@@ -244,8 +247,10 @@ const CustomReactTable = ({
   }, [cellValue, currentEditingCellPosition, data, onSaveEdit]);
 
   useEffect(() => {
-    return setGlobalFilter(searchQuery);
-  }, [searchQuery, setGlobalFilter]);
+    if (enableGlobalSearch) {
+      return setGlobalFilter(searchQuery);
+    }
+  }, [searchQuery, setGlobalFilter, enableGlobalSearch]);
 
   const table = useReactTable({
     data: data || [],
@@ -484,7 +489,7 @@ const CustomReactTable = ({
             expander={expander}
             hideExportTable={hideExportTable}
           />
-          {!isMobileView && (
+          {!isMobileView && !showOnlyMobileView && (
             <div className="relative">
               <TableComponent
                 virtualization={virtualization}
@@ -501,10 +506,11 @@ const CustomReactTable = ({
                 loading={loading}
                 error={error}
                 height={height}
+                onRowClick={onRowClick}
               />
             </div>
           )}
-          {isMobileView && rows ? (
+          {(isMobileView || showOnlyMobileView) && rows ? (
             <SwipableListForMobile
               table={table}
               key={page}
@@ -521,6 +527,7 @@ const CustomReactTable = ({
               cellValue={cellValue}
               setCellValue={setCellValue}
               isClientSideGrid={isClientSideGrid}
+              onRowClick={onRowClick}
             />
           ) : null}
           {(!isClientSideGrid || data?.length > 25) && (
