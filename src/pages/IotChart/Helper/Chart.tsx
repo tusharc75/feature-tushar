@@ -69,9 +69,14 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
             class: 'custom-icon',
             click: function (chart, options, e) {
               const newType = chart.w.config.chart.type === 'line' ? 'bar' : 'line';
+              const newSharedTooltip = newType !== 'bar';
               chart.updateOptions({
                 chart: {
                   type: newType
+                },
+                tooltip: {
+                  shared: newSharedTooltip,
+                  intersect: !newSharedTooltip
                 }
               });
             }
@@ -102,7 +107,7 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
     //     min: 0
     // },
     tooltip: {
-      shared: true,
+      shared: dataPoints[0]?.chartType === 'Bar' ? false : true,
       x: {
         formatter: function (value) {
           const formattedDateTime = moment(value).format(dateTimeFormat24Hours);
@@ -343,7 +348,7 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
             showHighLow={showHighLow}
             setShowHighLow={setShowHighLow}
           />
-          <ReactApexChart key={currentChartTheme} options={options} series={chartData} type="line" height={500} />
+          <ReactApexChart key={currentChartTheme} options={options} series={chartData} type={dataPoints[0]?.chartType?.toLowerCase() || 'line'} height={500} />
         </>
       ) : (
         <Box p={2} height={500}>
