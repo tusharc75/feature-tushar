@@ -35,12 +35,12 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
   const [formValues, setFormValues] = useState({});
   const [selectedResources, setSelectedResources] = useState([]);
   let [resourceOptions, setResourceOptions] = useState(null);
-
+  const [inputValues, setInputValues] = useState({});
   const [options, setOptions] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState({ loading: false, resource: null });
   const [statusTimeFrame, setStatusTimeFrame] = useState<any>({});
   const [betweenDate, setBetweenDate] = useState(null);
-
+  const [currentPage, setCurrentPage] = useState(0);
   const [selectedData, setSelectedData] = useState(null);
   const [error, setError] = useState(null);
 
@@ -74,22 +74,31 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
   }, [selectedData, selectedResources]);
 
   const fetchOptions = useCallback(
-    debounce(async (resource: string, searchKey: string = '') => {
+    debounce(async (resource: string, searchKey: string = '', page: number = 0) => {
       try {
         const lookupResourceName = resource;
-        let query = `sa-field/options?resource=${lookupResourceName}&limit=10&search=${searchKey}`;
+        if (searchKey !== '') {
+          page = 0;
+          setCurrentPage(0);
+        }
+        if (page === 0) {
+          setCurrentPage(0);
+          setOptions([]);
+        }
+        let query = `sa-field/options?resource=${lookupResourceName}&limit=25&page=${page}&search=${searchKey}`;
         const response = await axiosInstance().get(query);
-        const options = [...response.data.data];
-        setOptions(options);
-
-        //set resource options
-        const optionsData: any = {};
+        const currentOptions = page === 0 ? [...response.data.data] : [...options, ...response.data.data];
+        setOptions(currentOptions);
+        if (page > 0 && response.data.data?.length > 0) {
+          setCurrentPage(page);
+        }
+      const optionsData: any = {};
         [...field]
           .filter((d: any) => d.type === 'dropDown' || d.type === 'multiSelect' || d.type === 'date' || d.type === 'checkBox')
           .map((d: any) => {
             if (d.type === 'dropDown' || d.type === 'multiSelect') {
               optionsData[d.fieldName] = {
-                options: options,
+                options: currentOptions,
                 type: d.type,
                 lookup: Boolean(d?.lookup)
               };
@@ -101,10 +110,9 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
           });
 
         setResourceOptions(optionsData);
-
-        setLoading(false);
+        setLoading({ loading: false, resource: null });
       } catch (error) {
-        setToastConfig(error);
+        console.error(error);
       }
     }, 1000),
     []
@@ -551,6 +559,128 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
           </div>
         </DialogContent>
       </Dialog>
+                                      }
+                                      required={field?.required}
+                                      error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
+                                      helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
+                                    />
+                                  </Grid>
+                                </>
+                              ) : 
+                                field?.type === 'dropDown' && field?.options ? (
+                                  <Grid item xs={12} sm={6} md={6} key={`${i}${field?.fieldName}`}>
+                                    <Autocomplete
+                                      disableCloseOnSelect
+                                      options={field?.options}
+                                      getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                                      value={!isEmpty(formValues) && formValues[field?.fieldName]}
+                                      onChange={(e, val) => {
+                                        handleSelectFilter(field?.type, field?.fieldName, val);
+                                      }}
+                                      fullWidth
+                                      renderInput={(params) => (
+                                        <TextField {...params} label={field?.fieldLabel} variant="outlined" size="small" name={field?.fieldName} />
+                                      )}
+                                    />
+                                  </Grid>
+                                ) : (
+                                  <Grid item xs={12} sm={6} md={6} key={`${i}${field?.fieldName}`}>
+                                    <Autocomplete
+                                      multiple={field?.multiple}
+                                      inputValue={inputValues[field?.fieldName] || ''}
+                                      onOpen={() => {
+                                        setOptions([]);
+                                        setLoading({ loading: true, resource: field?.resource });
+                                        fetchOptions(field?.resource, '');
+                                      }}
+                                      onInputChange={(event, value, reason) => {
+                                        if (reason === 'input') {
+                                          setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: value }));
+                                          fetchOptions(field?.resource, value);
+                                        }
+                                      }}
+                                      disableCloseOnSelect
+                                      options={options}
+                                      fullWidth
+                                      loading={loading.loading && loading.resource === field?.resource}
+                                      getOptionLabel={(option: any) => option.optionLabel ?? ''}
+                                      getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
+                                      value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
+                                      onChange={(e, val) => {
+                                        handleSelectFilter(field?.type,field?.fieldName, val);
+                                        if(field?.multiple){
+                                          setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: '' }));
+                                        }else{
+                                          setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: val?.optionLabel })); 
+                                        }
+                                      }}
+                                      size="small"
+                                      renderInput={(params) => (
+                                        <TextField
+                                          {...params}
+                                          label={field?.fieldLabel}
+                                          variant="outlined"
+                                          name={field?.fieldName}
+                                          InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                              <>
+                                                {loading.loading && loading.resource === field?.resource ? (
+                                                  <CircularProgress color="inherit" size={20} />
+                                                ) : null}
+                                                {params.InputProps.endAdornment}
+                                              </>
+                                            )
+                                          }}
+                                        />
+                                      )}
+                                      ListboxProps={{
+                                        onScroll: (e) => {
+                                          if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
+                                            setLoading({ loading: true, resource: field?.resource });
+                                            fetchOptions(field?.resource, '', currentPage + 1);
+                                          }
+                                        }
+                                      }}
+                                    />
+                                  </Grid>
+                                )}
+                            </>
+                          );
+                        })
+                      ) : (
+                        <Box textAlign="center" width="100%">
+                          <Typography>No filters selected</Typography>
+                        </Box>
+                      )}
+                    </Grid>
+                  </Box>
+                  <Box mt={2}>
+                    <Button
+                      onClick={() => {
+                        const error = validate(formValues);
+                        if (isEmpty(error)) {
+                          handleApplyFilter();
+                        }
+                      }}
+                      startIcon={loadingData ? <CircularProgress color="inherit" size={18} /> : <List />}
+                      color="primary"
+                      variant="contained"
+                      size="small"
+                      disableElevation
+                      fullWidth
+                      disabled={loadingData}
+                    >
+                      Show
+                    </Button>
+                  </Box>
+                </Box>
+              </Container>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </MuiPickersUtilsProvider>
   );
 };
