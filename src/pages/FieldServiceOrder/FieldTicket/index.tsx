@@ -42,10 +42,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
-    const cancleToken = axios.CancelToken.source();
-    fetchGridColumns(cancleToken);
-    return () => cancleToken.cancel();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchGridColumns();
   }, []);
 
   useEffect(() => {
