@@ -1,9 +1,8 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   CircularProgress,
   Box,
   Button,
-  Chip,
   Dialog,
   FormControl,
   Grid,
@@ -27,25 +26,24 @@ import DialogContent from '@material-ui/core/DialogContent';
 import { useHistory } from 'react-router-dom';
 import routes from './../../../components/Helpers/Routes';
 import { List } from '@material-ui/icons';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
+const CustomFilter = ({ field, loadingData, handleSubmit, open }) => {
+
   const history = useHistory();
-  const { setToastConfig } = useContext(CustomToastContext);
   const [formValues, setFormValues] = useState({});
   const [selectedResources, setSelectedResources] = useState([]);
   let [resourceOptions, setResourceOptions] = useState(null);
-
+  const [inputValues, setInputValues] = useState({});
   const [options, setOptions] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState({ loading: false, resource: null });
   const [statusTimeFrame, setStatusTimeFrame] = useState<any>({});
   const [betweenDate, setBetweenDate] = useState(null);
-
+  const [currentPage, setCurrentPage] = useState(0);
   const [selectedData, setSelectedData] = useState(null);
   const [error, setError] = useState(null);
 
   const setDefaultResource = (val = []) => {
-    const resource = ['asset', 'date', 'interval'];
+    const resource = ['asset', 'date', 'interval', 'dataPointsCategory'];
     setSelectedResources([...field?.filter((f) => resource.includes(f?.fieldName)), ...val?.filter((f) => !resource.includes(f?.fieldName))]);
   };
 
@@ -53,8 +51,6 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
     setDefaultResource();
   }, []);
 
-  //selectedResources represents the main filter array
-  //selectedData is an object with keys as the filter and value as the sub filter values
 
   useEffect(() => {
     if (!selectedData) return;
@@ -74,22 +70,31 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
   }, [selectedData, selectedResources]);
 
   const fetchOptions = useCallback(
-    debounce(async (resource: string, searchKey: string = '') => {
+    debounce(async (resource: string, searchKey: string = '', page: number = 0) => {
       try {
         const lookupResourceName = resource;
-        let query = `sa-field/options?resource=${lookupResourceName}&limit=10&search=${searchKey}`;
+        if (searchKey !== '') {
+          page = 0;
+          setCurrentPage(0);
+        }
+        if (page === 0) {
+          setCurrentPage(0);
+          setOptions([]);
+        }
+        let query = `sa-field/options?resource=${lookupResourceName}&limit=25&page=${page}&search=${searchKey}`;
         const response = await axiosInstance().get(query);
-        const options = [...response.data.data];
-        setOptions(options);
-
-        //set resource options
+        const currentOptions = page === 0 ? [...response.data.data] : [...options, ...response.data.data];
+        setOptions(currentOptions);
+        if (page > 0 && response.data.data?.length > 0) {
+          setCurrentPage(page);
+        }
         const optionsData: any = {};
         [...field]
           .filter((d: any) => d.type === 'dropDown' || d.type === 'multiSelect' || d.type === 'date' || d.type === 'checkBox')
           .map((d: any) => {
             if (d.type === 'dropDown' || d.type === 'multiSelect') {
               optionsData[d.fieldName] = {
-                options: options,
+                options: currentOptions,
                 type: d.type,
                 lookup: Boolean(d?.lookup)
               };
@@ -101,10 +106,9 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
           });
 
         setResourceOptions(optionsData);
-
-        setLoading(false);
+        setLoading({ loading: false, resource: null });
       } catch (error) {
-        setToastConfig(error);
+        console.error(error);
       }
     }, 1000),
     []
@@ -256,7 +260,7 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
 
   const validate = (formValues: any) => {
     const error: any = {};
-    if (!formValues?.asset) {
+    if (!formValues?.asset || formValues?.asset?.optionLabel != inputValues['asset']) {
       error['asset'] = 'Asset is required';
     }
     if (!formValues?.from_date) {
@@ -460,7 +464,7 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
                                     disableCloseOnSelect
                                     options={field.options}
                                     fullWidth
-                                    loading={loading}
+                                    loading={loading.loading && loading.resource === field?.resource}
                                     getOptionLabel={(option: any) => option.optionLabel ?? ''}
                                     getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
                                     value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
@@ -484,22 +488,33 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
                               ) : (
                                 <Grid item xs={12} sm={6} md={6} key={i}>
                                   <Autocomplete
-                                    disableCloseOnSelect
-                                    multiple={field?.multiple}
+                                    multiple={field.multiple}
+                                    inputValue={inputValues[field?.fieldName] || ''}
                                     onOpen={() => {
                                       setOptions([]);
-                                      setLoading(true);
+                                      setLoading({ loading: true, resource: field?.resource });
                                       fetchOptions(field?.resource, '');
                                     }}
-                                    onInputChange={(event, value) => fetchOptions(field?.resource, value)}
+                                    onInputChange={(event, value, reason) => {
+                                      if (reason === 'input') {
+                                        setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: value }));
+                                        fetchOptions(field?.resource, value);
+                                      }
+                                    }}
+                                    disableCloseOnSelect={field.multiple}
                                     options={options}
                                     fullWidth
-                                    loading={loading}
+                                    loading={loading.loading && loading.resource === field?.resource}
                                     getOptionLabel={(option: any) => option.optionLabel ?? ''}
                                     getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
                                     value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
                                     onChange={(e, val) => {
                                       handleSelectFilter(field?.type, field?.fieldName, val);
+                                      if (field?.multiple) {
+                                        setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: '' }));
+                                      } else {
+                                        setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: val.optionLabel }));
+                                      }
                                     }}
                                     size="small"
                                     renderInput={(params) => (
@@ -509,10 +524,27 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
                                         variant="outlined"
                                         name={field?.fieldName}
                                         required={field?.required}
-                                        error={error && error[field?.fieldName] && Boolean(error[field?.fieldName])}
-                                        helperText={error && Boolean(error[field?.fieldName]) && error[field?.fieldName]}
+                                        InputProps={{
+                                          ...params.InputProps,
+                                          endAdornment: (
+                                            <>
+                                              {loading.loading && loading.resource === field?.resource ? (
+                                                <CircularProgress color="inherit" size={20} />
+                                              ) : null}
+                                              {params.InputProps.endAdornment}
+                                            </>
+                                          )
+                                        }}
                                       />
                                     )}
+                                    ListboxProps={{
+                                      onScroll: (e) => {
+                                        if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
+                                          setLoading({ loading: true, resource: field?.resource });
+                                          fetchOptions(field?.resource, '', currentPage + 1);
+                                        }
+                                      }
+                                    }}
                                   />
                                 </Grid>
                               ))

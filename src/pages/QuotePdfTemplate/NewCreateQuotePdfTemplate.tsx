@@ -259,7 +259,8 @@ export default function NewCreateQuotePdfTemplate() {
               data?.owner &&
               data?.owner !== undefined &&
               user.user._id !== data?.owner &&
-              !data?.collaborator?.some((d) => d === user.user._id)
+              !data?.collaborator?.some((d) => d === user.user._id) &&
+              !user?.role?.selectedEntity?.superAdminAccess
             ) {
               setHasPermissionToUpdate(false);
             }

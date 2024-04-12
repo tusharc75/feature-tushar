@@ -2287,7 +2287,7 @@ export const IOT_REPORT_LIST = [
   {
     title: sidebarResource.iotDataPoints,
     key: 'iotDataPoints',
-    api: '/report/iot/data-points',
+    api: '/report/iot-data-points',
     filters: [
       {
         fieldName: 'asset',
@@ -2321,6 +2321,7 @@ export const IOT_REPORT_LIST = [
         lookup: true,
         type: 'dropDown',
         multiple: true,
+        required: true,
         _id: '5'
       },
       {
@@ -2480,7 +2481,19 @@ export const REPORT_LIST = [
     permission: 'deals',
     key: 'standardReport',
     type: 'fleetReport'
-  }
+  },
+  {
+    title: 'Daily In/Out/Evap/Run Hours',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'dailyInOutEvapRunhours'
+  },
+  // {
+  //   title: 'IOT Data Points',
+  //   permission: 'iotChart',
+  //   key: 'standardReport',
+  //   type: 'dataPoints'
+  // }
 ];
 
 export const RESOURCE_CALENDAR = [
