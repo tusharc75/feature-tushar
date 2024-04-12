@@ -1,22 +1,23 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
 import Box from '@material-ui/core/Box';
+import Dialog from '@material-ui/core/Dialog';
 import Grid from '@material-ui/core/Grid';
-import { CreateCase } from './CreateCase';
-import { GetCase, DeleteCase } from '../../../axios/activity';
-import Typography from '@material-ui/core/Typography';
-import moment from 'moment';
+import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import Dialog from '@material-ui/core/Dialog';
+import axios, { CancelTokenSource } from 'axios';
+import moment from 'moment';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import { useData } from '../../../StateProvider/Provider';
+import { CustomDialogTransition, dateFormat } from '../../../constants/helpers';
+import ActivityLoader from '../../Helpers/ActivityLoader';
 import { ListRelatedTo } from '../Helpers/ListRelatedTo';
 import { ViewAll } from '../Helpers/ViewAll';
-import ActivityLoader from '../../Helpers/ActivityLoader';
-import { isMobile, isTablet } from 'react-device-detect';
-import { dateFormat, CustomDialogTransition } from '../../../constants/helpers';
-import { useData } from '../../../StateProvider/Provider';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { CreateCase } from './CreateCase';
 
 export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -31,13 +32,17 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    fetchCash();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchCase(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchCash = async () => {
+  const fetchCase = async (cancelTokenSource?: CancelTokenSource) => {
     setLoading(true);
-    await GetCase(JSON.stringify(relatedTo))
-      .then(({ data }) => {
+    axiosInstance()
+      .get(`/case?relatedTo=${JSON.stringify(relatedTo)}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         setCases(data);
         onSetCount('Case', data.length);
         setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
@@ -67,24 +72,25 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
 
   const handleDelete = (event) => {
     event.stopPropagation();
-    DeleteCase(caseId)
-      .then((data) => {
+    axiosInstance()
+      .delete(`/case/${caseId}`)
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
         setAnchorEl(null);
-        fetchCash();
+        fetchCase();
         handleActivityRefresh();
       })
-      .catch((error) => { 
+      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
   const handleClose = () => {
-    fetchCash();
+    fetchCase();
     setOpen(false);
     handleActivityRefresh();
   };

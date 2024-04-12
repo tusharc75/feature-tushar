@@ -34,7 +34,6 @@ const Address = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  //   const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false);
 
   const [columns, setColumns] = useState(null);
 
@@ -272,13 +271,6 @@ const Address = () => {
           }}
         />
       )}
-      {/* {showUpdateWarningConfirmBox ? (
-        <MessageDialog
-          open={showUpdateWarningConfirmBox}
-          message={`You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`}
-          onClose={() => setShowUpdateWarningConfirmBox(false)}
-        />
-      ) : null} */}
     </section>
   );
 };

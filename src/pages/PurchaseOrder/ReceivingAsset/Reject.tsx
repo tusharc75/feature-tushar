@@ -114,11 +114,15 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
 
   const validate = (values) => {
     let errors: any = {};
+
     if (values.length > 0) {
       values.map((d) => {
         let tempProduct = material.find((u) => u._id === d._id);
         if (tempProduct && d.rejectQuantity > tempProduct.qty - (tempProduct.rejectQuantity || 0)) {
-          errors.rejectQuantity = 'should be greater';
+          errors.rejectQuantity = 'Please enter valid qty';
+        }
+        if (d.rejectQuantity <= 0) {
+          errors.rejectQuantity = 'Should be greater';
         }
         if (user?.user?.brandPolicy?.storageLocation) {
           if (tempProduct && !d.storageLocation) {
@@ -127,7 +131,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
         }
         if (tempProduct?.assetQty) {
           if (tempProduct?.qty - (tempProduct?.actualReceived || 0) < parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0)) {
-            const removeActualReceivedQty = parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
+            const removeActualReceivedQty =
+              parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
             if (d?.assetIds?.length !== removeActualReceivedQty) {
               errors.assetIds = 'Selected Serialized Asset must be equal to Rejected Quantity';
             }
@@ -187,7 +192,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
               materialId: d.materialId,
               detail: d.detail,
               storageLocation: purchaseOrderData?.storageLocation || null,
-              rejectQuantity: 0,
+              rejectQuantity: d.qty,
               comment: '',
               supplierPartNumber: '',
               assetIds: [],
@@ -195,7 +200,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({ values, setFieldValue, errors }) => (
             <>
@@ -220,7 +225,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                   <div>
                                     <div
                                       style={{ borderBottom: '1px solid var(--common-border-color)' }}
-                                      className="flex border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
+                                      className="flex flex-wrap border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
                                     >
                                       <span>
                                         <span className="text-[var(--primary-text)] font-semibold">Type: </span>
@@ -291,7 +296,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                         }}
                                         onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                         error={validate([data])?.rejectQuantity}
-                                        helperText={validate([data]).rejectQuantity ? 'Reject quantity is more than quantity' : ''}
+                                        helperText={validate([data]).rejectQuantity}
                                       />
                                       {data.type === MATERIAL_TYPE.product && (
                                         <TextField
@@ -355,7 +360,9 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                               label={routes.serializedAsset.title}
                                               error={validate([data]).assetIds}
                                               helperText={
-                                                validate([data]).assetIds ? `Selected ${routes.serializedAsset.title} must be equal to reject quantity` : ''
+                                                validate([data]).assetIds
+                                                  ? `Selected ${routes.serializedAsset.title} must be equal to reject quantity`
+                                                  : ''
                                               }
                                             />
                                           )}
