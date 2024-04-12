@@ -513,7 +513,6 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
                                     getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
                                     value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
                                     onChange={(e, val) => {
-                                      console.log(val)
                                       handleSelectFilter(field?.type,field?.fieldName, val);
                                       if(field?.multiple){
                                         setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: '' }));
