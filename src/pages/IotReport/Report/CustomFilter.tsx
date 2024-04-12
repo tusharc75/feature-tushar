@@ -260,7 +260,7 @@ const CustomFilter = ({ field, loadingData, handleSubmit, open }) => {
 
   const validate = (formValues: any) => {
     const error: any = {};
-    if (!formValues?.asset) {
+    if (!formValues?.asset || formValues?.asset?.optionLabel != inputValues['asset']) {
       error['asset'] = 'Asset is required';
     }
     if (!formValues?.from_date) {
@@ -273,8 +273,6 @@ const CustomFilter = ({ field, loadingData, handleSubmit, open }) => {
       error['interval'] = 'Interval is required';
     }
     setError(error);
-    console.log(formValues)
-    console.log(error)
     return error;
   };
 
