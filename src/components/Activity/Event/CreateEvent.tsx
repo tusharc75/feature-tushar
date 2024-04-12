@@ -1,59 +1,51 @@
-import { useState, useEffect, Fragment, useContext } from "react";
-import PropTypes from "prop-types";
-import {
-  Box,
-  Grid,
-  Button,
-  TextField,
-  Typography,
-  CircularProgress,
-  useMediaQuery,
-} from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
-import { ArrowRightAlt } from "@material-ui/icons";
-import { Formik, Form } from "formik";
-import {
-  MuiPickersUtilsProvider,
-  KeyboardDatePicker,
-  KeyboardTimePicker,
-} from "@material-ui/pickers";
-import MomentUtils from "@date-io/moment";
-import { object, string } from "yup";
-import moment from "moment";
-import { isEmpty } from "lodash";
-import {
-  GetEventDetail,
-  CreateNewEvent,
-  UpdateEvent,
-  DeleteEvent,
-} from "../../../axios/activity";
-import { UserDropdown } from "../Helpers/userDropdown";
-import { RelatedToDispay } from "../Helpers/RelatedToDispay";
-import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import getAzureAcessToken from "../../Azure/getAzureAccessToken";
-import { useAccount, useMsal } from "@azure/msal-react";
-import axiosInstance from "../../../axios/axiosInstance";
-import { useData } from "../../../StateProvider/Provider";
-import Loader from "../../Loader";
-import { dateFormat, sidebarResource } from "../../../constants/helpers";
+import { useAccount, useMsal } from '@azure/msal-react';
+import MomentUtils from '@date-io/moment';
+import { Box, Button, CircularProgress, Grid, TextField, Typography, useMediaQuery } from '@material-ui/core';
+import { ArrowRightAlt } from '@material-ui/icons';
+import { Autocomplete } from '@material-ui/lab';
+import { KeyboardDatePicker, KeyboardTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import axios, { CancelTokenSource } from 'axios';
+import { Form, Formik } from 'formik';
+import { isEmpty } from 'lodash';
+import moment from 'moment';
+import PropTypes from 'prop-types';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { object, string } from 'yup';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { dateFormat, sidebarResource } from '../../../constants/helpers';
+import getAzureAcessToken from '../../Azure/getAzureAccessToken';
+import Loader from '../../Loader';
+import { RelatedToDispay } from '../Helpers/RelatedToDispay';
+import { UserDropdown } from '../Helpers/userDropdown';
 import { get_activity_resource } from '../Helpers/utils';
 
+const CreateNewEvent = async (inputData) => {
+  const { data } = await axiosInstance().post('/event', inputData);
+  return data;
+};
+
 const EventSchema = object().shape({
-  name: string().required("Please enter event name").min(3, "Too Short"),
-  startTime: string().required("Please enter start time").nullable(),
-  startDate: string().required("Please enter start date").nullable(),
-  endTime: string().required("Please enter end time").nullable(),
-  endDate: string().required("Please enter end date").nullable(),
+  name: string().required('Please enter event name').min(3, 'Too Short'),
+  startTime: string().required('Please enter start time').nullable(),
+  startDate: string().required('Please enter start date').nullable(),
+  endTime: string().required('Please enter end time').nullable(),
+  endDate: string().required('Please enter end date').nullable()
 });
 
 export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimized, onMinimizeMaximize, showManimizeMaximize }) => {
+  const {
+    state: {
+      user: { user },
+      permissions
+    }
+  } = useData();
 
-  const { state: { user: { user }, permissions }, } = useData();
-
-  const isMobile = useMediaQuery("(max-width:599px)");
+  const isMobile = useMediaQuery('(max-width:599px)');
   const [initialValues, setInitialValues] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const { instance, accounts } = useMsal();
@@ -66,31 +58,34 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
   const [resourceOptions, setResourceOptions] = useState([]);
 
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions))
+    setResourceOptions(get_activity_resource(permissions));
   }, []);
 
-
   useEffect(() => {
-    fetchEventDetail();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchEventDetail(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
-  const fetchEventDetail = async () => {
+  const fetchEventDetail = async (cancelTokenSource?: CancelTokenSource) => {
     if (eventId) {
-      await GetEventDetail(eventId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/event/${eventId}`, { cancelToken: cancelTokenSource?.token })
+        .then(({ data: { data } }) => {
           setInitialValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       setInitialValues({
-        name: "",
-        description: "",
-        location: "",
+        name: '',
+        description: '',
+        location: '',
         participant: [{ userId: user._id }],
         startDate: new Date(),
         endDate: new Date(),
         startTime: getTime(new Date()),
-        endTime: new Date(getTime(new Date()).getTime() + 30 * 60000),
+        endTime: new Date(getTime(new Date()).getTime() + 30 * 60000)
       });
     }
   };
@@ -110,7 +105,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
-      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue]
+      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue];
       axiosInstance()
         .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
@@ -136,8 +131,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
       values.graphToken = await getAzureAcessToken(instance);
     }
     if (eventId) {
-      UpdateEvent(eventId, values)
-        .then((data) => {
+      axiosInstance()
+        .put(`/event/${eventId}`, values)
+        .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -172,16 +168,16 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
             {
               type: resource?.optionValue,
               referenceId: selectedResourceData.optionValue,
-              access: true,
-            },
+              access: true
+            }
           ];
         } else {
           values.relatedTo = [
             {
-              type: "user",
+              type: 'user',
               referenceId: user._id,
-              access: true,
-            },
+              access: true
+            }
           ];
         }
         CreateNewEvent(values)
@@ -203,25 +199,25 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
   };
 
   function validate(values) {
-    const startDate = new Date(values?.startDate)
-    const endDate = new Date(values?.endDate)
-    startDate.setHours(0, 0, 0, 0)
-    endDate.setHours(0, 0, 0, 0)
+    const startDate = new Date(values?.startDate);
+    const endDate = new Date(values?.endDate);
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
     const errors = {};
     if (startDate > endDate) {
-      errors["endDate"] = "End date should be greater then start date";
+      errors['endDate'] = 'End date should be greater then start date';
       return errors;
     }
-    if (moment(startDate)?.format("MM-DD-YYYY") === moment(endDate)?.format("MM-DD-YYYY")) {
+    if (moment(startDate)?.format('MM-DD-YYYY') === moment(endDate)?.format('MM-DD-YYYY')) {
       if (new Date(values?.startTime)?.getTime() > new Date(values?.endTime).getTime()) {
-        errors["endTime"] = "End time should be greater then start time";
+        errors['endTime'] = 'End time should be greater then start time';
       }
     }
-    if (new Date(values.startTime)?.toString() === "Invalid Date") {
-      errors["startTime"] = "Invalid Time";
+    if (new Date(values.startTime)?.toString() === 'Invalid Date') {
+      errors['startTime'] = 'Invalid Time';
     }
-    if (new Date(values.endTime)?.toString() === "Invalid Date") {
-      errors["endTime"] = "Invalid Time";
+    if (new Date(values.endTime)?.toString() === 'Invalid Date') {
+      errors['endTime'] = 'Invalid Time';
     }
     return errors;
   }
@@ -229,19 +225,14 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
   return (
     <>
       <CustomDialogHeader
-        title={`${eventId ? "Edit" : "New"} Event`}
+        title={`${eventId ? 'Edit' : 'New'} Event`}
         onClose={handleClose}
         isMinimized={isMinimized}
         onMinimizeMaximize={onMinimizeMaximize}
         showManimizeMaximize={showManimizeMaximize}
       ></CustomDialogHeader>
       {initialValues ? (
-        <Formik
-          initialValues={initialValues}
-          validationSchema={EventSchema}
-          onSubmit={handleSave}
-          validate={validate}
-        >
+        <Formik initialValues={initialValues} validationSchema={EventSchema} onSubmit={handleSave} validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <>
               <CustomDialogContent>
@@ -256,12 +247,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                         name="name"
                         fullWidth
                         margin="dense"
-                        value={values["name"]}
-                        error={touched["name"] && Boolean(errors["name"])}
-                        helperText={touched["name"] && errors["name"]}
-                        onChange={(e) =>
-                          setFieldValue("name", e.target.value.trimStart())
-                        }
+                        value={values['name']}
+                        error={touched['name'] && Boolean(errors['name'])}
+                        helperText={touched['name'] && errors['name']}
+                        onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
                       />
                       <Box pt={1}>
                         <UserDropdown
@@ -272,12 +261,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                           required={false}
                           setFieldValue={setFieldValue}
                           multiple={true}
-                          value={values["participant"]}
-                          email={
-                            email
-                              ? email.map((e) => ({ userId: e, name: e }))
-                              : []
-                          }
+                          value={values['participant']}
+                          email={email ? email.map((e) => ({ userId: e, name: e })) : []}
                         />
                       </Box>
                       {!eventId && !relatedTo && (
@@ -291,13 +276,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               setResource(newValue);
                             }}
                             size="small"
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label="Resource"
-                                variant="outlined"
-                              />
-                            )}
+                            renderInput={(params) => <TextField {...params} label="Resource" variant="outlined" />}
                           />
                           <Box mt={2} />
                           {resource && resourceData && (
@@ -305,9 +284,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               disabled={loadingResources}
                               options={resourceData}
                               getOptionLabel={(option: any) => option.optionLabel}
-                              getOptionSelected={(option: any, value: any) =>
-                                option.optionLabel === value.optionLabel
-                              }
+                              getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
                               fullWidth
                               value={selectedResourceData}
                               onChange={(event, newValue) => {
@@ -315,22 +292,13 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               }}
                               size="small"
                               renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  label={`Select ${resource.optionValue}`}
-                                  variant="outlined"
-                                  required={Boolean(resource)}
-                                />
+                                <TextField {...params} label={`Select ${resource.optionValue}`} variant="outlined" required={Boolean(resource)} />
                               )}
                             />
                           )}
                         </Box>
                       )}
-                      <Box
-                        pt={1}
-                        display="flex"
-                        flexDirection={isMobile ? "column" : "row"}
-                      >
+                      <Box pt={1} display="flex" flexDirection={isMobile ? 'column' : 'row'}>
                         <Grid container spacing={2}>
                           <Grid item xs={7}>
                             <KeyboardDatePicker
@@ -343,20 +311,14 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               name="startDate"
                               label="Start Date"
                               onChange={(date: any) => {
-                                setFieldValue("startDate", date ? date : null);
-                                setFieldValue("startTime", date ? getTime(date._d) : null);
+                                setFieldValue('startDate', date ? date : null);
+                                setFieldValue('startTime', date ? getTime(date._d) : null);
                               }}
                               format={dateFormat}
-                              error={
-                                Boolean(touched["startDate"]) &&
-                                Boolean(errors["startDate"])
-                              }
-                              helperText={
-                                Boolean(touched["startDate"]) &&
-                                errors["startDate"]
-                              }
+                              error={Boolean(touched['startDate']) && Boolean(errors['startDate'])}
+                              helperText={Boolean(touched['startDate']) && errors['startDate']}
                               InputLabelProps={{
-                                shrink: true,
+                                shrink: true
                               }}
                               margin="dense"
                             />
@@ -376,24 +338,15 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               value={values.startTime}
                               invalidDateMessage="Invalid time format"
                               onChange={(date: any) => {
-                                setFieldValue("startTime", date || null);
+                                setFieldValue('startTime', date || null);
                                 if (date && new Date(date._d).getHours() < 23) {
-                                  setFieldValue("endTime", new Date(
-                                    new Date(date._d).getTime() + 30 * 60000
-                                  )
-                                  );
+                                  setFieldValue('endTime', new Date(new Date(date._d).getTime() + 30 * 60000));
                                 }
                               }}
-                              error={
-                                Boolean(touched["startTime"]) &&
-                                Boolean(errors["startTime"])
-                              }
-                              helperText={
-                                Boolean(touched["startTime"]) &&
-                                errors["startTime"]
-                              }
+                              error={Boolean(touched['startTime']) && Boolean(errors['startTime'])}
+                              helperText={Boolean(touched['startTime']) && errors['startTime']}
                               InputLabelProps={{
-                                shrink: true,
+                                shrink: true
                               }}
                               margin="dense"
                             />
@@ -419,20 +372,14 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               name="endDate"
                               label="End Date"
                               onChange={(date: any) => {
-                                setFieldValue("endDate", date);
-                                setFieldValue("endTime", new Date(getTime(date ? date._d : new Date()).getTime() + 30 * 60000)
-                                );
+                                setFieldValue('endDate', date);
+                                setFieldValue('endTime', new Date(getTime(date ? date._d : new Date()).getTime() + 30 * 60000));
                               }}
                               format={dateFormat}
-                              error={
-                                Boolean(touched["endDate"]) &&
-                                Boolean(errors["endDate"])
-                              }
-                              helperText={
-                                Boolean(touched["endDate"]) && errors["endDate"]
-                              }
+                              error={Boolean(touched['endDate']) && Boolean(errors['endDate'])}
+                              helperText={Boolean(touched['endDate']) && errors['endDate']}
                               InputLabelProps={{
-                                shrink: true,
+                                shrink: true
                               }}
                               margin="dense"
                             />
@@ -450,28 +397,21 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               mask="__:__"
                               value={values.endTime}
                               onChange={(date: any) => {
-                                const nDate = new Date(values.startTime).toISOString().split("T")[0];
-                                let nTime = ""
+                                const nDate = new Date(values.startTime).toISOString().split('T')[0];
+                                let nTime = '';
                                 if (date) {
-                                  if ((date._d + "").includes("Invalid Date")) {
-                                    setFieldValue("endTime", `${date._i}`)
-                                  }
-                                  else {
-                                    nTime = new Date(date._d).toISOString().split("T")[1];
-                                    setFieldValue("endTime", new Date(`${nDate}T${nTime}`))
+                                  if ((date._d + '').includes('Invalid Date')) {
+                                    setFieldValue('endTime', `${date._i}`);
+                                  } else {
+                                    nTime = new Date(date._d).toISOString().split('T')[1];
+                                    setFieldValue('endTime', new Date(`${nDate}T${nTime}`));
                                   }
                                 }
-
                               }}
-                              error={
-                                Boolean(touched["endTime"]) &&
-                                Boolean(errors["endTime"])
-                              }
-                              helperText={
-                                Boolean(touched["endTime"]) && errors["endTime"]
-                              }
+                              error={Boolean(touched['endTime']) && Boolean(errors['endTime'])}
+                              helperText={Boolean(touched['endTime']) && errors['endTime']}
                               InputLabelProps={{
-                                shrink: true,
+                                shrink: true
                               }}
                               margin="dense"
                             />
@@ -486,9 +426,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                         value={values['location']}
                         name="location"
                         variant="outlined"
-                        onChange={(e) =>
-                          setFieldValue("location", e.target.value.trimStart())
-                        }
+                        onChange={(e) => setFieldValue('location', e.target.value.trimStart())}
                       />
                       <TextField
                         fullWidth
@@ -500,45 +438,27 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                         value={values['description']}
                         name="description"
                         variant="outlined"
-                        onChange={(e) =>
-                          setFieldValue("description", e.target.value.trimStart())
-                        }
+                        onChange={(e) => setFieldValue('description', e.target.value.trimStart())}
                       />
                       {eventId && (
                         <Fragment>
-                          {initialValues.createdBy &&
-                            initialValues.createdBy.date && (
-                              <Box mt={1} color="text.secondary">
-                                <Typography variant="body2">
-                                  Created{" "}
-                                  {moment(initialValues.createdBy.date).format(
-                                    "MMM DD YYYY hh:mm A"
-                                  )}
-                                </Typography>
-                              </Box>
-                            )}
-                          {initialValues.updatedBy &&
-                            initialValues.updatedBy.date && (
-                              <Box mt={1} color="text.secondary">
-                                <Typography variant="body2">
-                                  Updated{" "}
-                                  {moment(initialValues.updatedBy.date).format(
-                                    "MMM DD YYYY hh:mm A"
-                                  )}
-                                </Typography>
-                              </Box>
-                            )}
+                          {initialValues.createdBy && initialValues.createdBy.date && (
+                            <Box mt={1} color="text.secondary">
+                              <Typography variant="body2">Created {moment(initialValues.createdBy.date).format('MMM DD YYYY hh:mm A')}</Typography>
+                            </Box>
+                          )}
+                          {initialValues.updatedBy && initialValues.updatedBy.date && (
+                            <Box mt={1} color="text.secondary">
+                              <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format('MMM DD YYYY hh:mm A')}</Typography>
+                            </Box>
+                          )}
                         </Fragment>
                       )}
 
-                      {eventId &&
-                        initialValues?.relatedTo &&
-                        initialValues.relatedTo.length ? (
+                      {eventId && initialValues?.relatedTo && initialValues.relatedTo.length ? (
                         <Fragment>
                           <Box mt={2}>
-                            <RelatedToDispay
-                              relatedTo={initialValues.relatedTo}
-                            />
+                            <RelatedToDispay relatedTo={initialValues.relatedTo} />
                           </Box>
                         </Fragment>
                       ) : null}
@@ -547,40 +467,32 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  disabled={isSubmitting}
-                  color="primary"
-                  size="small"
-                  onClick={handleClose}
-                >
+                <Button disabled={isSubmitting} color="primary" size="small" onClick={handleClose}>
                   Cancel
                 </Button>
-                <Button
-                  disabled={isSubmitting}
-                  type="button"
-                  color="primary"
-                  variant="contained"
-                  size="small"
-                  onClick={submitForm}
-                >
-                  {isSubmitting ? <CircularProgress size={22} /> : "Save"}
+                <Button disabled={isSubmitting} type="button" color="primary" variant="contained" size="small" onClick={submitForm}>
+                  {isSubmitting ? <CircularProgress size={22} /> : 'Save'}
                 </Button>
                 {eventId && (
                   <Button
                     disabled={isSubmitting}
                     variant="outlined"
                     size="small"
-                    style={{ color: "red", borderColor: "red" }}
+                    style={{ color: 'red', borderColor: 'red' }}
                     onClick={() =>
-                      DeleteEvent(eventId).then((data) => {
-                        toastConfig.setToastConfig({
-                          open: true,
-                          type: 'success',
-                          message: data.message
-                        });
-                        handleClose();
-                      })
-                        .catch((error) => { toastConfig.setToastConfig(error); })
+                      axiosInstance()
+                        .delete(`/event/${eventId}`)
+                        .then(({ data }) => {
+                          toastConfig.setToastConfig({
+                            open: true,
+                            type: 'success',
+                            message: data.message
+                          });
+                          handleClose();
+                        })
+                        .catch((error) => {
+                          toastConfig.setToastConfig(error);
+                        })
                     }
                   >
                     Delete
@@ -591,7 +503,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
           )}
         </Formik>
       ) : (
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Loader minHeight="500px" text="Loading..." />
         </CustomDialogContent>
       )}
@@ -603,8 +515,8 @@ CreateEvent.propTypes = {
   relatedTo: PropTypes.any,
   taskId: PropTypes.any,
   handleClose: PropTypes.any,
-  email: PropTypes.array,
-  // isMinimized: PropTypes.bool, 
-  // onMinimizeMaximize: PropTypes.func, 
+  email: PropTypes.array
+  // isMinimized: PropTypes.bool,
+  // onMinimizeMaximize: PropTypes.func,
   // showManimizeMaximize: PropTypes.bool
 };

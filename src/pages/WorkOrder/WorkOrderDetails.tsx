@@ -6,7 +6,7 @@ import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiFoodMenu } from 'react-icons/bi';
-import { FaDoorClosed, FaWpforms } from 'react-icons/fa';
+import { FaDoorClosed, FaWpforms, FaDoorOpen } from 'react-icons/fa';
 import { IoHandRightSharp } from 'react-icons/io5';
 import { LuPackageCheck } from 'react-icons/lu';
 import { RiFileShredFill, RiFlowChart } from 'react-icons/ri';
@@ -95,6 +95,7 @@ const WorkOrderDetails = () => {
   const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -221,6 +222,25 @@ const WorkOrderDetails = () => {
       });
   };
 
+  const reOpenWorkOrder = () => {
+    setIsSubmitting(true)
+    axiosInstance().put(`${workOrder.api}/re-open`, { _id: id })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchWorkOrderData();
+        setIsSubmitting(false)
+        setShowReopenConfirmation(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false)
+      });
+  };
+
   function a11yProps(index: any) {
     return {
       id: `main-tab-${index}`,
@@ -312,7 +332,7 @@ const WorkOrderDetails = () => {
       type: 'button',
       visibilityInMobile: 'visible',
       isVisible: permissions?.repairJob?.isCreate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder
-        && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.currentRepairJob ? true : false,
+        && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.currentRepairJob ? true : false,
       name: `Create ${routes?.repairJob.title}`,
       tooltip: `Create ${routes?.repairJob.title}`,
       onClick: () => setShowManageRepairJobDialog({ open: true }),
@@ -372,10 +392,20 @@ const WorkOrderDetails = () => {
       name: 'Close'
     },
     {
+      id: 'Re-Open',
+      type: 'button',
+      visibilityInMobile: 'visible',
+      isVisible: Boolean(allowedToEdit && workOrderData?.canReopen && workOrderData?.status === WORK_ORDER_STATUS.completed),
+      onClick: () => { setShowReopenConfirmation(true) },
+      iconForMobile: <FaDoorOpen />,
+      tooltip: 'Re-Open Work Order',
+      name: 'Re-Open'
+    },
+    {
       id: 'Create Version',
       type: 'button',
       visibilityInMobile: 'hidden',
-      isVisible: Boolean(allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed
+      isVisible: Boolean(allowedToEdit && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
         && !workOrderData?.currentRepairJob && !workOrderData?.deleted && workOrderData?.canCreateWorkOrderVersion),
       onClick: (e) => openAddActions(e),
       iconForMobile: false,
@@ -570,7 +600,7 @@ const WorkOrderDetails = () => {
         <TabPanel value={tabValue} index={2}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && !completed}
+              allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
               isCreate={true}
               service={null}
               uniqueId={null}
@@ -584,7 +614,7 @@ const WorkOrderDetails = () => {
         <TabPanel value={tabValue} index={3}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && !completed}
+              allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
               isCreate={true}
               service={null}
               uniqueId={null}
@@ -691,6 +721,17 @@ const WorkOrderDetails = () => {
             setRepairJobReceiveConfirmation(false);
           }}
           onOk={handleReceiveAssetInRepairJob}
+          okBtnLoading={isSubmitting}
+        />
+      )}
+      {showReopenConfirmation && (
+        <ConfirmationDialog
+          open={showReopenConfirmation}
+          message={`Are you sure you want to re-open work order ?`}
+          onClose={() => {
+            setShowReopenConfirmation(false);
+          }}
+          onOk={reOpenWorkOrder}
           okBtnLoading={isSubmitting}
         />
       )}

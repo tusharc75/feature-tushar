@@ -143,7 +143,7 @@ const PlanningDetail = () => {
             <>
               {permissions?.planning?.isUpdate && allowedToEdit && !planningData?.canDelete && planningData?.status != PLANNING_STATUS.converted && (
                 <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  variant={'contained'}
                   className="btn-outline-v1"
                   onClick={() => {
                     setShowConverConfirmBox(true);

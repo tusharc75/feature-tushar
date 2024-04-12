@@ -152,10 +152,10 @@ function SideBar({ location }) {
       >
         <Toolbar />
         <div id="sidebarOrDrawer" style={{ borderTop: '1px solid #485B64' }}>
-          <div className="max-[959px]:min-h-[56px] min-[769px]:min-h-[unset] max-[768px]:min-h-[56px] ">
-            <div className={`max-[768px]:pr-[50px] ${styles.logo}`}>
+          <div className="max-[959px]:min-h-[56px] min-[769px]:min-h-[unset] max-[768px]:min-h-[56px] bg-white">
+            <div className={`max-[768px]:pr-[50px] ${styles.logo} `}>
               <img
-                className={` ${isSidebarOpen ? 'block' : 'hidden'} ml-[22px] max-h-[33px]`}
+                className={` ${isSidebarOpen ? 'block' : 'hidden'} mx-auto max-h-[33px]`}
                 src={user?.brandLogo || SVG('LogoNew')}
                 onClick={() => history.push('/')}
                 alt="equip logo"

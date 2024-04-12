@@ -38,8 +38,6 @@ interface LoadingGridProps {
   transferAssetId: string | any;
   setNextStep: any;
   currentStep: number;
-  setTickets?: any;
-  setExistingAssets?: any;
   setTransferIsEnded?: any;
   updateTransferStatus?: any;
   isTransferEnded: boolean;
@@ -54,9 +52,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     permissions,
     transferAssetId,
     transferAssetData,
-    setTickets,
     setNextStep,
-    setExistingAssets,
     setTransferIsEnded,
     updateTransferStatus,
     isTransferEnded,
@@ -78,6 +74,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
+  const [showConformationDeliverdCancleTicket, setShowConformationDeliverdCancleTicket] = useState({ open: false, type: null });
+  const [okBtnLoading, setOkBtnLoading] = useState(false);
 
   useEffect(() => {
     if (transferAssetId) {
@@ -99,7 +97,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       if (transferAssetData?.transferType === 'Internal') {
         if (dataRows?.every((e) => e['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered)) {
           setTransferIsEnded(true);
-          updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
+          if (transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed) {
+            updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
+          }
         } else {
           setTransferIsEnded(false);
         }
@@ -288,7 +288,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           ...finalObject
         };
       });
-      setExistingAssets(assetData);
       dispatch({ type: 'initialize', data: assetData, count: assetData?.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -302,7 +301,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         .get(`${routes.deliveryTicket.path}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}&referenceId=${transferAssetId}`)
         .then(({ data: { data } }) => {
           resolve(data);
-          setTickets(data);
         })
         .catch((err) => {
           reject(err);
@@ -397,6 +395,54 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       });
   };
 
+  const handelCancleTickets = () => {
+    setOkBtnLoading(true);
+    const loadingTicketIds = uniq(map(selectedRecords?.filter((e) => e.loadingTicketId), 'loadingTicketId'));
+    if (loadingTicketIds.length) {
+      axiosInstance()
+        .put(`${deliveryTicket.api}/revert`, { ids: loadingTicketIds })
+        .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationDeliverdCancleTicket({ open: false, type: '' });
+          fetchAssetsData();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Cancelled Successfully`
+          });
+        })
+        .catch((error) => {
+          setOkBtnLoading(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
+  const cancelDeliveredTicket = () => {
+    setOkBtnLoading(true);
+    const loadingTicketId = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
+    if (loadingTicketId.length) {
+      let data = {};
+      data['_ids'] = loadingTicketId;
+      axiosInstance()
+        .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
+        .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationDeliverdCancleTicket({ open: false, type: null });
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Cancelled Successfully`
+          });
+          fetchAssetsData();
+        })
+        .catch((error) => {
+          setOkBtnLoading(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   const previewDownloadProps = {
     fileName: `${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`,
     resource: sidebarResource.transferAsset,
@@ -467,7 +513,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         >
           Receive Assets
         </MenuItem>
-
         <MenuItem
           disabled={
             selectedRecords.length === 0 ||
@@ -493,7 +538,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         >
           Replace Assets
         </MenuItem>
-
         {permissions?.transferAsset?.isUpdate &&
           selectedRecords.length &&
           selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
@@ -506,6 +550,22 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             Remove Assets
           </MenuItem>
         ) : null}
+        <MenuItem
+          disabled={selectedRecords.length && selectedRecords?.every(e => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit) ? false : true}
+          onClick={() => {
+            setShowConformationDeliverdCancleTicket({ open: true, type: 'Non-Delivered' });
+          }}
+        >
+          Cancel In-Transit Loading Ticket(s)
+        </MenuItem>
+        {/* <MenuItem
+          disabled={selectedRecords.length && selectedRecords?.every(e => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ? false : true}
+          onClick={() => {
+            setShowConformationDeliverdCancleTicket({ open: true, type: 'Delivered' });
+          }}
+        >
+          Cancel Deliverd Loading Ticket(s)
+        </MenuItem> */}
       </>
     );
   };
@@ -520,7 +580,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         previewDownloadProps={previewDownloadProps}
         hasXpadding
       />
-
       <Box mt={1}>
         {columns ? (
           <Box zIndex={5} width={'100%'}>
@@ -592,7 +651,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           isAdding={replaceLoading}
           selectedProducts={addSerializedAssetDialog.products}
           filterByPlant={transferAssetData?.transferFromPlant}
-
         />
       )}
       {showReplaceReason.open && (
@@ -602,6 +660,24 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           handleSucess={(data) => {
             handleReplaceAsset(data?.reason);
           }}
+        />
+      )}
+
+      {showConformationDeliverdCancleTicket.open && (
+        <ConfirmationDialog
+          open={showConformationDeliverdCancleTicket.open}
+          message={`This action will cancel the complete Loading Ticket(s). Are you sure?`}
+          onClose={() => {
+            setShowConformationDeliverdCancleTicket({ open: false, type: null });
+          }}
+          onOk={() => {
+            if (showConformationDeliverdCancleTicket.type === 'Delivered') {
+              cancelDeliveredTicket()
+            } else {
+              handelCancleTickets()
+            }
+          }}
+          okBtnLoading={okBtnLoading}
         />
       )}
     </Fragment>

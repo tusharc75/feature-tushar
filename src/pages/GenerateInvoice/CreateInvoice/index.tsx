@@ -110,6 +110,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       ...(resource === sidebarResource.fieldTicket ? [{
         accessor: 'fieldTicketNumber',
         Header: 'Field Ticket',
+        disabled: true,
         Cell: ({ row }) =>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p className="text-truncate">{row.original.fieldTicketNumber}</p>
@@ -183,6 +184,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
+    setRowsApplied([]);
 
     const referenceIds = resourceData?.map((d) => d._id);
     const { data: { data: data } } = await axiosInstance().get(`${routes?.generateInvoice.path}/material?resource=${resource}&referenceIds=${JSON.stringify(referenceIds)}`);
@@ -300,23 +302,21 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
   const handleApplyDate = async () => {
     let tempValues: any = { actualEndDate: endDate };
-
+    let newEndDate=  moment(endDate).toISOString()
     const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData[0]?._id}/invoice/material-end-date-qty?resource=${resource}`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
     let rows: any = [];
     selectedRecords.forEach((element) => {
       element.invalidDate = false;
-
-      const product = invoicedProducts?.material?.find((p) => p._id === element._id);
-
-      const productStartDateTime = new Date(new Date(element.actualStartDate).toLocaleDateString()).getTime();
-      const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
+      const product = invoicedProducts?.find((p) => p._id === element._id);
+      const productStartDateTime = new Date(element.actualStartDate).getTime();
+      const selectedEndDateTime = new Date(newEndDate).getTime();
 
       if (selectedEndDateTime < productStartDateTime) {
         element.invalidDate = true;
       } else if (product) {
-        const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
+        const productEndDateTime = new Date(product?.endDate).getTime();
         if (selectedEndDateTime < productEndDateTime) {
           element.invalidDate = true;
         } else {
@@ -325,7 +325,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       }
 
       if (element?.manualEndDate) {
-        const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
+        const productManualEndDate = new Date(element?.manualEndDate).getTime();
         if (selectedEndDateTime > productManualEndDate) {
           tempValues.actualEndDate = element?.manualEndDate;
         }
@@ -504,7 +504,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                 variant="contained"
                 color="primary"
                 size="small"
-                disabled={progressiveBilling ? isUpdating || !appliedDate || rowsApplied.some((d) => d.invalidDate === true) : false}
+                disabled={progressiveBilling ? isUpdating || !appliedDate || !rowsApplied?.length || rowsApplied.some((d) => d.invalidDate === true) : false}
                 onClick={() => {
                   handleCreateInvoice();
                 }}

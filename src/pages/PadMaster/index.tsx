@@ -17,8 +17,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { useData } from '../../StateProvider/Provider';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManagePadMaster from './ManagePadMaster';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const PadMaster = () => {
   const renderedFrom = camelCase(routes?.padMaster.title);
@@ -44,11 +43,11 @@ const PadMaster = () => {
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const fetchPadMasterData = async () => {
+  const fetchPadMasterData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes?.padMaster.path}${queryString}`)
+      .get(`${routes?.padMaster.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -106,15 +105,6 @@ const PadMaster = () => {
 
     return deepFilter;
   };
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchPadMasterData();
-    }, millisec);
-  }, [search]);
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
@@ -201,8 +191,10 @@ const PadMaster = () => {
   }, []);
 
   useEffect(() => {
-    fetchPadMasterData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchPadMasterData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const actionMenuItems = () => {
     return (
@@ -254,7 +246,6 @@ const PadMaster = () => {
           }}
           isAddButtonVisible={permissions?.padMaster?.isCreate}
           setQueryString
-          synchronizeType
         />
 
         {columns ? (

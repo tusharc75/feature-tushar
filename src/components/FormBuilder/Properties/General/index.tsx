@@ -14,14 +14,19 @@ import { DecimalPlaces } from '../../AddField/decimalPlaces';
 import { SignatureUser } from '../../AddField/signatureUser';
 import { MinMax } from '../../AddField/minMax';
 import { fieldLabelToFieldName } from '../../../../constants/helpers';
+import SettingsIcon from '@material-ui/icons/Settings';
+import IconButton from '@material-ui/core/IconButton';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import FieldNameDialog from './FieldNameDialog';
 
-const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField }) => {
+const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField, handleChangeFieldName }) => {
   const [isInitialUpdated, setIsInitialUpdated] = useState({
     MultipleFormula: false,
     Currency: false,
     Converter: false
   });
   const [lookupResource, setLookupResource] = useState([]);
+  const [changeFieldNameDialog, setChangeFieldNameDialog] = useState(false);
 
   useEffect(() => {
     getLookupList();
@@ -32,24 +37,55 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
     setLookupResource(lookupResource);
   };
 
+  const handleClick = () => {
+    setChangeFieldNameDialog(true);
+  }
+
   return (
     <Box>
-      <TextField
-        variant="outlined"
-        type="text"
-        label="Field Label"
-        required={true}
-        name="fieldLabel"
-        fullWidth
-        margin="dense"
-        disabled={!values['editAble']}
-        value={values['fieldLabel']}
-        error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
-        helperText={touched['fieldLabel'] && errors['fieldLabel']}
-        onChange={(e) => {
-          setFieldValue('fieldLabel', e.target.value.trimStart());
-        }}
-      />
+      <Grid container spacing={1}>
+        <Grid item xs={10} md={10} sm={10}>
+          <TextField
+            variant="outlined"
+            type="text"
+            label="Field Label"
+            required={true}
+            name="fieldLabel"
+            fullWidth
+            margin="dense"
+            disabled={!values['editAble']}
+            value={values['fieldLabel']}
+            error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
+            helperText={touched['fieldLabel'] && errors['fieldLabel']}
+            onChange={(e) => {
+              setFieldValue('fieldLabel', e.target.value.trimStart());
+            }}
+          />
+        </Grid>
+        <Grid item xs={2} md={2} sm={2} container justify="flex-end">
+          <HtmlTooltip title='Change Field Name'>
+            <IconButton
+              aria-label="setting"
+              onClick={handleClick}
+              size='small'
+            >
+              <SettingsIcon color='primary' fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        </Grid>
+      </Grid>
+      {changeFieldNameDialog && (
+        <FieldNameDialog
+          fieldData={fieldData}
+          handleSave={(data) => {
+            setChangeFieldNameDialog(false)
+            handleChangeFieldName(data)
+          }}
+          handleClose={() => {
+            setChangeFieldNameDialog(false)
+          }}
+        />
+      )}
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>

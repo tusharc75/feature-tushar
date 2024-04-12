@@ -149,6 +149,9 @@
   [data-mode='dark'] & {
     --self-bg: var(--dark-secondary);
     --color: var(--dark-secondary-text);
+
+    --bg: var(--dark-secondary);
+    --color: #ffffff;
   }
   --self-bg: #e8fcfb;
   --self-text: #3e3e3e;

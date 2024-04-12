@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, useMediaQuery } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -11,11 +11,14 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import { MATERIAL_TYPE, prepareDataForGrid, quotation, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, MATERIAL_TYPE, QUOTATION_STATUS, QUOTATION_TYPE, fieldServiceOrder, fieldTicket, prepareDataForGrid, quotation, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import PreviewDownload from 'src/components/PreviewDownload';
+import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
+import { getObjKeysWithValues } from '../../../constants/helpers';
+import { fetch_field_ticket_cost_fields, fetch_field_ticket_material_fields } from 'src/pages/FieldTicket/helper';
 
 const QuoteBuilder = ({
   quotationData,
@@ -29,7 +32,8 @@ const QuoteBuilder = ({
   versionData,
   allowedToEdit,
   renderedFrom,
-  DOAData = []
+  DOAData = [],
+  setReserveAssetWarning
 }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const toastConfig = useContext(CustomToastContext);
@@ -43,6 +47,8 @@ const QuoteBuilder = ({
   const { state, dispatch } = useTableReducer();
 
   const [columns, setColumns] = useState(null);
+  const { selectedRecords } = state;
+  const [fieldTicketDialog, setFieldTicketDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     fetchFields();
@@ -98,12 +104,12 @@ const QuoteBuilder = ({
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                  : ''}
+                    ? row.original?.packageDetail.packageType === 'Product'
+                      ? '(Product)'
+                      : '(Service)'
+                    : row.original.type === 'service'
+                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                      : ''}
               </p>
             </div>
           ) : (
@@ -132,14 +138,13 @@ const QuoteBuilder = ({
                   size="small"
                   onClick={() => {
                     window.open(
-                      `${
-                        row.original.type === 'serializedAsset'
-                          ? routes.serializedAssetDetail.path
-                          : row.original.type === 'product'
+                      `${row.original.type === 'serializedAsset'
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === 'product'
                           ? routes.productDetail.path
                           : row.original.type === 'package'
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
+                            ? routes.packagesDetail.path
+                            : routes.serviceMasterDetail.path
                       }/${row.original.materialId}`
                     );
                   }}
@@ -153,19 +158,19 @@ const QuoteBuilder = ({
       },
       ...(permissions?.leadTimeMaster
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
-              Footer: (info) => {
-                let rows = info.table.getExpandedRowModel().rows;
-                const total = rows
-                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-                return <>{total}</>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
+            Footer: (info) => {
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows
+                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+              return <>{total}</>;
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'description',
@@ -194,26 +199,26 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
+      parent.hideSelection = parent?.fieldTicketCreated ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
     });
 
@@ -229,7 +234,7 @@ const QuoteBuilder = ({
           Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
         finalObject['parentId'] = null;
         finalObject['isValid'] = true;
-        finalObject['hideSelection'] = false;
+        finalObject['hideSelection'] = item?.fieldTicketCreated ? true : false;
         finalObject['type'] = MATERIAL_TYPE.manualEntry;
         let res: any = {
           ...finalObject
@@ -272,29 +277,36 @@ const QuoteBuilder = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = true;
+      _subRow.hideSelection = _subRow?.fieldTicketCreated ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
+    for(const _subRow of subRows) {
+      let assetStatus = _subRow?.serializedAssetDetail?.status;
+      if (quotationData?.type === QUOTATION_TYPE.rentalJob && _subRow.type === MATERIAL_TYPE.serializedAsset && assetStatus !== ASSET_STATUS.new && assetStatus !== ASSET_STATUS.available && assetStatus !== ASSET_STATUS.underReview) {
+        setReserveAssetWarning(true);
+        break;
+      }
+    }
     return subRows;
   };
 
@@ -310,7 +322,7 @@ const QuoteBuilder = ({
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: sendMail ? 'Sent to Customer Sucessfully' : 'Processed Successfully'
+          message: sendMail ? 'Sent to Customer Successfully' : 'Processed Successfully'
         });
       })
       .catch((error) => {
@@ -326,7 +338,7 @@ const QuoteBuilder = ({
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'DOA Sended Sucessfully'
+          message: 'DOA Sended Successfully'
         });
       })
       .catch((err) => {
@@ -412,14 +424,78 @@ const QuoteBuilder = ({
     ]
   };
 
+  const fetchFieldServiceOrderData = () => {
+    const fieldServiceOrderId = quotationData?.fieldJob?.optionValue || quotationData?.fieldJob;
+    axiosInstance().get(`${fieldServiceOrder.api}/${fieldServiceOrderId}`).then(({ data: { data } }) => {
+      setFieldTicketDialog({ open: true, data: data });
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
+  }
+
+  const addFieldTicketMaterial = async (data) => {
+    try {
+      let materialIds = [], costIds = [];
+      if (selectedRecords?.filter((e) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service])?.length) {
+        var fieldTicketMaterialField = await fetch_field_ticket_material_fields(data?.currency);
+        const material = []
+        selectedRecords?.filter((e) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service].includes(e.type))?.forEach((e: any) => {
+          const extraData: any = {}
+          if (MATERIAL_TYPE.product && e?.parentId) {
+            if (selectedRecords?.find((ele) => ele._id === e?.parentId)?.type === MATERIAL_TYPE.service) {
+              extraData.service = selectedRecords?.find((ele) => ele._id === e?.parentId)?.materialId
+            }
+          }
+          material.push({ materialId: e.materialId, type: e.type, ...getObjKeysWithValues(e, fieldTicketMaterialField), ...extraData });
+          materialIds.push(e._id);
+        })
+        await axiosInstance().post(`${fieldTicket.api}/${data?._id}/material`, { material: material, notAddserviceProduct: true });
+      }
+      if (selectedRecords?.filter((e) => [MATERIAL_TYPE.manualEntry])?.length) {
+        var fieldTicketCostField = await fetch_field_ticket_cost_fields(data?.currency);
+        const manualEntry = []
+        selectedRecords?.filter((e) => [MATERIAL_TYPE.manualEntry].includes(e.type))?.forEach((e: any) => {
+          manualEntry.push({ ...getObjKeysWithValues(e, fieldTicketCostField) });
+          costIds.push(e._id);
+        })
+        await axiosInstance().post(`${fieldTicket.api}/${data?._id}/cost`, manualEntry);
+      }
+      if(materialIds.length || costIds.length) await axiosInstance().post(`${quotation.api}/set-field-ticket-created/${versionData?._id}`, { material: materialIds, cost: costIds });
+      setFieldTicketDialog({ open: false, data: null });
+      fetchData()
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={selectedRecords?.length ? false : true}
+          onClick={() => {
+            fetchFieldServiceOrderData()
+          }}
+        >
+          {`Create ${routes.fieldTicket.title}`}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={false}
+        isActionButtonVisible={quotationData?.type === QUOTATION_TYPE.fieldJob
+          && quotationData.status === QUOTATION_STATUS.converted
+          && quotationData?.fieldJob ? true : false}
         previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
         hasXpadding
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
       />
       {columns ? (
         <Box zIndex={5}>
@@ -431,7 +507,9 @@ const QuoteBuilder = ({
             refreshGrid={fetchData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             renderedFrom={renderedFrom}
-            hideSelection={true}
+            hideSelection={quotationData?.type === QUOTATION_TYPE.fieldJob
+              && quotationData.status === QUOTATION_STATUS.converted
+              && quotationData?.fieldJob ? false : true}
             hideAction={true}
             isClientSideGrid={true}
             expander={true}
@@ -442,6 +520,30 @@ const QuoteBuilder = ({
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
+      )}
+      {fieldTicketDialog.open && (
+        <ManageFieldTicket
+          onClose={() => setFieldTicketDialog({ open: false, data: null })}
+          referenceData={{
+            quotation: quotationData?._id,
+            fieldServiceOrder: fieldTicketDialog?.data?._id,
+            warehouse: fieldTicketDialog?.data?.warehouse?.optionValue || '',
+            wellName: fieldTicketDialog?.data?.wellName?.optionValue || '',
+            wellNumber: fieldTicketDialog?.data?.wellNumber?.map((m) => m.optionValue) || [],
+            numberOfWells: fieldTicketDialog?.data?.numberOfWells,
+            estimateStartDate: fieldTicketDialog?.data?.estimateStartDate || '',
+            estimateEndDate: fieldTicketDialog?.data?.estimateEndDate || '',
+            customerAccount: fieldTicketDialog?.data?.customerAccount?.optionValue || '',
+            billingAddress: fieldTicketDialog?.data?.billingAddress?.optionValue || '',
+            shippingAddress: fieldTicketDialog?.data?.shippingAddress?.optionValue || '',
+            taxCode: fieldTicketDialog?.data?.taxCode?.optionValue || '',
+            pricingCondition: fieldTicketDialog?.data?.pricingCondition?.optionValue || '',
+            collaborator: fieldTicketDialog?.data?.collaborator?.map((m) => m.optionValue) || [],
+          }}
+          onSuccess={(data) => {
+            addFieldTicketMaterial(data)
+          }}
+        />
       )}
     </Fragment>
   );

@@ -41,7 +41,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
   const [selectedService, setSelectedService] = useState(null);
 
   useEffect(() => {
-    setTabValue(serviceStatus[1]);
+    setTabValue(serviceStatus[0]);
   }, [serviceStatus]);
 
   useEffect(() => {

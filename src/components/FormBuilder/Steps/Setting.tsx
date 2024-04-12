@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, TextField } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, STEPS_STYLE } from 'src/constants/helpers';
 import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -9,6 +9,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
+
 
 const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,9 +53,11 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
 
   const validate = (values) => {
     const errors = {};
-
+    if (!values?.stepsStyle) {
+      errors['stepsStyle'] = 'Please select steps style';
+    }
     if (values.collaborateTools && !values?.collaborateToolsField) {
-      errors['collaborateToolsField'] = 'please select Field';
+      errors['collaborateToolsField'] = 'Please Select Collaborate Tools Field';
     }
     return errors;
   };
@@ -74,9 +77,9 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
     >
       <Formik
         initialValues={{
-          showStepsInList: resourceData.hasOwnProperty('showStepsInList') ? resourceData?.showStepsInList : false,
-          collaborateTools: resourceData.hasOwnProperty('collaborateTools') ? resourceData?.collaborateTools : false,
-          collaborateToolsField: resourceData.hasOwnProperty('collaborateToolsField') ? resourceData?.collaborateToolsField : ''
+          stepsStyle: resourceData?.stepsStyle || STEPS_STYLE.list,
+          collaborateTools: resourceData?.collaborateTools || false,
+          collaborateToolsField: resourceData?.collaborateToolsField || ''
         }}
         validate={validate}
         onSubmit={handleSubmit}
@@ -95,17 +98,28 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="showStepsInList"
-                        checked={values['showStepsInList']}
-                        onChange={(e) => {
-                          setFieldValue('showStepsInList', e.target.checked);
-                        }}
+                  <Autocomplete
+                    id="stepsStyle"
+                    options={[STEPS_STYLE.list, STEPS_STYLE.step, STEPS_STYLE.sideBar]}
+                    getOptionLabel={(option: any) => (option ? option : '')}
+                    getOptionSelected={(option: any, val) => option === val}
+                    value={values['stepsStyle']}
+                    onChange={(e: any, value) => {
+                      setFieldValue('stepsStyle', value);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        variant="outlined"
+                        label="Steps Style"
+                        placeholder="Steps Style"
+                        name="stepsStyle"
+                        required
+                        error={touched['stepsStyle'] && Boolean(errors['stepsStyle'])}
+                        helperText={touched['stepsStyle'] && errors['stepsStyle']}
                       />
-                    }
-                    label="Show Steps In List"
+                    )}
                   />
                 </Box>
                 <Box>

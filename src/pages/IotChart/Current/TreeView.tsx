@@ -99,6 +99,12 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
               <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
                 {category?.iotDataPointsCategoryName}
               </Typography>
+              {currentData?.find((d) => d?.category?.optionValue === category?._id && d?.redAlert) && (
+                <span className={`flex h-[6px] w-[6px] absolute -top-[3px] -left-[3px] z-10`}>
+                  <span className="absolute -top-[3px] -left-[3px] animate-ping inline-flex rounded-full bg-red-400 opacity-75 h-3 w-3"></span>
+                  <span className="inline-flex rounded-full bg-red-500 w-full h-full"></span>
+                </span>
+              )}
             </Box>
           </Box>
         </AccordionSummary>
@@ -123,14 +129,14 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
                       <Grid item xs={12} sm={6} lg={4} md={4}>
                         <Box
                           border="1px solid var(--common-border-color)"
-                          className="p-[10px] rounded-md min-h-full"
+                          className={`p-[10px] rounded-md min-h-full ${data?.redAlert ? 'bg-red-300' : ''}`}
                           display="flex"
                           justifyContent="space-between"
                           alignItems="center"
                         >
                           <p style={{ width: '100%' }} className="flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
-                            <strong className=" line-clamp-1">{data?.fieldLabel} : </strong>
-                            <span className=" font-medium">
+                            <strong className="line-clamp-1">{data?.fieldLabel} : </strong>
+                            <span className="font-medium">
                               {data?.fieldValue || 0}
                               {data?.unit && `(${data?.unit})`}
                             </span>
@@ -145,7 +151,6 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
                               <HistoryIcon fontSize="small" />
                             </IconButton>
                           </Box>
-                          {/* <span className="text-gray-500 dark:text-gray-300 text-[12px]">{moment(data?.time).format(dateTimeFormat)}</span> */}
                         </Box>
                       </Grid>
                     );
@@ -170,7 +175,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
       {dataPoint && (
         <Dialog fullWidth maxWidth="md" open onClose={handleClose} fullScreen aria-labelledby="assign-roles-dialog">
           <CustomDialogHeader title={`${dataPoint?.fieldLabel}`} showRequiredLabel={false} onClose={handleClose} />
-          <CustomDialogContent>
+          <CustomDialogContent isFooterPresent={false}>
             <Box mt={2}>
               <Grid direction="row" justifyContent="flex-end" alignItems="center" container spacing={2}>
                 <Grid>

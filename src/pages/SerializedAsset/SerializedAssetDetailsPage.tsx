@@ -236,7 +236,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -284,7 +284,14 @@ const SerializedAssetDetailsPage = () => {
       let tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
       if (assetDetails.status === ASSET_STATUS.underReview) {
         tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
-      } else if (assetDetails.status === ASSET_STATUS.scrap) {
+      }
+      else if (assetDetails.status === ASSET_STATUS.needRepair) {
+        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRecert];
+      }
+      else if (assetDetails.status === ASSET_STATUS.needRecert) {
+        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair];
+      }
+      else if (assetDetails.status === ASSET_STATUS.scrap) {
         tempStatus = [ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
         if (assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
           tempStatus.push(ASSET_STATUS.available);
@@ -315,7 +322,7 @@ const SerializedAssetDetailsPage = () => {
                       history.push(`${routes.iotChart.path}/${assetDetails?._id}`);
                     }}
                   >
-                    View Data
+                    View IOT Data
                   </Button>
                 )}
                 {permissions?.sendOutboundMessage?.isCreate && (

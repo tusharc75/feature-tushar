@@ -95,22 +95,24 @@ const Header = () => {
   }, [selectedEntity]);
 
   const saveEntity = () => {
-    axiosInstance()
-      .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
-      .then(({ data }) => {
-        axiosInstance()
-          .get('/user/me')
-          .then(({ data: response }) => {
-            const { data } = response;
-            dispatch({ type: SET_USER, payload: data });
-          })
-          .catch((err) => {
-            localStorage.setItem('token', '');
-          });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    if (!isOffline) {
+      axiosInstance()
+        .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
+        .then(({ data }) => {
+          axiosInstance()
+            .get('/user/me')
+            .then(({ data: response }) => {
+              const { data } = response;
+              dispatch({ type: SET_USER, payload: data });
+            })
+            .catch((err) => {
+              localStorage.setItem('token', '');
+            });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const [loadingChatNotifications, setLoadingChatNotifications] = useState(false);
@@ -313,20 +315,20 @@ const Header = () => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-            <MenuItem
-              title={curEntity.entityName}
-              key={curEntity._id}
-              selected={selectedEntity === curEntity._id}
-              onClick={() => {
-                handleSelectedEnity(curEntity._id);
-                closeEntitiesMenu();
-              }}
-            >
-              <Typography className={`max-w-[200px] line-clamp-1`}>{curEntity.entityName}</Typography>
-              <Box component="span" marginX={1} />
-              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-            </MenuItem>
-          ))
+          <MenuItem
+            title={curEntity.entityName}
+            key={curEntity._id}
+            selected={selectedEntity === curEntity._id}
+            onClick={() => {
+              handleSelectedEnity(curEntity._id);
+              closeEntitiesMenu();
+            }}
+          >
+            <Typography className={`max-w-[200px] line-clamp-1`}>{curEntity.entityName}</Typography>
+            <Box component="span" marginX={1} />
+            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+          </MenuItem>
+        ))
         : null}
     </Menu>
   );
@@ -433,23 +435,6 @@ const Header = () => {
     }
   }
 
-  // const startTour = () => {
-  //   const paths = pathname.split('/').filter((x: string) => x);
-  //   let path: string;
-  //   if (paths.includes('detail')) {
-  //     paths.splice(paths.length - 1, 1);
-  //     path = paths.join('/');
-  //   }
-  //   dispatch({
-  //     type: SET_START_TOUR,
-  //     payload: {
-  //       path: paths.includes('detail') ? `/${path}` : pathname,
-  //       start: true,
-  //       stepIndex: 0
-  //     }
-  //   });
-  // };
-
   return (
     <div className="poppins">
       <div className={styles.filler}></div>
@@ -461,9 +446,8 @@ const Header = () => {
         <Toolbar className={` ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
           <Box
             component="div"
-            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${
-              styles.flexAlignCenter
-            } flex-grow`}
+            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${styles.flexAlignCenter
+              } flex-grow`}
           >
             <div className={` ${styles.toggleButton}`}>
               <IconButton
@@ -495,7 +479,14 @@ const Header = () => {
                       onClick={openEntitiesMenu}
                       className={`${styles.flexAlignCenter} poppins max-w-[200px]`}
                     >
-                      <span className={'poppins line-clamp-1'}>{curEntity && curEntity.entityName}</span>
+                      {curEntity?.entityLogo ? (
+                        <>
+                          <img src={curEntity.entityLogo} alt={curEntity ? curEntity.entityName : ''} className="max-h-[44px]" />
+                        </>
+                      ) : (
+                        <span className={'poppins line-clamp-1'}>{curEntity && curEntity.entityName}</span>
+                      )}
+
                       <Box component="span" mr={1} />
                       <ExpandMore />
                     </Box>

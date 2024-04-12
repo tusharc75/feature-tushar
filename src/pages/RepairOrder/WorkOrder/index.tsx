@@ -389,7 +389,6 @@ const WorkOrder = ({
               <HtmlTooltip title="Add Products/Consumables">
                 <IconButton
                   size="small"
-                  disabled={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? false : true}
                   aria-label="Add Products/Consumables"
                   onClick={() => {
                     var ids = [];
@@ -407,7 +406,8 @@ const WorkOrder = ({
                 >
                   <AddCircleOutlineIcon
                     fontSize="small"
-                    color={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? 'primary' : 'disabled'}
+                    // color={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? 'primary' : 'disabled'}
+                    color={'primary'}
                   />
                 </IconButton>
               </HtmlTooltip>
@@ -594,16 +594,16 @@ const WorkOrder = ({
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
       parent.hideSelection = false;
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
-        parent.hideSelection = true;
-        parent.serviceStatus = parent?.workOrder?.status;
+      parent.workOrderStatus = parent?.workOrder?.status;
+      if (parent.workOrderStatus === WORK_ORDER_STATUS.completed) {
+        parent.serviceStatus = parent.workOrderStatus;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
+      if (parent.workOrderStatus === WORK_ORDER_STATUS.new) {
         parent.canAutoCompleteWorkOrder = true;
       }
       parent.canDelete = false;
-      if (parent?.subRows?.length === 0 && parent?.workOrder && parent?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+      if (parent?.subRows?.length === 0 && parent?.workOrder && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(parent.workOrderStatus)) {
         parent.canDelete = true;
       }
     });
@@ -628,7 +628,8 @@ const WorkOrder = ({
         if ((repairOrderData?.type === REPAIR_ORDER_TYPE.internal &&
           rows?.every((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed) ||
           (repairOrderData?.type === REPAIR_ORDER_TYPE.external &&
-            rows?.some((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed)))) {
+            rows?.every((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed))
+          || (repairOrderData?.type === REPAIR_ORDER_TYPE.external && user?.brandPolicy?.repairOrderPrice))) {
           setNextStep(true);
         } else {
           setNextStep(false);
@@ -667,6 +668,7 @@ const WorkOrder = ({
       _subRow.preWork = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.preWork : false;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
+      _subRow.workOrderStatus = parent?.workOrderStatus;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
       _subRow.isValid = true;
@@ -675,7 +677,7 @@ const WorkOrder = ({
       if (_subRow.type === MATERIAL_TYPE.product) {
         _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty ? false : true;
       }
-      if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+      if (![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(_subRow?.workOrder?.status)) {
         if (_subRow.type === MATERIAL_TYPE.service) {
           _subRow.canDelete = _subRow?.status === WORKORDER_SERVICE_STATUS.pending ? true : false;
         }
@@ -875,7 +877,9 @@ const WorkOrder = ({
   };
 
   const isDisabledCompleteService = () => {
-    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.includes(e?.status));
+    const records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service
+      && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(e?.workOrderStatus)
+      && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.includes(e?.status));
     if (records?.length === 0) {
       return true;
     }
@@ -955,11 +959,15 @@ const WorkOrder = ({
     );
   };
 
+  const isWorkOrderCompleted = (data) => {
+    return data?.some(e => [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(e.workOrderStatus));
+  }
+
   const actionButtonMenuItems = () => {
     return (
       <>
         <MenuItem
-          disabled={selectedRecords?.every((d) => d?.workOrder) ? false : true}
+          disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
           onClick={() => {
             setAddServicesDialog({ open: true, new: false });
           }}
@@ -967,7 +975,7 @@ const WorkOrder = ({
           Add Existing Services
         </MenuItem>
         <MenuItem
-          disabled={selectedRecords?.every((d) => d?.workOrder) ? false : true}
+          disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
           onClick={() => {
             setAddServicesDialog({ open: true, new: true });
           }}
@@ -975,7 +983,8 @@ const WorkOrder = ({
           Add New Service
         </MenuItem>
         <MenuItem
-          disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
+          disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 && !isWorkOrderCompleted(selectedRecords)
+            ? false : true}
           onClick={() => {
             setUserAssignDialog(true);
           }}
@@ -984,7 +993,7 @@ const WorkOrder = ({
         </MenuItem>
         {allowedToEdit && permissions?.workStations?.isRead && (
           <MenuItem
-            disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
+            disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 && !isWorkOrderCompleted(selectedRecords) ? false : true}
             onClick={() => {
               setWorkStationAssignDialog(true);
             }}
@@ -1021,7 +1030,8 @@ const WorkOrder = ({
           onClick={() => {
             setArrangeView(true);
           }}
-          disabled={checkUniqWorkOrder() && selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length ? false : true}
+          disabled={checkUniqWorkOrder() && selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords)
+            ? false : true}
         >
           Arrange Services
         </MenuItem>
@@ -1034,6 +1044,7 @@ const WorkOrder = ({
             selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
+              && !isWorkOrderCompleted(selectedRecords)
               ? false
               : true
           }
@@ -1058,16 +1069,17 @@ const WorkOrder = ({
         </MenuItem>
         <MenuItem
           disabled={
-            selectedRecords?.length && selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)
-              ? false
-              : true
+            selectedRecords?.length && selectedRecords?.some((e) =>
+              e.type === MATERIAL_TYPE.service
+              && e.status !== WORKORDER_SERVICE_STATUS.pending)
+              && !isWorkOrderCompleted(selectedRecords) ? false : true
           }
           onClick={() => {
             setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
           }}
         >
           Revert Service
-        </MenuItem>
+        </MenuItem >
         <MenuItem
           onClick={() => {
             setIsBulkEdit(true);
@@ -1076,7 +1088,7 @@ const WorkOrder = ({
               data: selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
             });
           }}
-          disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 ? false : true}
+          disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 && !isWorkOrderCompleted(selectedRecords) ? false : true}
         >
           Bulk Edit
         </MenuItem>

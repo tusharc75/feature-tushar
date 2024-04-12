@@ -18,8 +18,12 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
-import { fieldServiceOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { fieldServiceOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import ManageServiceOrder from './ManageServiceOrder';
+import { clearAll, deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { fieldServiceOfflineUpdate } from './Services/OfflineHelper';
+import HideWhenOffline from 'src/components/HideWhenOffline';
 
 let serviceOrderTimeout;
 
@@ -42,8 +46,7 @@ const ServiceOrder = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.fieldServiceOrder));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -55,14 +58,23 @@ const ServiceOrder = () => {
 
   const { generateColumns } = useColumns();
 
+  const { isOffline } = useContext(CustomOfflineContext);
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
-    data = response?.data?.data;
+    if (isOffline) {
+      data = await findOne(objectStore.resource, objectStore.fieldServiceOrder);
+    } else {
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
+      data = response?.data?.data;
+      try {
+        insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
+      } catch (e) { }
+    }
     const newColumns = generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
@@ -148,35 +160,39 @@ const ServiceOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.fieldServiceOrder?.isCreate ? 'Clone' : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              disabled={permissions?.fieldServiceOrder?.isCreate ? false : true}
-              onClick={() => {
-                setShowManageDialog({ open: true, isClone: true, idToClone: row?.original._id });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color={permissions?.fieldServiceOrder?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        <HideWhenOffline>
+          <HtmlTooltip title={permissions?.fieldServiceOrder?.isCreate ? 'Clone' : cloneDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                disabled={permissions?.fieldServiceOrder?.isCreate ? false : true}
+                onClick={() => {
+                  setShowManageDialog({ open: true, isClone: true, idToClone: row?.original._id });
+                }}
+              >
+                <FileCopyIcon fontSize="small" color={permissions?.fieldServiceOrder?.isCreate ? 'primary' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </HideWhenOffline>
+        <HideWhenOffline>
+          <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={row?.original?.canDelete ? false : true}
+                onClick={() => {
+                  setDeleteRecord(row.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </HideWhenOffline>
       </>
     )
   };
@@ -219,24 +235,40 @@ const ServiceOrder = () => {
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance()
-      .get(`${fieldServiceOrder.api}${queryString}`)
-      .then(({ data: { data, count } }) => {
+    if (isOffline) {
+      findAll(objectStore.fieldServiceOrder).then((data) => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           return finalObject;
         });
-        dispatch({ type: 'initialize', data: rows, count: count });
+        dispatch({ type: 'initialize', data: rows, count: rows.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
       });
+      return;
+    } else {
+      axiosInstance()
+        .get(`${fieldServiceOrder.api}${queryString}`)
+        .then(({ data: { data, count } }) => {
+          let rows = data?.map((u) => {
+            let finalObject: any = prepareDataForGrid(u);
+            finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+            finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+            return finalObject;
+          });
+          dispatch({ type: 'initialize', data: rows, count: count });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          dispatch({ type: 'loading', loading: false });
+        });
+    }
   };
 
   const handleSearch = (e) => {
@@ -247,17 +279,38 @@ const ServiceOrder = () => {
     dispatch({ type: 'pageChange', page: 0 });
   };
 
+  const handleAddOffline = async () => {
+    const data: any = [];
+    selectedRecords.forEach((element) => {
+      data.push(element._id);
+    });
+    await fieldServiceOfflineUpdate(data);
+    axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
+    });
+    dispatch({ type: 'selection', selectedRecords: [] });
+  };
+
+  const handleRemoveoffline = async () => {
+    await clearAll(objectStore.fieldServiceOrder);
+    await clearAll(objectStore.fieldTicket);
+  };
+
   const ActionMenuItems = () => {
     return (
       <>
         <MenuItem
-          disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+          disabled={selectedRecords.every((e) => e.canDelete) ? selectedRecords?.length ? false : true : true}
           onClick={() => {
             setShowDeleteConfirmBox(true);
           }}
         >
           {`Delete (${selectedRecords.length})`}
         </MenuItem>
+        <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
+          Add Offline
+        </MenuItem>
+        <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
       </>
     );
   };
@@ -294,7 +347,7 @@ const ServiceOrder = () => {
           onSearch={handleSearch}
           // rightSideContents
           isActionButtonVisible={true}
-          actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+          // actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           // addButtonProps
           addButtonOnclick={() => {
@@ -323,9 +376,8 @@ const ServiceOrder = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-              deleteRecord?.fieldServiceOrderNumber || ''
-            } ? `}
+            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.fieldServiceOrderNumber || ''
+              } ? `}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

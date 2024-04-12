@@ -344,10 +344,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail = `${parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === 'product'
-              ? parent?.productDetail?.productName
-              : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === 'service'
@@ -411,7 +411,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             parent.isValid = false;
           }
         }
-       
+
       });
 
       if (rows.filter((_rows) => _rows.isValid === false).length > 0 && !user?.user?.brandPolicy?.rentalStopAssetNextStepValidation) {
@@ -462,7 +462,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           canRemove = true;
         }
       }
-      
+
       subRows.push({
         ..._inventory,
         index: `${parent.index}.${subRows?.length + 1}`,
@@ -503,7 +503,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     });
 
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
-  
+
     var assetQtySUM = 0;
     var assetAssignedQtySUM = 0;
     childProduct.forEach((_subRow, j) => {
@@ -544,7 +544,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       if (_subRow.isOfflineError) {
         _subRow.offlineErrorAsset = offlineAssetErrorLog?.filter((e) => e._id === _subRow._id).map((e) => e.assetNumber);
       }
-      
+
       let tempSubRows = generateNestedData(
         material,
         inventory,
@@ -556,7 +556,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         bulkAssetCreationProduct,
         offlineAssetErrorLog
       );
-      
+
       _subRow.subRows = tempSubRows;
       _subRow.assetQty =
         tempSubRows.filter((d) => d.type !== 'asset').length === 0
@@ -694,7 +694,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         _id: m.materialId,
         unit: m.unit,
         serialized: m.serializedProduct,
-        assetsCount: m.serializedProduct ? m.realAssetQty - m.realAssetAssignedQty : m.assetQty
+        assetsCount: m.realAssetQty - m.realAssetAssignedQty
       };
     });
 
@@ -707,10 +707,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         uniqProduct.push(element);
       }
     });
+
     setOrderDialog((prevState) => {
       return {
         ...prevState,
-        products: uniqProduct
+        products: uniqProduct?.filter((e) => e.assetsCount)
       };
     });
 
@@ -1063,11 +1064,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               message: `${sidebarResource.purchaseOrder} has been created successfully`
             });
           }}
-          products={showOrderDialog?.products
-            ?.filter((e) => e.serialized === false)
-            ?.map((e) => {
-              return { product: e._id, unit: e.unit, qty: e.assetsCount };
-            })}
+          products={
+            user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct ?
+              showOrderDialog?.products.map((e) => { return { product: e._id, unit: e.unit, qty: e.assetsCount } }) :
+              showOrderDialog?.products?.filter((e) => e.serialized === false)?.map((e) => {
+                return { product: e._id, unit: e.unit, qty: e.assetsCount };
+              })}
           currency={rentalManagementData.currency}
           refrenceData={{
             wellName: rentalManagementData?.wellName?.optionValue,

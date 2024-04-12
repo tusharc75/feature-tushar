@@ -12,8 +12,7 @@ import CustomTabs, { CustomTab } from '../CustomTabs';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const AssignProductDialog = ({
   onSuccess,
@@ -60,13 +59,9 @@ const AssignProductDialog = ({
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchProduct();
-    }, millisec);
+    const cencelToken = axios.CancelToken.source();
+    fetchProduct(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
 
   const fetchGridColumns = () => {
@@ -90,11 +85,11 @@ const AssignProductDialog = ({
       });
   };
 
-  const fetchProduct = () => {
+  const fetchProduct = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${product.api}${queryString}`)
+      .get(`${product.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -176,7 +171,7 @@ const AssignProductDialog = ({
     if (updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
     }
- 
+
     if (updatedDeepFilters?.length || updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
@@ -235,7 +230,7 @@ const AssignProductDialog = ({
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title={`Add ${routes.product.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <>
           <ListingPageHeader
             searchValue={search}
@@ -252,7 +247,6 @@ const AssignProductDialog = ({
             }}
             isAddButtonVisible
             setQueryString={false}
-            synchronizeType={false}
           />
 
           {pricingCondition && (

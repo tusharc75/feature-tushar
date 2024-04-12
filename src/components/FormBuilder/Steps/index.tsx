@@ -3,6 +3,7 @@ import BuildIcon from '@material-ui/icons/Build';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import SettingIcon from '@material-ui/icons/Settings';
+import AddAlertIcon from '@material-ui/icons/AddAlert';
 import update from 'immutability-helper';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -19,6 +20,8 @@ import ManageSteps from './ManageSteps';
 import _ from 'lodash';
 import Setting from './Setting';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import Actions from './Actions';
+import Notifications from './Notifications';
 
 const DND_NAME = 'Box';
 
@@ -35,6 +38,8 @@ const Steps = ({ resource }) => {
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
+  const [openAction, setOpenAction] = useState(false);
+  const [openNotifications, setOpenNotifications] = useState(false);
 
   const fetchData = async () => {
     setStepsLoading(true);
@@ -117,13 +122,32 @@ const Steps = ({ resource }) => {
         <Box>
           <HtmlTooltip title={'Setting'}>
             <IconButton
-              size="small"
               aria-label="Setting"
               onClick={() => {
                 setOpenSetting(true);
               }}
             >
               <SettingIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title={'Actions'}>
+            <IconButton
+              aria-label="Actions"
+              onClick={() => {
+                setOpenAction(true);
+              }}
+            >
+              <BuildIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title={'Notifications'}>
+            <IconButton
+              aria-label="Notifications"
+              onClick={() => {
+                setOpenNotifications(true);
+              }}
+            >
+              <AddAlertIcon fontSize="small" color={'primary'} />
             </IconButton>
           </HtmlTooltip>
         </Box>
@@ -181,6 +205,32 @@ const Steps = ({ resource }) => {
           onSuccess={() => {
             fetchData();
             setOpenSetting(false);
+          }}
+          resource={resource}
+          resourceData={resourceData}
+        />
+      )}
+      {openAction && (
+        <Actions
+          onClose={() => {
+            setOpenAction(false);
+          }}
+          onSuccess={() => {
+            fetchData();
+            setOpenAction(false);
+          }}
+          resource={resource}
+          resourceData={resourceData}
+        />
+      )}
+      {openNotifications && (
+        <Notifications
+          onClose={() => {
+            setOpenNotifications(false);
+          }}
+          onSuccess={() => {
+            fetchData();
+            setOpenNotifications(false);
           }}
           resource={resource}
           resourceData={resourceData}

@@ -120,8 +120,8 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
         parent?.type === 'service'
           ? parent?.serviceDetail?.serviceDescription
           : parent?.type === 'product'
-            ? parent?.productDetail?.productDescription
-            : '';
+          ? parent?.productDetail?.productDescription
+          : '';
     });
 
     cost?.forEach((ele, i) => {
@@ -159,7 +159,7 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
           showRequiredLabel={false}
           showManimizeMaximize={true}
         />
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Box width={'100%'} display="flex" flexWrap="wrap">
             {versions &&
               versions?.map((v: any, i) => (

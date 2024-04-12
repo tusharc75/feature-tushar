@@ -1,23 +1,28 @@
-import React, { useState, useEffect } from 'react';
 import Box from '@material-ui/core/Box';
+import Chip from '@material-ui/core/Chip';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import { GetUpcomingActivity } from '../../axios/activity';
-import Chip from '@material-ui/core/Chip';
-import { ListRelatedTo } from './Helpers/ListRelatedTo';
+import { useEffect, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
 import { displayDate } from '../../constants/helpers';
+import { ListRelatedTo } from './Helpers/ListRelatedTo';
+import axios, { CancelTokenSource } from 'axios';
 
 const UpcomingActivity = (props) => {
   const { relatedTo } = props;
   const [activity, setActivity] = useState(null);
 
   useEffect(() => {
-    fetchUpcomingActivity();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchUpcomingActivity(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchUpcomingActivity = async () => {
-    await GetUpcomingActivity(JSON.stringify(relatedTo))
-      .then(({ data }) => {
+  const fetchUpcomingActivity = async (cancelTokenSource?: CancelTokenSource) => {
+    axiosInstance()
+      .get(`/activity/upcoming?relatedTo=${JSON.stringify(relatedTo)}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         setActivity(data);
       })
       .catch(() => {});

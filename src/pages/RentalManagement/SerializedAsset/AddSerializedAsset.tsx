@@ -38,8 +38,7 @@ import {
   transferAsset
 } from '../../../constants/helpers';
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const AddSerializedAsset = ({
   isAdding,
@@ -84,13 +83,9 @@ const AddSerializedAsset = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 600;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchAssets();
-    }, millisec);
+    const cencelToken = axios.CancelToken.source();
+    fetchAssets(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedWarehouse, selectedProduct, tabValue]);
 
   useEffect(() => {
@@ -157,7 +152,7 @@ const AddSerializedAsset = ({
     setSerializedProducts(tempProducts);
   }, [selectedRecords]);
 
-  const fetchAssets = () => {
+  const fetchAssets = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
 
     let queryString = getQueryString();
@@ -179,7 +174,7 @@ const AddSerializedAsset = ({
       api = `${serializedAsset.api}${queryString}`;
     }
     axiosInstance()
-      .get(api)
+      .get(api, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         const rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -438,7 +433,7 @@ const AddSerializedAsset = ({
             obj.product = e.materialId;
             obj.asset = result[0]._id;
             obj.rentalJob = result[0].loadingTicket?.rentalJob?.optionValue;
-            const rentalAsset = result[0].loadingTicket?.assets?.find((ele) => ele.asset === result[0]._id)
+            const rentalAsset = result[0].loadingTicket?.assets?.find((ele) => ele.asset === result[0]._id);
             if (rentalAsset) {
               obj.uniqueId = rentalAsset?.uniqueId;
             }
@@ -449,16 +444,16 @@ const AddSerializedAsset = ({
         }
       }
     });
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     axiosInstance()
       .post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, { assets: assetsAdd, rentalJob: referenceData?._id })
       .then(({ data }) => {
         setInuseAssetConfirmBox(false);
         handleSuccess();
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -477,7 +472,7 @@ const AddSerializedAsset = ({
           title={`${replaceAssets ? 'Replace' : 'Add'} ${routes.serializedAsset.title}`}
           onClose={handleSerializedAssetClose}
         ></CustomDialogHeader>
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Box pt={1} pb={1} className="main-container-v1">
             <Grid container spacing={2}>
               <Grid item xs={12} md={4}>
@@ -485,31 +480,32 @@ const AddSerializedAsset = ({
                   <Box style={{ display: 'inline' }}>
                     {serializedProducts.length > 0
                       ? serializedProducts.map((d) => (
-                        <Box
-                          m={0.5}
-                          p={1}
-                          border={1}
-                          className={`cursor-pointer ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                          <Box
+                            m={0.5}
+                            p={1}
+                            border={1}
+                            className={`cursor-pointer ${
+                              selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                             }`}
-                          borderColor="var(--common-border-color)"
-                          onClick={() => {
-                            if (selectedProduct === d.id) {
-                              setSelectedProduct(null);
-                            } else {
-                              setSelectedProduct(d.id);
-                            }
-                          }}
-                          style={{ display: 'inline-block' }}
-                        >
-                          {d?.qty < 0 ? (
-                            <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                          ) : d?.qty === 0 ? (
-                            <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                          ) : (
-                            <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                          )}
-                        </Box>
-                      ))
+                            borderColor="var(--common-border-color)"
+                            onClick={() => {
+                              if (selectedProduct === d.id) {
+                                setSelectedProduct(null);
+                              } else {
+                                setSelectedProduct(d.id);
+                              }
+                            }}
+                            style={{ display: 'inline-block' }}
+                          >
+                            {d?.qty < 0 ? (
+                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                            ) : d?.qty === 0 ? (
+                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                            ) : (
+                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                            )}
+                          </Box>
+                        ))
                       : null}
                   </Box>
                 </Box>
@@ -585,10 +581,10 @@ const AddSerializedAsset = ({
                           selectedRecords?.length !== 0 && !checkUniqWarehouse()
                             ? 'Direct transfer to customer location'
                             : referenceType === 'Rental Job'
-                              ? 'Add to Job'
-                              : replaceAssets
-                                ? 'Replace'
-                                : 'Add'
+                            ? 'Add to Job'
+                            : replaceAssets
+                            ? 'Replace'
+                            : 'Add'
                         }
                       >
                         <Button

@@ -6,7 +6,6 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import CertificationHistory from '../SerializedAsset/CertificationHistory';
 
 const CertificateHistoryDialog = ({ onClose, id, supplierAccount }) => {
-
   const [fullScreen, setFullScreen] = useState(true);
 
   return (
@@ -30,16 +29,11 @@ const CertificateHistoryDialog = ({ onClose, id, supplierAccount }) => {
         showManimizeMaximize={true}
         showRequiredLabel={false}
       />
-      <CustomDialogContent>
-        <CertificationHistory
-          id={id}
-          canIssueCertificate={false}
-          supplierAccount={supplierAccount}
-        />
+      <CustomDialogContent isFooterPresent={false}>
+        <CertificationHistory id={id} canIssueCertificate={false} supplierAccount={supplierAccount} />
       </CustomDialogContent>
     </Dialog>
   );
 };
-
 
 export default CertificateHistoryDialog;

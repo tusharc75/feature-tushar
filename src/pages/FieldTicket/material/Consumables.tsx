@@ -164,7 +164,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
                   {row?.original[e?.fieldName]}
                 </p>
               )}
-              <Box ml={1}>
+              <Box ml={1} flexShrink={0}>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -236,7 +236,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
         disableFilters: true,
         disableSortBy: true,
         canDrag: false,
-        cell: ({ row, table }: any) => (
+        Cell: ({ row, table }: any) => (
           <>
             <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
               <IconButton

@@ -15,8 +15,8 @@ import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { convertInventory, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import InventoryToAsset from './InventoryToAsset';
+import axios, { CancelTokenSource } from 'axios';
 
-let searchTimeout;
 const ConvertInventory = () => {
   const renderedFrom = camelCase(routes?.inventoryToAsset.title);
 
@@ -36,17 +36,6 @@ const ConvertInventory = () => {
 
   const { generateColumns } = useColumns();
 
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      if (warehouseId) {
-        fetchProductInventory();
-      }
-    }, millisec);
-  }, [search]);
 
   useEffect(() => {
     getWarehouse();
@@ -74,9 +63,11 @@ const ConvertInventory = () => {
 
   useEffect(() => {
     if (warehouseId) {
-      fetchProductInventory();
+    const cencelToken = axios.CancelToken.source();
+    fetchProductInventory(cencelToken);
+    return () => cencelToken.cancel();
     }
-  }, [warehouseId, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
+  }, [search, warehouseId, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -103,7 +94,7 @@ const ConvertInventory = () => {
     setColumns(columns);
   };
 
-  const fetchProductInventory = () => {
+  const fetchProductInventory = (cancelTokenSource?: CancelTokenSource) => {
     if (!warehouseId) {
       dispatch({ type: 'initialize', data: [], count: 0 });
       return;
@@ -112,7 +103,7 @@ const ConvertInventory = () => {
     if (warehouseId) {
       const queryString = getQueryString();
       axiosInstance()
-        .get(`${convertInventory.api}${queryString}`)
+        .get(`${convertInventory.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data }) => {
           let rows = data.data?.map((u) => {
             let finalObject = prepareDataForGrid(u, user);
@@ -230,7 +221,7 @@ const ConvertInventory = () => {
         <ListingPageHeader
           leftSideContents={
             <LeftSideContents
-              {...{ warehouseOptions, warehouseId, setWarehouseId, setStorageLocationId, user, storageLocationOptions, storageLocationId }}
+              {...{ warehouseOptions, warehouseId, setWarehouseId, setStorageLocationId, user, storageLocationOptions, storageLocationId, dispatch }}
             />
           }
           searchValue={search}
@@ -285,7 +276,8 @@ const LeftSideContents = ({
   setStorageLocationId,
   user,
   storageLocationOptions,
-  storageLocationId
+  storageLocationId,
+  dispatch
 }) => {
   return (
     <>
@@ -303,6 +295,7 @@ const LeftSideContents = ({
         }
         onChange={(e, val) => {
           if (val !== null) {
+            dispatch({ type: 'selection', selectedRecords: [] });
             setWarehouseId(val && val.optionValue ? val.optionValue : '');
             setStorageLocationId(null);
           }

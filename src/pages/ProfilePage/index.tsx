@@ -6,10 +6,12 @@ import ProfileSidebar from './components/ProfileSidebar';
 import { profileMenuItems } from '../../constants/helpers';
 import ManageProfile from './components/ManageProfile';
 import NotificationPreference from './components/NotificationPreference';
+import UiPreference from './components/UiPreference';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomContainer from '../../components/CustomContainer';
 import { useData } from '../../StateProvider/Provider';
+import { SET_USER } from 'src/StateProvider/actionTypes';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -37,7 +39,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 export default function ProfilePage(props) {
   const {
-    state: { user }
+    state: { user },
+    dispatch
   }: any = useData();
   const { profileBreadCrumbs } = props;
   const [activeItem, setActiveItem] = useState(profileMenuItems.profile);
@@ -63,11 +66,14 @@ export default function ProfilePage(props) {
     }
   }, []);
 
-  const fetchUserData = () => {
+  const fetchUserData = (dispatchData = false) => {
     setUserLoading(true);
     axiosInstance()
       .get(`/user/me`)
       .then(({ data: { data } }) => {
+        if (dispatchData) {
+          dispatch({ type: SET_USER, payload: data });
+        }
         if (data?.user) {
           setOtherDetails({
             Email: data.user.email ?? '',
@@ -151,6 +157,10 @@ export default function ProfilePage(props) {
                 />
               ) : activeItem === profileMenuItems.notification ? (
                 <NotificationPreference notificationPreferenceData={notificationPreferenceData} user={userData._id} onSuccess={fetchUserData} />
+              ) : activeItem === profileMenuItems.uiPreference ? (
+                <UiPreference userData={userData} onSuccess={() => {
+                  fetchUserData(true)
+                }} />
               ) : activeItem === profileMenuItems.setting ? (
                 <Paper className={classes.paper}>setting</Paper>
               ) : activeItem === profileMenuItems.users ? (

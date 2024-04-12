@@ -7,7 +7,6 @@ import { convertNodeToElement } from 'react-html-parser';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
-import { GetEmails, GetReferenceName } from '../../../axios/activity';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
@@ -18,6 +17,7 @@ import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
 
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Autocomplete } from '@material-ui/lab';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import { ViewEmail } from 'src/components/Activity/Email/ViewEmail';
@@ -80,8 +80,9 @@ const Email = () => {
 
   useEffect(() => {
     if (referenceType) {
-      GetReferenceName(referenceType, referenceId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
+        .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
         .catch((err) => {
@@ -93,9 +94,12 @@ const Email = () => {
   }, [referenceId]);
 
   useEffect(() => {
+    const cancelToken = axios.CancelToken.source();
     if (filter) {
-      fetchData();
+      fetchData(cancelToken);
     }
+    return () => cancelToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, filters, filter, sorting, search]);
 
   const fetchGridColumns = () => {
@@ -217,11 +221,13 @@ const Email = () => {
     window.open(type === 'quote' ? `${routes['quoteBuilder'].path}/detail/${id}` : `${routes[type].path}/detail/${id}`);
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-    await GetEmails(JSON.stringify(filter), queryString)
-      .then(({ data, count }) => {
+    let apiUrl = `/email/my?filter=${JSON.stringify(filter)}${queryString}`;
+    axiosInstance()
+      .get(apiUrl, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         let inboxEmailsData = [],
           sentEmails = [];
         data = data.forEach((obj) => {
@@ -242,11 +248,12 @@ const Email = () => {
           data: currentTab === tabs.Inbox ? inboxEmailsData : sentEmails,
           count: currentTab === tabs.Inbox ? inboxEmailsData.length : sentEmails.length
         });
-        dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        dispatch({ type: 'loading', loading: false });
       });
   };
 
@@ -402,7 +409,6 @@ const Email = () => {
             }}
             isAddButtonVisible={true}
             setQueryString
-            synchronizeType
           />
         )}
         {columns ? (
@@ -537,7 +543,7 @@ const LeftSideContents = ({
       <Autocomplete
         fullWidth
         options={resourceOptions}
-        getOptionLabel={(option) => option.optionLabel}
+        getOptionLabel={(option) => option.optionLabel || ''}
         value={resource}
         className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
         onChange={(event, newValue) => {
@@ -565,7 +571,7 @@ const LeftSideContents = ({
           fullWidth
           disabled={loadingResources}
           options={resourceData}
-          getOptionLabel={(option: any) => option.optionLabel}
+          getOptionLabel={(option: any) => option.optionLabel || ''}
           getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
           className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
           value={selectedResourceData}

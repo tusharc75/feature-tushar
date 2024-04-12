@@ -5,7 +5,9 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import WarningIcon from '@material-ui/icons/Warning';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import { Autocomplete } from '@material-ui/lab';
+
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
@@ -37,8 +39,7 @@ import {
 } from '../../constants/helpers';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const SerializedAsset = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -76,29 +77,19 @@ const SerializedAsset = () => {
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [status, setStatus] = useState('');
-  const [renderCount, setRenderCount] = useState(0);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    if (renderCount > 0) {
-      fetchData();
-    } else setRenderCount((preCount) => preCount + 1);
+    const cancelToken = axios.CancelToken.source();
+    fetchData(cancelToken);
+    return () => cancelToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     page,
+    search,
     limit,
     filters,
     sorting,
@@ -269,30 +260,44 @@ const SerializedAsset = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
+        {permissions?.iotChart?.isRead && (
+        <HtmlTooltip title="View IOT Data">
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => {
+                        history.push(`${routes.iotChart.path}/${row?.original?._id}`);
+                    }}
+                    >
+              <VisibilityIcon fontSize="small" color="primary" />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      )}
       </>
     )
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${serializedAsset.api}${queryString}`)
+      .get(`${serializedAsset.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-              ![
-                ASSET_STATUS.new,
-                ASSET_STATUS.available,
-                ASSET_STATUS.lost,
-                ASSET_STATUS.customerPossession,
-                ASSET_STATUS.onPO,
-                ASSET_STATUS.scrap
-              ]?.includes(u?.status)
+            ![
+              ASSET_STATUS.new,
+              ASSET_STATUS.available,
+              ASSET_STATUS.lost,
+              ASSET_STATUS.customerPossession,
+              ASSET_STATUS.onPO,
+              ASSET_STATUS.scrap
+            ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -552,8 +557,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -764,10 +770,13 @@ const ActionMenuItems = ({
               handleStatusChange(status);
             }}
             disabled={
-              selectedRecords?.filter((o) => [ASSET_STATUS.available, ASSET_STATUS.underReview].includes(o.status)
-                || (ASSET_STATUS.scrap === o.status && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand)
+              selectedRecords?.filter(
+                (o) =>
+                  [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(o.status) ||
+                  (ASSET_STATUS.scrap === o.status && o?.currentOwnerType === INVENTORY_OWNER_TYPE.brand)
               ).length === selectedRecords?.length
-                ? false : true
+                ? false
+                : true
             }
           >
             {`Status Change - ${status}`}
@@ -779,7 +788,11 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.needRepair);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.needRepair, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={
+              selectedRecords?.filter((o) => ![ASSET_STATUS.needRepair, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+                ? false
+                : true
+            }
           >
             {`Status Change - ${ASSET_STATUS.needRepair}`}
           </MenuItem>
@@ -787,7 +800,11 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.needRecert);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.needRecert, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={
+              selectedRecords?.filter((o) => ![ASSET_STATUS.needRecert, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+                ? false
+                : true
+            }
           >
             {`Status Change - ${ASSET_STATUS.needRecert}`}
           </MenuItem>
@@ -795,7 +812,11 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.scrap);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={
+              selectedRecords?.filter((o) => ![ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+                ? false
+                : true
+            }
           >
             {`Status Change - ${ASSET_STATUS.scrap}`}
           </MenuItem>

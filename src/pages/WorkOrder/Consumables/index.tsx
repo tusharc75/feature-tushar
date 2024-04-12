@@ -551,6 +551,7 @@ const Consumables = ({
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               hideSelection={allowedToEdit ? false : true}
+              hideExportTable={true}
             />
           ) : (
             <Box p={2} height={500}>

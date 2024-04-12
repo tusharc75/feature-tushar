@@ -283,7 +283,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
               setSelectedAttachment(null);
             }}
           />
-          <CustomDialogContent>
+          <CustomDialogContent isFooterPresent={false}>
             {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
               fromVersions ? (
                 <ShowPdf data={selectedAttachment} />

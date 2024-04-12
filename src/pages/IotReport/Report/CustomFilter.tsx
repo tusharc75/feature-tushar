@@ -125,7 +125,7 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
   const handleSelectFilter = (type, name, value) => {
     let fieldProps: any = {};
 
-    if(!resourceOptions) {
+    if (!resourceOptions) {
       const optionsData: any = {};
       [...field]
         .filter((d: any) => d.type === 'dropDown' || d.type === 'multiSelect' || d.type === 'date' || d.type === 'checkBox')

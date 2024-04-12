@@ -87,7 +87,7 @@ const ManagePurchaseOrder = ({
                 setCloneHeading(purchaseOrderNumber);
                 setLoading(false);
               } else {
-                if (!data?.canDelete) {
+                if (data?.canEdit === false) {
                   fieldsDataForUpdate?.forEach((e) => {
                     if (['warehouse', 'currency', 'expenseItem', 'supplierAccount']?.includes(e?.fieldName)) {
                       e.disableOnEdit = true;

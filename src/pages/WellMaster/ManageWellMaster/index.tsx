@@ -26,7 +26,7 @@ import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 
-const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuccess, refrenceData = null }) => {
+const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuccess, referenceData = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -79,13 +79,13 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
         } else {
           setTitle(`Create ${routes.wellMaster.title}`);
           let initialData: any = { ...getObjKeys('', fieldsDataForCreate) };
-          if (refrenceData?.customerAccount) {
+          if (referenceData?.customerAccount) {
             fieldsDataForCreate?.forEach((e) => {
               if (e.fieldName === 'customerAccount') {
                 if (e.type === 'multiSelect') {
-                  initialData.customerAccount = [refrenceData?.customerAccount];
+                  initialData.customerAccount = [referenceData?.customerAccount];
                 } else {
-                  initialData.customerAccount = refrenceData?.customerAccount;
+                  initialData.customerAccount = referenceData?.customerAccount;
                 }
               }
             });
@@ -132,7 +132,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
             type: 'success',
             message: message
           });
-          if (refrenceData) {
+          if (referenceData) {
             onSuccess(data);
           } else {
             history.push(`${routes.wellMasterDetail.path}/${data?._id}`);

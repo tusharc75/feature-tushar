@@ -11,8 +11,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, defaultCompetency = [], extraStaticFilter = [] }) => {
   const renderedFrom = `${routes.employeeMaster.title}_${reference}_selected`;
@@ -42,13 +41,9 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   }, [selectedRecords]);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetency]);
 
   const fetchCompetencyMaster = () => {
@@ -71,11 +66,11 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
       });
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${employeeMaster.api}${queryString}`)
+      .get(`${employeeMaster.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data }) => {
         let rows = data.data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -110,12 +105,15 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-    
+
     const updatedDeepFilters = [...deepFilters];
     const updatedFilterByIds = [...filterByIds];
 
     if (selectedCompetency?.length > 0) {
-      updatedDeepFilters.push(...selectedCompetency.map((i) => ({ field: 'competencyType', term: i?.optionLabel })));
+      updatedFilterByIds.push({
+        field: 'competencyType',
+        term: { $in: selectedCompetency?.map((e) => e?.optionValue) }
+      });
     }
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {
@@ -128,7 +126,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
     if (updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
     }
- 
+
     if (updatedDeepFilters?.length || updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
@@ -204,7 +202,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
         showRequiredLabel={false}
         onClose={handleClose}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         {competencyOptions && columns ? (
           <>
             <ListingPageHeader
@@ -221,7 +219,6 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
               addButtonOnclick={handleSubmit}
               isAddButtonVisible
               setQueryString={false}
-              synchronizeType={false}
             />
 
             <CustomReactTable

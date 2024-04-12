@@ -217,10 +217,13 @@ const LoadingTicket = ({
         var qty = element.qty;
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
 
-        var consumeQty = 0;
-        consumeProducts?.filter((e) => e.product === element.materialId)?.forEach((e) => { consumeQty = consumeQty + e.qty; });
-
         ticketProduct?.forEach((ele) => {
+
+          var consumeQty = 0;
+          consumeProducts?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)?.forEach((e) => {
+            consumeQty = consumeQty + e.qty
+          });
+
           const obj: any = {};
           obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
           obj.type = 'Product';
@@ -576,24 +579,23 @@ const LoadingTicket = ({
           row?.original?.rentalAssetStatus
         ) &&
         row?.original?.type === 'Asset' ? (
-        <HtmlTooltip title={'Change Date'}>
-          <span>
-            <IconButton
-              size="small"
-              onClick={() => {
-                setOpenDateDialog({
-                  open: true,
-                  type: 'changeDate',
-                  status: row?.original?.assetNumber,
-                  prevStatus: '',
-                  assets: [row?.original?._id],
-                  loading: false
-                });
-              }}
-            >
-              <Edit fontSize="small" />
-            </IconButton>
-          </span>
+        <HtmlTooltip title={`Change ${routes.serializedAsset.title} Last Status Date`}>
+          <IconButton
+            size="small"
+            color="primary"
+            onClick={() => {
+              setOpenDateDialog({
+                open: true,
+                type: 'changeDate',
+                status: row?.original?.assetNumber,
+                prevStatus: '',
+                assets: [row?.original?._id],
+                loading: false
+              });
+            }}
+          >
+            <Edit fontSize="small" />
+          </IconButton>
         </HtmlTooltip>
       ) : (
         ''
@@ -1557,7 +1559,7 @@ const ActionButtonMenuItems = ({
                   });
                 }}
               >
-                {`Change Date`}
+                {`Change ${routes.serializedAsset.title} Last Status Date`}
               </MenuItem>
             )}
         </Box>

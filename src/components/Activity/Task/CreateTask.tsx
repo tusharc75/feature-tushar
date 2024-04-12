@@ -1,41 +1,42 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
-import PropTypes from 'prop-types';
+import DateUtils from '@date-io/date-fns';
 import {
   Box,
-  Grid,
-  Button,
-  TextField,
-  Select,
-  Divider,
-  MenuItem,
-  InputLabel,
-  FormControl,
   Breadcrumbs,
-  Typography,
-  CircularProgress
+  Button,
+  CircularProgress,
+  Divider,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
 } from '@material-ui/core';
 import TableChartIcon from '@material-ui/icons/TableChart';
-import { Formik, Form } from 'formik';
-import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { object, string } from 'yup';
+import axios, { CancelTokenSource } from 'axios';
+import { Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
 import moment from 'moment';
-import { GetTaskDetail, CreateNewTask, UpdateTask } from '../../../axios/activity';
-import { UserDropdown } from '../Helpers/userDropdown';
-import statusList from '../Helpers/statusList';
-import { Comment } from '../Comment';
-import { RelatedToDispay } from '../Helpers/RelatedToDispay';
-import { SubTask } from './SubTask';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import PropTypes from 'prop-types';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { object, string } from 'yup';
+import { useData } from '../../../StateProvider/Provider';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { useData } from '../../../StateProvider/Provider';
-import Loader from '../../Loader';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { dateFormat, dateFormatForInputControl } from '../../../constants/helpers';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { isEqual } from 'lodash';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
+import Loader from '../../Loader';
+import { Comment } from '../Comment';
+import { RelatedToDispay } from '../Helpers/RelatedToDispay';
+import statusList from '../Helpers/statusList';
+import { UserDropdown } from '../Helpers/userDropdown';
+import { SubTask } from './SubTask';
 
 const TaskSchema = object().shape({
   name: string().required('Please enter task name'),
@@ -70,13 +71,17 @@ export const CreateTask = ({
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    fetchTaskDetail();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchTaskDetail(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const fetchTaskDetail = async () => {
+  const fetchTaskDetail = async (cancelTokenSource?: CancelTokenSource) => {
     if (id) {
-      await GetTaskDetail(id)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/task/${id}`, { cancelToken: cancelTokenSource?.token })
+        .then(({ data: { data } }) => {
           if (data?.assignee && data?.assignee !== '') {
             if (typeof data?.assignee === 'string') {
               data['assignee'] = [{ userId: data?.assignee }];
@@ -110,8 +115,9 @@ export const CreateTask = ({
     setSubmitting(true);
     values.relatedTo = relatedTo;
     if (id) {
-      UpdateTask(id, values)
-        .then((data) => {
+      axiosInstance()
+        .put(`/task/${id}`, values)
+        .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -126,8 +132,9 @@ export const CreateTask = ({
         });
     } else {
       values.parentId = null;
-      CreateNewTask(values)
-        .then((data) => {
+      axiosInstance()
+        .post('/task', values)
+        .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -153,7 +160,6 @@ export const CreateTask = ({
 
   return (
     <>
-      {' '}
       {initialValues ? (
         <Formik initialValues={initialValues} validationSchema={TaskSchema} onSubmit={handleSave} validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
@@ -408,7 +414,7 @@ export const CreateTask = ({
           )}
         </Formik>
       ) : (
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Loader minHeight="500px" text="Loading..." />
         </CustomDialogContent>
       )}

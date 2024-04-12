@@ -11,7 +11,7 @@ import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import { isArray, isObject } from 'lodash';
+import { find, isArray, isObject, result } from 'lodash';
 import InfoIcon from '@material-ui/icons/Info';
 import { getGridMetaDataFromLocalStorage } from '../utils';
 
@@ -189,7 +189,8 @@ export default function useColumns() {
       }
 
       if (hideColumns.indexOf(field?.fieldName) >= 0) {
-      } else if (field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter === true) {
+      }
+      else if (field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter === true) {
         const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
 
         if (field.type !== 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
@@ -197,14 +198,15 @@ export default function useColumns() {
             let fieldName = field.fieldName + '_' + _unit.toLowerCase();
             let fieldLabel = field.fieldLabel + ' ' + _unit;
             column.push({
+              ...commonFieldData,
+              id: fieldName,
+              accessorKey: fieldName,
               accessor: fieldName,
               Header: fieldLabel,
               cell: ({ row }) => {
                 return row?.original[fieldName] ? <p>{row?.original[fieldName]}</p> : <NoDataCell />;
               },
               editable: Boolean(field?.isColumnEditable),
-              decimalPlaces: field?.decimalPlaces,
-              primaryField: field?.primaryField ?? false
             });
           });
         } else if (field.type === 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
@@ -213,11 +215,12 @@ export default function useColumns() {
               let fieldName = field.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
               let fieldLabel = field.fieldLabel + ' ' + _unit + '/' + _currency;
               column.push({
+                ...commonFieldData,
+                id: fieldName,
+                accessorKey: fieldName,
                 accessor: fieldName,
                 Header: fieldLabel,
                 editable: Boolean(field?.isColumnEditable),
-                decimalPlaces: field?.decimalPlaces,
-                primaryField: field?.primaryField ?? false,
                 cell: ({ row }) => {
                   return row?.original[fieldName] ? (
                     <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
@@ -234,11 +237,11 @@ export default function useColumns() {
             let fieldLabel = field.fieldLabel + ' ' + _currency;
             column.push({
               ...commonFieldData,
+              id: fieldName,
+              accessorKey: fieldName,
               accessor: fieldName,
               Header: fieldLabel,
               editable: Boolean(field?.isColumnEditable),
-              decimalPlaces: field?.decimalPlaces,
-              primaryField: field?.primaryField ?? false,
               cell: ({ row }) => {
                 return row?.original[fieldName] ? (
                   <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
@@ -313,8 +316,8 @@ export default function useColumns() {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
               : isObject(original?.[field?.fieldName])
-              ? original?.[field?.fieldName]?.optionLabel
-              : original?.[field?.fieldName];
+                ? original?.[field?.fieldName]?.optionLabel
+                : original?.[field?.fieldName];
           },
           cell: ({ row }) => <DropdownCell permissions={permissions} permissionForLinks={permissionForLinks} field={field} original={row?.original} />
         });
@@ -417,6 +420,22 @@ export default function useColumns() {
           cell: ({ row }) => (
             <div>
               <h5 className="text-truncate">{row.original[field?.fieldName] ? row.original[field?.fieldName] : 0}</h5>
+            </div>
+          )
+        });
+      } else if (field?.type === 'currencyNumber') {
+        const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
+        column.push({
+          ...commonFieldData,
+          editable: false,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => (
+            <div>
+              <h5 className="text-truncate">
+                {currencySymbol}
+                {formatAmountWithCurrency(currency, (row.original[field?.fieldName] || 0))?.amountWithouCurrencyCode ?? (row.original[field?.fieldName] || 0)}
+              </h5>
             </div>
           )
         });

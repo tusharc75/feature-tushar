@@ -11,18 +11,9 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import axios, { CancelTokenSource } from 'axios';
 
-let searchTimeout;
-
-const AssignSerializedAssetDialog = ({
-  reference,
-  referenceData = null,
-  handleClose,
-  handleSucess,
-  ids,
-  isAssigning,
-  selectedProducts = []
-}) => {
+const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [] }) => {
   const renderedFrom = `${routes.serializedAsset.title}_${reference}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -40,33 +31,29 @@ const AssignSerializedAssetDialog = ({
   const [products, setProducts] = useState([]);
   const [checkMTRValidation, setCheckMTRValidation] = useState(false);
   const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
-  const [isSubmitting,setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedProduct]);
 
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data: { data } }) => {
-        if(reference==='rentalJob') setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
+        if (reference === 'rentalJob') setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         setColumns([...newColumns, ...getStaticFields()]);
       });
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     let queryString = getQueryString();
     if (selectedProducts.length > 0) {
@@ -81,7 +68,7 @@ const AssignSerializedAssetDialog = ({
       queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterByIdType=or`;
     }
     axiosInstance()
-      .get(`${serializedAsset.api}${queryString}`)
+      .get(`${serializedAsset.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data }) => {
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -130,6 +117,9 @@ const AssignSerializedAssetDialog = ({
       deepFilter = `${deepFilter}&quotation=true`;
       const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
       deepFilter = `${deepFilter}&date=${JSON.stringify(dateFilter)}`;
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
     }
     if (reference === 'supplier') {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
@@ -216,31 +206,32 @@ const AssignSerializedAssetDialog = ({
         <Box style={{ display: 'inline' }}>
           {products.length > 0
             ? products?.map((d) => (
-              <Box
-                m={0.5}
-                p={1}
-                border={1}
-                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                <Box
+                  m={0.5}
+                  p={1}
+                  border={1}
+                  className={`cursor-pointer rounded-sm ${
+                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                   }`}
-                borderColor="var(--common-border-color)"
-                onClick={() => {
-                  if (selectedProduct === d.id) {
-                    setSelectedProduct(null);
-                  } else {
-                    setSelectedProduct(d.id);
-                  }
-                }}
-                style={{ display: 'inline-block' }}
-              >
-                {d?.qty < 0 ? (
-                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                ) : d?.qty === 0 ? (
-                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                ) : (
-                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                )}
-              </Box>
-            ))
+                  borderColor="var(--common-border-color)"
+                  onClick={() => {
+                    if (selectedProduct === d.id) {
+                      setSelectedProduct(null);
+                    } else {
+                      setSelectedProduct(d.id);
+                    }
+                  }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {d?.qty < 0 ? (
+                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                  ) : d?.qty === 0 ? (
+                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                  ) : (
+                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                  )}
+                </Box>
+              ))
             : null}
         </Box>
       </>
@@ -255,7 +246,7 @@ const AssignSerializedAssetDialog = ({
         showRequiredLabel={false}
         onClose={handleClose}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
@@ -267,20 +258,19 @@ const AssignSerializedAssetDialog = ({
             loading: isAssigning,
             text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
           }}
-          addButtonOnclick={()=>{
+          addButtonOnclick={() => {
             if (checkMTRValidation) {
               if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
                 setMtrConfirmBox(true);
-              }else{
+              } else {
                 handleAdd();
               }
-            }else{
+            } else {
               handleAdd();
             }
           }}
           isAddButtonVisible
           setQueryString={false}
-          synchronizeType={false}
         />
 
         {products.length > 0 && products.some((s) => s.qty < 0) ? (
