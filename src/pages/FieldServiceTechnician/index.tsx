@@ -169,8 +169,6 @@ const FieldServiceTechnician = () => {
       });
   };
 
-  useEffect(() => {}, [search]);
-
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
     fetchData(cancelToken);
