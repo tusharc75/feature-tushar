@@ -164,21 +164,16 @@ const FieldServiceTechnician = () => {
       });
   };
 
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (serchtimeTimeout) {
-      clearTimeout(serchtimeTimeout);
-    }
-    serchtimeTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
+  useEffect(() => {}, [search]);
 
   useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
+    const cancelToken = axios.CancelToken.source();
+    fetchData(cancelToken);
+    return () => cancelToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, limit, filters, sorting, showFilteredRecordsOnly, search]);
 
-  const fetchData = async () => {
+  const fetchData = async (cancelToken?: CancelTokenSource) => {
     try {
       dispatch({ type: 'loading', loading: true });
       let data, count;
@@ -187,7 +182,7 @@ const FieldServiceTechnician = () => {
         count = data?.length || 0;
       } else {
         const queryString = getQueryString();
-        const response = await axiosInstance().get(`${fieldServiceOrder.api}${queryString}`);
+        const response = await axiosInstance().get(`${fieldServiceOrder.api}${queryString}`, { cancelToken: cancelToken.token });
         data = response?.data?.data;
         count = response?.data?.count;
       }

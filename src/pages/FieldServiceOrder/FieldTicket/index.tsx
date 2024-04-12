@@ -42,7 +42,10 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
-    fetchGridColumns();
+    const cancleToken = axios.CancelToken.source();
+    fetchGridColumns(cancleToken);
+    return () => cancleToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -52,13 +55,13 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEntity, serviceOrderData]);
 
-  const fetchGridColumns = async () => {
+  const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
     try {
       let data;
       if (isOffline) {
         data = await findOne(objectStore.resource, objectStore.fieldTicket);
       } else {
-        const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
+        const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`, { cancelToken: cancelToken });
         data = response?.data?.data;
       }
       const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
@@ -97,7 +100,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
     }
   };
 
-  const fetchData = async (cancelToken: CancelTokenSource) => {
+  const fetchData = async (cancelToken?: CancelTokenSource) => {
     try {
       setNextStep(false);
       dispatch({ type: 'loading', loading: true });
