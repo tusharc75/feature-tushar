@@ -2594,7 +2594,7 @@ const FormTypes = (props) => {
         <Typography color="textSecondary">{label}</Typography>
         <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple={false} type="file" onChange={readImageFile} />
         <label htmlFor="multiple-images-button">
-          <Button disabled={readingImage} variant="contained" color="primary" component="span">
+          <Button disabled={readingImage} variant="contained" color="primary" component="span" size={'small'}>
             Upload
           </Button>
         </label>
