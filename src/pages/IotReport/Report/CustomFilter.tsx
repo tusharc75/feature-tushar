@@ -264,7 +264,7 @@ const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
 
   const validate = (formValues: any) => {
     const error: any = {};
-    if (!formValues?.asset || !formValues?.asset !==inputValues['asset']) {
+    if (!formValues?.asset || formValues?.asset?.optionLabel !=inputValues['asset']) {
       error['asset'] = 'Asset is required';
     }
     if (!formValues?.from_date) {
