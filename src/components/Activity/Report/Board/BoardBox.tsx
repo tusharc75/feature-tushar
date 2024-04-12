@@ -1,11 +1,10 @@
+import { Box, IconButton, Menu, MenuItem, Typography, makeStyles } from '@material-ui/core';
+import { DateRange, MoreHoriz } from '@material-ui/icons';
 import React from 'react';
-import { Chip, makeStyles, IconButton, Typography, Box, Grid, Menu, MenuItem } from '@material-ui/core';
-import { MoreHoriz, DateRange } from '@material-ui/icons';
 
 import { useDrag, useDrop } from 'react-dnd';
+import axiosInstance from 'src/axios/axiosInstance';
 import { ListRelatedTo } from '../../Helpers/ListRelatedTo';
-import { DeleteEvent, DeleteCase, DeleteTask } from '../../../../axios/activity';
-import { red } from '@material-ui/core/colors';
 
 const useStyles = makeStyles(() => ({
   activitybox: {
@@ -88,23 +87,26 @@ export const BoardBox = (props) => {
   const handleDelete = (event) => {
     event.stopPropagation();
     if (type === 'event') {
-      DeleteEvent(data._id)
-        .then(({ data }) => {
+      axiosInstance()
+        .delete(`/event/${data._id}`)
+        .then(() => {
           setAnchorEl(null);
           fetchBoard();
         })
         .catch((err) => {});
     }
     if (type === 'case') {
-      DeleteCase(data._id)
-        .then(({ data }) => {
+      axiosInstance()
+        .delete(`/case/${data._id}`)
+        .then(() => {
           setAnchorEl(null);
           fetchBoard();
         })
         .catch((err) => {});
     }
     if (type === 'task') {
-      DeleteTask(data._id)
+      axiosInstance()
+        .delete(`/task/${data._id}`)
         .then(({ data }) => {
           setAnchorEl(null);
           fetchBoard();

@@ -327,6 +327,10 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                     checked={values['isSystemGenerate']}
                     onChange={(e) => {
                       setFieldValue('isSystemGenerate', e.target.checked);
+                      if (!e.target.checked) {
+                        setFieldValue('systemGeneratedPrefix', '');
+                        setFieldValue('systemGeneratedAutoIncrement', false);
+                      }
                     }}
                     color="primary"
                   />

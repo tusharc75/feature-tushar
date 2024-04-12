@@ -3,6 +3,7 @@ import { withStyles } from '@material-ui/core';
 import MuiDialogContent, { DialogContentProps } from '@material-ui/core/DialogContent';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CSSProperties } from '@material-ui/core/styles/withStyles';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const DialogContent = withStyles((theme) => ({
   root: {
@@ -36,13 +37,20 @@ const useViewportDynamicHeight = () => {
   return height;
 };
 
-function CustomDialogContent({ children, style = {}, ...others }: DialogContentProps) {
+type DialogContentPropsExtended = DialogContentProps & {
+  isFooterPresent?: boolean;
+};
+
+function CustomDialogContent({ children, style = {}, isFooterPresent = true, ...others }: DialogContentPropsExtended) {
   const vh = useViewportDynamicHeight();
   const [themeColor] = useAppTheme();
   return (
     <React.Fragment>
       <DialogContent
-        className="max-h-[calc(var(--vh)-110px)] max-[560px]:max-h-[calc(var(--vh)-99px)] overscroll-contain min-h-[250px]"
+        className={`${isFooterPresent
+            ? 'max-h-[calc(var(--vh)-110px)] max-[560px]:max-h-[calc(var(--vh)-99px)]'
+            : 'max-h-[calc(var(--vh)-55px)] max-[560px]:max-h-[calc(var(--vh)-45px)]'
+          } overscroll-contain ${isTablet || isMobile ? 'min-h-[250px]' : ''}`}
         style={
           {
             ...style,

@@ -126,14 +126,12 @@ const RentalManagementDetailsPage = () => {
     history.push(`?tab=${newValue}`);
   };
 
-
-
   useEffect(() => {
     if (id) {
       getRentalManagementFields();
       fetchRentalManagementData();
       fetchQuotationData();
-      fetchPolicy()
+      fetchPolicy();
     }
     if (!isOffline) {
       fetchAssetStatusRights();
@@ -428,6 +426,19 @@ const RentalManagementDetailsPage = () => {
             <Box className="control-buttons-v1">
               <>
                 <Fragment>
+                  {permissions?.iotChart?.isRead && (
+                    <Button
+                      className="btn-outline-v1"
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        history.push(`${routes.iotChart.path}?referenceData=${rentalManagementData?.shippingAddress?.optionValue}`)
+                      }}
+                    >
+                      {`View ${routes.iotChart.title}`}
+                    </Button>
+                  )}
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     className="btn-outline-v1"

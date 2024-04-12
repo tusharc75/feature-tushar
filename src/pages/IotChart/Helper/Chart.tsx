@@ -21,6 +21,15 @@ const downloadIconHTML = `<div title="Download">
 <div/>
 `;
 
+const toggleIconSvg =  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+<line x1="6" y1="14" x2="6" y2="10" stroke="currentColor" stroke-width="2"/>
+<line x1="9" y1="14" x2="9" y2="6" stroke="currentColor" stroke-width="2"/>
+<line x1="12" y1="14" x2="12" y2="8" stroke="currentColor" stroke-width="2"/>
+<path d="M15 14L15 10" stroke="currentColor" stroke-width="2"/>
+<path d="M18 14L18 12" stroke="currentColor" stroke-width="2"/>
+<path d="M15 10L18 12" stroke="currentColor" stroke-width="2"/>
+</svg>
+`;
 const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
   const toastConfig = useContext(CustomToastContext);
   const [chartData, setChartData] = useState(null);
@@ -53,7 +62,20 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
       toolbar: {
         autoSelected: 'zoom',
         tools: {
-          download: downloadIconHTML
+          download: downloadIconHTML,
+          customIcons: [{
+            icon: toggleIconSvg,
+            title: 'Toggle Chart Type',
+            class: 'custom-icon',
+            click: function (chart, options, e) {
+              const newType = chart.w.config.chart.type === 'line' ? 'bar' : 'line';
+              chart.updateOptions({
+                chart: {
+                  type: newType
+                }
+              });
+            }
+          }]
         }
       }
     },

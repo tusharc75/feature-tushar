@@ -99,12 +99,12 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
               <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
                 {category?.iotDataPointsCategoryName}
               </Typography>
-              {currentData?.find((d) => d?.category?.optionValue === category?._id && d?.redAlert) &&
+              {currentData?.find((d) => d?.category?.optionValue === category?._id && d?.redAlert) && (
                 <span className={`flex h-[6px] w-[6px] absolute -top-[3px] -left-[3px] z-10`}>
                   <span className="absolute -top-[3px] -left-[3px] animate-ping inline-flex rounded-full bg-red-400 opacity-75 h-3 w-3"></span>
                   <span className="inline-flex rounded-full bg-red-500 w-full h-full"></span>
                 </span>
-              }
+              )}
             </Box>
           </Box>
         </AccordionSummary>
@@ -121,7 +121,8 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
                     </span>
                   </Box>
                 ) : null}
-                {currentData?.filter((d) => d?.category?.optionValue === category?._id)
+                {currentData
+                  ?.filter((d) => d?.category?.optionValue === category?._id)
                   ?.sort((a, b) => parseInt(a?.order) - parseInt(b?.order))
                   ?.map((data) => {
                     return (
@@ -174,7 +175,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
       {dataPoint && (
         <Dialog fullWidth maxWidth="md" open onClose={handleClose} fullScreen aria-labelledby="assign-roles-dialog">
           <CustomDialogHeader title={`${dataPoint?.fieldLabel}`} showRequiredLabel={false} onClose={handleClose} />
-          <CustomDialogContent>
+          <CustomDialogContent isFooterPresent={false}>
             <Box mt={2}>
               <Grid direction="row" justifyContent="flex-end" alignItems="center" container spacing={2}>
                 <Grid>

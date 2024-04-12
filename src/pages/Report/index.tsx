@@ -119,6 +119,19 @@ const Report = () => {
       data,
       routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
     );
+    if (resourceStartCase === 'Quotation') {
+      newColumns.push({
+        accessor: 'versionComment',
+        Header: 'Version Comment',
+        show: true,
+        disabled: false,
+        Cell: ({ row }) => (
+          <>
+            <h5 className="text-truncate">{row.original['versionComment'] ? row.original['versionComment'] : <NoDataCell />}</h5>
+          </>
+        )
+      });
+    }
     columns = [...newColumns, ...getStaticFields()];
     if (resourceStartCase === 'Purchase Order') {
       columns.splice(1, 0, {
@@ -302,10 +315,17 @@ const Report = () => {
               term: selectedData[key].value ? 'Yes' : 'No'
             });
           } else {
-            deepFilter.push({
-              field: key,
-              term: selectedData[key].value?.map((d: any) => d.optionValue)
-            });
+            if(Array.isArray(selectedData[key].value)){
+              deepFilter.push({
+                field: key,
+                term: selectedData[key].value?.map((d: any) => d.optionValue)
+              });
+            }else{
+              deepFilter.push({
+                field: key,
+                term: selectedData[key].value
+              });
+            }  
           }
         });
 

@@ -84,7 +84,7 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="consume-dialog">
       <CustomDialogHeader title={'View Service Steps Data'} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <Autocomplete
           multiple
           id="service"

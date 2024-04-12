@@ -105,15 +105,15 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-    
+
     const updatedDeepFilters = [...deepFilters];
     const updatedFilterByIds = [...filterByIds];
 
     if (selectedCompetency?.length > 0) {
       updatedFilterByIds.push({
         field: 'competencyType',
-        term: {$in: selectedCompetency?.map((e)=> e?.optionValue)}
-      })
+        term: { $in: selectedCompetency?.map((e) => e?.optionValue) }
+      });
     }
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {
@@ -126,7 +126,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
     if (updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
     }
- 
+
     if (updatedDeepFilters?.length || updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
@@ -202,7 +202,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
         showRequiredLabel={false}
         onClose={handleClose}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         {competencyOptions && columns ? (
           <>
             <ListingPageHeader

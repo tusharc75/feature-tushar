@@ -11,7 +11,7 @@ import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import { isArray, isObject } from 'lodash';
+import { find, isArray, isObject, result } from 'lodash';
 import InfoIcon from '@material-ui/icons/Info';
 import { getGridMetaDataFromLocalStorage } from '../utils';
 
@@ -189,7 +189,8 @@ export default function useColumns() {
       }
 
       if (hideColumns.indexOf(field?.fieldName) >= 0) {
-      } else if (field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter === true) {
+      }
+      else if (field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter === true) {
         const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
 
         if (field.type !== 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
@@ -419,6 +420,22 @@ export default function useColumns() {
           cell: ({ row }) => (
             <div>
               <h5 className="text-truncate">{row.original[field?.fieldName] ? row.original[field?.fieldName] : 0}</h5>
+            </div>
+          )
+        });
+      } else if (field?.type === 'currencyNumber') {
+        const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
+        column.push({
+          ...commonFieldData,
+          editable: false,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => (
+            <div>
+              <h5 className="text-truncate">
+                {currencySymbol}
+                {formatAmountWithCurrency(currency, (row.original[field?.fieldName] || 0))?.amountWithouCurrencyCode ?? (row.original[field?.fieldName] || 0)}
+              </h5>
             </div>
           )
         });

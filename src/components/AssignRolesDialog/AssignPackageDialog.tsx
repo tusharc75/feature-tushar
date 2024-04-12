@@ -69,7 +69,7 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${packages.api}${queryString}`,{ cancelToken: cancelTokenSource?.token })
+      .get(`${packages.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data }) => {
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -164,7 +164,7 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title={`Assign ${routes.packages.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}

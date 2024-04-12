@@ -321,7 +321,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
         onClose={handleClose}
       />
       {!formData && (
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Loader minHeight={350} />
         </CustomDialogContent>
       )}

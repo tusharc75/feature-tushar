@@ -13,8 +13,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDynamicForm from './ManageDynamicForm';
-import { FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
 import TabPanel from 'src/components/TabPanel';
 import Step from './Step';
 import { getResourceLabel } from 'src/constants/helpers';
