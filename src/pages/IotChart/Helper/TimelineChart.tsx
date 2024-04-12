@@ -51,7 +51,7 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
 
   const fetchData = () => {
     axiosInstance()
-      .get(`/report/iot/data-points`, {
+      .get(`/report/iot-data-points`, {
         params: {
           asset: assetId,
           from_date: new Date(dateFilters.from).toISOString(),
