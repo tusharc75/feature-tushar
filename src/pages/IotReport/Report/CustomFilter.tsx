@@ -124,8 +124,6 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
 
   const handleSelectFilter = (type, name, value) => {
     let fieldProps: any = {};
-   console.log(resourceOptions)
-   console.log(name)
     if(!resourceOptions) {
       const optionsData: any = {};
       [...field]
@@ -553,7 +551,7 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
                                 ) : (
                                   <Grid item xs={12} sm={6} md={6} key={`${i}${field?.fieldName}`}>
                                     <Autocomplete
-                                      multiple
+                                      multiple={field?.multiple}
                                       inputValue={inputValues[field?.fieldName] || ''}
                                       onOpen={() => {
                                         setOptions([]);
@@ -575,7 +573,11 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
                                       value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
                                       onChange={(e, val) => {
                                         handleSelectFilter(field?.type,field?.fieldName, val);
-                                        setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: '' }));
+                                        if(field?.multiple){
+                                          setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: '' }));
+                                        }else{
+                                          setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: val?.optionLabel })); 
+                                        }
                                       }}
                                       size="small"
                                       renderInput={(params) => (
