@@ -25,7 +25,8 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   submitInput,
   cellValue,
   setCellValue,
-  isClientSideGrid
+  isClientSideGrid,
+  onRowClick
 }) => {
   const { error } = state;
   const [expanded, setExpanded] = React.useState<string | false>(false);
@@ -44,7 +45,10 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
     () => allColumns?.find((item) => item.primaryField || item.lockPosition) || allColumns[2],
     [allColumns]
   );
-  const actionField: any | null = React.useMemo(() => allColumns?.find((item) => item.id === 'action') || null, [allColumns]);
+  const actionField: any | null = React.useMemo(
+    () => allColumns?.find((item) => item.id === 'action' && item.isVisible !== false) || null,
+    [allColumns]
+  );
 
   const otherFields: any[] | null = React.useMemo(
     () =>
@@ -119,6 +123,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                         border: '1px solid var(--common-border-color)',
                         cursor: otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE ? 'pointer' : 'auto'
                       }}
+                      onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}
                     >
                       <div className={`flex gap-2 items-center`}>
                         {expander && expanderCol && flexRender(expanderCell.column.columnDef.cell, expanderCell?.getContext())}
