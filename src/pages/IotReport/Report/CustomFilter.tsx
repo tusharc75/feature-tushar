@@ -29,18 +29,18 @@ import routes from './../../../components/Helpers/Routes';
 import { List } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingData }) => {
+const CustomFilter = ({ field, loadingData, handleSubmit,open }) => {
   const history = useHistory();
   const { setToastConfig } = useContext(CustomToastContext);
   const [formValues, setFormValues] = useState({});
   const [selectedResources, setSelectedResources] = useState([]);
   let [resourceOptions, setResourceOptions] = useState(null);
-
+  const [inputValues, setInputValues] = useState({});
   const [options, setOptions] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState({ loading: false, resource: null });
   const [statusTimeFrame, setStatusTimeFrame] = useState<any>({});
   const [betweenDate, setBetweenDate] = useState(null);
-
+  const [currentPage, setCurrentPage] = useState(0);
   const [selectedData, setSelectedData] = useState(null);
   const [error, setError] = useState(null);
 
@@ -74,22 +74,31 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
   }, [selectedData, selectedResources]);
 
   const fetchOptions = useCallback(
-    debounce(async (resource: string, searchKey: string = '') => {
+    debounce(async (resource: string, searchKey: string = '', page: number = 0) => {
       try {
         const lookupResourceName = resource;
-        let query = `sa-field/options?resource=${lookupResourceName}&limit=10&search=${searchKey}`;
+        if (searchKey !== '') {
+          page = 0;
+          setCurrentPage(0);
+        }
+        if (page === 0) {
+          setCurrentPage(0);
+          setOptions([]);
+        }
+        let query = `sa-field/options?resource=${lookupResourceName}&limit=25&page=${page}&search=${searchKey}`;
         const response = await axiosInstance().get(query);
-        const options = [...response.data.data];
-        setOptions(options);
-
-        //set resource options
-        const optionsData: any = {};
+        const currentOptions = page === 0 ? [...response.data.data] : [...options, ...response.data.data];
+        setOptions(currentOptions);
+        if (page > 0 && response.data.data?.length > 0) {
+          setCurrentPage(page);
+        }
+      const optionsData: any = {};
         [...field]
           .filter((d: any) => d.type === 'dropDown' || d.type === 'multiSelect' || d.type === 'date' || d.type === 'checkBox')
           .map((d: any) => {
             if (d.type === 'dropDown' || d.type === 'multiSelect') {
               optionsData[d.fieldName] = {
-                options: options,
+                options: currentOptions,
                 type: d.type,
                 lookup: Boolean(d?.lookup)
               };
@@ -101,10 +110,9 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
           });
 
         setResourceOptions(optionsData);
-
-        setLoading(false);
+        setLoading({ loading: false, resource: null });
       } catch (error) {
-        setToastConfig(error);
+        console.error(error);
       }
     }, 1000),
     []
@@ -120,19 +128,19 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
     if(!resourceOptions) {
       const optionsData: any = {};
       [...field]
-      .filter((d: any) => d.type === 'dropDown' || d.type === 'multiSelect' || d.type === 'date' || d.type === 'checkBox')
-      .map((d: any) => {
-        if (d.type === 'dropDown' || d.type === 'multiSelect') {
-          optionsData[d.fieldName] = {
-            type: d.type,
-            lookup: Boolean(d?.lookup)
-          };
-        }
-        if (d.type === 'date') {
-          d['timeFrame'] = 'custom';
-        }
-        return d;
-      });
+        .filter((d: any) => d.type === 'dropDown' || d.type === 'multiSelect' || d.type === 'date' || d.type === 'checkBox')
+        .map((d: any) => {
+          if (d.type === 'dropDown' || d.type === 'multiSelect') {
+            optionsData[d.fieldName] = {
+              type: d.type,
+              lookup: Boolean(d?.lookup)
+            };
+          }
+          if (d.type === 'date') {
+            d['timeFrame'] = 'custom';
+          }
+          return d;
+        });
       resourceOptions = optionsData;
     }
 
@@ -164,8 +172,6 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
   };
 
   const handleApplyFilter = () => {
-    // let deepFilter: any = [];
-    // let filterById: any = [];
     let query: any = {};
     if (selectedResources.length > 0) {
       if (selectedData) {
@@ -188,57 +194,6 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
             query[_k] = options?.optionValue;
           }
         });
-
-        // const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
-        // const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
-
-        // filterById = idFilter.map((key) => {
-        //     const options = selectedData[key]?.value;
-        //     return {
-        //         field: key,
-        //         term: {
-        //             $in: options.map((d: any) => d.optionValue)
-        //         }
-        //     };
-        // });
-
-        // forDeepFilter.forEach((key) => {
-        //     if (selectedData[key].type === 'checkBox') {
-        //         deepFilter.push({
-        //             field: key,
-        //             term: selectedData[key].value ? 'Yes' : 'No'
-        //         });
-        //     } else if (key === 'from_date') {
-        //         const fromDate = selectedData['from_date'] ? selectedData['fromDate'] : null;
-        //         if (fromDate) {
-        //             deepFilter.push({
-        //                 field: 'date',
-        //                 term: {
-        //                     from: fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null,
-        //                 }
-        //             });
-        //         }
-
-        //     }
-        //     else if (key === 'to_date') {
-        //         const toDate = selectedData['to_date'] ? selectedData['to_date'] : null;
-        //         if (toDate) {
-        //             deepFilter.push({
-        //                 field: 'date',
-        //                 term: {
-        //                     to: toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
-        //                 }
-        //             });
-        //         }
-        //     }
-        //     else {
-        //         deepFilter.push({
-        //             field: key,
-        //             term: selectedData[key].value?.map((d: any) => d.optionValue)
-        //         });
-
-        //     }
-        // });
       }
       if (betweenDate) {
         const fields = Object.keys(betweenDate);
@@ -248,26 +203,8 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
           }
         });
       }
-
-      // if (betweenDate) {
-      //     const fields = Object.keys(betweenDate);
-      //     fields.forEach((field) => {
-      //         if (betweenDate[field]) {
-      //             deepFilter.push({
-      //                 field,
-      //                 term: moment(betweenDate[field]).format('MM/DD/YYYY')
-      //             });
-      //         }
-      //     });
-      // }
     }
-
-    setShowGrid(true);
-    setFilterQuery(query);
-    // setFilterQuery({
-    //     filterById,
-    //     deepFilter
-    // });
+    handleSubmit(query)
   };
 
   const handleDuration = (timeFrameTemp, field) => {
@@ -327,7 +264,7 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
 
   const validate = (formValues: any) => {
     const error: any = {};
-    if (!formValues?.asset) {
+    if (!formValues?.asset || !formValues?.asset !==inputValues['asset']) {
       error['asset'] = 'Asset is required';
     }
     if (!formValues?.from_date) {
@@ -345,285 +282,311 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
-      {!showGrid && (
-        <Dialog
-          maxWidth={'md'}
-          open={true}
-          fullWidth
-          onClose={(e, reason) => {
-            if (reason !== 'backdropClick') {
-              handleClose();
-            }
-          }}
-          aria-describedby="Filter Dialog"
-        >
-          <CustomDialogHeader title={`Filters`} onClose={handleClose} showRequiredLabel={false} />
-          <DialogContent>
-            <div className="p-4 pt-5 min-h-[200px]">
-              <Container maxWidth="sm">
-                <Box textAlign="center" mb={2}>
-                  <Autocomplete
-                    loadingText="Please wait..."
-                    options={field}
-                    limitTags={4}
-                    disableListWrap
-                    ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
-                    disableCloseOnSelect
-                    multiple
-                    value={selectedResources ?? []}
-                    onChange={(_, val, reason) => {
-                      if (val.filter((f) => f.fieldName === 'all').length > 0) {
-                        setSelectedResources(field);
-                      } else {
-                        setDefaultResource(val);
-                      }
+      <Dialog
+        maxWidth={'md'}
+        open={open}
+        fullWidth
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            handleClose();
+          }
+        }}
+        aria-describedby="Filter Dialog"
+      >
+        <CustomDialogHeader title={`Filters`} onClose={handleClose} showRequiredLabel={false} />
+        <DialogContent>
+          <div className="p-4 pt-5 min-h-[200px]">
+            <Container maxWidth="sm">
+              <Box textAlign="center" mb={2}>
+                <Autocomplete
+                  loadingText="Please wait..."
+                  options={field}
+                  limitTags={4}
+                  disableListWrap
+                  ListboxComponent={VirtualizedList as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
+                  disableCloseOnSelect
+                  multiple
+                  value={selectedResources ?? []}
+                  onChange={(_, val, reason) => {
+                    if (val.filter((f) => f.fieldName === 'all').length > 0) {
+                      setSelectedResources(field);
+                    } else {
+                      setDefaultResource(val);
+                    }
 
-                      if (reason === 'remove-option' && selectedData) {
-                        const selectedKeys = val.map((f) => f?.fieldName);
-                        setSelectedData((prev) => {
-                          const dataKeys = Object?.keys(prev);
-                          if (dataKeys && dataKeys.length) {
-                            dataKeys.forEach((key) => {
-                              if (!selectedKeys?.includes(key)) {
-                                delete prev[key];
-                              }
-                            });
-                          }
-                          return prev;
-                        });
-
-                        setFormValues((prev) => {
-                          const dataKeys = Object?.keys(prev);
-                          if (dataKeys && dataKeys.length) {
-                            dataKeys.forEach((key) => {
-                              if (!selectedKeys?.includes(key)) {
-                                delete prev[key];
-                              }
-                            });
-                          }
-                          return prev;
-                        });
-                      }
-
-                      if (reason === 'remove-option' && betweenDate) {
-                        const selectedKeys = val.map((f) => f?.fieldName);
-                        setBetweenDate((prevState) => {
-                          let keys = prevState ? Object.keys(prevState) : [];
-                          keys.forEach((key) => {
-                            if (key?.includes('to') || key?.includes('from')) {
-                              if (!selectedKeys?.includes(key.split('_')[1])) {
-                                delete prevState[key];
-                              }
+                    if (reason === 'remove-option' && selectedData) {
+                      const selectedKeys = val.map((f) => f?.fieldName);
+                      setSelectedData((prev) => {
+                        const dataKeys = Object?.keys(prev);
+                        if (dataKeys && dataKeys.length) {
+                          dataKeys.forEach((key) => {
+                            if (!selectedKeys?.includes(key)) {
+                              delete prev[key];
                             }
                           });
-                          return prevState;
-                        });
-                      }
-                    }}
-                    fullWidth
-                    getOptionSelected={(option, val) => option.fieldName === val.fieldName}
-                    getOptionLabel={(option) => option.fieldLabel}
-                    renderInput={(params) => <TextField {...params} variant="outlined" label="Select Filter" size="small" />}
-                  />
-                  <Box py={2}>
-                    <Grid container spacing={2}>
-                      {selectedResources.length > 0 ? (
-                        selectedResources?.map((field: any, i: number) => {
-                          if (
-                            !statusTimeFrame[field.fieldName] &&
-                            field.type === 'date' &&
-                            !formValues[`from_${field.fieldName}`] &&
-                            formValues[`to_${field.fieldName}`]
-                          ) {
-                            handleDuration('custom', field);
+                        }
+                        return prev;
+                      });
+
+                      setFormValues((prev) => {
+                        const dataKeys = Object?.keys(prev);
+                        if (dataKeys && dataKeys.length) {
+                          dataKeys.forEach((key) => {
+                            if (!selectedKeys?.includes(key)) {
+                              delete prev[key];
+                            }
+                          });
+                        }
+                        return prev;
+                      });
+                    }
+
+                    if (reason === 'remove-option' && betweenDate) {
+                      const selectedKeys = val.map((f) => f?.fieldName);
+                      setBetweenDate((prevState) => {
+                        let keys = prevState ? Object.keys(prevState) : [];
+                        keys.forEach((key) => {
+                          if (key?.includes('to') || key?.includes('from')) {
+                            if (!selectedKeys?.includes(key.split('_')[1])) {
+                              delete prevState[key];
+                            }
                           }
-                          return (
-                            <>
-                              {field?.type === 'date' ? (
-                                <>
-                                  <Grid item xs={12} sm={6} md={6}>
-                                    <FormControl fullWidth size="small" variant="outlined">
-                                      <InputLabel id={field.fieldName}>Select Duration</InputLabel>
-                                      <Select
-                                        labelId={field.fieldLabel}
-                                        id={`time-${field.fieldName}`}
-                                        defaultValue={'custom'}
-                                        value={statusTimeFrame[field.fieldName] ?? 'custom'}
-                                        onChange={(e) => {
-                                          handleDuration(e.target.value, field);
-                                          const tempArray = [...selectedResources];
-                                          let tempIndex = tempArray.findIndex((d) => d?.fieldName === field?.fieldName);
-                                          tempArray[tempIndex].timeFrame = e.target.value;
-                                          setSelectedResources(tempArray);
-                                        }}
-                                        label="Select Duration"
-                                        style={{ textAlign: 'start' }}
-                                      >
-                                        <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                                        <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                                        <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                                        <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                                        <MenuItem value={'custom'}>Custom</MenuItem>
-                                      </Select>
-                                    </FormControl>
-                                  </Grid>
-                                  <Grid item xs={12} sm={6} md={6}>
-                                    <KeyboardDatePicker
-                                      autoOk
-                                      disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
-                                      fullWidth
-                                      size="small"
-                                      variant="inline"
-                                      inputVariant="outlined"
-                                      name={`from_${field.fieldName}`}
-                                      label={`From ${field.fieldLabel}`}
-                                      value={formValues[`from_${field.fieldName}`] ? formValues[`from_${field.fieldName}`] : null}
-                                      onChange={(date: any) => {
-                                        setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
-                                        handleSelectFilter(field?.type, `from_${field.fieldName}`, date);
+                        });
+                        return prevState;
+                      });
+                    }
+                  }}
+                  fullWidth
+                  getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                  getOptionLabel={(option) => option.fieldLabel}
+                  renderInput={(params) => <TextField {...params} variant="outlined" label="Select Filter" size="small" />}
+                />
+                <Box py={2}>
+                  <Grid container spacing={2}>
+                    {selectedResources.length > 0 ? (
+                      selectedResources?.map((field: any, i: number) => {
+                        if (
+                          !statusTimeFrame[field.fieldName] &&
+                          field.type === 'date' &&
+                          !formValues[`from_${field.fieldName}`] &&
+                          formValues[`to_${field.fieldName}`]
+                        ) {
+                          handleDuration('custom', field);
+                        }
+                        return (
+                          <>
+                            {field?.type === 'date' ? (
+                              <>
+                                <Grid item xs={12} sm={6} md={6}>
+                                  <FormControl fullWidth size="small" variant="outlined">
+                                    <InputLabel id={field.fieldName}>Select Duration</InputLabel>
+                                    <Select
+                                      labelId={field.fieldLabel}
+                                      id={`time-${field.fieldName}`}
+                                      defaultValue={'custom'}
+                                      value={statusTimeFrame[field.fieldName] ?? 'custom'}
+                                      onChange={(e) => {
+                                        handleDuration(e.target.value, field);
+                                        const tempArray = [...selectedResources];
+                                        let tempIndex = tempArray.findIndex((d) => d?.fieldName === field?.fieldName);
+                                        tempArray[tempIndex].timeFrame = e.target.value;
+                                        setSelectedResources(tempArray);
                                       }}
-                                      format={dateFormat}
-                                      InputLabelProps={{
-                                        shrink: true
-                                      }}
-                                      required={field?.required}
-                                      error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
-                                      helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={12} sm={6} md={6}>
-                                    <KeyboardDatePicker
-                                      autoOk
-                                      disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
-                                      fullWidth
-                                      size="small"
-                                      variant="inline"
-                                      inputVariant="outlined"
-                                      name={`to_${field.fieldName}`}
-                                      label={`To ${field.fieldLabel}`}
-                                      value={formValues[`to_${field.fieldName}`] ? formValues[`to_${field.fieldName}`] : null}
-                                      onChange={(date: any) => {
-                                        setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
-                                        handleSelectFilter(field?.type, `to_${field.fieldName}`, date);
-                                      }}
-                                      format={dateFormat}
-                                      InputLabelProps={{
-                                        shrink: true
-                                      }}
-                                      minDate={
-                                        betweenDate && betweenDate[`from_${field.fieldName}`]
-                                          ? betweenDate[`from_${field.fieldName}`]
-                                          : formValues[`from_${field.fieldName}`]
+                                      label="Select Duration"
+                                      style={{ textAlign: 'start' }}
+                                    >
+                                      <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                                      <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                                      <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                                      <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                                      <MenuItem value={'custom'}>Custom</MenuItem>
+                                    </Select>
+                                  </FormControl>
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                  <KeyboardDatePicker
+                                    autoOk
+                                    disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
+                                    fullWidth
+                                    size="small"
+                                    variant="inline"
+                                    inputVariant="outlined"
+                                    name={`from_${field.fieldName}`}
+                                    label={`From ${field.fieldLabel}`}
+                                    value={formValues[`from_${field.fieldName}`] ? formValues[`from_${field.fieldName}`] : null}
+                                    onChange={(date: any) => {
+                                      setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
+                                      handleSelectFilter(field?.type, `from_${field.fieldName}`, date);
+                                    }}
+                                    format={dateFormat}
+                                    InputLabelProps={{
+                                      shrink: true
+                                    }}
+                                    required={field?.required}
+                                    error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
+                                    helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
+                                  />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                  <KeyboardDatePicker
+                                    autoOk
+                                    disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
+                                    fullWidth
+                                    size="small"
+                                    variant="inline"
+                                    inputVariant="outlined"
+                                    name={`to_${field.fieldName}`}
+                                    label={`To ${field.fieldLabel}`}
+                                    value={formValues[`to_${field.fieldName}`] ? formValues[`to_${field.fieldName}`] : null}
+                                    onChange={(date: any) => {
+                                      setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
+                                      handleSelectFilter(field?.type, `to_${field.fieldName}`, date);
+                                    }}
+                                    format={dateFormat}
+                                    InputLabelProps={{
+                                      shrink: true
+                                    }}
+                                    minDate={
+                                      betweenDate && betweenDate[`from_${field.fieldName}`]
+                                        ? betweenDate[`from_${field.fieldName}`]
+                                        : formValues[`from_${field.fieldName}`]
                                           ? formValues[`from_${field.fieldName}`]
                                           : new Date()
-                                      }
-                                      required={field?.required}
-                                      error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
-                                      helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
-                                    />
-                                  </Grid>
-                                </>
+                                    }
+                                    required={field?.required}
+                                    error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
+                                    helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
+                                  />
+                                </Grid>
+                              </>
+                            ) : (
+                              field.fieldName !== 'all' &&
+                              field.type !== 'date' &&
+                              (field.options ? (
+                                <Grid item xs={12} sm={6} md={6} key={i}>
+                                  <Autocomplete
+                                    disableCloseOnSelect
+                                    options={field.options}
+                                    fullWidth
+                                    loading={loading.loading && loading.resource === field?.resource}
+                                    getOptionLabel={(option: any) => option.optionLabel ?? ''}
+                                    getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
+                                    value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
+                                    onChange={(e, val) => {
+                                      handleSelectFilter(field?.type, field?.fieldName, val);
+                                    }}
+                                    size="small"
+                                    renderInput={(params) => (
+                                      <TextField
+                                        {...params}
+                                        label={field?.fieldLabel}
+                                        variant="outlined"
+                                        name={field?.fieldName}
+                                        required={field?.required}
+                                        error={error && error[field?.fieldName] && Boolean(error[field?.fieldName])}
+                                        helperText={error && Boolean(error[field?.fieldName]) && error[field?.fieldName]}
+                                      />
+                                    )}
+                                  />
+                                </Grid>
                               ) : (
-                                field.fieldName !== 'all' &&
-                                field.type !== 'date' &&
-                                (field.options ? (
-                                  <Grid item xs={12} sm={6} md={6} key={i}>
-                                    <Autocomplete
-                                      disableCloseOnSelect
-                                      options={field.options}
-                                      fullWidth
-                                      loading={loading}
-                                      getOptionLabel={(option: any) => option.optionLabel ?? ''}
-                                      getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
-                                      value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
-                                      onChange={(e, val) => {
-                                        handleSelectFilter(field?.type, field?.fieldName, val);
-                                      }}
-                                      size="small"
-                                      renderInput={(params) => (
-                                        <TextField
-                                          {...params}
-                                          label={field?.fieldLabel}
-                                          variant="outlined"
-                                          name={field?.fieldName}
-                                          required={field?.required}
-                                          error={error && error[field?.fieldName] && Boolean(error[field?.fieldName])}
-                                          helperText={error && Boolean(error[field?.fieldName]) && error[field?.fieldName]}
-                                        />
-                                      )}
-                                    />
-                                  </Grid>
-                                ) : (
-                                  <Grid item xs={12} sm={6} md={6} key={i}>
-                                    <Autocomplete
-                                      disableCloseOnSelect
-                                      multiple={field?.multiple}
-                                      onOpen={() => {
-                                        setOptions([]);
-                                        setLoading(true);
-                                        fetchOptions(field?.resource, '');
-                                      }}
-                                      onInputChange={(event, value) => fetchOptions(field?.resource, value)}
-                                      options={options}
-                                      fullWidth
-                                      loading={loading}
-                                      getOptionLabel={(option: any) => option.optionLabel ?? ''}
-                                      getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
-                                      value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
-                                      onChange={(e, val) => {
-                                        handleSelectFilter(field?.type, field?.fieldName, val);
-                                      }}
-                                      size="small"
-                                      renderInput={(params) => (
-                                        <TextField
-                                          {...params}
-                                          label={field?.fieldLabel}
-                                          variant="outlined"
-                                          name={field?.fieldName}
-                                          required={field?.required}
-                                          error={error && error[field?.fieldName] && Boolean(error[field?.fieldName])}
-                                          helperText={error && Boolean(error[field?.fieldName]) && error[field?.fieldName]}
-                                        />
-                                      )}
-                                    />
-                                  </Grid>
-                                ))
-                              )}
-                            </>
-                          );
-                        })
-                      ) : (
-                        <Box textAlign="center" width="100%">
-                          <Typography>No filters selected</Typography>
-                        </Box>
-                      )}
-                    </Grid>
-                  </Box>
-                  <Box mt={2}>
-                    <Button
-                      onClick={() => {
-                        const error = validate(formValues);
-                        if (isEmpty(error)) {
-                          handleApplyFilter();
-                        }
-                      }}
-                      startIcon={loadingData ? <CircularProgress color="inherit" size={18} /> : <List />}
-                      color="primary"
-                      variant="contained"
-                      size="small"
-                      disableElevation
-                      fullWidth
-                      disabled={loadingData}
-                    >
-                      Show
-                    </Button>
-                  </Box>
+                                <Grid item xs={12} sm={6} md={6} key={i}>
+                                  <Autocomplete
+                                    multiple={field.multiple}
+                                    inputValue={inputValues[field?.fieldName] || ''}
+                                    onOpen={() => {
+                                      setOptions([]);
+                                      setLoading({ loading: true, resource: field?.resource });
+                                      fetchOptions(field?.resource, '');
+                                    }}
+                                    onInputChange={(event, value, reason) => {
+                                      if (reason === 'input') {
+                                        setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: value }));
+                                        fetchOptions(field?.resource, value);
+                                      }
+                                    }}
+                                    disableCloseOnSelect={field.multiple}
+                                    options={options}
+                                    fullWidth
+                                    loading={loading.loading && loading.resource === field?.resource}
+                                    getOptionLabel={(option: any) => option.optionLabel ?? ''}
+                                    getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
+                                    value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
+                                    onChange={(e, val) => {
+                                      console.log(val)
+                                      handleSelectFilter(field?.type,field?.fieldName, val);
+                                      if(field?.multiple){
+                                        setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: '' }));
+                                      }else{
+                                        setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: val.optionLabel })); 
+                                      }
+                                    }}
+                                    size="small"
+                                    renderInput={(params) => (
+                                      <TextField
+                                        {...params}
+                                        label={field?.fieldLabel}
+                                        variant="outlined"
+                                        name={field?.fieldName}
+                                        InputProps={{
+                                          ...params.InputProps,
+                                          endAdornment: (
+                                            <>
+                                              {loading.loading && loading.resource === field?.resource ? (
+                                                <CircularProgress color="inherit" size={20} />
+                                              ) : null}
+                                              {params.InputProps.endAdornment}
+                                            </>
+                                          )
+                                        }}
+                                      />
+                                    )}
+                                    ListboxProps={{
+                                      onScroll: (e) => {
+                                        if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
+                                          setLoading({ loading: true, resource: field?.resource });
+                                          fetchOptions(field?.resource, '', currentPage + 1);
+                                        }
+                                      }
+                                    }}
+                                  />
+                                </Grid>
+                              ))
+                            )}
+                          </>
+                        );
+                      })
+                    ) : (
+                      <Box textAlign="center" width="100%">
+                        <Typography>No filters selected</Typography>
+                      </Box>
+                    )}
+                  </Grid>
                 </Box>
-              </Container>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+                <Box mt={2}>
+                  <Button
+                    onClick={() => {
+                      const error = validate(formValues);
+                      if (isEmpty(error)) {
+                        handleApplyFilter();
+                      }
+                    }}
+                    startIcon={loadingData ? <CircularProgress color="inherit" size={18} /> : <List />}
+                    color="primary"
+                    variant="contained"
+                    size="small"
+                    disableElevation
+                    fullWidth
+                    disabled={loadingData}
+                  >
+                    Show
+                  </Button>
+                </Box>
+              </Box>
+            </Container>
+          </div>
+        </DialogContent>
+      </Dialog>
     </MuiPickersUtilsProvider>
   );
 };
