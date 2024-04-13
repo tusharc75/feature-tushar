@@ -76,7 +76,10 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
         end: new Date(d.date)
       };
     });
-
+    newData = newData.map(activity => ({
+      ...activity,
+      allDay: true
+    }));
     setActivities(newData);
   };
 
