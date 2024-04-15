@@ -12,7 +12,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import Steps, { getIndex } from 'src/components/Steps';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -102,7 +102,7 @@ const SalesOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${salesOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -198,23 +198,22 @@ const SalesOrderDetails = () => {
                       Close
                     </ButtonWithPulse>
                   )}
-                {permissions?.salesOrder?.isUpdate &&
-                  [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        if (salesOrderData?.invoice) {
-                          updateJobStatus(SALES_ORDER_STATUS.invoiced);
-                        } else {
-                          updateJobStatus(SALES_ORDER_STATUS.readyToInvoice);
-                        }
-                      }}
-                    >
-                      Re-Open
-                    </Button>
-                  )}
+                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
+                  <ThemeButton
+                    variant="contained"
+                    iconForMobile={false}
+                    size="small"
+                    onClick={() => {
+                      if (salesOrderData?.invoice) {
+                        updateJobStatus(SALES_ORDER_STATUS.invoiced);
+                      } else {
+                        updateJobStatus(SALES_ORDER_STATUS.readyToInvoice);
+                      }
+                    }}
+                  >
+                    Re-Open
+                  </ThemeButton>
+                )}
                 {permissions?.salesOrder?.isUpdate && allowedToEdit && ![SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <Button
                     className={'btn-outline-v1'}
