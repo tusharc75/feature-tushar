@@ -17,7 +17,8 @@ import {
   ACTIVITY_RESOURCE,
   SUBLEASE_TYPE,
   DELIVERY_TICKET_TYPE,
-  sidebarResource
+  sidebarResource,
+  checkSuperAdminAccess
 } from '../../constants/helpers';
 import ManageSublease from './ManageSublease';
 import { FaWpforms } from 'react-icons/fa';
@@ -147,7 +148,7 @@ const SubleaseDetailsPage = () => {
         setCurrentStep(getIndex(data?.processStatus, subleaseSteps));
       }
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.sublease)) {
         isAllowedToEdit = true;
       }
       const isProcessorToEdit = [data.processor].some((d) => d?.optionValue === user?.user?._id);

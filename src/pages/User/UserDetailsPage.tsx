@@ -49,12 +49,14 @@ import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
+  checkSuperAdminAccess,
   customerAccount,
   customerContact,
   displayDate,
   lead,
   opportunity,
   quoteBuilder,
+  sidebarResource,
   supplierAccount,
   supplierContact,
   userType
@@ -496,7 +498,7 @@ const UserDetailsPage = () => {
                   onClick={handleOpenUpdateDialog}
                   disabled={
                     userData?.userType === userType.brandAdmin
-                      ? user?.role?.selectedEntity?.superAdminAccess || user?.user?._id === id
+                      ? checkSuperAdminAccess(user, sidebarResource.user) || user?.user?._id === id
                         ? false
                         : true
                       : false
@@ -871,8 +873,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
-              : ''
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
+                : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

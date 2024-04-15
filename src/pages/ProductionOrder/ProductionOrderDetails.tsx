@@ -22,7 +22,7 @@ import routes from 'src/components/Helpers/Routes';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import Steps, { getIndex } from 'src/components/Steps';
 import TabPanel from 'src/components/TabPanel';
-import { ACTIVITY_RESOURCE, PRODUCTION_ORDER_STATUS, productionOrder, productionOrderSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, PRODUCTION_ORDER_STATUS, checkSuperAdminAccess, productionOrder, productionOrderSteps, sidebarResource } from 'src/constants/helpers';
 import Invoice from './Invoice';
 import LoadingTicket from './LoadingTicket';
 import ManageProductionOrder from './ManageProductionOrder';
@@ -125,7 +125,7 @@ const ProductionOrderDetails = () => {
           setCurrentStep(getIndex(data?.processStatus, tempStepList));
         }
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (user?.role?.selectedEntity?.superAdminAccess) {
+        if (checkSuperAdminAccess(user, sidebarResource.productionOrder)) {
           isAllowedToEdit = true;
         }
         // if (!data?.customerAccount) {

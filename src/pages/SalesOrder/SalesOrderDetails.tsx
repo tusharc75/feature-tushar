@@ -23,7 +23,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, INVOICE_STATUS, SALES_ORDER_STATUS, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, INVOICE_STATUS, SALES_ORDER_STATUS, checkSuperAdminAccess, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
 import Invoice from './Invoice';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import Material from './Material';
@@ -102,7 +102,7 @@ const SalesOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${salesOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -129,7 +129,7 @@ const SalesOrderDetails = () => {
         setCurrentStep(getIndex(data?.processStatus, steps));
       }
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.salesOrder)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);

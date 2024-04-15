@@ -40,6 +40,7 @@ import routes from '../../../components/Helpers/Routes';
 import ProjectInAccordion from '../../../components/ProjectInAccordion/ProjectInAccordion';
 import {
   ACTIVITY_RESOURCE,
+  checkSuperAdminAccess,
   customerAccount,
   formatAmountWithCurrency,
   gridLoadingTimeout,
@@ -337,7 +338,7 @@ export default function QuoteDetail() {
             }
             setTypeCreateProjectSalesDialog(dataOfTyoes);
             var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-            if (user?.role?.selectedEntity?.superAdminAccess) {
+            if (checkSuperAdminAccess(user, sidebarResource.quoteBuilder)) {
               isAllowedToEdit = true;
             }
             setAllowedToEdit(isAllowedToEdit);
@@ -738,8 +739,8 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={
                         allowedToEdit &&
-                        !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
-                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                          !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
+                          !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
                           ? false
                           : true
                       }

@@ -23,7 +23,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, SERVICE_ORDER_STATUS, fieldServiceOrder, serviceOrderSteps, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, SERVICE_ORDER_STATUS, checkSuperAdminAccess, fieldServiceOrder, serviceOrderSteps, sidebarResource } from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
 import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import FieldTicket from './FieldTicket';
@@ -129,7 +129,7 @@ const ServiceOrderDetailsPage = () => {
       }
       setLoadingDetails(false);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.fieldServiceOrder)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
