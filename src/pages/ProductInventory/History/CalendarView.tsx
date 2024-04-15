@@ -73,10 +73,11 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
         id: d?._id,
         title: d?.isFinalInventory ? `Final Quantity (${d.finalInventory})` : `${d?.type === 'credit' ? '↑' : '↓'} ${d?.referenceType} (${d?.qty})`,
         start: new Date(d.date),
-        end: new Date(d.date)
+        end: new Date(d.date),
+        allDay: true
       };
     });
-
+    
     setActivities(newData);
   };
 
