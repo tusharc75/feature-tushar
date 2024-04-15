@@ -20,7 +20,7 @@ const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue
   const CellShell = ({ children }) => {
     return (
       <h6 className=" text-[12px] grid max-w-full">
-        <span className="text-[var(--dark-secondary-text,#8b8b8b)] text-[10px] font-medium">{field.header}: </span>
+        <span className="text-[var(--dark-secondary-text,#8b8b8b)] text-[8px] font-medium">{field.header}: </span>
         <span
           onKeyDown={(e) => {
             handleKeyDown({ e, currentEditingCellPosition, submitInput });
