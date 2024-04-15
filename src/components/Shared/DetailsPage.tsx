@@ -170,7 +170,15 @@ const Details = (props: DetailProps) => {
    */
   const normalizeValues = (values, input) => {
     let text = '';
-    if (input.type === 'multiSelect') {
+    if((input.type === 'multiSelect' || input.type === 'dropDown') && input?.dataList){
+      if(input.type === 'multiSelect'){
+        const value = values[`${input?.fieldName}_dataList`]?.length ? values[`${input?.fieldName}_dataList`]?.map((d) => d.optionLabel).join(', ') : ''
+        text = value ? value : '-';
+      } else {
+        const value = values[`${input?.fieldName}_dataList`]?.optionLabel;
+        text = value ? value : '-';
+      }
+    } else if (input.type === 'multiSelect') {
       const filterOptions = input.option?.filter((opt) => values[input.fieldName].includes(opt.optionValue));
       const value =
         typeof values[input.fieldName] === 'string'
