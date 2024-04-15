@@ -9,7 +9,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS, ACTIVITY_RESOURCE, serializedAsset } from 'src/constants/helpers';
+import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS, ACTIVITY_RESOURCE, serializedAsset, checkSuperAdminAccess } from 'src/constants/helpers';
 import ManageRepairJob from './ManageRepairJob';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
@@ -140,7 +140,7 @@ const RepairJobDetails = () => {
       .then(({ data: { data } }) => {
         setCurrentStep(getIndex(data?.processStatus, repairJobProcessSteps));
         let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (user?.role?.selectedEntity?.superAdminAccess) {
+        if (checkSuperAdminAccess(user, sidebarResource.repairJob)) {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);

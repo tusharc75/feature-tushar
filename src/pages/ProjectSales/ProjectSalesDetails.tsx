@@ -21,7 +21,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { displayCardDate, formatAmountWithCurrency, projectSales } from '../../constants/helpers';
+import { checkSuperAdminAccess, displayCardDate, formatAmountWithCurrency, projectSales, sidebarResource } from '../../constants/helpers';
 import AssignDataDialog from './AssignDataDialog';
 import CreateProjectSales from './CreateProjectSales';
 import CustomerAccounts from './CustomerAccounts';
@@ -110,15 +110,13 @@ const ProjectSalesDetails = () => {
         data: { data }
       } = await axiosInstance().get(`${projectSales.projectSalesApi}/${id}`);
 
-      // data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
-      // data.value = formatAmountWithCurrency(data.currency, data.value).fullFormatAmount;
       let modifiedData: any = {};
       Object.assign(modifiedData, data);
 
       modifiedData['amount'] = formatAmountWithCurrency(modifiedData.currency, modifiedData.amount).fullFormatAmount;
 
       var isAllowedToEdit = data.projectManager.optionValue === user?.user?._id;
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.projectSales)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
@@ -484,8 +482,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName} ?`
               : removeUserRec
-              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName} ?`
-              : ''
+                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName} ?`
+                : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

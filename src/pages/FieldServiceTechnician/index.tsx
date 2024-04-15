@@ -9,6 +9,7 @@ import CustomContainer from 'src/components/CustomContainer';
 import {
   GenerateResourceLineNumber,
   SERVICE_ORDER_STATUS,
+  checkSuperAdminAccess,
   cloneResourceData,
   fieldServiceOrder,
   getObjKeys,
@@ -267,7 +268,7 @@ const FieldServiceTechnician = () => {
     if (!selectedData || row._id !== selectedData._id) {
       setSelectedData(row);
       var isAllowedToEdit = [...(row?.orignalData?.collaborator ?? []), row?.orignalData?.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.fieldTicket)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(permissions?.fieldTicket?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status));

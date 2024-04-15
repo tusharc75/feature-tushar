@@ -19,7 +19,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from '../../StateProvider/Provider';
-import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource } from '../../constants/helpers';
+import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkSuperAdminAccess } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomTable from './customTable/customTable';
 import { useLocation } from 'react-router-dom';
@@ -260,7 +260,7 @@ export default function NewCreateQuotePdfTemplate() {
               data?.owner !== undefined &&
               user.user._id !== data?.owner &&
               !data?.collaborator?.some((d) => d === user.user._id) &&
-              !user?.role?.selectedEntity?.superAdminAccess
+              !checkSuperAdminAccess(user, sidebarResource.quotePdfTemplate)
             ) {
               setHasPermissionToUpdate(false);
             }

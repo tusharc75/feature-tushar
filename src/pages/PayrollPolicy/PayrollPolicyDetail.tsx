@@ -23,7 +23,6 @@ import PaidTimeOff from './PaidTimeOff';
 import PayTypes from './PayTypes';
 
 const PayrollPolicyDetail = () => {
-  const renderedFrom = camelCase(routes?.payrollPolicy.title);
 
   const { id } = useParams();
   const history = useHistory();
@@ -37,8 +36,6 @@ const PayrollPolicyDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
@@ -65,14 +62,6 @@ const PayrollPolicyDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.payrollPolicy.path}/${id}`);
-      //   var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      var isAllowedToEdit = true;
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
-      //   setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
-      setAllowedToDelete(true);
       setPayrollPolicyData(data);
       setLoading(false);
     } catch (error) {
@@ -123,12 +112,12 @@ const PayrollPolicyDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.payrollPolicy?.isUpdate && allowedToEdit && (
+              {permissions?.payrollPolicy?.isUpdate && (
                 <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.payrollPolicy?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.payrollPolicy?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               {/* <ActivityButton
                 referenceId={planningData?._id}
                 resource={ACTIVITY_RESOURCE.payrollPolicy}

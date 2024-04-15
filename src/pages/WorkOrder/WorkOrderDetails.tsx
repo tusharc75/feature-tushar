@@ -31,6 +31,7 @@ import {
   MATERIAL_SUB_TYPE,
   WORK_ORDER_STATUS,
   WORK_ORDER_TYPE,
+  checkSuperAdminAccess,
   repairJob,
   sidebarResource,
   workOrder
@@ -159,7 +160,7 @@ const WorkOrderDetails = () => {
       .get(`${routes.workOrder.path}/${id}`)
       .then(({ data: { data } }) => {
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (user?.role?.selectedEntity?.superAdminAccess) {
+        if (checkSuperAdminAccess(user, sidebarResource.workOrder)) {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);

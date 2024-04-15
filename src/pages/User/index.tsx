@@ -22,7 +22,7 @@ import NoDataCell from '../../components/Helpers/NoDataCell';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from './../../constants/helpers';
+import { checkSuperAdminAccess, gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from './../../constants/helpers';
 import ApprovalProcessDialog from './ApprovalProcessDialog';
 import GenerateAutoPassword from './GenerateAutoPassword';
 import ManageUserDialog from './ManageUserDialog';
@@ -219,9 +219,9 @@ const User: FC = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-    const cencelToken = axios.CancelToken.source();
-    fetchUsers(cencelToken);
-    return () => cencelToken.cancel();
+      const cencelToken = axios.CancelToken.source();
+      fetchUsers(cencelToken);
+      return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [search, page, limit, filters, sorting, entityRoleRedirectDetails, showFilteredRecordsOnly]);
 
@@ -582,7 +582,7 @@ const User: FC = () => {
           Reset Password
         </MenuItem>
         <MenuItem
-          disabled={!user?.role?.selectedEntity?.superAdminAccess}
+          disabled={!checkSuperAdminAccess(user, sidebarResource.user)}
           onClick={() => {
             handleEmailVisibility(true);
           }}
@@ -590,7 +590,7 @@ const User: FC = () => {
           Hide Email
         </MenuItem>
         <MenuItem
-          disabled={!user?.role?.selectedEntity?.superAdminAccess}
+          disabled={!checkSuperAdminAccess(user, sidebarResource.user)}
           onClick={() => {
             handleEmailVisibility(false);
           }}

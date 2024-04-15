@@ -58,11 +58,7 @@ const AccountsReceivableDetail = () => {
       const response = await axiosInstance().get(`${routes.accountsReceivable.path}/${id}`);
       data = response?.data?.data;
       setAccountReceivableData(data);
-      let isAllowedToEdit = false;
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(permissions?.accountsReceivable?.isUpdate && isAllowedToEdit);
+      setAllowedToEdit(permissions?.accountsReceivable?.isUpdate);
       setAllowedToDelete(permissions?.accountsReceivable?.isDelete && data?.canDelete);
       setLoading(false);
     } catch (error) {
