@@ -2488,12 +2488,12 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'dailyInOutEvapRunhours'
   },
-  // {
-  //   title: 'IOT Data Points',
-  //   permission: 'iotChart',
-  //   key: 'standardReport',
-  //   type: 'dataPoints'
-  // }
+  {
+    title: 'IOT Data Points',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'iotDataPoints'
+  }
 ];
 
 export const RESOURCE_CALENDAR = [
