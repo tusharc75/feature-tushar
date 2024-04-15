@@ -59,7 +59,7 @@ const ListingPageHeader = ({
 
   isActionButtonVisible,
   actionButtonProps = {},
-  actionMenuItems,
+  actionMenuItems
 }: ListingPageHeaderProps) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const history = useHistory();
@@ -179,8 +179,9 @@ const ListingPageHeader = ({
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
         <div
-          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
-            }`}
+          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${
+            !isLeftSidePresent && isMobile ? '-mt-2' : ''
+          }`}
         >
           {onSearch ? (
             <HideWhenOffline>
@@ -246,7 +247,11 @@ const ListingPageHeader = ({
                             {renderButtonText({
                               text: 'Actions',
                               loading: actionButtonLoading,
-                              mobileIcon: <FaCircleChevronDown size={20} />
+                              mobileIcon: (
+                                <span className="w-[20px] h-[16px]">
+                                  <FaCircleChevronDown size={16} />
+                                </span>
+                              )
                             })}
                           </Button>
                         </span>
