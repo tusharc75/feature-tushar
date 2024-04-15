@@ -3014,6 +3014,12 @@ export const STEPS_STYLE = {
   sideBar: 'Side Bar',
 }
 
+export const DEAL_STAGE = {
+  proposalSent: 'Proposal Sent',
+  contractSigned: 'Contract Signed',
+  renewalSent: 'Renewal Sent',
+  renewalSigned: 'Renewal Signed'
+}
 
 export const cloneResourceData = (fromFields, toFields, data) => {
   const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName));
