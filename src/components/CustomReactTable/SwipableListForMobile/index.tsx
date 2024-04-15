@@ -99,12 +99,8 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
         ) : null}
 
         {/* Table  */}
-        <div
-          style={{ overflowY: 'auto', maxHeight: 'max(calc(100vh - 250px), 646px)', minHeight: '200px' }}
-          id={`scrollableDiv_${renderedFrom}`}
-          className=""
-        >
-          <div className="grid gap-2">
+        <div style={{ overflowY: 'auto', maxHeight: 'max(calc(100vh - 250px), 646px)', minHeight: '200px' }} id={`scrollableDiv_${renderedFrom}`}>
+          <div className={`grid gap-2 `}>
             {dataRows.length
               ? dataRows?.map((row, index) => {
                   if (row.depth !== 0) return null;
@@ -117,13 +113,32 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                     <div
                       className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
                         backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
-                      }`}
+                      } ${typeof onRowClick === 'function' ? 'focus:[box-shadow:inset_0px_0px_0px_1px_var(--primary-text)] focus:outline-0' : ''}`}
                       key={row.original._id}
                       style={{
                         border: '1px solid var(--common-border-color)',
                         cursor: otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE ? 'pointer' : 'auto'
                       }}
                       onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}
+                      tabIndex={typeof onRowClick === 'function' ? 0 : -1}
+                      role={typeof onRowClick === 'function' ? 'button' : 'none'}
+                      onKeyDown={(e) => {
+                        if (typeof onRowClick !== 'function') return;
+                        const target = e.target as HTMLDivElement;
+
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onRowClick(row.original);
+                        }
+                        if (e.key === 'ArrowDown') {
+                          const next = target?.nextSibling as HTMLDivElement;
+                          next?.focus();
+                        }
+                        if (e.key === 'ArrowUp') {
+                          const previous = target?.previousSibling as HTMLDivElement;
+                          previous?.focus();
+                        }
+                      }}
                     >
                       <div className={`flex gap-2 items-center`}>
                         {expander && expanderCol && flexRender(expanderCell.column.columnDef.cell, expanderCell?.getContext())}
@@ -142,7 +157,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                           <div className="flex gap-2 justify-between items-center">
                             {primaryField && (
                               <div className="line-clamp-1">
-                                <h6 className="text-[var(--dark-primary-text,#8b8b8b)] text-[10px] font-medium line-clamp-1">
+                                <h6 className="text-[var(--dark-secondary-text,#8b8b8b)] text-[10px] font-medium line-clamp-1">
                                   {primaryField.header}:
                                 </h6>
                                 <h4 className="quote-name line-clamp-1 [&_*]:[font-size:12px_!important] [&_*]:line-clamp-1 [&>*]:[font-weight:700_!important] [&_*]:[white-space:unset_!important]">
@@ -233,6 +248,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                                   cellValue={cellValue}
                                   setCellValue={setCellValue}
                                   state={state}
+                                  onRowClick={onRowClick}
                                 />
                               );
                             })}
