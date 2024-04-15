@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Grid, Tab, Tabs } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -8,11 +8,12 @@ import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Steps from 'src/components/Steps';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -23,16 +24,11 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
 import { ACTIVITY_RESOURCE, SERVICE_ORDER_STATUS, fieldServiceOrder, serviceOrderSteps, sidebarResource } from '../../constants/helpers';
+import { findOne, objectStore } from '../../constants/indexdbhelper';
 import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import FieldTicket from './FieldTicket';
 import ManageServiceOrderDialog from './ManageServiceOrder';
-import Products from './Products';
 import ServiceOrderViews from './RoadMapViews';
-import Services from './Services';
-import Technician from './Technician';
-import TechnicianDispatch from './TechnicianDispatch';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { findOne, objectStore } from '../../constants/indexdbhelper';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -139,9 +135,9 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-        data.owner.optionValue === user?.user?._id &&
-        data.canDelete &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+          data.owner.optionValue === user?.user?._id &&
+          data.canDelete &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setServiceOrderData(data);
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
@@ -162,7 +158,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const getServiceOrderFields = async () => {
@@ -384,7 +380,7 @@ const ServiceOrderDetailsPage = () => {
                 resource={sidebarResource.fieldTicket}
                 invoiceFieldName="fieldServiceOrder"
                 fetchParentData={fetchServiceOrderData}
-                />
+              />
             )}
           </ContentFullScreen>
         </TabPanel>

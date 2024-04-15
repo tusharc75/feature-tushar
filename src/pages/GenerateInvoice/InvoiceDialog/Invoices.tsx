@@ -48,7 +48,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = nu
         o.show = true;
         o.disabled = true;
         o.cell = ({ row }) => (
-          <div>
+          <div className="!flex items-center">
             <span
               className="link"
               onClick={() => {
@@ -57,7 +57,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = nu
             >
               <CustomRenderCell value={row.original?.invoiceNumber} />
             </span>
-            <Box ml={1}>
+            <Box ml={1} className="flex-shrink-0">
               <IconButton
                 size="small"
                 onClick={() => {
@@ -227,8 +227,8 @@ const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = nu
           }}
           onSuccess={() => {
             setViewInvoiceDialog({ open: false, invoice: null });
-            if(fetchParentData){
-              fetchParentData()
+            if (fetchParentData) {
+              fetchParentData();
             }
             fetchData();
           }}
