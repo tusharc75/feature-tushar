@@ -492,7 +492,7 @@ const ReportFilters = (props: FiltersProps) => {
                         type={resource === 'Iot Data Points' ? field?.multiple ? 'multiSelect' : field.type : field.type === 'dropDown' ? 'multiSelect' : field.type}
                         options={field.option}
                         setFieldValue={(name, value) => {
-                          handleSelectFilter(field, name, value);
+                          handleSelectFilter(field?.type, name, value);
                         }}
                         required={resource === 'Iot Data Points' ? field?.required : false}
                         fullWidth
