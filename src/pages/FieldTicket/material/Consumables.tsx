@@ -35,7 +35,7 @@ import { Add } from '@material-ui/icons';
 import { camelCase, isEmpty } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -650,6 +650,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
           onClose={() => setOpenConsumablesQtyDialog(false)}
           onSuccess={() => {
             fetchData();
+            fetchMaterial();
             setOpenConsumablesQtyDialog(false);
           }}
           warehouse={fieldTicketData?.warehouse}
