@@ -9,7 +9,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, transferInventory } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, checkSuperAdminAccess, sidebarResource, transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
 import Steps, { getIndex } from 'src/components/Steps';
@@ -120,7 +120,7 @@ const TransferInventoryDetailPage = () => {
           setCurrentStep(getIndex(data?.processStatus, transferInventorySteps));
         }
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (user?.role?.selectedEntity?.superAdminAccess) {
+        if (checkSuperAdminAccess(user, sidebarResource.transferInventory)) {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);

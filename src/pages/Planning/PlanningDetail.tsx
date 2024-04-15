@@ -13,7 +13,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, PLANNING_STATUS } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, PLANNING_STATUS, checkSuperAdminAccess, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -67,7 +67,7 @@ const PlanningDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.planning.path}/${id}`);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.planning)) {
         isAllowedToEdit = true;
       }
       if (data?.status === PLANNING_STATUS.converted) {
@@ -237,7 +237,7 @@ const PlanningDetail = () => {
       {showConverConfirmBox && (
         <ConfirmationDialog
           open={true}
-          message={reserveAssetWarning? 'Asset(s) are not available, should we allow to convert without asset(s) ?' : `Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
+          message={reserveAssetWarning ? 'Asset(s) are not available, should we allow to convert without asset(s) ?' : `Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
           onClose={() => {
             setShowConverConfirmBox(false);
           }}

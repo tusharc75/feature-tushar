@@ -18,7 +18,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import ProcessFlow from '../../components/ProcessFlow';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, getObjKeysWithValues, lead, processFieldName } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, checkSuperAdminAccess, getObjKeysWithValues, lead, processFieldName, sidebarResource } from '../../constants/helpers';
 import { leadPage } from '../../routes/Lead';
 import axiosInstance from './../../axios/axiosInstance';
 import AccordionOfOpportunity from './AccordionOfOpportunity';
@@ -103,7 +103,7 @@ const LeadDetailsPage = () => {
           handleMainPoints(data);
           let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
           var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-          if (user?.role?.selectedEntity?.superAdminAccess) {
+          if (checkSuperAdminAccess(user, sidebarResource.lead)) {
             isAllowedToEdit = true;
           }
           setAllowedToEdit(isAllowedToEdit);

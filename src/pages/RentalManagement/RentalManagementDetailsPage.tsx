@@ -27,6 +27,7 @@ import {
   DELIVERY_TICKET_TYPE,
   QUOTATION_STATUS,
   RENTAL_STATUS,
+  checkSuperAdminAccess,
   deliveryTicket,
   rentalManagement,
   rentalManagementSteps,
@@ -236,7 +237,7 @@ const RentalManagementDetailsPage = () => {
       }
       setLoadingDetails(false);
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.rentalManagement)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
