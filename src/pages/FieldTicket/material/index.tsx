@@ -85,21 +85,21 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {!allowedToEdit || fieldTicketData?.quotation ? (
               <p> {row.original.detail}</p>
+            ) : row.original.detail ? (
+              <p
+                onClick={() => {
+                  openMaterial(row, table.getRowModel().rows);
+                }}
+                className="link text-truncate"
+                title={row.original.detail}
+              >
+                {row.original.detail}
+              </p>
             ) : (
-              row.original.detail ?
-                <p
-                  onClick={() => {
-                    openMaterial(row, table.getRowModel().rows);
-                  }}
-                  className="link text-truncate"
-                  title={row.original.detail}
-                >
-                  {row.original.detail}
-                </p>
-                : <NoDataCell />
+              <NoDataCell />
             )}
             {row.original.type !== MATERIAL_TYPE.manualEntry && (
-              <Box ml={1}>
+              <Box ml={1} className=" flex-shrink-0">
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -110,7 +110,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                 >
                   <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>
-              </Box>)}
+              </Box>
+            )}
           </div>
         )
       },
@@ -197,12 +198,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
 
     data.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === MATERIAL_TYPE.service
-        ? (parent.serviceDetail?.serviceName || '')
-        : (parent.detail || '');
-      parent.description = `${parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceDescription || ''
-        : parent.description || ''}`;
+      parent.detail = parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName || '' : parent.detail || '';
+      parent.description = `${parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription || '' : parent.description || ''}`;
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
       parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
@@ -378,7 +375,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     setDeleting(true);
     const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id);
     const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry);
-    const updatedProducts = products?.map(ele => ({
+    const updatedProducts = products?.map((ele) => ({
       id: ele.id,
       service: ele.service
     }));

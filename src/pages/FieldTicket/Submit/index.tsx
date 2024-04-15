@@ -75,7 +75,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p title={row.original.detail}>{row.original.detail}</p>
             {['product', 'service'].includes(row.original.type) && (
-              <Box ml={1}>
+              <Box ml={1} className="flex-shrink-0">
                 <IconButton
                   size="small"
                   onClick={() => {
