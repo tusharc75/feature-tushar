@@ -44,7 +44,8 @@ import Step from '../DynamicForm/Step';
 import Current from '../IotChart/Current';
 import PerformanceAnalysis from '../IotChart/PerformanceAnalysis';
 import Alarms from '../IotChart/Alarms';
-import Status from '../IotChart/Status'
+import Status from '../IotChart/Status';
+// import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -80,6 +81,7 @@ const SerializedAssetDetailsPage = () => {
   const [resourceData, setResourceData] = useState(null);
   const [deviceTemplate, setDeviceTemplate] = useState(null);
   const [dataPoints, setDataPoints] = useState([]);
+  // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -149,10 +151,18 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
       setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}`);
-      setCustomizedRoutes([
-        routes.serializedAsset,
-        { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
-      ]);
+      if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
+        setCustomizedRoutes([
+          routes.serializedAsset,
+          { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
+        ]);
+      } else if (history.location.pathname.includes(routes.iotChartDetail.path)) {
+        setCustomizedRoutes([
+          routes.iotChart,
+          { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
+        ]);
+      }
+
       if (data.certificateExpiryDate && new Date(data.certificateExpiryDate) > new Date()) {
         data.certificateAttached = true;
       }
@@ -336,18 +346,6 @@ const SerializedAssetDetailsPage = () => {
           <Box className="control-buttons-v1">
             {assetDetails ? (
               <>
-                {permissions?.iotChart?.isRead && (
-                  <Button
-                    variant="outlined"
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={() => {
-                      history.push(`${routes.iotChart.path}/${assetDetails?._id}`);
-                    }}
-                  >
-                    View IOT Data
-                  </Button>
-                )}
                 {permissions?.sendOutboundMessage?.isCreate && (
                   <Button
                     variant="outlined"
@@ -360,6 +358,16 @@ const SerializedAssetDetailsPage = () => {
                     Send Outbound Message
                   </Button>
                 )}
+                {/* <Button
+                  onClick={() => {
+                    setOpenDataSimulationDialog(!openDataSimulationDialog);
+                  }}
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                >
+                  Data Simulation
+                </Button> */}
                 {permissions?.serializedAsset?.isUpdate && assetDetails.active && (
                   <>
                     {permissions?.repairJob?.isCreate &&
@@ -603,7 +611,6 @@ const SerializedAssetDetailsPage = () => {
           }}
         />
       )}
-
       {manageSendOutBoundMessageDialog && (
         <ManageSendOutboundMessage
           assetId={assetDetails?._id || null}
@@ -615,6 +622,7 @@ const SerializedAssetDetailsPage = () => {
           }}
         />
       )}
+      {/* {openDataSimulationDialog && <DataSimulationDialog onClose={() => setOpenDataSimulationDialog(false)} />} */}
     </Box>
   );
 };
