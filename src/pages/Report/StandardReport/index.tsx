@@ -735,6 +735,7 @@ const Report = () => {
                                 title={`Set Filters`}
                                 onClose={() => {
                                     // history.push(routes.reports.path);
+                                    if(defaultColumns?.length) return;
                                     setShowGrid(true);
                                     dispatch({ type: 'onlyFilter', filters: {} });
                                 }}
