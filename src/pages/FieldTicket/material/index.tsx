@@ -165,12 +165,12 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                 <IconButton
                   size="small"
                   aria-label="Delete"
-                  disabled={!allowedToEdit}
+                  disabled={!allowedToEdit || !row?.original?.canDelete}
                   onClick={() => {
                     setDeleteData([{ id: row.original._id, service: row?.original?.materialId, type: row?.original?.type }]);
                   }}
                 >
-                  <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                  <DeleteIcon fontSize="small" color={!allowedToEdit || !row?.original?.canDelete ? 'disabled' : 'error'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
@@ -188,7 +188,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=service`);
     const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
     let costData = costResponse?.data?.data;
-
+    
     costData = costData?.map((e: any) => {
       return { ...e, type: MATERIAL_TYPE.manualEntry };
     });
@@ -206,6 +206,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
       parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
+      parent.canDelete = parent.canDelete ?? true;
     });
     if (data?.length) {
       if (data.filter((_rows) => _rows.isValid === false).length > 0) {
@@ -514,7 +515,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         </HtmlTooltip>
         <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
           <MenuItem
-            disabled={isDeleting}
+            disabled={isDeleting || selectedRecords.some((ele)=> !ele?.canDelete)}
             onClick={() => {
               setDeleteData(
                 selectedRecords?.map((d) => {
@@ -573,7 +574,9 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         <Consumables
           allowedToEdit={allowedToEdit}
           services={dataRows}
-          fieldTicketData={fieldTicketData} />
+          fieldTicketData={fieldTicketData} 
+          fetchMaterial={fetchMaterial}
+          />
       </Box>
       {serviceDialog?.open && serviceDialog?.type === 'service' && (
         <AssignServiceDialog
