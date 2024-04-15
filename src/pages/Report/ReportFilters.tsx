@@ -99,7 +99,7 @@ const ReportFilters = (props: FiltersProps) => {
   const [isStatusPeriod, setIsStatusPeriod] = React.useState(false);
   const [errors, setErrors] = React.useState({});
   const [dataLoading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(null);
+  const [error, setError] = React.useState({});
 
   React.useEffect(() => {
     if (!customReportData) return;
@@ -485,8 +485,8 @@ const ReportFilters = (props: FiltersProps) => {
                     <div>
                       <FormTypes
                         values={formValues}
-                        errors={errors}
-                        touched={errors}
+                        errors={error}
+                        touched={error}
                         label={field.fieldLabel}
                         name={field.fieldName}
                         type={resource === 'Iot Data Points' ? field?.multiple ? 'multiSelect' : field.type : field.type === 'dropDown' ? 'multiSelect' : field.type}
