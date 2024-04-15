@@ -21,11 +21,12 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { displayCardDate, formatAmountWithCurrency, projectSales } from '../../constants/helpers';
+import { displayCardDate, formatAmountWithCurrency, projectSales, sidebarResource } from '../../constants/helpers';
 import AssignDataDialog from './AssignDataDialog';
 import CreateProjectSales from './CreateProjectSales';
 import CustomerAccounts from './CustomerAccounts';
 import TeamUsers from './TeamUsers';
+import Step from '../DynamicForm/Step';
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -58,6 +59,7 @@ const ProjectSalesDetails = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes?.projectSales]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [loadingGraphData, setLoadingGraphData] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
   const [graphData, setGraphData] = useState({
     edges: [],
     nodes: [],
@@ -146,7 +148,21 @@ const ProjectSalesDetails = () => {
   useEffect(() => {
     getSalesData();
     getProjectFields();
+    fetchPolicy();
   }, [id]);
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.projectSales}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const getProjectFields = () => {
     axiosInstance()
@@ -345,6 +361,11 @@ const ProjectSalesDetails = () => {
               <CustomTab index={3} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
                 Customer Account
               </CustomTab>
+              {resourceData && resourceData?.steps?.length && (
+              <CustomTab index={4} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
+                Associations
+              </CustomTab>
+            )}
             </CustomTabs>
             <TabPanel value={currentTabIndex} index={0}>
               <Box>
@@ -433,6 +454,15 @@ const ProjectSalesDetails = () => {
                 />
               </Box>
             </TabPanel>
+         <TabPanel value={currentTabIndex} index={4}>
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={sidebarResource.projectSales}
+            data={projectSalesData}
+            allowedToEdit={permissions?.projectSales?.isUpdate}
+          />
+        </TabPanel>
           </>
         )}
         <TabPanel value={tabValue} index={1}>
