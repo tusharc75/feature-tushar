@@ -82,7 +82,7 @@ const RenderSubCard = ({
           <div className="flex gap-2 justify-between items-center">
             {primaryField && (
               <div className="line-clamp-1">
-                <h6 className="text-[var(--dark-primary-text,#8b8b8b)] text-[10px] font-medium line-clamp-1">{primaryField.header}:</h6>
+                <h6 className="text-[var(--dark-secondary-text,#8b8b8b)] text-[10px] font-medium line-clamp-1">{primaryField.header}:</h6>
                 <h4 className="quote-name line-clamp-1 [&_*]:[font-size:12px_!important] [&_*]:line-clamp-1  [&>*]:[font-weight:700_!important] [&_*]:[white-space:unset_!important]">
                   {primaryField.cell({ row })}
                 </h4>
