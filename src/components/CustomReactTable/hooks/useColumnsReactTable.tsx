@@ -14,6 +14,7 @@ import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { find, isArray, isObject, result } from 'lodash';
 import InfoIcon from '@material-ui/icons/Info';
 import { getGridMetaDataFromLocalStorage } from '../utils';
+import DataListCell from '../Cells/DataListCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -308,6 +309,18 @@ export default function useColumns() {
             ) : (
               <p className="text-truncate">{row?.original?.[fieldName] ? <p>{row?.original?.[fieldName]}</p> : <NoDataCell />}</p>
             )
+        });
+      } else if (field?.dataList) {
+        column.push({
+          ...commonFieldData,
+          accessorFn: (original) => {
+            return isArray(original?.[field?.fieldName])
+              ? original?.[field?.fieldName][0]?.optionLabel
+              : isObject(original?.[field?.fieldName])
+                ? original?.[field?.fieldName]?.optionLabel
+                : original?.[field?.fieldName];
+          },
+          cell: ({ row }) => <DataListCell field={field} original={row?.original} />
         });
       } else if (field?.lookup) {
         column.push({

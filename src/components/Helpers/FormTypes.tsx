@@ -64,6 +64,7 @@ import RichTextEditor from './FormTypes/RichTextEditor';
 import Dropdown from './FormTypes/Dropdown';
 import Signature from './FormTypes/Signature';
 import { Image } from '@material-ui/icons';
+import DataList from './FormTypes/DataList';
 
 type MultiFileType = {
   fileName: string;
@@ -1116,6 +1117,24 @@ const FormTypes = (props) => {
           }}
         />
       </InfoLabel>
+    ) : (type === 'dropDown' || type === 'multiSelect') && fieldData?.dataList ? (
+      <>
+        <DataList
+          InfoLabel={InfoLabel}
+          fieldData={fieldData}
+          rest={rest}
+          values={values}
+          type={type}
+          label={label}
+          name={name}
+          getLabel={getLabel}
+          touched={touched}
+          errors={errors}
+          required={required}
+          setFieldValue={setFieldValue}
+          fields={allFields}
+        />
+      </>
     ) : (type === 'dropDown' || type === 'multiSelect') && (lookup || fieldData?.lookup) ? (
       <>
         <Dropdown
