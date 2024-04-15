@@ -167,7 +167,7 @@ const SerializedAssetDetailsPage = () => {
         data.certificateAttached = true;
       }
       setAssetDetails({ ...data, currentOwner: data?.currentOwner?.optionLabel });
-      setDeviceTemplate(data?.deviceTemplates?._id);
+      setDeviceTemplate(data?.product?.deviceTemplate);
       if (data.status === ASSET_STATUS.scrap) {
         setCustomField({
           fieldData: {
@@ -272,7 +272,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -498,7 +498,7 @@ const SerializedAssetDetailsPage = () => {
             </CustomTab>
           )}
           <CustomTab index={6} value={6}>
-            Asset History
+            History
           </CustomTab>
           {user?.user?.brandPolicy?.serializedAssetCertification && (
             <CustomTab index={7} value={7}>
