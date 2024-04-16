@@ -211,6 +211,12 @@ const ReportFilters = (props: FiltersProps) => {
       setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
     }
     setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    if (error[name] && value) {
+      setError((prev) => {
+        delete prev[name];
+        return prev;
+      });
+    }
   };
 
   const handleRemoveOption = () => {
@@ -366,6 +372,13 @@ const ReportFilters = (props: FiltersProps) => {
       default:
         setStatusTimeFrame('custom');
         break;
+    }
+    if (timeFrameTemp !== 'custom') {
+      setError((prev) => {
+        delete prev[`from_${field.fieldName}`];
+        delete prev[`to_${field.fieldName}`];
+        return prev;
+      });
     }
   };
 
@@ -540,14 +553,20 @@ const ReportFilters = (props: FiltersProps) => {
                         value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
                         onChange={(date: any) => {
                           setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
+                          if (error[`from_${field.fieldName}`]) {
+                            setError((prev) => {
+                              delete prev[`from_${field.fieldName}`];
+                              return prev;
+                            });
+                          }
                         }}
                         format={dateFormat}
                         InputLabelProps={{
                           shrink: true
                         }}
                         required={resource === 'Iot Data Points' ? field?.required : false}
-                        error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
-                        helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
+                        error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
+                        helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
                       />
                     </div>
                   )}
@@ -565,6 +584,12 @@ const ReportFilters = (props: FiltersProps) => {
                         value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
                         onChange={(date: any) => {
                           setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
+                          if (error[`to_${field.fieldName}`]) {
+                            setError((prev) => {
+                              delete prev[`to_${field.fieldName}`];
+                              return prev;
+                            });
+                          }
                         }}
                         format={dateFormat}
                         InputLabelProps={{
@@ -572,8 +597,8 @@ const ReportFilters = (props: FiltersProps) => {
                         }}
                         minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
                         required={resource === 'Iot Data Points' ? field?.required : false}
-                        error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
-                        helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
+                        error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
+                        helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
                       />
                     </div>
                   )}
