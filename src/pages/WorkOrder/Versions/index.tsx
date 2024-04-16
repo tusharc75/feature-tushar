@@ -359,7 +359,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
               ))}
-            {tabValue === 1 && <ServiceStepsData stepsData={stepData} servicesData={servicesData} />}
+            {tabValue === 1 && <ServiceStepsData stepsData={stepData} servicesData={servicesData?.filter((s) => s.type === MATERIAL_TYPE.service)} />}
             {tabValue === 2 && (
               <Diagram
                 resource={ACTIVITY_RESOURCE.workOrder}
