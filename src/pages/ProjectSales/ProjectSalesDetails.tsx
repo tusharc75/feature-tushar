@@ -357,13 +357,13 @@ const ProjectSalesDetails = () => {
                 Project Team
               </CustomTab>
               <CustomTab index={3} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
-                Customer Account
+                {routes.customerAccount.title}
               </CustomTab>
               {resourceData && resourceData?.steps?.length && (
-              <CustomTab index={4} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
-                Associations
-              </CustomTab>
-            )}
+                <CustomTab index={4} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
+                  Associations
+                </CustomTab>
+              )}
             </CustomTabs>
             <TabPanel value={currentTabIndex} index={0}>
               <Box>
@@ -452,15 +452,15 @@ const ProjectSalesDetails = () => {
                 />
               </Box>
             </TabPanel>
-         <TabPanel value={currentTabIndex} index={4}>
-          <Step
-            resourceData={resourceData}
-            resourceId={id}
-            resource={sidebarResource.projectSales}
-            data={projectSalesData}
-            allowedToEdit={permissions?.projectSales?.isUpdate}
-          />
-        </TabPanel>
+            <TabPanel value={currentTabIndex} index={4}>
+              <Step
+                resourceData={resourceData}
+                resourceId={id}
+                resource={sidebarResource.projectSales}
+                data={projectSalesData}
+                allowedToEdit={permissions?.projectSales?.isUpdate}
+              />
+            </TabPanel>
           </>
         )}
         <TabPanel value={tabValue} index={1}>
