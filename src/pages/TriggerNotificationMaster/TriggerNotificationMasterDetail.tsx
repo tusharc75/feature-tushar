@@ -30,7 +30,6 @@ const TriggerNotificationMasterDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
@@ -57,11 +56,6 @@ const TriggerNotificationMasterDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.triggerNotificationMaster.path}/${id}`);
-      var isAllowedToEdit = true;
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
       setTriggerNotificationMasterData(data);
       setLoading(false);
     } catch (error) {
@@ -112,7 +106,7 @@ const TriggerNotificationMasterDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.triggerNotificationMaster?.isUpdate && allowedToEdit && (
+              {permissions?.triggerNotificationMaster?.isUpdate && (
                 <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>

@@ -9,7 +9,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, TRANSFER_ASSET_STATUS, transferAsset, transferAssetSteps } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, TRANSFER_ASSET_STATUS, checkSuperAdminAccess, sidebarResource, transferAsset, transferAssetSteps } from 'src/constants/helpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import queryString from 'query-string';
 import AssetsGrid from './AssetGrid';
@@ -154,7 +154,7 @@ const TransferAssetDetailPage = () => {
         );
 
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (user?.role?.selectedEntity?.superAdminAccess) {
+        if (checkSuperAdminAccess(user, sidebarResource.transferAsset)) {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);

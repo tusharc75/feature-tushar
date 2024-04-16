@@ -21,7 +21,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, PURCHASE_ORDER_STATUS, purchaseOrder, purchaseOrderSteps } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, PURCHASE_ORDER_STATUS, checkSuperAdminAccess, purchaseOrder, purchaseOrderSteps, sidebarResource } from '../../constants/helpers';
 import Invoice from './Invoice';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import Product from './Product';
@@ -95,7 +95,7 @@ const PurchaseOrderDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.purchaseOrder)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);

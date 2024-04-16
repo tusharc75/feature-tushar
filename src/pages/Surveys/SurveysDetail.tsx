@@ -17,6 +17,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import FieldDialog from './FieldDialog';
 import ManageSurveys from './ManageSurveys';
 import SurveysData from './SurveysData';
+import { checkSuperAdminAccess, sidebarResource } from 'src/constants/helpers';
 
 const SurveysDetail = () => {
   const { id } = useParams();
@@ -63,7 +64,7 @@ const SurveysDetail = () => {
         data: { data }
       } = await axiosInstance().get(`/surveys/${id}`);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.surveys)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);

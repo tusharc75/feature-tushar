@@ -18,7 +18,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, QUOTATION_STATUS, QUOTATION_TYPE, RENTAL_STATUS, quotation, quotationProcessSteps } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, QUOTATION_STATUS, QUOTATION_TYPE, RENTAL_STATUS, checkSuperAdminAccess, quotation, quotationProcessSteps, sidebarResource } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import Productpackage from './Productpackage';
 import { CircularProgress } from '@material-ui/core';
@@ -74,7 +74,7 @@ const QuotationDetails = () => {
   const [currVersionId, setCurrVersionId] = useState(null);
   const [sentToCustomer, setSentToCustomer] = useState(false);
 
-  const [convertConfirmBox, setConvertConfirmBox] = useState({open : false, warning : null});
+  const [convertConfirmBox, setConvertConfirmBox] = useState({ open: false, warning: null });
   const [renewal, setRenewal] = useState(false);
   const [releaseConfirm, setReleaseConfirm] = useState(false);
 
@@ -186,7 +186,7 @@ const QuotationDetails = () => {
             quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
           ) {
             var isAllowedToEdit = [...(quotationData.collaborator ?? []), quotationData.owner].some((d) => d?.optionValue === user?.user?._id);
-            if (user?.role?.selectedEntity?.superAdminAccess) {
+            if (checkSuperAdminAccess(user, sidebarResource.quotation)) {
               isAllowedToEdit = true;
             }
             setAllowedToEdit(isAllowedToEdit);
@@ -231,7 +231,7 @@ const QuotationDetails = () => {
       data = response?.data?.data;
 
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.quotation)) {
         isAllowedToEdit = true;
       }
       if ([QUOTATION_STATUS.converted].includes(data.status)) {
@@ -338,7 +338,7 @@ const QuotationDetails = () => {
       .post(`${quotation.api}/convert`, { quotationId: quotationData._id, versionId: currVersionId })
       .then(({ data: { data } }) => {
         fetchQuotationData();
-        setConvertConfirmBox({open : false, warning : null});
+        setConvertConfirmBox({ open: false, warning: null });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -502,7 +502,7 @@ const QuotationDetails = () => {
                   {allowedToEdit && canConvert && (
                     <MenuItem
                       onClick={() => {
-                        setConvertConfirmBox({open : true, warning : reserveAssetWarning ? 'Asset(s) are not available, should we allow to convert without asset(s) ?' : null});
+                        setConvertConfirmBox({ open: true, warning: reserveAssetWarning ? 'Asset(s) are not available, should we allow to convert without asset(s) ?' : null });
                         closeActionsAction();
                       }}
                     >
@@ -808,7 +808,7 @@ const QuotationDetails = () => {
           open={convertConfirmBox.open}
           message={convertConfirmBox?.warning ? convertConfirmBox?.warning : `Are you sure you want to convert quotation : ${quotationData?.quotationNumber} ?`}
           onClose={() => {
-            setConvertConfirmBox({open : false, warning : null});
+            setConvertConfirmBox({ open: false, warning: null });
           }}
           onOk={handleConvert}
         />

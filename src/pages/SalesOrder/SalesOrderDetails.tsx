@@ -12,7 +12,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import Steps, { getIndex } from 'src/components/Steps';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -23,7 +23,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, INVOICE_STATUS, SALES_ORDER_STATUS, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, INVOICE_STATUS, SALES_ORDER_STATUS, checkSuperAdminAccess, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
 import Invoice from './Invoice';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import Material from './Material';
@@ -129,7 +129,7 @@ const SalesOrderDetails = () => {
         setCurrentStep(getIndex(data?.processStatus, steps));
       }
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.salesOrder)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
@@ -198,23 +198,22 @@ const SalesOrderDetails = () => {
                       Close
                     </ButtonWithPulse>
                   )}
-                {permissions?.salesOrder?.isUpdate &&
-                  [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        if (salesOrderData?.invoice) {
-                          updateJobStatus(SALES_ORDER_STATUS.invoiced);
-                        } else {
-                          updateJobStatus(SALES_ORDER_STATUS.readyToInvoice);
-                        }
-                      }}
-                    >
-                      Re-Open
-                    </Button>
-                  )}
+                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
+                  <ThemeButton
+                    variant="contained"
+                    iconForMobile={false}
+                    size="small"
+                    onClick={() => {
+                      if (salesOrderData?.invoice) {
+                        updateJobStatus(SALES_ORDER_STATUS.invoiced);
+                      } else {
+                        updateJobStatus(SALES_ORDER_STATUS.readyToInvoice);
+                      }
+                    }}
+                  >
+                    Re-Open
+                  </ThemeButton>
+                )}
                 {permissions?.salesOrder?.isUpdate && allowedToEdit && ![SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <Button
                     className={'btn-outline-v1'}

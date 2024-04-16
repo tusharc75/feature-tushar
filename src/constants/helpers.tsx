@@ -986,23 +986,23 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
   for (const key of arr) {
     if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;
-    } else if((key.type === 'multiSelect' || key.type === 'dropDown') && key?.dataList){
-      if(key.type === 'multiSelect') {
+    } else if ((key.type === 'multiSelect' || key.type === 'dropDown') && key?.dataList) {
+      if (key.type === 'multiSelect') {
         const values =
-        dataObj[key.fieldName] && dataObj[key.fieldName].length
-          ? typeof dataObj[key.fieldName] === 'string'
-            ? [dataObj[key.fieldName]]
-            : dataObj[key.fieldName].map((val: any) => filterValues(val))
-          : [];
+          dataObj[key.fieldName] && dataObj[key.fieldName].length
+            ? typeof dataObj[key.fieldName] === 'string'
+              ? [dataObj[key.fieldName]]
+              : dataObj[key.fieldName].map((val: any) => filterValues(val))
+            : [];
 
         obj[key.fieldName] = values;
 
         obj[`${key.fieldName}_dataList`] = dataObj[key.fieldName] ? dataObj[key.fieldName] : [];
       } else {
         const value =
-        dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) && dataObj[key.fieldName]?.length
-          ? dataObj[key.fieldName][0]
-          : filterValues(dataObj[key.fieldName]);
+          dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) && dataObj[key.fieldName]?.length
+            ? dataObj[key.fieldName][0]
+            : filterValues(dataObj[key.fieldName]);
 
         obj[key.fieldName] = value ? value : '';
 
@@ -3014,6 +3014,12 @@ export const STEPS_STYLE = {
   sideBar: 'Side Bar',
 }
 
+export const DEAL_STAGE = {
+  proposalSent: 'Proposal Sent',
+  contractSigned: 'Contract Signed',
+  renewalSent: 'Renewal Sent',
+  renewalSigned: 'Renewal Signed'
+}
 
 export const cloneResourceData = (fromFields, toFields, data) => {
   const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName));
@@ -3060,4 +3066,8 @@ export const getDefaultMyRecordType = (user, resource) => {
   else {
     return 1;
   }
+}
+
+export const checkSuperAdminAccess = (user, resource) => {
+  return user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource) ? true : false
 }

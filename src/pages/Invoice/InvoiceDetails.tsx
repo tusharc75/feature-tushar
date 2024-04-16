@@ -25,7 +25,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, INVOICE_STATUS, invoice, invoiceProcessSteps, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, INVOICE_STATUS, checkSuperAdminAccess, invoice, invoiceProcessSteps, sidebarResource } from '../../constants/helpers';
 import CreditMemo from './CreditMemo';
 import Invoice from './Invoice';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
@@ -93,7 +93,7 @@ const InvoiceDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -128,7 +128,7 @@ const InvoiceDetails = () => {
       setHeadingLabel(data.invoiceNumber);
       setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.invoice)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);

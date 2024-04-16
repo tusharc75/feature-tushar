@@ -181,7 +181,7 @@ function IotChart() {
                     ?.assets?.map((asset, i) => {
                       return (
                         <div key={i} className={cardStyle.singleCard}>
-                          <Link to={`${routes.iotChart.path}/${asset?.optionValue}`}>
+                          <Link to={`${routes.iotChartDetail.path}/${asset?.optionValue}`}>
                             <DashBoardCardShell
                               darkThemeBackgroundColor="var(--dark-secondary)"
                               background={'#fff'}
