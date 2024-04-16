@@ -493,7 +493,6 @@ export const RESOURCE_LABEL = {
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
-  iotReport: 'IoT Report',
   sendOutboundMessage: 'Send Outbound Message',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
