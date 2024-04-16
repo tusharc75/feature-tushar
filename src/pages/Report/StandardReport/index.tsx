@@ -147,7 +147,9 @@ const Report = () => {
                 columns = [...newColumns]
             }
             setResourceColumns(filterFields);
-            setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+            if (type === 'iot-data-points') {
+                setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+            }
             setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
             setColumns(columns);
             setLoadingColumns(false);
@@ -387,7 +389,7 @@ const Report = () => {
         )
     };
 
-    
+
     const fetchResourceData = () => {
         setShowGrid(true);
         let filterQuery = getQueryString();
@@ -494,7 +496,7 @@ const Report = () => {
         if (!isExport) {
             filterQuery = `page=${page}&limit=${limit}&`;
         }
-        if (resourceStartCase === 'Iot Data Points') {
+        if (type === 'iot-data-points') {
             filterQuery += `column=true&timezone=${Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone}&`;
         }
         if (sorting.length > 0) {
@@ -725,19 +727,26 @@ const Report = () => {
                             fullWidth
                             onClose={(e, reason) => {
                                 if (reason !== 'backdropClick') {
-                                    // history.push(routes.reports.path);
-                                    setShowGrid(true);
-                                    dispatch({ type: 'onlyFilter', filters: {} });
+                                    if (defaultColumns?.length) {
+                                        history.push(routes.reports.path);
+                                    }
+                                    else {
+                                        setShowGrid(true);
+                                        dispatch({ type: 'onlyFilter', filters: {} });
+                                    }
                                 }
                             }}
                         >
                             <CustomDialogHeader
                                 title={`Set Filters`}
                                 onClose={() => {
-                                    // history.push(routes.reports.path);
-                                    if(defaultColumns?.length) return;
-                                    setShowGrid(true);
-                                    dispatch({ type: 'onlyFilter', filters: {} });
+                                    if (defaultColumns?.length) {
+                                        history.push(routes.reports.path);
+                                    }
+                                    else {
+                                        setShowGrid(true);
+                                        dispatch({ type: 'onlyFilter', filters: {} });
+                                    }
                                 }}
                             />
                             <div className="p-4 min-h-[600px]">
