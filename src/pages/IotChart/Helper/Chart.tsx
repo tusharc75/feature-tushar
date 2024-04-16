@@ -233,7 +233,7 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
   };
 
   useEffect(() => {
-    if (deviceTemplate && chartData) {
+    if (deviceTemplate) {
       const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
       const deepFilter = [
         { field: 'active', term: 'yes' },
@@ -256,7 +256,7 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
           setAlertOptions(data?.map((d) => d?.alertNumber));
         });
     }
-  }, [assetId, deviceTemplate, chartData]);
+  }, [assetId, deviceTemplate]);
 
   const fetchAlert = () => {
     if (alarm) {
@@ -360,7 +360,12 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
             showHighLow={showHighLow}
             setShowHighLow={setShowHighLow}
           />
-          <ReactApexChart key={currentChartTheme} options={options} series={chartData} type={dataPoints[0]?.chartType?.toLowerCase() || 'line'} height={500} />
+          <ReactApexChart
+            key={currentChartTheme}
+            options={options}
+            series={chartData}
+            type={dataPoints?.length === 1 ? dataPoints[0]?.chartType?.toLowerCase() || 'line' : 'line'}
+            height={500} />
         </>
       ) : (
         <Box p={2} height={500}>

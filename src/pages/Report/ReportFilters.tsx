@@ -19,9 +19,8 @@ import { Autocomplete } from '@material-ui/lab';
 import { Delete, List } from '@material-ui/icons';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { startCase } from 'lodash';
-
 import VirtualizedList from '../../components/VirtualizedList';
-import { getObjKeys, dateFormat } from '../../constants/helpers';
+import { dateFormat } from '../../constants/helpers';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmDialog from '../../components/Helpers/ConfirmationDialog';
 import axiosInstance from '../../axios/axiosInstance';
@@ -702,7 +701,7 @@ const ReportFilters = (props: FiltersProps) => {
             size="small"
             disableElevation
             fullWidth
-            disabled={loading}
+            disabled={loading || loadingColumns}
           >
             Show
           </Button>
