@@ -57,6 +57,7 @@ interface FiltersProps {
   selectedData?: any;
   customReportData?: any;
   isCustomReport?: boolean;
+  defaultResource?: any[];
 }
 
 const ReportFilters = (props: FiltersProps) => {
@@ -89,13 +90,16 @@ const ReportFilters = (props: FiltersProps) => {
     setStatusPeriodDate,
     selectedData,
     customReportData,
-    isCustomReport
+    isCustomReport,
+    defaultResource = []
   } = props;
+
   const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null, name: '' });
   const [isDeleting, setDeleting] = React.useState(false);
   const [isStatusPeriod, setIsStatusPeriod] = React.useState(false);
   const [errors, setErrors] = React.useState({});
   const [dataLoading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState({});
 
   React.useEffect(() => {
     if (!customReportData) return;
@@ -170,6 +174,14 @@ const ReportFilters = (props: FiltersProps) => {
     setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
   }, [resourceColumns]);
 
+  const setDefaultResource = (val = []) => {
+    setSelectedResources([...filterOptions?.filter((f) => defaultResource.includes(f?.fieldName)), ...val?.filter((f) => !defaultResource.includes(f?.fieldName))]);
+  };
+
+  useEffect(() => {
+    setDefaultResource();
+  }, [filterOptions]);
+
   const handleSelectFilter = (type, name, value) => {
     let fieldProps: any = {};
 
@@ -179,7 +191,7 @@ const ReportFilters = (props: FiltersProps) => {
     } else if (type === 'checkBox') {
       fieldProps.type = 'checkBox';
       fieldProps.lookup = false;
-    } else if(type === 'singleLine'){
+    } else if (type === 'singleLine') {
       fieldProps.type = 'singleLine';
       fieldProps.lookup = false;
     } else {
@@ -358,6 +370,26 @@ const ReportFilters = (props: FiltersProps) => {
     }
   };
 
+  const validate = (formValues: any) => {
+    const error: any = {};
+    let resources = defaultResource;
+    if (resource === 'Iot Data Points') {
+      if (!betweenDate?.from_date) {
+        error['from_date'] = 'From date is required';
+      }
+      if (!betweenDate?.to_date) {
+        error['to_date'] = 'To date is required';
+      }
+      resources = defaultResource.filter((field: any) => field !== 'date');
+    }
+    resources?.forEach((field: any) => {
+      if (!formValues[field]) {
+        error[field] = `${startCase(field)} is required`;
+      }
+    })
+    setError(error);
+    return error;
+  };
 
   return (
     <Container maxWidth="sm">
@@ -379,7 +411,7 @@ const ReportFilters = (props: FiltersProps) => {
             if (val.filter((f) => f.fieldName === 'all').length > 0) {
               setSelectedResources(filterOptions);
             } else {
-              setSelectedResources(val);
+              setDefaultResource(val);
             }
             if (reason === 'remove-option' && selectedData) {
               const selectedKeys = val.map((f) => f?.fieldName);
@@ -453,16 +485,16 @@ const ReportFilters = (props: FiltersProps) => {
                     <div>
                       <FormTypes
                         values={formValues}
-                        errors={{}}
-                        touched={{}}
+                        errors={error}
+                        touched={error}
                         label={field.fieldLabel}
                         name={field.fieldName}
-                        type={field.type === 'dropDown' ? 'multiSelect' : field.type}
+                        type={resource === 'Iot Data Points' ? field?.multiple ? 'multiSelect' : field.type : field.type === 'dropDown' ? 'multiSelect' : field.type}
                         options={field.option}
                         setFieldValue={(name, value) => {
-                          handleSelectFilter(field.type, name, value);
+                          handleSelectFilter(field?.type, name, value);
                         }}
-                        required={false}
+                        required={resource === 'Iot Data Points' ? field?.required : false}
                         fullWidth
                         size="small"
                         fromFilter={true}
@@ -514,6 +546,9 @@ const ReportFilters = (props: FiltersProps) => {
                         InputLabelProps={{
                           shrink: true
                         }}
+                        required={resource === 'Iot Data Points' ? field?.required : false}
+                        error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
+                        helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
                       />
                     </div>
                   )}
@@ -537,6 +572,9 @@ const ReportFilters = (props: FiltersProps) => {
                           shrink: true
                         }}
                         minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
+                        required={resource === 'Iot Data Points' ? field?.required : false}
+                        error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
+                        helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
                       />
                     </div>
                   )}
@@ -653,7 +691,11 @@ const ReportFilters = (props: FiltersProps) => {
             </Box>
           )}
           <Button
-            onClick={fetchReportData}
+            onClick={() => {
+              const error = validate(formValues);
+              if (Object.keys(error).length > 0) return;
+              fetchReportData();
+            }}
             startIcon={loading ? <CircularProgress color="inherit" size={18} /> : <List />}
             color="primary"
             variant="contained"

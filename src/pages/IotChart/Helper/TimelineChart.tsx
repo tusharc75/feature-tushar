@@ -50,22 +50,31 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
   }, [assetId, dateFilters, dataPoints]);
 
   const fetchData = () => {
+    let filterById = [
+      {
+        field: 'dataPoints',
+        term: { $in: dataPoints?.filter((e) => e.type === 'Digital')?.map((d: any) => d._id) }
+      },
+      {
+        field: 'asset',
+        term: assetId
+      }
+    ];
+    let deepFilter = [
+      { field: 'from_date', term: new Date(dateFilters.from).toISOString() },
+      { field: 'to_date', term: new Date(dateFilters.to).toISOString() },
+      { field: 'interval', term: dateFilters.intervals }
+    ];
     axiosInstance()
       .get(`/report/iot-data-points`, {
         params: {
-          asset: assetId,
-          from_date: new Date(dateFilters.from).toISOString(),
-          to_date: new Date(dateFilters.to).toISOString(),
-          interval: dateFilters.intervals,
-          dataPoints: dataPoints
-            ?.filter((e) => e.type === 'Digital')
-            ?.map((e) => e._id)
-            ?.toString(),
+          filterById: JSON.stringify(filterById),
+          deepFilter: JSON.stringify(deepFilter),
           timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone
         }
       })
       .then(({ data: { data } }) => {
-        setChartData(data.data);
+        setChartData(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

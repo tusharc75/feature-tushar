@@ -18,6 +18,7 @@ import {
     downloadExcel,
     isObjectEmpty,
     sidebarResource,
+    dateFormat,
 } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -68,6 +69,7 @@ const Report = () => {
     const [reportList, setReportList] = React.useState([]);
     const [selectedReportView, setSelectedReportView] = React.useState(null);
     const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
+    const [defaultColumns, setDefaultColumns] = React.useState([]);
 
     // Grid Configs
     const { generateColumns } = useColumns();
@@ -145,6 +147,8 @@ const Report = () => {
                 columns = [...newColumns]
             }
             setResourceColumns(filterFields);
+            setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+            setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
             setColumns(columns);
             setLoadingColumns(false);
         } catch (error) {
@@ -383,7 +387,7 @@ const Report = () => {
         )
     };
 
-
+    
     const fetchResourceData = () => {
         setShowGrid(true);
         let filterQuery = getQueryString();
@@ -434,6 +438,32 @@ const Report = () => {
                     setColumns(columns);
                     setLoadingColumns(false);
                 }
+                if (resourceCamelCase === 'iotDataPoints') {
+                    setLoadingColumns(true);
+                    columns = columns?.map((e) => {
+                        return {
+                            accessor: e.fieldName,
+                            Header: e.fieldLabel,
+                            disableSortBy: true,
+                            disableFilters: true,
+                            Cell: ({ row }) => {
+                                return (
+                                    <div>
+                                        {row?.original?.[e?.fieldName] ? (
+                                            <h5 className="text-truncate" title={row?.original?.[e?.fieldName]}>
+                                                {e.type === 'date' ? moment(row?.original?.[e?.fieldName])?.format(dateFormat) : row?.original?.[e?.fieldName]}
+                                            </h5>
+                                        ) : (
+                                            <NoDataCell />
+                                        )}
+                                    </div>
+                                );
+                            }
+                        }
+                    });
+                    setColumns(columns);
+                    setLoadingColumns(false);
+                }
                 data = data.map((u: any) => {
                     let finalObject: any = prepareDataForGrid(u);
                     return finalObject;
@@ -464,6 +494,9 @@ const Report = () => {
         if (!isExport) {
             filterQuery = `page=${page}&limit=${limit}&`;
         }
+        if (resourceStartCase === 'Iot Data Points') {
+            filterQuery += `column=true&timezone=${Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone}&`;
+        }
         if (sorting.length > 0) {
             filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
         }
@@ -480,6 +513,12 @@ const Report = () => {
                     if (key === 'warehouse') {
                         if (!isExport) {
                             setShowPricefilter((prevState) => ({ ...prevState, warehouse: options.map((d: any) => d.optionValue) }));
+                        }
+                    }
+                    if (resourceCamelCase === 'iotDataPoints' && !Array.isArray(selectedData[key].value)) {
+                        return {
+                            field: key,
+                            term: selectedData[key].value
                         }
                     }
                     const options = selectedData[key].value;
@@ -501,6 +540,11 @@ const Report = () => {
                         deepFilter.push({
                             field: key,
                             term: selectedData[key].value
+                        });
+                    } else if (resourceCamelCase === 'iotDataPoints' && !Array.isArray(selectedData[key].value)) {
+                        deepFilter.push({
+                            field: key,
+                            term: selectedData[key]?.value
                         });
                     } else {
                         deepFilter.push({
@@ -691,6 +735,7 @@ const Report = () => {
                                 title={`Set Filters`}
                                 onClose={() => {
                                     // history.push(routes.reports.path);
+                                    if(defaultColumns?.length) return;
                                     setShowGrid(true);
                                     dispatch({ type: 'onlyFilter', filters: {} });
                                 }}
@@ -701,7 +746,7 @@ const Report = () => {
                                         resourceColumns={resourceColumns}
                                         betweenDate={betweenDate}
                                         setBetweenDate={setBetweenDate}
-                                        resource={'Purchase Order Type'}
+                                        resource={resourceStartCase}
                                         setSelectedData={setSelectedData}
                                         loading={loading}
                                         fetchReportData={fetchResourceData}
@@ -725,6 +770,7 @@ const Report = () => {
                                         statusTimeFrame={statusTimeFrame}
                                         setStatusTimeFrame={setStatusTimeFrame}
                                         selectedData={selectedData}
+                                        defaultResource={defaultColumns}
                                     />
                                 </DialogContent>
                             </div>
