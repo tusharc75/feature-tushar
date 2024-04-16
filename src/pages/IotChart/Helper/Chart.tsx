@@ -21,7 +21,7 @@ const downloadIconHTML = `<div title="Download">
 <div/>
 `;
 
-const toggleIconSvg =  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+const toggleIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
 <line x1="6" y1="14" x2="6" y2="10" stroke="currentColor" stroke-width="2"/>
 <line x1="9" y1="14" x2="9" y2="6" stroke="currentColor" stroke-width="2"/>
 <line x1="12" y1="14" x2="12" y2="8" stroke="currentColor" stroke-width="2"/>
@@ -165,13 +165,25 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
 
   const fetchData = () => {
     let api = `/report/iot-data-points`;
+    let filterById = [
+      {
+        field: 'dataPoints',
+        term: { $in: dataPoints.map((d: any) => d._id) }
+      },
+      {
+        field: 'asset',
+        term: assetId
+      }
+    ];
+    let deepFilter = [
+      { field: 'from_date', term: new Date(dateFilters.from).toISOString() },
+      { field: 'to_date', term: new Date(dateFilters.to).toISOString() },
+      { field: 'interval', term: dateFilters.intervals }
+    ];
     let param = {
-      asset: assetId,
-      from_date: new Date(dateFilters.from).toISOString(),
-      to_date: new Date(dateFilters.to).toISOString(),
-      interval: dateFilters.intervals,
       timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone,
-      dataPoints: dataPoints?.map((e) => e._id)?.toString()
+      filterById: JSON.stringify(filterById),
+      deepFilter: JSON.stringify(deepFilter),
     };
     axiosInstance()
       .get(api, { params: param })
@@ -181,7 +193,7 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
         dataPoints?.forEach((dataPoint) => {
           newData.push({
             name: dataPoint?.fieldLabel,
-            data: data?.data?.map((e) => [new Date(e.time).getTime(), e[dataPoint?.fieldName]])
+            data: data?.map((e) => [new Date(e.time).getTime(), e[dataPoint?.fieldName]])
           });
           if (dataPoint?.highValue) {
             yaxis.push({

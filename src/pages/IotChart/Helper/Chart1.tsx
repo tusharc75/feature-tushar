@@ -19,14 +19,26 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
     }, [assetId, dataPoints, dateFilters]);
 
     const fetchData = () => {
+        let filterById = [
+            {
+                field: 'dataPoints',
+                term: { $in: dataPoints.map((d: any) => d._id) }
+            },
+            {
+                field: 'asset',
+                term: assetId
+            }
+        ];
+        let deepFilter = [
+            { field: 'from_date', term: new Date(dateFilters.from).toISOString() },
+            { field: 'to_date', term: new Date(dateFilters.to).toISOString() },
+            { field: 'interval', term: dateFilters.intervals }
+        ];
         axiosInstance()
             .get(`/report/iot-data-points`, {
                 params: {
-                    asset: assetId,
-                    from_date: new Date(dateFilters.from).toISOString(),
-                    to_date: new Date(dateFilters.to).toISOString(),
-                    interval: dateFilters.intervals,
-                    dataPoints: dataPoints?.map((e) => e._id)?.toString(),
+                    filterById: JSON.stringify(filterById),
+                    deepFilter: JSON.stringify(deepFilter),
                     timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone
                 }
             })
@@ -36,7 +48,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
                     newData.push({
                         name: `${obj?.fieldLabel}${obj?.unit ? ` (${obj?.unit})` : ``}`,
                         type: 'line',
-                        data: data?.data?.map((e) => { return [new Date(e.time).getTime(), e[obj?.fieldName]] }),
+                        data: data?.map((e) => { return [new Date(e.time).getTime(), e[obj?.fieldName]] }),
                         tooltip: {
                             valueDecimals: parseInt(obj?.decimalPlaces) || 2,
                         },
