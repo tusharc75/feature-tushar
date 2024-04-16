@@ -58,7 +58,7 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
   }, [isMobile]);
 
   const frostedGlass =
-    'relative after:[content:""] after:absolute after:inset-0 after:z-10 after:bg-[rgba(255,255,255,0.54)] after:dark:bg-[rgba(5,9,19,0.54)] after:[backdrop-filter:blur(2px)_!important]';
+    'relative after:[content:""] after:absolute after:inset-0 after:z-10 after:bg-[rgba(var(--dark-primary-rgb,255,255,255),0.54)] after:[backdrop-filter:blur(2px)_!important]';
 
   return (
     <>
