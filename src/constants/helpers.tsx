@@ -548,7 +548,8 @@ export const CHILD_RESOURCE = {
   payrollHoliday: 'Payroll Holiday',
   payrollPayTypes: 'Payroll Pay Types',
   payrollPaidTimeOff: 'Payroll Paid Time Off',
-  dealsMaterial: 'Deals Material'
+  dealsMaterial: 'Deals Material',
+  rentalManagementTechnician: 'Rental Management Technician',
 };
 
 export const sidebarResourceObjectFromValues = () => {

@@ -17,6 +17,18 @@ export const fetch_rental_product_fields = async (currency, isOffline) => {
     return data;
 }
 
+export const fetch_rental_technician_fields = async (currency, isOffline) => {
+    var data;
+    if (isOffline) {
+        data = await findOne(objectStore.resource, 'rentalManagementProduct');
+    } else {
+        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementTechnician}`);
+        data = response?.data?.data;
+    }
+    data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
+    return data;
+}
+
 export const fetch_rental_cost_fields = async (currency, isOffline) => {
     var data;
     if (isOffline) {
