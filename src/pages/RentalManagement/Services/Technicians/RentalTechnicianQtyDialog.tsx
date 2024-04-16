@@ -125,7 +125,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
-                  title={bulkEdit ? 'Bulk Edit' : `Edit - ${technicianData?.index} (${technicianData?.detail || ''})`}
+                  title={bulkEdit ? 'Bulk Edit' : `Edit - ${technicianData?.technicianName}`}
                   onClose={() => {
                     onClose();
                   }}
