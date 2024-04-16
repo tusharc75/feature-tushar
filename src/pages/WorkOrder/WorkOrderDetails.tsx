@@ -609,6 +609,7 @@ const WorkOrderDetails = () => {
               serviceName={null}
               materialSubType={MATERIAL_SUB_TYPE.consumable}
               workOrderData={workOrderData}
+              fetchTotalConsumablesCost={fetchTotalConsumablesCost}
             />
           )}
         </TabPanel>
@@ -623,6 +624,7 @@ const WorkOrderDetails = () => {
               serviceName={null}
               materialSubType={MATERIAL_SUB_TYPE.bom}
               workOrderData={workOrderData}
+              fetchTotalConsumablesCost={fetchTotalConsumablesCost}
             />
           )}
         </TabPanel>

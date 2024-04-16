@@ -36,7 +36,8 @@ const Consumables = ({
   stepId,
   serviceName,
   materialSubType = MATERIAL_SUB_TYPE.consumable,
-  workOrderData
+  workOrderData,
+  fetchTotalConsumablesCost,
 }) => {
   let renderedFrom = `${camelCase(routes?.workOrder.title)}_consumable`;
 
@@ -578,6 +579,7 @@ const Consumables = ({
             onClose={() => setOpenConsumablesQtyDialog(false)}
             onSuccess={() => {
               fetchData();
+              fetchTotalConsumablesCost();
               setOpenConsumablesQtyDialog(false);
             }}
             warehouse={warehouse}
