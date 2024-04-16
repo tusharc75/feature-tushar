@@ -302,6 +302,7 @@ const TransferInventoryDetailPage = () => {
                 {stepNames[currentStep] === 'Loading Ticket' && (
                   <LoadingTicket
                     transferInventoryData={transferInventoryData}
+                    fetchTransferInventoryData={fetchTransferInventoryData}
                     renderedFrom={`${renderedFrom}_grid-3`}
                     allowedToEdit={allowedToEdit}
                     canLoad={canLoad}

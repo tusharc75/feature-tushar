@@ -11,7 +11,6 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
-  gridLoadingTimeout,
   deliveryTicket,
   TRANSFER_INVENTORY_STATUS,
   sidebarResource
@@ -20,14 +19,12 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import ReceiveDialog from './ReceiveDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import PreviewDownload from 'src/components/PreviewDownload';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem } from '@material-ui/core';
+import { MenuItem } from '@material-ui/core';
 import { map, uniq } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, canLoad, canReceive, stepFullScreen }) => {
+const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, canLoad, canReceive, stepFullScreen, fetchTransferInventoryData }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -277,6 +274,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
         });
         setShowConfirmInterPlantTransfer(false);
         setLoadingInterPlantTransfer(false);
+        fetchTransferInventoryData()
       })
       .catch((error) => {
         setLoadingInterPlantTransfer(false);
@@ -300,6 +298,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
             message: `Cancelled Successfully`
           });
           fetchData();
+          fetchTransferInventoryData()
         })
         .catch((error) => {
           setOkBtnLoading(false);
@@ -419,6 +418,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchData();
+            fetchTransferInventoryData()
           }}
         />
       )}
@@ -430,6 +430,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           handleSucess={() => {
             setShowConfirmBoxReceive(false);
             fetchData();
+            fetchTransferInventoryData()
           }}
           selectedRecords={selectedRecords}
           transferInventoryData={transferInventoryData}
