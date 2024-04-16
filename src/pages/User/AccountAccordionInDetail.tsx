@@ -89,7 +89,7 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
                 </Box>
                 <Box padding="5px">
                   <Typography variant="subtitle2">
-                    {type === 'customer' ? 'Customer Account' : 'Supplier Account'} ({accounts?.length ?? 0})
+                    {type === 'customer' ? routes.customerAccount.title : routes.supplierAccount.title} ({accounts?.length ?? 0})
                   </Typography>
                 </Box>
               </Box>

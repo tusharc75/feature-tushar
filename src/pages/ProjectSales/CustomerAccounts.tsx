@@ -1,51 +1,27 @@
 import React, { useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { withStyles, Grid, Typography, makeStyles, Paper, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button } from '@material-ui/core';
+import { Grid, Typography, makeStyles, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-
-import { Delete, ExpandMore, MoreVert } from '@material-ui/icons';
+import { MoreVert } from '@material-ui/icons';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-
 import axiosInstance from '../../axios/axiosInstance';
 import CustomerContacts from './CustomerContacts';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import OpportunityAccordianProjectSales from './OpportunityAccordingProjectSales';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageContactDialog from '../Contact/ManageContact';
-import { customerAccount, customerContact } from '../../constants/helpers';
+import { customerContact } from '../../constants/helpers';
 import ManageAccountDialog from '../Account/ManageAccount';
 import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
 import QuotesAccordionInProjectSale from './QuotesAccordionInProjectSale';
 import QuotationAccordionInProjectSales from './QuotationAccordionInProjectSales';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-
-import PropTypes from 'prop-types';
-import { MdDelete } from 'react-icons/md';
-import { AiFillCaretLeft, AiFillCaretRight } from 'react-icons/ai';
 import { isMobile, isTablet } from 'react-device-detect';
-
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
+import routes from 'src/components/Helpers/Routes';
 
-function TabPanel(props) {
-  const { children, value, index, classes, ...other } = props;
-
-  return <div {...other}>{value === index && <Box p={3}>{children}</Box>}</div>;
-}
-
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired
-};
-
-function a11yProps(index) {
-  return {
-    id: `vertical-tab-${index}`,
-    'aria-controls': `vertical-tabpanel-${index}`
-  };
-}
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -295,7 +271,7 @@ const CustomerAccounts = (props) => {
       .put(`/project-sales/add-customer-contact`, dataObj)
       .then(() => {
         setToastConfig({
-          message: `Customer Contact added successfully`,
+          message: `Added successfully`,
           type: 'success',
           open: true
         });
@@ -361,7 +337,7 @@ const CustomerAccounts = (props) => {
       })
       .then(() => {
         setToastConfig({
-          message: `Customer Contact removed successfully`,
+          message: `Removed successfully`,
           type: 'success',
           open: true
         });
@@ -475,44 +451,12 @@ const CustomerAccounts = (props) => {
                 [classes.expandOpen]: expandedParent
               })}
             >
-              {/*<ExpandMore />*/}
             </Box>
-
             <Typography variant="subtitle1" className={classes.cusName}>
-              Customer Accounts
+              {routes.customerAccount.title}
             </Typography>
             {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
               <>
-                {/* {customerAccounts.length > 0 &&
-                opportunities.filter(
-                    (o) => o.customerAccountName === currentAccount?._id
-                ).length < 1 ? (
-                      
-                        <IconButton
-                            title={`Remove Account: ${currentAccount?.accountName}`}
-                            aria-haspopup="true"
-                            color="primary"
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveAccount();
-                            }}
-                            style={{paddingBottom:"5px" , paddingLeft:"10px" }}
-                        >
-                          <Delete color="error" style={{fontSize:"20px"}}/>
-                        </IconButton>
-                    ) :
-                  
-                    <IconButton
-                        aria-haspopup="true"
-                        color="primary"
-                        size="small"
-                        className="cursor-stop"
-                    >
-                      <Delete color="disabled" />
-                    </IconButton>
-                } */}
-
                 <Button
                   variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                   style={isMobile && !isTablet ? { color: 'var(--info-dark)', marginLeft: 'auto' } : { marginLeft: 'auto' }}
@@ -524,7 +468,6 @@ const CustomerAccounts = (props) => {
                 >
                   {isMobile && !isTablet ? 'New' : 'Create New'}
                 </Button>
-
                 <Button
                   variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                   style={isMobile && !isTablet ? { color: 'var(--info-dark)', marginLeft: '10px' } : { marginLeft: '10px' }}
@@ -536,24 +479,9 @@ const CustomerAccounts = (props) => {
                 >
                   {isMobile && !isTablet ? 'Add' : 'Add Existing'}
                 </Button>
-
-                {/*<IconButton*/}
-                {/*    aria-haspopup="true"*/}
-                {/*    color="primary"*/}
-                {/*    size="small"*/}
-                {/*    className={classes.addBtn}*/}
-                {/*    onClick={(e) => {*/}
-                {/*      handleClick(e, "customer-account");*/}
-                {/*    }}*/}
-                {/*>*/}
-                {/*  <MoreVert />*/}
-                {/*</IconButton>*/}
-
-                {/*<Box component="span" mx={1} />*/}
               </>
             ) : null}
           </AccordionSummary>
-
           <AccordionDetails>
             {loading ? (
               <Typography>Loading...</Typography>
@@ -606,14 +534,9 @@ const CustomerAccounts = (props) => {
                         aria-controls={`vertical-tabpanel-${i}`}
                         id={`vertical-tab-${i}`}
                         className={classes.tabProject}
-
-                        // icon={<AiFillCaretRight size={18}/>}
                       />
                     ))}
                   </Tabs>
-
-                  {/* <Box component="span" mx={1} /> */}
-
                   {customerAccounts.map((c, i) => (
                     <Box hidden={currentTabIndex !== i} key={c._id}>
                       <Box mb={2}>
@@ -627,7 +550,7 @@ const CustomerAccounts = (props) => {
                                   </IconButton>
                                   <Box>
                                     <Typography variant="subtitle2">
-                                      Customer Contacts ({customerContacts.filter((ca) => ca.accountName === c._id).length})
+                                      {routes.customerContact.title} ({customerContacts.filter((ca) => ca.accountName === c._id).length})
                                     </Typography>
                                   </Box>
                                 </Box>
@@ -658,7 +581,6 @@ const CustomerAccounts = (props) => {
                                   <BoxWithBorder key={i} style={{ marginBottom: '8px' }}>
                                     <Box padding={1}>
                                       <Skeleton variant="text" width="100px" height="20px" />
-
                                       <Skeleton variant="text" width="100%" height="15px" />
                                     </Box>
                                   </BoxWithBorder>
@@ -758,7 +680,7 @@ const CustomerAccounts = (props) => {
                 </>
               </Box>
             ) : (
-              <Typography>No Customer Accounts</Typography>
+              <Typography>{`No ${routes.customerAccount.title}`}</Typography>
             )}
           </AccordionDetails>
         </div>
@@ -771,8 +693,8 @@ const CustomerAccounts = (props) => {
             accountDeleteRec
               ? 'Are you sure about removing this account from project?'
               : contactDeleteRec
-              ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
-              : null
+                ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
+                : null
           }
           onClose={() => {
             setShowConfirmBox(false);
