@@ -1,4 +1,4 @@
-import { Box, FormGroup, Grid } from '@material-ui/core';
+import { Box, FormGroup, Grid, IconButton, useMediaQuery } from '@material-ui/core';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -8,10 +8,12 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import Chart from '../Helper/Chart';
 import FilterModel from '../Helper/FilterModel';
 import TreeViewNew from './TreeView';
+import { ChevronLeft, ChevronRight } from '@material-ui/icons';
 
 const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }) => {
   const toastConfig = useContext(CustomToastContext);
-
+  const [isExpanded, setIsExpanded] = useState(true);
+  const isMobile = useMediaQuery('(max-width:640px)');
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').startOf('day').toJSON()),
     to: new Date(),
@@ -49,6 +51,15 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
       });
   };
 
+  useEffect(() => {
+    if (isMobile) {
+      setIsExpanded(true);
+    }
+  }, [isMobile]);
+
+  const frostedGlass =
+    'relative after:[content:""] after:absolute after:inset-0 after:z-10 after:bg-[rgba(255,255,255,0.54)] after:dark:bg-[rgba(5,9,19,0.54)] after:[backdrop-filter:blur(2px)_!important]';
+
   return (
     <>
       <Grid direction="row" justifyContent="flex-end" alignItems="center" container spacing={2}>
@@ -65,12 +76,26 @@ const PerformanceAnalysis = ({ deviceTemplate = null, assetId, dataPoints = [] }
         </Grid>
       </Grid>
       <Box mt={2}>
-        <div className="grid gap-y-4 sm:gap-x-3 md:gap-x-4 grid-cols-1 sm:grid-cols-[5fr_9fr] md:grid-cols-[4fr_9fr] lg:grid-cols-[320px_1fr]">
-          <div className="container-with-border">
-            <p className=" font-semibold px-4 py-3 text-[16px]" style={{ borderBottom: '1px solid var(--common-border-color)' }}>
-              Data Points
-            </p>
-            <div className="sm:h-[calc(574px-48px)] h-[250px] px-2 overflow-auto py-1">
+        <div
+          className={`grid gap-y-4 sm:gap-x-3 md:gap-x-4 grid-cols-1 ${
+            isExpanded ? '' : '[--left-col-size:62px]'
+          } sm:grid-cols-[var(--left-col-size,5fr)_9fr] md:grid-cols-[var(--left-col-size,4fr)_9fr] lg:grid-cols-[var(--left-col-size,320px)_1fr]  transition-all duration-300`}
+        >
+          <div className={`container-with-border ${isExpanded ? '' : 'overflow-hidden'} `}>
+            <div className="[border-bottom:1px_solid_var(--common-border-color)] flex justify-between gap-2 px-4 py-3 items-center">
+              <p className={` font-semibold text-[16px] ${isExpanded ? '' : ' sr-only'}`}>Data Points</p>
+              {isMobile ? null : (
+                <IconButton size="small" onClick={() => setIsExpanded((prev) => !prev)}>
+                  {isExpanded ? <ChevronLeft /> : <ChevronRight />}
+                </IconButton>
+              )}
+            </div>
+
+            <div
+              className={`sm:h-[calc(574px-48px)] h-[250px] px-2 ${
+                isExpanded ? 'overflow-auto' : `overflow-hidden [&_*]:!overflow-hidden [&_*]:!line-clamp-1 [&_*]:!flex-nowrap ${frostedGlass}`
+              } py-1`}
+            >
               <FormGroup>
                 <div className="grid gap-2">
                   {categories ? (
