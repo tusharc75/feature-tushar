@@ -5,11 +5,9 @@ import { Skeleton } from '@material-ui/lab';
 import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
 import { FaDoorClosed, FaWpforms, FaDoorOpen } from 'react-icons/fa';
 import { IoHandRightSharp } from 'react-icons/io5';
-import { LuPackageCheck } from 'react-icons/lu';
-import { RiFileShredFill, RiFlowChart } from 'react-icons/ri';
+import { RiFileShredFill } from 'react-icons/ri';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -18,8 +16,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { DeleteButton, ThemeButton, ButtonType } from 'src/components/Helpers/Buttons';
+import { ThemeButton, ButtonType } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
@@ -138,7 +135,9 @@ const WorkOrderDetails = () => {
   }, [id]);
 
   useEffect(() => {
-    fetchTotalConsumablesCost();
+    if (tabValue === 0) {
+      fetchTotalConsumablesCost();
+    }
   }, [tabValue]);
 
   useEffect(() => {
@@ -245,13 +244,6 @@ const WorkOrderDetails = () => {
         setIsSubmitting(false)
       });
   };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const openAddActions = (event) => {
     setAddAnchorEl(event.currentTarget);
@@ -521,28 +513,28 @@ const WorkOrderDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} value={0} {...a11yProps(0)}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          <CustomTab index={0} value={0} >
+            Header
           </CustomTab>
-          <CustomTab index={1} value={1} {...a11yProps(1)}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Services
+          <CustomTab index={1} value={1} >
+            Services
           </CustomTab>
           {!user?.user?.brandPolicy?.workOrderConsumableHide && (
-            <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
+            <CustomTab index={2} value={2} >
+              Products/Consumables
             </CustomTab>
           )}
           {user?.user?.brandPolicy?.workOrderBom && (
-            <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
+            <CustomTab index={3} value={3} >
+              BOM
             </CustomTab>
           )}
-          <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawings
+          <CustomTab index={4} value={4} >
+            Drawings
           </CustomTab>
           {!(isMobile && !isTablet) && (
-            <CustomTab index={5} value={5} className={'tabLayout'} {...a11yProps(5)}>
-              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+            <CustomTab index={5} value={5} >
+              Views
             </CustomTab>
           )}
         </CustomTabs>
