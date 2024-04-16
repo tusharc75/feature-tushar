@@ -138,6 +138,10 @@ const WorkOrderDetails = () => {
   }, [id]);
 
   useEffect(() => {
+    fetchTotalConsumablesCost();
+  }, [tabValue]);
+
+  useEffect(() => {
     getResourceFields();
   }, []);
 
