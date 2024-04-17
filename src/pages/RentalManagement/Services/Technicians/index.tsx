@@ -17,6 +17,10 @@ import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialo
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { displayDate } from 'src/constants/helpers';
 import { Add } from '@material-ui/icons';
+import EditIcon from '@material-ui/icons/Edit';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { CustomOfflineContext } from '../../../../StateProvider/OfflineContext/OfflineContext';
+import RentalTechnicianQtyDialog from './RentalTechnicianQtyDialog';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -27,7 +31,12 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
   const [isDeleting, setIsDeleting] = useState(false);
   const [technicianDialog, setTechnicianDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [isBulkEdit, setIsBulkEdit] = useState(false);
+  const [isUpdating, setUpdating] = useState(false);
+  const [technicianEdit, setTechnicianEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
   const open = Boolean(anchorEl);
+
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -40,6 +49,35 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     fetchColumns();
     fetchData();
   }, [selectedService, services]);
+
+   const openTechnician = (data, rows) => {
+    setTechnicianEdit({
+      open: true,
+      data: data.original,
+      bulkedit: false,
+      showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
+    });
+  };
+
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
+    setUpdating(true);
+    axiosInstance()
+      .put(`${rentalManagement.api}/technician/${rentalManagementData._id}`, { technician: rows })
+      .then(() => {
+        setUpdating(false);
+        fetchData();
+        if (saveAndNext) {
+          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
+          setTechnicianEdit({ open: true, data: dataRows[rowIndex + 1], bulkedit:false,showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+        } else {
+          setTechnicianEdit({ open: false, data: null, bulkedit:false,showSaveAndNext: false });
+        }
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const fetchColumns = async () => {
     const column: any = [
@@ -54,10 +92,32 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         accessor: 'technicianName',
         Header: 'Name',
         width: 250,
-        Cell: ({ row }) => (
-          <a className="link text-truncate" href={`${routes.employeeMasterDetail.path}/${row.original?.technicianId}`} target="_blank">
-            {row.original?.technicianName}
-          </a>
+        Cell: ({ row, table }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {isOffline || !allowedToEdit ? (
+              <p> {row.original.detail}</p>
+            ) : (
+              <p
+                onClick={() => {
+                  openTechnician(row, table.getRowModel().rows);
+                }}
+                className="link text-truncate"
+                title={row.original.detail}
+              >
+                {row.original?.technicianName}
+              </p>
+            )}
+            {!isOffline && (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.employeeMasterDetail.path}/${row.original?.technicianId}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            )}
+          </div>
         )
       },
       {
@@ -112,8 +172,21 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         disableFilters: true,
         disableSortBy: true,
         canDrag: false,
-        Cell: ({ row }) => {
-          return allowedToEdit ? (
+        Cell: ({ row, table }) => {
+          return <>
+          <HtmlTooltip title={isOffline || !allowedToEdit  ? '' : 'Edit'}>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                disabled={isOffline || !allowedToEdit  ? true : false}
+                onClick={() => {
+                  openTechnician(row, table.getRowModel().rows);
+                }}
+              >
+                <EditIcon fontSize="small" color={isOffline || !allowedToEdit  ? 'disabled' : 'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          {allowedToEdit ? (
             <HtmlTooltip title={'Delete'}>
               <span>
                 <IconButton
@@ -127,7 +200,8 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
                 </IconButton>
               </span>
             </HtmlTooltip>
-          ) : null;
+          ) : null}
+          </>
         }
       }
     ];
@@ -326,6 +400,20 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
+        />
+      )}
+      {technicianEdit.open && (
+        <RentalTechnicianQtyDialog
+          onClose={() => {
+            setTechnicianEdit({ open: false, data: null,  bulkedit: false, showSaveAndNext: false });
+            setIsBulkEdit(false);
+          }}
+          technicianData={technicianEdit.data}
+          rentalManagementData={rentalManagementData}
+          handleUpdate={handleSaveData}
+          loadingEdit={isUpdating}
+          bulkEdit={isBulkEdit}
+          showSaveAndNext={technicianEdit.showSaveAndNext}
         />
       )}
     </>
