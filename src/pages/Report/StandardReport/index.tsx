@@ -19,6 +19,7 @@ import {
     isObjectEmpty,
     sidebarResource,
     dateFormat,
+    REPORT_LIST,
 } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -53,6 +54,7 @@ const Report = () => {
     const resourceCamelCase = camelCase(type);
     const resourceStartCase = startCase(type);
     const renderedFrom = `${type}_report_new`;
+    const reportConfig = REPORT_LIST?.find((e) => e.type === resourceCamelCase);
 
     const [showGrid, setShowGrid] = React.useState(false);
     const [selectedData, setSelectedData] = React.useState(null);
@@ -83,6 +85,8 @@ const Report = () => {
     const fetchGridColumns = async () => {
         try {
             setLoadingColumns(true);
+
+
             let columns = [];
             let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${type}/column`);
             let newColumns = generateColumns(type, columnFields);
@@ -147,7 +151,7 @@ const Report = () => {
                 columns = [...newColumns]
             }
             setResourceColumns(filterFields);
-            if (type === 'iot-data-points') {
+            if (reportConfig?.defaultColumn) {
                 setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
             }
             setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
@@ -780,6 +784,7 @@ const Report = () => {
                                         setStatusTimeFrame={setStatusTimeFrame}
                                         selectedData={selectedData}
                                         defaultResource={defaultColumns}
+                                        reportConfig={reportConfig}
                                     />
                                 </DialogContent>
                             </div>

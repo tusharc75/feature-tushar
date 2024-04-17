@@ -2241,6 +2241,10 @@ export const LOG_RESOURCE = {
 
 export const INTERVALS = [
   {
+    optionValue: 'perCycle',
+    optionLabel: 'Per Cycle'
+  },
+  {
     optionValue: '1second',
     optionLabel: '1 Second'
   },
@@ -2485,13 +2489,21 @@ export const REPORT_LIST = [
     title: 'Daily In/Out/Evap/Run Hours',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'dailyInOutEvapRunhours'
+    type: 'dailyInOutEvapRunhours',
+    defaultColumn: true,
   },
   {
     title: 'IOT Data Points',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'iotDataPoints'
+    type: 'iotDataPoints',
+    defaultColumn: true
+  },
+  {
+    title: 'Unit Downtime Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'iotUnitDowntimeReport',
   }
 ];
 

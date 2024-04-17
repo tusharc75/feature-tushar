@@ -57,6 +57,7 @@ interface FiltersProps {
   customReportData?: any;
   isCustomReport?: boolean;
   defaultResource?: any[];
+  reportConfig?: any
 }
 
 const ReportFilters = (props: FiltersProps) => {
@@ -90,7 +91,8 @@ const ReportFilters = (props: FiltersProps) => {
     selectedData,
     customReportData,
     isCustomReport,
-    defaultResource = []
+    defaultResource = [],
+    reportConfig
   } = props;
 
   const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null, name: '' });
@@ -385,7 +387,7 @@ const ReportFilters = (props: FiltersProps) => {
   const validate = (formValues: any) => {
     const error: any = {};
     let resources = defaultResource;
-    if (resource === 'Iot Data Points') {
+    if (reportConfig?.defaultColumn) {
       if (!betweenDate?.from_date) {
         error['from_date'] = 'From date is required';
       }
@@ -501,12 +503,12 @@ const ReportFilters = (props: FiltersProps) => {
                         touched={error}
                         label={field.fieldLabel}
                         name={field.fieldName}
-                        type={resource === 'Iot Data Points' ? field?.multiple ? 'multiSelect' : field.type : field.type === 'dropDown' ? 'multiSelect' : field.type}
+                        type={reportConfig?.defaultColumn ? field?.multiple ? 'multiSelect' : field.type : field.type === 'dropDown' ? 'multiSelect' : field.type}
                         options={field.option}
                         setFieldValue={(name, value) => {
                           handleSelectFilter(field?.type, name, value);
                         }}
-                        required={resource === 'Iot Data Points' ? field?.required : false}
+                        required={reportConfig?.defaultColumn ? field?.required : false}
                         fullWidth
                         size="small"
                         fromFilter={true}
@@ -564,7 +566,7 @@ const ReportFilters = (props: FiltersProps) => {
                         InputLabelProps={{
                           shrink: true
                         }}
-                        required={resource === 'Iot Data Points' ? field?.required : false}
+                        required={reportConfig?.defaultColumn ? field?.required : false}
                         error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
                         helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
                       />
@@ -596,7 +598,7 @@ const ReportFilters = (props: FiltersProps) => {
                           shrink: true
                         }}
                         minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
-                        required={resource === 'Iot Data Points' ? field?.required : false}
+                        required={reportConfig?.defaultColumn ? field?.required : false}
                         error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
                         helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
                       />
