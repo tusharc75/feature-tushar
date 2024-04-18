@@ -493,7 +493,6 @@ export const RESOURCE_LABEL = {
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
-  iotReport: 'IoT Report',
   sendOutboundMessage: 'Send Outbound Message',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
@@ -548,7 +547,8 @@ export const CHILD_RESOURCE = {
   payrollHoliday: 'Payroll Holiday',
   payrollPayTypes: 'Payroll Pay Types',
   payrollPaidTimeOff: 'Payroll Paid Time Off',
-  dealsMaterial: 'Deals Material'
+  dealsMaterial: 'Deals Material',
+  rentalManagementTechnician: 'Rental Management Technician',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -2242,6 +2242,10 @@ export const LOG_RESOURCE = {
 
 export const INTERVALS = [
   {
+    optionValue: 'perCycle',
+    optionLabel: 'Per Cycle'
+  },
+  {
     optionValue: '1second',
     optionLabel: '1 Second'
   },
@@ -2486,13 +2490,21 @@ export const REPORT_LIST = [
     title: 'Daily In/Out/Evap/Run Hours',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'dailyInOutEvapRunhours'
+    type: 'dailyInOutEvapRunhours',
+    defaultColumn: true,
   },
   {
     title: 'IOT Data Points',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'iotDataPoints'
+    type: 'iotDataPoints',
+    defaultColumn: true
+  },
+  {
+    title: 'Unit Downtime Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'iotUnitDowntimeReport',
   }
 ];
 

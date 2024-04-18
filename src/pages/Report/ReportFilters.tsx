@@ -19,9 +19,8 @@ import { Autocomplete } from '@material-ui/lab';
 import { Delete, List } from '@material-ui/icons';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { startCase } from 'lodash';
-
 import VirtualizedList from '../../components/VirtualizedList';
-import { getObjKeys, dateFormat } from '../../constants/helpers';
+import { dateFormat } from '../../constants/helpers';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmDialog from '../../components/Helpers/ConfirmationDialog';
 import axiosInstance from '../../axios/axiosInstance';
@@ -58,6 +57,7 @@ interface FiltersProps {
   customReportData?: any;
   isCustomReport?: boolean;
   defaultResource?: any[];
+  reportConfig?: any
 }
 
 const ReportFilters = (props: FiltersProps) => {
@@ -91,7 +91,8 @@ const ReportFilters = (props: FiltersProps) => {
     selectedData,
     customReportData,
     isCustomReport,
-    defaultResource = []
+    defaultResource = [],
+    reportConfig
   } = props;
 
   const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null, name: '' });
@@ -212,6 +213,12 @@ const ReportFilters = (props: FiltersProps) => {
       setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
     }
     setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    if (error[name] && value) {
+      setError((prev) => {
+        delete prev[name];
+        return prev;
+      });
+    }
   };
 
   const handleRemoveOption = () => {
@@ -368,12 +375,19 @@ const ReportFilters = (props: FiltersProps) => {
         setStatusTimeFrame('custom');
         break;
     }
+    if (timeFrameTemp !== 'custom') {
+      setError((prev) => {
+        delete prev[`from_${field.fieldName}`];
+        delete prev[`to_${field.fieldName}`];
+        return prev;
+      });
+    }
   };
 
   const validate = (formValues: any) => {
     const error: any = {};
     let resources = defaultResource;
-    if (resource === 'Iot Data Points') {
+    if (reportConfig?.defaultColumn) {
       if (!betweenDate?.from_date) {
         error['from_date'] = 'From date is required';
       }
@@ -489,12 +503,12 @@ const ReportFilters = (props: FiltersProps) => {
                         touched={error}
                         label={field.fieldLabel}
                         name={field.fieldName}
-                        type={resource === 'Iot Data Points' ? field?.multiple ? 'multiSelect' : field.type : field.type === 'dropDown' ? 'multiSelect' : field.type}
+                        type={reportConfig?.defaultColumn ? field?.multiple ? 'multiSelect' : field.type : field.type === 'dropDown' ? 'multiSelect' : field.type}
                         options={field.option}
                         setFieldValue={(name, value) => {
                           handleSelectFilter(field?.type, name, value);
                         }}
-                        required={resource === 'Iot Data Points' ? field?.required : false}
+                        required={reportConfig?.defaultColumn ? field?.required : false}
                         fullWidth
                         size="small"
                         fromFilter={true}
@@ -541,14 +555,20 @@ const ReportFilters = (props: FiltersProps) => {
                         value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
                         onChange={(date: any) => {
                           setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
+                          if (error[`from_${field.fieldName}`]) {
+                            setError((prev) => {
+                              delete prev[`from_${field.fieldName}`];
+                              return prev;
+                            });
+                          }
                         }}
                         format={dateFormat}
                         InputLabelProps={{
                           shrink: true
                         }}
-                        required={resource === 'Iot Data Points' ? field?.required : false}
-                        error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
-                        helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
+                        required={reportConfig?.defaultColumn ? field?.required : false}
+                        error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
+                        helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
                       />
                     </div>
                   )}
@@ -566,15 +586,21 @@ const ReportFilters = (props: FiltersProps) => {
                         value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
                         onChange={(date: any) => {
                           setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
+                          if (error[`to_${field.fieldName}`]) {
+                            setError((prev) => {
+                              delete prev[`to_${field.fieldName}`];
+                              return prev;
+                            });
+                          }
                         }}
                         format={dateFormat}
                         InputLabelProps={{
                           shrink: true
                         }}
                         minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
-                        required={resource === 'Iot Data Points' ? field?.required : false}
-                        error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
-                        helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
+                        required={reportConfig?.defaultColumn ? field?.required : false}
+                        error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
+                        helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
                       />
                     </div>
                   )}
@@ -702,7 +728,7 @@ const ReportFilters = (props: FiltersProps) => {
             size="small"
             disableElevation
             fullWidth
-            disabled={loading}
+            disabled={loading || loadingColumns}
           >
             Show
           </Button>
