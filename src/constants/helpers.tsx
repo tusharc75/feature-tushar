@@ -74,7 +74,6 @@ export const fieldServiceOrderSteps: stepInterface[] = [
 
 export const demandOrderSteps = ['Add Products'];
 
-export const purchaseRequisitionSteps = ['Add Products'];
 
 export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
@@ -117,6 +116,12 @@ export const quotationProcessSteps: stepInterface[] = [
   { name: 'Quote Builder', title: 'Builder', icon: 'quote' },
   { name: 'DOA', title: 'DOA', icon: 'doa' },
   { name: 'Quote Approval', title: 'Approval', icon: 'approval' },
+  { name: 'End', title: 'End', icon: 'end' }
+];
+
+export const purchaseRequisitionSteps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Approval', title: 'Approval', icon: 'approval' },
   { name: 'End', title: 'End', icon: 'end' }
 ];
 
@@ -531,6 +536,7 @@ export const CHILD_RESOURCE = {
   repairOrderProduct: 'Repair Order Product',
   planningMaterial: 'Planning Material',
   purchaseRequisition: 'Purchase Requisition Detail',
+  purchaseRequisitionCost: 'Purchase Requisition Cost',
   fieldServiceOrderDetails: 'Field Service Order Detail',
   fieldServiceOrderAddon: 'Field Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
@@ -2678,6 +2684,10 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   failed: 'Failed',
   skipped: 'Skipped',
   needReperform: 'Need Reperform'
+};
+
+export const PURCHASE_REQUISITION_STEP_STATUS = {
+  end: 'end',
 };
 
 type ChipStatus =

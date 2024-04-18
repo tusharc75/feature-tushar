@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { startCase } from 'lodash';
+import { map, startCase, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -18,9 +18,10 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
+import CostDialog from './CostDialog';
+import { fetch_pr_cost_fields, fetch_pr_product_fields } from 'src/components/PurchaseRequisition/helper';
 
 const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
   const {
@@ -29,13 +30,12 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
-
+  const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [columns, setColumns] = useState(null);
-
   const [allFields, setAllFields] = useState([]);
-
+  const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
-
+  const [loadingEdit, setLoadingEdit] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -52,9 +52,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
   }, []);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseRequisition}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, purchaseRequisitionData?.currency);
+    var data = await fetch_pr_product_fields(purchaseRequisitionData?.currency);
     setAllFields(data);
     const newColumns = generateColumns(renderedFrom, data, null, false, purchaseRequisitionData?.currency);
     let coloum: any = [
@@ -153,7 +151,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
             aria-label="Details"
             disabled={!allowedToEdit}
             onClick={() => {
-              onMaterialEdit(row, table.getRowModel().rows);
+              onMaterialEdit(row.original, table.getRowModel().rows);
             }}
           >
             <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
@@ -186,25 +184,89 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
     const response = await axiosInstance().get(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`);
+    const additionalCost = await axiosInstance().get(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}`);
+    const additionalData = additionalCost?.data?.data || [];
+    const updatedAdditionalData = additionalData?.map((e: any) => {
+      return { ...e, type: 'Manual Entry'};
+    })
     data = response?.data?.data;
     let rows = data.material.filter((e) => e.parentId === null);
+    rows = [...rows, ...updatedAdditionalData]
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.serviceDetail?.serviceName;
-      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.serviceDetail?.serviceDescription;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+              : parent.detail || parent.description
+        }`;
+      parent.description =
+       parent.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productDescription || ''
+              : parent.description;
     });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
   const onMaterialEdit = (row, rows) => {
-    setMaterialEdit({
-      open: true,
-      data: row.original,
-      bulkedit: false,
-      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-    });
+    if (row.type != 'Manual Entry' ) {
+      setMaterialEdit({
+            open: true,
+            data: row,
+            bulkedit: false,
+            showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+          });
+        }
+    if(row.type === 'Manual Entry')
+    {
+    setShowCostDialog({ open: true, data: row, showSaveAndNext: row?.index < rows?.length ? true : false });
+    }
   };
+
+
+  const handleAddCost = (rows) => {
+    setLoadingEdit(true);
+    axiosInstance()
+      .post(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}/add`, { additionalCost: rows })
+      .then(() => {
+        fetchData();
+        setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+        setLoadingEdit(false);
+      })
+      .catch((error) => {
+        setLoadingEdit(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleUpdateCost = (rows, saveAndNext = false) => {
+    setLoadingEdit(true);
+    axiosInstance()
+    .put(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}/update`, { additionalCost: rows })
+      .then(() => {
+        fetchData();
+        if (saveAndNext) {
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          if (rowIndex < dataRows?.length - 1) {
+            if (dataRows[rowIndex + 1]?.type === 'Manual Entry') {
+              setShowCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            } else {
+              setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+            }
+          }
+        } else {
+          setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+        }
+        setLoadingEdit(false);
+      })
+      .catch((error) => {
+        setLoadingEdit(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
 
   const handleAdd = async (rows) => {
     setSubmitting(true);
@@ -249,13 +311,21 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-          setMaterialEdit({
-            open: true,
-            data: dataRows[rowIndex + 1],
-            bulkedit: false,
-            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
-          });
+          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+          if (!row?.parentId) {
+            const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
+            if (dataRows[rowIndex + 1]?.type === 'Manual Entry') {
+              setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
+              setShowCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            } else {
+              setMaterialEdit({
+                open: true,
+                data: dataRows[rowIndex + 1],
+                bulkedit: false,
+                showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+              });
+            }
+          } 
         } else {
           setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
         }
@@ -268,6 +338,9 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
 
   const handleDelete = (rows) => {
     setDeleting(true);
+    const cost = rows?.filter((ele) => ele.type === 'Manual Entry').map((e) => e?.id)
+    const products = rows?.filter((ele) => ele.type !== 'Manual Entry');
+    if (products?.length) {
     axiosInstance()
       .put(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData?._id}/delete`, { ids: rows })
       .then(({ data }) => {
@@ -285,13 +358,33 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
+    }
+    if (cost?.length) {
+      axiosInstance()
+        .post(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}/delete`, { ids: cost })
+        .then(({ data }) => {
+          setDeleting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        setDeleteData(null);
+      })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
+        });
+    }
   };
-
+  
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
-    handleSaveData(rows);
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+      handleSaveData(rows);
   };
 
   const addButtonMenuItems = () => {
@@ -311,6 +404,13 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
         >
           Add Existing Services
         </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
+          }}
+        >
+          Add Manual Entry
+        </MenuItem>
       </>
     );
   };
@@ -326,8 +426,9 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     return (
       <>
         <MenuItem
+          disabled={selectedRecords.some((e) => e.type === 'Manual Entry')}
           onClick={() => {
-            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+              setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
           }}
         >
           Bulk Edit
@@ -424,6 +525,21 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
             handleAdd(rows);
           }}
           isSubmitting={isSubmitting}
+        />
+      )}
+      {showCostDialog.open && (
+        <CostDialog
+          onClose={() => {
+            setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+            setIsBulkEdit(false);
+          }}
+          handleAddCost={handleAddCost}
+          handleUpdateCost={handleUpdateCost}
+          purchaseRequisitionData={purchaseRequisitionData}
+          costData={!isBulkEdit ? showCostDialog.data : selectedRecords?.filter((e) => !e.hideSelection)}
+          bulkEdit={isBulkEdit}
+          showSaveAndNext={showCostDialog.showSaveAndNext}
+          loadingEdit={loadingEdit}
         />
       )}
     </Fragment>

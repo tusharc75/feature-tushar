@@ -10,7 +10,7 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import axiosInstance from 'src/axios/axiosInstance';
 import { uniq, map, orderBy } from 'lodash';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { CURReplaceByCurrencySingle, autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
@@ -28,6 +28,7 @@ const MaterialDialog = ({ onClose, materialData, handleUpdate, loadingEdit, bulk
     setInitialData({ fields: [], values: {} });
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseRequisition}`);
     var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, materialData?.currency || 'USD');
     if (bulkEdit) {
       let unitArray: any = [];
       materialData?.forEach((element) => {
@@ -64,6 +65,7 @@ const MaterialDialog = ({ onClose, materialData, handleUpdate, loadingEdit, bulk
           element.option = unitOptions;
         }
       });
+      
       setAllFields(JSON.parse(JSON.stringify(data)));
       setInitialData({
         fields: data,
