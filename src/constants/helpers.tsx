@@ -2487,11 +2487,24 @@ export const REPORT_LIST = [
     type: 'fleetReport'
   },
   {
-    title: 'Daily In/Out/Evap/Run Hours',
+    title: 'Daily Volume Report',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'dailyInOutEvapRunhours',
+    type: 'dailyVolumeReport',
     defaultColumn: true,
+  },
+  {
+    title: 'Revenue Daily Volume Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'revenueDailyVolumeReport',
+    defaultColumn: true,
+  },
+  {
+    title: 'Unit Downtime Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'iotUnitDowntimeReport',
   },
   {
     title: 'IOT Data Points',
@@ -2500,12 +2513,6 @@ export const REPORT_LIST = [
     type: 'iotDataPoints',
     defaultColumn: true
   },
-  {
-    title: 'Unit Downtime Report',
-    permission: 'iotChart',
-    key: 'standardReport',
-    type: 'iotUnitDowntimeReport',
-  }
 ];
 
 export const RESOURCE_CALENDAR = [
