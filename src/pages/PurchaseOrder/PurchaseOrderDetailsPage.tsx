@@ -21,7 +21,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, PURCHASE_ORDER_STATUS, purchaseOrder, purchaseOrderSteps } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, PURCHASE_ORDER_STATUS, checkSuperAdminAccess, purchaseOrder, purchaseOrderSteps, sidebarResource } from '../../constants/helpers';
 import Invoice from './Invoice';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import Product from './Product';
@@ -95,7 +95,7 @@ const PurchaseOrderDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.purchaseOrder)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
@@ -266,21 +266,21 @@ const PurchaseOrderDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} {...a11yProps(0)}>
+          <CustomTab index={0} value={0}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Header
           </CustomTab>
           {purchaseOrderData?.deleted ? null : (
-            <CustomTab index={1} {...a11yProps(1)}>
+            <CustomTab index={1} value={1}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
             </CustomTab>
           )}
           {purchaseOrderData?.deleted ? null : (
-            <CustomTab index={3} {...a11yProps(3)}>
+            <CustomTab index={3} value={2}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Invoice
             </CustomTab>
           )}
-          {purchaseOrderData?.deleted && isMobile && !isTablet ? null : (
-            <CustomTab className={'tabLayout'} index={2} {...a11yProps(2)}>
+          {purchaseOrderData?.deleted || (isMobile && !isTablet) ? null : (
+            <CustomTab index={3} value={3}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}

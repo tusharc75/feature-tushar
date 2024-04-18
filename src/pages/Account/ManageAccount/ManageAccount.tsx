@@ -544,7 +544,7 @@ export default function ManageAccount(props) {
             </Formik>
           </>
         ) : (
-          <CustomDialogContent>
+          <CustomDialogContent isFooterPresent={false}>
             <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>

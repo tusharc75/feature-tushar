@@ -12,7 +12,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
-import { DeleteTask } from '../../../axios/activity';
 import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
 import ActivityLoader from '../../Helpers/ActivityLoader';
 import { ListRelatedTo } from '../Helpers/ListRelatedTo';
@@ -73,8 +72,9 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
 
   const handleDelete = (event) => {
     event.stopPropagation();
-    DeleteTask(taskId)
-      .then((data) => {
+    axiosInstance()
+      .delete(`/task/${taskId}`)
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',

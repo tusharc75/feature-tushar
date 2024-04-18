@@ -16,7 +16,7 @@ const InvoiceDialog = ({ resourceData, selectedResource, handleClose }) => {
           }}
           showRequiredLabel={false}
         />
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           {selectedResource.resource === sidebarResource.rentalManagement ? (
             <ProgressiveBilling rentalId={resourceData?._id} rentalManagementData={resourceData} allowCreateInvoice={false} />
           ) : (

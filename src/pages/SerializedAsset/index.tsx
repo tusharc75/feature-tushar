@@ -5,6 +5,7 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import WarningIcon from '@material-ui/icons/Warning';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import { Autocomplete } from '@material-ui/lab';
 
 import { camelCase } from 'lodash';
@@ -259,6 +260,20 @@ const SerializedAsset = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
+        {permissions?.iotChart?.isRead && (
+        <HtmlTooltip title="View IOT Data">
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => {
+                        history.push(`${routes.iotChart.path}/${row?.original?._id}`);
+                    }}
+                    >
+              <VisibilityIcon fontSize="small" color="primary" />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      )}
       </>
     )
   };

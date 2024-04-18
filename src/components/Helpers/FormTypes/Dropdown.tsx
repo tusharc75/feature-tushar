@@ -25,6 +25,7 @@ import ManageDynamicForm from 'src/pages/DynamicForm/ManageDynamicForm';
 import ManageMarketSegmentDialog from 'src/pages/MarketSegment/ManageMarketSegmentDialog';
 import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
 import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
+import ManagePadMaster from 'src/pages/PadMaster/ManagePadMaster';
 import ManageWellMaster from 'src/pages/WellMaster/ManageWellMaster';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
@@ -477,32 +478,32 @@ function Dropdown({
                 onChange={
                   onChange
                     ? (e, value: any, reason) => {
-                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-                        if (isSelectedAll) {
-                          onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
-                        } else {
-                          onChange(e, value, reason);
-                        }
+                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (isSelectedAll) {
+                        onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
+                      } else {
+                        onChange(e, value, reason);
                       }
+                    }
                     : (e, value: any, reason) => {
-                        if (setFieldValue) {
-                          const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (setFieldValue) {
+                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
 
-                          if (isSelectedAll) {
-                            // If "Select All" is selected, set all other options as values
-                            setFieldValue(
-                              name,
-                              dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
-                            );
-                          } else {
-                            // Remove "Select All" if it was selected and set the values accordingly
-                            setFieldValue(
-                              name,
-                              value.map((val) => val.optionValue)
-                            );
-                          }
+                        if (isSelectedAll) {
+                          // If "Select All" is selected, set all other options as values
+                          setFieldValue(
+                            name,
+                            dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
+                          );
+                        } else {
+                          // Remove "Select All" if it was selected and set the values accordingly
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
                         }
                       }
+                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -536,26 +537,26 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                        if (setFieldValue) {
-                          handleChange(name, val && val.optionValue ? val.optionValue : '');
-                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                          fieldChange?.forEach((val: any) => {
-                            setFieldValue(val.fieldName, val.value);
-                          });
-                          const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                          if (filterFields?.length) {
-                            filterFields?.forEach((ele: any) => {
-                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
-                                if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
-                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                                } else {
-                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                                }
+                      if (setFieldValue) {
+                        handleChange(name, val && val.optionValue ? val.optionValue : '');
+                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                        fieldChange?.forEach((val: any) => {
+                          setFieldValue(val.fieldName, val.value);
+                        });
+                        const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                        if (filterFields?.length) {
+                          filterFields?.forEach((ele: any) => {
+                            if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                              if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                              } else {
+                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
                               }
-                            });
-                          }
+                            }
+                          });
                         }
                       }
+                    }
                 }
                 selectOnFocus
                 clearOnBlur
@@ -622,6 +623,53 @@ function Dropdown({
           </>
         ) : (
           <>
+            {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.padMaster && permissions?.padMaster?.isCreate && (
+              <>
+                <>
+                  <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                    <IconButton
+                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      onClick={() => setLookupDialog(true)}
+                      size="small"
+                      color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                    >
+                      <AddCircleIcon />
+                    </IconButton>
+                  </HtmlTooltip>
+                  {lookupDialog && (
+                    <ManagePadMaster
+                      referenceData={{ customerAccount: values[fieldData.lookupDependentOn] }}
+                      onClose={() => setLookupDialog(false)}
+                      onSuccess={(data) => {
+                        setLookupDialog(false);
+                        if (data.padName && data._id) {
+                          let tempNewOption = {
+                            default: false,
+                            optionLabel: data.padName,
+                            optionValue: data._id,
+                            order: option.length,
+                            customerAccount: data?.customerAccount,
+                            address: data?.address
+                          };
+                          setOptionsList([tempNewOption, ...option]);
+                          if (fieldData.lookupDependentOn) {
+                            if (
+                              data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
+                              data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
+                            ) {
+                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                            }
+                          } else {
+                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                </>
+              </>
+            )}
             {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.wellMaster && permissions?.wellMaster?.isCreate && (
               <>
                 <>
@@ -638,7 +686,7 @@ function Dropdown({
                   </HtmlTooltip>
                   {lookupDialog && (
                     <ManageWellMaster
-                      refrenceData={{ customerAccount: values[fieldData.lookupDependentOn] }}
+                      referenceData={{ customerAccount: values[fieldData.lookupDependentOn] }}
                       isClone={false}
                       wellMasterId={null}
                       onClose={() => setLookupDialog(false)}
@@ -650,7 +698,8 @@ function Dropdown({
                             optionLabel: data.wellName,
                             optionValue: data._id,
                             order: option.length,
-                            customerAccount: data?.customerAccount
+                            customerAccount: data?.customerAccount,
+                            address: data?.address
                           };
                           setOptionsList([tempNewOption, ...option]);
                           if (fieldData.lookupDependentOn) {
@@ -1150,7 +1199,7 @@ function Dropdown({
                           }
                         }
                       }}
-                      referenceData={{region: values['region']}}
+                      referenceData={{ region: values['region'] }}
                     />
                   )}
                 </>

@@ -106,6 +106,7 @@
   --accordion-details-border: #3d3d5c;
 
   --dark-primary: #0e0e23;
+  --dark-primary-rgb: 14, 14, 35;
   --dark-primary-light: hsl(240, 27%, 16%);
   --dark-secondary: #24243e;
   --accordion-summary-bg: hsl(240, 27%, 30%);
@@ -4235,5 +4236,11 @@ body .btn-outline-red-v1 {
     .MuiToolbar-root.MuiToolbar-regular.MuiToolbar-gutters {
       background-color: white;
     }
+  }
+}
+.has-mobile-step {
+  .detail-container-v1,
+  .detail-container {
+    margin-bottom: 50px;
   }
 }

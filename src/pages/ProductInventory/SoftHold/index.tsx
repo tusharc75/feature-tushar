@@ -101,7 +101,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
         showManimizeMaximize={true}
         showRequiredLabel={false}
       ></CustomDialogHeader>
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <Tabs
           textColor="primary"
           TabIndicatorProps={{

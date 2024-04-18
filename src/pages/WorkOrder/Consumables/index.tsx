@@ -36,7 +36,7 @@ const Consumables = ({
   stepId,
   serviceName,
   materialSubType = MATERIAL_SUB_TYPE.consumable,
-  workOrderData
+  workOrderData,
 }) => {
   let renderedFrom = `${camelCase(routes?.workOrder.title)}_consumable`;
 

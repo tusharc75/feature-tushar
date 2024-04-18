@@ -15,11 +15,10 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import TabPanel from '../../components/TabPanel';
 import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
-import { TbFileInvoice } from 'react-icons/tb';
 import ManageJobDialog from './ManageJobDialog';
 import Material from './Material';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { ACTIVITY_RESOURCE, jobProcessSteps } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, checkSuperAdminAccess, jobProcessSteps, sidebarResource } from 'src/constants/helpers';
 import Dispatch from './Dispatch';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
@@ -77,7 +76,7 @@ const JobDetail = () => {
       } = await axiosInstance().get(`${routes.job.path}/${id}`);
       setCurrentStep(getIndex(data?.processStatus, jobProcessSteps));
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.job)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);

@@ -130,8 +130,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
     const productFieldsColumns = generateColumns(renderedFrom, productFields);
     productFieldsColumns?.forEach((e) => {
-      column.push(e)
-    })
+      column.push(e);
+    });
 
     let fields = await fetch_po_product_fields(purchaseOrderData?.currency);
     fields?.forEach((e) => {
@@ -192,10 +192,10 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                   </HtmlTooltip>
                 } */}
               {permissions?.purchaseOrder?.isUpdate &&
-                row?.original?.type === MATERIAL_TYPE.product &&
-                allowedToEdit &&
-                row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
-                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+              row?.original?.type === MATERIAL_TYPE.product &&
+              allowedToEdit &&
+              row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
+              ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                 <HtmlTooltip title="Reject">
                   <span>
                     <IconButton
@@ -266,8 +266,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       const serviceResponse: any = await axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`);
       const costResponce: any = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData._id}`);
 
-
-      const tempMaterialAssets: any = {}
+      const tempMaterialAssets: any = {};
 
       let rows = result?.data?.data?.map((item, index) => {
         let finalObject = prepareDataForGrid(item);
@@ -355,7 +354,11 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
           : 0;
 
-        tempMaterialAssets[res?._id] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => { return { optionValue: e?._id, optionLabel: e?.detail } })
+        tempMaterialAssets[res?._id] = res?.subRows
+          ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
+          ?.map((e) => {
+            return { optionValue: e?._id, optionLabel: e?.detail };
+          });
         return res;
       });
 
@@ -441,8 +444,6 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     ]
   };
 
-
-
   return (
     <>
       <DetailsPageHeader
@@ -513,18 +514,31 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         />
       )}
       {rejectProductDialog && (
-        <RejectProduct
-          handleClose={() => setRejectProductDialog(null)}
-          handleSuccess={() => {
-            setRejectProductDialog(null);
-            fetchProduct();
-          }}
-          purchaseOrderData={purchaseOrderData}
-          POId={purchaseOrderData?._id}
-          product={rejectProductDialog}
-          warehouse={purchaseOrderData?.warehouse.optionValue}
-          materialAssets={materialAssets[rejectProductDialog?._id] || []}
-        />
+        <>
+          <Reject
+            purchaseOrderID={purchaseOrderData._id}
+            onClose={() => setRejectProductDialog(null)}
+            onSuccess={() => {
+              setRejectProductDialog(null);
+              fetchProduct();
+            }}
+            material={[rejectProductDialog]}
+            purchaseOrderData={purchaseOrderData}
+            materialAssets={materialAssets}
+          />
+          {/* <RejectProduct
+            handleClose={() => setRejectProductDialog(null)}
+            handleSuccess={() => {
+              setRejectProductDialog(null);
+              fetchProduct();
+            }}
+            purchaseOrderData={purchaseOrderData}
+            POId={purchaseOrderData?._id}
+            product={rejectProductDialog}
+            warehouse={purchaseOrderData?.warehouse.optionValue}
+            materialAssets={materialAssets[rejectProductDialog?._id] || []}
+          /> */}
+        </>
       )}
       {logDialog.open && (
         <Logs

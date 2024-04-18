@@ -1042,10 +1042,12 @@ const routes = {
       : RESOURCE_LABEL.iotChart,
     path: '/iot-chart'
   },
-  iotReport: {
-    title: storedRoutes && storedRoutes.iotReport && storedRoutes.iotReport?.title ? storedRoutes.iotReport?.title
-      : RESOURCE_LABEL.iotReport,
-    path: '/iot-report'
+  iotChartDetail: {
+    title:
+      storedRoutes && storedRoutes.iotChart && storedRoutes.iotChart.title
+        ? storedRoutes.iotChart.title
+        : RESOURCE_LABEL.iotChart,
+    path: '/iot-chart/detail'
   },
   sendOutboundMessage: {
     title: storedRoutes && storedRoutes.sendOutboundMessage && storedRoutes.sendOutboundMessage?.title ? storedRoutes.sendOutboundMessage?.title

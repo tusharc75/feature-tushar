@@ -23,10 +23,10 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 
-const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData }) => {
+const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData, setReserveAssetWarning }) => {
   const {
     state: { user, permissions }
   }: any = useData();
@@ -52,7 +52,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [planningData]);
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.planningMaterial}`);
@@ -87,12 +87,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail?.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === MATERIAL_TYPE.service
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail?.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === MATERIAL_TYPE.service
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </Box>
           </div>
         )
@@ -109,13 +109,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             {allowedToEdit && row.original.type !== MATERIAL_TYPE.serializedAsset ? (
               <p
                 onClick={() => {
-                  setMaterialEdit({
-                    open: true,
-                    data: row.original,
-                    bulkedit: false,
-                    showSaveAndNext:
-                      row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                  });
+                  onMaterialEdit(row, table.getRowModel().rows);
                 }}
                 className="link text-truncate"
                 title={row.original?.detail}
@@ -232,14 +226,14 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.type === MATERIAL_TYPE.package
-            ? parent.packageDetail?.packageName
-            : parent.serviceDetail?.serviceName;
+          ? parent.packageDetail?.packageName
+          : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
           : parent.type === MATERIAL_TYPE.package
-            ? parent?.packageDetail?.packageDescription
-            : parent?.serviceDetail?.serviceDescription;
+          ? parent?.packageDetail?.packageDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === MATERIAL_TYPE.serializedAsset)?.length;
       parent.hideSelection = false;
@@ -251,11 +245,19 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   };
 
   const onMaterialEdit = (row, rows) => {
+    let showSaveAndNext;
+    if (row.depth != 0) {
+      const allRows = rows.filter((ele) => ele.parentId === row.parentId);
+      showSaveAndNext = row?.index < allRows.length - 1 ? true : false;
+    } else {
+      showSaveAndNext = row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false;
+    }
+
     setMaterialEdit({
       open: true,
       data: row.original,
       bulkedit: false,
-      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+      showSaveAndNext: showSaveAndNext
     });
   };
 
@@ -264,26 +266,33 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.assetDetail.assetNumber
-              : _subRow.serviceDetail?.serviceName;
+          : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
+          ? _subRow.assetDetail.assetNumber
+          : _subRow.serviceDetail?.serviceName;
       _subRow.description =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
-          : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow.type === 'serializedAsset'
-              ? parent.description
-              : _subRow?.serviceDetail?.serviceDescription;
+          : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
+          ? parent.description
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
-      _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
+      _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === MATERIAL_TYPE.serializedAsset)?.length;
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
+    for(const _subRow of subRows) {
+      let assetStatus = _subRow?.assetDetail?.status;
+      if (planningData?.type === 'Rental Job' && _subRow.type === MATERIAL_TYPE.serializedAsset && assetStatus !== ASSET_STATUS.new && assetStatus !== ASSET_STATUS.available && assetStatus !== ASSET_STATUS.underReview) {
+        setReserveAssetWarning(true);
+        break;
+      }
+    }
     return subRows;
   };
 
@@ -337,13 +346,25 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-          setMaterialEdit({
-            open: true,
-            data: dataRows[rowIndex + 1],
-            bulkedit: false,
-            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
-          });
+          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+          if (!row?.parentId) {
+            const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
+            setMaterialEdit({
+              open: true,
+              data: dataRows[rowIndex + 1],
+              bulkedit: false,
+              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+            });
+          } else {
+            const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
+            const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
+            setMaterialEdit({
+              open: true,
+              data: allSubRowData[subRowIdx + 1],
+              bulkedit: false,
+              showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
+            });
+          }
         } else {
           setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
         }
@@ -385,7 +406,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
 
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
-    const flatArray = selectedRecords.filter((f) => f?.type === 'product' && f?.productDetail?.serializedProduct && f?.qty > f?.assetQty);
+    const flatArray = selectedRecords.filter((f) => f?.type === MATERIAL_TYPE.product && f?.productDetail?.serializedProduct && f?.qty > f?.assetQty);
     return flatArray.length === 0;
   };
 
@@ -399,7 +420,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         >
           Add Existing Products
         </MenuItem>
-        {!user?.user?.brandPolicy?.rentalService && planningData?.type === 'Rental Job' ? null :
+        {!user?.user?.brandPolicy?.rentalService && planningData?.type === 'Rental Job' ? null : (
           <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: 'service', parentId: null });
@@ -407,7 +428,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           >
             Add Existing Services
           </MenuItem>
-        }
+        )}
         <MenuItem
           onClick={() => {
             setAddDialog({ open: true, type: 'package', parentId: null });

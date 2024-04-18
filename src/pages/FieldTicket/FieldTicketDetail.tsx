@@ -19,7 +19,7 @@ import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
 import Versions from 'src/components/Versions';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, FIELD_TICKET_STATUS, checkSuperAdminAccess, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -94,7 +94,7 @@ const FieldTicketDetail = () => {
         setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
       }
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.fieldTicket)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(permissions?.fieldTicket?.isUpdate && isAllowedToEdit);

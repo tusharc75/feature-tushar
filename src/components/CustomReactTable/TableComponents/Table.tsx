@@ -26,6 +26,7 @@ type TTableProps = {
   height?: any;
   exportTableView?: boolean;
   virtualization: boolean;
+  onRowClick: (row: Row<any>) => void;
 };
 
 const TableComponent = forwardRef(function (
@@ -44,7 +45,8 @@ const TableComponent = forwardRef(function (
     error,
     height,
     exportTableView = false,
-    virtualization = false
+    virtualization = false,
+    onRowClick
   }: TTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -116,6 +118,7 @@ const TableComponent = forwardRef(function (
                 left: 0,
                 transform: `translateY(${virtualRow.start}px)`
               }}
+              onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}
             >
               {columnVirtualizer.getVirtualItems().map((virtualCell, index) => {
                 const cell = row.getVisibleCells()[virtualCell.index];
@@ -161,7 +164,7 @@ const TableComponent = forwardRef(function (
       <>
         {rows.map((row) => {
           return (
-            <TableRow key={row.id} className={`tr`}>
+            <TableRow key={row.id} className={`tr`} onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}>
               {row.getVisibleCells().map((cell, index) => {
                 if (exportTableView && excludedColumns.includes(cell.column.columnDef.id)) return null;
                 return (

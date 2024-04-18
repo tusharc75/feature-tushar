@@ -493,7 +493,6 @@ export const RESOURCE_LABEL = {
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
-  iotReport: 'IoT Report',
   sendOutboundMessage: 'Send Outbound Message',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
@@ -548,7 +547,8 @@ export const CHILD_RESOURCE = {
   payrollHoliday: 'Payroll Holiday',
   payrollPayTypes: 'Payroll Pay Types',
   payrollPaidTimeOff: 'Payroll Paid Time Off',
-  dealsMaterial: 'Deals Material'
+  dealsMaterial: 'Deals Material',
+  rentalManagementTechnician: 'Rental Management Technician',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -986,6 +986,28 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
   for (const key of arr) {
     if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;
+    } else if ((key.type === 'multiSelect' || key.type === 'dropDown') && key?.dataList) {
+      if (key.type === 'multiSelect') {
+        const values =
+          dataObj[key.fieldName] && dataObj[key.fieldName].length
+            ? typeof dataObj[key.fieldName] === 'string'
+              ? [dataObj[key.fieldName]]
+              : dataObj[key.fieldName].map((val: any) => filterValues(val))
+            : [];
+
+        obj[key.fieldName] = values;
+
+        obj[`${key.fieldName}_dataList`] = dataObj[key.fieldName] ? dataObj[key.fieldName] : [];
+      } else {
+        const value =
+          dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) && dataObj[key.fieldName]?.length
+            ? dataObj[key.fieldName][0]
+            : filterValues(dataObj[key.fieldName]);
+
+        obj[key.fieldName] = value ? value : '';
+
+        obj[`${key.fieldName}_dataList`] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
+      }
     } else if (key.type === 'multiSelect') {
       const values =
         dataObj[key.fieldName] && dataObj[key.fieldName].length
@@ -2220,6 +2242,10 @@ export const LOG_RESOURCE = {
 
 export const INTERVALS = [
   {
+    optionValue: 'perCycle',
+    optionLabel: 'Per Cycle'
+  },
+  {
     optionValue: '1second',
     optionLabel: '1 Second'
   },
@@ -2265,7 +2291,7 @@ export const IOT_REPORT_LIST = [
   {
     title: sidebarResource.iotDataPoints,
     key: 'iotDataPoints',
-    api: '/report/iot/data-points',
+    api: '/report/iot-data-points',
     filters: [
       {
         fieldName: 'asset',
@@ -2299,6 +2325,7 @@ export const IOT_REPORT_LIST = [
         lookup: true,
         type: 'dropDown',
         multiple: true,
+        required: true,
         _id: '5'
       },
       {
@@ -2458,6 +2485,26 @@ export const REPORT_LIST = [
     permission: 'deals',
     key: 'standardReport',
     type: 'fleetReport'
+  },
+  {
+    title: 'Daily In/Out/Evap/Run Hours',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'dailyInOutEvapRunhours',
+    defaultColumn: true,
+  },
+  {
+    title: 'IOT Data Points',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'iotDataPoints',
+    defaultColumn: true
+  },
+  {
+    title: 'Unit Downtime Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'iotUnitDowntimeReport',
   }
 ];
 
@@ -2979,6 +3026,12 @@ export const STEPS_STYLE = {
   sideBar: 'Side Bar',
 }
 
+export const DEAL_STAGE = {
+  proposalSent: 'Proposal Sent',
+  contractSigned: 'Contract Signed',
+  renewalSent: 'Renewal Sent',
+  renewalSigned: 'Renewal Signed'
+}
 
 export const cloneResourceData = (fromFields, toFields, data) => {
   const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName));
@@ -3025,4 +3078,8 @@ export const getDefaultMyRecordType = (user, resource) => {
   else {
     return 1;
   }
+}
+
+export const checkSuperAdminAccess = (user, resource) => {
+  return user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource) ? true : false
 }

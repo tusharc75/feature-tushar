@@ -224,9 +224,6 @@ import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
 import IotDataPoints from './pages/IotDataPoints';
 import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
 import IotChart from './pages/IotChart';
-import IotChartDetail from './pages/IotChart/IotChartDetail';
-import IotReportList from './pages/IotReport';
-import IotReport from './pages/IotReport/Report';
 import AccountsReceivable from './pages/AccountsReceivable';
 import AccountsReceivableDetail from './pages/AccountsReceivable/AccountsReceivableDetail';
 import DeviceTemplates from './pages/DeviceTemplates';
@@ -1036,14 +1033,8 @@ function App() {
             <PrivateRoute exact path={`${routes.iotChart.path}`}>
               <IotChart />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.iotChart.path}/:assetId`}>
-              <IotChartDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.iotReport.path}`}>
-              <IotReportList />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.iotReport.path}/:resource`}>
-              <IotReport />
+            <PrivateRoute exact path={`${routes.iotChartDetail.path}/:id`}>
+              <SerializedAssetDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.sendOutboundMessage.path}`}>
               <SendOutboundMessage />

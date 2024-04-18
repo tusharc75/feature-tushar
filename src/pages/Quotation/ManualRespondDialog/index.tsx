@@ -27,6 +27,10 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
 
   const manualSendToCustomer = () => {
     if (selectedOption) {
+      if(selectedOption === 'Reject' && !comment) {
+        setCommentError('Comment is required');
+        return;
+      }
       setSubmitting(true);
       let dataObj: any = {
         status: options[selectedOption],
@@ -91,6 +95,7 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
                 variant="outlined"
                 error={Boolean(commentError)}
                 helperText={Boolean(commentError) && commentError}
+                required={selectedOption === 'Reject'}
               />
             </Box>
           )}

@@ -2,6 +2,8 @@ import React from 'react';
 import { withStyles } from '@material-ui/core';
 import MuiDialogContent, { DialogContentProps } from '@material-ui/core/DialogContent';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { CSSProperties } from '@material-ui/core/styles/withStyles';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const DialogContent = withStyles((theme) => ({
   root: {
@@ -10,13 +12,52 @@ const DialogContent = withStyles((theme) => ({
   }
 }))(MuiDialogContent);
 
-function CustomDialogContent({ children, style = {}, ...others }: DialogContentProps) {
+const useViewportDynamicHeight = () => {
+  const [height, setHeight] = React.useState(0);
+
+  React.useEffect(() => {
+    const setHeightFunc = () => {
+      if (window.visualViewport) {
+        const vh = window.visualViewport.height;
+        setHeight(vh);
+        document.body.style.height = `${vh}px`;
+        document.getElementsByTagName('html')[0].style.height = `${vh}px`;
+        document.getElementsByTagName('html')[0].style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+      }
+    };
+    setHeightFunc();
+    window?.visualViewport?.addEventListener('resize', setHeightFunc);
+    return () => {
+      document?.body?.removeAttribute?.('style');
+      document?.getElementsByTagName('html')[0]?.removeAttribute?.('style');
+      window?.visualViewport?.removeEventListener('resize', setHeightFunc);
+    };
+  }, []);
+  return height;
+};
+
+type DialogContentPropsExtended = DialogContentProps & {
+  isFooterPresent?: boolean;
+};
+
+function CustomDialogContent({ children, style = {}, isFooterPresent = true, ...others }: DialogContentPropsExtended) {
+  const vh = useViewportDynamicHeight();
   const [themeColor] = useAppTheme();
   return (
     <React.Fragment>
       <DialogContent
-        className="!max-h-[calc(100svh-110px)]"
-        style={{ ...style, background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff' }}
+        className={`${isFooterPresent
+            ? 'max-h-[calc(var(--vh)-110px)] max-[560px]:max-h-[calc(var(--vh)-99px)]'
+            : 'max-h-[calc(var(--vh)-55px)] max-[560px]:max-h-[calc(var(--vh)-45px)]'
+          } overscroll-contain ${isTablet || isMobile ? 'min-h-[250px]' : ''}`}
+        style={
+          {
+            ...style,
+            background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff',
+            '--vh': `${vh}px`
+          } as CSSProperties
+        }
         {...others}
       >
         {children}

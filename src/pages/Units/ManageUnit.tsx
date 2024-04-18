@@ -1,7 +1,7 @@
 import { Box, Button, Chip, CircularProgress, Dialog, TextField, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { camelCase, isEqual, update } from 'lodash';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { isEqual } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -12,12 +12,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import {
   CustomDialogTransition,
-  FIELD_TICKET_STATUS,
-  GenerateResourceLineNumber,
-  RESOURCE_LABEL,
-  cloneResourceData,
-  fieldServiceOrder,
-  serviceMaster,
   setFieldsInAscendingOrder,
   sidebarResource
 } from 'src/constants/helpers';
@@ -25,11 +19,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import { FaDiceOne } from 'react-icons/fa';
-import { findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
 
 const ManageUnit = ({ onClose, onSuccess, id = null }) => {
@@ -52,7 +42,9 @@ const ManageUnit = ({ onClose, onSuccess, id = null }) => {
   const fetchFields = async () => {
     try {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.units}`);
-      const data = response?.data?.data;
+      var data = response?.data?.data;
+
+      data = data.filter((e) => e.fieldData?.fieldName !== 'deal');
 
       const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);

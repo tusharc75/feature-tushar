@@ -27,6 +27,7 @@ import {
   DELIVERY_TICKET_TYPE,
   QUOTATION_STATUS,
   RENTAL_STATUS,
+  checkSuperAdminAccess,
   deliveryTicket,
   rentalManagement,
   rentalManagementSteps,
@@ -126,14 +127,12 @@ const RentalManagementDetailsPage = () => {
     history.push(`?tab=${newValue}`);
   };
 
-
-
   useEffect(() => {
     if (id) {
       getRentalManagementFields();
       fetchRentalManagementData();
       fetchQuotationData();
-      fetchPolicy()
+      fetchPolicy();
     }
     if (!isOffline) {
       fetchAssetStatusRights();
@@ -238,7 +237,7 @@ const RentalManagementDetailsPage = () => {
       }
       setLoadingDetails(false);
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.rentalManagement)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
@@ -428,6 +427,19 @@ const RentalManagementDetailsPage = () => {
             <Box className="control-buttons-v1">
               <>
                 <Fragment>
+                  {permissions?.iotChart?.isRead && (
+                    <Button
+                      className="btn-outline-v1"
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        history.push(`${routes.iotChart.path}?referenceData=${rentalManagementData?.shippingAddress?.optionValue}`)
+                      }}
+                    >
+                      {`View ${routes.iotChart.title}`}
+                    </Button>
+                  )}
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     className="btn-outline-v1"

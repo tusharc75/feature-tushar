@@ -13,11 +13,9 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDynamicForm from './ManageDynamicForm';
-import { FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
 import TabPanel from 'src/components/TabPanel';
 import Step from './Step';
-import { getResourceLabel } from 'src/constants/helpers';
+import { checkSuperAdminAccess, getResourceLabel } from 'src/constants/helpers';
 import PreviewDownload from 'src/components/PreviewDownload';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
@@ -84,7 +82,7 @@ const DynamicFormDetail = () => {
       let isAllowedToDelete = true;
       if (data.hasOwnProperty('collaborator') || data.hasOwnProperty('owner')) {
         isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (user?.role?.selectedEntity?.superAdminAccess) {
+        if (checkSuperAdminAccess(user, resource)) {
           isAllowedToEdit = true;
         }
         isAllowedToDelete = data.owner.optionValue === user?.user?._id;
