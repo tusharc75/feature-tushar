@@ -374,7 +374,7 @@ const EntityDetailsPage = () => {
             </Box>
             {DOA_RESOURCE?.filter((_r) => permissions[_r.key]?.isRead)?.map((_r) => (
               <Box>
-                <DoaSetup resource={_r.resoorce} entity={id} />
+                <DoaSetup resource={_r.resorce} entity={id} />
               </Box>
             ))}
           </Grid>

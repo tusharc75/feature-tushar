@@ -3087,7 +3087,7 @@ export const checkSuperAdminAccess = (user, resource) => {
 export const DOA_RESOURCE = [
   {
     key: 'purchaseRequisition',
-    resoorce: sidebarResource.purchaseRequisition
+    resorce: sidebarResource.purchaseRequisition
   }
 ] 
 
