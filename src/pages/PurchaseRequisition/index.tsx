@@ -330,6 +330,7 @@ const PurchaseRequisition = () => {
             fetchData();
             setShowManageDialog({ open: false, isClone: false, idToClone: null });
           }}
+          currency={user.user?.brandCurrency || null}
         />
       )}
 

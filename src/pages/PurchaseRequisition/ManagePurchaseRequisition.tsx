@@ -17,7 +17,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema, GenerateResourceLineNumber } from '../../constants/helpers';
 
-const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null ,currency}) => {
   const history = useHistory();
   const {
     state: { user }
@@ -66,6 +66,9 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['purchaseRequisitionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (currency) {
+          tempInitialData['currency'] = currency;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
