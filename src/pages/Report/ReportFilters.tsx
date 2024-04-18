@@ -405,8 +405,6 @@ const ReportFilters = (props: FiltersProps) => {
     return error;
   };
 
-  console.log(selectedResources);
-
   return (
     <Container maxWidth="sm">
       <Box height={'100%'} my={2}>
