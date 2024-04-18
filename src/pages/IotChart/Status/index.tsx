@@ -9,7 +9,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').startOf('day').toJSON()),
     to: new Date(),
-    intervals: '1hour'
+    intervals: 'perCycle'
   });
 
   return (

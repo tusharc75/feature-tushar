@@ -1227,7 +1227,7 @@ export const initializeDropdownById = (field, fieldName, id) => {
 export const dateFormat = localStorage.getItem('dateFormat') ?? 'MM/DD/YYYY';
 export const dateTimeFormat = localStorage.getItem('dateTimeFormat') ?? 'MM/DD/YYYY hh:mm A';
 export const cardDateFormat = localStorage.getItem('cardDateFormat') ?? 'MMM DD, YYYY';
-export const dateTimeFormat24Hours = `${dateFormat} HH:mm`;
+export const dateTimeFormat24Hours = `${dateFormat} HH:mm:ss`;
 
 export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/dd/yyyy';
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
@@ -3089,7 +3089,7 @@ export const DOA_RESOURCE = [
     key: 'purchaseRequisition',
     resorce: sidebarResource.purchaseRequisition
   }
-] 
+]
 
 export const DoaApproveType = {
   user: 'User',

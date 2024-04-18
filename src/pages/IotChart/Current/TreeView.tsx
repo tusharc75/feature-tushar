@@ -63,18 +63,20 @@ const AccordionDetails = withStyles((theme) => ({
 }))(MuiAccordionDetails);
 
 export default function TreeView({ expandedAccordition, setExpandedAccordition, category, currentData, assetId, deviceTemplate = null }) {
+  
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
     to: new Date(),
-    intervals: '1day'
+    intervals: 'perCycle'
   });
+  
   const [dataPoint, setDataPoint] = useState(null);
 
   const handleClose = () => {
     setDateFilters({
       from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
       to: new Date(),
-      intervals: '1day'
+      intervals: 'perCycle'
     });
     setDataPoint(null);
   };

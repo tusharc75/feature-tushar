@@ -5,6 +5,8 @@ import { Box } from '@material-ui/core';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 import { useAppTheme } from 'src/constants/AppConfig';
+import moment from 'moment';
+import { dateTimeFormat24Hours } from 'src/constants/helpers';
 
 let chartOptions: any = {
   theme: {
@@ -34,28 +36,28 @@ let chartOptions: any = {
   xaxis: {
     type: 'datetime',
     labels: {
-      formatter: function(value) {
-        const date = new Date(value);
-        return date.toLocaleDateString('default', { month: 'short', day: 'numeric' }) + ' ' + date.toLocaleTimeString('default', { hour: '2-digit', minute:'2-digit' });
+      formatter: function (value) {
+        const formattedDateTime = moment(value).format(dateTimeFormat24Hours);
+        return formattedDateTime;
       }
     },
     tickAmount: 8
-  },  
+  },
   legend: {
     position: 'right'
   },
   tooltip: {
     x: {
-      formatter: function(value) {
+      formatter: function (value) {
         let date = new Date(value);
         if (isNaN(date.getTime())) {
           return value;
         } else {
-          return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+          return moment(value).format(dateTimeFormat24Hours);
         }
       }
     }
-  }  
+  }
 };
 
 const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
@@ -167,7 +169,12 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
   return (
     <>
       {chartData ? (
-        <ReactApexChart key={currentChartTheme} options={chartOptions} series={series} type="rangeBar" height={500} />
+        <ReactApexChart
+          key={currentChartTheme}
+          options={chartOptions}
+          series={series}
+          type="rangeBar"
+          height={500} />
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
