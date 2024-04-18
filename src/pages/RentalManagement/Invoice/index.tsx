@@ -199,22 +199,23 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
         parent.detail =
           parent.type === MATERIAL_TYPE.manualEntry
             ? parent.detail
-            : parent.type === 'product'
+            : parent.type === MATERIAL_TYPE.product
               ? parent?.productDetail?.productName
-              : parent.type === 'service'
+              : parent.type === MATERIAL_TYPE.service
                 ? parent?.serviceDetail?.serviceName
                 : parent.packageDetail?.packageName;
         parent.description =
-          parent?.type === 'service'
+          parent?.type === MATERIAL_TYPE.service
             ? parent?.serviceDetail?.serviceDescription || ''
-            : parent?.type === 'product'
+            : parent?.type === MATERIAL_TYPE.product
               ? parent?.productDetail?.productDescription || ''
-              : parent?.type === 'package'
+              : parent?.type === MATERIAL_TYPE.package
                 ? parent?.packageDetail?.packageDescription || ''
                 : parent.type === MATERIAL_TYPE.manualEntry
                   ? parent.description
                   : '';
         parent.qty = parent.qty;
+        parent.status = parent?.productDetail?.serializedProduct ? parent.status : '';
         parent.subRows = generateNestedData(material, inventory, parent);
       });
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -247,20 +248,21 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
     childProduct.forEach((_subRow) => {
       _subRow.index = parent.index + '.' + (subRows?.length + 1);
       _subRow.detail =
-        _subRow?.type === 'product'
+        _subRow?.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productName
-          : _subRow?.type === 'service'
+          : _subRow?.type === MATERIAL_TYPE.service
             ? _subRow?.serviceDetail?.serviceName
             : _subRow?.packageDetail?.packageName;
       _subRow.description =
-        _subRow?.type === 'service'
+        _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow?.type === 'product'
+          : _subRow?.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow?.type === 'package'
+            : _subRow?.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.qty = `${parent.qty * _subRow.qty}`;
+      _subRow.status = _subRow?.productDetail?.serializedProduct ? parent.status : '';
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
       subRows.push(_subRow);
     });
