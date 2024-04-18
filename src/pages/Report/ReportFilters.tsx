@@ -180,7 +180,7 @@ const ReportFilters = (props: FiltersProps) => {
   };
 
   useEffect(() => {
-    setDefaultResource();
+    if (!selectedResources?.length) setDefaultResource();
   }, [filterOptions]);
 
   const handleSelectFilter = (type, name, value) => {
@@ -404,6 +404,8 @@ const ReportFilters = (props: FiltersProps) => {
     setError(error);
     return error;
   };
+
+  console.log(selectedResources);
 
   return (
     <Container maxWidth="sm">
