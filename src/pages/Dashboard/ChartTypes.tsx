@@ -14,7 +14,7 @@ import { GlobalFiltersType } from './GlobalFilter';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import MapView from './MapView';
 import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 import getStaticData from './getStaticData';
@@ -452,6 +452,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
             ...filterData,
             status: chart.statusOptions
           }}
+          kpi={camelCase(chart.kpi.name)}
         />
       )}
       {chart.hasExport && (

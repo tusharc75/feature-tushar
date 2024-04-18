@@ -1,11 +1,17 @@
-import React, { useCallback, useState } from 'react';
-import { Popover, TextField, Box, CircularProgress } from '@material-ui/core';
+import React, { useCallback, useContext, useState } from 'react';
+import { Popover, TextField, Box, CircularProgress, IconButton, Button } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import routes from 'src/components/Helpers/Routes';
-import { debounce } from 'lodash';
+import { debounce, isEmpty } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import { sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { RiDeleteBin6Fill } from 'react-icons/ri';
+import { AiFillEdit } from 'react-icons/ai';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import SaveFilterDialog from './SaveFilterDialog';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 interface Props {
   filters: { key: string; title: string; multiple?: boolean; defaultValue?: number; }[];
   anchorEl: any;
@@ -14,9 +20,10 @@ interface Props {
   setValues: any;
   filterOptions: any;
   isCRM: boolean;
+  kpi: string;
 }
 
-const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values, setValues, isCRM }: Props) => {
+const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values, setValues, isCRM, kpi }: Props) => {
   const {
     state: { selectedEntity }
   } = useData();
@@ -24,7 +31,12 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
   const [loading, setLoading] = useState({ loading: false, resource: null });
   const [currentPage, setCurrentPage] = useState(0);
   const [inputValues, setInputValues] = useState({});
-  
+  const [selectedUserFilter, setSelectedUserFilter] = useState(null);
+  const [userFilters, setUserFilters] = useState([]);
+  const [isFilterDeleteConfirm, setIsFilterDeleteConfirm] = useState({ open: false, ids: null });
+  const [isSaveFilter, setIsSaveFilter] = useState({ open: false, data: null });
+  const { setToastConfig } = useContext(CustomToastContext);
+
   React.useEffect(() => {
     if (!filters) return;
     filters.forEach((filter) => {
@@ -34,6 +46,19 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
       }));
     });
   }, [filters]);
+
+  const fetchFilters = async () => {
+    try {
+      const { data } = await axiosInstance().get(`/kpi/filters?kpi=${kpi}`);
+      setUserFilters(data?.data);
+    } catch (error) {
+      setToastConfig(error);
+    }
+  }
+
+  React.useEffect(() => {
+    fetchFilters();
+  }, [])
 
   const fetchOptions = useCallback(
     debounce(async (resource: string, searchKey: string = '', page: number = 0, key: string = '') => {
@@ -50,15 +75,15 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
         let query = `sa-field/options?resource=${lookupResourceName}&limit=25&page=${page}&entity=${selectedEntity}&search=${searchKey}`;
         const response = await axiosInstance().get(query);
         let data = response?.data?.data
-      
-        if(resource===sidebarResource.marketSegment){
-          if(key==='marketSegment'){
+
+        if (resource === sidebarResource.marketSegment) {
+          if (key === 'marketSegment') {
             data = data.filter((d) => !d.parentMarketSegment);
-          }else if(key==='subMarketSegment'){
+          } else if (key === 'subMarketSegment') {
             data = data.filter((d) => d.parentMarketSegment);
           }
         }
-       
+
         setOptions((currentOptions) => {
           return page === 0 ? [...data] : [...currentOptions, ...data];
         });
@@ -81,7 +106,25 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
   };
 
   if (!values) return <p>Loading...</p>;
-  
+
+  const handleDeleteUserFilter = () => {
+    axiosInstance()
+      .put(`/kpi/filters/remove`, { ids: isFilterDeleteConfirm.ids })
+      .then(({ data }) => {
+        fetchFilters();
+        setIsFilterDeleteConfirm({ open: false, ids: null });
+        setSelectedUserFilter(null);
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((err) => {
+        setToastConfig(err);
+      });
+  };
+
   return (
     <Popover
       open={Boolean(anchorEl)}
@@ -96,64 +139,94 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
         horizontal: 'center'
       }}
     >
-      <Box width={300} padding={'0px 16px 16px 16px'}>
-      {filters.map((filter:any, index) => (
-        <Box mt={'16px'} key={index}>
-          {filter?.resource ? (
-            <Autocomplete
-              size="small"
-              multiple={filter?.multiple}
-              fullWidth
-              // inputValue={inputValues[filter.key] || ''}
-              onOpen={() => {
+      <Box width={300} padding={'0px 16px 16px 16px'} mt={2}>
+        <Autocomplete
+          fullWidth
+          size="small"
+          value={selectedUserFilter}
+          onChange={(event: any, newValue: any) => {
+            setSelectedUserFilter(newValue || null);
+            setValues(newValue?.filterValue || {});
+            setInputValues(newValue?.filterValue || {});
+          }}
+          getOptionLabel={(option) => option.title}
+          renderOption={(option) => (
+            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
+              <span style={{ width: 'calc(100% - 71px)' }}>{option?.title}</span>
+              <Box>
+                <HtmlTooltip title={'Edit'} placement="top" arrow enterTouchDelay={0}>
+                  <IconButton size="small" style={{ marginRight: '20px' }}>
+                    <AiFillEdit />
+                  </IconButton>
+                </HtmlTooltip>
+                <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
+                  <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
+                    <RiDeleteBin6Fill />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
+            </Box>
+          )}
+          id="controllable-states-demo"
+          options={userFilters}
+          renderInput={(params) => <TextField {...params} fullWidth label="Select a Filter Set" variant="outlined" />}
+        />
+        {filters.map((filter: any, index) => (
+          <Box mt={'16px'} key={index}>
+            {filter?.resource ? (
+              <Autocomplete
+                size="small"
+                multiple={filter?.multiple}
+                fullWidth
+                onOpen={() => {
                   setOptions([]);
                   setLoading({ loading: true, resource: filter?.resource });
                   fetchOptions(filter?.resource, '', 0, filter.key);
-              }}
-              onInputChange={(event, value, reason) => {
-                if (reason === 'input') {
-                  setInputValues((prevValues) => ({ ...prevValues, [filter?.key]: value }));
-                  fetchOptions(filter?.resource, value);
-                }
-              }}
-              loading={loading.loading && loading.resource === filter?.resource}
-              options={options}
-              autoHighlight
-              value={values[filter.key]}
-              getOptionLabel={(option: any) => option.optionLabel}
-              getOptionSelected={(option, val) => option.optionValue === val.optionValue}
-              onChange={(_, val) => {
-                handleChange(filter.key, val);
-                setInputValues((prevValues) => ({ ...prevValues, [filter.key]: '' }));
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={routes[filter.key] ? routes[filter.key]?.title : filter.title}
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {loading.loading && loading.resource === filter?.resource ? (
-                          <CircularProgress color="inherit" size={20} />
-                        ) : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    )
-                  }}
-                  variant="outlined"
-                />
-              )}
-              ListboxProps={{
-                onScroll: (e:any) => {
-                  if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight-1) {
-                    setLoading({ loading: true, resource: filter?.resource });
-                    fetchOptions(filter?.resource, '', currentPage + 1);
+                }}
+                onInputChange={(event, value, reason) => {
+                  if (reason === 'input') {
+                    setInputValues((prevValues) => ({ ...prevValues, [filter?.key]: value }));
+                    fetchOptions(filter?.resource, value);
                   }
-                }
-              }}
-            />
-          ) : (filter.key in filterOptions ? (
+                }}
+                loading={loading.loading && loading.resource === filter?.resource}
+                options={options}
+                autoHighlight
+                value={values[filter.key]}
+                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionSelected={(option, val) => option.optionValue === val.optionValue}
+                onChange={(_, val) => {
+                  handleChange(filter.key, val);
+                  setInputValues((prevValues) => ({ ...prevValues, [filter.key]: '' }));
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={routes[filter.key] ? routes[filter.key]?.title : filter.title}
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {loading.loading && loading.resource === filter?.resource ? (
+                            <CircularProgress color="inherit" size={20} />
+                          ) : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      )
+                    }}
+                    variant="outlined"
+                  />
+                )}
+                ListboxProps={{
+                  onScroll: (e: any) => {
+                    if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1) {
+                      setLoading({ loading: true, resource: filter?.resource });
+                      fetchOptions(filter?.resource, '', currentPage + 1);
+                    }
+                  }
+                }}
+              />
+            ) : (filter.key in filterOptions ? (
               <Autocomplete
                 size="small"
                 multiple={filter?.multiple}
@@ -165,6 +238,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                 getOptionSelected={(option, val) => option.optionValue === val.optionValue}
                 onChange={(_, val) => {
                   handleChange(filter.key, val);
+                  setInputValues((prevValues) => ({ ...prevValues, [filter?.key]: val }));
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -184,14 +258,51 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                 fullWidth
                 margin="dense"
                 value={values[filter.key]}
-                onChange={(e) => handleChange(filter.key, Number(e.target.value))}
+                onChange={(e) => {
+                  handleChange(filter.key, Number(e.target.value));
+                  setInputValues((prevValues) => ({ ...prevValues, [filter?.key]: e.target.value }));
+                }}
               />
             )
-          )}
-        </Box>
-      ))}
-    </Box>
-
+            )}
+          </Box>
+        ))}
+        <Button
+          onClick={() => {
+            setIsSaveFilter({ open: true, data: selectedUserFilter });
+          }}
+          disabled={isEmpty(inputValues) && !selectedUserFilter ? true : false}
+          size="small"
+          color="primary"
+          className="yellow-button mt-2"
+        >
+          {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
+        </Button>
+      </Box>
+      {isSaveFilter.open && (
+        <SaveFilterDialog
+          handleClose={() => {
+            setIsSaveFilter({ open: false, data: null });
+          }}
+          kpi={kpi}
+          handleSucess={() => {
+            setIsSaveFilter({ open: false, data: null });
+            setInputValues({});
+            fetchFilters();
+            setSelectedUserFilter(null);
+          }}
+          filterData={isSaveFilter.data}
+          filterValue={inputValues}
+        />
+      )}
+      {isFilterDeleteConfirm.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to delete ?`}
+          onClose={() => setIsFilterDeleteConfirm({ open: false, ids: null })}
+          onOk={handleDeleteUserFilter}
+        />
+      )}
     </Popover>
   );
 };
