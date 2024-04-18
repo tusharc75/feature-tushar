@@ -180,7 +180,7 @@ const ReportFilters = (props: FiltersProps) => {
   };
 
   useEffect(() => {
-    setDefaultResource();
+    if (!selectedResources?.length) setDefaultResource();
   }, [filterOptions]);
 
   const handleSelectFilter = (type, name, value) => {
