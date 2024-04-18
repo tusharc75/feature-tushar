@@ -2668,17 +2668,7 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
 };
 
 export const PURCHASE_REQUISITION_STEP_STATUS = {
-  start: 'start',
-  pause: 'pause',
   end: 'end',
-  completed: 'Completed',
-  passed: 'Passed',
-  failed: 'Failed',
-  inProgress: 'In-Progress',
-  skipped: 'Skipped',
-  needReperform: 'Need Reperform',
-  acceptByCustomer: 'Accepted by Customer',
-  rejectByCustomer: 'Rejected by Customer',
 };
 
 type ChipStatus =
