@@ -164,9 +164,6 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
     setCurrentChartTheme(themeColor);
   }, [themeColor]);
 
-  console.log(chartData);
-  console.log(series);
-
   return (
     <>
       {chartData ? (
