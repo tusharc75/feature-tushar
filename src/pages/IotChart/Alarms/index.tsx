@@ -8,7 +8,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { dateTimeFormat, gridLoadingTimeout } from 'src/constants/helpers';
+import { dateTimeFormat24Hours, gridLoadingTimeout } from 'src/constants/helpers';
 
 const Alarms = ({ deviceTemplate, assetId }) => {
   const { state, dispatch } = useTableReducer();
@@ -46,7 +46,7 @@ const Alarms = ({ deviceTemplate, assetId }) => {
     } else {
       deepFilter = deepFilter + `&dataPoints=${selectedAlarm.optionValue}`;
     }
-    if(selectedAlert){
+    if (selectedAlert) {
       deepFilter = deepFilter + `&fieldValue=${selectedAlert}`;
     }
     return `${deepFilter}`;
@@ -67,7 +67,7 @@ const Alarms = ({ deviceTemplate, assetId }) => {
       disabled: true,
       disableFilters: true,
       disableSortBy: true,
-      Cell: ({ row }) => <div>{moment(row?.original.time).format(dateTimeFormat)}</div>
+      Cell: ({ row }) => <div>{moment(row?.original.time).format(dateTimeFormat24Hours)}</div>
     },
     {
       accessor: 'alertNumber',
