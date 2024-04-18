@@ -3,7 +3,7 @@ import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -12,8 +12,8 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { fetch_pr_cost_fields } from '../../../components/PurchaseRequisition/helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const CostDialog = ({ onClose, purchaseRequisitionData, handleAddCost, handleUpdateCost, costData, bulkEdit, showSaveAndNext, loadingEdit }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -28,7 +28,7 @@ const CostDialog = ({ onClose, purchaseRequisitionData, handleAddCost, handleUpd
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    let prFields = await fetch_pr_cost_fields(purchaseRequisitionData?.currency);
+    let prFields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseRequisitionCost, purchaseRequisitionData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(prFields)));
     if (bulkEdit) {
       prFields.forEach((element) => {

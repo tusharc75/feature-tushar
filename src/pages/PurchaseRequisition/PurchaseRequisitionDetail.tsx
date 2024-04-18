@@ -13,7 +13,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, PURCHASE_REQUISITION_STEP_STATUS, checkSuperAdminAccess, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, checkSuperAdminAccess, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -25,6 +25,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const PurchaseRequisitionDetail = () => {
+
   const renderedFrom = camelCase(routes?.purchaseRequisition.title);
   const { id } = useParams();
   const history = useHistory();
@@ -74,11 +75,7 @@ const PurchaseRequisitionDetail = () => {
       if (checkSuperAdminAccess(user, sidebarResource.purchaseRequisition)) {
         isAllowedToEdit = true;
       }
-      if (data?.status === PURCHASE_REQUISITION_STEP_STATUS.end) {
-        setCurrentStep(purchaseRequisitionSteps?.length - 1);
-      } else {
-        setCurrentStep(getIndex(data?.processStatus, purchaseRequisitionSteps));
-      }
+      setCurrentStep(getIndex(data?.processStatus, purchaseRequisitionSteps));
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPurchaseRequisitionData(data);
@@ -246,22 +243,28 @@ const PurchaseRequisitionDetail = () => {
                   steps={purchaseRequisitionSteps}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
-                  isStepEnded={[PURCHASE_REQUISITION_STEP_STATUS.end].includes(purchaseRequisitionData?.status)}
+                  isStepEnded={false}
                   setStepFullScreen={() => setStepFullScreen(true)}
                 />
                 <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                   {currentStep === 0 && (
-                     <Material 
-                     renderedFrom={`${renderedFrom}_grid-1`} 
-                     allowedToEdit={allowedToEdit} 
-                     purchaseRequisitionData={purchaseRequisitionData} 
-                     />
+                    <Material
+                      allowedToEdit={allowedToEdit}
+                      allowedToAddMaterial={true}
+                      purchaseRequisitionData={purchaseRequisitionData}
+                    />
                   )}
                   {currentStep === 1 && (
-                   <Material renderedFrom={`${renderedFrom}_grid-1`} allowedToEdit={false} purchaseRequisitionData={purchaseRequisitionData} />
+                    <Material
+                      allowedToEdit={allowedToEdit}
+                      allowedToAddMaterial={false}
+                      purchaseRequisitionData={purchaseRequisitionData} />
                   )}
-                   {currentStep === 2 && (
-                   <Material renderedFrom={`${renderedFrom}_grid-1`} allowedToEdit={false} purchaseRequisitionData={purchaseRequisitionData} />
+                  {currentStep === 2 && (
+                    <Material
+                      allowedToEdit={allowedToEdit}
+                      allowedToAddMaterial={false}
+                      purchaseRequisitionData={purchaseRequisitionData} />
                   )}
                 </ContentFullScreen>
               </Grid>
@@ -306,7 +309,6 @@ const PurchaseRequisitionDetail = () => {
             closeUpdateDialog();
             fetchData();
           }}
-          currency={user.user?.brandCurrency || null}
         />
       )}
     </Box>

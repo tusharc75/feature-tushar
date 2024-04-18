@@ -17,7 +17,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema, GenerateResourceLineNumber } from '../../constants/helpers';
 
-const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null ,currency}) => {
+const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const history = useHistory();
   const {
     state: { user }
@@ -51,7 +51,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
             if (isClone) {
               fields = fieldsDataForCreate;
               const { purchaseRequisitionNumber, ...rest } = data;
-              rest.purchaseRequisitionNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+              rest['purchaseRequisitionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
               setCloneHeading(purchaseRequisitionNumber);
               tempData = rest;
             }
@@ -66,8 +66,8 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['purchaseRequisitionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-        if (currency) {
-          tempInitialData['currency'] = currency;
+        if (fieldsDataForCreate?.find((e) => e.fieldName === 'currency')) {
+          tempInitialData['currency'] = user.user?.brandCurrency;
         }
         setInitialData({
           fields: fieldsDataForCreate,
@@ -152,10 +152,10 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                   }
                 }}
                 title={`${id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
-                    : `Create ${routes?.purchaseRequisition?.title}`
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
+                  : `Create ${routes?.purchaseRequisition?.title}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
