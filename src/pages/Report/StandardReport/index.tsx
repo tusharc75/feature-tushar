@@ -153,8 +153,8 @@ const Report = () => {
             setResourceColumns(filterFields);
             if (reportConfig?.defaultColumn) {
                 setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+                setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
             }
-            setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
             setColumns(columns);
             setLoadingColumns(false);
         } catch (error) {
