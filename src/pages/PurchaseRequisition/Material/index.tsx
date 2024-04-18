@@ -2,11 +2,10 @@ import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { map, startCase, uniq } from 'lodash';
+import { camelCase, map, startCase, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -21,12 +20,11 @@ import { flattenArray } from 'src/constants/columns';
 import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import CostDialog from './CostDialog';
-import { fetch_pr_cost_fields, fetch_pr_product_fields } from 'src/components/PurchaseRequisition/helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
-const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
-  const {
-    state: { user, permissions }
-  }: any = useData();
+const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData }) => {
+
+  const renderedFrom = `${camelCase(routes?.purchaseRequisition.title)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
   const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
@@ -52,7 +50,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_pr_product_fields(purchaseRequisitionData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseRequisitionDetail, purchaseRequisitionData?.currency, allowedToEdit && allowedToAddMaterial);
     setAllFields(data);
     const newColumns = generateColumns(renderedFrom, data, null, false, purchaseRequisitionData?.currency);
     let coloum: any = [
@@ -71,6 +69,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
         Header: 'Type',
         disableFilters: true,
         disabled: true,
+        width: 100,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -87,7 +86,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {allowedToEdit ? (
+            {allowedToEdit && allowedToAddMaterial ? (
               <p
                 onClick={() => {
                   setMaterialEdit({
@@ -106,29 +105,30 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
             ) : (
               <p className="text-truncate">{row.original?.detail}</p>
             )}
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+            {![MATERIAL_TYPE.manualEntry]?.includes(row.original.type) &&
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === MATERIAL_TYPE.service) {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            }
           </div>
         )
       },
       {
         accessor: 'description',
         Header: 'Description',
-        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
@@ -170,11 +170,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
         </>
       )
     });
-    if (!allowedToEdit) {
-      coloum?.forEach((e: any) => {
-        e.editable = false;
-      });
-    }
     setColumns(coloum);
     fetchData();
   };
@@ -184,47 +179,46 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
     const response = await axiosInstance().get(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`);
-    const additionalCost = await axiosInstance().get(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}`);
-    const additionalData = additionalCost?.data?.data || [];
-    const updatedAdditionalData = additionalData?.map((e: any) => {
-      return { ...e, type: 'Manual Entry'};
-    })
     data = response?.data?.data;
+
+    let costData: any = await axiosInstance().get(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}`);
+    costData = costData?.data?.data || [];
+    costData?.forEach((e) => {
+      e.type = MATERIAL_TYPE.manualEntry
+    })
+
     let rows = data.material.filter((e) => e.parentId === null);
-    rows = [...rows, ...updatedAdditionalData]
+    rows = [...rows, ...costData]
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-            ? parent.serviceDetail?.serviceName
-              : parent.detail || parent.description
-        }`;
-      parent.description =
-       parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productDescription || ''
-              : parent.description;
+      parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName
+          : parent.detail || parent.description;
+      parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription
+        : parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceDescription
+          : parent.description;
     });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
   const onMaterialEdit = (row, rows) => {
-    if (row.type != 'Manual Entry' ) {
+    if (row.type === MATERIAL_TYPE.manualEntry) {
+      setShowCostDialog({
+        open: true,
+        data: row,
+        showSaveAndNext: row?.index < rows?.length ? true : false
+      });
+    }
+    else {
       setMaterialEdit({
-            open: true,
-            data: row,
-            bulkedit: false,
-            showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-          });
-        }
-    if(row.type === 'Manual Entry')
-    {
-    setShowCostDialog({ open: true, data: row, showSaveAndNext: row?.index < rows?.length ? true : false });
+        open: true,
+        data: row,
+        bulkedit: false,
+        showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+      });
     }
   };
-
 
   const handleAddCost = (rows) => {
     setLoadingEdit(true);
@@ -244,13 +238,13 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
   const handleUpdateCost = (rows, saveAndNext = false) => {
     setLoadingEdit(true);
     axiosInstance()
-    .put(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}/update`, { additionalCost: rows })
+      .put(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}/update`, { additionalCost: rows })
       .then(() => {
         fetchData();
         if (saveAndNext) {
           const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
           if (rowIndex < dataRows?.length - 1) {
-            if (dataRows[rowIndex + 1]?.type === 'Manual Entry') {
+            if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
               setShowCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
             } else {
               setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
@@ -314,7 +308,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
           const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
           if (!row?.parentId) {
             const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
-            if (dataRows[rowIndex + 1]?.type === 'Manual Entry') {
+            if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
               setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
               setShowCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
             } else {
@@ -325,7 +319,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
                 showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
               });
             }
-          } 
+          }
         } else {
           setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
         }
@@ -338,40 +332,40 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
 
   const handleDelete = (rows) => {
     setDeleting(true);
-    const cost = rows?.filter((ele) => ele.type === 'Manual Entry').map((e) => e?.id)
-    const products = rows?.filter((ele) => ele.type !== 'Manual Entry');
+    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id)
+    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry);
     if (products?.length) {
-    axiosInstance()
-      .put(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData?._id}/delete`, { ids: rows })
-      .then(({ data }) => {
-        setDeleting(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      axiosInstance()
+        .put(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData?._id}/delete`, { ids: rows })
+        .then(({ data }) => {
+          setDeleting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+          setDeleteData(null);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
         });
-        fetchData();
-        setDeleteData(null);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-        setDeleteData(null);
-      });
     }
     if (cost?.length) {
       axiosInstance()
         .post(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}/delete`, { ids: cost })
         .then(({ data }) => {
           setDeleting(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchData();
-        setDeleteData(null);
-      })
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+          setDeleteData(null);
+        })
         .catch((error) => {
           setDeleting(false);
           toastConfig.setToastConfig(error);
@@ -379,12 +373,12 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
         });
     }
   };
-  
+
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
-      handleSaveData(rows);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+    handleSaveData(rows);
   };
 
   const addButtonMenuItems = () => {
@@ -426,24 +420,22 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     return (
       <>
         <MenuItem
-          disabled={selectedRecords.some((e) => e.type === 'Manual Entry')}
+          disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
           onClick={() => {
-              setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
           }}
         >
           Bulk Edit
         </MenuItem>
         <MenuItem
           onClick={() => {
-            const dataToDelete = selectedRecords
-              ?.filter((e) => !e.hideSelection)
-              .map((rec: any) => {
-                const obj: any = {};
-                obj.id = rec._id;
-                obj.type = rec?.type;
-                obj.materialId = rec?.materialId;
-                return obj;
-              });
+            const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection).map((rec: any) => {
+              const obj: any = {};
+              obj.id = rec._id;
+              obj.type = rec?.type;
+              obj.materialId = rec?.materialId;
+              return obj;
+            });
             setDeleteData(dataToDelete);
           }}
         >
@@ -457,16 +449,15 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     <Fragment>
       {allowedToEdit && (
         <DetailsPageHeader
-          isAddButtonVisible={true}
+          isAddButtonVisible={allowedToAddMaterial}
           addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={true}
+          isActionButtonVisible={allowedToAddMaterial}
           actionButtonMenuItems={actionButtonMenuItems()}
           actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
           previewDownloadProps={previewDownloadProps}
-          hasXpadding={false}
+          hasXpadding={true}
         />
       )}
-
       {columns ? (
         <Box zIndex={5}>
           <CustomReactTable
@@ -475,8 +466,8 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
             state={state}
             dispatch={dispatch}
             refreshGrid={fetchData}
-            hideSelection={!allowedToEdit}
-            hideAction={!allowedToEdit}
+            hideSelection={allowedToEdit && allowedToAddMaterial ? false : true}
+            hideAction={allowedToEdit && allowedToAddMaterial ? false : true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
@@ -507,6 +498,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
           loadingEdit={isUpdating}
           bulkEdit={materialEdit.bulkedit}
           showSaveAndNext={materialEdit.showSaveAndNext}
+          purchaseRequisitionData={purchaseRequisitionData}
         />
       )}
       {addDialog.open && addDialog.type === 'product' && (

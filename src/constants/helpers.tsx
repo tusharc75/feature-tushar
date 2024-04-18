@@ -120,8 +120,8 @@ export const quotationProcessSteps: stepInterface[] = [
 ];
 
 export const purchaseRequisitionSteps: stepInterface[] = [
-  { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Approval', title: 'Approval', icon: 'approval' },
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'DOA', title: 'DOA', icon: 'doa' },
   { name: 'End', title: 'End', icon: 'end' }
 ];
 
@@ -535,7 +535,7 @@ export const CHILD_RESOURCE = {
   quotationService: 'Quotation Service',
   repairOrderProduct: 'Repair Order Product',
   planningMaterial: 'Planning Material',
-  purchaseRequisition: 'Purchase Requisition Detail',
+  purchaseRequisitionDetail: 'Purchase Requisition Detail',
   purchaseRequisitionCost: 'Purchase Requisition Cost',
   fieldServiceOrderDetails: 'Field Service Order Detail',
   fieldServiceOrderAddon: 'Field Service Order Addon',
@@ -2684,10 +2684,6 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   failed: 'Failed',
   skipped: 'Skipped',
   needReperform: 'Need Reperform'
-};
-
-export const PURCHASE_REQUISITION_STEP_STATUS = {
-  end: 'end',
 };
 
 type ChipStatus =
