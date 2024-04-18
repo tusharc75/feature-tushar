@@ -3,7 +3,7 @@ import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -12,9 +12,9 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { fetch_po_cost_fields } from '../../../components/PurchaseOrder/helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetchTaxRate } from './helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCost, costData, bulkEdit, showSaveAndNext, loadingEdit }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -29,7 +29,7 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    let poFields = await fetch_po_cost_fields(purchaseOrderData?.currency);
+    let poFields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderCost, purchaseOrderData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(poFields)));
     if (bulkEdit) {
       poFields.forEach((element) => {

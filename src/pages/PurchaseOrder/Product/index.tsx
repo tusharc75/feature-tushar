@@ -19,13 +19,13 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { purchaseOrder, sidebarResource } from 'src/constants/helpers';
-import { fetch_po_cost_fields, fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
+import { CHILD_RESOURCE, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import CostDialog from './CostDialog';
 import InventoryStatesDialog from './InventoryStatesDialog';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import ServiceDialog from './ServiceDialog';
 import { fetchTaxRate } from './helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -155,10 +155,10 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       columns.push(e)
     })
 
-    const p_fields = await fetch_po_product_fields(purchaseOrderData?.currency);
-    const s_fields = await fetch_po_service_fields(purchaseOrderData?.currency);
+    const p_fields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderProduct, purchaseOrderData?.currency, allowedToEdit);
+    const s_fields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderService, purchaseOrderData?.currency, allowedToEdit);
     setServiceFields(s_fields);
-    const c_fields = await fetch_po_cost_fields(purchaseOrderData?.currency);
+    const c_fields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderCost, purchaseOrderData?.currency, allowedToEdit);
     setCostFields(c_fields);
 
     p_fields.forEach((element) => {

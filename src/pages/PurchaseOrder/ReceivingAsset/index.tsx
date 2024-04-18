@@ -15,15 +15,15 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MATERIAL_TYPE, PURCHASE_ORDER_STATUS, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PURCHASE_ORDER_STATUS, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import History from 'src/pages/ProductInventory/LedgerHistory';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import AssetQtyDialog from './AssetQtyDialog';
 import Logs from './Logs';
 import Receive from './Receive';
 import Reject from './Reject';
 import RejectProduct from './RejectProduct';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -133,10 +133,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       column.push(e);
     });
 
-    let fields = await fetch_po_product_fields(purchaseOrderData?.currency);
-    fields?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    let fields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderProduct, purchaseOrderData?.currency, false);
+
     const newColumns = generateColumns(renderedFrom, fields, null, false, purchaseOrderData?.currency);
     column = [...column, ...newColumns];
     column.push({

@@ -23,7 +23,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, INVOICE_STATUS, SALES_ORDER_STATUS, checkSuperAdminAccess, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, INVOICE_STATUS, SALES_ORDER_STATUS, checkSuperAdminAccess, salesOrder, salesOrderProcessSteps, sidebarResource } from '../../constants/helpers';
 import Invoice from './Invoice';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import Material from './Material';
