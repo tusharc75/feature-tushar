@@ -1,0 +1,90 @@
+import { useContext, useEffect, useState } from 'react';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import BoxWithBorder from 'src/components/BoxWithBorder';
+import ManageDoa from './ManageDoa';
+import DoaStepper from './Stepper';
+
+const DoaSetup = ({ resource, entity }) => {
+  const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { user, permissions }
+  }: any = useData();
+
+  const [doaData, setDoaData] = useState(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (entity) {
+      fetchData();
+    }
+  }, [entity]);
+
+  const fetchData = async () => {
+    axiosInstance()
+      .get(`/doa-setup?entity=${entity}&resource=${resource}`)
+      .then(({ data: { data } }) => {
+        if (data) {
+          setDoaData(data);
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  return (
+    <>
+      <Box mt={2} className="single-form-v1">
+        <Box className="form-head-v1">
+          <Typography className="form-label-style-v1" component={'h3'}>
+            {`${resource} DOA Details`}
+          </Typography>
+          {permissions.entity?.isUpdate && user?.user?.permissions?.doaSetup && (
+            <Button variant="contained" className="float-right-button-v1" color="primary" size="small" onClick={() => setOpen(true)}>
+              {doaData ? `Edit ${resource} DOA` : `Add ${resource} DOA`}
+            </Button>
+          )}
+        </Box>
+        <Box className="formdata-v1">
+          <Grid container style={{ padding: '8px' }} spacing={1}>
+            <Grid item xs={12} sm={12}>
+              <BoxWithBorder
+                style={{
+                  padding: '0px'
+                }}
+              >
+                {doaData ? (
+                  <DoaStepper data={doaData} />
+                ) : (
+                  <Box textAlign="center" my={2}>
+                    <Typography variant="body2">Entity doesn't have any {resource} DOA</Typography>
+                  </Box>
+                )}
+              </BoxWithBorder>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+      {open && (
+        <ManageDoa
+          onClose={() => {
+            setOpen(false);
+          }}
+          onSuccess={() => {
+            setOpen(false);
+            fetchData();
+          }}
+          resource={resource}
+          entity={entity}
+          data={doaData}
+        />
+      )}
+    </>
+  );
+};
+
+export default DoaSetup;
