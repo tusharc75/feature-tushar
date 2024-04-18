@@ -23,6 +23,8 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
 import AssignedUsers from './AssignedUsers';
 import ManageEntity from './ManageEntity';
+import DoaSetup from '../DoaSetupNew';
+import { DOA_RESOURCE } from 'src/constants/helpers';
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -370,6 +372,11 @@ const EntityDetailsPage = () => {
                 </Grid>
               </Box>
             </Box>
+            {DOA_RESOURCE?.filter((_r) => permissions[_r.key]?.isRead)?.map((_r) => (
+              <Box>
+                <DoaSetup resource={_r.resorce} entity={id} />
+              </Box>
+            ))}
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
             <Box style={{ overflow: 'hidden' }} className="single-form-v1">
