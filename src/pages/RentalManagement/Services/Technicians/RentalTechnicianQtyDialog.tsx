@@ -24,48 +24,18 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
   useEffect(() => {
     fetchFields();
   }, [technicianData]);
-
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementTechnician}`);
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, rentalManagementData?.currency || 'USD');
     if (bulkEdit) {
-      let unitArray: any = [];
-      technicianData?.forEach((element) => {
-        if (element?.[`${element.type}Detail`]?.unit) {
-          unitArray.push([...element?.[`${element.type}Detail`]?.unit]);
-        }
-      });
-      let unit: any = unitArray?.shift()?.filter(function (v) {
-        return unitArray.every(function (a) {
-          return a.indexOf(v) !== -1;
-        });
-      });
-      const unitOptions: any = arrayToDropwdownOption(unit);
-      data.forEach((element) => {
-        if (element.fieldName === 'unit') {
-          element.option = unitOptions;
-        }
-        element.required = false;
-        element.isFormula = false;
-        element.isMulitFormula = false;
-      });
       data = data.filter((e: any) => (!e.isUneditable && !e.disableOnEdit));
       setInitialData({
         fields: data,
         values: getObjKeys('', data)
       });
     } else {
-      let unitOptions: any = [];
-      if (technicianData?.[`${technicianData.type}Detail`]?.unit) {
-        unitOptions = arrayToDropwdownOption(technicianData?.[`${technicianData.type}Detail`]?.unit);
-      }
-      data.forEach((element) => {
-        if (element.fieldName === 'unit') {
-          element.option = unitOptions;
-        }
-      });
       setAllFields(JSON.parse(JSON.stringify(data)));
       setInitialData({
         fields: data,
@@ -192,6 +162,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                             isTooltip={field.isTooltip}
                                             tooltipMessage={field.tooltipMessage}
                                             size="small"
+                                            fields={initialData.fields}
                                           />
                                         </Box>
                                       </Box>

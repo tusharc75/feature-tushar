@@ -108,14 +108,16 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
               </p>
             )}
             {!isOffline && (
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.employeeMasterDetail.path}/${row.original?.technicianId}`);
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
+              <Box ml={1} className="d-flex align-items-center">
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.employeeMasterDetail.path}/${row.original?.technicianId}`);
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
             )}
           </div>
         )
