@@ -32,11 +32,30 @@ let chartOptions: any = {
     type: 'solid'
   },
   xaxis: {
-    type: 'datetime'
-  },
+    type: 'datetime',
+    labels: {
+      formatter: function(value) {
+        const date = new Date(value);
+        return date.toLocaleDateString('default', { month: 'short', day: 'numeric' }) + ' ' + date.toLocaleTimeString('default', { hour: '2-digit', minute:'2-digit' });
+      }
+    },
+    tickAmount: 8
+  },  
   legend: {
     position: 'right'
-  }
+  },
+  tooltip: {
+    x: {
+      formatter: function(value) {
+        let date = new Date(value);
+        if (isNaN(date.getTime())) {
+          return value;
+        } else {
+          return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+      }
+    }
+  }  
 };
 
 const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
@@ -144,6 +163,9 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
     chartOptions = newOptions;
     setCurrentChartTheme(themeColor);
   }, [themeColor]);
+
+  console.log(chartData);
+  console.log(series);
 
   return (
     <>
