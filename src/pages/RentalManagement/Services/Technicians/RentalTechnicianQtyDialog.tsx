@@ -2,17 +2,17 @@ import { Fragment, useEffect, useState } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import { CHILD_RESOURCE, CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { CURReplaceByCurrencySingle, autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { orderBy, uniq, map } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
-import axiosInstance from 'src/axios/axiosInstance';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -24,11 +24,10 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
   useEffect(() => {
     fetchFields();
   }, [technicianData]);
+
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementTechnician}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, rentalManagementData?.currency || 'USD');
+    let data = await fetch_child_resource_fields(CHILD_RESOURCE.rentalManagementTechnician, rentalManagementData?.currency, true);
     if (bulkEdit) {
       data = data.filter((e: any) => (!e.isUneditable && !e.disableOnEdit));
       setInitialData({

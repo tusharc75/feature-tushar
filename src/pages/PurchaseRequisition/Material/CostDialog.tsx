@@ -28,33 +28,33 @@ const CostDialog = ({ onClose, purchaseRequisitionData, handleAddCost, handleUpd
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    let prFields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseRequisitionCost, purchaseRequisitionData?.currency, true);
-    setAllFields(JSON.parse(JSON.stringify(prFields)));
+    let data = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseRequisitionCost, purchaseRequisitionData?.currency, true);
+    setAllFields(JSON.parse(JSON.stringify(data)));
     if (bulkEdit) {
-      prFields.forEach((element) => {
+      data.forEach((element) => {
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
       });
-      prFields = prFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
+      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({
-        fields: prFields,
-        values: { ...getObjKeys('', prFields) }
+        fields: data,
+        values: { ...getObjKeys('', data) }
       });
     } else {
       if (costData) {
         setInitialData({
-          fields: prFields,
-          values: getObjKeysWithValues(costData, prFields)
+          fields: data,
+          values: getObjKeysWithValues(costData, data)
         });
       } else {
         setInitialData({
-          fields: prFields,
-          values: getObjKeys('', prFields)
+          fields: data,
+          values: getObjKeys('', data)
         });
       }
     }
-    EvaluteproductFields(prFields);
+    EvaluteproductFields(data);
   };
 
   const EvaluteproductFields = async (fields) => {
