@@ -3083,3 +3083,20 @@ export const getDefaultMyRecordType = (user, resource) => {
 export const checkSuperAdminAccess = (user, resource) => {
   return user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource) ? true : false
 }
+
+export const DOA_RESOURCE = [
+  {
+    key: 'purchaseRequisition',
+    resorce: sidebarResource.purchaseRequisition
+  }
+] 
+
+export const DoaApproveType = {
+  user: 'User',
+  role: 'Role'
+};
+
+export const DOAType = {
+  sequence: 'Sequence',
+  amount: 'Amount'
+};
