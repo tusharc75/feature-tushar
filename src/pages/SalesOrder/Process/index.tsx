@@ -4,12 +4,12 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { salesOrder, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, salesOrder, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { startCase } from 'lodash';
-import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   const renderedFrom = `${routes.salesOrder.title}_Process`;
@@ -24,7 +24,7 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.salesOrderProduct, salesOrderData?.currency, true);
     const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);
     let coloum: any = [
       {
