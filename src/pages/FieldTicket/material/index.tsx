@@ -21,10 +21,10 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { fetch_field_ticket_cost_fields, fetch_field_ticket_material_fields } from '../helper';
 import Consumables from './Consumables';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import AddCostDialog from './AddCostDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeStatus }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
@@ -52,15 +52,9 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const { generateColumns } = useColumns();
   const fetchFields = async () => {
     setColumns(null);
-    var data = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
-    let costField: any = await fetch_field_ticket_cost_fields(fieldTicketData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation);
+    let costField: any = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation);
     setCostFields(costField);
-
-    if (!allowedToEdit || fieldTicketData?.quotation) {
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
-    }
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, fieldTicketData?.currency);
     let column: any = [

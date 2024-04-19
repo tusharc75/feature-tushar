@@ -6,6 +6,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -22,7 +23,7 @@ import {
   yupSchema
 } from 'src/constants/helpers';
 
-const ManageHolidays = ({ payrollPolicyId, id = null, onSuccess, onClose }) => {
+const ManageHolidays = ({ payrollPolicyId, payrollPolicyData, id = null, onSuccess, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -37,8 +38,7 @@ const ManageHolidays = ({ payrollPolicyId, id = null, onSuccess, onClose }) => {
 
   const fetchFields = async () => {
     try {
-      const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.payrollHoliday}`);
-      const fields = response?.data?.data;
+      const fields = await fetch_child_resource_fields(CHILD_RESOURCE.payrollHoliday, payrollPolicyData?.currency, true);
 
       if (id) {
         axiosInstance()

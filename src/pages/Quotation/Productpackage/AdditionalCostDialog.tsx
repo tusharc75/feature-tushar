@@ -15,6 +15,8 @@ import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
+import { fetchFieldOptions } from 'src/components/CustomReactTable';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 interface AdditionalCostDialogProps {
   onClose: VoidFunction | any;
@@ -35,25 +37,25 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   const [saveAndNext, setSaveAndNext] = useState(false);
 
   useEffect(() => {
-    setInitialData({ fields: [], values: {} });
-    axiosInstance()
-      .get(`/field/child?resource=${CHILD_RESOURCE.quotationCost}`)
-      .then(({ data: { data } }) => {
-        const poFields = CURReplaceByCurrencySingle(data, currency);
-        if (costData) {
-          setInitialData({
-            fields: poFields,
-            values: getObjKeysWithValues(costData, poFields)
-          });
-        } else {
-          setInitialData({
-            fields: poFields,
-            values: getObjKeys('', poFields)
-          });
-        }
-        EvaluteproductFields(poFields);
-      });
+    fetchFields()
   }, [costData]);
+
+  const fetchFields = async ()=>{
+    setInitialData({ fields: [], values: {} });
+    const poFields = await fetch_child_resource_fields(CHILD_RESOURCE.quotationCost, currency, true);
+    if (costData) {
+      setInitialData({
+        fields: poFields,
+        values: getObjKeysWithValues(costData, poFields)
+      });
+    } else {
+      setInitialData({
+        fields: poFields,
+        values: getObjKeys('', poFields)
+      });
+    }
+    EvaluteproductFields(poFields);
+  }
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));

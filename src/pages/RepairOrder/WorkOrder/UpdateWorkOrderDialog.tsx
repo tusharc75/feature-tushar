@@ -13,6 +13,7 @@ import { uniq, map, orderBy } from 'lodash';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CURReplaceByCurrencySingle, autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 
 const UpdateWorkOrderDialog = ({ isBulkEdit = null, onClose, materialData, handleUpdate, loadingEdit, repairOrderData }) => {
@@ -28,9 +29,7 @@ const UpdateWorkOrderDialog = ({ isBulkEdit = null, onClose, materialData, handl
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderService}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, repairOrderData?.currency || 'USD');
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderService, repairOrderData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
 
     setInitialData({

@@ -7,11 +7,12 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { fieldTicket } from 'src/constants/helpers';
+import { CHILD_RESOURCE, fieldTicket } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { fetch_child_resource_fields } from '../ChildResourceField';
 
 function Versions({ id, label, childResource, resource, referenceData, versions, renderedFrom, handleClose }) {
   const [fullScreen, setFullScreen] = useState(true);
@@ -33,11 +34,7 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
 
   const fetchFields = async () => {
     setColumns(null);
-    const response = await axiosInstance().get(`/field/child?resource=${childResource}`);
-    const data = CURReplaceByCurrencySingle(response?.data?.data, referenceData?.referenceData ? referenceData?.currency : 'USD');
-    data?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    const data = await fetch_child_resource_fields(childResource, referenceData?.currency , false);
     const newColumns = generateColumns(renderedFrom, data, null, false, referenceData?.currency);
     let column: any = [
       {

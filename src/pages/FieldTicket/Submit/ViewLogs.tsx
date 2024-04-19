@@ -13,8 +13,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
-import { fetch_field_ticket_submit_fields } from '../helper';
+import { CHILD_RESOURCE, CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 function ViewLogs({ fieldTicketData, handleClose }) {
   const renderedFrom = `${routes.fieldTicket.title}_logs`;
@@ -93,7 +93,7 @@ function ViewLogs({ fieldTicketData, handleClose }) {
         }
       }
     ];
-    const fields = await fetch_field_ticket_submit_fields();
+    const fields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true);
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     const actionColumn = {
       accessor: 'action',

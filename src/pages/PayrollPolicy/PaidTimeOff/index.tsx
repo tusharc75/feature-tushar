@@ -15,6 +15,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ManagePaidTimeOff from './ManagePaidTimeOff';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const PaidTimeOff = ({ payrollPolicyData }) => {
   const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_paidTimeOff`;
@@ -39,8 +40,7 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
   }, []);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.payrollPaidTimeOff}`);
-    var data = response?.data?.data;
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.payrollPaidTimeOff, payrollPolicyData?.currency, true);
     const newColumns = generateColumns(renderedFrom, data);
 
     newColumns?.forEach((e: any) => {
@@ -213,6 +213,7 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
       {managePaidTimeOff?.open && (
         <ManagePaidTimeOff
           payrollPolicyId={payrollPolicyData?._id}
+          payrollPolicyData={payrollPolicyData}
           id={managePaidTimeOff?.id}
           onSuccess={() => {
             fetchData();
