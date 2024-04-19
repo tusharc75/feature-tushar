@@ -14,6 +14,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const AdditionalCostDialog = ({ costData, onClose, handleAddCost, handleUpdateCost, loadingEdit, showSaveAndNext, invoiceData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -28,9 +29,7 @@ const AdditionalCostDialog = ({ costData, onClose, handleAddCost, handleUpdateCo
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.invoiceCost}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, invoiceData?.currency || 'USD');
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceCost, costData?.currency, true);
     if (costData) {
       setInitialData({
         fields: data,

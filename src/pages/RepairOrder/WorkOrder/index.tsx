@@ -42,6 +42,7 @@ import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { Autocomplete } from '@material-ui/lab';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
@@ -127,9 +128,7 @@ const WorkOrder = ({
   }, [selectedRecords]);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderService}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, repairOrderData?.currency || 'USD');
+    var data =  await fetch_child_resource_fields(CHILD_RESOURCE.workOrderService, repairOrderData?.currency, allowedToEdit);
     const newColumns = generateColumns(renderedFrom, data, null, false, repairOrderData?.currency || 'USD');
     let coloum: any = [
       {

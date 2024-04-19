@@ -27,6 +27,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { camelCase } from 'lodash';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Consumables = ({
   isCreate,
@@ -99,9 +100,7 @@ const Consumables = ({
   };
 
   const fetchColumns = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
-    let childFields = response?.data?.data || [];
-    childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    let childFields = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderProduct, workOrderData?.currency, allowedToEdit);
     const newColumns = generateColumns(renderedFrom, childFields, null, false, workOrderData?.currency || 'USD');
 
     const hasChildFields = Array.isArray(childFields) && childFields?.length > 0 ? true : false;

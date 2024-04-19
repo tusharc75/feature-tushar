@@ -13,10 +13,10 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { FIELD_TICKET_STATUS, fieldTicket, sidebarResource } from 'src/constants/helpers';
-import { fetch_field_ticket_material_fields } from '../helper';
+import { CHILD_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import ManageSubmit from './ManageSubmit';
 import ViewLogs from './ViewLogs';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Submit`;
@@ -37,10 +37,8 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
 
   const fetchFields = async () => {
     setColumns(null);
-    var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
-    fields?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    var fields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, false);
+  
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     let column: any = [
       {

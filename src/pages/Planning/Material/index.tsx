@@ -25,6 +25,7 @@ import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData, setReserveAssetWarning }) => {
   const {
@@ -55,9 +56,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   }, [planningData]);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.planningMaterial}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, planningData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.planningMaterial, planningData?.currency, allowedToEdit);
     setAllFields(data);
     const newColumns = generateColumns(renderedFrom, data, null, false, planningData?.currency);
     let coloum: any = [

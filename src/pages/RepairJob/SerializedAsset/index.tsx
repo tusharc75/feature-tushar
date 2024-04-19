@@ -36,6 +36,7 @@ import {
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import RepairProcess from '../RepairProcess';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const SerializedAsset = ({
   repairJobData,
@@ -79,7 +80,7 @@ const SerializedAsset = ({
   }, []);
 
   const fetchFields = async () => {
-    const fieldResponce = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`);
+    let fields = await fetch_child_resource_fields(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, false);
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -95,10 +96,6 @@ const SerializedAsset = ({
       ]
     });
 
-    let fields = CURReplaceByCurrencySingle(fieldResponce?.data?.data, repairJobData?.currency || 'USD');
-    fields?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
     const assetField = data?.find((e) => e.resource === 'Serialized Asset')?.fieldNames || [];
     const productField = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
 

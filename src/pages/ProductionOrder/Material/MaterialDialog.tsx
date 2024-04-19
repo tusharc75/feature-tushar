@@ -13,6 +13,7 @@ import { orderBy, uniq, map } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const MaterialDialog = ({ onClose, materialData, productionOrderData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -27,9 +28,7 @@ const MaterialDialog = ({ onClose, materialData, productionOrderData, handleUpda
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.productionOrderDetail, productionOrderData?.currency, true);
     if (bulkEdit) {
       let unitArray: any = [];
       materialData?.forEach((element) => {
