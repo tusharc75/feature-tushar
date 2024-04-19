@@ -2500,10 +2500,17 @@ export const REPORT_LIST = [
     defaultColumn: true,
   },
   {
-    title: 'Revenue Daily Volume Report',
+    title: 'Daily Volume Revenue Report',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'revenueDailyVolumeReport',
+    type: 'dailyVolumeRevenueReport',
+    defaultColumn: true,
+  },
+  {
+    title: 'Day Wise Volume Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'dayWiseVolumeReport',
     defaultColumn: true,
   },
   {

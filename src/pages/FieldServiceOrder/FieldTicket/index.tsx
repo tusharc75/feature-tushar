@@ -42,7 +42,9 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
+    const cancleToken = axios.CancelToken.source();
     fetchGridColumns();
+    return () => cancleToken.cancel();
   }, []);
 
   useEffect(() => {
@@ -58,7 +60,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
       if (isOffline) {
         data = await findOne(objectStore.resource, objectStore.fieldTicket);
       } else {
-        const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`, { cancelToken: cancelToken });
+        const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`, { cancelToken: cancelToken?.token });
         data = response?.data?.data;
       }
       const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
@@ -110,7 +112,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
         count = data.length;
       } else {
         const queryString = getQueryString();
-        const response = await axiosInstance().get(`${routes.fieldTicket.path}${queryString}`, { cancelToken: cancelToken.token });
+        const response = await axiosInstance().get(`${routes.fieldTicket.path}${queryString}`, { cancelToken: cancelToken?.token });
         data = response?.data?.data;
         count = response?.data?.count;
       }
