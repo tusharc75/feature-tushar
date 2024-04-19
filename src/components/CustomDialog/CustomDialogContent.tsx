@@ -21,8 +21,6 @@ const useViewportDynamicHeight = () => {
         const vh = window.visualViewport.height;
         setHeight(vh);
         document.body.style.height = `${vh}px`;
-        document.getElementsByTagName('html')[0].style.height = `${vh}px`;
-        document.getElementsByTagName('html')[0].style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
       }
     };
@@ -30,7 +28,6 @@ const useViewportDynamicHeight = () => {
     window?.visualViewport?.addEventListener('resize', setHeightFunc);
     return () => {
       document?.body?.removeAttribute?.('style');
-      document?.getElementsByTagName('html')[0]?.removeAttribute?.('style');
       window?.visualViewport?.removeEventListener('resize', setHeightFunc);
     };
   }, []);
@@ -47,10 +44,11 @@ function CustomDialogContent({ children, style = {}, isFooterPresent = true, ...
   return (
     <React.Fragment>
       <DialogContent
-        className={`${isFooterPresent
+        className={`${
+          isFooterPresent
             ? 'max-h-[calc(var(--vh)-110px)] max-[560px]:max-h-[calc(var(--vh)-99px)]'
             : 'max-h-[calc(var(--vh)-55px)] max-[560px]:max-h-[calc(var(--vh)-45px)]'
-          } overscroll-contain ${isTablet || isMobile ? 'min-h-[250px]' : ''}`}
+        } overscroll-contain ${isTablet || isMobile ? 'min-h-[250px]' : ''}`}
         style={
           {
             ...style,
