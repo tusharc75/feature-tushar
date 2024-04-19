@@ -405,7 +405,7 @@ const Report = () => {
 
         var api = `/report/${type}`;
         axiosInstance().get(`${api}${filterQuery}`, {
-            cancelToken: cancelTokenSource.token
+            cancelToken: cancelTokenSource?.token
         })
             .then(({ data: { data, count, columns } }) => {
                 if (resourceCamelCase === 'userSession') {
@@ -446,28 +446,8 @@ const Report = () => {
                 }
                 if (resourceCamelCase === 'iotDataPoints') {
                     setLoadingColumns(true);
-                    columns = columns?.map((e) => {
-                        return {
-                            accessor: e.fieldName,
-                            Header: e.fieldLabel,
-                            disableSortBy: true,
-                            disableFilters: true,
-                            Cell: ({ row }) => {
-                                return (
-                                    <div>
-                                        {row?.original?.[e?.fieldName] ? (
-                                            <h5 className="text-truncate" title={row?.original?.[e?.fieldName]}>
-                                                {e.type === 'date' ? moment(row?.original?.[e?.fieldName])?.format(dateFormat) : row?.original?.[e?.fieldName]}
-                                            </h5>
-                                        ) : (
-                                            <NoDataCell />
-                                        )}
-                                    </div>
-                                );
-                            }
-                        }
-                    });
-                    setColumns(columns);
+                    let newColumns = generateColumns(type, columns);
+                    setColumns(newColumns);
                     setLoadingColumns(false);
                 }
                 data = data.map((u: any) => {
@@ -518,20 +498,19 @@ const Report = () => {
                 let filterById = idFilter.map((key) => {
                     if (key === 'warehouse') {
                         if (!isExport) {
-                            setShowPricefilter((prevState) => ({ ...prevState, warehouse: options.map((d: any) => d.optionValue) }));
+                            setShowPricefilter((prevState) => ({
+                                ...prevState,
+                                warehouse: selectedData[key]?.value?.map((d: any) => d.optionValue)
+                            }));
                         }
                     }
-                    if (resourceCamelCase === 'iotDataPoints' && !Array.isArray(selectedData[key].value)) {
-                        return {
-                            field: key,
-                            term: selectedData[key].value
-                        }
+                    if (!Array.isArray(selectedData[key].value)) {
+                        return { field: key, term: selectedData[key].value }
                     }
-                    const options = selectedData[key].value;
                     return {
                         field: key,
                         term: {
-                            $in: options.map((d: any) => d.optionValue)
+                            $in: selectedData[key]?.value?.map((d: any) => d.optionValue)
                         }
                     };
                 });
@@ -547,7 +526,7 @@ const Report = () => {
                             field: key,
                             term: selectedData[key].value
                         });
-                    } else if (resourceCamelCase === 'iotDataPoints' && !Array.isArray(selectedData[key].value)) {
+                    } else if (!Array.isArray(selectedData[key].value)) {
                         deepFilter.push({
                             field: key,
                             term: selectedData[key]?.value
