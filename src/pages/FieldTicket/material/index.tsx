@@ -53,7 +53,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const fetchFields = async () => {
     setColumns(null);
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation);
-    let costField: any = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation);
+    let costField: any = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true);
     setCostFields(costField);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, fieldTicketData?.currency);
