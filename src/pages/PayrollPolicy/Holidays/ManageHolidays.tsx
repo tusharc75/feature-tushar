@@ -23,7 +23,7 @@ import {
   yupSchema
 } from 'src/constants/helpers';
 
-const ManageHolidays = ({ payrollPolicyId, payrollPolicyData, id = null, onSuccess, onClose }) => {
+const ManageHolidays = ({ payrollPolicyId, currency, id = null, onSuccess, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -38,7 +38,7 @@ const ManageHolidays = ({ payrollPolicyId, payrollPolicyData, id = null, onSucce
 
   const fetchFields = async () => {
     try {
-      const fields = await fetch_child_resource_fields(CHILD_RESOURCE.payrollHoliday, payrollPolicyData?.currency, true);
+      const fields = await fetch_child_resource_fields(CHILD_RESOURCE.payrollHoliday, currency, true);
 
       if (id) {
         axiosInstance()

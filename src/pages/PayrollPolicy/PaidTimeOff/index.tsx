@@ -213,7 +213,7 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
       {managePaidTimeOff?.open && (
         <ManagePaidTimeOff
           payrollPolicyId={payrollPolicyData?._id}
-          payrollPolicyData={payrollPolicyData}
+          currency={payrollPolicyData?.currency}
           id={managePaidTimeOff?.id}
           onSuccess={() => {
             fetchData();

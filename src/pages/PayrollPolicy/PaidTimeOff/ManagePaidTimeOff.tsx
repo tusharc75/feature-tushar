@@ -24,11 +24,8 @@ import {
   yupSchema
 } from 'src/constants/helpers';
 
-const ManagePaidTimeOff = ({ payrollPolicyId, payrollPolicyData, id = null, onSuccess, onClose }) => {
+const ManagePaidTimeOff = ({ payrollPolicyId, currency, id = null, onSuccess, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user }
-  }: any = useData();
 
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -42,7 +39,7 @@ const ManagePaidTimeOff = ({ payrollPolicyId, payrollPolicyData, id = null, onSu
 
   const fetchFields = async () => {
     try {
-      const fields = await fetch_child_resource_fields(CHILD_RESOURCE.payrollPaidTimeOff, payrollPolicyData?.currency, true);
+      const fields = await fetch_child_resource_fields(CHILD_RESOURCE.payrollPaidTimeOff, currency, true);
 
       if (id) {
         axiosInstance()

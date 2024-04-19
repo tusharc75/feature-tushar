@@ -214,7 +214,7 @@ const Holidays = ({ payrollPolicyData }) => {
       {manageHolidays?.open && (
         <ManageHolidays
           payrollPolicyId={payrollPolicyData?._id}
-          payrollPolicyData={payrollPolicyData}
+          currency={payrollPolicyData?.currency}
           id={manageHolidays?.id}
           onSuccess={() => {
             fetchData();
