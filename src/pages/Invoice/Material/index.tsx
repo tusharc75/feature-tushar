@@ -63,15 +63,8 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
 
   const fetchFields = async () => {
     let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, allowedToEdit);
-    let childFields = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.invoiceCost}`);
-    let addDataFields = childFields?.data?.data;
-    addDataFields = CURReplaceByCurrencySingle(addDataFields, invoiceData?.currency || 'USD');
-    setCostFields(addDataFields);
-    if (!allowedToEdit) {
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
-    }
+    let childFields = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceCost, invoiceData?.currency, allowedToEdit);
+    setCostFields(childFields);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
     const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;

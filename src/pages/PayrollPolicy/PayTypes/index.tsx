@@ -17,6 +17,7 @@ import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageH
 import { useData } from '../../../StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ManagePayType from './ManagePayType';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const PayTypes = ({ payrollPolicyId }) => {
   const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_payTypes`;
@@ -25,7 +26,7 @@ const PayTypes = ({ payrollPolicyId }) => {
   const { state, dispatch } = useTableReducer();
   const { rowCount, selectedRecords } = state;
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
 
   const [payTypeDialog, setPayTypeDialog] = useState({ open: false, data: null, isClone: false });
@@ -36,8 +37,7 @@ const PayTypes = ({ payrollPolicyId }) => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.payrollPayTypes}`);
-    data = response?.data?.data;
+    data = await fetch_child_resource_fields(CHILD_RESOURCE.payrollPayTypes, user.user?.brandCurrency, true);
     const newColumns = generateColumns(renderedFrom, data);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -230,6 +230,7 @@ const PayTypes = ({ payrollPolicyId }) => {
             setPayTypeDialog({ open: false, data: null, isClone: false });
             fetchData();
           }}
+          currency={user.user?.brandCurrency}
           payTypeData={payTypeDialog.data}
           payrollPolicyId={payrollPolicyId}
           isClone={payTypeDialog.isClone}

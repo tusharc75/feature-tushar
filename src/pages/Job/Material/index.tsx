@@ -21,6 +21,7 @@ import MaterialDialog from './MaterialDialog';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,9 +46,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   }, []);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.jobDetail}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, jobData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.jobDetail, jobData?.currency, allowedToEdit);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, jobData?.currency);
 

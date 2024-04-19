@@ -13,6 +13,7 @@ import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from 'src/con
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const MaterialDialog = ({ onClose, materialData, jobData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -28,9 +29,7 @@ const MaterialDialog = ({ onClose, materialData, jobData, handleUpdate, loadingE
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.jobDetail}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, jobData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.jobDetail, jobData?.currency, true);
     if (bulkEdit) {
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({

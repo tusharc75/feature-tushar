@@ -21,6 +21,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import MaterialDialog from './MaterialDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,9 +46,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   }, []);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.demandOrderDetail}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, demandOrderData?.currency || 'USD');
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.demandOrderDetail, demandOrderData?.currency, allowedToEdit);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(
       renderedFrom,
