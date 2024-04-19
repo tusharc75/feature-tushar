@@ -112,7 +112,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
         count = data.length;
       } else {
         const queryString = getQueryString();
-        const response = await axiosInstance().get(`${routes.fieldTicket.path}${queryString}`, { cancelToken: cancelToken.token });
+        const response = await axiosInstance().get(`${routes.fieldTicket.path}${queryString}`, { cancelToken: cancelToken?.token });
         data = response?.data?.data;
         count = response?.data?.count;
       }
