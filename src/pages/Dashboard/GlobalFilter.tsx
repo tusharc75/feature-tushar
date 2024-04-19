@@ -10,8 +10,6 @@ const useStyles = makeStyles((theme) => ({
     padding: 0,
     height: '70px',
     borderRadius: '3px 3px 0 0',
-    // borderBottom: '1px solid #e1dde6',
-    // boxShadow: '1px 3px 3px #ddd',
     backgroundColor: 'transparent',
     [theme.breakpoints.down('sm')]: {
       height: 'auto'
@@ -23,7 +21,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export type GlobalFiltersType = {
-  dashboardType?: string;
+  dashboardType: string;
+  timeFrame: string;
   currency: string;
   between: {
     from: Date;
@@ -41,7 +40,11 @@ interface Props {
 const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled }: Props) => {
   const classes = useStyles();
 
-  const [timeFrame, setTimeFrame] = React.useState<any>('current-year');
+  const [timeFrame, setTimeFrame] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    setTimeFrame(globalFilters.timeFrame)
+  }, [globalFilters.timeFrame]);
 
   React.useEffect(() => {
     switch (timeFrame) {
@@ -103,6 +106,9 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
     const selectedDashboard = e.target.value.toString();
     localStorage.setItem('selectedDashboard', selectedDashboard);
     setGlobalFilters((prevState: GlobalFiltersType) => ({ ...prevState, dashboardType: selectedDashboard }));
+    if (dashboardList?.find((e) => e?.name === selectedDashboard)?.defaultDuration) {
+      setTimeFrame(dashboardList?.find((e) => e?.name === selectedDashboard)?.defaultDuration)
+    }
   };
 
   return (
@@ -147,67 +153,69 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={12} sm={12} md={6}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={4}>
-                <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
-                  <InputLabel id="duration">Select Duration</InputLabel>
-                  <Select
-                    labelId="duration"
-                    id="time-duration"
-                    value={timeFrame}
-                    onChange={(e) => setTimeFrame(e.target.value)}
-                    label="Select Duration"
-                  >
-                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                    <MenuItem value={'current-year'}>Current Year</MenuItem>
-                    <MenuItem value={'custom'}>Custom</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom' || disabled}
-                  inputVariant="outlined"
-                  variant="inline"
-                  fullWidth
-                  size="small"
-                  openTo="year"
-                  autoOk
-                  format={dateFormatForInputControl}
-                  maxDate={globalFilters.between.to}
-                  label="From"
-                  views={['year', 'month', 'date']}
-                  value={globalFilters.between.from}
-                  onChange={(date) => {
-                    setGlobalFilters({ ...globalFilters, between: { ...globalFilters.between, from: date } });
-                  }}
-                />
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom' || disabled}
-                  inputVariant="outlined"
-                  variant="inline"
-                  fullWidth
-                  size="small"
-                  minDate={globalFilters.between.from}
-                  openTo="year"
-                  autoOk
-                  format={dateFormatForInputControl}
-                  label="To"
-                  views={['year', 'month', 'date']}
-                  value={globalFilters.between.to}
-                  onChange={(date) => {
-                    setGlobalFilters({ ...globalFilters, between: { ...globalFilters.between, to: date } });
-                  }}
-                />
+          {globalFilters?.timeFrame && globalFilters?.between &&
+            <Grid item xs={12} sm={12} md={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
+                    <InputLabel id="duration">Select Duration</InputLabel>
+                    <Select
+                      labelId="duration"
+                      id="time-duration"
+                      value={timeFrame}
+                      onChange={(e) => setTimeFrame(e.target.value)}
+                      label="Select Duration"
+                    >
+                      <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                      <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                      <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                      <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                      <MenuItem value={'current-year'}>Current Year</MenuItem>
+                      <MenuItem value={'custom'}>Custom</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                  <KeyboardDatePicker
+                    disabled={timeFrame !== 'custom' || disabled}
+                    inputVariant="outlined"
+                    variant="inline"
+                    fullWidth
+                    size="small"
+                    openTo="year"
+                    autoOk
+                    format={dateFormatForInputControl}
+                    maxDate={globalFilters.between.to}
+                    label="From"
+                    views={['year', 'month', 'date']}
+                    value={globalFilters.between.from}
+                    onChange={(date) => {
+                      setGlobalFilters({ ...globalFilters, between: { ...globalFilters.between, from: date } });
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                  <KeyboardDatePicker
+                    disabled={timeFrame !== 'custom' || disabled}
+                    inputVariant="outlined"
+                    variant="inline"
+                    fullWidth
+                    size="small"
+                    minDate={globalFilters.between.from}
+                    openTo="year"
+                    autoOk
+                    format={dateFormatForInputControl}
+                    label="To"
+                    views={['year', 'month', 'date']}
+                    value={globalFilters.between.to}
+                    onChange={(date) => {
+                      setGlobalFilters({ ...globalFilters, between: { ...globalFilters.between, to: date } });
+                    }}
+                  />
+                </Grid>
               </Grid>
             </Grid>
-          </Grid>
+          }
         </Grid>
       </Box>
     </AppBar>
