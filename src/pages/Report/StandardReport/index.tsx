@@ -405,7 +405,7 @@ const Report = () => {
 
         var api = `/report/${type}`;
         axiosInstance().get(`${api}${filterQuery}`, {
-            cancelToken: cancelTokenSource.token
+            cancelToken: cancelTokenSource?.token
         })
             .then(({ data: { data, count, columns } }) => {
                 if (resourceCamelCase === 'userSession') {
