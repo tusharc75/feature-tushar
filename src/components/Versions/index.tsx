@@ -7,9 +7,8 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, fieldTicket } from 'src/constants/helpers';
+import { fieldTicket } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_child_resource_fields } from '../ChildResourceField';
@@ -34,7 +33,7 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
 
   const fetchFields = async () => {
     setColumns(null);
-    const data = await fetch_child_resource_fields(childResource, referenceData?.currency , false);
+    const data = await fetch_child_resource_fields(childResource, referenceData?.currency, false);
     const newColumns = generateColumns(renderedFrom, data, null, false, referenceData?.currency);
     let column: any = [
       {
@@ -117,8 +116,8 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
         parent?.type === 'service'
           ? parent?.serviceDetail?.serviceDescription
           : parent?.type === 'product'
-          ? parent?.productDetail?.productDescription
-          : '';
+            ? parent?.productDetail?.productDescription
+            : '';
     });
 
     cost?.forEach((ele, i) => {
