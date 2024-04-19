@@ -455,7 +455,7 @@ const CustomReactTable = ({
         }
       }
 
-      // set column widht to header width
+      // set column width to header width
       ws['!cols'] = fitToColumn(columns, ws);
 
       const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
