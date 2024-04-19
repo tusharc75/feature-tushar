@@ -47,23 +47,25 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Add"
-              disabled={permissions?.fieldTicket?.isCreate && !isSubmitting ? false : true}
-              onClick={() => {
-                handleCreateFieldTicket(
-                  row?.original?.orignalData,
-                  data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
-                );
-              }}
-            >
-              <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && !isSubmitting ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) &&
+          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Add"
+                disabled={permissions?.fieldTicket?.isCreate && !isSubmitting ? false : true}
+                onClick={() => {
+                  handleCreateFieldTicket(
+                    row?.original?.orignalData,
+                    data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
+                  );
+                }}
+              >
+                <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && !isSubmitting ? 'primary' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        }
         {view === 'table' && (
           <Box>
             <HtmlTooltip title={`View ${routes.fieldTicket.title}`}>
@@ -199,6 +201,7 @@ const FieldServiceTechnician = () => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
     } catch (e) {
+      dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(e);
     }
   };
