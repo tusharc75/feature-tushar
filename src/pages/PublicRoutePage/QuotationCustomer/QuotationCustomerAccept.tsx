@@ -1,19 +1,19 @@
 import { useState, useEffect, useContext } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Box, Grid, Tooltip, Typography } from '@material-ui/core';
-import { dateFormat, formatAmountWithCurrency, getUniqueCurrencies, quotation } from '../../../constants/helpers';
+import { CHILD_RESOURCE, dateFormat, formatAmountWithCurrency, getUniqueCurrencies, quotation } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Skeleton } from '@material-ui/lab';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import QCcomment from './QCcomment';
 import { orderBy, startCase } from 'lodash';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const QuotationCustomerAccept = ({ openAuthId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,7 +31,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
   }, [openAuthId]);
 
   const fetchFields = async (quotationData) => {
-    var data = await fetch_quotation_product_fields(quotationData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
     const coloum: any = [
       {
         accessor: 'index',

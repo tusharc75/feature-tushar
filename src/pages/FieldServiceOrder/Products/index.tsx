@@ -11,17 +11,17 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { fieldServiceOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, fieldServiceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import { startCase } from 'lodash';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import AddOnDialog from './AddOnDialog';
 import AddIcon from '@material-ui/icons/Add';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,10 +52,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   }, [columns]);
 
   const fetchFields = async () => {
-    var allFields = await fetch_service_order_detail_fields(serviceOrderData?.currency);
-    allFields?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    var allFields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldServiceOrderDetails, serviceOrderData?.currency, false);
     const newColumns = generateColumns(renderedFrom, allFields, null, false, serviceOrderData?.currency);
     let column: any = [
       {

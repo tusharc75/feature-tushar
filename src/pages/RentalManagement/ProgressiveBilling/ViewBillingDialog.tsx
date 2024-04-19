@@ -7,7 +7,7 @@ import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, MATERIAL_TYPE, dateFormat, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, dateFormat, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -16,7 +16,6 @@ import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { camelCase, startCase } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -24,6 +23,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import moment from 'moment';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess }) => {
 
@@ -55,10 +55,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
 
   const fetchFields = async () => {
     try {
-      let data = await fetch_invoice_product_fields(invoiceData?.currency);
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
+      let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
+
       setAllFields(JSON.parse(JSON.stringify(data)));
       const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, invoiceData?.currency);
       var column: any = [

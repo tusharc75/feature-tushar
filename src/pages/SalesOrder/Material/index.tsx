@@ -14,7 +14,6 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
-import { fetch_salesOrder_cost_fields, fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -23,11 +22,12 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
 import LeadTimeDialog from './LeadTimeDialog';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { flattenArray } from 'src/constants/columns';
 import AdditionalCostDialog from './AdditionalCostDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
   const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
@@ -66,8 +66,8 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
-    const c_fields = await fetch_salesOrder_cost_fields(salesOrderData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.salesOrderProduct, salesOrderData?.currency, true);
+    const c_fields = await fetch_child_resource_fields(CHILD_RESOURCE.salesOrderCost, salesOrderData?.currency, true);
     setCostFields(c_fields);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);

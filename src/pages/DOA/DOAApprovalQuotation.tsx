@@ -19,7 +19,8 @@ import {
   quoteBuilder,
   ACTIVITY_RESOURCE,
   sidebarResource,
-  quotation
+  quotation,
+  CHILD_RESOURCE
 } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import { useData } from '../../StateProvider/Provider';
@@ -29,8 +30,8 @@ import Loader from '../../components/Loader';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const DoaQuotationApproval = () => {
 
@@ -153,10 +154,7 @@ const DoaQuotationApproval = () => {
   };
 
   const fetchFields = async (quotationData) => {
-    var data = await fetch_quotation_product_fields(quotationData?.currency);
-    data?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false);
     const newColumns = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
     let column: any = [
       {

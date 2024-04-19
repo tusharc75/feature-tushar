@@ -6,7 +6,6 @@ import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import Versions from 'src/pages/Quotation/Versions';
@@ -15,10 +14,11 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { MATERIAL_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { VscVersions } from 'react-icons/vsc';
 import PreviewDownload from 'src/components/PreviewDownload';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Quotation = ({
   rentalManagementData,
@@ -73,10 +73,7 @@ const Quotation = ({
   }, [quotationData?.versions[currentVersion]?._id]);
 
   const fetchFields = async () => {
-    var data = await fetch_quotation_product_fields(rentalManagementData?.currency);
-    data?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false);
     let newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
 
     let coloum: any = [
