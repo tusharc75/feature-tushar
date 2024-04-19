@@ -13,9 +13,8 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
-import { uniq, map, orderBy, isEqual } from 'lodash';
-import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
-import axiosInstance from 'src/axios/axiosInstance';
+import { uniq, map, orderBy } from 'lodash';
+import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 interface BulkAssetCreationQtyDialogProps {
