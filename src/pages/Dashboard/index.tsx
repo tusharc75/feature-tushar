@@ -17,7 +17,7 @@ import { ChartDataType } from './ChartTypes';
 import AssetStats from '../KpiDashboard/AssetDashboard/AssetStats';
 import FullScreenChart from './FullScreenChart';
 import { periodOption, frequencyData } from '../DashboardBuilder/builderHelpers';
-import { camelCase } from 'lodash';
+import { camelCase, set } from 'lodash';
 
 const DashbaordNew = () => {
   const {
@@ -90,6 +90,11 @@ const DashbaordNew = () => {
           if (!savedSelected) {
             setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
             setCharts(data[0]?.charts);
+            setKpis(data[0]?.charts?.map((chart) => {
+              if (chart?.hasFilters) {
+                return camelCase(chart.kpi.name);
+              }
+            }));
             setSelectedDashboardId(data[0]?._id);
           } else {
             setGlobalFilters((prevState) => ({ ...prevState, dashboardType: savedSelected }));
