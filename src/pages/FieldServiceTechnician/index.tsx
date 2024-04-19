@@ -120,7 +120,7 @@ const FieldServiceTechnician = () => {
     if (isOffline) {
       data = await findOne(objectStore.resource, objectStore.fieldServiceOrder);
     } else {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`, { cancelToken: cancelToken.token });
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`, { cancelToken: cancelToken?.token });
       data = response?.data?.data;
     }
     try {
