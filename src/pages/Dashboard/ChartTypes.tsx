@@ -14,7 +14,7 @@ import { GlobalFiltersType } from './GlobalFilter';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEmpty, startCase } from 'lodash';
 import MapView from './MapView';
 import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 import getStaticData from './getStaticData';
@@ -37,9 +37,11 @@ interface Props {
   setSelectedChart?: (Chart: ChartDataType) => void;
   selectedDashboardId?: String;
   fetchDashboards: any;
+  kpiFilters: any[];
+  fetchKpiFilters: any;
 }
 
-const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen, selectedDashboardId, fetchDashboards }: Props) => {
+const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen, selectedDashboardId, fetchDashboards, kpiFilters, fetchKpiFilters }: Props) => {
   const [themeColor] = useAppTheme();
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
@@ -48,11 +50,16 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     state: { selectedEntity, user }
   } = useData();
 
+  const getDefaultFilter = (filters) => {
+    const defaultFilters = filters?.filter((f) => f.default);
+    return defaultFilters?.length ? defaultFilters[0] : {};
+  };
+  
   const currency = user?.user?.currency || 'USD';
   const [chartData, setChartData] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [tableView, setTableView] = React.useState(false);
-  const [filterValues, setFilterValues] = React.useState(null);
+  const [filterValues, setFilterValues] = React.useState(getDefaultFilter(kpiFilters));
   const [anchorElFilter, setAnchorElFilter] = React.useState(null);
   const [anchorElExport, setAnchorElExport] = React.useState(null);
   const [invisible, setInvisible] = React.useState(false);
@@ -440,7 +447,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
         </Box>
       )}
 
-      {chart.hasFilters && filterData && (
+      {chart.hasFilters && !isEmpty(filterData) &&(
         <FiltersDropdown
           closeAnchor={() => setAnchorElFilter(null)}
           anchorEl={anchorElFilter}
@@ -453,6 +460,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
             status: chart.statusOptions
           }}
           kpi={camelCase(chart.kpi.name)}
+          kpiFilters={kpiFilters}
+          fetchKpiFilters={fetchKpiFilters}
         />
       )}
       {chart.hasExport && (

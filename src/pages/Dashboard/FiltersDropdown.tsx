@@ -21,9 +21,12 @@ interface Props {
   filterOptions: any;
   isCRM: boolean;
   kpi: string;
+  kpiFilters: any[];
+  fetchKpiFilters: () => any;
 }
 
-const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values, setValues, isCRM, kpi }: Props) => {
+const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values, setValues, isCRM, kpi, kpiFilters, fetchKpiFilters }: Props) => {
+
   const {
     state: { selectedEntity }
   } = useData();
@@ -31,14 +34,13 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
   const [loading, setLoading] = useState({ loading: false, resource: null });
   const [currentPage, setCurrentPage] = useState(0);
   const [inputValues, setInputValues] = useState({});
-  const [selectedUserFilter, setSelectedUserFilter] = useState(null);
-  const [userFilters, setUserFilters] = useState([]);
+  const [selectedKpiFilter, setSelectedKpiFilter] = useState(null);
   const [isFilterDeleteConfirm, setIsFilterDeleteConfirm] = useState({ open: false, ids: null });
   const [isSaveFilter, setIsSaveFilter] = useState({ open: false, data: null });
   const { setToastConfig } = useContext(CustomToastContext);
 
   React.useEffect(() => {
-    if (!filters) return;
+    if (!filters && !selectedKpiFilter) return;
     filters.forEach((filter) => {
       setValues((prevState: any) => ({
         ...prevState,
@@ -47,18 +49,23 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
     });
   }, [filters]);
 
-  const fetchFilters = async () => {
-    try {
-      const { data } = await axiosInstance().get(`/kpi/filters?kpi=${kpi}`);
-      setUserFilters(data?.data);
-    } catch (error) {
-      setToastConfig(error);
-    }
-  }
+  React.useEffect(() => {
+    setSelectedKpiFilter(kpiFilters?.find((f) => f?.default) || null);
+  }, [kpiFilters]);
 
   React.useEffect(() => {
-    fetchFilters();
-  }, [])
+    if (!isEmpty(selectedKpiFilter?.filterValue)) {
+      setValues(selectedKpiFilter.filterValue);
+      setInputValues(selectedKpiFilter.filterValue);
+    } else {
+      setValues(() => {
+        return filters.reduce((acc, filter) => {
+          return { ...acc, [filter.key]: filter?.multiple ? [] : filter.key === 'status' && isCRM ? { optionValue: 'open', optionLabel: 'Open' } : filter?.defaultValue };
+        }, {});
+      })
+      setInputValues({});
+    }
+  }, [selectedKpiFilter])
 
   const fetchOptions = useCallback(
     debounce(async (resource: string, searchKey: string = '', page: number = 0, key: string = '') => {
@@ -111,9 +118,9 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
     axiosInstance()
       .put(`/kpi/filters/remove`, { ids: isFilterDeleteConfirm.ids })
       .then(({ data }) => {
-        fetchFilters();
+        fetchKpiFilters();
         setIsFilterDeleteConfirm({ open: false, ids: null });
-        setSelectedUserFilter(null);
+        setSelectedKpiFilter(null);
         setToastConfig({
           open: true,
           type: 'success',
@@ -143,13 +150,11 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
         <Autocomplete
           fullWidth
           size="small"
-          value={selectedUserFilter}
+          value={selectedKpiFilter}
           onChange={(event: any, newValue: any) => {
-            setSelectedUserFilter(newValue || null);
-            setValues(newValue?.filterValue || {});
-            setInputValues(newValue?.filterValue || {});
+            setSelectedKpiFilter(newValue || null);
           }}
-          getOptionLabel={(option) => option.title}
+          getOptionLabel={(option) => option?.title}
           renderOption={(option) => (
             <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
               <span style={{ width: 'calc(100% - 71px)' }}>{option?.title}</span>
@@ -168,10 +173,11 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
             </Box>
           )}
           id="controllable-states-demo"
-          options={userFilters}
+          options={kpiFilters}
           renderInput={(params) => <TextField {...params} fullWidth label="Select a Filter Set" variant="outlined" />}
+          getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
         />
-        {filters.map((filter: any, index) => (
+        {filters?.map((filter: any, index) => (
           <Box mt={'16px'} key={index}>
             {filter?.resource ? (
               <Autocomplete
@@ -193,11 +199,11 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                 options={options}
                 autoHighlight
                 value={values[filter.key]}
-                getOptionLabel={(option: any) => option.optionLabel}
-                getOptionSelected={(option, val) => option.optionValue === val.optionValue}
+                getOptionLabel={(option: any) => option?.optionLabel}
+                getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
                 onChange={(_, val) => {
                   handleChange(filter.key, val);
-                  setInputValues((prevValues) => ({ ...prevValues, [filter.key]: '' }));
+                  setInputValues((prevValues) => ({ ...prevValues, [filter.key]: val }));
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -226,18 +232,18 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                   }
                 }}
               />
-            ) : (filter.key in filterOptions ? (
+            ) : (filter?.key in filterOptions ? (
               <Autocomplete
                 size="small"
                 multiple={filter?.multiple}
                 fullWidth
-                options={filterOptions[filter.key]}
+                options={filterOptions[filter?.key]}
                 autoHighlight
-                value={values[filter.key]}
-                getOptionLabel={(option: any) => option.optionLabel}
-                getOptionSelected={(option, val) => option.optionValue === val.optionValue}
+                value={values[filter?.key]}
+                getOptionLabel={(option: any) => option?.optionLabel}
+                getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
                 onChange={(_, val) => {
-                  handleChange(filter.key, val);
+                  handleChange(filter?.key, val);
                   setInputValues((prevValues) => ({ ...prevValues, [filter?.key]: val }));
                 }}
                 renderInput={(params) => (
@@ -269,14 +275,14 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
         ))}
         <Button
           onClick={() => {
-            setIsSaveFilter({ open: true, data: selectedUserFilter });
+            setIsSaveFilter({ open: true, data: selectedKpiFilter });
           }}
-          disabled={isEmpty(inputValues) && !selectedUserFilter ? true : false}
+          disabled={isEmpty(inputValues) && !selectedKpiFilter ? true : false}
           size="small"
           color="primary"
           className="yellow-button mt-2"
         >
-          {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
+          {selectedKpiFilter ? 'Update Filter' : 'Save Filter'}
         </Button>
       </Box>
       {isSaveFilter.open && (
@@ -288,8 +294,8 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
           handleSucess={() => {
             setIsSaveFilter({ open: false, data: null });
             setInputValues({});
-            fetchFilters();
-            setSelectedUserFilter(null);
+            fetchKpiFilters();
+            setSelectedKpiFilter(null);
           }}
           filterData={isSaveFilter.data}
           filterValue={inputValues}
