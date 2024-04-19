@@ -16,16 +16,16 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import PreviewDownload from 'src/components/PreviewDownload';
 import TabPanel from 'src/components/TabPanel';
-import { CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CreditMemo from '../CreditMemo';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FaFileZipper } from 'react-icons/fa6';
 import { FaFileInvoice } from 'react-icons/fa';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -73,10 +73,8 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
 
   const fetchFields = async () => {
     try {
-      let data = await fetch_invoice_product_fields(invoiceData?.currency);
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
+      let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
+ 
       const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData.currency ? invoiceData.currency : 'USD');
       var column: any = [
         {

@@ -22,10 +22,10 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { PRICING_SETUP_TYPE, SUBLEASE_STATUS, SUBLEASE_TYPE, pricingCondition, sublease } from '../../../constants/helpers';
+import { CHILD_RESOURCE, PRICING_SETUP_TYPE, SUBLEASE_STATUS, SUBLEASE_TYPE, pricingCondition, sublease } from '../../../constants/helpers';
 import QtyDialog from './QtyDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -62,13 +62,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_sublease_product_fields(subleaseData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, allowedToEdit&&!isIssued);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    data?.forEach((e) => {
-      if (!allowedToEdit || isIssued) {
-        e.isColumnEditable = false;
-      }
-    });
     const newColumns = generateColumns(
       renderedFrom,
       data?.map((e) => {
