@@ -40,7 +40,7 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.payrollPaidTimeOff, payrollPolicyData?.currency, true);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.payrollPaidTimeOff, user.user?.brandCurrency, true);
     const newColumns = generateColumns(renderedFrom, data);
 
     newColumns?.forEach((e: any) => {
@@ -213,7 +213,7 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
       {managePaidTimeOff?.open && (
         <ManagePaidTimeOff
           payrollPolicyId={payrollPolicyData?._id}
-          currency={payrollPolicyData?.currency}
+          currency={user.user?.brandCurrency}
           id={managePaidTimeOff?.id}
           onSuccess={() => {
             fetchData();

@@ -16,12 +16,9 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
 import moment from 'moment';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import { useData } from 'src/StateProvider/Provider';
 
-const ManagePayType = ({ payTypeData, onClose, onSuccess, payrollPolicyId, isClone = false }) => {
-  const {
-    state: { user }
-  }: any = useData();
+const ManagePayType = ({ payTypeData, onClose, onSuccess,currency, payrollPolicyId, isClone = false }) => {
+ 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -39,7 +36,7 @@ const ManagePayType = ({ payTypeData, onClose, onSuccess, payrollPolicyId, isClo
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.payrollPayTypes, user.user?.brandCurrency, true);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.payrollPayTypes, currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (payTypeData) {
       setInitialData({

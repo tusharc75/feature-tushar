@@ -40,7 +40,7 @@ const Holidays = ({ payrollPolicyData }) => {
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.payrollHoliday, payrollPolicyData?.currency, true);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.payrollHoliday, user.user?.brandCurrency, true);
     const newColumns = generateColumns(renderedFrom, data);
 
     newColumns?.forEach((e: any) => {
@@ -214,7 +214,7 @@ const Holidays = ({ payrollPolicyData }) => {
       {manageHolidays?.open && (
         <ManageHolidays
           payrollPolicyId={payrollPolicyData?._id}
-          currency={payrollPolicyData?.currency}
+          currency={user.user?.brandCurrency}
           id={manageHolidays?.id}
           onSuccess={() => {
             fetchData();

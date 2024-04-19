@@ -230,6 +230,7 @@ const PayTypes = ({ payrollPolicyId }) => {
             setPayTypeDialog({ open: false, data: null, isClone: false });
             fetchData();
           }}
+          currency={user.user?.brandCurrency}
           payTypeData={payTypeDialog.data}
           payrollPolicyId={payrollPolicyId}
           isClone={payTypeDialog.isClone}
