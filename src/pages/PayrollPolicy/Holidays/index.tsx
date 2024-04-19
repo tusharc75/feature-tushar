@@ -15,6 +15,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CHILD_RESOURCE, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ManageHolidays from './ManageHolidays';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Holidays = ({ payrollPolicyData }) => {
   const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_holidays`;
@@ -39,8 +40,7 @@ const Holidays = ({ payrollPolicyData }) => {
   }, []);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.payrollHoliday}`);
-    var data = response?.data?.data;
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.payrollHoliday, user.user?.brandCurrency, true);
     const newColumns = generateColumns(renderedFrom, data);
 
     newColumns?.forEach((e: any) => {
@@ -214,6 +214,7 @@ const Holidays = ({ payrollPolicyData }) => {
       {manageHolidays?.open && (
         <ManageHolidays
           payrollPolicyId={payrollPolicyData?._id}
+          currency={user.user?.brandCurrency}
           id={manageHolidays?.id}
           onSuccess={() => {
             fetchData();

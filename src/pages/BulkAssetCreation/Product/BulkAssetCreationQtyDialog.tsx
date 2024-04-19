@@ -16,6 +16,7 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
 import axiosInstance from 'src/axios/axiosInstance';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 interface BulkAssetCreationQtyDialogProps {
   onClose: VoidFunction | any;
@@ -45,9 +46,7 @@ const BulkAssetCreationQtyDialog: FC<BulkAssetCreationQtyDialogProps> = ({
   }, []);
 
   const fetchField = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.bulkAssetCreationProduct}`);
-    var fields = response?.data?.data;
-    fields = CURReplaceByCurrencySingle(fields, bulkAssetCreationData?.currency ? bulkAssetCreationData?.currency : 'USD');
+    var fields = await fetch_child_resource_fields(CHILD_RESOURCE.bulkAssetCreationProduct, bulkAssetCreationData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(fields)));
     if (bulkEdit) {
       let unitArray: any = [];

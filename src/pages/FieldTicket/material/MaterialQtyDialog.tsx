@@ -6,7 +6,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -21,7 +21,7 @@ import moment from 'moment';
 import { bulkUpdate, calculatePrice, calculateRowsField } from '../../../components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { fetch_field_ticket_material_fields } from '../helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -93,7 +93,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   const fetchData = async () => {
     setFetchingData(true);
-    var data = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       let unitArray: any = [];

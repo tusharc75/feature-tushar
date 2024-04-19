@@ -25,6 +25,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder, sidebarResource } from '../../../constants/helpers';
 import MaterialDialog from './MaterialDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete, updateOrderStatus }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -51,14 +52,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   }, [productionOrderData]);
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
-    if (!allowedToEdit) {
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
-    }
-    data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
+    const response = await fetch_child_resource_fields(CHILD_RESOURCE.productionOrderDetail, productionOrderData?.currency, allowedToEdit);
+    var data = response?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
     setAllFields(JSON.parse(JSON.stringify(data)));
     let newColumns = generateColumns(renderedFrom, data, null, false, productionOrderData?.currency || 'USD');
     let coloum: any = [
