@@ -25,6 +25,7 @@ import {
   productionOrder
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -121,12 +122,8 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
   };
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
-    data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
-    data?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    const response = await fetch_child_resource_fields(CHILD_RESOURCE.productionOrderDetail, productionOrderData?.currency, false);
+    var data = response?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
     const newColumns = generateColumns(renderedFrom, data, null, false, productionOrderData?.currency || 'USD');
     let coloum: any = [
       {

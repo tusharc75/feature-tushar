@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { MATERIAL_TYPE, fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -21,7 +21,6 @@ import { Autocomplete } from '@material-ui/lab';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Technicians from './Technicians';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { fetch_field_ticket_material_fields } from '../helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
@@ -34,8 +33,9 @@ import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
 import { Add } from '@material-ui/icons';
 import { camelCase, isEmpty } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -108,12 +108,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
   }, [columns, renderCount, selectedServiceOption, tabValue]);
 
   const fetchColumns = async () => {
-    var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
-    if (!allowedToEdit || fieldTicketData?.quotation) {
-      fields?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
-    }
+    var fields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation);
     setAllFields(JSON.parse(JSON.stringify(fields)));
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     const column: any = [
@@ -650,6 +645,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
           onClose={() => setOpenConsumablesQtyDialog(false)}
           onSuccess={() => {
             fetchData();
+            fetchMaterial();
             setOpenConsumablesQtyDialog(false);
           }}
           warehouse={fieldTicketData?.warehouse}

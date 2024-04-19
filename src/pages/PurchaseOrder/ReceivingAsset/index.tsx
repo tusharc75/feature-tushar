@@ -15,15 +15,15 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MATERIAL_TYPE, PURCHASE_ORDER_STATUS, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PURCHASE_ORDER_STATUS, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import History from 'src/pages/ProductInventory/LedgerHistory';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import AssetQtyDialog from './AssetQtyDialog';
 import Logs from './Logs';
 import Receive from './Receive';
 import Reject from './Reject';
 import RejectProduct from './RejectProduct';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -130,13 +130,11 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
     const productFieldsColumns = generateColumns(renderedFrom, productFields);
     productFieldsColumns?.forEach((e) => {
-      column.push(e)
-    })
-
-    let fields = await fetch_po_product_fields(purchaseOrderData?.currency);
-    fields?.forEach((e) => {
-      e.isColumnEditable = false;
+      column.push(e);
     });
+
+    let fields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderProduct, purchaseOrderData?.currency, false);
+
     const newColumns = generateColumns(renderedFrom, fields, null, false, purchaseOrderData?.currency);
     column = [...column, ...newColumns];
     column.push({
@@ -192,10 +190,10 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                   </HtmlTooltip>
                 } */}
               {permissions?.purchaseOrder?.isUpdate &&
-                row?.original?.type === MATERIAL_TYPE.product &&
-                allowedToEdit &&
-                row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
-                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+              row?.original?.type === MATERIAL_TYPE.product &&
+              allowedToEdit &&
+              row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
+              ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                 <HtmlTooltip title="Reject">
                   <span>
                     <IconButton
@@ -266,8 +264,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       const serviceResponse: any = await axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`);
       const costResponce: any = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData._id}`);
 
-
-      const tempMaterialAssets: any = {}
+      const tempMaterialAssets: any = {};
 
       let rows = result?.data?.data?.map((item, index) => {
         let finalObject = prepareDataForGrid(item);
@@ -355,7 +352,11 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
           : 0;
 
-        tempMaterialAssets[res?._id] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => { return { optionValue: e?._id, optionLabel: e?.detail } })
+        tempMaterialAssets[res?._id] = res?.subRows
+          ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
+          ?.map((e) => {
+            return { optionValue: e?._id, optionLabel: e?.detail };
+          });
         return res;
       });
 
@@ -441,8 +442,6 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     ]
   };
 
-
-
   return (
     <>
       <DetailsPageHeader
@@ -513,18 +512,31 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         />
       )}
       {rejectProductDialog && (
-        <RejectProduct
-          handleClose={() => setRejectProductDialog(null)}
-          handleSuccess={() => {
-            setRejectProductDialog(null);
-            fetchProduct();
-          }}
-          purchaseOrderData={purchaseOrderData}
-          POId={purchaseOrderData?._id}
-          product={rejectProductDialog}
-          warehouse={purchaseOrderData?.warehouse.optionValue}
-          materialAssets={materialAssets[rejectProductDialog?._id] || []}
-        />
+        <>
+          <Reject
+            purchaseOrderID={purchaseOrderData._id}
+            onClose={() => setRejectProductDialog(null)}
+            onSuccess={() => {
+              setRejectProductDialog(null);
+              fetchProduct();
+            }}
+            material={[rejectProductDialog]}
+            purchaseOrderData={purchaseOrderData}
+            materialAssets={materialAssets}
+          />
+          {/* <RejectProduct
+            handleClose={() => setRejectProductDialog(null)}
+            handleSuccess={() => {
+              setRejectProductDialog(null);
+              fetchProduct();
+            }}
+            purchaseOrderData={purchaseOrderData}
+            POId={purchaseOrderData?._id}
+            product={rejectProductDialog}
+            warehouse={purchaseOrderData?.warehouse.optionValue}
+            materialAssets={materialAssets[rejectProductDialog?._id] || []}
+          /> */}
+        </>
       )}
       {logDialog.open && (
         <Logs

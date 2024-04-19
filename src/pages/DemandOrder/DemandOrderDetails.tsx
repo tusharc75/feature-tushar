@@ -19,7 +19,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, demandOrder } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, checkSuperAdminAccess, demandOrder, sidebarResource } from '../../constants/helpers';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import Material from './Material';
 
@@ -78,7 +78,7 @@ const DemandOrderDetails = () => {
       const response: any = await axiosInstance().get(`${demandOrder.api}/${id}`);
       data = response?.data?.data;
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.demandOrder)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);

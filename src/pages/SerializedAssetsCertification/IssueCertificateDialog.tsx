@@ -23,6 +23,7 @@ import {
   yupSchema
 } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiryDate }) => {
 
@@ -44,8 +45,7 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
 
   const fetchFields = async () => {
     try {
-      const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.serializedAssetsCertification}`);
-      const fields = response?.data?.data;
+      const fields = await fetch_child_resource_fields(CHILD_RESOURCE.serializedAssetsCertification, user.user?.brandCurrency, true);
       let createValues = { ...getObjKeys('', fields) };
       createValues['issueDate'] = null;
       createValues['expiryDate'] = null;

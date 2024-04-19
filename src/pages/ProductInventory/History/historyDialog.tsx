@@ -15,7 +15,7 @@ const HistoryDialog = ({ close, product, warehouse, storageLocation, productName
   return (
     <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
       <CustomDialogHeader title={`History - ${productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <Box className={`flex justify-end items-center min-h-[50px] ${currentView !== 'calendar' && 'md:absolute md:top-[65px] md:right-[16px]'} `}>
           <Box display="flex">
             <ToggleButtonGroup size="small" exclusive value={currentView} onChange={(e, newVal) => {}}>

@@ -13,6 +13,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit, workOrderData }) => {
 
@@ -26,9 +27,7 @@ const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit,
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, workOrderData?.currency || 'USD');
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderProduct, workOrderData?.currency, true);
     setInitialData({
       fields: data,
       values: getObjKeysWithValues(materialData, data)

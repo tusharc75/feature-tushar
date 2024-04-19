@@ -1,5 +1,6 @@
 import { Box, Button, ClickAwayListener, Dialog, Grow, MenuItem, MenuList, Paper, Popper } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import axios, { CancelTokenSource } from 'axios';
 import { lowerCase, startCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -10,7 +11,6 @@ import { VscCalendar } from 'react-icons/vsc';
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
-import { GetBoard } from '../../../axios/activity';
 import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
 import { CreateCase } from '../../../components/Activity/Case/CreateCase';
 import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
@@ -62,9 +62,10 @@ const BigCalendar = () => {
   };
 
   useEffect(() => {
+    const cancelTokenSource = axios.CancelToken.source();
     if (referenceType) {
       axiosInstance()
-        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
+        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
@@ -72,27 +73,35 @@ const BigCalendar = () => {
     } else {
       setFilter([]);
     }
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, referenceId]);
 
-  const fetchBoard = useCallback(() => {
-    GetBoard('', JSON.stringify(filter))
-      .then(({ data }) => {
-        const allActivities = [...data.event, ...data.task, ...data.case];
-        const newData = allActivities.map((d) => ({
-          ...d,
-          title: d.name,
-          start: d.startDate,
-          end: d.dueDate,
-          allDay: true,
-          type: d.type
-        }));
-        setActivities(newData);
-      })
-      .catch(() => {});
-  }, [type, filter]);
+  const fetchBoard = useCallback(
+    (cancelTokenSource?: CancelTokenSource) => {
+      axiosInstance()
+        .get(`/activity/board?type=${''}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
+        .then(({ data: { data } }) => {
+          const allActivities = [...data.event, ...data.task, ...data.case];
+          const newData = allActivities.map((d) => ({
+            ...d,
+            title: d.name,
+            start: d.startDate,
+            end: d.dueDate,
+            allDay: true,
+            type: d.type
+          }));
+          setActivities(newData);
+        })
+        .catch(() => {});
+    },
+    [type, filter]
+  );
 
   useEffect(() => {
-    fetchBoard();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchBoard(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [fetchBoard]);
 
   const activityOptions = [

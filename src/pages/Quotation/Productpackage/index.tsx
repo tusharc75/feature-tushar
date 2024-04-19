@@ -13,7 +13,6 @@ import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/Assign
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fetch_quotation_cost_fields, fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -26,6 +25,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
+  CHILD_RESOURCE,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
   QUOTATION_TYPE,
@@ -39,6 +39,7 @@ import LeadTimeDialog from './LeadTimeDialog';
 import PriceRequestDialog from './PriceRequestDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -91,14 +92,9 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   }, [version, columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_quotation_product_fields(quotationData?.currency);
-    const c_fields = await fetch_quotation_cost_fields(quotationData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, allowedToEdit);
+    const c_fields = await fetch_child_resource_fields(CHILD_RESOURCE.quotationCost, quotationData?.currency, allowedToEdit);
     setCostFields(c_fields);
-    if (!allowedToEdit) {
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
-    }
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns: any = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
     let column: any = [

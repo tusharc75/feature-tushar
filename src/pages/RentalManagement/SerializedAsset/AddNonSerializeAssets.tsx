@@ -147,7 +147,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
           state?.map((s, i) => {
             const foundRows = option?.find((p) => p['srno'] === s['srno']);
             if (foundRows) {
-              if(foundRows?.assetNumber===s['Asset Number']){
+              if (foundRows?.assetNumber === s['Asset Number']) {
                 setToastConfig({
                   open: true,
                   message: 'One or more serial numbers are same!',
@@ -213,7 +213,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
         title={isOffline ? `Assign ${routes.serializedAsset.title}` : `Create Non ${routes.serializedAsset.title}`}
         onClose={closeDialog}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <Box display="flex" flexDirection="column" component={'form'} onSubmit={handleSubmit}>
           <Box alignSelf={'flex-end'} mb={2}>
             <Button

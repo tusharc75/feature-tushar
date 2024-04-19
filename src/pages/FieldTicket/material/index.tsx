@@ -21,10 +21,10 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { fetch_field_ticket_cost_fields, fetch_field_ticket_material_fields } from '../helper';
 import Consumables from './Consumables';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import AddCostDialog from './AddCostDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeStatus }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
@@ -52,15 +52,9 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const { generateColumns } = useColumns();
   const fetchFields = async () => {
     setColumns(null);
-    var data = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
-    let costField: any = await fetch_field_ticket_cost_fields(fieldTicketData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation);
+    let costField: any = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true);
     setCostFields(costField);
-
-    if (!allowedToEdit || fieldTicketData?.quotation) {
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
-    }
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, fieldTicketData?.currency);
     let column: any = [
@@ -85,21 +79,21 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {!allowedToEdit || fieldTicketData?.quotation ? (
               <p> {row.original.detail}</p>
+            ) : row.original.detail ? (
+              <p
+                onClick={() => {
+                  openMaterial(row, table.getRowModel().rows);
+                }}
+                className="link text-truncate"
+                title={row.original.detail}
+              >
+                {row.original.detail}
+              </p>
             ) : (
-              row.original.detail ?
-                <p
-                  onClick={() => {
-                    openMaterial(row, table.getRowModel().rows);
-                  }}
-                  className="link text-truncate"
-                  title={row.original.detail}
-                >
-                  {row.original.detail}
-                </p>
-                : <NoDataCell />
+              <NoDataCell />
             )}
             {row.original.type !== MATERIAL_TYPE.manualEntry && (
-              <Box ml={1}>
+              <Box ml={1} className=" flex-shrink-0">
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -110,7 +104,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                 >
                   <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>
-              </Box>)}
+              </Box>
+            )}
           </div>
         )
       },
@@ -165,12 +160,12 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                 <IconButton
                   size="small"
                   aria-label="Delete"
-                  disabled={!allowedToEdit}
+                  disabled={!allowedToEdit || !row?.original?.canDelete}
                   onClick={() => {
                     setDeleteData([{ id: row.original._id, service: row?.original?.materialId, type: row?.original?.type }]);
                   }}
                 >
-                  <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                  <DeleteIcon fontSize="small" color={!allowedToEdit || !row?.original?.canDelete ? 'disabled' : 'error'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
@@ -188,7 +183,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=service`);
     const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
     let costData = costResponse?.data?.data;
-
+    
     costData = costData?.map((e: any) => {
       return { ...e, type: MATERIAL_TYPE.manualEntry };
     });
@@ -197,15 +192,12 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
 
     data.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === MATERIAL_TYPE.service
-        ? (parent.serviceDetail?.serviceName || '')
-        : (parent.detail || '');
-      parent.description = `${parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceDescription || ''
-        : parent.description || ''}`;
+      parent.detail = parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName || '' : parent.detail || '';
+      parent.description = `${parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription || '' : parent.description || ''}`;
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
       parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
+      parent.canDelete = parent.canDelete ?? true;
     });
     if (data?.length) {
       if (data.filter((_rows) => _rows.isValid === false).length > 0) {
@@ -377,7 +369,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     setDeleting(true);
     const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id);
     const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry);
-    const updatedProducts = products?.map(ele => ({
+    const updatedProducts = products?.map((ele) => ({
       id: ele.id,
       service: ele.service
     }));
@@ -514,7 +506,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         </HtmlTooltip>
         <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
           <MenuItem
-            disabled={isDeleting}
+            disabled={isDeleting || selectedRecords.some((ele)=> !ele?.canDelete)}
             onClick={() => {
               setDeleteData(
                 selectedRecords?.map((d) => {
@@ -573,7 +565,9 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         <Consumables
           allowedToEdit={allowedToEdit}
           services={dataRows}
-          fieldTicketData={fieldTicketData} />
+          fieldTicketData={fieldTicketData} 
+          fetchMaterial={fetchMaterial}
+          />
       </Box>
       {serviceDialog?.open && serviceDialog?.type === 'service' && (
         <AssignServiceDialog

@@ -21,9 +21,9 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { camelCase } from 'lodash';
+import axios, { CancelTokenSource } from 'axios';
 
-
-const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChangeStatus, resource }) => {
+const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChangeStatus, resource, enableGlobalSearch = true }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const renderedFrom = camelCase(routes?.fieldTicket.title);
@@ -42,20 +42,25 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
+    const cancleToken = axios.CancelToken.source();
     fetchGridColumns();
+    return () => cancleToken.cancel();
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cancleToken = axios.CancelToken.source();
+    fetchData(cancleToken);
+    return () => cancleToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEntity, serviceOrderData]);
 
-  const fetchGridColumns = async () => {
+  const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
     try {
       let data;
       if (isOffline) {
         data = await findOne(objectStore.resource, objectStore.fieldTicket);
       } else {
-        const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
+        const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`, { cancelToken: cancelToken?.token });
         data = response?.data?.data;
       }
       const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
@@ -94,7 +99,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelToken?: CancelTokenSource) => {
     try {
       setNextStep(false);
       dispatch({ type: 'loading', loading: true });
@@ -107,7 +112,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
         count = data.length;
       } else {
         const queryString = getQueryString();
-        const response = await axiosInstance().get(`${routes.fieldTicket.path}${queryString}`);
+        const response = await axiosInstance().get(`${routes.fieldTicket.path}${queryString}`, { cancelToken: cancelToken?.token });
         data = response?.data?.data;
         count = response?.data?.count;
       }
@@ -115,7 +120,8 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
         let finalObject = prepareDataForGrid(u);
         finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
         var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-        finalObject['allowedToEdit'] = isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        finalObject['allowedToEdit'] =
+          isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
         finalObject['canDelete'] =
           u?.canDelete &&
           permissions?.fieldTicket?.isDelete &&
@@ -208,7 +214,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
           </span>
         </HtmlTooltip>
         <HideWhenOffline>
-          {!serviceOrderData?.quotation &&
+          {!serviceOrderData?.quotation && (
             <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
               <span>
                 <IconButton
@@ -223,7 +229,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
                 </IconButton>
               </span>
             </HtmlTooltip>
-          }
+          )}
         </HideWhenOffline>
         <HideWhenOffline>
           <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
@@ -245,8 +251,6 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
       </>
     )
   };
-
-  
 
   const addButtonMenuItems = () => {
     return (
@@ -280,7 +284,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
 
   return (
     <Fragment>
-      {resource === sidebarResource.fieldServiceOrder &&
+      {resource === sidebarResource.fieldServiceOrder && (
         <DetailsPageHeader
           isAddButtonVisible={allowedToEdit && !serviceOrderData?.quotation}
           addButtonMenuItems={addButtonMenuItems()}
@@ -288,7 +292,8 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
           actionButtonMenuItems={actionButtonMenuItems()}
           actionButtonProps={{ disabled: selectedRecords.length === 0 }}
           hasXpadding
-        />}
+        />
+      )}
       {columns ? (
         <CustomReactTable
           height={resource === sidebarResource.fieldServiceOrder ? 'calc(100vh - 393px)' : 'calc(100vh - 200px)'}
@@ -297,6 +302,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
+          enableGlobalSearch={enableGlobalSearch}
           isClientSideGrid={true}
           hideAction={resource === sidebarResource.fieldServiceOrder ? false : true}
         />

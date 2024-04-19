@@ -13,7 +13,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, checkSuperAdminAccess, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -21,8 +21,11 @@ import TabPanel from '../../components/TabPanel';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import Material from './Material';
+import Steps, { getIndex } from 'src/components/Steps';
+import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const PurchaseRequisitionDetail = () => {
+
   const renderedFrom = camelCase(routes?.purchaseRequisition.title);
   const { id } = useParams();
   const history = useHistory();
@@ -37,7 +40,9 @@ const PurchaseRequisitionDetail = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], services: [] });
-
+  const [nextStep, setNextStep] = useState(true);
+  const [currentStep, setCurrentStep] = useState(null);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
   const {
     state: { permissions, user }
   }: any = useData();
@@ -67,9 +72,10 @@ const PurchaseRequisitionDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.purchaseRequisition.path}/${id}`);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.purchaseRequisition)) {
         isAllowedToEdit = true;
       }
+      setCurrentStep(getIndex(data?.processStatus, purchaseRequisitionSteps));
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPurchaseRequisitionData(data);
@@ -224,9 +230,46 @@ const PurchaseRequisitionDetail = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          {purchaseRequisitionData && (
-            <Material renderedFrom={`${renderedFrom}_grid-1`} allowedToEdit={allowedToEdit} purchaseRequisitionData={purchaseRequisitionData} />
-          )}
+          <Grid item xs={12} sm={12} md={12} lg={12}>
+            {!purchaseRequisitionData ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <Grid item xs={12} sm={12} md={12} lg={12}>
+                <Steps
+                  isNextStep={false}
+                  nextStep={nextStep}
+                  steps={purchaseRequisitionSteps}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  isStepEnded={false}
+                  setStepFullScreen={() => setStepFullScreen(true)}
+                />
+                <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                  {currentStep === 0 && (
+                    <Material
+                      allowedToEdit={allowedToEdit}
+                      allowedToAddMaterial={true}
+                      purchaseRequisitionData={purchaseRequisitionData}
+                    />
+                  )}
+                  {currentStep === 1 && (
+                    <Material
+                      allowedToEdit={allowedToEdit}
+                      allowedToAddMaterial={false}
+                      purchaseRequisitionData={purchaseRequisitionData} />
+                  )}
+                  {currentStep === 2 && (
+                    <Material
+                      allowedToEdit={allowedToEdit}
+                      allowedToAddMaterial={false}
+                      purchaseRequisitionData={purchaseRequisitionData} />
+                  )}
+                </ContentFullScreen>
+              </Grid>
+            )}
+          </Grid>
         </TabPanel>
       </Box>
       {showOrderDialog.open && (

@@ -17,7 +17,8 @@ import {
   REPAIR_ORDER_STATUS,
   repairOrderSteps,
   REPAIR_ORDER_TYPE,
-  QUOTATION_STATUS
+  QUOTATION_STATUS,
+  checkSuperAdminAccess
 } from 'src/constants/helpers';
 import ManageRepairOrder from './ManageRepairOrder';
 import queryString from 'query-string';
@@ -138,7 +139,7 @@ const RepairOrderDetails = () => {
       .then(({ data: { data } }) => {
         setisAnyMaterial(data?.canDelete ? false : true);
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (user?.role?.selectedEntity?.superAdminAccess) {
+        if (checkSuperAdminAccess(user, sidebarResource.repairOrder)) {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);

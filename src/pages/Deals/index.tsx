@@ -11,11 +11,12 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
-import { COLOUR_MASTER, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { COLOUR_MASTER, DEAL_STAGE, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import WarningFilter from 'src/components/WarningFilter';
 import axios, { CancelTokenSource } from 'axios';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 
 const getWarningList = (row?: any) => {
   const icon = <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />;
@@ -39,7 +40,14 @@ const getWarningList = (row?: any) => {
       icon,
       title: 'Contract Start Date has not set',
       label: 'Contract Start Date has not set',
-      isVisible: row?.original?.dealstage === 'Contract Signed' && !row?.original?.start_set_date
+      isVisible: row?.original?.dealstage === DEAL_STAGE.contractSigned && !row?.original?.start_set_date
+    },
+    {
+      warningFilter: 4,
+      icon,
+      title: 'Contract Start Date has set but Contract not Signed',
+      label: 'Contract Start Date has set but Contract not Signed',
+      isVisible: row?.original?.dealstage === DEAL_STAGE.proposalSent && row?.original?.start_set_date
     }
   ];
   return list;
@@ -73,7 +81,7 @@ const Deals = () => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, search, checkedFilter]);
 
   useEffect(() => {
-    dispatch({ type: 'filter', filters: { dealstage: { filter: ['Proposal Sent', 'Contract Signed', 'Renewal Sent', 'Renewal Signed'] } } });
+    dispatch({ type: 'filter', filters: { dealstage: { filter: [DEAL_STAGE.proposalSent, DEAL_STAGE.contractSigned, DEAL_STAGE.renewalSent, DEAL_STAGE.renewalSigned] } } });
   }, []);
 
   const getVisibleWarnings = useCallback((row: any) => {
@@ -171,6 +179,10 @@ const Deals = () => {
       });
   };
 
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -193,9 +205,13 @@ const Deals = () => {
         />
       </div>
       <CustomContainer>
-        <div className="flex justify-end pb-[18px]">
-          <WarningFilter checkedFilter={checkedFilter} setCheckedFilter={setCheckedFilter} warnings={getWarningList()} />
-        </div>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={false}
+          isAddButtonVisible={false}
+          rightSideContents={<WarningFilter checkedFilter={checkedFilter} setCheckedFilter={setCheckedFilter} warnings={getWarningList()} />}
+        />
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

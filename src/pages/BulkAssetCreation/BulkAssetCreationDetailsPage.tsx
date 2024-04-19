@@ -19,7 +19,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, bulkAssetCreation, bulkAssetCreationSteps, getObjKeysWithValues } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, bulkAssetCreation, bulkAssetCreationSteps, checkSuperAdminAccess, getObjKeysWithValues, sidebarResource } from '../../constants/helpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import Product from './Product';
 import SerializedAsset from './SerializedAsset';
@@ -71,8 +71,8 @@ const BulkAssetCreationDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${bulkAssetCreation.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   useEffect(() => {
@@ -95,7 +95,7 @@ const BulkAssetCreationDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`${bulkAssetCreation.api}/${id}`);
       var isAllowedToEdit = [...(data?.collaborator ?? []), data?.owner, data?.processor].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.bulkAssetCreation)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);

@@ -1,16 +1,16 @@
-import React, { memo, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import { Typography, Box, Button, ButtonGroup } from '@material-ui/core';
+import { Box, Button, ButtonGroup, Typography } from '@material-ui/core';
 import { Map } from '@material-ui/icons';
 import moment from 'moment';
+import PropTypes from 'prop-types';
+import React, { memo, useEffect, useState } from 'react';
 
-import { GetRoadmap } from '../../../../axios/activity';
-
-import Calendar from './Calendar';
-import ActivityList from './ActivityList';
-import CalendarList from './CalendarList';
-import Loader from '../../../../components/Loader';
+import axios, { CancelTokenSource } from 'axios';
 import { isMobile, isTablet } from 'react-device-detect';
+import axiosInstance from 'src/axios/axiosInstance';
+import Loader from '../../../../components/Loader';
+import ActivityList from './ActivityList';
+import Calendar from './Calendar';
+import CalendarList from './CalendarList';
 
 function Roadmap({ type, filter }) {
   const scrollRef = React.useRef(null);
@@ -28,12 +28,16 @@ function Roadmap({ type, filter }) {
   const [treeList, setTreeList] = useState(null);
 
   useEffect(() => {
-    fetchRoadmap();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchRoadmap(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  const fetchRoadmap = async () => {
-    await GetRoadmap(type, JSON.stringify(filter))
-      .then(({ data }) => {
+  const fetchRoadmap = async (cancelTokenSource?: CancelTokenSource) => {
+    axiosInstance()
+      .get(`/activity/roadmap?type=${type}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         setActivity(data.activity);
         setTreeList(data.treeList);
         executeScroll();

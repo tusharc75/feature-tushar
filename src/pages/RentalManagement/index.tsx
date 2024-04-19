@@ -4,7 +4,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
-import queryString from 'query-string';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -20,7 +20,15 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import { CHILD_RESOURCE, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, rentalManagement, serializedAsset, sidebarResource } from 'src/constants/helpers';
+import {
+  CHILD_RESOURCE,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  rentalManagement,
+  serializedAsset,
+  sidebarResource
+} from 'src/constants/helpers';
 import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -28,6 +36,7 @@ import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { IOTIcon } from 'src/assets/svg/svgIcons';
 
 const RentalManagement = () => {
   const renderedFrom = camelCase(routes?.rentalManagement.title);
@@ -76,8 +85,8 @@ const RentalManagement = () => {
   useEffect(() => {
     if (renderCount > 0) {
       const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+      fetchData(cencelToken);
+      return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
@@ -159,7 +168,22 @@ const RentalManagement = () => {
     Cell: ({ row }) => (
       <>
         <HideWhenOffline>
-          <HtmlTooltip title={permissions?.rentalManagement?.isCreate ? 'Clone' : cloneDisable}>
+          {permissions?.iotChart?.isRead && (
+            <HtmlTooltip title={`View ${routes.iotChart.title}`} placement="top" arrow enterTouchDelay={0}>
+              <span>
+                <IconButton
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    history.push(`${routes.iotChart.path}?referenceData=${row?.original?.shippingAddressId}`);
+                  }}
+                >
+                  <IOTIcon size={20} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          )}
+          <HtmlTooltip title={permissions?.rentalManagement?.isCreate ? 'Clone' : cloneDisable} placement="top" arrow enterTouchDelay={0}>
             <span>
               <IconButton
                 size="small"
@@ -173,7 +197,7 @@ const RentalManagement = () => {
               </IconButton>
             </span>
           </HtmlTooltip>
-          <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable}>
+          <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable} placement="top" arrow enterTouchDelay={0}>
             <span>
               <IconButton
                 size="small"
@@ -240,7 +264,7 @@ const RentalManagement = () => {
       let data: any = [],
         count;
       if (!isOffline) {
-        const response: any = await axiosInstance().get(`${rentalManagement.api}${queryString}`,{ cancelToken: cancelTokenSource?.token });
+        const response: any = await axiosInstance().get(`${rentalManagement.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
         data = response?.data?.data;
         count = response?.data?.count;
       } else {

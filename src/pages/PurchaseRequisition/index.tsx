@@ -165,7 +165,7 @@ const PurchaseRequisition = () => {
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes.purchaseRequisition.path}${queryString}`,{ cancelToken: cancelTokenSource?.token })
+      .get(`${routes.purchaseRequisition.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
@@ -332,7 +332,6 @@ const PurchaseRequisition = () => {
           }}
         />
       )}
-
       {showOrderDialog.open && (
         <ManagePurchaseOrder
           isClone={false}

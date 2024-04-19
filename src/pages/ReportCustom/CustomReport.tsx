@@ -188,7 +188,7 @@ const CustomReport = () => {
     }${queryString}`;
 
     axiosInstance()
-      .get(api, { cancelToken: cancelTokenSource.token })
+      .get(api, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);

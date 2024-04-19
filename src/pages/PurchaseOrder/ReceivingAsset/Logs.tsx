@@ -10,7 +10,6 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import moment from 'moment';
 
 const Logs = ({ handleClose, detail, inventoryHistory }) => {
-
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
   const [columns, setColumns] = useState([]);
@@ -57,8 +56,8 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
                       ? 'hsl(1 100% 65% / 1)'
                       : '#FFCCCB'
                     : isDarkTheme
-                      ? 'hsl(120 73% 40% / 1)'
-                      : '#90ee90'
+                    ? 'hsl(120 73% 40% / 1)'
+                    : '#90ee90'
               }}
             >
               {row?.original?.type === 'Debit' ? `-${row?.original?.qty}` : row?.original?.qty}
@@ -115,7 +114,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
   return (
     <Dialog fullWidth fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
       <CustomDialogHeader title={`Logs - ${detail}`} showRequiredLabel={false} onClose={handleClose} />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <CustomReactTable
           height={'calc(100vh - 200px)'}
           columns={columns}
@@ -123,7 +122,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
           dispatch={dispatch}
           renderedFrom={'purchaseOrder_logs'}
           isClientSideGrid={true}
-          refreshGrid={() => { }}
+          refreshGrid={() => {}}
           hideAction={true}
           hideSelection={true}
         />

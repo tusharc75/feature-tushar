@@ -36,6 +36,7 @@ import {
   camelCaseToWords,
   childrenProperty,
   extractLastNumberFromDataRange,
+  fitToColumn,
   getExcelColumnNameFromRange,
   getStickyColumnNames,
   getUniqueDataByKey,
@@ -68,7 +69,10 @@ const CustomReactTable = ({
   reportSave = false,
   virtualization = false,
   showArrangeView = true,
-  hideExportTable = false
+  hideExportTable = false,
+  showOnlyMobileView = false,
+  onRowClick = null,
+  enableGlobalSearch = true
 }) => {
   const {
     currentEditingCellPosition,
@@ -244,8 +248,10 @@ const CustomReactTable = ({
   }, [cellValue, currentEditingCellPosition, data, onSaveEdit]);
 
   useEffect(() => {
-    return setGlobalFilter(searchQuery);
-  }, [searchQuery, setGlobalFilter]);
+    if (enableGlobalSearch) {
+      return setGlobalFilter(searchQuery);
+    }
+  }, [searchQuery, setGlobalFilter, enableGlobalSearch]);
 
   const table = useReactTable({
     data: data || [],
@@ -405,7 +411,7 @@ const CustomReactTable = ({
     exportTimeout = setTimeout(() => {
       if (!tableRef.current) return;
       const wb = xlsx.utils.book_new();
-      const ws = xlsx.utils.table_to_sheet(tableRef.current);
+      const ws = xlsx.utils.table_to_sheet(tableRef.current, { cellStyles: true, cellDates: true, raw: true });
 
       const columns = getExcelColumnNameFromRange(ws['!ref']);
 
@@ -430,6 +436,28 @@ const CustomReactTable = ({
           };
         }
       }
+
+      // For redirecting to the domain and cell style for links
+      const keys = Object.keys(ws);
+      const origin = window?.location?.origin;
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (key.includes('!')) continue;
+        if (ws[key].hasOwnProperty('l')) {
+          const data = ws[key];
+          data.l.Target = `${origin}${data.l.Target}`;
+          ws[key].s = {
+            font: {
+              name: 'Calibri',
+              color: { rgb: '171db1' }
+            }
+          };
+        }
+      }
+
+      // set column width to header width
+      ws['!cols'] = fitToColumn(columns, ws);
+
       const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
       xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
       xlsx.writeFile(wb, `${name}.xlsx`);
@@ -484,7 +512,7 @@ const CustomReactTable = ({
             expander={expander}
             hideExportTable={hideExportTable}
           />
-          {!isMobileView && (
+          {!isMobileView && !showOnlyMobileView && (
             <div className="relative">
               <TableComponent
                 virtualization={virtualization}
@@ -501,10 +529,11 @@ const CustomReactTable = ({
                 loading={loading}
                 error={error}
                 height={height}
+                onRowClick={onRowClick}
               />
             </div>
           )}
-          {isMobileView && rows ? (
+          {(isMobileView || showOnlyMobileView) && rows ? (
             <SwipableListForMobile
               table={table}
               key={page}
@@ -521,6 +550,7 @@ const CustomReactTable = ({
               cellValue={cellValue}
               setCellValue={setCellValue}
               isClientSideGrid={isClientSideGrid}
+              onRowClick={onRowClick}
             />
           ) : null}
           {(!isClientSideGrid || data?.length > 25) && (

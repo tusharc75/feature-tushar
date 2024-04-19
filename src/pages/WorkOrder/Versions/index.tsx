@@ -15,6 +15,7 @@ import { isMobile } from 'react-device-detect';
 import { camelCase, orderBy } from 'lodash';
 import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
@@ -41,16 +42,12 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   const fetchFields = async () => {
     let columns = [];
 
-    let response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
-    let childFields = response?.data?.data || [];
-    childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    let childFields = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderProduct, workOrderData?.currency, true);
     let newColumns = generateColumns(null, childFields, null, false, workOrderData?.currency || 'USD');
 
     columns = [...columns, ...newColumns];
 
-    response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderService}`);
-    childFields = response?.data?.data || [];
-    childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    childFields = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderService, workOrderData?.currency, true);
     newColumns = generateColumns(null, childFields, null, false, workOrderData?.currency || 'USD');
 
     columns = [...columns, ...newColumns];
@@ -218,18 +215,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent?.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productName
-            : parent?.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.packageName
-              : '';
+          ? parent?.productDetail?.productName
+          : parent?.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageName
+          : '';
       parent.description =
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription
           : parent?.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productDescription
-            : parent?.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.packageDescription
-              : '';
+          ? parent?.productDetail?.productDescription
+          : parent?.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageDescription
+          : '';
       parent.subRows = generateNestedData(data?.data, parent);
     });
 
@@ -246,18 +243,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow?.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productName
-            : _subRow?.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageName
-              : '';
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageName
+          : '';
       _subRow.description =
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription
           : _subRow?.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription
-            : _subRow?.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageDescription
-              : '';
+          ? _subRow?.productDetail?.productDescription
+          : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription
+          : '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -281,7 +278,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         }}
       >
         <CustomDialogHeader title={`Versions - ${workOrderData?.workOrderNumber}`} onClose={handleClose} showRequiredLabel={false} />
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Box width={'100%'} display="flex" flexWrap="wrap">
             {workOrderData?.versions &&
               workOrderData?.versions?.map((v: any, i) => (
@@ -338,8 +335,8 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 className={'tabLayout'}
               />
             </Tabs>
-            {tabValue === 0 && (
-              columns ? (
+            {tabValue === 0 &&
+              (columns ? (
                 <Box zIndex={5} width={'100%'}>
                   <CustomReactTable
                     height={'calc(100vh - 300px)'}
@@ -358,11 +355,8 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 <Box p={2} height={500}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
-              )
-            )}
-            {tabValue === 1 && (
-              <ServiceStepsData stepsData={stepData} servicesData={servicesData} />
-            )}
+              ))}
+            {tabValue === 1 && <ServiceStepsData stepsData={stepData} servicesData={servicesData?.filter((s) => s.type === MATERIAL_TYPE.service)} />}
             {tabValue === 2 && (
               <Diagram
                 resource={ACTIVITY_RESOURCE.workOrder}

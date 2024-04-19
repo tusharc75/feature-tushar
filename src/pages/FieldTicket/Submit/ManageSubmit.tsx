@@ -9,12 +9,12 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, fieldTicket, getObjKeys, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, fieldTicket, getObjKeys, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { fetch_field_ticket_submit_fields } from '../helper';
 import { array, object, string } from 'yup';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const submitValidation = object().shape({
     signature: string(),
@@ -46,7 +46,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
 
     const fetchFields = async () => {
         try {
-            const data = await fetch_field_ticket_submit_fields();
+            const data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true);
             const tempInitialData = getObjKeys('', data);
             if (data?.find((d) => d.fieldName === 'customerAccount') && fieldTicketData?.customerAccount?.optionValue) {
                 tempInitialData["customerAccount"] = fieldTicketData.customerAccount.optionValue;

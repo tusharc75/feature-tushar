@@ -1,8 +1,9 @@
-import { Box, Button, Typography } from '@material-ui/core';
+import { Box, Button, Chip, Typography } from '@material-ui/core';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import { useContext, useEffect, useState } from 'react';
 import { MdChevronLeft } from 'react-icons/md';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import queryString from 'query-string';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DataPointsIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -18,6 +19,9 @@ import { uniqBy } from 'lodash';
 
 function IotChart() {
   const toastConfig = useContext(CustomToastContext);
+
+  const history = useHistory();
+  let { referenceData }: any = queryString.parse(history.location.search);
 
   const [assetLocation, setAssetLocation] = useState(null);
   const [search, setSearch] = useState('');
@@ -42,6 +46,13 @@ function IotChart() {
         toastConfig.setToastConfig(error);
       });
   };
+
+  useEffect(() => {
+    if (referenceData && assetLocation) {
+      setShowLocation(assetLocation?.find((a) => a?._id === referenceData)?.region?.optionValue);
+      setShowAsset(referenceData);
+    }
+  }, [referenceData, assetLocation]);
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
@@ -96,8 +107,8 @@ function IotChart() {
           isActionButtonVisible={false}
           isAddButtonVisible={false}
         />
-        {assetLocation ?
-          assetLocation?.length > 0 ?
+        {assetLocation ? (
+          assetLocation?.length > 0 ? (
             !showLocation && !showAsset ? (
               uniqBy(assetLocation, 'region.optionValue')?.filter((r: any) => !!r?.region)?.length ? (
                 <Box className={cardStyle.reportGrid}>
@@ -110,9 +121,12 @@ function IotChart() {
                             darkThemeBackgroundColor="var(--dark-secondary)"
                             background={'#fff'}
                             className={cardStyle.cardInner}
-                            gradientColors={assetLocation?.some((a) => a?.region?.optionValue === region?.region?.optionValue && a?.assets?.some((asset) => asset?.redAlert))
-                              ? colours[0]?.gradient
-                              : colours[1]?.gradient
+                            gradientColors={
+                              assetLocation?.some(
+                                (a) => a?.region?.optionValue === region?.region?.optionValue && a?.assets?.some((asset) => asset?.redAlert)
+                              )
+                                ? colours[0]?.gradient
+                                : colours[1]?.gradient
                             }
                             minHeight={false}
                             onClick={() => {
@@ -121,6 +135,7 @@ function IotChart() {
                             }}
                           >
                             <MyLocationIcon className={`absolute -top-[10px] left-[18px]`} />
+                            <Chip label="Region" color="primary" className={`absolute -top-[-10px] right-[10px]`} />
                             <Typography variant="h6">{region?.region?.optionLabel}</Typography>
                           </DashBoardCardShell>
                         </div>
@@ -151,6 +166,7 @@ function IotChart() {
                           }}
                         >
                           <MyLocationIcon className={`absolute -top-[10px] left-[18px]`} />
+                          <Chip label="Location" color="primary" className={`absolute -top-[-10px] right-[10px]`} />
                           <Typography variant="h6">{location?.currentLocation}</Typography>
                         </DashBoardCardShell>
                       </div>
@@ -165,7 +181,7 @@ function IotChart() {
                     ?.assets?.map((asset, i) => {
                       return (
                         <div key={i} className={cardStyle.singleCard}>
-                          <Link to={`${routes.iotChart.path}/${asset?.optionValue}`}>
+                          <Link to={`${routes.iotChartDetail.path}/${asset?.optionValue}`}>
                             <DashBoardCardShell
                               darkThemeBackgroundColor="var(--dark-secondary)"
                               background={'#fff'}
@@ -177,6 +193,7 @@ function IotChart() {
                                 colors={asset?.redAlert ? colours[0]?.iconGradient : colours[1]?.iconGradient}
                                 className={`absolute -top-[23px] left-[18px]`}
                               />
+                              <Chip label="Unit" color="primary" className={`absolute -top-[-10px] right-[10px]`} />
                               <Typography variant="h6">{asset?.optionLabel}</Typography>
                             </DashBoardCardShell>
                           </Link>
@@ -190,11 +207,14 @@ function IotChart() {
                 </Box>
               )
             ) : null
-            : <span>{'No Data Found'}</span>
-          :
+          ) : (
+            <span>{'No Data Found'}</span>
+          )
+        ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>}
+          </Box>
+        )}
       </CustomContainer>
     </div>
   );

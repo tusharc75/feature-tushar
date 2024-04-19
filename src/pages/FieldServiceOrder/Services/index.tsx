@@ -11,7 +11,6 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
-import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import { flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -21,8 +20,9 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { fieldServiceOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, fieldServiceOrder } from '../../../constants/helpers';
 import ServiceOrderQty from './ServiceOrderQty';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,7 +52,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   }, [columns]);
 
   const fetchFields = async () => {
-    var allFields = await fetch_service_order_detail_fields(serviceOrderData?.currency);
+    var allFields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldServiceOrderDetails, serviceOrderData?.currency, allowedToEdit);
     setAllFields(allFields);
     const newColumns = generateColumns(renderedFrom, allFields, null, false, serviceOrderData?.currency);
     let column: any = [

@@ -27,6 +27,7 @@ import {
   DELIVERY_TICKET_TYPE,
   QUOTATION_STATUS,
   RENTAL_STATUS,
+  checkSuperAdminAccess,
   deliveryTicket,
   rentalManagement,
   rentalManagementSteps,
@@ -126,14 +127,12 @@ const RentalManagementDetailsPage = () => {
     history.push(`?tab=${newValue}`);
   };
 
-
-
   useEffect(() => {
     if (id) {
       getRentalManagementFields();
       fetchRentalManagementData();
       fetchQuotationData();
-      fetchPolicy()
+      fetchPolicy();
     }
     if (!isOffline) {
       fetchAssetStatusRights();
@@ -204,7 +203,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -238,7 +237,7 @@ const RentalManagementDetailsPage = () => {
       }
       setLoadingDetails(false);
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.rentalManagement)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
@@ -339,8 +338,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -428,6 +427,19 @@ const RentalManagementDetailsPage = () => {
             <Box className="control-buttons-v1">
               <>
                 <Fragment>
+                  {permissions?.iotChart?.isRead && (
+                    <Button
+                      className="btn-outline-v1"
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        history.push(`${routes.iotChart.path}?referenceData=${rentalManagementData?.shippingAddress?.optionValue}`);
+                      }}
+                    >
+                      {`View ${routes.iotChart.title}`}
+                    </Button>
+                  )}
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     className="btn-outline-v1"
@@ -528,22 +540,27 @@ const RentalManagementDetailsPage = () => {
         </Box>
         <Box className={`detail-container-v1`}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-            <CustomTab index={0} value={0}  >
+            <CustomTab index={0} value={0}>
               Header
             </CustomTab>
-            <CustomTab index={1} value={1}  >
+            <CustomTab index={1} value={1}>
               Details
             </CustomTab>
-            {resourceData && resourceData?.steps?.length > 0 &&
-              <CustomTab index={2} value={2}  >
+            {resourceData && resourceData?.steps?.length > 0 && (
+              <CustomTab index={2} value={2}>
                 Associations
-              </CustomTab>}
-            {displayProgressiveBillingTab && <CustomTab index={3} value={3}  >
-              Progressive Billing
-            </CustomTab>}
-            {!isOffline && !(isMobile && !isTablet) && <CustomTab index={4} value={4}  >
-              Views
-            </CustomTab>}
+              </CustomTab>
+            )}
+            {displayProgressiveBillingTab && (
+              <CustomTab index={3} value={3}>
+                Progressive Billing
+              </CustomTab>
+            )}
+            {!isOffline && !(isMobile && !isTablet) && (
+              <CustomTab index={4} value={4}>
+                Views
+              </CustomTab>
+            )}
           </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             <Box>
@@ -588,12 +605,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -609,12 +626,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }

@@ -1,5 +1,6 @@
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
+import axios, { CancelTokenSource } from 'axios';
 import moment from 'moment';
 import queryString from 'query-string';
 import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
@@ -7,7 +8,6 @@ import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
-import { GetBoard } from '../../../axios/activity';
 import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
@@ -40,25 +40,31 @@ const Event = () => {
     }
   }, [referenceId]);
 
-  const fetchBoard = useCallback(() => {
-    GetBoard('event', JSON.stringify(filter))
-      .then(({ data }) => {
-        const newData = data.map((d) => ({
-          ...d,
-          title: d.name,
-          start: d.startDate ? new Date(d.startDate) : moment().toDate(),
-          end: d.dueDate ? new Date(d.dueDate) : moment().add(20, 'days').toDate()
-        }));
+  const fetchBoard = useCallback(
+    (cancelTokenSource?: CancelTokenSource) => {
+      axiosInstance()
+        .get(`/activity/board?type=event&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
+        .then(({ data: { data } }) => {
+          const newData = data.map((d) => ({
+            ...d,
+            title: d.name,
+            start: d.startDate ? new Date(d.startDate) : moment().toDate(),
+            end: d.dueDate ? new Date(d.dueDate) : moment().add(20, 'days').toDate()
+          }));
 
-        setEvents(newData);
-      })
-      .catch((err) => {
-        setToastConfig(err);
-      });
-  }, [filter]);
+          setEvents(newData);
+        })
+        .catch((err) => {
+          setToastConfig(err);
+        });
+    },
+    [filter]
+  );
 
   useEffect(() => {
-    fetchBoard();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchBoard(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [fetchBoard]);
 
   const handleChangeFilter = (value) => {

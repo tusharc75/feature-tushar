@@ -86,7 +86,7 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
                 </Box>
                 <Box padding="5px">
                   <Typography variant="subtitle2">
-                    {type === 'customer' ? 'Customer Contact' : 'Supplier Contact'} ({contacts?.length ?? 0})
+                    {type === 'customer' ? routes.customerContact.title : routes.supplierContact.title} ({contacts?.length ?? 0})
                   </Typography>
                 </Box>
               </Box>
@@ -96,14 +96,6 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
                 {isAllowedToEdit && (
                   <>
                     {(type === 'customer' ? permissions?.customerContact?.isCreate : permissions?.supplierContact?.isCreate) && (
-                      // <IconButton
-                      //     color="primary"
-                      //     size="small"
-                      //     onClick={() => { setShowCreateContactDialog(true) }}
-                      // >
-                      //     <ControlPointIcon />
-                      // </IconButton>
-
                       <>
                         <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleOpenMenu}>
                           <MoreVert />

@@ -28,6 +28,7 @@ import { camelCase, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling }) => {
 
@@ -72,12 +73,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       : resource === sidebarResource.fieldTicket ? CHILD_RESOURCE.fieldTicketMateial
         : sidebarResource.salesOrder ? CHILD_RESOURCE.salesOrderProduct : CHILD_RESOURCE.quotationProduct;
 
-    const response = await axiosInstance().get(`/field/child?resource=${childResourceName}`);
-    data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, resourceData[0]?.currency ? resourceData[0]?.currency : 'USD');
-    data?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    data = await fetch_child_resource_fields(childResourceName, resourceData[0]?.currency, false);
 
     var newColumns = generateColumns(renderedFrom, data, null, false, resourceData[0]?.currency ? resourceData[0]?.currency : 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));

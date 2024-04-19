@@ -13,7 +13,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, PLANNING_STATUS } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, PLANNING_STATUS, checkSuperAdminAccess, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -40,6 +40,7 @@ const PlanningDetail = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [reserveAssetWarning, setReserveAssetWarning] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -66,7 +67,7 @@ const PlanningDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.planning.path}/${id}`);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.planning)) {
         isAllowedToEdit = true;
       }
       if (data?.status === PLANNING_STATUS.converted) {
@@ -143,7 +144,7 @@ const PlanningDetail = () => {
             <>
               {permissions?.planning?.isUpdate && allowedToEdit && !planningData?.canDelete && planningData?.status != PLANNING_STATUS.converted && (
                 <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  variant={'contained'}
                   className="btn-outline-v1"
                   onClick={() => {
                     setShowConverConfirmBox(true);
@@ -218,6 +219,7 @@ const PlanningDetail = () => {
               allowedToEdit={allowedToEdit && permissions?.planning?.isUpdate ? true : false}
               planningData={planningData}
               fetchPlanningData={fetchData}
+              setReserveAssetWarning={setReserveAssetWarning}
             />
           )}
         </TabPanel>
@@ -235,7 +237,7 @@ const PlanningDetail = () => {
       {showConverConfirmBox && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
+          message={reserveAssetWarning ? 'Asset(s) are not available, should we allow to convert without asset(s) ?' : `Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
           onClose={() => {
             setShowConverConfirmBox(false);
           }}
