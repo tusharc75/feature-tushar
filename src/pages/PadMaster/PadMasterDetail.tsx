@@ -14,6 +14,8 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManagePadMaster from './ManagePadMaster';
+import Step from '../DynamicForm/Step';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const PadMasterDetail = () => {
   const { id } = useParams();
@@ -24,7 +26,9 @@ const PadMasterDetail = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
   const {
     state: { permissions, user }
   }: any = useData();
@@ -33,6 +37,7 @@ const PadMasterDetail = () => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -90,6 +95,19 @@ const PadMasterDetail = () => {
     setOpenUpdateDialog(false);
   };
 
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.padMaster}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -110,15 +128,40 @@ const PadMasterDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Box>
-          {loading || !fields?.length ? (
+      <CustomTabs
+              value={currentTabIndex}
+              onChange={(index, newValue) => {
+                setCurrentTabIndex(newValue);
+              }}
+            >
+              <CustomTab index={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0">
+                Header
+              </CustomTab>
+              {resourceData && resourceData?.steps?.length && (
+                <CustomTab index={1} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
+                  Associations
+                </CustomTab>
+              )}
+            </CustomTabs>
+        <TabPanel value={currentTabIndex} index={0}>
+        {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
               <CommonSkeleton lenArray={[...Array(7).keys()]} />
             </Grid>
           ) : (
             <DetailsPage data={padMasterData} fields={fields} />
           )}
-        </Box>
+        </TabPanel>
+        <TabPanel value={currentTabIndex} index={1}>
+              <Step
+                resourceData={resourceData}
+                resourceId={id}
+                resource={sidebarResource.padMaster}
+                data={padMasterData}
+                allowedToEdit={permissions?.padMaster?.isUpdate}
+              />
+        </TabPanel>
+        
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
