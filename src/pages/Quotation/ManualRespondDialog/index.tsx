@@ -14,8 +14,10 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
   const [comment, setComment] = useState('');
   const [commentError, setCommentError] = useState(null);
   const [submitting, setSubmitting] = useState(null);
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setComment(event.target.value.trimStart());
+    setComment(event.target?.value?.trimStart());
+    setCommentError(null);
   };
 
   const closeManualDiaog = () => {
@@ -27,7 +29,7 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
 
   const manualSendToCustomer = () => {
     if (selectedOption) {
-      if(selectedOption === 'Reject' && !comment) {
+      if (selectedOption === 'Reject' && !comment) {
         setCommentError('Comment is required');
         return;
       }
@@ -58,6 +60,7 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
         });
     }
   };
+
   return (
     <Dialog fullWidth maxWidth="xs" open onClose={closeManualDiaog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title={`Reason For Ending`} />

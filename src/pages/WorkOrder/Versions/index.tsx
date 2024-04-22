@@ -15,6 +15,7 @@ import { isMobile } from 'react-device-detect';
 import { camelCase, orderBy } from 'lodash';
 import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
@@ -41,16 +42,12 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   const fetchFields = async () => {
     let columns = [];
 
-    let response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
-    let childFields = response?.data?.data || [];
-    childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    let childFields = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderProduct, workOrderData?.currency, true);
     let newColumns = generateColumns(null, childFields, null, false, workOrderData?.currency || 'USD');
 
     columns = [...columns, ...newColumns];
 
-    response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderService}`);
-    childFields = response?.data?.data || [];
-    childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    childFields = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderService, workOrderData?.currency, true);
     newColumns = generateColumns(null, childFields, null, false, workOrderData?.currency || 'USD');
 
     columns = [...columns, ...newColumns];

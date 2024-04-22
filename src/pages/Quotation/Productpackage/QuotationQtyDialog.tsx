@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -16,11 +16,11 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual, unionBy, uniqBy, isEmpty } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -89,7 +89,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    var data = await fetch_quotation_product_fields(quotationData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       let unitArray: any = [];

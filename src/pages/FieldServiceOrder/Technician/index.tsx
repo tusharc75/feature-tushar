@@ -7,7 +7,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -16,7 +15,8 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { SERVICE_ORDER_STATUS, fieldServiceOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, SERVICE_ORDER_STATUS, fieldServiceOrder } from '../../../constants/helpers';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Technician = ({
   serviceOrderData,
@@ -59,10 +59,7 @@ const Technician = ({
   }, [columns, serviceOrderData]);
 
   const fetchFields = async () => {
-    var data = await fetch_service_order_detail_fields(serviceOrderData?.currency);
-    data?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldServiceOrderDetails, serviceOrderData?.currency, false);
     const newColumns = generateColumns(renderedFrom, data, null, false, serviceOrderData?.currency);
     var column: any = [
       {

@@ -12,8 +12,8 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
-import { MATERIAL_TYPE, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Invoice`;
@@ -39,7 +39,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.salesOrderProduct, salesOrderData?.currency, true);
     const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);
     let coloum: any = [
       {

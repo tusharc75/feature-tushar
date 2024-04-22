@@ -12,8 +12,8 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
-import { INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from '../../../constants/helpers';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.invoice.title)}_Invoice`;
@@ -39,10 +39,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
 
   const fetchFields = async () => {
     try {
-      let data = await fetch_invoice_product_fields(invoiceData?.currency);
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
+      let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
       const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
       let coloum: any = [
         {

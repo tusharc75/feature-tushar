@@ -5,7 +5,9 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -22,7 +24,7 @@ import {
   yupSchema
 } from 'src/constants/helpers';
 
-const ManagePaidTimeOff = ({ payrollPolicyId, id = null, onSuccess, onClose }) => {
+const ManagePaidTimeOff = ({ payrollPolicyId, currency, id = null, onSuccess, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -37,8 +39,7 @@ const ManagePaidTimeOff = ({ payrollPolicyId, id = null, onSuccess, onClose }) =
 
   const fetchFields = async () => {
     try {
-      const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.payrollPaidTimeOff}`);
-      const fields = response?.data?.data;
+      const fields = await fetch_child_resource_fields(CHILD_RESOURCE.payrollPaidTimeOff, currency, true);
 
       if (id) {
         axiosInstance()

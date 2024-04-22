@@ -3,6 +3,7 @@ import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { TColType } from './TableComponents/TableHelperComponents';
+import xlsx from 'xlsx-js-style';
 
 export const childrenProperty = 'subRows';
 
@@ -372,6 +373,17 @@ export function extractLastNumberFromDataRange(input: string): number | null {
   const regex = /(\d+)(?!.*\d)/;
   const match = input.match(regex);
   return match ? parseInt(match[1], 10) : null;
+}
+
+export function fitToColumn(columns, ws: xlsx.WorkSheet, padding = 5) {
+  // get maximum character of each column
+  const wch = [];
+  for (const a of columns) {
+    if (ws[`${a}1`]) {
+      wch.push({ wch: Math.max(ws[`${a}1`]?.v?.toString().length + padding, 15) });
+    }
+  }
+  return wch;
 }
 
 export const createFilterModel = (formValues, coloums) => {

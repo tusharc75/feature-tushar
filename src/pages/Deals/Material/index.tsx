@@ -27,6 +27,7 @@ import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } fro
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CHILD_RESOURCE, MATERIAL_TYPE, prepareDataForGrid, rentalManagement } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Material = ({
   dealId,
@@ -55,9 +56,9 @@ const Material = ({
 
 
   const fetchFields = async () => {
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.dealsMaterial}`);
-    setAllFields(JSON.parse(JSON.stringify(response?.data?.data)));
-    const newColumns = generateColumns(renderedFrom, response?.data?.data, routes.dealDetail.path, true);
+    const response = await fetch_child_resource_fields(CHILD_RESOURCE.dealsMaterial, user.user?.brandCurrency, true);
+    setAllFields(JSON.parse(JSON.stringify(response)));
+    const newColumns = generateColumns(renderedFrom, response, routes.dealDetail.path, true);
     let column: any = [
       {
         accessor: 'index',

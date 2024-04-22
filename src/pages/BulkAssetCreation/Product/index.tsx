@@ -18,6 +18,7 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, bulkAssetCreation, prepareDataForGrid } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -106,9 +107,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
         });
       }
     });
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.bulkAssetCreationProduct}`);
-    var fields = response?.data?.data;
-    fields = CURReplaceByCurrencySingle(fields, bulkAssetCreationData?.currency ? bulkAssetCreationData?.currency : 'USD');
+    var fields = await fetch_child_resource_fields(CHILD_RESOURCE.bulkAssetCreationProduct, bulkAssetCreationData?.currency, allowedToEdit);
     const newColumns = generateColumns(renderedFrom, fields, routes.bulkAssetCreationDetail.path);
     setColumns([...coloum, ...newColumns, ActionsRenderer]);
   };
