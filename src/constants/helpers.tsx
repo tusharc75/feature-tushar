@@ -62,6 +62,12 @@ export const rentalManagementSteps: stepInterface[] = [
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
+export const RENTAL_STEPS = {
+  loading: 'Loading',
+  onField: 'On Field',
+  receiving: 'Receiving',
+}
+
 export const fieldTicketSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Submit', title: 'Submit', icon: 'end' }

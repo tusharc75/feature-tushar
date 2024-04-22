@@ -27,6 +27,7 @@ import {
   DELIVERY_TICKET_TYPE,
   QUOTATION_STATUS,
   RENTAL_STATUS,
+  RENTAL_STEPS,
   checkSuperAdminAccess,
   deliveryTicket,
   rentalManagement,
@@ -682,7 +683,7 @@ const RentalManagementDetailsPage = () => {
                 <ReceivingTicket
                   fetchRentalData={fetchRentalManagementData}
                   rentalManagementData={rentalManagementData}
-                  currentStep={currentStep}
+                  currentStep={rentalSteps[currentStep]?.name === 'On Field' ? RENTAL_STEPS.onField : RENTAL_STEPS.receiving}
                   setNextStep={setNextStep}
                   setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-4`}
@@ -690,7 +691,7 @@ const RentalManagementDetailsPage = () => {
                   isProcessor={isProcessor}
                   stepFullScreen={stepFullScreen}
                   allowUpdateStatus={allowUpdateStatus}
-                  isOnFieldStep={rentalSteps[currentStep]?.name === 'On Field' ? true : false}
+                  checkProgressiveBilling={checkProgressiveBilling}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (
