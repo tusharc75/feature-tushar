@@ -6,7 +6,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
-import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -18,6 +18,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageWarehouse from './ManageWarehouse';
 import StorageLocation from './StorageLocation';
 import Users from './Users';
+import Step from '../DynamicForm/Step';
 
 const WarehouseDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -35,11 +36,13 @@ const WarehouseDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.warehouse]);
   const [tabValue, setTabValue] = useState(0);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     if (id) {
       getWarehouseFields();
       fetchWarehouseData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -67,6 +70,19 @@ const WarehouseDetailsPage = () => {
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.warehouse}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleDeleteWarehouse = () => {
@@ -158,6 +174,9 @@ const WarehouseDetailsPage = () => {
           {user?.user?.brandPolicy?.warehouseAccessByUser && (
             <Tab label={<div className="tab-font">Users</div>} value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className={'tabLayout'} />
           )}
+          {resourceData && resourceData?.steps?.length && (
+            <Tab label={<div className="tab-font">Associations</div>} value={3} aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className={'tabLayout'} />
+          )}
         </Tabs>
         {tabValue === 0 && (
           <Box>
@@ -172,6 +191,15 @@ const WarehouseDetailsPage = () => {
         )}
         {tabValue === 1 && <StorageLocation warehouse={id} />}
         {tabValue === 2 && <Users warehouse={id} />}
+        {tabValue === 3 && 
+        <Step
+        resourceData={resourceData}
+        resourceId={id}
+        resource={sidebarResource.warehouse}
+        data={warehouseData}
+        allowedToEdit={permissions?.warehouse?.isUpdate}
+      />
+        }
       </Box>
       {openUpdateDialog && (
         <ManageWarehouse

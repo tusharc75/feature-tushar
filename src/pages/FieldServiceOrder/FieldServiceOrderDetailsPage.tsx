@@ -29,6 +29,7 @@ import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import FieldTicket from './FieldTicket';
 import ManageServiceOrderDialog from './ManageServiceOrder';
 import ServiceOrderViews from './RoadMapViews';
+import Step from '../DynamicForm/Step';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -61,6 +62,7 @@ const ServiceOrderDetailsPage = () => {
 
   const [steps, setSteps] = useState(serviceOrderSteps);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -115,6 +117,7 @@ const ServiceOrderDetailsPage = () => {
     if (id) {
       getServiceOrderFields();
       fetchServiceOrderData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -147,6 +150,19 @@ const ServiceOrderDetailsPage = () => {
       }
     } catch (error) {
       setLoadingDetails(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
@@ -294,6 +310,18 @@ const ServiceOrderDetailsPage = () => {
               {...a11yProps(2)}
             />
           )}
+          {resourceData && resourceData?.steps?.length && (
+         <Tab
+         className={'tabLayout'}
+         label={
+           <div className="d-flex align-items-center tab-font">
+             <BiFoodMenu className="mr-1" fontSize="inherit" />
+             Associations
+           </div>
+         }
+         {...a11yProps(3)}
+       />
+          )}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -386,6 +414,17 @@ const ServiceOrderDetailsPage = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <Box>{serviceOrderData && <ServiceOrderViews serviceData={serviceOrderData} />}</Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <Box>
+          <Step
+                resourceData={resourceData}
+                resourceId={id}
+                resource={sidebarResource.fieldServiceOrder}
+                data={serviceOrderData}
+                allowedToEdit={permissions?.fieldServiceOrder?.isUpdate}
+              />
+          </Box>
         </TabPanel>
       </Box>
       {showConfirmBox && (

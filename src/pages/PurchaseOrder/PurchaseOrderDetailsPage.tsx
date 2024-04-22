@@ -27,6 +27,7 @@ import ManagePurchaseOrder from './ManagePurchaseOrder';
 import Product from './Product';
 import ReceivingAsset from './ReceivingAsset';
 import PurchaseOrderViews from './RoadMapViews';
+import Step from '../DynamicForm/Step';
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
@@ -52,6 +53,7 @@ const PurchaseOrderDetailsPage = () => {
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
   const [nextStep, setNextStep] = useState(true);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   function a11yProps(index: any) {
     return {
@@ -79,6 +81,7 @@ const PurchaseOrderDetailsPage = () => {
     if (id) {
       getPurchaseOrderFields();
       fetchPurchaseOrderData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -128,6 +131,19 @@ const PurchaseOrderDetailsPage = () => {
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.purchaseOrder}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleOpenUpdateDialog = () => {
@@ -284,6 +300,11 @@ const PurchaseOrderDetailsPage = () => {
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
+          {resourceData && resourceData?.steps?.length && (
+                <CustomTab index={4} value={5} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
+                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
+                </CustomTab>
+            )}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -347,6 +368,15 @@ const PurchaseOrderDetailsPage = () => {
               <PurchaseOrderViews purchaseOrderData={purchaseOrderData} />
             }
           </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={4}>
+              <Step
+                resourceData={resourceData}
+                resourceId={id}
+                resource={sidebarResource.purchaseOrder}
+                data={purchaseOrderData}
+                allowedToEdit={permissions?.purchaseOrder?.isUpdate}
+              />
         </TabPanel>
       </Box>
       {showConfirmBox && (

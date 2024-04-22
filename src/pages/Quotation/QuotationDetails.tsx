@@ -39,6 +39,7 @@ import QuotationSummeryDialog from './QuotationSummeryDialog';
 import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
 import Versions from './Versions';
+import Step from '../DynamicForm/Step';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -82,6 +83,7 @@ const QuotationDetails = () => {
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
   const [canConvert, setCanConvert] = useState(false);
   const [reserveAssetWarning, setReserveAssetWarning] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -168,6 +170,7 @@ const QuotationDetails = () => {
     if (id) {
       fetchFields();
       fetchQuotationData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -275,6 +278,19 @@ const QuotationDetails = () => {
       setLoading(false);
     } catch (error) {
       setLoading(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.quotation}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
@@ -585,6 +601,17 @@ const QuotationDetails = () => {
               {...a11yProps(2)}
             />
           )}
+          {resourceData && resourceData?.steps?.length && (
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
+                </div>
+              }
+              {...a11yProps(3)}
+            />
+          )}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -723,6 +750,17 @@ const QuotationDetails = () => {
             {quotationData && (
               <RoadmapViews quoteName={quotationData?.quotationNumber} quoteId={id} versionId={currVersionId} status={quotationData?.status || ''} />
             )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <Box>
+          <Step
+                resourceData={resourceData}
+                resourceId={id}
+                resource={sidebarResource.quotation}
+                data={quotationData}
+                allowedToEdit={permissions?.quotation?.isUpdate}
+              />
           </Box>
         </TabPanel>
       </Box>
