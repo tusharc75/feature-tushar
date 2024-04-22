@@ -61,11 +61,11 @@ export const updateSignatureOffline = async (id, signatures) => {
         });
         if (deliveryTicket.signatures) {
             if (deliveryTicket.signatures.length === 0) {
-                deliveryTicket.status = DELIVERY_TICKET_STATUS.indTransit
+                deliveryTicket.status = DELIVERY_TICKET_STATUS.inTransit
                 deliveryTicket.signatures = signatures
-                await updateofflineDataSync(id, { status: DELIVERY_TICKET_STATUS.indTransit, signatures: signatures })
+                await updateofflineDataSync(id, { status: DELIVERY_TICKET_STATUS.inTransit, signatures: signatures })
                 await updateRentalAssetStatus(deliveryTicket?.rentalJob?.optionValue,
-                    ASSET_STATUS.indTransit,
+                    ASSET_STATUS.inTransit,
                     deliveryTicket?.productInventory?.map((e) => e.optionValue))
             }
             else {

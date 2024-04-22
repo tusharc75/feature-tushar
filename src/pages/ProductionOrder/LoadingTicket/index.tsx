@@ -227,7 +227,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
       if (productionOrderData?.processor?.optionValue) {
         data['processor'] = productionOrderData?.processor?.optionValue;
       }
-      data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+      data['status'] = DELIVERY_TICKET_STATUS.inTransit;
       setShowTicketDialog({ open: true, data: data });
     }
   };
@@ -270,7 +270,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
         <MenuItem
           disabled={
             selectedRecords?.length === 0 ||
-            selectedRecords?.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords?.length
+            selectedRecords?.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords?.length
           }
           onClick={() => {
             handelProcessTickets();

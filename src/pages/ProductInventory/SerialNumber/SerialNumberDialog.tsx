@@ -21,8 +21,9 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
   }, []);
 
   const fetchRecords = () => {
+    let api = `${productInventory.api}/product/${product}?warehouse=${warehouse}`;
     axiosInstance()
-      .get(`${productInventory.api}/product/${product}?warehouse=${warehouse}`)
+      .get(api)
       .then(({ data: { data } }) => {
         const count = data?.inventory - (data?.softHold || 0) - data?.serialNumber;
         if (count > 0) {
@@ -31,7 +32,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
           setSerialNumberCount(0);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   return (
