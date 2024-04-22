@@ -57,7 +57,8 @@ export const rentalManagementSteps: stepInterface[] = [
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
   { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
-  { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
+  { name: 'On Field', title: 'On Field', icon: 'receivingTicket' },
+  { name: 'Receiving Ticket', title: 'Receiving', icon: 'ticket' },
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
@@ -1973,7 +1974,7 @@ export const ASSET_STATUS = {
   standBy: 'Stand By',
   standByNotChargeable: 'Stand By-Not Chargeable',
   delivered: 'Delivered',
-  indTransit: 'In-Transit',
+  inTransit: 'In-Transit',
   underReview: 'Under Review',
   repair: 'Repair',
   readyToShip: 'Ready to ship',
@@ -2017,7 +2018,7 @@ export const INVENTORY_HISTORY_TYPE = {
 
 export const DELIVERY_TICKET_STATUS = {
   new: 'New',
-  indTransit: 'In-Transit',
+  inTransit: 'In-Transit',
   delivered: 'Delivered',
   cancelled: 'Cancelled'
 };
@@ -2054,7 +2055,7 @@ export const REPAIR_JOB_STATUS = {
 };
 
 export const DELIVERY_TICKET_MAPPED_STATUS = {
-  'Sign-off - Dispatch': DELIVERY_TICKET_STATUS.indTransit,
+  'Sign-off - Dispatch': DELIVERY_TICKET_STATUS.inTransit,
   'Sign-off - Delivery': DELIVERY_TICKET_STATUS.delivered
 };
 

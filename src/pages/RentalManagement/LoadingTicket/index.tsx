@@ -104,7 +104,7 @@ const LoadingTicket = ({
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
-  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState({ open: false, type: null });
+  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState({ open: false });
   const [checkMTRValidation, setCheckMTRValidation] = useState(false);
   const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
@@ -645,7 +645,7 @@ const LoadingTicket = ({
       if (rentalManagementData?.processor?.optionValue) {
         data['processor'] = rentalManagementData?.processor?.optionValue;
       }
-      //data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+      //data['status'] = DELIVERY_TICKET_STATUS.inTransit;
       setShowTicketDialog({ open: true, data: data });
     }
   };
@@ -766,57 +766,28 @@ const LoadingTicket = ({
     }
   };
 
-  const handelCancleTickets = () => {
+  const handelCancleTickets = async () => {
     setOkBtnLoading(true);
-    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
-    if (loadingTicketIds.length) {
-      axiosInstance()
-        .put(`${deliveryTicket.api}/revert`, { ids: loadingTicketIds })
-        .then(({ data }) => {
-          setOkBtnLoading(false);
-          setShowConformationCancleTicket({ open: false, type: '' });
-          fetchRecords();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Cancelled Successfully`
-          });
-        })
-        .catch((error) => {
-          setOkBtnLoading(false);
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
-
-  const handelCancelDeliveredTicket = () => {
-    setOkBtnLoading(true);
-    const loadingTicketId = uniq(map(selectedRecords, 'loadingTicketId'));
-    const ticketIds: any = [];
-    loadingTicketId?.forEach((e) => {
-      if (e && e !== undefined) {
-        ticketIds.push(e);
+    try {
+      const inTransitloadingTicketIds = uniq(map(selectedRecords?.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit), 'loadingTicketId'));
+      if (inTransitloadingTicketIds?.length) {
+        await axiosInstance().put(`${deliveryTicket.api}/revert`, { ids: inTransitloadingTicketIds })
       }
-    });
-    if (ticketIds.length) {
-      let data = {};
-      data['_ids'] = ticketIds;
-      axiosInstance()
-        .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
-        .then(({ data }) => {
-          setOkBtnLoading(false);
-          setShowConformationCancleTicket({ open: false, type: '' });
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Cancelled Successfully`
-          });
-          fetchRecords();
-        })
-        .catch((error) => {
-          setOkBtnLoading(false);
-          toastConfig.setToastConfig(error);
-        });
+      const deliveredloadingTicketIds = uniq(map(selectedRecords?.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered), 'loadingTicketId'));
+      if (deliveredloadingTicketIds?.length) {
+        await axiosInstance().post(`${deliveryTicket.api}/cancel-delivered-ticket`, { _ids: deliveredloadingTicketIds })
+      }
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `Cancelled Successfully`
+      });
+      setOkBtnLoading(false);
+      setShowConformationCancleTicket({ open: false });
+      fetchRecords();
+    } catch (error) {
+      setOkBtnLoading(false);
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -872,7 +843,7 @@ const LoadingTicket = ({
   const validateAction = (action) => {
     const errorMessages = [];
     var records = [...selectedRecords];
-    if (action === rentalManagementActions.cancelDeliveredLoadingTicket) {
+    if (action === rentalManagementActions.cancelLoadingTicket) {
       const loadingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
       records = [...selectedRecords?.filter((e) => !e?.loadingTicketId),
       ...dataRows?.filter((e) => loadingTicketIds?.includes(e?.loadingTicketId))]
@@ -900,50 +871,51 @@ const LoadingTicket = ({
         } else if (e?.status !== ASSET_STATUS.inUse || e?.rentalAssetStatus !== ASSET_STATUS.inUse) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplaceInUse });
         }
-        // else if (!e?.isReplaceable) {
-        //   errorMessages.push({ index: e.index, message: rentalManagementMessage.canNotReplaceInvoiceCreated });
-        // }
       }
       else if (action === rentalManagementActions.cancelInTransitLoadingTicket) {
         if (!e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.indTransit) {
+        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.inTransit) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.cancelInTransitLineItems });
         }
       }
-      else if (action === rentalManagementActions.cancelDeliveredLoadingTicket) {
+      else if (action === rentalManagementActions.cancelLoadingTicket) {
         if (!e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        } else if (e?.type === 'Asset' &&
-          ![
-            RENTAL_INTERNAL_ASSET_STATUS.inUse,
-            RENTAL_INTERNAL_ASSET_STATUS.standBy,
-            RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable,
-            RENTAL_INTERNAL_ASSET_STATUS.delivered
-          ]?.includes(e?.rentalAssetStatus)
-        ) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusInUseCancelLoading });
         }
-        else if (e?.type === 'Asset' &&
-          ![ASSET_STATUS.needRepair, ASSET_STATUS.needRecert,
-          ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered]?.includes(e?.status)
-        ) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.statusInUseCancelLoading });
+        else if (![DELIVERY_TICKET_STATUS.inTransit, DELIVERY_TICKET_STATUS.delivered]?.includes(e?.loadingTicketStatus)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.inTransitDeliveredLoadingTicket });
         }
-        else if (e?.type === 'Product' && [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed]?.includes(e?.rentalAssetStatus)) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalProductConsumed });
-        }
-        else if (e?.type === 'Product' &&
-          ![
-            RENTAL_INTERNAL_ASSET_STATUS.inUse,
-            RENTAL_INTERNAL_ASSET_STATUS.standBy,
-            RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable,
-            RENTAL_INTERNAL_ASSET_STATUS.delivered,
-          ]?.includes(e?.rentalAssetStatus)
-        ) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusInUseCancelLoading });
+        else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
+          if (e?.type === 'Asset' &&
+            ![
+              RENTAL_INTERNAL_ASSET_STATUS.inUse,
+              RENTAL_INTERNAL_ASSET_STATUS.standBy,
+              RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable,
+              RENTAL_INTERNAL_ASSET_STATUS.delivered
+            ]?.includes(e?.rentalAssetStatus)
+          ) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusInUseCancelLoading });
+          }
+          else if (e?.type === 'Asset' &&
+            ![ASSET_STATUS.needRepair, ASSET_STATUS.needRecert,
+            ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered]?.includes(e?.status)
+          ) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.statusInUseCancelLoading });
+          }
+          else if (e?.type === 'Product' && [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed]?.includes(e?.rentalAssetStatus)) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalProductConsumed });
+          }
+          else if (e?.type === 'Product' &&
+            ![
+              RENTAL_INTERNAL_ASSET_STATUS.inUse,
+              RENTAL_INTERNAL_ASSET_STATUS.standBy,
+              RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable,
+              RENTAL_INTERNAL_ASSET_STATUS.delivered,
+            ]?.includes(e?.rentalAssetStatus)
+          ) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusInUseCancelLoading });
+          }
         }
       }
     });
@@ -1319,14 +1291,10 @@ const LoadingTicket = ({
           open={showConformationCancleTicket.open}
           message={`This action will cancel the complete Loading Ticket(s). Are you sure?`}
           onClose={() => {
-            setShowConformationCancleTicket({ open: false, type: '' });
+            setShowConformationCancleTicket({ open: false });
           }}
           onOk={() => {
-            if (showConformationCancleTicket.type === 'Delivered') {
-              handelCancelDeliveredTicket();
-            } else {
-              handelCancleTickets();
-            }
+            handelCancleTickets();
           }}
           okBtnLoading={okBtnLoading}
         />
@@ -1594,25 +1562,16 @@ const ActionButtonMenuItems = ({
           }
         }}
       >
-        Cancel In-Transit Line Items
+        Cancel Specific Line Items
       </MenuItem>
       <MenuItem
         onClick={() => {
-          if (!validateAction(rentalManagementActions.cancelInTransitLoadingTicket)) {
-            setShowConformationCancleTicket({ open: true, type: 'Non-Delivered' });
+          if (!validateAction(rentalManagementActions.cancelLoadingTicket)) {
+            setShowConformationCancleTicket({ open: true });
           }
         }}
       >
-        Cancel In-Transit Loading Ticket(s)
-      </MenuItem>
-      <MenuItem
-        onClick={() => {
-          if (!validateAction(rentalManagementActions.cancelDeliveredLoadingTicket)) {
-            setShowConformationCancleTicket({ open: true, type: 'Delivered' });
-          }
-        }}
-      >
-        Cancel Delivered Loading Ticket(s)
+        Cancel Loading Ticket(s)
       </MenuItem>
     </>
   );

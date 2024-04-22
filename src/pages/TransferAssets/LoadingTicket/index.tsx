@@ -495,7 +495,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             }
             data['isPickupFromDisable'] = true;
             data['isDeliveryToDisable'] = true;
-            data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+            data['status'] = DELIVERY_TICKET_STATUS.inTransit;
             setShowTicketDialog({ open: true, data: data });
           }}
         >
@@ -505,7 +505,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           disabled={
             !canReceive ||
             selectedRecords.length === 0 ||
-            selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+            selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
           }
           onClick={() => {
             setShowConfirmBoxReceive(true);
@@ -516,7 +516,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         <MenuItem
           disabled={
             selectedRecords.length === 0 ||
-            selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+            selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
           }
           onClick={() => {
             const products = [];
@@ -551,7 +551,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           </MenuItem>
         ) : null}
         <MenuItem
-          disabled={selectedRecords.length && selectedRecords?.every(e => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit) ? false : true}
+          disabled={selectedRecords.length && selectedRecords?.every(e => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit) ? false : true}
           onClick={() => {
             setShowConformationDeliverdCancleTicket({ open: true, type: 'Non-Delivered' });
           }}

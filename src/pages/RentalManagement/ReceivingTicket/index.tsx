@@ -86,7 +86,8 @@ const ReceivingTicket = ({
   allowedToEdit,
   isProcessor,
   allowUpdateStatus,
-  stepFullScreen
+  stepFullScreen,
+  isOnFieldStep
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -99,7 +100,7 @@ const ReceivingTicket = ({
   const [showConformationConsume, setShowConformationConsume] = useState({ open: false, type: 'add' });
   const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
   const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
-  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState({ open: false, type: null });
+  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState({ open: false });
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
@@ -410,7 +411,7 @@ const ReceivingTicket = ({
 
       // if (deliveryTicketList.length) {
       //   if (deliveryTicketList.filter((e) => [DELIVERY_TICKET_TYPE.receiving, DELIVERY_TICKET_TYPE.return].includes(e.ticketType) &&
-      //     [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status)).length) {
+      //     [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.inTransit].includes(e.status)).length) {
       //     setShowProcessDeliveryTicket(true)
       //   }
       //   else {
@@ -885,7 +886,7 @@ const ReceivingTicket = ({
     if (rentalManagementData?.processor?.optionValue) {
       data['processor'] = rentalManagementData?.processor?.optionValue;
     }
-    //data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+    //data['status'] = DELIVERY_TICKET_STATUS.inTransit;
 
     setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
   };
@@ -975,43 +976,7 @@ const ReceivingTicket = ({
     }
   };
 
-  const handelCancelDeliveredTicket = () => {
-    setOkBtnLoading(true);
-    const receivingTicketId = uniq(map(selectedRecords, 'receivingTicketId'));
-    const returnTicketId = uniq(map(selectedRecords, 'returnTicketId'));
-    const ticketIds: any = [];
-    receivingTicketId?.forEach((e) => {
-      if (e && e !== undefined) {
-        ticketIds.push(e);
-      }
-    });
-    returnTicketId?.forEach((e) => {
-      if (e && e !== undefined) {
-        ticketIds.push(e);
-      }
-    });
-    if (ticketIds.length) {
-      let data = {};
-      data['_ids'] = ticketIds;
-      axiosInstance()
-        .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
-        .then(({ data }) => {
-          setOkBtnLoading(false);
-          setShowConformationCancleTicket({ open: false, type: '' });
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Cancelled Successfully`
-          });
-          fetchRecords();
-          fetchRentalData();
-        })
-        .catch((error) => {
-          setOkBtnLoading(false);
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
+
 
   const handleConsumProduct = (data) => {
     const products = [];
@@ -1143,39 +1108,39 @@ const ReceivingTicket = ({
     }
   };
 
-  const handelCancleTickets = () => {
+  const handelCancleTickets = async () => {
     setOkBtnLoading(true);
-    const receivingTicketIds = uniq(
-      map(
-        selectedRecords?.filter((e) => e?.receivingTicketId),
-        'receivingTicketId'
-      )
-    );
-    const returnTicketIds = uniq(
-      map(
-        selectedRecords?.filter((e) => e?.returnTicketId),
-        'returnTicketId'
-      )
-    );
-    if (receivingTicketIds.length || returnTicketIds.length) {
-      axiosInstance()
-        .put(`${deliveryTicket.api}/revert`, { ids: [...receivingTicketIds, ...returnTicketIds] })
-        .then(({ data: { data } }) => {
-          setOkBtnLoading(false);
-          setShowConformationCancleTicket({ open: false, type: '' });
-          fetchRecords();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Cancelled Successfully`
-          });
-        })
-        .catch((error) => {
-          setOkBtnLoading(false);
-          toastConfig.setToastConfig(error);
-        });
+    try {
+      const inTransitReceivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.inTransit), 'receivingTicketId'));
+      const inTransitReturnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketStatus === DELIVERY_TICKET_STATUS.inTransit), 'returnTicketId'));
+
+      if (inTransitReceivingTicketIds.length || inTransitReturnTicketIds.length) {
+        await axiosInstance().put(`${deliveryTicket.api}/revert`, { ids: [...inTransitReceivingTicketIds, ...inTransitReturnTicketIds] })
+      }
+
+      const deliveredReceivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered), 'receivingTicketId'));
+      const deliveredReturnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered), 'returnTicketId'));
+
+      if (deliveredReceivingTicketIds.length || deliveredReturnTicketIds.length) {
+        await axiosInstance().post(`${deliveryTicket.api}/cancel-delivered-ticket`, { _ids: [...deliveredReceivingTicketIds, ...deliveredReturnTicketIds] })
+      }
+
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `Cancelled Successfully`
+      });
+      setOkBtnLoading(false);
+      setShowConformationCancleTicket({ open: false });
+      fetchRecords();
+      fetchRentalData();
+    }
+    catch (error) {
+      setOkBtnLoading(false);
+      toastConfig.setToastConfig(error);
     }
   };
+
 
   useEffect(() => {
     const product = selectedRecords?.filter((e) => e.type === 'Product');
@@ -1727,14 +1692,10 @@ const ReceivingTicket = ({
           open={showConformationCancleTicket.open}
           message={`This action will cancel the complete Receiving/Return Ticket(s). Are you sure?`}
           onClose={() => {
-            setShowConformationCancleTicket({ open: false, type: '' });
+            setShowConformationCancleTicket({ open: false });
           }}
           onOk={() => {
-            if (showConformationCancleTicket.type === 'Delivered') {
-              handelCancelDeliveredTicket();
-            } else {
-              handelCancleTickets();
-            }
+            handelCancleTickets();
           }}
           okBtnLoading={okBtnLoading}
         />
@@ -1813,7 +1774,7 @@ const ActionButtonMenuItems = ({
   const validateAction = (action) => {
     const errorMessages = [];
     var records = selectedRecords;
-    if (action === rentalManagementActions.cancelDeliveredTicket) {
+    if (action === rentalManagementActions.cancelReceivingReturnTicket) {
       const receivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketId), 'receivingTicketId'));
       const returnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketId), 'returnTicketId'));
       records = [...selectedRecords?.filter((e) => !e?.receivingTicketId && !e?.returnTicketId),
@@ -1901,18 +1862,21 @@ const ActionButtonMenuItems = ({
       } else if (action === rentalManagementActions.cancelInTransitTicket) {
         if (!e.hasOwnProperty('receivingTicketId') && !e.hasOwnProperty('returnTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingReturnNotCreated });
-        } else if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.indTransit && e?.returnTicketStatus !== DELIVERY_TICKET_STATUS.indTransit) {
+        } else if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.inTransit && e?.returnTicketStatus !== DELIVERY_TICKET_STATUS.inTransit) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.cancelInTransitLineItems });
         }
-      } else if (action === rentalManagementActions.cancelDeliveredTicket) {
+      } else if (action === rentalManagementActions.cancelReceivingReturnTicket) {
         if (!e.hasOwnProperty('receivingTicketId') && !e.hasOwnProperty('returnTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingReturnNotCreated });
-        } else if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.delivered && e?.returnTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingReturnNotDeliverd });
-        } else if (![ASSET_STATUS.underReview]?.includes(e?.status) && e?.type === 'Asset') {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.statusURForCancelReceiving });
-        } else if (![RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return, 'Returned']?.includes(e?.rentalAssetStatus)) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusCompleteCancelReceiving });
+        } else if (![DELIVERY_TICKET_STATUS.inTransit, DELIVERY_TICKET_STATUS.delivered]?.includes(e?.receivingTicketStatus)
+          && ![DELIVERY_TICKET_STATUS.inTransit, DELIVERY_TICKET_STATUS.delivered]?.includes(e?.returnTicketStatus)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.inTransitDeliveredLoadingTicket });
+        } else if (e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
+          if (![ASSET_STATUS.underReview]?.includes(e?.status) && e?.type === 'Asset') {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.statusURForCancelReceiving });
+          } else if (![RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return, 'Returned']?.includes(e?.rentalAssetStatus)) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusCompleteCancelReceiving });
+          }
         }
       } else if (action === rentalManagementActions.createRepairJob || action === rentalManagementActions.createRepairOrder) {
         if (e.type !== 'Asset') {
@@ -2018,7 +1982,7 @@ const ActionButtonMenuItems = ({
           }
         }}
       >
-        Receive Items
+        {`Receive Items to ${routes.warehouse.title}`}
       </MenuItem>
       <MenuItem
         onClick={() => {
@@ -2027,7 +1991,7 @@ const ActionButtonMenuItems = ({
           }
         }}
       >
-        Create Supplier Delivery Ticket
+        Create Delivery Ticket for Supplier
       </MenuItem>
       {!isOffline && (
         <MenuItem
@@ -2094,25 +2058,16 @@ const ActionButtonMenuItems = ({
           }
         }}
       >
-        Cancel In-Transit Line Items
+        Cancel Specific Line Items
       </MenuItem>
       <MenuItem
         onClick={() => {
-          if (!validateAction(rentalManagementActions.cancelInTransitTicket)) {
-            setShowConformationCancleTicket({ open: true, type: 'Non-Delivered' });
+          if (!validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
+            setShowConformationCancleTicket({ open: true });
           }
         }}
       >
-        Cancel In-Transit Ticket(s)
-      </MenuItem>
-      <MenuItem
-        onClick={() => {
-          if (!validateAction(rentalManagementActions.cancelDeliveredTicket)) {
-            setShowConformationCancleTicket({ open: true, type: 'Delivered' });
-          }
-        }}
-      >
-        Cancel Delivered Ticket(s)
+        Cancel Receiving/Return Ticket(s)
       </MenuItem>
       {selectedRecords?.filter(
         (f) =>
