@@ -7,7 +7,6 @@ import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from '
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import { subleaseMessage } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -16,6 +15,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import {
   ASSET_STATUS,
+  CHILD_RESOURCE,
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
@@ -30,6 +30,7 @@ import {
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import CustomMessageDialog from 'src/components/MessageDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const SerializedAsset = ({
   subleaseData,
@@ -70,7 +71,7 @@ const SerializedAsset = ({
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_sublease_product_fields(subleaseData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, allowedToEdit);
     const newColumns = generateColumns(null, data, null, false, subleaseData?.currency);
     let coloum: any = [
       {

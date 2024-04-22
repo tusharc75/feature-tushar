@@ -10,15 +10,13 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import { ASSET_STATUS, MATERIAL_TYPE, QUOTATION_STATUS, QUOTATION_TYPE, fieldServiceOrder, fieldTicket, prepareDataForGrid, quotation, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, QUOTATION_STATUS, QUOTATION_TYPE, fieldServiceOrder, fieldTicket, prepareDataForGrid, quotation, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
-import PreviewDownload from 'src/components/PreviewDownload';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { getObjKeysWithValues } from '../../../constants/helpers';
-import { fetch_field_ticket_cost_fields, fetch_field_ticket_material_fields } from 'src/pages/FieldTicket/helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const QuoteBuilder = ({
   quotationData,
@@ -65,10 +63,7 @@ const QuoteBuilder = ({
   }, [sentToCustomer, DOAData]);
 
   const fetchFields = async () => {
-    var data = await fetch_quotation_product_fields(quotationData?.currency);
-    data?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false);
     const newColumns = generateColumns(
       renderedFrom,
       data?.map((e) => {
@@ -437,7 +432,7 @@ const QuoteBuilder = ({
     try {
       let materialIds = [], costIds = [];
       if (selectedRecords?.filter((e) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service])?.length) {
-        var fieldTicketMaterialField = await fetch_field_ticket_material_fields(data?.currency);
+        var fieldTicketMaterialField = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, data?.currency, true);
         const material = []
         selectedRecords?.filter((e) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service].includes(e.type))?.forEach((e: any) => {
           const extraData: any = {}
@@ -452,7 +447,7 @@ const QuoteBuilder = ({
         await axiosInstance().post(`${fieldTicket.api}/${data?._id}/material`, { material: material, notAddserviceProduct: true });
       }
       if (selectedRecords?.filter((e) => [MATERIAL_TYPE.manualEntry])?.length) {
-        var fieldTicketCostField = await fetch_field_ticket_cost_fields(data?.currency);
+        var fieldTicketCostField = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, data?.currency, true);
         const manualEntry = []
         selectedRecords?.filter((e) => [MATERIAL_TYPE.manualEntry].includes(e.type))?.forEach((e: any) => {
           manualEntry.push({ ...getObjKeysWithValues(e, fieldTicketCostField) });

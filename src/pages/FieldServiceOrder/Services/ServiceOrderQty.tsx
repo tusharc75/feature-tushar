@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -15,8 +15,8 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import moment from 'moment';
-import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
@@ -51,7 +51,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
 
   const fetchData = async () => {
     setInitialData({ fields: [], values: {} });
-    var data = await fetch_service_order_detail_fields(serviceOrderData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldServiceOrderDetails, serviceOrderData?.currency, true);
     if(isBulkedit) {
       let unitArray: any = [];
       let pricingMethodArray: any = [];

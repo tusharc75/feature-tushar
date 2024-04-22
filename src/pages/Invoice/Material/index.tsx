@@ -12,7 +12,6 @@ import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/Assign
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
@@ -27,6 +26,7 @@ import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, invoice, pricingCond
 import MaterialDialog from './MaterialDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import AdditionalCostDialog from './AdditionalCostDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const renderedFrom = `${camelCase(routes?.invoice.title)}_Material`;
@@ -62,16 +62,9 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   }, [columns]);
 
   const fetchFields = async () => {
-    let data = await fetch_invoice_product_fields(invoiceData?.currency);
-    let childFields = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.invoiceCost}`);
-    let addDataFields = childFields?.data?.data;
-    addDataFields = CURReplaceByCurrencySingle(addDataFields, invoiceData?.currency || 'USD');
-    setCostFields(addDataFields);
-    if (!allowedToEdit) {
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
-    }
+    let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, allowedToEdit);
+    let childFields = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceCost, invoiceData?.currency, allowedToEdit);
+    setCostFields(childFields);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
     const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;

@@ -17,6 +17,7 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, handleUpdateCost, showSaveAndNext, loadingEdit }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -47,9 +48,7 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`);
-    var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true);
     if (
       fieldTicketData?.taxCode ||
       (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))

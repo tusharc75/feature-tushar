@@ -47,23 +47,25 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Add"
-              disabled={permissions?.fieldTicket?.isCreate && !isSubmitting ? false : true}
-              onClick={() => {
-                handleCreateFieldTicket(
-                  row?.original?.orignalData,
-                  data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
-                );
-              }}
-            >
-              <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && !isSubmitting ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) && (
+          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Add"
+                disabled={permissions?.fieldTicket?.isCreate && !isSubmitting ? false : true}
+                onClick={() => {
+                  handleCreateFieldTicket(
+                    row?.original?.orignalData,
+                    data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
+                  );
+                }}
+              >
+                <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && !isSubmitting ? 'primary' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        )}
         {view === 'table' && (
           <Box>
             <HtmlTooltip title={`View ${routes.fieldTicket.title}`}>
@@ -118,12 +120,12 @@ const FieldServiceTechnician = () => {
     if (isOffline) {
       data = await findOne(objectStore.resource, objectStore.fieldServiceOrder);
     } else {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`, { cancelToken: cancelToken.token });
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`, { cancelToken: cancelToken?.token });
       data = response?.data?.data;
     }
     try {
       insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
-    } catch (e) { }
+    } catch (e) {}
     setColData(data);
     const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
     newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }));
@@ -177,15 +179,15 @@ const FieldServiceTechnician = () => {
   }, [page, limit, filters, sorting, showFilteredRecordsOnly, search]);
 
   const fetchData = async (cancelToken?: CancelTokenSource) => {
+    dispatch({ type: 'loading', loading: true });
     try {
-      dispatch({ type: 'loading', loading: true });
       let data, count;
       if (isOffline) {
         data = await findAll(objectStore.fieldServiceOrder);
         count = data?.length || 0;
       } else {
         const queryString = getQueryString();
-        const response = await axiosInstance().get(`${fieldServiceOrder.api}${queryString}`, { cancelToken: cancelToken.token });
+        const response = await axiosInstance().get(`${fieldServiceOrder.api}${queryString}`, { cancelToken: cancelToken?.token });
         data = response?.data?.data;
         count = response?.data?.count;
       }
@@ -195,11 +197,12 @@ const FieldServiceTechnician = () => {
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: count });
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    } finally {
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
-    } catch (e) {
-      toastConfig.setToastConfig(e);
     }
   };
 
@@ -327,9 +330,9 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => { }}
+                    setNextStep={() => {}}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => { }}
+                    handleChangeStatus={() => {}}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
                   />

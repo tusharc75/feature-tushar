@@ -569,7 +569,7 @@ export default function DeliveryTicketDetail(props) {
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob &&
-                [DELIVERY_TICKET_STATUS.indTransit].includes(deliveryTicketData?.status) &&
+                [DELIVERY_TICKET_STATUS.inTransit].includes(deliveryTicketData?.status) &&
                 [DELIVERY_TICKET_TYPE.loading, DELIVERY_TICKET_TYPE.receiving].includes(deliveryTicketData?.ticketType) && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}

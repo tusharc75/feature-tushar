@@ -1,36 +1,27 @@
-import { useEffect, useState, useContext, useReducer, Fragment } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, Button, Card, CardContent, Dialog, Grid, IconButton, Paper, Tooltip, Typography, useMediaQuery } from '@material-ui/core';
-import { GiAbstract055, GiVintageRobot } from 'react-icons/gi';
+import { Box, Button, Card, CardContent, Grid, Typography } from '@material-ui/core';
 import { AiOutlineEye } from 'react-icons/ai';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import Activity from '../../components/Activity';
-import PerformanceTuningImg from '../../assets/PerformanceTuning.png';
 import {
-  CustomDialogTransition,
   formatAmountWithCurrency,
-  gridLoadingTimeout,
-  gridPageSizes,
-  defaultActivityShow,
-  quoteBuilder,
-  ACTIVITY_RESOURCE,
   sidebarResource,
-  quotation
+  quotation,
+  CHILD_RESOURCE
 } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import DOAReasonDialog from './DOAReasonDialog';
-import Loader from '../../components/Loader';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const DoaQuotationApproval = () => {
 
@@ -153,10 +144,7 @@ const DoaQuotationApproval = () => {
   };
 
   const fetchFields = async (quotationData) => {
-    var data = await fetch_quotation_product_fields(quotationData?.currency);
-    data?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false);
     const newColumns = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
     let column: any = [
       {

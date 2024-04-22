@@ -1,9 +1,7 @@
 import { Box, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import React, { useEffect } from 'react';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import moment from 'moment';
-
 import axiosInstance from 'src/axios/axiosInstance';
 import ChartTypes from './ChartTypes';
 import countriesData from 'src/constants/Country.json';
@@ -17,29 +15,26 @@ import { ChartDataType } from './ChartTypes';
 import AssetStats from '../KpiDashboard/AssetDashboard/AssetStats';
 import FullScreenChart from './FullScreenChart';
 import { periodOption, frequencyData } from '../DashboardBuilder/builderHelpers';
+import { camelCase, set } from 'lodash';
 
-const DashbaordNew = () => {
+const Dashboard = () => {
+
   const {
-    state: { user, userLoading, selectedEntity }
+    state: { user, userLoading }
   } = useData();
+  
   const { setToastConfig } = React.useContext(CustomToastContext);
   const [filtersOptions, setFilterOptions] = React.useState(null);
   const [dashboardLoading, setDashboardLoading] = React.useState(false);
   const [dashboardList, setDashboardList] = React.useState([]);
   const [charts, setCharts] = React.useState([]);
+  const [kpis, setKpis] = React.useState([]);
+  const [kpiFilters, setKpiFilters] = React.useState([]);
   const [openFullScreenChart, setOpenFullScreenChart] = React.useState(false);
   const [selectedChart, setSelectedChart] = React.useState(null);
-  const [globalFilters, setGlobalFilters] = React.useState(() => {
-    const selectedDashboard = localStorage.getItem('selectedDashboard') ? localStorage.getItem('selectedDashboard') : '';
-    return {
-      dashboardType: selectedDashboard,
-      currency: user?.user?.currency,
-      between: {
-        from: new Date(moment().startOf('year').calendar()),
-        to: new Date(moment().endOf('year').calendar())
-      }
-    };
-  });
+
+  const [globalFilters, setGlobalFilters] = React.useState<any>(() => { return { currency: user?.user?.currency } });
+
   const [selectedDashboardId, setSelectedDashboardId] = React.useState(null);
 
   React.useEffect(() => {
@@ -60,7 +55,6 @@ const DashbaordNew = () => {
             businessUnitOptions = e.fieldData.option;
           }
         });
-  
         setFilterOptions({
           countryBillTo: countriesData,
           countrySellTo: countriesData,
@@ -68,7 +62,6 @@ const DashbaordNew = () => {
           period: periodOption,
           businessUnit: businessUnitOptions,
           frequency: frequencyData,
-          
         });
       } catch (error) {
         alert(JSON.stringify(error));
@@ -79,32 +72,51 @@ const DashbaordNew = () => {
 
   const fetchDashboards = () => {
     setDashboardLoading(true);
-    axiosInstance()
-      .get('/dashboard-master')
-      .then(({ data: { data } }) => {
-        if (data?.length) {
-          const savedSelected = localStorage.getItem('selectedDashboard');
-          if (!savedSelected) {
-            setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
-            setCharts(data[0]?.charts);
-            setSelectedDashboardId(data[0]?._id);
-          } else {
-            setGlobalFilters((prevState) => ({ ...prevState, dashboardType: savedSelected }));
-            const selectedDashboard = data.find((d) => d.name === savedSelected);
-            if (selectedDashboard) {
-              setCharts(selectedDashboard?.charts || []);
-              setSelectedDashboardId(selectedDashboard?._id);
+    axiosInstance().get('/dashboard-master').then(({ data: { data } }) => {
+      if (data?.length) {
+        const savedSelected = localStorage.getItem('selectedDashboard');
+        if (savedSelected && data.find((d) => d.name === savedSelected)) {
+          const selectedDashboard = data.find((d) => d.name === savedSelected);
+          setGlobalFilters((prevState) => ({ ...prevState, dashboardType: savedSelected, timeFrame: selectedDashboard?.defaultDuration || 'current-year' }));
+          setCharts(selectedDashboard?.charts || []);
+          setKpis(selectedDashboard?.charts?.map((chart) => {
+            if (chart?.hasFilters) {
+              return camelCase(chart?.kpi?.name);
             }
-          }
-          setDashboardList(data);
+          }))
+          setSelectedDashboardId(selectedDashboard?._id);
         }
-        setDashboardLoading(false);
-      })
+        else {
+          setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name, timeFrame: data[0]?.defaultDuration || 'current-year' }));
+          setCharts(data[0]?.charts);
+          setKpis(data[0]?.charts?.map((chart) => {
+            if (chart?.hasFilters) {
+              return camelCase(chart?.kpi?.name);
+            }
+          }))       
+          setSelectedDashboardId(data[0]?._id);
+        }
+        setDashboardList(data);
+      }
+      setDashboardLoading(false);
+    })
       .catch((err) => {
         setToastConfig(err);
         setDashboardLoading(false);
       });
   };
+
+  const fetchKpiFilters = () => {
+    axiosInstance().get(`kpi/filters?kpi=${kpis.join(',')}`).then(({ data }) => {
+      setKpiFilters(data?.data || []);
+    }).catch((err) => {
+      setToastConfig(err);
+    });
+  }
+
+  useEffect(() => {
+    if (kpis?.length) fetchKpiFilters();
+  }, [kpis]);
 
   return (
     <div className="main-container-v1">
@@ -116,7 +128,7 @@ const DashbaordNew = () => {
           {!userLoading ? (
             <React.Fragment>
               <GlobalFilter
-                dashboardList={dashboardList.map((d) => ({ id: d._id, name: d.name }))}
+                dashboardList={dashboardList.map((d) => ({ id: d._id, name: d.name, defaultDuration: d?.defaultDuration }))}
                 globalFilters={globalFilters}
                 setGlobalFilters={setGlobalFilters}
                 disabled={dashboardList.length === 0}
@@ -159,6 +171,8 @@ const DashbaordNew = () => {
                         }}
                         selectedDashboardId={selectedDashboardId}
                         fetchDashboards={fetchDashboards}
+                        kpiFilters={kpiFilters?.filter((k: any) => k.kpi === camelCase(chart.kpi.name))}
+                        fetchKpiFilters={fetchKpiFilters}
                       />
                     ))}
                     {globalFilters.dashboardType?.includes('Asset') && (
@@ -192,4 +206,4 @@ const DashbaordNew = () => {
   );
 };
 
-export default DashbaordNew;
+export default Dashboard;

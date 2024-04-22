@@ -36,6 +36,7 @@ import {
   camelCaseToWords,
   childrenProperty,
   extractLastNumberFromDataRange,
+  fitToColumn,
   getExcelColumnNameFromRange,
   getStickyColumnNames,
   getUniqueDataByKey,
@@ -410,7 +411,7 @@ const CustomReactTable = ({
     exportTimeout = setTimeout(() => {
       if (!tableRef.current) return;
       const wb = xlsx.utils.book_new();
-      const ws = xlsx.utils.table_to_sheet(tableRef.current);
+      const ws = xlsx.utils.table_to_sheet(tableRef.current, { cellStyles: true, cellDates: true, raw: true });
 
       const columns = getExcelColumnNameFromRange(ws['!ref']);
 
@@ -435,6 +436,28 @@ const CustomReactTable = ({
           };
         }
       }
+
+      // For redirecting to the domain and cell style for links
+      const keys = Object.keys(ws);
+      const origin = window?.location?.origin;
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (key.includes('!')) continue;
+        if (ws[key].hasOwnProperty('l')) {
+          const data = ws[key];
+          data.l.Target = `${origin}${data.l.Target}`;
+          ws[key].s = {
+            font: {
+              name: 'Calibri',
+              color: { rgb: '171db1' }
+            }
+          };
+        }
+      }
+
+      // set column width to header width
+      ws['!cols'] = fitToColumn(columns, ws);
+
       const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
       xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
       xlsx.writeFile(wb, `${name}.xlsx`);
@@ -463,6 +486,7 @@ const CustomReactTable = ({
             exportTableView={true}
             error={error}
             height={height}
+            onRowClick={onRowClick}
           />
         </div>
       )}

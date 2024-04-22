@@ -9,7 +9,6 @@ import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
@@ -25,6 +24,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import {
+  CHILD_RESOURCE,
   PRICING_SETUP_TYPE,
   QUOTATION_STATUS,
   REPAIR_ORDER_STATUS,
@@ -33,6 +33,7 @@ import {
   repairOrder,
   sidebarResource
 } from '../../../constants/helpers';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Quotation = ({
   repairOrderData,
@@ -119,7 +120,7 @@ const Quotation = ({
       setNextStep(true);
     }
 
-    var data = await fetch_quotation_product_fields(quotationInfo?.currency);
+    var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
 
     if (

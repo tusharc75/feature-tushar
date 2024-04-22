@@ -21,6 +21,7 @@ import { ASSET_STATUS, CHILD_RESOURCE, REPAIR_JOB_STATUS, repairJob, sidebarReso
 import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerializedAsset';
 import ManageAssetDialog from './ManageAssetDialog';
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen, alloweOperation }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -62,10 +63,9 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
 
   const fetchFields = async () => {
     setColumns(null);
-    const fieldResponce = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`);
-    const repairJobAssetFields = fieldResponce?.data?.data;
+    let fields = await fetch_child_resource_fields(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, true);
 
-    const isPriceRequired = repairJobAssetFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    const isPriceRequired = fields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
 
     const {
@@ -83,7 +83,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       ]
     });
 
-    let fields = CURReplaceByCurrencySingle(repairJobAssetFields, repairJobData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(fields)));
 
     const assetField = data?.find((e) => e.resource === sidebarResource.serializedAsset)?.fieldNames || [];
