@@ -1,5 +1,5 @@
 import { Box, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import React, { useEffect } from 'react';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -15,6 +15,7 @@ import { ChartDataType } from './ChartTypes';
 import AssetStats from '../KpiDashboard/AssetDashboard/AssetStats';
 import FullScreenChart from './FullScreenChart';
 import { periodOption, frequencyData } from '../DashboardBuilder/builderHelpers';
+import { camelCase, set } from 'lodash';
 
 const Dashboard = () => {
 
@@ -27,6 +28,8 @@ const Dashboard = () => {
   const [dashboardLoading, setDashboardLoading] = React.useState(false);
   const [dashboardList, setDashboardList] = React.useState([]);
   const [charts, setCharts] = React.useState([]);
+  const [kpis, setKpis] = React.useState([]);
+  const [kpiFilters, setKpiFilters] = React.useState([]);
   const [openFullScreenChart, setOpenFullScreenChart] = React.useState(false);
   const [selectedChart, setSelectedChart] = React.useState(null);
 
@@ -76,11 +79,21 @@ const Dashboard = () => {
           const selectedDashboard = data.find((d) => d.name === savedSelected);
           setGlobalFilters((prevState) => ({ ...prevState, dashboardType: savedSelected, timeFrame: selectedDashboard?.defaultDuration || 'current-year' }));
           setCharts(selectedDashboard?.charts || []);
+          setKpis(selectedDashboard?.charts?.map((chart) => {
+            if (chart?.hasFilters) {
+              return camelCase(chart?.kpi?.name);
+            }
+          }))
           setSelectedDashboardId(selectedDashboard?._id);
         }
         else {
           setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name, timeFrame: data[0]?.defaultDuration || 'current-year' }));
           setCharts(data[0]?.charts);
+          setKpis(data[0]?.charts?.map((chart) => {
+            if (chart?.hasFilters) {
+              return camelCase(chart?.kpi?.name);
+            }
+          }))       
           setSelectedDashboardId(data[0]?._id);
         }
         setDashboardList(data);
@@ -92,6 +105,18 @@ const Dashboard = () => {
         setDashboardLoading(false);
       });
   };
+
+  const fetchKpiFilters = () => {
+    axiosInstance().get(`kpi/filters?kpi=${kpis.join(',')}`).then(({ data }) => {
+      setKpiFilters(data?.data || []);
+    }).catch((err) => {
+      setToastConfig(err);
+    });
+  }
+
+  useEffect(() => {
+    if (kpis?.length) fetchKpiFilters();
+  }, [kpis]);
 
   return (
     <div className="main-container-v1">
@@ -146,6 +171,8 @@ const Dashboard = () => {
                         }}
                         selectedDashboardId={selectedDashboardId}
                         fetchDashboards={fetchDashboards}
+                        kpiFilters={kpiFilters?.filter((k: any) => k.kpi === camelCase(chart.kpi.name))}
+                        fetchKpiFilters={fetchKpiFilters}
                       />
                     ))}
                     {globalFilters.dashboardType?.includes('Asset') && (
