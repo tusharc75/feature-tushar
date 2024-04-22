@@ -1,17 +1,17 @@
-import React, { Fragment, useCallback, useContext, useState } from 'react';
-import { Popover, TextField, Box, CircularProgress, IconButton, Button, Grid } from '@material-ui/core';
+import { Box, Button, CircularProgress, IconButton, Popover, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
-import routes from 'src/components/Helpers/Routes';
 import { debounce, isEmpty } from 'lodash';
-import axiosInstance from 'src/axios/axiosInstance';
-import { sidebarResource } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { RiDeleteBin6Fill } from 'react-icons/ri';
+import React, { useCallback, useContext, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';
+import { RiDeleteBin6Fill } from 'react-icons/ri';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import SaveFilterDialog from './SaveFilterDialog';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import routes from 'src/components/Helpers/Routes';
+import { sidebarResource } from 'src/constants/helpers';
+import SaveFilterDialog from './SaveFilterDialog';
 interface Props {
   filters: { key: string; title: string; multiple?: boolean; defaultValue?: number }[];
   anchorEl: any;
