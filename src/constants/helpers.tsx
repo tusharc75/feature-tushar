@@ -371,6 +371,7 @@ export const sidebarResource = {
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
   units: 'Units',
   workOrderPlanning: 'Work Order Planning',
+  resourceDoaRequest: 'Resource Doa Request',
 };
 
 export const primaryFields = {
@@ -3113,3 +3114,12 @@ export const DOAType = {
   sequence: 'Sequence',
   amount: 'Amount'
 };
+
+export const DOA_STATUS = {
+  pending: 'Pending',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  sentForDoa: 'Sent for DOA',
+  acceptedbyDOA: 'Accepted by DOA',
+  rejectedbyDOA: 'Rejected by DOA'
+}
