@@ -57,7 +57,7 @@ export const rentalManagementSteps: stepInterface[] = [
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
   { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
-  { name: 'On Field', title: 'On Field', icon: 'receivingTicket' },
+  { name: 'On Field', title: 'On Field', icon: 'onField' },
   { name: 'Receiving Ticket', title: 'Receiving', icon: 'ticket' },
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
@@ -74,7 +74,6 @@ export const fieldServiceOrderSteps: stepInterface[] = [
 ];
 
 export const demandOrderSteps = ['Add Products'];
-
 
 export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
@@ -371,7 +370,7 @@ export const sidebarResource = {
   assetsReceiving: 'Assets Receiving',
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
   units: 'Units',
-  workOrderPlanning: 'Work Order Planning',
+  workOrderPlanning: 'Work Order Planning'
 };
 
 export const primaryFields = {
@@ -515,7 +514,7 @@ export const RESOURCE_LABEL = {
   userAttendance: 'User Attendance',
   dataList: 'Data List',
   dataListitems: 'Data List Items',
-  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
+  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request'
 };
 
 export const CHILD_RESOURCE = {
@@ -555,7 +554,7 @@ export const CHILD_RESOURCE = {
   payrollPayTypes: 'Payroll Pay Types',
   payrollPaidTimeOff: 'Payroll Paid Time Off',
   dealsMaterial: 'Deals Material',
-  rentalManagementTechnician: 'Rental Management Technician',
+  rentalManagementTechnician: 'Rental Management Technician'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -921,13 +920,11 @@ export const SCHEDULE_FREQUENCY = ['Hourly', 'Daily', 'Weekly', 'Monthly'];
 export const FREQUENCY_WEEKS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
-
-  let user = JSON.parse(localStorage.getItem("userData"))
+  let user = JSON.parse(localStorage.getItem('userData'));
 
   const obj = {};
   for (const key of arr) {
-    let value = key.isDefaultValue ? key.defaultValue === 'Current User' && user?.user?._id ? user?.user?._id :
-      key.defaultValue : val;
+    let value = key.isDefaultValue ? (key.defaultValue === 'Current User' && user?.user?._id ? user?.user?._id : key.defaultValue) : val;
 
     if (key.type === 'dropDown') {
       let option = key.option?.find((data: any) => data.default === true);
@@ -1102,21 +1099,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -2498,27 +2495,27 @@ export const REPORT_LIST = [
     permission: 'iotChart',
     key: 'standardReport',
     type: 'dailyVolumeReport',
-    defaultColumn: true,
+    defaultColumn: true
   },
   {
     title: 'Daily Volume Revenue Report',
     permission: 'iotChart',
     key: 'standardReport',
     type: 'dailyVolumeRevenueReport',
-    defaultColumn: true,
+    defaultColumn: true
   },
   {
     title: 'Day Wise Volume Report',
     permission: 'iotChart',
     key: 'standardReport',
     type: 'dayWiseVolumeReport',
-    defaultColumn: true,
+    defaultColumn: true
   },
   {
     title: 'Unit Downtime Report',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'iotUnitDowntimeReport',
+    type: 'iotUnitDowntimeReport'
   },
   {
     title: 'IOT Data Points',
@@ -2526,7 +2523,7 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'iotDataPoints',
     defaultColumn: true
-  },
+  }
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -3032,85 +3029,80 @@ export function clamp(val: number, min: number, max: number) {
 }
 
 export const getResourceLabel = (resource, user) => {
-  return user?.role?.selectedEntity?.resource?.find((e) => e.name === resource)?.resourceLabel || resource
-}
+  return user?.role?.selectedEntity?.resource?.find((e) => e.name === resource)?.resourceLabel || resource;
+};
 
 export const ASSET_APPROVAL_STATUS = {
   approved: 'Approved',
   rejected: 'Rejected',
-  pending: 'Pending',
-}
+  pending: 'Pending'
+};
 
 export const STEPS_STYLE = {
   list: 'List',
   step: 'Step',
-  sideBar: 'Side Bar',
-}
+  sideBar: 'Side Bar'
+};
 
 export const DEAL_STAGE = {
   proposalSent: 'Proposal Sent',
   contractSigned: 'Contract Signed',
   renewalSent: 'Renewal Sent',
   renewalSigned: 'Renewal Signed'
-}
+};
 
 export const cloneResourceData = (fromFields, toFields, data) => {
   const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName));
-  const result: any = {}
+  const result: any = {};
   overlappingFields?.forEach((e) => {
     if (data[e?.fieldName]) {
       if (e?.lookup) {
         if (e?.type === 'dropDown') {
-          result[e?.fieldName] = data[e?.fieldName]?.optionValue || ''
+          result[e?.fieldName] = data[e?.fieldName]?.optionValue || '';
+        } else {
+          result[e?.fieldName] = isArray(data[e?.fieldName]) ? data[e?.fieldName]?.map((m) => m.optionValue) : [];
         }
-        else {
-          result[e?.fieldName] = isArray(data[e?.fieldName]) ? data[e?.fieldName]?.map((m) => m.optionValue) : []
-        }
-      }
-      else {
-        result[e?.fieldName] = data[e?.fieldName]
+      } else {
+        result[e?.fieldName] = data[e?.fieldName];
       }
     }
-  })
+  });
 
   delete result?.owner;
   delete result?.pdfTemplate;
   delete result?.status;
 
   return result;
-}
+};
 
 export const getDefaultMyRecordType = (user, resource) => {
-  const userByDefaultRecord = user?.uiPreference?.byDefaultRecord
+  const userByDefaultRecord = user?.uiPreference?.byDefaultRecord;
   if (isArray(userByDefaultRecord)) {
-    const byDefaultRecord = userByDefaultRecord?.find((e) => e.resource === resource)
+    const byDefaultRecord = userByDefaultRecord?.find((e) => e.resource === resource);
     if (byDefaultRecord) {
       if (byDefaultRecord?.type === 'All') {
-        return 2
+        return 2;
+      } else {
+        return 1;
       }
-      else {
-        return 1
-      }
-    }
-    else {
+    } else {
       return 1;
     }
-  }
-  else {
+  } else {
     return 1;
   }
-}
+};
 
 export const checkSuperAdminAccess = (user, resource) => {
-  return user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource) ? true : false
-}
+  return user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource) ? true : false;
+};
 
 export const DOA_RESOURCE = [
   {
     key: 'purchaseRequisition',
     resorce: sidebarResource.purchaseRequisition
   }
-]
+];
 
 export const DoaApproveType = {
   user: 'User',
