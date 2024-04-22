@@ -20,6 +20,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
 import ManagePlanning from './ManagePlanning';
 import Material from './Material';
+import Step from '../DynamicForm/Step';
 
 const PlanningDetail = () => {
   const renderedFrom = camelCase(routes?.planning.title);
@@ -41,11 +42,13 @@ const PlanningDetail = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [reserveAssetWarning, setReserveAssetWarning] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -77,6 +80,19 @@ const PlanningDetail = () => {
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPlanningData(data);
       setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.planning}`);
+      if (data) {
+        setResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -200,6 +216,19 @@ const PlanningDetail = () => {
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
           />
+          {resourceData && resourceData?.steps?.length &&(
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
+              </div>
+            }
+            value={2}
+            aria-controls="a11y-tabpanel-2"
+            id="a11y-tab-2"
+          />
+          )}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -222,6 +251,15 @@ const PlanningDetail = () => {
               setReserveAssetWarning={setReserveAssetWarning}
             />
           )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+        <Step
+        resourceData={resourceData}
+        resourceId={id}
+        resource={sidebarResource.planning}
+        data={planningData}
+        allowedToEdit={permissions?.planning?.isUpdate}
+      />
         </TabPanel>
       </Box>
       {showConfirmBox && (

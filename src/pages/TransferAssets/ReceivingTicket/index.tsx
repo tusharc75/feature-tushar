@@ -342,7 +342,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     }
     data['isPickupFromDisable'] = true;
     data['isDeliveryToDisable'] = false;
-    data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+    data['status'] = DELIVERY_TICKET_STATUS.inTransit;
     setShowTicketDialog({ open: true, data: data });
   };
 
@@ -371,7 +371,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         </MenuItem>
         <MenuItem
           disabled={selectedRecords.length === 0 ||
-            selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+            selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
           }
           onClick={() => {
             setShowConfirmBoxReceive(true);

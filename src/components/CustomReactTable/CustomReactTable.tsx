@@ -486,6 +486,7 @@ const CustomReactTable = ({
             exportTableView={true}
             error={error}
             height={height}
+            onRowClick={onRowClick}
           />
         </div>
       )}
