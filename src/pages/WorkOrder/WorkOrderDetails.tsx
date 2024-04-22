@@ -42,6 +42,7 @@ import View from './View';
 import { TbProgressCheck } from 'react-icons/tb';
 import { FaCircleChevronDown } from 'react-icons/fa6';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
+import Step from '../DynamicForm/Step';
 
 type ToolbarElement = {
   type: 'element';
@@ -94,6 +95,7 @@ const WorkOrderDetails = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -131,6 +133,7 @@ const WorkOrderDetails = () => {
     if (id) {
       fetchWorkOrderData();
       fetchTotalConsumablesCost();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -173,6 +176,19 @@ const WorkOrderDetails = () => {
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.workOrder}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const fetchTotalConsumablesCost = () => {
@@ -537,6 +553,11 @@ const WorkOrderDetails = () => {
               Views
             </CustomTab>
           )}
+          {resourceData && resourceData?.steps?.length && (
+                <CustomTab index={6} value={6} >
+                  Associations
+                </CustomTab>
+            )}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -634,6 +655,17 @@ const WorkOrderDetails = () => {
         <TabPanel value={tabValue} index={5}>
           <Box>
             <View workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={6}>
+          <Box>
+          <Step
+                resourceData={resourceData}
+                resourceId={id}
+                resource={sidebarResource.workOrder}
+                data={workOrderData}
+                allowedToEdit={permissions?.workOrder?.isUpdate}
+              />
           </Box>
         </TabPanel>
         <Box my={1} />

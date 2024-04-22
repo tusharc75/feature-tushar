@@ -40,6 +40,8 @@ import OpportunityContacts from './OpportunityContacts';
 
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { stepIconInterface, StepIconType } from 'src/components/Steps/icons';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import Step from '../DynamicForm/Step';
 
 interface StepInterface extends stepIconInterface {
   text: string;
@@ -76,6 +78,8 @@ function OpportunityDetailsPage() {
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' });
+  const [resourceData, setResourceData] = useState(null);
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const parsed = queryString.parse(history.location.search);
 
   const [messageDialog, setMessageDialog] = useState({
@@ -150,6 +154,7 @@ function OpportunityDetailsPage() {
     if (id) {
       fetchOpportunityData();
       fetchRelatedData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -235,6 +240,19 @@ function OpportunityDetailsPage() {
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.opportunity}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -620,7 +638,23 @@ function OpportunityDetailsPage() {
           </Box>
         </Box>
         <Box className={`detail-container-v1`}>
-          <ProcessFlow
+        <CustomTabs
+              value={currentTabIndex}
+              onChange={(index, newValue) => {
+                setCurrentTabIndex(newValue);
+              }}
+            >
+              <CustomTab index={0}>
+                Details
+              </CustomTab>
+              {resourceData && resourceData?.steps?.length && (
+                <CustomTab index={1}>
+                  Associations
+                </CustomTab>
+              )}
+            </CustomTabs>
+          <TabPanel value={currentTabIndex} index={0}>
+            <ProcessFlow
             disableBackNext={allowedToEdit ? false : true}
             steps={steps}
             activeStep={activeStep}
@@ -723,6 +757,17 @@ function OpportunityDetailsPage() {
               />
             )}
           </div>
+       </TabPanel>
+       <TabPanel value={currentTabIndex} index={1}>
+              <Step
+                resourceData={resourceData}
+                resourceId={id}
+                resource={sidebarResource.opportunity}
+                data={opportunityData}
+                allowedToEdit={permissions?.opportunity?.isUpdate}
+              />
+        </TabPanel>
+         
         </Box>
         {showConfirmBox ? (
           <ConfirmationDialog
