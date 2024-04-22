@@ -79,11 +79,21 @@ const Dashboard = () => {
           const selectedDashboard = data.find((d) => d.name === savedSelected);
           setGlobalFilters((prevState) => ({ ...prevState, dashboardType: savedSelected, timeFrame: selectedDashboard?.defaultDuration || 'current-year' }));
           setCharts(selectedDashboard?.charts || []);
+          setKpis(selectedDashboard?.charts?.map((chart) => {
+            if (chart?.hasFilters) {
+              return camelCase(chart?.kpi?.name);
+            }
+          }))
           setSelectedDashboardId(selectedDashboard?._id);
         }
         else {
           setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name, timeFrame: data[0]?.defaultDuration || 'current-year' }));
           setCharts(data[0]?.charts);
+          setKpis(data[0]?.charts?.map((chart) => {
+            if (chart?.hasFilters) {
+              return camelCase(chart?.kpi?.name);
+            }
+          }))       
           setSelectedDashboardId(data[0]?._id);
         }
         setDashboardList(data);
