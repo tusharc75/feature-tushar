@@ -348,6 +348,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
       element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
       element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
+      element.isRental = false;
       const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
       element.estimateJobDuration = 1;
       if (calValues && calValues['estimateJobDuration']) {

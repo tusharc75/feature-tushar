@@ -108,9 +108,10 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
     dispatch({ type: 'loading', loading: true });
 
     const materialResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material`);
+    const rentalResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material/rental-data`)
     const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
 
-    const material = materialResponse?.data?.data?.material;
+    const material = [...materialResponse?.data?.data?.material,...rentalResponse?.data?.data?.material];
     const costs = costResponse?.data?.data || [];
 
     material?.forEach((parent, i) => {
