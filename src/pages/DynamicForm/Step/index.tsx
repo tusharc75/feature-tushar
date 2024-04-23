@@ -11,7 +11,7 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { STEPS_STYLE } from 'src/constants/helpers';
 import { KeyboardArrowLeft } from '@material-ui/icons';
 
-const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
+const Step = ({ resourceData, resourceId, resource, data, allowedToEdit, referenceData = null }) => {
   const [steps, setSteps] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [stepFullScreen, setStepFullScreen] = useState(false);
@@ -59,6 +59,7 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
                 resourceId={resourceId}
                 setNextStep={setNextStep}
                 stepFullScreen={stepFullScreen}
+                referenceData={referenceData}
               />
             </ContentFullScreen>
           </>
@@ -81,9 +82,8 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
                       title={step?.stepName}
                       onClick={() => handleClick(step)}
                       data-active={index === step}
-                      className={`p-[18px] [border:1px_solid_var(--common-border-color)] ${
-                        i === 0 ? 'rounded-t-md' : ''
-                      } last:rounded-b-md cursor-pointer data-[active=true]:[border:1px_solid_var(--dark-active-border-color,#298B88)]`}
+                      className={`p-[18px] [border:1px_solid_var(--common-border-color)] ${i === 0 ? 'rounded-t-md' : ''
+                        } last:rounded-b-md cursor-pointer data-[active=true]:[border:1px_solid_var(--dark-active-border-color,#298B88)]`}
                     >
                       <div className="flex gap-2">
                         <span className="bg-[var(--dark-secondary,var(--primary))] text-white w-[20px] h-[20px] text-center rounded-full text-[10px] leading-[20px] flex-shrink-0">
@@ -106,6 +106,7 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
                   resourceId={resourceId}
                   setNextStep={setNextStep}
                   stepFullScreen={stepFullScreen}
+                  referenceData={referenceData}
                 />
               </div>
             </div>
@@ -144,6 +145,7 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit }) => {
                             resource={resource}
                             resourceId={resourceId}
                             fromAccordian={true}
+                            referenceData={referenceData}
                           />
                         )}
                       </>

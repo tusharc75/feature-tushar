@@ -207,7 +207,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                       </div>
                       <div className="flex flex-wrap gap-2 my-2">
                         <FormTypes
-                          label="File"
+                          label=""
                           name="fileUrl"
                           required={true}
                           type="fileUpload"

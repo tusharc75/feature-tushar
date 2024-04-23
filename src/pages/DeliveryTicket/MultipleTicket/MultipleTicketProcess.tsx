@@ -151,7 +151,7 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
               onClick={() => {
                 setOpenSignatureDialog({ label: 'Sign-off - Delivery', open: true });
               }}
-              disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.status !== DELIVERY_TICKET_STATUS.indTransit)}
+              disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.status !== DELIVERY_TICKET_STATUS.inTransit)}
             >
               Sign-off - Delivery
             </Button>

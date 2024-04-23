@@ -276,7 +276,7 @@ export default function ManageAttachment({
                             <Box display="flex" flexDirection="row">
                               <Box>
                                 <FormTypes
-                                  label="File"
+                                  label=""
                                   name="fileUrl"
                                   required={true}
                                   type="fileUpload"

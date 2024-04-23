@@ -278,7 +278,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
       if (subleaseData?.processor?.optionValue) {
         data['processor'] = subleaseData?.processor?.optionValue;
       }
-      data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+      data['status'] = DELIVERY_TICKET_STATUS.inTransit;
       setShowTicketDialog({ open: true, data: data });
     }
   };
