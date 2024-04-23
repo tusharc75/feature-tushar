@@ -51,6 +51,7 @@ import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import { getRentalDeliveryTicket, getRentalProductAssets, uniqueProduct } from './../rentalOfflineHelper';
 import DateDialog from './DateDialog';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -391,42 +392,23 @@ const LoadingTicket = ({
       minWidth: 100,
       width: 100,
       disabled: true,
-      Cell: ({ row }) => (row?.original?.index ? <h5 className="text-truncate">{row?.original?.index}</h5> : <NoDataCell />)
-    },
-    {
-      accessor: 'assetNumber',
-      Header: 'Details',
-      disabled: true,
       Cell: ({ row }) => (
         <div
+          className="d-flex gap-2 align-items-center"
           style={{
-            display: 'flex',
-            alignItems: 'center',
             backgroundColor:
               row?.original?.warehouseId && row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue
                 ? COLOUR_MASTER.transferAsset.background
                 : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(row?.original?.status)
                   ? COLOUR_MASTER.lostAssets.background
                   : ''
-          }}
-        >
-          <h5 className="text-truncate" title={row?.original?.assetNumber}>
-            {row?.original?.assetNumber}
-          </h5>
-          <Box ml={1}>
-            <IconButton
-              size="small"
-              onClick={() => {
-                window.open(
-                  `${row?.original?.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${row?.original?._id?.split('_')[0]
-                  }`
-                );
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color={'primary'} />
-            </IconButton>
-          </Box>
-
+          }}>
+          <h5 className="text-truncate">{row?.original?.index}</h5>
+          {row?.original?.loadingTicketId &&
+            <HtmlTooltip title={`Loading Ticket ${row?.original?.loadingTicketStatus}`}  >
+              <LocalShippingIcon fontSize="small" color={'primary'} />
+            </HtmlTooltip>
+          }
           {row?.original?.warehouseId && row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
             <HtmlTooltip title="This asset will be shipped from different facility">
               <IconButton size="small">
@@ -434,31 +416,50 @@ const LoadingTicket = ({
               </IconButton>
             </HtmlTooltip>
           )}
-          {row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0 && (
-            <Box ml={1}>
-              <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setShowNonSerializeAsset({
-                      open: true,
-                      data: { productName: row?.original?.productName, nonSerializeAsset: row?.original?.nonSerializeAsset }
-                    });
-                  }}
-                >
-                  <InfoIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
-            </Box>
-          )}
           {row?.original?.isReplaced && (
-            <Box ml={1}>
-              <HtmlTooltip
-                title={`This Asset has been Replaced by ${row?.original?.replaceAsset} (Due to following reason-"${row?.original?.replaceReason}")`}
+            <HtmlTooltip
+              title={`This Asset has been Replaced by ${row?.original?.replaceAsset} (Due to following reason-"${row?.original?.replaceReason}")`}
+            >
+              <InfoIcon fontSize="small" color={'primary'} />
+            </HtmlTooltip>
+          )}
+        </div>
+      )
+    },
+    {
+      accessor: 'assetNumber',
+      Header: 'Details',
+      disabled: true,
+      Cell: ({ row }) => (
+        <div className="d-flex gap-2 align-items-center">
+          <h5 className="text-truncate" title={row?.original?.assetNumber}>
+            {row?.original?.assetNumber}
+          </h5>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(
+                `${row?.original?.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${row?.original?._id?.split('_')[0]
+                }`
+              );
+            }}
+          >
+            <OpenInNewIcon fontSize="small" color={'primary'} />
+          </IconButton>
+          {row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0 && (
+            <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setShowNonSerializeAsset({
+                    open: true,
+                    data: { productName: row?.original?.productName, nonSerializeAsset: row?.original?.nonSerializeAsset }
+                  });
+                }}
               >
                 <InfoIcon fontSize="small" color={'primary'} />
-              </HtmlTooltip>
-            </Box>
+              </IconButton>
+            </HtmlTooltip>
           )}
         </div>
       )

@@ -9,6 +9,8 @@ import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { isTablet } from 'react-device-detect';
+import HtmlTooltip from '../CustomTooltipTitle';
+import { ThemeButton } from '../Helpers/Buttons';
 
 function PreviewDownload({
   resource,
@@ -161,13 +163,11 @@ function PreviewDownload({
       <Box display="flex" alignItems="center">
         <Box display="flex" flexWrap={'wrap'} gridGap={8}>
           {
-            <Button
-              variant={isMobile ? 'text' : 'outlined'}
-              className="btn-outline-v1  with-border"
-              color="primary"
-              type="button"
+            <ThemeButton
               size="small"
-              startIcon={isMobile ? '' : <VisibilityIcon />}
+              tooltip="Preview"
+              iconForMobile={<VisibilityIcon />}
+              startIcon={<VisibilityIcon />}
               disabled={btnLoading === 'Preview'}
               onClick={(e) => {
                 if (hideDialog) {
@@ -177,16 +177,14 @@ function PreviewDownload({
                 }
               }}
             >
-              {isMobile ? <VisibilityIcon /> : btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
-            </Button>
+              {btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
+            </ThemeButton>
           }
-          <Button
-            className="btn-outline-v1 with-border"
-            variant={isMobile ? 'text' : 'outlined'}
-            color="primary"
-            type="button"
-            size="small"
-            startIcon={isMobile ? '' : <DownloadIcon />}
+
+          <ThemeButton
+            iconForMobile={<DownloadIcon />}
+            tooltip="Download"
+            startIcon={<DownloadIcon />}
             disabled={btnLoading === 'Download'}
             onClick={(e) => {
               if (hideDialog) {
@@ -196,32 +194,28 @@ function PreviewDownload({
               }
             }}
           >
-            {isMobile ? <DownloadIcon fontSize={20} /> : btnLoading === 'Download' ? 'Please wait...' : 'Download'}
-          </Button>
+            {btnLoading === 'Download' ? 'Please wait...' : 'Download'}
+          </ThemeButton>
+
           {isExcelDownload && (
-            <Button
-              className="btn-outline-v1  with-border"
-              variant={isMobile ? 'text' : 'outlined'}
-              color="primary"
-              type="button"
-              size="small"
-              startIcon={isMobile ? '' : <ExportIcon />}
+            <ThemeButton
+              iconForMobile={<ExportIcon />}
+              tooltip="Download"
+              startIcon={<ExportIcon />}
               disabled={btnLoading === 'Download'}
               onClick={(e) => {
                 setShowColumnsDialog({ open: true, type: 'Excel', operation: 'Download' });
               }}
             >
-              {isMobile ? <ExportIcon /> : btnLoading === 'Download' ? 'Please wait...' : 'Export To Excel'}
-            </Button>
+              {btnLoading === 'Download' ? 'Please wait...' : 'Export To Excel'}
+            </ThemeButton>
           )}
           {isSendEmail && (
-            <Button
-              variant={isMobile ? 'text' : 'outlined'}
-              color="primary"
-              size="small"
-              className="btn-outline-v1  with-border"
+            <ThemeButton
+              iconForMobile={<MdEmail />}
               disabled={btnLoading === 'Send Email'}
-              startIcon={isMobile ? '' : <MdEmail />}
+              startIcon={<MdEmail />}
+              tooltip="Send Email"
               onClick={() => {
                 if (isAsyncDownload) {
                   setSendEmail(true);
@@ -230,8 +224,8 @@ function PreviewDownload({
                 }
               }}
             >
-              {isMobile ? <MdEmail size={20} /> : btnLoading === 'Send Email' ? 'Please wait...' : `Send Email`}
-            </Button>
+              {btnLoading === 'Send Email' ? 'Please wait...' : `Send Email`}
+            </ThemeButton>
           )}
         </Box>
       </Box>

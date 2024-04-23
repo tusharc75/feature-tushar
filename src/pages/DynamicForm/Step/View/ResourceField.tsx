@@ -202,7 +202,6 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen
     );
   };
 
-  console.log(linkResourceFieldType)
 
   return (
     <>

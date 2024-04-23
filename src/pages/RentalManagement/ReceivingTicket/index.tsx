@@ -66,6 +66,7 @@ import ExistingRentalJob from './ExistingRentalJob';
 import ReturnTicketDialog from './ReturnTicketDialog';
 import DateDialog from '../LoadingTicket/DateDialog';
 import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
+import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -517,18 +518,12 @@ const ReceivingTicket = ({
     });
     const productFields = data?.filter((d) => d.resource === 'Product');
     const assetFields = data?.filter((d) => d.resource === 'Serialized Asset');
-    const column = [
+    const column: any = [
       {
         accessor: 'index',
         Header: 'Index',
         minWidth: 100,
         width: 100,
-        disabled: true,
-        Cell: ({ row }) => (row?.original?.index ? <h5 className="text-truncate">{row?.original?.index}</h5> : <NoDataCell />)
-      },
-      {
-        accessor: 'assetNumber',
-        Header: 'Details',
         disabled: true,
         Cell: ({ row }) => (
           <div
@@ -541,6 +536,38 @@ const ReceivingTicket = ({
                 : ''
             }}
           >
+            <h5 className="text-truncate">{row?.original?.index}</h5>
+            {row?.original?.receivingTicketId &&
+              <HtmlTooltip title={`Receiving Ticket ${row?.original?.receivingTicketStatus}`}  >
+                <LocalShippingIcon fontSize="small" color={'primary'} />
+              </HtmlTooltip>
+            }
+            {row?.original?.returnTicketId &&
+              <HtmlTooltip title={`Return Ticket ${row?.original?.returnTicketStatus}`}  >
+                <LocalShippingIcon fontSize="small" color={'primary'} />
+              </HtmlTooltip>
+            }
+            {row?.original?.warehouseId && row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
+              <HtmlTooltip title="This asset will be shipped from different facility">
+                <IconButton size="small">
+                  <HelpIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            {row?.original?.isReplaced && (
+              <HtmlTooltip title={`This Asset has been Replaced by ${row?.original?.replaceAsset} (Due to following reason-"${row?.original?.replaceReason}")`}   >
+                <InfoIcon fontSize="small" color={'primary'} />
+              </HtmlTooltip>
+            )}
+          </div>
+        )
+      },
+      {
+        accessor: 'assetNumber',
+        Header: 'Details',
+        disabled: true,
+        Cell: ({ row }) => (
+          <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate">{row?.original?.assetNumber}</p>
             <IconButton
               size="small"
@@ -553,13 +580,6 @@ const ReceivingTicket = ({
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
-            {row?.original?.warehouseId && row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
-              <HtmlTooltip title="This asset will be shipped from different facility">
-                <IconButton size="small">
-                  <HelpIcon fontSize="small" color="primary" />
-                </IconButton>
-              </HtmlTooltip>
-            )}
             {row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0 && (
               <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
                 <IconButton
@@ -573,13 +593,6 @@ const ReceivingTicket = ({
                 >
                   <InfoIcon fontSize="small" color={'primary'} />
                 </IconButton>
-              </HtmlTooltip>
-            )}
-            {row?.original?.isReplaced && (
-              <HtmlTooltip
-                title={`This Asset has been Replaced by ${row?.original?.replaceAsset} (Due to following reason-"${row?.original?.replaceReason}")`}
-              >
-                <InfoIcon fontSize="small" color={'primary'} />
               </HtmlTooltip>
             )}
             {row?.original?.isRepairJob && (
