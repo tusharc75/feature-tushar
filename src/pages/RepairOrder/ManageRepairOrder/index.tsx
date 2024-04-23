@@ -17,7 +17,8 @@ import {
   yupSchema,
   repairOrder,
   REPAIR_ORDER_TYPE,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  sidebarResource
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -129,11 +130,15 @@ const ManageRepairOrder = ({
             initialData['type'] = REPAIR_ORDER_TYPE.internal;
           }
         }
-        if(referenceType === 'workOrderPlanning'){
-          if (referenceData?.warehouse) {
+        if (referenceType === sidebarResource.workOrderPlanning) {
+          if (referenceData) {
+            for (const key in referenceData) {
+              if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+                initialData[key] = referenceData[key];
+              }
+            }
             fieldsDataForCreate?.forEach((e) => {
               if (e.fieldName === 'warehouse') {
-                initialData['warehouse'] = referenceData?.warehouse;
                 e.disableOnEdit = true;
                 e.isUneditable = true;
               }
