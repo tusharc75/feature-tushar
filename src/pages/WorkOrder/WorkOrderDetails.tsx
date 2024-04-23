@@ -390,6 +390,7 @@ const WorkOrderDetails = () => {
     {
       id: 'Close',
       type: 'button',
+      ripple: true,
       isVisible: Boolean(allowedToEdit && workOrderData?.canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed),
       onClick: () => updateJobStatus(WORK_ORDER_STATUS.completed),
       iconForMobile: <FaDoorClosed />,
@@ -823,7 +824,7 @@ const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponen
   };
 
   const menuItems = useMemo(() => {
-    return buttonOptions.filter((b) => b.type === 'menuItem');
+    return buttonOptions.filter((b) => b.type === 'menuItem' && b.isVisible);
   }, [buttonOptions]);
 
   const buttonItems = useMemo(() => {
@@ -842,17 +843,19 @@ const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponen
       {otherItems.map((item) => (
         <Fragment key={item.id}>{renderComponent(item)}</Fragment>
       ))}
-      <Button
-        variant={'outlined'}
-        color="default"
-        size="small"
-        className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
-        onClick={openActions}
-        aria-controls="action-menu"
-        endIcon={isMobile ? null : <ExpandMore />}
-      >
-        {isMobile ? <FaCircleChevronDown size={20} /> : <>Actions </>}
-      </Button>
+      {menuItems.length > 0 && (
+        <Button
+          variant={'outlined'}
+          color="default"
+          size="small"
+          className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
+          onClick={openActions}
+          aria-controls="action-menu"
+          endIcon={isMobile ? null : <ExpandMore />}
+        >
+          {isMobile ? <FaCircleChevronDown size={20} /> : <>Actions </>}
+        </Button>
+      )}
       <Menu
         anchorEl={actionAnchor}
         keepMounted
