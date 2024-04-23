@@ -9,13 +9,13 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
-import { camelCase, kebabCase } from 'lodash';
+import { camelCase, isArray, kebabCase } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
 import ManageDynamicForm from '../../ManageDynamicForm';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen = false }) => {
+const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen = false, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -32,6 +32,8 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
+  const [linkResourceFieldType, setLinkResourceFieldType] = useState(null);
+
   useEffect(() => {
     fetchColumn();
   }, [step]);
@@ -41,62 +43,59 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen
       const {
         data: { data }
       } = await axiosInstance().get(`/field?resource=${step?.linkResourceName}`);
-      const newColumns = generateColumns(
-        camelCase(step?.linkResourceName),
-        data?.filter((d) => d?.fieldData?.fieldName !== step?.linkResourceField),
-        `/${kebabCase(step?.linkResourceName)}/detail`,
-        false
-      );
+      setLinkResourceFieldType(data?.find((d) => d?.fieldData?.fieldName === step?.linkResourceField)?.fieldData?.type)
+      const newColumns = generateColumns(camelCase(step?.linkResourceName),
+        data?.filter((d) => d?.fieldData?.fieldName !== step?.linkResourceField), `/${kebabCase(step?.linkResourceName)}/detail`, false);
       setColumns([
         ...newColumns,
         ...(step?.readOnly
           ? []
           : [
-              {
-                accessor: 'action',
-                Header: 'Actions',
-                minWidth: 100,
-                width: 110,
-                sticky: 'right',
-                disableFilters: true,
-                disableSortBy: true,
-                canDrag: false,
-                Cell: ({ row }) => (
-                  <>
-                    <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                      <span>
-                        <IconButton
-                          size="small"
-                          aria-label="Edit"
-                          disabled={allowedToEdit ? false : true}
-                          onClick={() => {
-                            setOpen({ open: true, id: row?.original?._id });
-                          }}
-                        >
-                          <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                        </IconButton>
-                      </span>
-                    </HtmlTooltip>
+            {
+              accessor: 'action',
+              Header: 'Actions',
+              minWidth: 100,
+              width: 110,
+              sticky: 'right',
+              disableFilters: true,
+              disableSortBy: true,
+              canDrag: false,
+              Cell: ({ row }) => (
+                <>
+                  <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="Edit"
+                        disabled={allowedToEdit ? false : true}
+                        onClick={() => {
+                          setOpen({ open: true, id: row?.original?._id });
+                        }}
+                      >
+                        <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
 
-                    <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
-                      <span>
-                        <IconButton
-                          size="small"
-                          aria-label="Delete"
-                          disabled={allowedToEdit ? false : true}
-                          onClick={() => {
-                            setDeleteRecord(row?.original);
-                            setShowDeleteConfirmBox(true);
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
-                        </IconButton>
-                      </span>
-                    </HtmlTooltip>
-                  </>
-                )
-              }
-            ])
+                  <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="Delete"
+                        disabled={allowedToEdit ? false : true}
+                        onClick={() => {
+                          setDeleteRecord(row?.original);
+                          setShowDeleteConfirmBox(true);
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                </>
+              )
+            }
+          ])
       ]);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -203,6 +202,8 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen
     );
   };
 
+  console.log(linkResourceFieldType)
+
   return (
     <>
       {allowedToEdit && !step?.readOnly && (
@@ -257,7 +258,10 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen
             fetchData();
             setOpen({ open: false, id: null });
           }}
-          referenceData={{ [step?.linkResourceField]: data?._id }}
+          referenceData={{
+            [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id)
+              ? [data?._id] : data?._id, ...(referenceData || {})
+          }}
         />
       )}
 
