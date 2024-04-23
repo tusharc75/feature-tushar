@@ -185,7 +185,6 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     dispatch({ type: 'selection', selectedRecords: [] });
 
     const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=service`);
-    const rentalResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material/rental-data`)
     const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
     let costData = costResponse?.data?.data;
     
@@ -193,7 +192,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       return { ...e, type: MATERIAL_TYPE.manualEntry };
     });
 
-    const data = [...response?.data?.data?.material,...rentalResponse?.data?.data?.material, ...costData];
+    const data = [...response?.data?.data?.material, ...costData];
 
     data.forEach((parent, i) => {
       parent.index = i + 1;
