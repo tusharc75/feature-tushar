@@ -334,7 +334,7 @@ const WorkOrderDetails = () => {
   const toolbarButtons: ToolbarComponents<ButtonType | MenuItemProps>[] = [
     {
       id: `Repair Job`,
-      type: 'button',
+      type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
         allowedToEdit &&
@@ -343,33 +343,33 @@ const WorkOrderDetails = () => {
         !workOrderData?.currentRepairJob
           ? true
           : false,
-      name: `Create ${routes?.repairJob.title}`,
+      children: `Create ${routes?.repairJob.title}`,
       tooltip: `Create ${routes?.repairJob.title}`,
-      onClick: () => setShowManageRepairJobDialog({ open: true }),
-      iconForMobile: <RiFileShredFill />
+      onClick: () => setShowManageRepairJobDialog({ open: true })
+      // iconForMobile: <RiFileShredFill />
     },
     {
+      type: 'menuItem',
       id: `Repair Job Receive`,
-      type: 'button',
       isVisible:
         permissions?.repairJob?.isUpdate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder && workOrderData?.currentRepairJob
           ? true
           : false,
-      name: `Receive Asset From Supplier`,
+      children: `Receive Asset From Supplier`,
       tooltip: `Receive Asset From Supplier`,
-      onClick: () => setRepairJobReceiveConfirmation(true),
-      iconForMobile: <RiFileShredFill />
+      onClick: () => setRepairJobReceiveConfirmation(true)
+      // iconForMobile: <RiFileShredFill />
     },
     {
       id: 'Scrap Asset',
-      type: 'button',
+      type: 'menuItem',
       isVisible: Boolean(
         workOrderData?.serializedAsset && allowedToEdit && !workOrderData?.currentRepairJob && workOrderData?.status !== WORK_ORDER_STATUS.completed
       ),
-      name: `${ASSET_STATUS.scrap} Asset`,
+      children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
-      onClick: () => setShowConfirmBoxScrap(true),
-      iconForMobile: <RiFileShredFill />
+      onClick: () => setShowConfirmBoxScrap(true)
+      // iconForMobile: <RiFileShredFill />
     },
     {
       id: 'In-Progress',
