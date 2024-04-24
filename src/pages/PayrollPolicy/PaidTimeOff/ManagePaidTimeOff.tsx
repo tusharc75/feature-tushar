@@ -13,7 +13,6 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
 import {
@@ -21,7 +20,6 @@ import {
   CustomDialogTransition,
   getObjKeys,
   getObjKeysWithValues,
-  setFieldsInAscendingOrder,
   yupSchema
 } from 'src/constants/helpers';
 

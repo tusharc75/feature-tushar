@@ -1,5 +1,5 @@
-import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { FC, useEffect, useState, Fragment, useRef } from 'react';
+import { Button, Dialog, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -9,8 +9,6 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../../components/Helpers/CustomButton';
-import { FaDiceOne } from 'react-icons/fa';
-import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';

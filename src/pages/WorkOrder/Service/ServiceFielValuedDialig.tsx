@@ -1,16 +1,14 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaDiceOne } from 'react-icons/fa';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import FormTypes from 'src/components/Helpers/FormTypes';
-import { CustomDialogTransition, setFieldsInAscendingOrder, workOrder, yupSchema } from 'src/constants/helpers';
+import { CustomDialogTransition, workOrder, yupSchema } from 'src/constants/helpers';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import InputField from 'src/components/Helpers/InputField';
 
