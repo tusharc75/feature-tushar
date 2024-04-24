@@ -68,11 +68,11 @@ const SerialNumber = ({ product, warehouse }) => {
       )
     },
     {
-      accessor: 'active',
+      accessor: 'status',
       Header: 'Status',
       Cell: ({ row }) => (
-        <h5 className="text-truncate" title={row?.original?.warehouse}>
-          {row?.original?.active ? 'Available' : 'Unavailable'}
+        <h5 className="text-truncate" title={row?.original?.status}>
+          {row?.original?.status}
         </h5>
       )
     },
