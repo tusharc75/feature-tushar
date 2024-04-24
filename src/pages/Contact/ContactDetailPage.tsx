@@ -619,9 +619,9 @@ const ContactDetailsPage = (props) => {
                 }}
                 textColor="primary"
               >
-                <CustomTab index={0} label={'Details'} />
-                <CustomTab index={1} label={'Org Charts'} />
-                {contactResource === 'customerContact' && permissions?.productInventory && <CustomTab index={2} label={'Plants'} />}
+                <CustomTab value={0} label={'Details'} />
+                <CustomTab value={1} label={'Org Charts'} />
+                {contactResource === 'customerContact' && permissions?.productInventory && <CustomTab value={2} label={'Plants'} />}
               </CustomTabs>
               <Box hidden={currentTabIndex !== 0}>
                 {showAtLast ? (

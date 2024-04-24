@@ -71,13 +71,13 @@ const DealDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0}>
+          <CustomTab value={0}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Header
           </CustomTab>
           {/* <CustomTab
-                        index={1}
+                        value={1}
                     ><BiFoodMenu className="mr-1" fontSize="inherit" /> Material</CustomTab> */}
-          <CustomTab index={2}>
+          <CustomTab value={2}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> {routes.units.title}
           </CustomTab>
         </CustomTabs>

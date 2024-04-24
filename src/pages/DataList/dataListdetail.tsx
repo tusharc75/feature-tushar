@@ -49,7 +49,7 @@ const DataListDetail = () => {
       </Box>
       <Box className={'detail-container-v1'}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0}>
+          <CustomTab value={0}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Data List Items
           </CustomTab>
         </CustomTabs>

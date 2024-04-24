@@ -250,16 +250,16 @@ const ProductDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange} aria-label="Product Details Tab" variant="scrollable" scrollButtons="auto">
-          <CustomTab className={'tabLayout'} label={'Details'} index={0} />
-          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab label={'Child Products'} index={1} />}
-          {permissions?.serviceMaster && <CustomTab index={2} label={'Services/Consumables'} />}
-          {permissions?.serviceMaster && <CustomTab index={3} label={'Service Packages'} />}
-          {permissions?.repairType && <CustomTab index={4} label={'Repair Types'} />}
-          {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <CustomTab index={5} label={'Product Images'} />}
-          {permissions?.packages && <CustomTab index={6} label={'Product Packages'} />}
-          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab index={7} label={'Parent Products'} />}
-          {permissions?.productInventory?.isRead && <CustomTab index={8} label={'History'} />}
-          {productData?.digitalProduct && <CustomTab index={9} label={'Digital'} />}
+          <CustomTab value={0} className={'tabLayout'} label={'Details'} />
+          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={1} label={'Child Products'} />}
+          {permissions?.serviceMaster && <CustomTab value={2} label={'Services/Consumables'} />}
+          {permissions?.serviceMaster && <CustomTab value={3} label={'Service Packages'} />}
+          {permissions?.repairType && <CustomTab value={4} label={'Repair Types'} />}
+          {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <CustomTab value={5} label={'Product Images'} />}
+          {permissions?.packages && <CustomTab value={6} label={'Product Packages'} />}
+          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={7} label={'Parent Products'} />}
+          {permissions?.productInventory?.isRead && <CustomTab value={8} label={'History'} />}
+          {productData?.digitalProduct && <CustomTab value={9} label={'Digital'} />}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -408,11 +408,7 @@ const ProductDetailsPage = () => {
                                                   }
                                                 }}
                                               >
-                                                {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? (
-                                                  <ExpandLess />
-                                                ) : (
-                                                  <ExpandMore />
-                                                )}
+                                                {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? <ExpandLess /> : <ExpandMore />}
                                               </IconButton>
                                             </Box>
                                             <Box ml={1} display="flex" alignItems="center">
@@ -470,9 +466,8 @@ const ProductDetailsPage = () => {
                                                     size="small"
                                                     onClick={() => {
                                                       history.push(`${routes.serializedAsset.path}`, {
-                                                        warehouse: productWarehouseData.find(
-                                                          (d) => d?.warehouse?.optionValue === selectedWarehouse
-                                                        ).warehouse,
+                                                        warehouse: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse)
+                                                          .warehouse,
                                                         product: { id: id, name: headingLabel }
                                                       });
                                                     }}

@@ -70,16 +70,17 @@ const PadMasterDetail = () => {
   };
 
   const getAssetsOnPad = () => {
-    axiosInstance().get(`${routes?.padMaster?.path}/${id}/asset-in-use`)
+    axiosInstance()
+      .get(`${routes?.padMaster?.path}/${id}/asset-in-use`)
       .then(({ data: { data } }) => {
         if (data?.length) {
-          setAssets(data)
+          setAssets(data);
         }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const handleDelete = () => {
     if (id) {
@@ -149,14 +150,8 @@ const PadMasterDetail = () => {
             setCurrentTabIndex(newValue);
           }}
         >
-          <CustomTab index={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0">
-            Header
-          </CustomTab>
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab index={1} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
-              Associations
-            </CustomTab>
-          )}
+          <CustomTab value={0}>Header</CustomTab>
+          {resourceData && resourceData?.steps?.length && <CustomTab value={1}>Associations</CustomTab>}
         </CustomTabs>
         <TabPanel value={currentTabIndex} index={0}>
           {loading || !fields?.length ? (

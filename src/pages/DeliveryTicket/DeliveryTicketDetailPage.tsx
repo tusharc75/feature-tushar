@@ -447,8 +447,8 @@ export default function DeliveryTicketDetail(props) {
       deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new
         ? 'Sign-off - Dispatch'
         : deliveryTicketData?.status === 'In-Transit'
-          ? 'Sign-off - Delivery'
-          : '';
+        ? 'Sign-off - Delivery'
+        : '';
 
     const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
@@ -634,19 +634,19 @@ export default function DeliveryTicketDetail(props) {
         </Box>
         <Box className={`detail-container-v1`}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-            <CustomTab index={0} className={'tabLayout'}>
+            <CustomTab value={0}>
               <FaWpforms className="mr-1" fontSize="inherit" /> Header
             </CustomTab>
             {permissions?.serializedAsset?.isRead && (
-              <CustomTab index={1} className={'tabLayout'}>
+              <CustomTab value={1}>
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
               </CustomTab>
             )}
-            <CustomTab index={2} className={'tabLayout'}>
+            <CustomTab value={2}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
             </CustomTab>
             {deliveryTicketData?.additionalCost?.length > 0 && (
-              <CustomTab index={3} className={'tabLayout'}>
+              <CustomTab value={3}>
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Add-On
               </CustomTab>
             )}

@@ -188,7 +188,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
               >
                 {entities.map((c, i) =>
                   currentTabIndex === i ? (
-                    <CustomTab key={i} index={i}>
+                    <CustomTab key={i} value={i}>
                       {c?.entity?.entityName}
                       {permissions?.user?.isDelete && !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
                         <IconButton aria-label="delete" size="small" className="ml-1" onClick={() => handleDeleteEntity()}>
@@ -197,7 +197,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       ) : null}
                     </CustomTab>
                   ) : (
-                    <CustomTab key={i} index={i} label={c?.entity?.entityName} />
+                    <CustomTab key={i} value={i} label={c?.entity?.entityName} />
                   )
                 )}
               </CustomTabs>
@@ -265,8 +265,8 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       field={unionRoleData ? unionRoleData.field : []}
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
-                      setField={() => { }}
-                      setResource={() => { }}
+                      setField={() => {}}
+                      setResource={() => {}}
                     />
                   </BoxWithBorder>
                 </Grid>

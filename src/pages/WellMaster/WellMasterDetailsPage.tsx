@@ -113,8 +113,8 @@ const WellMasterDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab label={'Details'} index={0} />
-          {permissions?.wellNumber?.isRead && <CustomTab label={'Well Number'} index={1} />}
+          <CustomTab label={'Details'} value={0} />
+          {permissions?.wellNumber?.isRead && <CustomTab label={'Well Number'} value={1} />}
         </CustomTabs>
         {tabValue === 0 && (
           <Box>

@@ -468,47 +468,15 @@ const SerializedAssetDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} value={0}>
-            Details
-          </CustomTab>
-          {deviceTemplate && (
-            <CustomTab index={1} value={1}>
-              Current
-            </CustomTab>
-          )}
-          {deviceTemplate && (
-            <CustomTab index={2} value={2}>
-              Performance Analysis
-            </CustomTab>
-          )}
-          {deviceTemplate && (
-            <CustomTab index={3} value={3}>
-              Alarms
-            </CustomTab>
-          )}
-          {deviceTemplate && (
-            <CustomTab index={4} value={4}>
-              Status
-            </CustomTab>
-          )}
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab index={5} value={5}>
-              Associations
-            </CustomTab>
-          )}
-          <CustomTab index={6} value={6}>
-            History
-          </CustomTab>
-          {user?.user?.brandPolicy?.serializedAssetCertification && (
-            <CustomTab index={7} value={7}>
-              Certification History
-            </CustomTab>
-          )}
-          {user?.user?.brandPolicy?.serializedAssetDepreciation && (
-            <CustomTab index={8} value={8}>
-              Depreciation History
-            </CustomTab>
-          )}
+          <CustomTab value={0}>Details</CustomTab>
+          {deviceTemplate && <CustomTab value={1}>Current</CustomTab>}
+          {deviceTemplate && <CustomTab value={2}>Performance Analysis</CustomTab>}
+          {deviceTemplate && <CustomTab value={3}>Alarms</CustomTab>}
+          {deviceTemplate && <CustomTab value={4}>Status</CustomTab>}
+          {resourceData && resourceData?.steps?.length && <CustomTab value={5}>Associations</CustomTab>}
+          <CustomTab value={6}>History</CustomTab>
+          {user?.user?.brandPolicy?.serializedAssetCertification && <CustomTab value={7}>Certification History</CustomTab>}
+          {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={8}>Depreciation History</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {assetDetails && <DetailsPageHeader mainPoints={mainPoints} />}

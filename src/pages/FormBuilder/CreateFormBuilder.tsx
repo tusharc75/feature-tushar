@@ -196,7 +196,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => { });
+          .catch((error) => {});
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -434,10 +434,10 @@ const CreateFormBuilder = () => {
               </Box>
               <Box>
                 <Tabs value={tabValue} onChange={handleMainTabChange}>
-                  <CustomTab index={0} id="fields-tab">
+                  <CustomTab value={0} id="fields-tab">
                     Fields
                   </CustomTab>
-                  <CustomTab index={1} id="tab-2">
+                  <CustomTab value={1} id="tab-2">
                     Steps
                   </CustomTab>
                 </Tabs>

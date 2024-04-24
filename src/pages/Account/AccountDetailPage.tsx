@@ -804,14 +804,14 @@ export default function AccountDetailPage(props) {
         ) : (
           <>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab index={0} label={'Details'} />
-              <CustomTab index={1} label={'Account Hierarchy'} id="a11y-tab-1" className="tabLayout" />
-              <CustomTab index={2} label={'OM-Neurons'} />
+              <CustomTab value={0} label={'Details'} />
+              <CustomTab value={1} label={'Account Hierarchy'} id="a11y-tab-1" className="tabLayout" />
+              <CustomTab value={2} label={'OM-Neurons'} />
               {accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification && (
-                <CustomTab index={3} label={'Supplier View'} />
+                <CustomTab value={3} label={'Supplier View'} />
               )}
-              {accountResource === 'customerAccount' && permissions?.productInventory && <CustomTab index={4} label={routes.warehouse.title} />}
-              {resourceData && resourceData?.steps?.length && <CustomTab index={5} label={'Associations'} />}
+              {accountResource === 'customerAccount' && permissions?.productInventory && <CustomTab value={4} label={routes.warehouse.title} />}
+              {resourceData && resourceData?.steps?.length && <CustomTab value={5} label={'Associations'} />}
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Box>

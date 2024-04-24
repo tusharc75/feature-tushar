@@ -134,8 +134,8 @@ const ZoneDetailPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab label={'Details'} index={0} />
-          <CustomTab label={'Zip Code'} index={1} />
+          <CustomTab label={'Details'} value={0} />
+          <CustomTab label={'Zip Code'} value={1} />
         </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>

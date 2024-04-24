@@ -120,7 +120,7 @@ const creditMemoDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab label={'Details'} index={0} />
+          <CustomTab value={0} label={'Details'} />
         </CustomTabs>
         {tabValue === 0 && (
           <Box>

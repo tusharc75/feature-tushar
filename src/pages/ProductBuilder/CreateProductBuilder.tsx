@@ -142,9 +142,9 @@ const CreateProductBuilder = () => {
                 </Box>
                 <Box p={1}>
                   <CustomTabs value={tabIndex} onChange={handleChange}>
-                    <CustomTab index={0} label={'Product'} />
-                    <CustomTab index={1} label={'Cost'} />
-                    {/* <CustomTab index={2} label="All" /> */}
+                    <CustomTab value={0} label={'Product'} />
+                    <CustomTab value={1} label={'Cost'} />
+                    {/* <CustomTab value={2} label="All" /> */}
                   </CustomTabs>
                 </Box>
                 {tabIndex === 0 && (

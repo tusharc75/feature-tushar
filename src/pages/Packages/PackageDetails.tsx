@@ -137,18 +137,18 @@ const PackageDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0}>
+          <CustomTab value={0}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Header
           </CustomTab>
-          <CustomTab index={1}>
+          <CustomTab value={1}>
             <MdMiscellaneousServices className="mr-1" fontSize="inherit" />
             individual Services
           </CustomTab>
-          <CustomTab index={2}>
+          <CustomTab value={2}>
             <RiShoppingBag3Fill className="mr-1" fontSize="inherit" />
             individual Products
           </CustomTab>
-          <CustomTab index={3}>
+          <CustomTab value={3}>
             <BiPackage className="mr-1" fontSize="inherit" /> Sub Packages
           </CustomTab>
         </CustomTabs>

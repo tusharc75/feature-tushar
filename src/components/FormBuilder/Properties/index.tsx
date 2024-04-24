@@ -533,8 +533,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
                   <Box pt={1}>
                     <CustomTabs value={tabValue} onChange={handleTabChange}>
-                      <CustomTab label={'General'} index={0} />
-                      <CustomTab label={'Setting'} index={1} />
+                      <CustomTab value={0} label={'General'} />
+                      <CustomTab value={1} label={'Setting'} />
                     </CustomTabs>
                     <TabPanel value={tabValue} index={0}>
                       <General

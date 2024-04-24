@@ -212,17 +212,17 @@ const SubleaseDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0}>
+          <CustomTab value={0}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Header
           </CustomTab>
-          <CustomTab index={1}>
+          <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
-          <CustomTab index={2}>
+          <CustomTab value={2}>
             <GiAbstract055 className="mr-1" fontSize="inherit" />
             {routes.deliveryTicket.title}
           </CustomTab>
-          <CustomTab index={3}>
+          <CustomTab value={3}>
             <GiAbstract055 className="mr-1" fontSize="inherit" />
             Invoices
           </CustomTab>

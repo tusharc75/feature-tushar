@@ -83,12 +83,12 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
         <CustomTabs value={value} onChange={handleChange}>
           {tabs?.map((row, index) => (
             <CustomTab
+              value={index}
               style={{
                 background: value === index ? 'white' : '',
                 color: value === index ? '#163340' : '#163340'
               }}
               label={row}
-              index={index}
             />
           ))}
         </CustomTabs>
