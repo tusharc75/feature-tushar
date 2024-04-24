@@ -79,7 +79,7 @@ function OpportunityDetailsPage() {
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' });
   const [resourceData, setResourceData] = useState(null);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const parsed = queryString.parse(history.location.search);
 
   const [messageDialog, setMessageDialog] = useState({

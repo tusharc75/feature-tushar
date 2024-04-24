@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -71,8 +71,8 @@ const BulkAssetCreationDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${bulkAssetCreation.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   useEffect(() => {

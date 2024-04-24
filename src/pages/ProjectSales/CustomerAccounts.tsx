@@ -123,7 +123,7 @@ const CustomerAccounts = (props) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const [expandedParent, setExpandedParent] = useState(true);
   const [expandCustomerContact, setExpandCustomerContact] = useState(false);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [collaborators, setCollaborators] = useState([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showContactCreateDialog, setShowContactCreateDialog] = useState(false);

@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState, Fragment } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Box, Grid, Button, IconButton, Tooltip, Tabs, Tab } from '@material-ui/core';
+import { Box, Grid, Button, IconButton, Tooltip } from '@material-ui/core';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import queryString from 'query-string';
 import { deliveryTicket, getObjKeysWithValues, dateTimeFormat, ACTIVITY_RESOURCE, ASSET_STATUS, rentalManagement } from '../../constants/helpers';
@@ -447,8 +447,8 @@ export default function DeliveryTicketDetail(props) {
       deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new
         ? 'Sign-off - Dispatch'
         : deliveryTicketData?.status === 'In-Transit'
-        ? 'Sign-off - Delivery'
-        : '';
+          ? 'Sign-off - Delivery'
+          : '';
 
     const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
