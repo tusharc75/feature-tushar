@@ -224,8 +224,6 @@ import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
 import IotDataPoints from './pages/IotDataPoints';
 import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
 import IotChart from './pages/IotChart';
-import AccountsReceivable from './pages/AccountsReceivable';
-import AccountsReceivableDetail from './pages/AccountsReceivable/AccountsReceivableDetail';
 import DeviceTemplates from './pages/DeviceTemplates';
 import DeviceTemplatesDetails from './pages/DeviceTemplates/DeviceTemplatesDetails';
 import WorkStations from './pages/WorkStations';
@@ -234,8 +232,6 @@ import DeviceTemplatesAlert from './pages/DeviceTemplatesAlert';
 import DeviceTemplateAlertDetail from './pages/DeviceTemplatesAlert/DeviceTemplateAlertDetail';
 import ChartOfAccount from './pages/ChartOfAccount';
 import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
-import Flash from './pages/Flash';
-import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
 import CreditMemo from './pages/CreditMemo';
 import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
 import GenerateInvoice from './pages/GenerateInvoice';
@@ -779,12 +775,6 @@ function App() {
             <PrivateRoute exact path={`${routes.posProductDetail.path}/:id/:warehouseId`}>
               <PosProductDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.accountsReceivable.path}`}>
-              <AccountsReceivable />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.accountsReceivable.path}/:id`}>
-              <AccountsReceivableDetail />
-            </PrivateRoute>
             <PrivateRoute exact path={'/dashboard-master/:id'}>
               <DashboardBuilder />
             </PrivateRoute>
@@ -1075,12 +1065,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.chartOfAccountDetail.path}/:id`}>
               <ChartOfAccountDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.flash.path}`}>
-              <Flash />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.flashDetail.path}/:id`}>
-              <FlashDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.creditMemo.path}`}>
               <CreditMemo />
