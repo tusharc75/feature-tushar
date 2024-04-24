@@ -446,17 +446,15 @@ const CustomReactTable = ({
         if (ws[key].hasOwnProperty('l')) {
           delete ws[key].l; // this will remove link styles
 
-          /* 
           //! this section will style links
-          const data = ws[key];
-           data.l.Target = `${origin}${data.l.Target}`;
-           ws[key].s = {
-             font: {
-               name: 'Calibri',
-               color: { rgb: '171db1' }
-            }
-           };
-           */
+          // const data = ws[key];
+          //  data.l.Target = `${origin}${data.l.Target}`;
+          //  ws[key].s = {
+          //    font: {
+          //      name: 'Calibri',
+          //      color: { rgb: '171db1' }
+          //   }
+          //  };
         }
       }
 
