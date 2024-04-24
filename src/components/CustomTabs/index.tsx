@@ -42,6 +42,7 @@ interface CustomTabProps extends TabProps {
   index: number;
   primaryColor?: boolean;
 }
+
 const CustomTab: React.FC<CustomTabProps> = ({ children, label, className = '', index = 0, primaryColor = false, ...props }) => {
   return (
     <Tab
@@ -50,6 +51,8 @@ const CustomTab: React.FC<CustomTabProps> = ({ children, label, className = '', 
           {children || label}
         </div>
       }
+      value={index}
+      tabIndex={index}
       className={`tabLayout ${className} ${primaryColor ? 'primaryColoredTab' : ''}`}
       id={`main-tab-${index}`}
       aria-controls={`main-tabpanel-${index}`}
