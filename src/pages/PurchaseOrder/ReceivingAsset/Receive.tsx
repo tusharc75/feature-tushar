@@ -148,9 +148,6 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
           errors.inventoryQuantity = 'should be greater';
           errors.assetQuantity = 'should be greater';
         }
-        if (tempProduct && parseInt(d.inventoryQuantity) < d.serialNumber?.length) {
-          errors.serialNumber = 'should be greater';
-        }
         if (tempProduct && !d.warehouse) {
           errors.warehouse = 'Plant is required';
         }
@@ -159,8 +156,13 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
             errors.storageLocation = 'Storage Location is required';
           }
         }
-        if(user?.user?.brandPolicy?.productInventorySerialNumberRequired  && parseInt(d.inventoryQuantity) !== d.serialNumber?.length){
-          errors.serialNumber = 'Please enter required serial number';
+        if (parseInt(d.inventoryQuantity)) {
+          if (d.serialNumber?.length > parseInt(d.inventoryQuantity)) {
+            errors['serialNumber'] = `Please enter serial numbers same as quantity`;
+          }
+          if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && parseInt(d.inventoryQuantity) !== d.serialNumber?.length) {
+            errors['serialNumber'] = `Please enter serial numbers same as quantity`;
+          }
         }
       });
     }
@@ -270,7 +272,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
               }))
             }}
             enableReinitialize={true}
-            onSubmit={() => {}}
+            onSubmit={() => { }}
           >
             {({ values, setFieldValue, errors }) => (
               <>
@@ -475,9 +477,8 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                                 name="serialNumber"
                                                 label={'Serial Numbers'}
                                                 error={validate([data])?.serialNumber}
-                                                helperText={
-                                                  validate([data]).serialNumber ? 'Serial numbers should be less then inventory quantity' : ''
-                                                }
+                                                helperText={validate([data]).serialNumber}
+                                                required={user?.user?.brandPolicy?.productInventorySerialNumberRequired ? true : false}
                                               />
                                             )}
                                           />
