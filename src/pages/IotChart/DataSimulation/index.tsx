@@ -11,9 +11,9 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
 import { useParams } from 'react-router-dom';
+import InputField from 'src/components/Helpers/InputField';
 
 const DataSimulationDialog = ({ onClose }) => {
 
@@ -22,7 +22,6 @@ const DataSimulationDialog = ({ onClose }) => {
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
-  const [formsData, setFormsData] = useState([]);
 
   const { assetId } = useParams();
 
@@ -63,10 +62,6 @@ const DataSimulationDialog = ({ onClose }) => {
       });
   };
 
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
-
   return (
     <Dialog
       maxWidth="md"
@@ -81,7 +76,7 @@ const DataSimulationDialog = ({ onClose }) => {
         }
       }}
     >
-      {formsData && formsData.length ? (
+      {initialData.fields.length ? (
         <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
@@ -99,43 +94,15 @@ const DataSimulationDialog = ({ onClose }) => {
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData.length > 0 &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content'}>
-                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {form.sectionFields.map((field, index2) => (
-                              <Grid key={index2} item xs={12} sm={6} md={6}>
-                                <FormTypes
-                                  {...field}
-                                  fieldData={field}
-                                  fields={initialData.fields}
-                                  values={values}
-                                  errors={errors}
-                                  touched={touched}
-                                  label={field.fieldLabel}
-                                  name={field.fieldName}
-                                  type={field.type}
-                                  options={field.option}
-                                  setFieldValue={(name, value) => {
-                                    setFieldValue(name, value);
-                                  }}
-                                  required={field.required}
-                                  fullWidth
-                                  isTooltip={field?.isTooltip || false}
-                                  tooltipMessage={field?.tooltipMessage}
-                                  size="small"
-                                />
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

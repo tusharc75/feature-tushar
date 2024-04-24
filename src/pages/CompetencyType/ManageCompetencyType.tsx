@@ -10,12 +10,12 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import routes from 'src/components/Helpers/Routes';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -28,7 +28,6 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -58,7 +57,6 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
               fields: fields,
               values: getObjKeysWithValues(tempData, fields)
             });
-            setFormsData(setFieldsInAscendingOrder(fields));
           })
           .catch((error) => {
             toastConfig.setToastConfig(error);
@@ -69,7 +67,6 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
           fields: fieldsDataForCreate,
           values: tempInitialData
         });
-        setFormsData(setFieldsInAscendingOrder(fieldsDataForCreate));
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -162,47 +159,15 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
               />
               <CustomDialogContent>
                 <Form>
-                  {formsData &&
-                    formsData.map((form, i) => {
-                      return (
-                        form.name && (
-                          <div key={i}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <FormTypes
-                                      {...field}
-                                      fieldData={field}
-                                      disabled={field.disabled}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                    />
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
-                      );
-                    })}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
