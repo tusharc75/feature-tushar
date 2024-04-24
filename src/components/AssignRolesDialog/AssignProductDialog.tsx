@@ -1,18 +1,18 @@
 import { Box, Dialog } from '@material-ui/core';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import CustomTabs, { CustomTab } from '../CustomTabs';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
-import axios, { CancelTokenSource } from 'axios';
 
 const AssignProductDialog = ({
   onSuccess,
@@ -214,13 +214,6 @@ const AssignProductDialog = ({
     dispatch({ type: 'update', data: rows });
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -252,8 +245,8 @@ const AssignProductDialog = ({
           {pricingCondition && (
             <Box>
               <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Products`} {...a11yProps(0)} />
-                <CustomTab className={'tabLayout'} value={1} index={1} label={'All Products'} {...a11yProps(1)} />
+                <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Products`} />
+                <CustomTab className={'tabLayout'} value={1} index={1} label={'All Products'} />
               </CustomTabs>
             </Box>
           )}
