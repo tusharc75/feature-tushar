@@ -25,6 +25,7 @@ import Consumables from './Consumables';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import AddCostDialog from './AddCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import AddRentalDataDialog from './AddRentalDataDialog';
 
 const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeStatus }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
@@ -42,9 +43,10 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [costFields, setCostFields] = useState([]);
+  const [assignRentalDataDialog,setAssignRentalDataDialog] = useState({open:false, type:''});
 
   const {
-    state: { permissions }
+    state: { user, permissions }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
@@ -97,8 +99,10 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                 <IconButton
                   size="small"
                   onClick={() => {
-                    if (row.original.type === 'service') {
+                    if (row.original.type === MATERIAL_TYPE.service) {
                       window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    }else if(row.original.type=== MATERIAL_TYPE.product){
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                     }
                   }}
                 >
@@ -192,8 +196,23 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
 
     data.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName || '' : parent.detail || '';
-      parent.description = `${parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription || '' : parent.description || ''}`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.manualEntry
+          ? parent.detail || ''
+          : ''
+      }`;
+      parent.description =
+        parent.type === MATERIAL_TYPE.service
+          ? parent?.serviceDetail?.serviceDescription || ''
+          : parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productDescription || ''
+          : parent.description || '';
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
       parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
@@ -236,6 +255,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
 
   const handleAdd = async (rows) => {
     setIsSubmitting(true);
+    const isRental = assignRentalDataDialog.open;
     var taxCodeData: any = null;
     if (fieldTicketData?.taxCode) {
       const {
@@ -248,29 +268,58 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       }
     }
     const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = MATERIAL_TYPE.service;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
-      element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
-      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      element.estimateJobDuration = 1;
-      if (calValues && calValues['estimateJobDuration']) {
-        element.estimateJobDuration = calValues['estimateJobDuration'];
-      }
-      if (calValues && calValues['finalQty']) {
-        element.finalQty = calValues['finalQty'];
-      }
-      if (taxCodeData) {
-        element.taxCode = taxCodeData?.optionValue;
-        element.taxPercentage = taxCodeData?.taxRate || 0;
-      }
-      material.push(element);
-    });
+    if(isRental){
+      const currency = fieldTicketData?.currency?.toLowerCase();
+      rows?.forEach((d)=> {
+        const element: any = {};
+        element.materialId = d.materialId;
+        element.type = d.type;
+        element.unit = d.unit ? d.unit : '';
+        element.pricingMethod = d.pricingMethod ? d.pricingMethod : '';
+        element.qty = d.qty ? parseFloat(d.qty) : 1;
+        element.estimateStartDate = d?.estimateStartDate ? d?.estimateStartDate : new Date();
+        element.estimateEndDate = d?.estimateEndDate ? d?.estimateEndDate : new Date();
+        element.estimateJobDuration = d?.estimateJobDuration;
+        element['tax_' + currency] = d['tax_' + currency] || 0;
+        element['price_' + currency] = d['price_' + currency] || 0;
+        element.taxPercentage = d.taxPercentage;
+        element.discountPercentage = d.discountPercentage;
+        element['totalPrice_' + currency] = d['totalPrice_' + currency] || 0;
+        element['finalPrice_' + currency] = d['finalPrice_' + currency] || 0;
+        element.isRental = true;
+        if (taxCodeData) {
+          element.taxCode = taxCodeData?.optionValue;
+          element.taxPercentage = taxCodeData?.taxRate || 0;
+        }
+        material.push(element);
+      })
+    }else{
+      rows.forEach((d) => {
+        const element: any = {};
+        element.materialId = d._id;
+        element.type = MATERIAL_TYPE.service;
+        element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+        element.qty = d.qty ? parseFloat(d.qty) : 1;
+        element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
+        element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
+        element.isRental = false;
+        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+        element.estimateJobDuration = 1;
+        if (calValues && calValues['estimateJobDuration']) {
+          element.estimateJobDuration = calValues['estimateJobDuration'];
+        }
+        if (calValues && calValues['finalQty']) {
+          element.finalQty = calValues['finalQty'];
+        }
+        if (taxCodeData) {
+          element.taxCode = taxCodeData?.optionValue;
+          element.taxPercentage = taxCodeData?.taxRate || 0;
+        }
+        material.push(element);
+      });
+    }
+  
     if (fieldTicketData?.pricingCondition?.optionValue) {
       const priceData: any = await calculatePrice(fieldTicketData, material);
       AddMaterial(
@@ -313,6 +362,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         }
         fetchMaterial();
         setServiceDialog({ open: false, type: '' });
+        setAssignRentalDataDialog({open: false,type:''});
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -486,6 +536,24 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             Add Manual Entry
           </MenuItem>
         )}
+        {fieldTicketData?.rentalJob && user?.user?.brandPolicy?.fieldTicketRentalMaterialAdd && (
+          <MenuItem
+            onClick={() => {
+              setAssignRentalDataDialog({open:true,type:'asset'});
+            }}
+          >
+            Add Rental Asset
+          </MenuItem>
+        )}
+        {fieldTicketData?.rentalJob && user?.user?.brandPolicy?.fieldTicketRentalMaterialAdd && (
+          <MenuItem
+          onClick={() => {
+            setAssignRentalDataDialog({open:true,type:MATERIAL_TYPE.product});
+          }}
+          >
+            Add Rental Consumable
+          </MenuItem>
+        )}
       </>
     );
   };
@@ -636,6 +704,18 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           showSaveAndNext={showCostDialog.showSaveAndNext}
           loadingEdit={isUpdating}
         />
+      )}
+      {assignRentalDataDialog?.open && (
+         <AddRentalDataDialog 
+          type={assignRentalDataDialog?.type}
+          onClose= {()=>{
+            setAssignRentalDataDialog({open:false,type:''});
+          }}
+          onSuccess={handleAdd}
+          rentalId={fieldTicketData?.rentalJob?.optionValue}
+          currency={fieldTicketData.currency}
+          isSubmitting={isSubmitting}
+         />
       )}
     </>
   );

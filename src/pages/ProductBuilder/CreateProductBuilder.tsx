@@ -13,8 +13,7 @@ import CustomContainer from '../../components/CustomContainer';
 import routes from '../../components/Helpers/Routes';
 import ProductBuilder from '../../components/productBuilder';
 import { BiArrowBack } from 'react-icons/bi';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { useData } from '../../StateProvider/Provider';
 import { TextField } from '@material-ui/core';
@@ -92,7 +91,16 @@ const CreateProductBuilder = () => {
                 <Box p={1}>
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={3}>
-                      <TextField fullWidth margin="dense" type="text" label="Name" name="name" variant="outlined" disabled={true} value={values['name']} />
+                      <TextField
+                        fullWidth
+                        margin="dense"
+                        type="text"
+                        label="Name"
+                        name="name"
+                        variant="outlined"
+                        disabled={true}
+                        value={values['name']}
+                      />
                     </Grid>
                     <Grid item xs={12} sm={3}>
                       <Box mt={1}>
@@ -133,21 +141,11 @@ const CreateProductBuilder = () => {
                   </Grid>
                 </Box>
                 <Box p={1}>
-                  <Tabs
-                    className="new-tab-container-v1"
-                    textColor="primary"
-                    TabIndicatorProps={{
-                      style: {
-                        display: 'none'
-                      }
-                    }}
-                    value={tabIndex}
-                    onChange={handleChange}
-                  >
-                    <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Product</div>} />
-                    <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Cost</div>} />
-                    {/* <Tab label="All" /> */}
-                  </Tabs>
+                  <CustomTabs value={tabIndex} onChange={handleChange}>
+                    <CustomTab index={0} label={'Product'} />
+                    <CustomTab index={1} label={'Cost'} />
+                    {/* <CustomTab index={2} label="All" /> */}
+                  </CustomTabs>
                 </Box>
                 {tabIndex === 0 && (
                   <Fragment>

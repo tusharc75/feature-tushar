@@ -20,6 +20,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -32,7 +33,6 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const [productAuctionData, setProductAuctionData] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -82,10 +82,6 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
         toastConfig.setToastConfig(error);
       });
   }, [productAuctionId]);
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   const handleSubmit = (values) => {
     setLoading(true);
@@ -151,7 +147,7 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
       }}
       fullWidth
     >
-      {formsData && formsData.length ? (
+      {initialData && initialData?.fields?.length ? (
         <Formik
           innerRef={ref}
           initialValues={initialData.values}
@@ -180,47 +176,15 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData.length > 0 &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content'}>
-                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {form.sectionFields.map((field, index2) => (
-                              <Grid key={index2} item xs={12} sm={6} md={6}>
-                                <FormTypes
-                                  {...field}
-                                  fieldData={field}
-                                  disabled={
-                                    (Boolean(productAuctionId) && field.disableOnEdit && !isClone) || field.fieldName == 'auctionNumber'
-                                      ? true
-                                      : false
-                                  }
-                                  values={values}
-                                  errors={errors}
-                                  touched={touched}
-                                  label={field.fieldLabel}
-                                  name={field.fieldName}
-                                  type={field.type}
-                                  options={field.option}
-                                  setFieldValue={(name, value) => {
-                                    setFieldValue(name, value);
-                                  }}
-                                  required={field.required}
-                                  fullWidth
-                                  isTooltip={field?.isTooltip || false}
-                                  tooltipMessage={field?.tooltipMessage}
-                                  size="small"
-                                />
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

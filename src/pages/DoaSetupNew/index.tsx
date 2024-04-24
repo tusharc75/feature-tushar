@@ -27,9 +27,7 @@ const DoaSetup = ({ resource, entity }) => {
     axiosInstance()
       .get(`/doa-setup?entity=${entity}&resource=${resource}`)
       .then(({ data: { data } }) => {
-        if (data) {
-          setDoaData(data);
-        }
+        setDoaData(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -45,7 +43,7 @@ const DoaSetup = ({ resource, entity }) => {
           </Typography>
           {permissions.entity?.isUpdate && user?.user?.permissions?.doaSetup && (
             <Button variant="contained" className="float-right-button-v1" color="primary" size="small" onClick={() => setOpen(true)}>
-              {doaData ? `Edit ${resource} DOA` : `Add ${resource} DOA`}
+              {doaData ? `Edit DOA` : `Add DOA`}
             </Button>
           )}
         </Box>

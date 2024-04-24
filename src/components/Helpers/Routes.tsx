@@ -1054,13 +1054,7 @@ const routes = {
       : RESOURCE_LABEL.sendOutboundMessage,
     path: '/send-outbound-message'
   },
-  accountsReceivable: {
-    title:
-      storedRoutes && storedRoutes.accountsReceivable && storedRoutes.accountsReceivable.title
-        ? storedRoutes.accountsReceivable?.title
-        : RESOURCE_LABEL.accountsReceivable,
-    path: '/accounts-receivable'
-  },
+ 
   deviceTemplates: {
     title: storedRoutes && storedRoutes.deviceTemplates && storedRoutes.deviceTemplates?.title ? storedRoutes.deviceTemplates?.title
       : RESOURCE_LABEL.deviceTemplates,
@@ -1110,16 +1104,6 @@ const routes = {
         ? storedRoutes.chartOfAccount?.title
         : RESOURCE_LABEL.chartOfAccount,
     path: '/chart-of-account/detail'
-  },
-  flash: {
-    title: storedRoutes && storedRoutes.flash && storedRoutes.flash.title
-      ? storedRoutes.flash?.title
-      : RESOURCE_LABEL.flash,
-    path: '/flash'
-  },
-  flashDetail: {
-    title: storedRoutes && storedRoutes.flash && storedRoutes.flash.title ? storedRoutes.flash?.title : RESOURCE_LABEL.flash,
-    path: '/flash/detail'
   },
   creditMemo: {
     title: storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo?.title ? storedRoutes.creditMemo?.title
@@ -1221,6 +1205,10 @@ const routes = {
   workOrderPlanning: {
     title: storedRoutes && storedRoutes.workOrderPlanning && storedRoutes.workOrderPlanning.title ? storedRoutes.workOrderPlanning?.title : sidebarResource.workOrderPlanning,
     path: '/work-order-planning'
+  },
+  resourceDoaRequest: {
+    title: storedRoutes && storedRoutes.resourceDoaRequest && storedRoutes.resourceDoaRequest.title ? storedRoutes.resourceDoaRequest?.title : sidebarResource.resourceDoaRequest,
+    path: '/resource-doa-request'
   },
 };
 

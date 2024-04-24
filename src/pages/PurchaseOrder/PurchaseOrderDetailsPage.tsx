@@ -21,13 +21,20 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, PURCHASE_ORDER_STATUS, checkSuperAdminAccess, purchaseOrder, purchaseOrderSteps, sidebarResource } from '../../constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  PURCHASE_ORDER_STATUS,
+  checkSuperAdminAccess,
+  purchaseOrder,
+  purchaseOrderSteps,
+  sidebarResource
+} from '../../constants/helpers';
+import Step from '../DynamicForm/Step';
 import Invoice from './Invoice';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import Product from './Product';
 import ReceivingAsset from './ReceivingAsset';
 import PurchaseOrderViews from './RoadMapViews';
-import Step from '../DynamicForm/Step';
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
@@ -54,13 +61,6 @@ const PurchaseOrderDetailsPage = () => {
   const [nextStep, setNextStep] = useState(true);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [resourceData, setResourceData] = useState(null);
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const purchaseOrderStepNames = React.useMemo(() => {
     return purchaseOrderSteps.map((item) => item.name);
@@ -178,8 +178,8 @@ const PurchaseOrderDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const updateStatus = (status) => {
@@ -301,10 +301,10 @@ const PurchaseOrderDetailsPage = () => {
             </CustomTab>
           )}
           {resourceData && resourceData?.steps?.length && (
-                <CustomTab index={4} value={5} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
-                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
-                </CustomTab>
-            )}
+            <CustomTab index={4} value={5} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
+            </CustomTab>
+          )}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -363,20 +363,16 @@ const PurchaseOrderDetailsPage = () => {
           <Box>{purchaseOrderData && <Invoice allowedToEdit={allowedToEdit} purchaseOrderData={purchaseOrderData} />}</Box>
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
-          <Box>
-            {purchaseOrderData &&
-              <PurchaseOrderViews purchaseOrderData={purchaseOrderData} />
-            }
-          </Box>
+          <Box>{purchaseOrderData && <PurchaseOrderViews purchaseOrderData={purchaseOrderData} />}</Box>
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-              <Step
-                resourceData={resourceData}
-                resourceId={id}
-                resource={sidebarResource.purchaseOrder}
-                data={purchaseOrderData}
-                allowedToEdit={permissions?.purchaseOrder?.isUpdate}
-              />
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={sidebarResource.purchaseOrder}
+            data={purchaseOrderData}
+            allowedToEdit={permissions?.purchaseOrder?.isUpdate}
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

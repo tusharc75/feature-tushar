@@ -1,10 +1,11 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -15,10 +16,10 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
+import Step from '../DynamicForm/Step';
 import ManageWarehouse from './ManageWarehouse';
 import StorageLocation from './StorageLocation';
 import Users from './Users';
-import Step from '../DynamicForm/Step';
 
 const WarehouseDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -150,34 +151,14 @@ const WarehouseDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+        <CustomTabs className="new-tab-container-v1" value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab label={'Details'} index={0} />
           {permissions?.storageLocation?.isRead && user?.user?.brandPolicy?.storageLocation && (
-            <Tab
-              label={<div className="tab-font">{routes.storageLocation.title}</div>}
-              value={1}
-              aria-controls="a11y-tabpanel-1"
-              id="a11y-tab-1"
-              className={'tabLayout'}
-            />
+            <CustomTab label={routes.storageLocation.title} index={1} />
           )}
-          {user?.user?.brandPolicy?.warehouseAccessByUser && (
-            <Tab label={<div className="tab-font">Users</div>} value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className={'tabLayout'} />
-          )}
-          {resourceData && resourceData?.steps?.length && (
-            <Tab label={<div className="tab-font">Associations</div>} value={3} aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className={'tabLayout'} />
-          )}
-        </Tabs>
+          {user?.user?.brandPolicy?.warehouseAccessByUser && <CustomTab label={'Users'} index={2} />}
+          {resourceData && resourceData?.steps?.length && <CustomTab label={'Associations'} index={3} />}
+        </CustomTabs>
         {tabValue === 0 && (
           <Box>
             {loading || !warehouseFields.length ? (
@@ -191,15 +172,15 @@ const WarehouseDetailsPage = () => {
         )}
         {tabValue === 1 && <StorageLocation warehouse={id} />}
         {tabValue === 2 && <Users warehouse={id} />}
-        {tabValue === 3 && 
-        <Step
-        resourceData={resourceData}
-        resourceId={id}
-        resource={sidebarResource.warehouse}
-        data={warehouseData}
-        allowedToEdit={permissions?.warehouse?.isUpdate}
-      />
-        }
+        {tabValue === 3 && (
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={sidebarResource.warehouse}
+            data={warehouseData}
+            allowedToEdit={permissions?.warehouse?.isUpdate}
+          />
+        )}
       </Box>
       {openUpdateDialog && (
         <ManageWarehouse

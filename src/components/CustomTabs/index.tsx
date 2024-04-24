@@ -1,7 +1,7 @@
 import React from 'react';
 
-import Tabs, { TabsProps } from '@material-ui/core/Tabs';
 import Tab, { TabProps } from '@material-ui/core/Tab';
+import Tabs, { TabsProps } from '@material-ui/core/Tabs';
 
 interface TabPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
@@ -18,7 +18,7 @@ const TabPanel = (props: TabPanelProps) => {
 };
 
 type CustomTabInterface = Omit<TabsProps, 'TabIndicatorProps' | 'TabIndicatorProps' | 'onChange'> & {
-  onChange?: (event: React.ChangeEvent<{}>, newValue: number) => void;
+  onChange?: (event: React.ChangeEvent<{}>, newValue: number | string) => void;
 };
 const CustomTabs: React.FC<CustomTabInterface> = ({ children, className = '', ...others }) => {
   return (
@@ -42,12 +42,12 @@ interface CustomTabProps extends TabProps {
   index: number;
   primaryColor?: boolean;
 }
-const CustomTab: React.FC<CustomTabProps> = ({ children, className = '', index = 0, primaryColor = false, ...props }) => {
+const CustomTab: React.FC<CustomTabProps> = ({ children, label, className = '', index = 0, primaryColor = false, ...props }) => {
   return (
     <Tab
       label={
         <div className="tab-font" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {children}
+          {children || label}
         </div>
       }
       className={`tabLayout ${className} ${primaryColor ? 'primaryColoredTab' : ''}`}

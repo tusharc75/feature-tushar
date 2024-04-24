@@ -16,13 +16,13 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
 import moment from 'moment';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManagePayType = ({ payTypeData, onClose, onSuccess,currency, payrollPolicyId, isClone = false }) => {
  
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [fields, setFields] = useState([]);
   const [allFields, setAllFields] = useState([]);
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -49,17 +49,6 @@ const ManagePayType = ({ payTypeData, onClose, onSuccess,currency, payrollPolicy
         values: getObjKeys('', data)
       });
     }
-    EvaluteproductFields(data);
-  };
-
-  const EvaluteproductFields = (fields) => {
-    const sections = uniq(map(fields, 'sectionName'));
-    const customData = sections.map((name) => {
-      let sectionFields = fields.filter((field) => field.sectionName === name);
-      sectionFields = orderBy(sectionFields, 'order', 'asc');
-      return { name, sectionFields };
-    });
-    setFields(customData);
   };
 
   const handleSubmit = (values) => {
@@ -139,50 +128,15 @@ const ManagePayType = ({ payTypeData, onClose, onSuccess,currency, payrollPolicy
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {fields &&
-                    fields.map((section, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content detail-product-box'}>
-                          <div className={'product-form-layout'}>
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className={`${'form-label-style'} ${'form-label-product'}`}>{section.name}</h2>
-                          </div>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {section.sectionFields &&
-                              section.sectionFields.map((field) => (
-                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                  <Box display="flex">
-                                    <Box flexGrow={1}>
-                                      <FormTypes
-                                        {...field}
-                                        fieldData={field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field.isTooltip}
-                                        tooltipMessage={field.tooltipMessage}
-                                        size="small"
-                                        fields={initialData.fields}
-                                      />
-                                    </Box>
-                                  </Box>
-                                </Grid>
-                              ))}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

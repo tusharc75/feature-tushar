@@ -26,6 +26,7 @@ import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, onClose, onSuccess, open }) => {
 
@@ -36,16 +37,11 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
 
   useEffect(() => {
@@ -204,44 +200,15 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData &&
-                    formsData.map((form, i) => {
-                      return (
-                        form.name && (
-                          <div key={i}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <FormTypes
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      fieldData={field}
-                                      fields={initialData?.fields}
-                                    />
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
-                      );
-                    })}
+                <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
