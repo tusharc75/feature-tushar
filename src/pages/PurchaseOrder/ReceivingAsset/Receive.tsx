@@ -159,6 +159,9 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
             errors.storageLocation = 'Storage Location is required';
           }
         }
+        if(user?.user?.brandPolicy?.productInventorySerialNumberRequired  && parseInt(d.inventoryQuantity) !== d.serialNumber?.length){
+          errors.serialNumber = 'Please enter required serial number';
+        }
       });
     }
     return errors;
