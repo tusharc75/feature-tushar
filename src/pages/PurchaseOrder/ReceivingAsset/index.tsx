@@ -22,10 +22,9 @@ import AssetQtyDialog from './AssetQtyDialog';
 import Logs from './Logs';
 import Receive from './Receive';
 import Reject from './Reject';
-import RejectProduct from './RejectProduct';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
-const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
+const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { generateColumns } = useColumns();
@@ -44,7 +43,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
   const [columns, setColumns] = useState(null);
   const [addAssetDialog, setAddAssetDialog] = useState({ open: false, product: null });
-  const [materialAssets, setMaterialAssets] = useState([]);
+
+  const [materialserializedAssets, setMaterialserializedAssets] = useState([]);
+  const [materialSerialNumbers, setMaterialSerialNumbers] = useState([]);
 
   useEffect(() => {
     fetchColumns();
@@ -190,10 +191,10 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                   </HtmlTooltip>
                 } */}
               {permissions?.purchaseOrder?.isUpdate &&
-              row?.original?.type === MATERIAL_TYPE.product &&
-              allowedToEdit &&
-              row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
-              ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+                row?.original?.type === MATERIAL_TYPE.product &&
+                allowedToEdit &&
+                row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
+                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                 <HtmlTooltip title="Reject">
                   <span>
                     <IconButton
@@ -228,7 +229,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                   </span>
                 </HtmlTooltip>
               )}
-              {row?.original?.type !== MATERIAL_TYPE.serializedAsset && (
+              {!['Serial Number', MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) && (
                 <HtmlTooltip title="Logs">
                   <span>
                     <IconButton
@@ -264,12 +265,14 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       const serviceResponse: any = await axiosInstance().get(`${purchaseOrder.api}/service/${purchaseOrderData._id}`);
       const costResponce: any = await axiosInstance().get(`${purchaseOrder.api}/cost/${purchaseOrderData._id}`);
 
-      const tempMaterialAssets: any = {};
+      const tempMaterialserializedAssets: any = {};
+      const tempMaterialSerialNumbers: any = {};
 
       let rows = result?.data?.data?.map((item, index) => {
         let finalObject = prepareDataForGrid(item);
         finalObject['isChecked'] = selectedRecords.some((s) => s._id === item._id);
         finalObject['allowedToEdit'] = allowedToEdit;
+
         let res: any = {
           ...finalObject,
           index: index + 1,
@@ -285,78 +288,35 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
         res.subRows = [
           ...(res?.subRows || []),
-          ...(serializedAsset
-            ?.filter((e) => e?.product?.optionValue === res?.materialId && e?.uniqueId === res?._id)
-            ?.map((e, i) => ({
-              index: `${res.index}.${i + 1}`,
-              _id: e?._id,
-              detail: e.assetNumber,
-              type: MATERIAL_TYPE.serializedAsset,
-              assetId: e?._id,
-              hideSelection: true
-            })) || []),
-          ...(productSerialNumber
-            ?.filter((e) => e?.product === res?.materialId && e?.uniqueId === res?._id)
-            ?.map((e, i) => ({
-              index: `${res.index}.${i + 1}`,
-              _id: e?._id,
-              detail: e.serialNumber,
-              type: 'Serial Number',
-              assetId: e?._id,
-              hideSelection: true
-            })) || [])
+          ...(serializedAsset?.filter((e) => e?.product?.optionValue === res?.materialId && e?.uniqueId === res?._id)?.map((e, i) => ({
+            index: `${res.index}.${i + 1}`,
+            _id: e?._id,
+            detail: e.assetNumber,
+            type: MATERIAL_TYPE.serializedAsset,
+            assetId: e?._id,
+            hideSelection: true
+          })) || []),
+          ...(productSerialNumber?.filter((e) => e?.product === res?.materialId && e?.uniqueId === res?._id)?.map((e, i) => ({
+            index: `${res.index}.${i + 1}`,
+            _id: e?._id,
+            detail: e.serialNumber,
+            type: 'Serial Number',
+            assetId: e?._id,
+            hideSelection: true
+          })) || [])
         ];
-
-        // const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.materialId && e?.uniqueId === res?._id);
-        // if (subRows?.length) {
-        //   let actualReceived = item.actualReceived;
-        //   let index = 1;
-        //   subRows?.forEach((e: any) => {
-        //     if (actualReceived && !e.isUsed) {
-        //       res.subRows.push({
-        //         index: `${res.index}.${index}`,
-        //         _id: e?._id,
-        //         detail: e.assetNumber,
-        //         type: MATERIAL_TYPE.serializedAsset,
-        //         assetId: e?._id,
-        //         hideSelection: true
-        //       });
-        //       actualReceived = actualReceived - 1;
-        //       index = index + 1;
-        //       e.isUsed = true;
-        //     }
-        //   });
-        // }
-        // const subRowsproductSerialNumber = productSerialNumber?.filter((e) => e?.product === res?.materialId && e?.uniqueId === res?._id);
-        // if (subRowsproductSerialNumber?.length) {
-        //   let actualReceived = item.actualReceived;
-        //   let index = 1;
-        //   subRowsproductSerialNumber?.forEach((e: any) => {
-        //     if (actualReceived && !e.isUsed) {
-        //       res.subRows.push({
-        //         _id: e?._id,
-        //         index: `${res.index}.${index + 1}`,
-        //         detail: e.serialNumber,
-        //         type: 'Serial Number',
-        //         assetId: e?._id,
-        //         hideSelection: true
-        //       });
-        //       actualReceived = actualReceived - 1;
-        //       index = index + 1;
-        //       e.isUsed = true;
-        //     }
-        //   });
-        // }
         res['assetQty'] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length;
         res['inventoryQty'] = item?.actualReceived
           ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
           : 0;
 
-        tempMaterialAssets[res?._id] = res?.subRows
-          ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
-          ?.map((e) => {
-            return { optionValue: e?._id, optionLabel: e?.detail };
-          });
+
+        tempMaterialserializedAssets[res?._id] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => {
+          return { optionValue: e?._id, optionLabel: e?.detail }
+        });
+        tempMaterialSerialNumbers[res?._id] = res?.subRows?.filter((e) => e.type === 'Serial Number')?.map((e) => {
+          return { optionValue: e?._id, optionLabel: e?.detail };
+        });
         return res;
       });
 
@@ -376,7 +336,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         });
       }
       checkReceivedProduct(rows);
-      setMaterialAssets(tempMaterialAssets);
+      setMaterialserializedAssets(tempMaterialserializedAssets);
+      setMaterialSerialNumbers(tempMaterialSerialNumbers);
+
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -451,7 +413,6 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         leftSideContents={<LeftSideContents />}
         hasXpadding={true}
       />
-
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <Box zIndex={5} width={'100%'}>
@@ -508,35 +469,22 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             (d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(d.type) && d.qty !== (d?.rejectQuantity || 0)
           )}
           purchaseOrderData={purchaseOrderData}
-          materialAssets={materialAssets}
-        />
+          materialserializedAssets={materialserializedAssets}
+          materialSerialNumbers={materialSerialNumbers} />
       )}
       {rejectProductDialog && (
-        <>
-          <Reject
-            purchaseOrderID={purchaseOrderData._id}
-            onClose={() => setRejectProductDialog(null)}
-            onSuccess={() => {
-              setRejectProductDialog(null);
-              fetchProduct();
-            }}
-            material={[rejectProductDialog]}
-            purchaseOrderData={purchaseOrderData}
-            materialAssets={materialAssets}
-          />
-          {/* <RejectProduct
-            handleClose={() => setRejectProductDialog(null)}
-            handleSuccess={() => {
-              setRejectProductDialog(null);
-              fetchProduct();
-            }}
-            purchaseOrderData={purchaseOrderData}
-            POId={purchaseOrderData?._id}
-            product={rejectProductDialog}
-            warehouse={purchaseOrderData?.warehouse.optionValue}
-            materialAssets={materialAssets[rejectProductDialog?._id] || []}
-          /> */}
-        </>
+        <Reject
+          purchaseOrderID={purchaseOrderData._id}
+          onClose={() => setRejectProductDialog(null)}
+          onSuccess={() => {
+            setRejectProductDialog(null);
+            fetchProduct();
+          }}
+          material={[rejectProductDialog]}
+          purchaseOrderData={purchaseOrderData}
+          materialserializedAssets={materialserializedAssets}
+          materialSerialNumbers={materialSerialNumbers}
+        />
       )}
       {logDialog.open && (
         <Logs

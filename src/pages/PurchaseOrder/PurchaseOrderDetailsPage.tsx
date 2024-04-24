@@ -51,11 +51,8 @@ const PurchaseOrderDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [purchaseOrderFields, setPurchaseOrderFields] = useState([]);
-  const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
-
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
   const [nextStep, setNextStep] = useState(true);
@@ -119,14 +116,6 @@ const PurchaseOrderDetailsPage = () => {
       .get('/field?resource=Purchase Order')
       .then(({ data }) => {
         setPurchaseOrderFields(data.data);
-        if (data.data && data.data.length) {
-          data.data.some((o) => {
-            if (o?.fieldData?.fieldName === 'status') {
-              setStatusOptions([...o.fieldData.option]);
-              return true;
-            }
-          });
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -161,18 +150,6 @@ const PurchaseOrderDetailsPage = () => {
         toastConfig.setToastConfig(error);
         setShowConfirmBox(false);
       });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const handleStatusChange = (o) => {
-    updateStatus(o.optionValue);
   };
 
   const updateProcessStatus = async (processStatus) => {
@@ -347,7 +324,6 @@ const PurchaseOrderDetailsPage = () => {
                   {currentStep === 1 && (
                     <ReceivingAsset
                       purchaseOrderData={purchaseOrderData}
-                      updateStatus={updateStatus}
                       renderedFrom={`${renderedFrom}_grid-4`}
                       stepFullScreen={stepFullScreen}
                       allowedToEdit={allowedToEdit}

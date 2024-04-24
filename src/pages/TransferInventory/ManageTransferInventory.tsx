@@ -156,7 +156,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
         });
     }
   };
-console.log(initialData.fields)
+  
   const validate = (values) => {
     const errors = {};
     if (user?.user?.brandPolicy?.storageLocation) {
@@ -209,7 +209,7 @@ console.log(initialData.fields)
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}
