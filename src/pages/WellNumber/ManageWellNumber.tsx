@@ -10,13 +10,11 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, setFieldsInAscendingOrder, sidebarResource } from '../../constants/helpers';
+import { CustomDialogTransition, sidebarResource } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid } from '@material-ui/core';
-import FormTypes from '../../components/Helpers/FormTypes';
+import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
