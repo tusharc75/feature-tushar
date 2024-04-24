@@ -81,9 +81,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       let tempWarehouse =
         selectedWarehouse === 'All'
           ? warehouseOptions
-              ?.filter((d) => d.optionValue !== 'All')
-              .map((d) => d.optionValue)
-              .toString()
+            ?.filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
           : selectedWarehouse;
 
       deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`;
@@ -143,7 +143,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       disabled: true,
       disableSortBy: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.date ? (
             <h5 className="text-truncate" title={moment(row?.original?.date)?.format(dateTimeFormat)}>
               {moment(row?.original?.date)?.format(dateTimeFormat)}
@@ -151,7 +151,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     {
@@ -159,7 +159,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       Header: 'Reference Type',
       disableSortBy: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.referenceType ? (
             <h5 className="text-truncate" title={row?.original?.referenceType}>
               {row?.original?.referenceType}
@@ -167,7 +167,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     {
@@ -176,103 +176,105 @@ const History = ({ product, warehouse, storageLocation }) => {
       disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) =>
-        row?.original?.reference ? (
-          row?.original?.referenceType === 'Purchase Order' ? (
-            <Link
-              className="link"
-              target="_blank"
-              title={row?.original?.reference}
-              to={`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`}
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Transfer Inventory' ? (
-            <Link
-              className="link"
-              target="_blank"
-              title={row?.original?.reference}
-              to={`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`}
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Transfer Asset' ? (
-            <Link
-              className="link"
-              target="_blank"
-              title={row?.original?.reference}
-              to={`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`}
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Sales Order' ? (
-            <Link
-              className="link"
-              target="_blank"
-              title={row?.original?.reference}
-              to={`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`}
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Bulk Asset Creation' ? (
-            <Link
-              className="link"
-              target="_blank"
-              title={row?.original?.reference}
-              to={`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`}
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Serialized Asset' ? (
-            <Link
-              className="link"
-              target="_blank"
-              title={row?.original?.reference}
-              to={`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`}
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Rental Job' ? (
-            <Link
-              className="link"
-              target="_blank"
-              title={row?.original?.reference}
-              to={`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`}
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === 'Work Order' ? (
-            <Link
-              className="link"
-              target="_blank"
-              title={row?.original?.reference}
-              to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
-            >
-              {row?.original?.reference}
-            </Link>
-          ) : row?.original?.referenceType === sidebarResource.fieldTicket ? (
-            <Link
-              className="link"
-              target="_blank"
-              title={row?.original?.reference}
-              to={`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`}
-            >
-              {row?.original?.reference}
-            </Link>
+        <div>
+          {row?.original?.reference ? (
+            row?.original?.referenceType === 'Purchase Order' ? (
+              <Link
+                className="link"
+                target="_blank"
+                title={row?.original?.reference}
+                to={`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`}
+              >
+                {row?.original?.reference}
+              </Link>
+            ) : row?.original?.referenceType === 'Transfer Inventory' ? (
+              <Link
+                className="link"
+                target="_blank"
+                title={row?.original?.reference}
+                to={`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`}
+              >
+                {row?.original?.reference}
+              </Link>
+            ) : row?.original?.referenceType === 'Transfer Asset' ? (
+              <Link
+                className="link"
+                target="_blank"
+                title={row?.original?.reference}
+                to={`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`}
+              >
+                {row?.original?.reference}
+              </Link>
+            ) : row?.original?.referenceType === 'Sales Order' ? (
+              <Link
+                className="link"
+                target="_blank"
+                title={row?.original?.reference}
+                to={`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`}
+              >
+                {row?.original?.reference}
+              </Link>
+            ) : row?.original?.referenceType === 'Bulk Asset Creation' ? (
+              <Link
+                className="link"
+                target="_blank"
+                title={row?.original?.reference}
+                to={`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`}
+              >
+                {row?.original?.reference}
+              </Link>
+            ) : row?.original?.referenceType === 'Serialized Asset' ? (
+              <Link
+                className="link"
+                target="_blank"
+                title={row?.original?.reference}
+                to={`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`}
+              >
+                {row?.original?.reference}
+              </Link>
+            ) : row?.original?.referenceType === 'Rental Job' ? (
+              <Link
+                className="link"
+                target="_blank"
+                title={row?.original?.reference}
+                to={`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`}
+              >
+                {row?.original?.reference}
+              </Link>
+            ) : row?.original?.referenceType === 'Work Order' ? (
+              <Link
+                className="link"
+                target="_blank"
+                title={row?.original?.reference}
+                to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
+              >
+                {row?.original?.reference}
+              </Link>
+            ) : row?.original?.referenceType === sidebarResource.fieldTicket ? (
+              <Link
+                className="link"
+                target="_blank"
+                title={row?.original?.reference}
+                to={`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`}
+              >
+                {row?.original?.reference}
+              </Link>
+            ) : (
+              row?.original?.reference
+            )
+          ) : row?.original?.referenceType === 'Product Inventory' ? (
+            <h5 className="text-truncate">Manual Entry</h5>
           ) : (
-            row?.original?.reference
-          )
-        ) : row?.original?.referenceType === 'Product Inventory' ? (
-          <h5 className="text-truncate">Manual Entry</h5>
-        ) : (
-          <NoDataCell />
-        )
+            <NoDataCell />
+          )}
+        </div>
     },
     {
       accessor: 'type',
       Header: 'Type',
       disableSortBy: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.type ? (
             <h5 className="text-truncate" title={row?.original?.type}>
               {row?.original?.type}
@@ -280,7 +282,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     {
@@ -298,10 +300,10 @@ const History = ({ product, warehouse, storageLocation }) => {
                   ? 'hsl(120 73% 40% / 1)'
                   : '#90ee90'
                 : row?.original?.type === 'Debit'
-                ? isDarkTheme
-                  ? 'hsl(1 100% 65% / 1)'
-                  : '#FFCCCB'
-                : ''
+                  ? isDarkTheme
+                    ? 'hsl(1 100% 65% / 1)'
+                    : '#FFCCCB'
+                  : ''
           }}
         >
           {row?.original?.qty ? (
@@ -316,31 +318,31 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(!user?.user?.brandPolicy?.hideInventoryCount
       ? [
-          {
-            accessor: 'finalInventory',
-            Header: 'Final Quantity',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => (
-              <>
-                {row?.original?.finalInventory ? (
-                  <h5 className="text-truncate" title={row?.original?.finalInventory}>
-                    {row?.original?.finalInventory}
-                  </h5>
-                ) : (
-                  <NoDataCell />
-                )}
-              </>
-            )
-          }
-        ]
+        {
+          accessor: 'finalInventory',
+          Header: 'Final Quantity',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <div>
+              {row?.original?.finalInventory ? (
+                <h5 className="text-truncate" title={row?.original?.finalInventory}>
+                  {row?.original?.finalInventory}
+                </h5>
+              ) : (
+                <NoDataCell />
+              )}
+            </div>
+          )
+        }
+      ]
       : []),
     {
       accessor: 'price',
       Header: `Cost ${curr}`,
       disableFilters: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.price ? (
             <h5 className="text-truncate" title={row?.original?.price}>
               {row?.original?.price}
@@ -348,7 +350,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     {
@@ -356,7 +358,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       Header: `Amount ${curr}`,
       disableFilters: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.totalPrice ? (
             <h5 className="text-truncate" title={row?.original?.totalPrice}>
               {row?.original?.totalPrice}
@@ -364,29 +366,29 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     ...(selectedWarehouse && selectedWarehouse !== 'All'
       ? [
-          {
-            accessor: 'finalAvgPrice',
-            Header: `Final Average Cost ${curr}`,
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => (
-              <>
-                {row?.original?.finalAvgPrice ? (
-                  <h5 className="text-truncate" title={row?.original?.finalAvgPrice}>
-                    {row?.original?.finalAvgPrice}
-                  </h5>
-                ) : (
-                  <NoDataCell />
-                )}
-              </>
-            )
-          }
-        ]
+        {
+          accessor: 'finalAvgPrice',
+          Header: `Final Average Cost ${curr}`,
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <div>
+              {row?.original?.finalAvgPrice ? (
+                <h5 className="text-truncate" title={row?.original?.finalAvgPrice}>
+                  {row?.original?.finalAvgPrice}
+                </h5>
+              ) : (
+                <NoDataCell />
+              )}
+            </div>
+          )
+        }
+      ]
       : []),
     {
       accessor: 'warehouse',
@@ -394,7 +396,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.warehouse ? (
             <Link
               className="link"
@@ -407,41 +409,41 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     ...(user?.user?.brandPolicy?.storageLocation
       ? [
-          {
-            accessor: 'storageLocation',
-            Header: 'Storage Location',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => (
-              <>
-                {row?.original?.storageLocation ? (
-                  <Link
-                    className="link"
-                    target="_blank"
-                    title={row?.original?.storageLocation}
-                    to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
-                  >
-                    {row?.original?.storageLocation}
-                  </Link>
-                ) : (
-                  <NoDataCell />
-                )}
-              </>
-            )
-          }
-        ]
+        {
+          accessor: 'storageLocation',
+          Header: 'Storage Location',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <div>
+              {row?.original?.storageLocation ? (
+                <Link
+                  className="link"
+                  target="_blank"
+                  title={row?.original?.storageLocation}
+                  to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
+                >
+                  {row?.original?.storageLocation}
+                </Link>
+              ) : (
+                <NoDataCell />
+              )}
+            </div>
+          )
+        }
+      ]
       : []),
     {
       accessor: 'supplierPartNumber',
       Header: 'Supplier Part Number',
       disableSortBy: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.supplierPartNumber ? (
             <h5 className="text-truncate" title={row?.original?.supplierPartNumber}>
               {row?.original?.supplierPartNumber}
@@ -449,7 +451,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     {
@@ -457,7 +459,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       Header: 'Comment',
       disableSortBy: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.comment ? (
             <h5 className="text-truncate" title={row?.original?.comment}>
               {row?.original?.comment}
@@ -465,7 +467,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     {
@@ -474,7 +476,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.serialNumber ? (
             <h5 className="text-truncate" title={row?.original?.serialNumber}>
               {row?.original?.serialNumber}
@@ -482,7 +484,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     {
@@ -490,7 +492,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       Header: 'Transacted By',
       disableSortBy: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.user ? (
             <Link className="link" target="_blank" title={row?.original?.user} to={`${routes.userDetail.path}/${row?.original?.userId}`}>
               {row?.original?.user}
@@ -498,7 +500,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     {
@@ -507,7 +509,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       disableFilters: true,
       disableSortBy: true,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row?.original?.transactionDate ? (
             <h5 className="text-truncate" title={moment(row?.original?.transactionDate)?.format(dateTimeFormat)}>
               {moment(row?.original?.transactionDate)?.format(dateTimeFormat)}
@@ -515,7 +517,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     {
@@ -525,11 +527,11 @@ const History = ({ product, warehouse, storageLocation }) => {
       width: 110,
       sticky: 'right',
       Cell: ({ row }) => (
-        <>
+        <div>
           {(['Product Inventory', 'Reverted'].includes(row?.original?.referenceType) && !row?.original?.reverted) ||
-          ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(row?.original?.referenceType) &&
-            row?.original?.type?.toLowerCase() === 'debit' &&
-            row?.original?.qty - (row?.original?.revertedQty || 0) > 0) ? (
+            ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(row?.original?.referenceType) &&
+              row?.original?.type?.toLowerCase() === 'debit' &&
+              row?.original?.qty - (row?.original?.revertedQty || 0) > 0) ? (
             <Box pl={1}>
               <HtmlTooltip title="Revert">
                 <span>
@@ -557,7 +559,7 @@ const History = ({ product, warehouse, storageLocation }) => {
               </HtmlTooltip>
             </Box>
           ) : null}
-        </>
+        </div>
       )
     }
   ];
