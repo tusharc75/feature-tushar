@@ -26,7 +26,7 @@ const WorkOrderPlanning = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const statusOption = ['Pending', 'Completed'];
+  const statusOption = ['Pending', 'In-Progress', 'Completed'];
 
   const [columns, setColumns] = useState(null);
   const [openRepairOrderDialog, setOpenRepairOrderDialog] = useState(false);
