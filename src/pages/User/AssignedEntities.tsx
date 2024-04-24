@@ -23,7 +23,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
   } = useData();
   const [currentEntity, setCurrentEntity] = useState(entities[0]);
   const [unionRoleData, setUnionRoleData] = useState(null);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -265,8 +265,8 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       field={unionRoleData ? unionRoleData.field : []}
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
-                      setField={() => {}}
-                      setResource={() => {}}
+                      setField={() => { }}
+                      setResource={() => { }}
                     />
                   </BoxWithBorder>
                 </Grid>

@@ -22,6 +22,7 @@ import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -34,7 +35,6 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const [repairTypeData, setRepairTypeData] = useState(null);
   const [repairSteps, setRepairSteps] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -80,10 +80,6 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
         toastConfig.setToastConfig(error);
       });
   }, [repairTypeId]);
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   const handleSubmit = (values) => {
     if (repairSteps?.length === 0) {
@@ -182,7 +178,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
       }}
       fullWidth
     >
-      {formsData && formsData.length ? (
+      {initialData && initialData?.fields?.length ? (
         <Formik
           innerRef={ref}
           initialValues={initialData.values}
@@ -209,43 +205,15 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData.length > 0 &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content'}>
-                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {form.sectionFields.map((field, index2) => (
-                              <Grid key={index2} item xs={12} sm={6} md={6}>
-                                <FormTypes
-                                  {...field}
-                                  fieldData={field}
-                                  disabled={Boolean(repairTypeId) && field.disableOnEdit && !isClone}
-                                  values={values}
-                                  errors={errors}
-                                  touched={touched}
-                                  label={field.fieldLabel}
-                                  name={field.fieldName}
-                                  type={field.type}
-                                  options={field.option}
-                                  setFieldValue={(name, value) => {
-                                    setFieldValue(name, value);
-                                  }}
-                                  required={field.required}
-                                  fullWidth
-                                  isTooltip={field?.isTooltip || false}
-                                  tooltipMessage={field?.tooltipMessage}
-                                  size="small"
-                                />
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                   <div className={'detail-box-content'}>
                     <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                     <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Repair Steps</h2>

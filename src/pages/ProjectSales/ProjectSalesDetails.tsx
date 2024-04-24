@@ -57,7 +57,7 @@ const ProjectSalesDetails = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes?.projectSales]);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [loadingGraphData, setLoadingGraphData] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [graphData, setGraphData] = useState({

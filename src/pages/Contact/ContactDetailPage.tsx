@@ -1,9 +1,8 @@
-import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Tab, Tabs, Tooltip, Typography } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Tooltip, Typography } from '@material-ui/core';
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiOutlineMail } from 'react-icons/ai';
@@ -78,7 +77,7 @@ const ContactDetailsPage = (props) => {
     isDelete: false
   });
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [orgChartData, setOrgChartData] = useState([]);
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [opportunities, setOpportunities] = useState([]);

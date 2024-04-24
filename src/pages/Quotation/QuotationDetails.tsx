@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Grid, Menu, MenuItem, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, CircularProgress, Grid, Menu, MenuItem } from '@material-ui/core';
 import CachedIcon from '@material-ui/icons/Cached';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { Skeleton } from '@material-ui/lab';
@@ -609,10 +609,10 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-            <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
-              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-            </Box>
-          )}
+              <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
+                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+              </Box>
+            )}
           <div>
             <Steps
               isNextStep={false}
@@ -629,8 +629,8 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
-                      setCustomerAcceptable(true);
-                    }
+                    setCustomerAcceptable(true);
+                  }
                   : null
               }
             />

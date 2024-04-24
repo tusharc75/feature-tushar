@@ -19,6 +19,7 @@ import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
+import InputField from 'src/components/Helpers/InputField';
 
 interface Props {
   isClone?: boolean;
@@ -155,7 +156,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
         });
     }
   };
-
+  
   const validate = (values) => {
     const errors = {};
     if (user?.user?.brandPolicy?.storageLocation) {
@@ -208,42 +209,15 @@ const ManageTransferInventory: FC<Props> = (props) => {
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {initialData.fields.length > 0 &&
-                    initialData.fields.map((form, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content'}>
-                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container alignItems="center">
-                            {form.sectionFields.map((field, index2) => (
-                              <Grid key={index2} item xs={12} sm={6}>
-                                <FormTypes
-                                  {...field}
-                                  fields={allFields}
-                                  fieldData={field}
-                                  disabled={Boolean(transferInventoryId) && field.disableOnEdit}
-                                  values={values}
-                                  errors={errors}
-                                  touched={touched}
-                                  label={field.fieldLabel}
-                                  name={field.fieldName}
-                                  type={field.type}
-                                  options={field.option}
-                                  setFieldValue={setFieldValue}
-                                  required={field.required}
-                                  fullWidth
-                                  isTooltip={field?.isTooltip || false}
-                                  tooltipMessage={field?.tooltipMessage}
-                                  size="small"
-                                />
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={allFields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
