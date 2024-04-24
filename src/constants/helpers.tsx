@@ -357,13 +357,11 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
-  accountsReceivable: 'Accounts Receivable',
   iotDataPointsCategory: 'Iot Data Points Category',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
-  flash: 'Flash',
   rentalManagementInvoice: 'Rental Management Invoice',
   creditMemo: 'Credit Memo',
   outboundMessage: 'Outbound Message',
@@ -509,8 +507,6 @@ export const RESOURCE_LABEL = {
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
-  flash: 'Flash',
-  accountsReceivable: 'Accounts Receivable',
   creditMemo: 'Credit Memo',
   generateInvoice: 'Generate Invoice',
   repairOrderInvoice: 'Repair Order Invoice',
@@ -904,13 +900,6 @@ export const leadTimeMaster = {
 export const workOrder = {
   resource: 'Work Order',
   api: '/work-order'
-};
-
-export const flash = {
-  api: '/flash',
-  route: '/flash',
-  permission: 'Flash',
-  resource: 'Flash'
 };
 
 export const profileMenuItems = {
@@ -2197,7 +2186,6 @@ export const ACTIVITY_RESOURCE = {
   marketSegment: 'marketSegment',
   budget: 'budget',
   irtTicket: 'irtTicket',
-  accountsReceivable: 'accountsReceivable'
 };
 
 export const LOG_RESOURCE = {

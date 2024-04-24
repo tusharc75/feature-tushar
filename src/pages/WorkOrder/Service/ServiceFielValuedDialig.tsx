@@ -12,18 +12,14 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition, setFieldsInAscendingOrder, workOrder, yupSchema } from 'src/constants/helpers';
 import DetailsPage from 'src/components/Shared/DetailsPage';
+import InputField from 'src/components/Helpers/InputField';
 
 const ServiceFieldValueDialig = ({ workOrderId, fields = [], fieldsValue = {}, service, handleClose, handleSuccess, editable = false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const [isEditing, setIsEditing] = useState(editable);
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(fields));
-  }, [fields]);
 
   const handleSubmit = (values) => {
     setSubmitting(true);
@@ -76,47 +72,15 @@ const ServiceFieldValueDialig = ({ workOrderId, fields = [], fieldsValue = {}, s
                 <Box pt={1}>
                   {isEditing ? (
                     <Form autoComplete="off" autoCorrect="off" noValidate>
-                      {formsData &&
-                        formsData.map((form, index1) => {
-                          return (
-                            form.name && (
-                              <div key={index1}>
-                                <div className={'detail-box-content'}>
-                                  <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                                  <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                                </div>
-                                <Box marginY={2}>
-                                  <Grid spacing={3} container>
-                                    {form.sectionFields.map((field, index2) => (
-                                      <Grid key={index2} item xs={12} sm={6} md={6}>
-                                        <FormTypes
-                                          {...field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={null}
-                                          disabled={field.disableOnEdit}
-                                          fieldData={field}
-                                          fields={fields}
-                                        />
-                                      </Grid>
-                                    ))}
-                                  </Grid>
-                                </Box>
-                              </div>
-                            )
-                          );
-                        })}
+                     <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={fields}
+                    size="small"
+                    fullWidth
+                  />
                     </Form>
                   ) : (
                     <DetailsPage containerPadding={'0px'} data={fieldsValue} fields={fields.map((f) => ({ fieldData: f }))} />

@@ -17,6 +17,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useHistory } from 'react-router-dom';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -28,7 +29,6 @@ const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const history = useHistory();
 
   const fetchFields = async () => {
@@ -108,10 +108,6 @@ const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, 
   };
 
   useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData?.fields));
-  }, [initialData?.fields]);
-
-  useEffect(() => {
     fetchFields();
   }, []);
 
@@ -129,7 +125,7 @@ const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, 
         }
       }}
     >
-      {initialData.fields.length ? (
+      {initialData?.fields?.length ? (
         <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
@@ -147,47 +143,15 @@ const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, 
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData &&
-                    formsData.map((form, index1) => {
-                      return (
-                        form.name && (
-                          <div key={index1}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field, index2) => (
-                                  <Grid key={index2} item xs={12} sm={6} md={6}>
-                                    <FormTypes
-                                      {...field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                      disabled={field.disableOnEdit}
-                                      fieldData={field}
-                                      fields={initialData?.fields}
-                                    />
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
-                      );
-                    })}
+                <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
