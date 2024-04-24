@@ -26,6 +26,7 @@ import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import ServiceDialog from './ServiceDialog';
 import { fetchTaxRate } from './helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -180,7 +181,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       canDrag: false,
       Cell: ({ row, table }) => {
         return allowedToEdit ? (
-          <>
+          <div>
             <HtmlTooltip title="Edit">
               <IconButton
                 color="primary"
@@ -190,7 +191,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   openMaterial(row.original, table.getRowModel().rows);
                 }}
               >
-                <EditIcon color="primary" />
+                <EditIcon color="primary" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
             {permissions?.irtTicket?.isCreate && row.original?.type === 'Product' && (
@@ -207,23 +208,26 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                     });
                   }}
                 >
-                  <VisibilityIcon color="primary" />
+                  <VisibilityIcon color="primary" fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
             )}
             {(row.original?.actualReceived === undefined || row.original?.actualReceived === 0) && (
-              <GridDeleteIcon
-                hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
-                ownerId={user?.user?._id}
-                userId={user?.user?._id}
-                onDelete={() => {
-                  setShowDeleteConfirmBox(true);
-                  setDeletePurchaseOrderItem([row.original]);
-                }}
-                entity=""
-              />
+              <HtmlTooltip title="Delete">
+                <IconButton
+                  color="primary"
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setShowDeleteConfirmBox(true);
+                    setDeletePurchaseOrderItem([row.original]);
+                  }}
+                >
+                  <DeleteIcon color="error" fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
             )}
-          </>
+          </div>
         ) : null;
       }
     });

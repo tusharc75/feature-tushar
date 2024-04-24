@@ -81,23 +81,21 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
           />
           <Formik
             initialValues={initialData.values}
-            // validationSchema={yupSchema(initialData.fields)}
-            // validateOnMount
             onSubmit={handleSave}
           >
             {({ values, errors, touched, submitForm, setFieldValue }) => (
               <>
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    touched={touched}
-                    fieldsData={initialData.fields}
-                    size="small"
-                    fullWidth
-                  />
+                    <InputField
+                      errors={errors}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      fieldsData={initialData.fields}
+                      size="small"
+                      fullWidth
+                    />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
