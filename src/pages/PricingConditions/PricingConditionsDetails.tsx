@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
@@ -7,6 +7,7 @@ import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -19,22 +20,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { ACTIVITY_RESOURCE, pricingCondition } from '../../constants/helpers';
 import AddConditions from './AddConditions';
 import PricingConditionsDialog from './PricingConditionsDialog';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
-    </div>
-  );
-}
 
 const PricingConditionsDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -131,34 +116,14 @@ const PricingConditionsDetails = () => {
           </Grid>
         ) : (
           <>
-            <Tabs
-              className="new-tab-container-v1"
-              value={tabValue}
-              onChange={handleMainTabChange}
-              textColor="primary"
-              TabIndicatorProps={{
-                style: {
-                  display: 'none'
-                }
-              }}
-            >
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                  </div>
-                }
-              />
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                  </div>
-                }
-              />
-            </Tabs>
+            <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+              <CustomTab index={0}>
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </CustomTab>
+              <CustomTab index={1}>
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </CustomTab>
+            </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <DetailsPage data={detailData} fields={fields} />
             </TabPanel>

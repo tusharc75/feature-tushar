@@ -1,6 +1,4 @@
 import { Box, Button, Chip, Grid, IconButton, Typography } from '@material-ui/core';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
 import { ControlPoint, Edit, ExpandLess, ExpandMore, InfoOutlined } from '@material-ui/icons';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Skeleton } from '@material-ui/lab';
@@ -11,6 +9,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -40,11 +39,6 @@ import ServiceMaster from './ServiceMaster';
 import ServicePackage from './ServicePackage';
 import NonSerializedAssetProductInventory from './inventory';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
 const minHeight = '250px';
 
 const ProductDetailsPage = () => {
@@ -229,13 +223,6 @@ const ProductDetailsPage = () => {
     }
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -262,89 +249,18 @@ const ProductDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          variant="scrollable"
-          scrollButtons="auto"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          indicatorColor="primary"
-          textColor="primary"
-          aria-label="Product Details Tab"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab className={'tabLayout'} value={0} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
-
-          {(permissions?.serializedAsset || permissions?.productionOrder) && (
-            <Tab
-              className={'tabLayout'}
-              value={1}
-              label={<div className="d-flex align-items-center tab-font">Child Products</div>}
-              {...a11yProps(1)}
-            />
-          )}
-
-          {permissions?.serviceMaster && (
-            <Tab
-              className={'tabLayout'}
-              value={2}
-              label={<div className="d-flex align-items-center tab-font">Services/Consumables</div>}
-              {...a11yProps(2)}
-            />
-          )}
-
-          {permissions?.serviceMaster && (
-            <Tab
-              className={'tabLayout'}
-              value={3}
-              label={<div className="d-flex align-items-center tab-font">Service Packages</div>}
-              {...a11yProps(3)}
-            />
-          )}
-
-          {permissions?.repairType && (
-            <Tab className={'tabLayout'} value={4} label={<div className="d-flex align-items-center tab-font">Repair Types</div>} {...a11yProps(4)} />
-          )}
-
-          {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && (
-            <Tab
-              className={'tabLayout'}
-              value={5}
-              label={<div className="d-flex align-items-center tab-font">Product Images</div>}
-              {...a11yProps(5)}
-            />
-          )}
-
-          {permissions?.packages && (
-            <Tab
-              className={'tabLayout'}
-              value={6}
-              label={<div className="d-flex align-items-center tab-font">Product Packages</div>}
-              {...a11yProps(6)}
-            />
-          )}
-
-          {(permissions?.serializedAsset || permissions?.productionOrder) && (
-            <Tab
-              className={'tabLayout'}
-              value={7}
-              label={<div className="d-flex align-items-center tab-font">Parent Products</div>}
-              {...a11yProps(7)}
-            />
-          )}
-
-          {permissions?.productInventory?.isRead && (
-            <Tab className={'tabLayout'} value={8} label={<div className="d-flex align-items-center tab-font">History</div>} {...a11yProps(8)} />
-          )}
-
-          {productData?.digitalProduct && (
-            <Tab className={'tabLayout'} value={9} label={<div className="d-flex align-items-center tab-font">Digital</div>} {...a11yProps(9)} />
-          )}
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange} aria-label="Product Details Tab" variant="scrollable" scrollButtons="auto">
+          <CustomTab className={'tabLayout'} label={'Details'} index={0} />
+          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab label={'Child Products'} index={1} />}
+          {permissions?.serviceMaster && <CustomTab index={2} label={'Services/Consumables'} />}
+          {permissions?.serviceMaster && <CustomTab index={3} label={'Service Packages'} />}
+          {permissions?.repairType && <CustomTab index={4} label={'Repair Types'} />}
+          {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <CustomTab index={5} label={'Product Images'} />}
+          {permissions?.packages && <CustomTab index={6} label={'Product Packages'} />}
+          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab index={7} label={'Parent Products'} />}
+          {permissions?.productInventory?.isRead && <CustomTab index={8} label={'History'} />}
+          {productData?.digitalProduct && <CustomTab index={9} label={'Digital'} />}
+        </CustomTabs>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {tabValue === 0 && (

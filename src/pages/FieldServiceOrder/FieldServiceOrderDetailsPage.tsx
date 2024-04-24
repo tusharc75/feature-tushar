@@ -1,4 +1,4 @@
-import { Box, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -22,14 +22,22 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, SERVICE_ORDER_STATUS, checkSuperAdminAccess, fieldServiceOrder, serviceOrderSteps, sidebarResource } from '../../constants/helpers';
+
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import {
+  ACTIVITY_RESOURCE,
+  SERVICE_ORDER_STATUS,
+  checkSuperAdminAccess,
+  fieldServiceOrder,
+  serviceOrderSteps,
+  sidebarResource
+} from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
+import Step from '../DynamicForm/Step';
 import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import FieldTicket from './FieldTicket';
 import ManageServiceOrderDialog from './ManageServiceOrder';
 import ServiceOrderViews from './RoadMapViews';
-import Step from '../DynamicForm/Step';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -105,13 +113,6 @@ const ServiceOrderDetailsPage = () => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
   };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   useEffect(() => {
     if (id) {
@@ -269,60 +270,26 @@ const ServiceOrderDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab index={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab index={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
           {!(isMobile && !isTablet) && !isOffline && (
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <RiFlowChart className="mr-1" fontSize="inherit" />
-                  Views
-                </div>
-              }
-              {...a11yProps(2)}
-            />
+            <CustomTab index={2}>
+              <RiFlowChart className="mr-1" fontSize="inherit" />
+              Views
+            </CustomTab>
           )}
           {resourceData && resourceData?.steps?.length && (
-         <Tab
-         className={'tabLayout'}
-         label={
-           <div className="d-flex align-items-center tab-font">
-             <BiFoodMenu className="mr-1" fontSize="inherit" />
-             Associations
-           </div>
-         }
-         {...a11yProps(3)}
-       />
+            <CustomTab index={3}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" />
+              Associations
+            </CustomTab>
           )}
-        </Tabs>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {!loadingDetails && serviceOrderData && serviceOrderFields.length > 0 ? (
@@ -417,13 +384,13 @@ const ServiceOrderDetailsPage = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
           <Box>
-          <Step
-                resourceData={resourceData}
-                resourceId={id}
-                resource={sidebarResource.fieldServiceOrder}
-                data={serviceOrderData}
-                allowedToEdit={permissions?.fieldServiceOrder?.isUpdate}
-              />
+            <Step
+              resourceData={resourceData}
+              resourceId={id}
+              resource={sidebarResource.fieldServiceOrder}
+              data={serviceOrderData}
+              allowedToEdit={permissions?.fieldServiceOrder?.isUpdate}
+            />
           </Box>
         </TabPanel>
       </Box>

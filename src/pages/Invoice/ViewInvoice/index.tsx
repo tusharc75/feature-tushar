@@ -4,28 +4,27 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { FaFileInvoice } from 'react-icons/fa';
+import { FaFileZipper } from 'react-icons/fa6';
 import { IoMdDownload } from 'react-icons/io';
 import { useData } from 'src/StateProvider/Provider';
 import { CancelInvoiceIcon } from 'src/assets/svg/svgIcons';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CommentDialog from 'src/components/CommentDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import PreviewDownload from 'src/components/PreviewDownload';
-import TabPanel from 'src/components/TabPanel';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CHILD_RESOURCE, CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CreditMemo from '../CreditMemo';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { FaFileZipper } from 'react-icons/fa6';
-import { FaFileInvoice } from 'react-icons/fa';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -74,7 +73,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const fetchFields = async () => {
     try {
       let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
- 
+
       const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData.currency ? invoiceData.currency : 'USD');
       var column: any = [
         {
@@ -354,7 +353,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       <>
         {dataRows &&
           dataRows?.length > 0 &&
-          [sidebarResource.fieldTicket, sidebarResource.repairOrder,sidebarResource.salesOrder]?.includes(resource) &&
+          [sidebarResource.fieldTicket, sidebarResource.repairOrder, sidebarResource.salesOrder]?.includes(resource) &&
           ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
             <ThemeButton
               iconForMobile={<CancelInvoiceIcon />}
@@ -388,32 +387,10 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
             <Box pt={1}>
               {resource === sidebarResource.fieldTicket && permissions?.creditMemo?.isRead ? (
                 <>
-                  <Tabs
-                    className="new-tab-container-v1"
-                    value={tabValue}
-                    onChange={handleMainTabChange}
-                    textColor="primary"
-                    TabIndicatorProps={{
-                      style: {
-                        height: 0
-                      }
-                    }}
-                  >
-                    <Tab
-                      className={'tabLayout'}
-                      label={<div className="d-flex align-items-center tab-font">Details</div>}
-                      value={0}
-                      aria-controls="a11y-tabpanel-0"
-                      id="a11y-tab-0"
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      label={<div className="d-flex align-items-center tab-font">{routes.creditMemo.title}</div>}
-                      value={1}
-                      aria-controls="a11y-tabpanel-1"
-                      id="a11y-tab-1"
-                    />
-                  </Tabs>
+                  <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+                    <CustomTab label={'Details'} index={0} />
+                    <CustomTab label={routes.creditMemo.title} index={1} />
+                  </CustomTabs>
                   <TabPanel value={tabValue} index={0}>
                     <Fragment>
                       {columns ? (

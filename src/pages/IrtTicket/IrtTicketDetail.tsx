@@ -17,6 +17,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import Approver from './Approver';
 import ManageIrtTicket from './ManageIrtTicket';
 import IrtTicketView from './View';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 
 const IrtTicketDetail = () => {
   const { id } = useParams();
@@ -132,41 +133,11 @@ const IrtTicketDetail = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={<div className="d-flex align-items-center tab-font">Header</div>}
-            value={0}
-            aria-controls="a11y-tabpanel-0"
-            id="a11y-tab-0"
-          />
-          <Tab
-            className={'tabLayout'}
-            label={<div className="d-flex align-items-center tab-font">Details</div>}
-            value={1}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
-          />
-          {!(isMobile && !isTablet) && (
-            <Tab
-              className={'tabLayout'}
-              label={<div className="d-flex align-items-center tab-font">Views</div>}
-              value={2}
-              aria-controls="a11y-tabpanel-1"
-              id="a11y-tab-1"
-            />
-          )}
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab label={'Header'} index={0} />
+          <CustomTab label={'Details'} index={1} />
+          {!(isMobile && !isTablet) && <CustomTab label={'Views'} index={2} />}
+        </CustomTabs>
         {tabValue === 0 && (
           <Box>
             {loading || !fields?.length ? (

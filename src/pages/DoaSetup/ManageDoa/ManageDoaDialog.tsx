@@ -82,13 +82,6 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
-
 const DoaDialog = ({
   selectedEntity,
   onSuccess,

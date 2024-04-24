@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
@@ -8,8 +8,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -124,28 +125,12 @@ export default function DeviceTemplatesDetails() {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          <Tab
-            label={<div className="tab-font">{routes.iotDataPoints.title}</div>}
-            value={1}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
-            className={'tabLayout'}
-          />
-          <Tab label={<div className="tab-font">Rules</div>} value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className={'tabLayout'} />
-          <Tab label={<div className="tab-font">Alerts</div>} value={3} aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className={'tabLayout'} />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab label={'Details'} index={0} />
+          <CustomTab label={routes.iotDataPoints.title} index={1} />
+          <CustomTab label={<div className="tab-font">Rules</div>} index={2} />
+          <CustomTab label={<div className="tab-font">Alerts</div>} index={3} />
+        </CustomTabs>
         {tabValue === 0 && (
           <Box>
             {loading || !fields.length ? (

@@ -19,6 +19,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import Comments from './Comments';
 import ManageSupportTicket from './ManageSupportTicket';
+
 const SupportTicketDetail = () => {
   const { id } = useParams();
   const history = useHistory();
@@ -130,13 +131,6 @@ const SupportTicketDetail = () => {
       });
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -169,10 +163,10 @@ const SupportTicketDetail = () => {
       </Box>
       <Box className={'detail-container-v1'}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} value={0} {...a11yProps(0)}>
+          <CustomTab index={0}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
-          <CustomTab index={1} value={1} {...a11yProps(1)}>
+          <CustomTab index={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Activity
           </CustomTab>
         </CustomTabs>
