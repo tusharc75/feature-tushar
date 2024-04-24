@@ -1,44 +1,22 @@
-import { useState, useEffect } from 'react';
-import { Box, Button, Grid, Tab, Tabs, TextField, Typography } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../../constants/helpers';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import axiosInstance from 'src/axios/axiosInstance';
+import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import { map, uniq } from 'lodash';
+import { useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { Link } from 'react-router-dom';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import routes from '../../../components/Helpers/Routes';
-import { productInventory } from '../../../constants/helpers';
-import { uniq, map } from 'lodash';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
-    </div>
-  );
-}
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
+import { CustomDialogTransition, productInventory } from '../../../constants/helpers';
 
 const SoftHoldDialog = ({ close, data, warehouse }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -102,28 +80,18 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
         showRequiredLabel={false}
       ></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
-        <Tabs
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-          value={value}
-          onChange={handleChange}
-        >
+        <CustomTabs value={value} onChange={handleChange}>
           {tabs?.map((row, index) => (
-            <Tab
-              className={'tabLayout'}
+            <CustomTab
               style={{
                 background: value === index ? 'white' : '',
                 color: value === index ? '#163340' : '#163340'
               }}
-              label={<div className="d-flex align-items-center tab-font">{row}</div>}
-              {...a11yProps(index)}
+              label={row}
+              index={index}
             />
           ))}
-        </Tabs>
+        </CustomTabs>
         <Box pt={1}>
           <TableContainer component={Paper}>
             <Table aria-label="simple table">

@@ -25,29 +25,7 @@ import ManagePackageDialog from './ManagePackageDialog';
 import Packages from './Packages';
 import Products from './Products';
 import Services from './Services';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
-    </div>
-  );
-}
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const PackageDetails = () => {
   const renderedFrom = camelCase(routes?.packages.title);
@@ -159,56 +137,22 @@ const PackageDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <MdMiscellaneousServices className="mr-1" fontSize="inherit" />
-                individual Services
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <RiShoppingBag3Fill className="mr-1" fontSize="inherit" />
-                individual Products
-              </div>
-            }
-            {...a11yProps(2)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiPackage className="mr-1" fontSize="inherit" /> Sub Packages
-              </div>
-            }
-            {...a11yProps(3)}
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab index={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab index={1}>
+            <MdMiscellaneousServices className="mr-1" fontSize="inherit" />
+            individual Services
+          </CustomTab>
+          <CustomTab index={2}>
+            <RiShoppingBag3Fill className="mr-1" fontSize="inherit" />
+            individual Products
+          </CustomTab>
+          <CustomTab index={3}>
+            <BiPackage className="mr-1" fontSize="inherit" /> Sub Packages
+          </CustomTab>
+        </CustomTabs>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={12}>
             <TabPanel value={tabValue} index={0}>
