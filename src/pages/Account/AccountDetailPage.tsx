@@ -1,7 +1,5 @@
 import { Box, Button, Card, CardContent, Grid, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@material-ui/core';
 import ListItem from '@material-ui/core/ListItem/ListItem';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
 import { Edit } from '@material-ui/icons';
 import AddIcon from '@material-ui/icons/Add';
 import { Skeleton } from '@material-ui/lab';
@@ -13,7 +11,9 @@ import { FcApproval, FcDisapprove } from 'react-icons/fc';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { AccountHierarchyIcon, AccountsTeamsIcon, ContactsIcon, OpportunityIcon, ProjectsIcon, QuoteIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -22,7 +22,6 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomNodalStructure from '../../components/CustomNodalStructure/CustomNodalStructure';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
 import ProcessFlow from '../../components/ProcessFlow';
@@ -33,6 +32,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { customerAccount, getObjKeysWithValues, isObjectEmpty, processFieldName, sidebarResource } from '../../constants/helpers';
 import { accountPage } from '../../routes/Accounts';
 import ManageContactDialog from '../Contact/ManageContact';
+import Step from '../DynamicForm/Step';
 import ManageOpportunityDialog from '../Opportunities/ManageOpportunityDialog';
 import axiosInstance from './../../axios/axiosInstance';
 import routes from './../../components/Helpers/Routes';
@@ -43,7 +43,6 @@ import RelatedContacts from './RelatedContacts';
 import SupplierItems from './SupplierItems';
 import Warehouse from './Warehouse';
 import accountClass from './account.module.scss';
-import Step from '../DynamicForm/Step';
 
 function DisplayData({ label, value, icon, highlightsHead = false }) {
   return (
@@ -804,35 +803,16 @@ export default function AccountDetailPage(props) {
           </Grid>
         ) : (
           <>
-            <Tabs
-              className="new-tab-container-v1"
-              value={tabValue}
-              onChange={handleMainTabChange}
-              textColor="primary"
-              TabIndicatorProps={{
-                style: {
-                  display: 'none'
-                }
-              }}
-            >
-              <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
-              <Tab label={<div className="tab-font">Account Hierarchy</div>} id="a11y-tab-1" className="tabLayout" />
-              <Tab label={<div className="tab-font">OM-Neurons</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
+            <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+              <CustomTab index={0} label={'Details'} />
+              <CustomTab index={1} label={'Account Hierarchy'} id="a11y-tab-1" className="tabLayout" />
+              <CustomTab index={2} label={'OM-Neurons'} />
               {accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification && (
-                <Tab label={<div className="tab-font">Supplier View</div>} aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className="tabLayout" />
+                <CustomTab index={3} label={'Supplier View'} />
               )}
-              {accountResource === 'customerAccount' && permissions?.productInventory && (
-                <Tab
-                  label={<div className="tab-font">{routes.warehouse.title}</div>}
-                  aria-controls="a11y-tabpanel-2"
-                  id="a11y-tab-2"
-                  className="tabLayout"
-                />
-              )}
-              {resourceData && resourceData?.steps?.length && (
-                <Tab label={<div className="tab-font">Associations</div>} aria-controls="a11y-tabpanel-4" id="a11y-tab-4" className="tabLayout" />
-              )}
-            </Tabs>
+              {accountResource === 'customerAccount' && permissions?.productInventory && <CustomTab index={4} label={routes.warehouse.title} />}
+              {resourceData && resourceData?.steps?.length && <CustomTab index={5} label={'Associations'} />}
+            </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Box>
                 {showAtLast ? (

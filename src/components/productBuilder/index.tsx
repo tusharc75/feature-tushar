@@ -526,7 +526,7 @@ const ProductBuilder = (props) => {
     if (Editable)
       return (
         <>
-          {rightSideContents()}
+          {typeof rightSideContents === 'function' ? rightSideContents() : null}
           {permissions?.isUpdate && (
             <ImportExportLinks
               permissions={permissions}
@@ -588,14 +588,14 @@ const ProductBuilder = (props) => {
           )}
         </>
       );
-    return rightSideContents();
+    return typeof rightSideContents === 'function' ? rightSideContents() : null;
   };
 
   return (
     <Box pt={0}>
       <DetailsPageHeader
         isAddButtonVisible={isAddButtonVisible}
-        addButtonMenuItems={addButtonMenuItems()}
+        addButtonMenuItems={typeof addButtonMenuItems === 'function' ? addButtonMenuItems() : null}
         isActionButtonVisible={Editable && permissions?.isUpdate}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{
@@ -607,8 +607,8 @@ const ProductBuilder = (props) => {
               : true
         }}
         previewDownloadProps={previewDownloadProps}
-        leftSideContents={leftSideContents()}
-        rightSideContents={updatedRightSideContents()}
+        leftSideContents={typeof leftSideContents === 'function' ? leftSideContents() : null}
+        rightSideContents={typeof updatedRightSideContents === 'function' ? updatedRightSideContents() : null}
         hasXpadding
       />
 

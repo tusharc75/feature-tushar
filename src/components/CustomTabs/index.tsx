@@ -1,7 +1,7 @@
 import React from 'react';
 
-import Tabs, { TabsProps } from '@material-ui/core/Tabs';
 import Tab, { TabProps } from '@material-ui/core/Tab';
+import Tabs, { TabsProps } from '@material-ui/core/Tabs';
 
 interface TabPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
@@ -18,7 +18,7 @@ const TabPanel = (props: TabPanelProps) => {
 };
 
 type CustomTabInterface = Omit<TabsProps, 'TabIndicatorProps' | 'TabIndicatorProps' | 'onChange'> & {
-  onChange?: (event: React.ChangeEvent<{}>, newValue: number) => void;
+  onChange?: (event: React.ChangeEvent<{}>, newValue: number | string) => void;
 };
 const CustomTabs: React.FC<CustomTabInterface> = ({ children, className = '', ...others }) => {
   return (
