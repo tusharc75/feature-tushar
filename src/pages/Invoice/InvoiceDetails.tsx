@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
@@ -24,12 +24,20 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, INVOICE_STATUS, checkSuperAdminAccess, invoice, invoiceProcessSteps, sidebarResource } from '../../constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  CHILD_RESOURCE,
+  INVOICE_STATUS,
+  checkSuperAdminAccess,
+  invoice,
+  invoiceProcessSteps,
+  sidebarResource
+} from '../../constants/helpers';
 import CreditMemo from './CreditMemo';
 import Invoice from './Invoice';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import Material from './Material';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -69,13 +77,6 @@ const InvoiceDetails = () => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
   };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   useEffect(() => {
     if (id) {
@@ -272,47 +273,34 @@ const InvoiceDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab
             label={
               <div className="d-flex align-items-center tab-font">
                 <FaWpforms className="mr-1" fontSize="inherit" /> Header
               </div>
             }
-            {...a11yProps(0)}
+            index={0}
           />
-          <Tab
-            className={'tabLayout'}
+          <CustomTab
             label={
               <div className="d-flex align-items-center tab-font">
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
               </div>
             }
-            {...a11yProps(1)}
+            index={1}
           />
           {permissions?.creditMemo?.isRead && (
-            <Tab
-              className={'tabLayout'}
+            <CustomTab
               label={
                 <div className="d-flex align-items-center tab-font">
                   <BiFoodMenu className="mr-1" fontSize="inherit" /> {routes.creditMemo.title}
                 </div>
               }
-              {...a11yProps(2)}
+              index={2}
             />
           )}
-        </Tabs>
+        </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
           <Box>

@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog } from '@material-ui/core';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -6,14 +7,12 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from 'src/constants/helpers';
-import styles from 'src/pages/Leads/Header.module.scss';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomTabs, { CustomTab } from '../CustomTabs';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
-import axios, { CancelTokenSource } from 'axios';
 
 const AssignServiceDialog = ({
   onSuccess,
@@ -191,13 +190,6 @@ const AssignServiceDialog = ({
     dispatch({ type: 'update', data: rows });
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -232,8 +224,8 @@ const AssignServiceDialog = ({
         {pricingCondition && (
           <Box>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Services`} {...a11yProps(0)} />
-              <CustomTab className={'tabLayout'} value={1} index={1} label={'All Services'} {...a11yProps(1)} />
+              <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Services`} />
+              <CustomTab className={'tabLayout'} value={1} index={1} label={'All Services'} />
             </CustomTabs>
           </Box>
         )}

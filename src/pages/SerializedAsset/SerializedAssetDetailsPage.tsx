@@ -13,7 +13,7 @@ import { MdEdit } from 'react-icons/md';
 import { RiExchangeBoxFill } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import TabPanel from 'src/components/TabPanel';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -32,19 +32,18 @@ import {
   serializedAsset,
   sidebarResource
 } from '../../constants/helpers';
+import Step from '../DynamicForm/Step';
+import Alarms from '../IotChart/Alarms';
+import Current from '../IotChart/Current';
+import PerformanceAnalysis from '../IotChart/PerformanceAnalysis';
+import Status from '../IotChart/Status';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
+import ManageSendOutboundMessage from '../SendOutboundMessage/manageSendOutboundMessage';
 import AssetHistory from './AssetHistory';
 import CertificationHistory from './CertificationHistory';
 import DepreciationHistory from './DepreciationHistory';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
-import ManageSendOutboundMessage from '../SendOutboundMessage/manageSendOutboundMessage';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
-import Step from '../DynamicForm/Step';
-import Current from '../IotChart/Current';
-import PerformanceAnalysis from '../IotChart/PerformanceAnalysis';
-import Alarms from '../IotChart/Alarms';
-import Status from '../IotChart/Status';
 // import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {
@@ -272,7 +271,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });

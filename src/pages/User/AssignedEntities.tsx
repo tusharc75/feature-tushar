@@ -1,11 +1,10 @@
 import { Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 import { ControlPoint, Delete } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -24,7 +23,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
   } = useData();
   const [currentEntity, setCurrentEntity] = useState(entities[0]);
   const [unionRoleData, setUnionRoleData] = useState(null);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -178,35 +177,32 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                 </Select>
               </FormControl>
             ) : (
-              <Tabs
+              <CustomTabs
                 variant="scrollable"
                 scrollButtons="auto"
-                className="oms-tab"
                 value={currentTabIndex}
                 onChange={(index, newValue) => {
                   setCurrentTabIndex(newValue);
                   setCurrentEntity(entities[newValue]);
                 }}
-                indicatorColor="primary"
-                textColor="primary"
-                aria-label="icon tabs example"
               >
                 {entities.map((c, i) =>
                   currentTabIndex === i ? (
-                    <>
-                      <Tab key={i} tabIndex={i} label={c?.entity?.entityName} aria-controls={`a11y-tabpanel-${i}`} id={`a11y-tab-${i}`} />
+                    <CustomTab key={i} index={i}>
+                      {c?.entity?.entityName}
                       {permissions?.user?.isDelete && !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
-                        <IconButton aria-label="delete" onClick={() => handleDeleteEntity()}>
+                        <IconButton aria-label="delete" size="small" className="ml-1" onClick={() => handleDeleteEntity()}>
                           <Delete color="error" />
                         </IconButton>
                       ) : null}
-                    </>
+                    </CustomTab>
                   ) : (
-                    <Tab key={i} tabIndex={i} label={c?.entity?.entityName} aria-controls={`a11y-tabpanel-${i}`} id={`a11y-tab-${i}`} />
+                    <CustomTab key={i} index={i} label={c?.entity?.entityName} />
                   )
                 )}
-              </Tabs>
+              </CustomTabs>
             )}
+
             <Box style={{ padding: '0px', minHeight: '300px' }}>
               <Box display="flex" padding={1} bgcolor="var(--dark-secondary, var(--accordion-expanded-summary-bg, #EFFBF9))">
                 <Grid container>
@@ -269,8 +265,8 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       field={unionRoleData ? unionRoleData.field : []}
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
-                      setField={() => {}}
-                      setResource={() => {}}
+                      setField={() => { }}
+                      setResource={() => { }}
                     />
                   </BoxWithBorder>
                 </Grid>

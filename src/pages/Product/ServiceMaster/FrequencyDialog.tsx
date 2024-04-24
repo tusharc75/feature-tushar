@@ -13,6 +13,7 @@ import { Form, Formik } from 'formik';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
+import InputField from 'src/components/Helpers/InputField';
 
 const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -89,33 +90,15 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
               <>
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    <Box mt={2}>
-                      {initialData?.fields.length > 0 &&
-                        initialData?.fields.map((field, i) => (
-                          <Box key={i}>
-                            <FormTypes
-                              {...field}
-                              fieldData={field}
-                              fields={initialData.fields}
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              label={field.fieldLabel}
-                              name={field.fieldName}
-                              type={field.type}
-                              options={field.option}
-                              setFieldValue={(name, value) => {
-                                setFieldValue(name, value);
-                              }}
-                              required={field.required}
-                              fullWidth
-                              isTooltip={field?.isTooltip || false}
-                              tooltipMessage={field?.tooltipMessage}
-                              size="small"
-                            />
-                          </Box>
-                        ))}
-                    </Box>
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>

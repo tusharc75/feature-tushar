@@ -22,7 +22,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
 import routes from 'src/components/Helpers/Routes';
 
-
 const useStyles = makeStyles((theme) => ({
   root: {
     border: '1px solid var(--common-border-color)',
@@ -124,7 +123,7 @@ const CustomerAccounts = (props) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const [expandedParent, setExpandedParent] = useState(true);
   const [expandCustomerContact, setExpandCustomerContact] = useState(false);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [collaborators, setCollaborators] = useState([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showContactCreateDialog, setShowContactCreateDialog] = useState(false);
@@ -450,8 +449,7 @@ const CustomerAccounts = (props) => {
               className={clsx(classes.expand, {
                 [classes.expandOpen]: expandedParent
               })}
-            >
-            </Box>
+            ></Box>
             <Typography variant="subtitle1" className={classes.cusName}>
               {routes.customerAccount.title}
             </Typography>
@@ -693,8 +691,8 @@ const CustomerAccounts = (props) => {
             accountDeleteRec
               ? 'Are you sure about removing this account from project?'
               : contactDeleteRec
-                ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
-                : null
+              ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
+              : null
           }
           onClose={() => {
             setShowConfirmBox(false);

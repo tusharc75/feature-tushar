@@ -233,6 +233,9 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     } else if (duplicates.length > 0) {
       errors['serialNumbers'] = `Serial numbers cannot be duplicate`;
     }
+    if(user?.user?.brandPolicy?.productInventorySerialNumberRequired && serialNumbersList.length !== Number(values['qty'])){
+      errors['serialNumbers'] = "Please add required Serial number";
+    }
 
     if (lockDate) {
       if (!moment(values['customDate']).isSameOrAfter(moment(lockDate))) {

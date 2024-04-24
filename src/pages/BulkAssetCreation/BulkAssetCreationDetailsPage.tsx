@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -18,11 +18,18 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, bulkAssetCreation, bulkAssetCreationSteps, checkSuperAdminAccess, getObjKeysWithValues, sidebarResource } from '../../constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  bulkAssetCreation,
+  bulkAssetCreationSteps,
+  checkSuperAdminAccess,
+  getObjKeysWithValues,
+  sidebarResource
+} from '../../constants/helpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import Product from './Product';
 import SerializedAsset from './SerializedAsset';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(routes?.bulkAssetCreation.title);
@@ -49,13 +56,6 @@ const BulkAssetCreationDetailsPage = () => {
   const bulkAssetCreationStepsNames = React.useMemo(() => {
     return bulkAssetCreationSteps.map((item) => item.name);
   }, [bulkAssetCreationSteps]);
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -182,36 +182,26 @@ const BulkAssetCreationDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
                 <FaWpforms className="mr-1" fontSize="inherit" /> Header
               </div>
             }
-            {...a11yProps(0)}
+            index={0}
           />
-          <Tab
+          <CustomTab
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
               </div>
             }
-            {...a11yProps(1)}
+            index={1}
           />
-        </Tabs>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loadingBulkAssetCreation || !bulkAssetCreationFields.length ? (

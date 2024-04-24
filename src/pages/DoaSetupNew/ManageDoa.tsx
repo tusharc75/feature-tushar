@@ -109,9 +109,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
         setUserList(
           data.length
             ? data.map((user: any) => ({
-                id: user._id,
-                name: `${user.firstName} ${user.lastName}`
-              }))
+              id: user._id,
+              name: `${user.firstName} ${user.lastName}`
+            }))
             : []
         );
       })
@@ -127,9 +127,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
         setRoleList(
           data.length
             ? data.map((role: any) => ({
-                id: role._id,
-                name: role.name
-              }))
+              id: role._id,
+              name: role.name
+            }))
             : []
         );
       });
@@ -194,7 +194,6 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
               getOptionLabel={(option: any) => (option?.name ? option?.name : '')}
               value={options?.filter((element) => _data?._id?.some((d) => d === element?.id))}
               onChange={(event, newValue) => {
-                console.log('touched', touched, errors);
                 arrayHelpers.replace(i, {
                   ...data[i],
                   ['_id']: newValue?.map((d) => d.id)

@@ -19,8 +19,8 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { FaDiceOne } from 'react-icons/fa';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import { useHistory } from 'react-router-dom';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManagePayrollPolicy = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -33,7 +33,6 @@ const ManagePayrollPolicy = ({ onClose, onSuccess, isClone = false, id = null })
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const history = useHistory();
 
   const fetchFields = async () => {
@@ -117,10 +116,6 @@ const ManagePayrollPolicy = ({ onClose, onSuccess, isClone = false, id = null })
   };
 
   useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData?.fields));
-  }, [initialData?.fields]);
-
-  useEffect(() => {
     fetchFields();
   }, []);
 
@@ -162,47 +157,15 @@ const ManagePayrollPolicy = ({ onClose, onSuccess, isClone = false, id = null })
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData &&
-                    formsData.map((form, index1) => {
-                      return (
-                        form.name && (
-                          <div key={index1}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field, index2) => (
-                                  <Grid key={index2} item xs={12} sm={6} md={6}>
-                                    <FormTypes
-                                      {...field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                      disabled={field.disableOnEdit}
-                                      fieldData={field}
-                                      fields={initialData?.fields}
-                                    />
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
-                      );
-                    })}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

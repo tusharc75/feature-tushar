@@ -1,9 +1,8 @@
-import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Tab, Tabs, Tooltip, Typography } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Tooltip, Typography } from '@material-ui/core';
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiOutlineMail } from 'react-icons/ai';
@@ -33,9 +32,17 @@ import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccord
 import DetailsPage from '../../components/Shared/DetailsPage';
 import Warehouse from '../Account/Warehouse';
 import axiosInstance from './../../axios/axiosInstance';
-import { checkSuperAdminAccess, customerAccount, customerContact, getObjKeysWithValues, processFieldName, sidebarResource } from './../../constants/helpers';
+import {
+  checkSuperAdminAccess,
+  customerAccount,
+  customerContact,
+  getObjKeysWithValues,
+  processFieldName,
+  sidebarResource
+} from './../../constants/helpers';
 import AddReportsToContact from './AddReportsToContact';
 import ManageContactDialog from './ManageContact';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -70,7 +77,7 @@ const ContactDetailsPage = (props) => {
     isDelete: false
   });
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [orgChartData, setOrgChartData] = useState([]);
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [opportunities, setOpportunities] = useState([]);
@@ -318,7 +325,6 @@ const ContactDetailsPage = (props) => {
       class: 'account'
     }
   ].filter((d) => d.show);
-
 
   const getContactFields = () => {
     axiosInstance()
@@ -605,7 +611,7 @@ const ContactDetailsPage = (props) => {
             </Grid>
           ) : (
             <>
-              <Tabs
+              <CustomTabs
                 className="new-tab-container-v1"
                 value={currentTabIndex}
                 onChange={(index, newValue) => {
@@ -613,12 +619,10 @@ const ContactDetailsPage = (props) => {
                 }}
                 textColor="primary"
               >
-                <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
-                <Tab label={<div className="tab-font">Org Charts</div>} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className="tabLayout" />
-                {contactResource === 'customerContact' && permissions?.productInventory && (
-                  <Tab label={<div className="tab-font">Plants</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
-                )}
-              </Tabs>
+                <CustomTab index={0} label={'Details'} />
+                <CustomTab index={1} label={'Org Charts'} />
+                {contactResource === 'customerContact' && permissions?.productInventory && <CustomTab index={2} label={'Plants'} />}
+              </CustomTabs>
               <Box hidden={currentTabIndex !== 0}>
                 {showAtLast ? (
                   <DetailsPage data={contactData} fields={contactFields} />

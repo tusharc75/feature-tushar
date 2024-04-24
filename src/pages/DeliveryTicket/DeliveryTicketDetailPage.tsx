@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState, Fragment } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Box, Grid, Button, IconButton, Tooltip, Tabs, Tab } from '@material-ui/core';
+import { Box, Grid, Button, IconButton, Tooltip } from '@material-ui/core';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import queryString from 'query-string';
 import { deliveryTicket, getObjKeysWithValues, dateTimeFormat, ACTIVITY_RESOURCE, ASSET_STATUS, rentalManagement } from '../../constants/helpers';
@@ -44,13 +44,6 @@ import DateDialog from '../RentalManagement/LoadingTicket/DateDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
 
 export default function DeliveryTicketDetail(props) {
   const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-1`;
@@ -625,8 +618,10 @@ export default function DeliveryTicketDetail(props) {
                 referenceId={deliveryTicketData?._id}
                 hideDetailButton={true}
                 fileName={`${routes.deliveryTicket.title}-${deliveryTicketData?.ticketName}`}
-                columns={serializedAssetColumns?.length ? serializedAssetColumns?.filter((e) => ['assetNumber', 'product', 'productDescription'].includes(e.accessor)) :
-                  productColumns?.filter((e) => ['productName', 'productDescription'].includes(e.accessor))
+                columns={
+                  serializedAssetColumns?.length
+                    ? serializedAssetColumns?.filter((e) => ['assetNumber', 'product', 'productDescription'].includes(e.accessor))
+                    : productColumns?.filter((e) => ['productName', 'productDescription'].includes(e.accessor))
                 }
               />
               <ActivityButton
@@ -639,19 +634,19 @@ export default function DeliveryTicketDetail(props) {
         </Box>
         <Box className={`detail-container-v1`}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-            <CustomTab index={0} value={0} className={'tabLayout'} {...a11yProps(0)} >
+            <CustomTab index={0} className={'tabLayout'}>
               <FaWpforms className="mr-1" fontSize="inherit" /> Header
             </CustomTab>
             {permissions?.serializedAsset?.isRead && (
-              <CustomTab index={1} value={1} className={'tabLayout'} {...a11yProps(1)} >
+              <CustomTab index={1} className={'tabLayout'}>
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
-              </CustomTab >
+              </CustomTab>
             )}
-            <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)} >
+            <CustomTab index={2} className={'tabLayout'}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
             </CustomTab>
             {deliveryTicketData?.additionalCost?.length > 0 && (
-              <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)}>
+              <CustomTab index={3} className={'tabLayout'}>
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Add-On
               </CustomTab>
             )}
