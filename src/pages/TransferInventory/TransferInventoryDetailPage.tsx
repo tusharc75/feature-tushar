@@ -14,7 +14,6 @@ import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
 import Steps, { getIndex } from 'src/components/Steps';
 import { transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
-import TabPanel from 'src/components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import Products from './Products';
@@ -25,6 +24,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Edit } from '@material-ui/icons';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
@@ -83,7 +83,7 @@ const TransferInventoryDetailPage = () => {
   }, [id]);
 
   useEffect(() => {
-    fetchFields()
+    fetchFields();
   }, []);
 
   const fetchFields = () => {
@@ -100,7 +100,8 @@ const TransferInventoryDetailPage = () => {
   };
 
   const fetchTransferInventoryData = () => {
-    axiosInstance().get(`${routes.transferInventory.path}/${id}`)
+    axiosInstance()
+      .get(`${routes.transferInventory.path}/${id}`)
       .then(({ data: { data } }) => {
         const userEntity = user?.entity?.map((e) => e._id) ?? [];
         if (data?.transferFromPlant?.entity?.length) {
@@ -143,7 +144,7 @@ const TransferInventoryDetailPage = () => {
       .then(() => {
         setDeleting(false);
         setShowConfirmBox(false);
-        history.push(`${routes.transferInventory.path}`)
+        history.push(`${routes.transferInventory.path}`);
       })
       .catch((error) => {
         setDeleting(false);
@@ -156,13 +157,6 @@ const TransferInventoryDetailPage = () => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
   };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const updateStatus = (status: string) => {
     axiosInstance()
@@ -185,7 +179,7 @@ const TransferInventoryDetailPage = () => {
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
         processStatus: stepNames[step]
       })
-      .then(() => { })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -199,9 +193,9 @@ const TransferInventoryDetailPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {allowedToEdit && ![TRANSFER_INVENTORY_STATUS.delivered].includes(transferInventoryData?.status) &&
-              transferInventoryData?.canComplete &&
-              (
+            {allowedToEdit &&
+              ![TRANSFER_INVENTORY_STATUS.delivered].includes(transferInventoryData?.status) &&
+              transferInventoryData?.canComplete && (
                 <Fragment>
                   <ButtonWithPulse
                     variant={'outlined'}
@@ -233,36 +227,14 @@ const TransferInventoryDetailPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab index={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab index={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !transferInventoryData ? (
