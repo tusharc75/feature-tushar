@@ -439,19 +439,22 @@ const CustomReactTable = ({
 
       // For redirecting to the domain and cell style for links
       const keys = Object.keys(ws);
-      const origin = window?.location?.origin;
+      // const origin = window?.location?.origin;
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         if (key.includes('!')) continue;
         if (ws[key].hasOwnProperty('l')) {
-          const data = ws[key];
-          data.l.Target = `${origin}${data.l.Target}`;
-          ws[key].s = {
-            font: {
-              name: 'Calibri',
-              color: { rgb: '171db1' }
-            }
-          };
+          delete ws[key].l; // this will remove link styles
+
+          //! this section will style links
+          // const data = ws[key];
+          //  data.l.Target = `${origin}${data.l.Target}`;
+          //  ws[key].s = {
+          //    font: {
+          //      name: 'Calibri',
+          //      color: { rgb: '171db1' }
+          //   }
+          //  };
         }
       }
 
