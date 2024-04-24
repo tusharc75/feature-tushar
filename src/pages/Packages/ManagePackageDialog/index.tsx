@@ -184,7 +184,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
       }}
       open={open}
     >
-      {initialData.fields.length ? (
+      {initialData?.fields?.length ? (
         <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
           {({ values, errors, touched, setFieldValue, handleSubmit }) => (
             <Fragment>

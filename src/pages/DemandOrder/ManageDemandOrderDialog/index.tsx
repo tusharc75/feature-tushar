@@ -160,7 +160,7 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
         }}
         open={open}
       >
-        {salesData && salesData.fields.length ? (
+        {salesData && salesData?.fields?.length ? (
           <Formik
             innerRef={ref}
             initialValues={salesData.initialValues}

@@ -76,7 +76,7 @@ const DataSimulationDialog = ({ onClose }) => {
         }
       }}
     >
-      {initialData.fields.length ? (
+      {initialData?.fields?.length ? (
         <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>

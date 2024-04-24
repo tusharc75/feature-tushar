@@ -129,7 +129,7 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
         }
       }}
     >
-      {initialData.fields.length ? (
+      {initialData?.fields?.length ? (
         <Formik innerRef={ref} initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>

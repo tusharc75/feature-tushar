@@ -170,7 +170,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
       }}
       fullWidth
     >
-      {initialData.fields.length ? (
+      {initialData?.fields?.length ? (
         <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
           {({ values, errors, touched, setFieldValue, handleSubmit, setValues }) => (
             <Fragment>
