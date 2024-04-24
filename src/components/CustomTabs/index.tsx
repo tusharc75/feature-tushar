@@ -50,6 +50,7 @@ const CustomTab: React.FC<CustomTabProps> = ({ children, label, className = '', 
           {children || label}
         </div>
       }
+      value={index}
       className={`tabLayout ${className} ${primaryColor ? 'primaryColoredTab' : ''}`}
       id={`main-tab-${index}`}
       aria-controls={`main-tabpanel-${index}`}
