@@ -113,7 +113,7 @@ const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess })
         });
     }
   };
-console.log(initialData.fields)
+  
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
@@ -172,7 +172,7 @@ console.log(initialData.fields)
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}

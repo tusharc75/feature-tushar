@@ -10,12 +10,9 @@ import {
   ButtonGroup,
   makeStyles,
   InputAdornment,
-  Chip,
   Tooltip,
   FormControlLabel,
   Switch,
-  Tab,
-  Tabs,
   Dialog
 } from '@material-ui/core';
 import { Autocomplete, TabPanel, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
