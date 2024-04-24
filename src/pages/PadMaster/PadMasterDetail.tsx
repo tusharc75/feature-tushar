@@ -26,7 +26,7 @@ const PadMasterDetail = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [assets, setAssets] = useState(null);

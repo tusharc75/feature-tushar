@@ -1,11 +1,10 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { BiPackage } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
-
 import { Edit } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdMiscellaneousServices } from 'react-icons/md';
