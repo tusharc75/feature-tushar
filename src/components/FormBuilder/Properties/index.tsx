@@ -14,6 +14,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import TabPanel from 'src/components/TabPanel';
 import General from './General';
 import Setting from './Setting';
+import Visibility from './Visibility';
 
 const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
@@ -224,6 +225,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.minValueServiceAdd = values.minValueServiceAdd ? values.minValueServiceAdd : '';
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
+            ele.visibilityCondition = values.visibilityCondition || [];
             ele.isSystemGenerate = values?.isSystemGenerate || false;
             if (values.isSystemGenerate) {
               ele.systemGeneratedAutoIncrement = values.systemGeneratedAutoIncrement;
@@ -553,10 +555,18 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                       <Tab
                         className={'tabLayout'}
-                        label={<div className="d-flex align-items-center tab-font">Setting</div>}
+                        style={{ padding: '0px' }}
+                        label={<div className="d-flex align-items-center tab-font">Visibility</div>}
                         value={1}
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
+                      />
+                      <Tab
+                        className={'tabLayout'}
+                        label={<div className="d-flex align-items-center tab-font">Setting</div>}
+                        value={2}
+                        aria-controls="a11y-tabpanel-2"
+                        id="a11y-tab-2"
                       />
                     </Tabs>
                     <TabPanel value={tabValue} index={0}>
@@ -573,6 +583,14 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
+                      <Visibility
+                        values={values}
+                        setFieldValue={setFieldValue}
+                        fields={fields}
+                        fieldData={fieldData}
+                      />
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={2}>
                       <Setting
                         initialValues={initialValues}
                         values={values}
