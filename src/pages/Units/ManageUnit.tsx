@@ -1,4 +1,4 @@
-import { Box, Button, Chip, CircularProgress, Dialog, TextField, Grid } from '@material-ui/core';
+import { Box, Button, Chip, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -12,15 +12,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import {
   CustomDialogTransition,
-  setFieldsInAscendingOrder,
   sidebarResource
 } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import { FaDiceOne } from 'react-icons/fa';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import InputField from 'src/components/Helpers/InputField';
 
 const ManageUnit = ({ onClose, onSuccess, id = null }) => {

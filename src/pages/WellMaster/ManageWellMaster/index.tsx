@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext, useRef, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress, Grid } from '@material-ui/core';
+import { Box, Button, CircularProgress } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -20,7 +19,6 @@ import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
-import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
