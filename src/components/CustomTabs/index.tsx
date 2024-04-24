@@ -42,12 +42,12 @@ interface CustomTabProps extends TabProps {
   index: number;
   primaryColor?: boolean;
 }
-const CustomTab: React.FC<CustomTabProps> = ({ children, className = '', index = 0, primaryColor = false, ...props }) => {
+const CustomTab: React.FC<CustomTabProps> = ({ children, label, className = '', index = 0, primaryColor = false, ...props }) => {
   return (
     <Tab
       label={
         <div className="tab-font" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {children}
+          {children || label}
         </div>
       }
       className={`tabLayout ${className} ${primaryColor ? 'primaryColoredTab' : ''}`}
