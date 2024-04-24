@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -17,13 +17,23 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import CostDialog from './CostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import RequestButton from 'src/pages/DoaSetupNew/RequestButton';
 
-const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData }) => {
-
+const Material = ({
+  allowedToEdit,
+  allowedToAddMaterial,
+  purchaseRequisitionData,
+  updateDOASetup = null,
+  currentStep,
+  DOAData = null,
+  fetchParentData = null,
+  setNextStep,
+  setPrevStep
+}) => {
   const renderedFrom = `${camelCase(routes?.purchaseRequisition.title)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -50,7 +60,11 @@ const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseRequisitionDetail, purchaseRequisitionData?.currency, allowedToEdit && allowedToAddMaterial);
+    var data = await fetch_child_resource_fields(
+      CHILD_RESOURCE.purchaseRequisitionDetail,
+      purchaseRequisitionData?.currency,
+      allowedToEdit && allowedToAddMaterial
+    );
     setAllFields(data);
     const newColumns = generateColumns(renderedFrom, data, null, false, purchaseRequisitionData?.currency);
     let coloum: any = [
@@ -105,7 +119,7 @@ const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData
             ) : (
               <p className="text-truncate">{row.original?.detail}</p>
             )}
-            {![MATERIAL_TYPE.manualEntry]?.includes(row.original.type) &&
+            {![MATERIAL_TYPE.manualEntry]?.includes(row.original.type) && (
               <Box ml={1}>
                 <IconButton
                   size="small"
@@ -122,7 +136,7 @@ const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData
                   <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>
               </Box>
-            }
+            )}
           </div>
         )
       },
@@ -177,6 +191,10 @@ const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
+    if (currentStep === 'DOA') {
+      setNextStep(false);
+      setPrevStep(false);
+    }
     var data: any = [];
     const response = await axiosInstance().get(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`);
     data = response?.data?.data;
@@ -184,22 +202,31 @@ const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData
     let costData: any = await axiosInstance().get(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}`);
     costData = costData?.data?.data || [];
     costData?.forEach((e) => {
-      e.type = MATERIAL_TYPE.manualEntry
-    })
+      e.type = MATERIAL_TYPE.manualEntry;
+    });
 
     let rows = data.material.filter((e) => e.parentId === null);
-    rows = [...rows, ...costData]
+    rows = [...rows, ...costData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName
+      parent.detail =
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.serviceName
           : parent.detail || parent.description;
-      parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription
-        : parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceDescription
+      parent.description =
+        parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productDescription
+          : parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.serviceDescription
           : parent.description;
     });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
+    if (updateDOASetup) {
+      updateDOASetup(data?.doaSetup);
+    }
   };
 
   const onMaterialEdit = (row, rows) => {
@@ -209,8 +236,7 @@ const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData
         data: row,
         showSaveAndNext: row?.index < rows?.length ? true : false
       });
-    }
-    else {
+    } else {
       setMaterialEdit({
         open: true,
         data: row,
@@ -260,7 +286,6 @@ const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData
         toastConfig.setToastConfig(error);
       });
   };
-
 
   const handleAdd = async (rows) => {
     setSubmitting(true);
@@ -332,7 +357,7 @@ const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData
 
   const handleDelete = (rows) => {
     setDeleting(true);
-    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id)
+    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id);
     const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry);
     if (products?.length) {
       axiosInstance()
@@ -429,18 +454,36 @@ const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData
         </MenuItem>
         <MenuItem
           onClick={() => {
-            const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection).map((rec: any) => {
-              const obj: any = {};
-              obj.id = rec._id;
-              obj.type = rec?.type;
-              obj.materialId = rec?.materialId;
-              return obj;
-            });
+            const dataToDelete = selectedRecords
+              ?.filter((e) => !e.hideSelection)
+              .map((rec: any) => {
+                const obj: any = {};
+                obj.id = rec._id;
+                obj.type = rec?.type;
+                obj.materialId = rec?.materialId;
+                return obj;
+              });
             setDeleteData(dataToDelete);
           }}
         >
           Delete
         </MenuItem>
+      </>
+    );
+  };
+
+  const rightSideContents = () => {
+    return (
+      <>
+        {!DOAData && currentStep === 'DOA' && (
+          <RequestButton
+            resource={sidebarResource.purchaseRequisition}
+            id={purchaseRequisitionData._id}
+            entity={purchaseRequisitionData.entity}
+            processStatus={currentStep}
+            fetchParentData={fetchParentData}
+          />
+        )}
       </>
     );
   };
@@ -456,6 +499,7 @@ const Material = ({ allowedToEdit, allowedToAddMaterial, purchaseRequisitionData
           actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
           previewDownloadProps={previewDownloadProps}
           hasXpadding={true}
+          rightSideContents={rightSideContents()}
         />
       )}
       {columns ? (

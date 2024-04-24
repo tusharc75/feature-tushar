@@ -23,9 +23,9 @@ import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import Material from './Material';
 import Steps, { getIndex } from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import ShowDoa from '../DoaSetupNew/ShowDoa';
 
 const PurchaseRequisitionDetail = () => {
-
   const renderedFrom = camelCase(routes?.purchaseRequisition.title);
   const { id } = useParams();
   const history = useHistory();
@@ -41,8 +41,12 @@ const PurchaseRequisitionDetail = () => {
   const [tabValue, setTabValue] = useState(0);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], services: [] });
   const [nextStep, setNextStep] = useState(true);
+  const [prevStep, setPrevStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [stepList, setStepList] = useState(purchaseRequisitionSteps);
+  const [stepNames, setStepNames] = useState(purchaseRequisitionSteps.map((item) => item.name));
+  const [DOAData, setDOAData] = useState(null);
   const {
     state: { permissions, user }
   }: any = useData();
@@ -65,6 +69,16 @@ const PurchaseRequisitionDetail = () => {
       });
   };
 
+  const updateDOASetup = (doaSetup) => {
+    if (doaSetup) {
+      setStepList(purchaseRequisitionSteps);
+      setStepNames(purchaseRequisitionSteps?.map((item) => item.name));
+    } else {
+      setStepList(purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA'));
+      setStepNames(purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA').map((item) => item.name));
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -75,11 +89,26 @@ const PurchaseRequisitionDetail = () => {
       if (checkSuperAdminAccess(user, sidebarResource.purchaseRequisition)) {
         isAllowedToEdit = true;
       }
+      var tempStepList = purchaseRequisitionSteps;
+      if (!data?.doaSetup) {
+        tempStepList = purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA');
+      }
+      setStepList(tempStepList);
+      setStepNames(tempStepList?.map((item) => item.name));
+
       setCurrentStep(getIndex(data?.processStatus, purchaseRequisitionSteps));
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPurchaseRequisitionData(data);
       setCustomizedRoutes([routes.purchaseRequisition, { title: data?.purchaseRequisitionNumber }]);
+
+      if (data?.doaSetup) {
+        const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/${data?._id}?entity=${data?.entity}`);
+        if (doaResponse?.data?.data) {
+          setDOAData(doaResponse?.data?.data);
+        }
+      }
+
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -236,38 +265,66 @@ const PurchaseRequisitionDetail = () => {
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
             ) : (
-              <Grid item xs={12} sm={12} md={12} lg={12}>
-                <Steps
-                  isNextStep={false}
-                  nextStep={nextStep}
-                  steps={purchaseRequisitionSteps}
-                  currentStep={currentStep}
-                  setCurrentStep={setCurrentStep}
-                  isStepEnded={false}
-                  setStepFullScreen={() => setStepFullScreen(true)}
-                />
-                <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                  {currentStep === 0 && (
-                    <Material
-                      allowedToEdit={allowedToEdit}
-                      allowedToAddMaterial={true}
-                      purchaseRequisitionData={purchaseRequisitionData}
-                    />
-                  )}
-                  {currentStep === 1 && (
-                    <Material
-                      allowedToEdit={allowedToEdit}
-                      allowedToAddMaterial={false}
-                      purchaseRequisitionData={purchaseRequisitionData} />
-                  )}
-                  {currentStep === 2 && (
-                    <Material
-                      allowedToEdit={allowedToEdit}
-                      allowedToAddMaterial={false}
-                      purchaseRequisitionData={purchaseRequisitionData} />
-                  )}
-                </ContentFullScreen>
-              </Grid>
+              <>
+                {stepNames[currentStep] === 'DOA' && (
+                  <Box
+                    style={{
+                      marginLeft: 'auto',
+                      maxWidth: 'max-content',
+                      marginTop: '-30px'
+                    }}
+                  >
+                    <ShowDoa status={purchaseRequisitionData?.doa_status} data={DOAData} />
+                  </Box>
+                )}
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Steps
+                    isNextStep={false}
+                    nextStep={nextStep}
+                    steps={stepList}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                    isStepEnded={false}
+                    isPrevStep={prevStep}
+                    setStepFullScreen={() => setStepFullScreen(true)}
+                  />
+                  <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                    {stepNames[currentStep] === 'Add' && purchaseRequisitionData && (
+                      <Material
+                        allowedToEdit={allowedToEdit}
+                        allowedToAddMaterial={true}
+                        purchaseRequisitionData={purchaseRequisitionData}
+                        updateDOASetup={updateDOASetup}
+                        currentStep={stepNames[currentStep]}
+                        setNextStep={setNextStep}
+                        setPrevStep={setPrevStep}
+                      />
+                    )}
+                    {stepNames[currentStep] === 'DOA' && purchaseRequisitionData && (
+                      <Material
+                        allowedToEdit={allowedToEdit}
+                        allowedToAddMaterial={false}
+                        purchaseRequisitionData={purchaseRequisitionData}
+                        currentStep={stepNames[currentStep]}
+                        DOAData={DOAData}
+                        fetchParentData={fetchData}
+                        setNextStep={setNextStep}
+                        setPrevStep={setPrevStep}
+                      />
+                    )}
+                    {stepNames[currentStep] === 'END' && purchaseRequisitionData && (
+                      <Material
+                        allowedToEdit={allowedToEdit}
+                        allowedToAddMaterial={false}
+                        purchaseRequisitionData={purchaseRequisitionData}
+                        currentStep={stepNames[currentStep]}
+                        setNextStep={setNextStep}
+                        setPrevStep={setPrevStep}
+                      />
+                    )}
+                  </ContentFullScreen>
+                </Grid>
+              </>
             )}
           </Grid>
         </TabPanel>

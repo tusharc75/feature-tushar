@@ -1222,6 +1222,10 @@ const routes = {
     title: storedRoutes && storedRoutes.workOrderPlanning && storedRoutes.workOrderPlanning.title ? storedRoutes.workOrderPlanning?.title : sidebarResource.workOrderPlanning,
     path: '/work-order-planning'
   },
+  resourceDoaRequest: {
+    title: storedRoutes && storedRoutes.resourceDoaRequest && storedRoutes.resourceDoaRequest.title ? storedRoutes.resourceDoaRequest?.title : sidebarResource.resourceDoaRequest,
+    path: '/resource-doa-request'
+  },
 };
 
 export default routes;
