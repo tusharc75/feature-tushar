@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import Tab, { TabProps } from '@material-ui/core/Tab';
 import Tabs, { TabsProps } from '@material-ui/core/Tabs';
