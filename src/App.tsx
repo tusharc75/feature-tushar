@@ -252,6 +252,7 @@ import SerializedAssetStatusChangeRequest from './pages/SerializedAsset/Serializ
 import Units from './pages/Units';
 import UnitDetail from './pages/Units/UnitDetail';
 import WorkOrderPlanning from './pages/WorkOrderPlanning';
+import ResourceDoaRequest from './pages/ResourceDoaRequest';
 
 
 var notificationInterval: any = null;
@@ -1118,6 +1119,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.workOrderPlanning.path}>
               <WorkOrderPlanning />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.resourceDoaRequest.path}>
+              <ResourceDoaRequest />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
