@@ -120,8 +120,8 @@ const WorkStationsDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab label={'Details'} index={0} />
-          <CustomTab label={'Active Services'} index={1} />
+          <CustomTab label={'Details'} value={0} />
+          <CustomTab label={'Active Services'} value={1} />
         </CustomTabs>
         {tabValue === 0 && (
           <Box>

@@ -1,19 +1,16 @@
-import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
+import { FC, useEffect, useState, Fragment, useRef } from 'react';
 import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
+import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../../components/Helpers/CustomButton';
-import { FaDiceOne } from 'react-icons/fa';
-import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
+import { isEqual } from 'lodash';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
 

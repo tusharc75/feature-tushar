@@ -152,12 +152,12 @@ const WarehouseDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs className="new-tab-container-v1" value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab label={'Details'} index={0} />
+          <CustomTab label={'Details'} value={0} />
           {permissions?.storageLocation?.isRead && user?.user?.brandPolicy?.storageLocation && (
-            <CustomTab label={routes.storageLocation.title} index={1} />
+            <CustomTab label={routes.storageLocation.title} value={1} />
           )}
-          {user?.user?.brandPolicy?.warehouseAccessByUser && <CustomTab label={'Users'} index={2} />}
-          {resourceData && resourceData?.steps?.length && <CustomTab label={'Associations'} index={3} />}
+          {user?.user?.brandPolicy?.warehouseAccessByUser && <CustomTab label={'Users'} value={2} />}
+          {resourceData && resourceData?.steps?.length && <CustomTab label={'Associations'} value={3} />}
         </CustomTabs>
         {tabValue === 0 && (
           <Box>

@@ -273,7 +273,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
         <Box>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             {serviceStatus?.map((status, i) => {
-              return <CustomTab key={status} label={status} index={status} value={status} />;
+              return <CustomTab key={status} label={status} value={status} />;
             })}
           </CustomTabs>
           <DetailsPageHeader

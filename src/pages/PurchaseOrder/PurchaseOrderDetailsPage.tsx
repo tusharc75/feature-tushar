@@ -259,26 +259,26 @@ const PurchaseOrderDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} value={0}>
+          <CustomTab value={0}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Header
           </CustomTab>
           {purchaseOrderData?.deleted ? null : (
-            <CustomTab index={1} value={1}>
+            <CustomTab value={1}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
             </CustomTab>
           )}
           {purchaseOrderData?.deleted ? null : (
-            <CustomTab index={3} value={2}>
+            <CustomTab value={2}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Invoice
             </CustomTab>
           )}
           {purchaseOrderData?.deleted || (isMobile && !isTablet) ? null : (
-            <CustomTab index={3} value={3}>
+            <CustomTab value={3}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
           {resourceData && resourceData?.steps?.length && (
-            <CustomTab index={4} value={5} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
+            <CustomTab value={4}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
             </CustomTab>
           )}

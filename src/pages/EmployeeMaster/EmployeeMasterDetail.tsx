@@ -191,8 +191,8 @@ const EmployeeMasterDetail = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Details</div>} index={0} />
-          <CustomTab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">History</div>} index={1} />
+          <CustomTab value={0} label={'Details'} />
+          <CustomTab value={1} label={'History'} />
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (

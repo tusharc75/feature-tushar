@@ -543,27 +543,11 @@ const RentalManagementDetailsPage = () => {
         </Box>
         <Box className={`detail-container-v1`}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-            <CustomTab index={0} value={0}>
-              Header
-            </CustomTab>
-            <CustomTab index={1} value={1}>
-              Details
-            </CustomTab>
-            {resourceData && resourceData?.steps?.length > 0 && (
-              <CustomTab index={2} value={2}>
-                Associations
-              </CustomTab>
-            )}
-            {displayProgressiveBillingTab && (
-              <CustomTab index={3} value={3}>
-                Progressive Billing
-              </CustomTab>
-            )}
-            {!isOffline && !(isMobile && !isTablet) && (
-              <CustomTab index={4} value={4}>
-                Views
-              </CustomTab>
-            )}
+            <CustomTab value={0}>Header</CustomTab>
+            <CustomTab value={1}>Details</CustomTab>
+            {resourceData && resourceData?.steps?.length > 0 && <CustomTab value={2}>Associations</CustomTab>}
+            {displayProgressiveBillingTab && <CustomTab value={3}>Progressive Billing</CustomTab>}
+            {!isOffline && !(isMobile && !isTablet) && <CustomTab value={4}>Views</CustomTab>}
           </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             <Box>

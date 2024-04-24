@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment, useContext, useRef, FC } from 'react';
+import { useState, useEffect, Fragment, useContext, FC } from 'react';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -14,10 +14,8 @@ import { CustomDialogTransition, transferInventory, setFieldsInAscendingOrder, G
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { useData } from 'src/StateProvider/Provider';
-import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 

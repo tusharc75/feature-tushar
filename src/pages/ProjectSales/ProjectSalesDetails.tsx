@@ -347,23 +347,11 @@ const ProjectSalesDetails = () => {
                 setCurrentTabIndex(newValue);
               }}
             >
-              <CustomTab index={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0">
-                Header
-              </CustomTab>
-              <CustomTab index={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1">
-                OM-Neurons
-              </CustomTab>
-              <CustomTab index={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
-                Project Team
-              </CustomTab>
-              <CustomTab index={3} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
-                {routes.customerAccount.title}
-              </CustomTab>
-              {resourceData && resourceData?.steps?.length && (
-                <CustomTab index={4} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
-                  Associations
-                </CustomTab>
-              )}
+              <CustomTab value={0}>Header</CustomTab>
+              <CustomTab value={1}>OM-Neurons</CustomTab>
+              <CustomTab value={2}>Project Team</CustomTab>
+              <CustomTab value={3}>{routes.customerAccount.title}</CustomTab>
+              {resourceData && resourceData?.steps?.length && <CustomTab value={4}>Associations</CustomTab>}
             </CustomTabs>
             <TabPanel value={currentTabIndex} index={0}>
               <Box>
@@ -512,8 +500,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName} ?`
               : removeUserRec
-                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName} ?`
-                : ''
+              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName} ?`
+              : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

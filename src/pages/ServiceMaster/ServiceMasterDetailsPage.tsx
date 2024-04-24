@@ -133,9 +133,9 @@ const ServiceMasterDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab label={<>Details</>} index={0} />
-          <CustomTab label={<>Steps</>} index={1} />
-          <CustomTab label={<>Consumables/Tools</>} index={2} />
+          <CustomTab value={0} label={<>Details</>} />
+          <CustomTab value={1} label={<>Steps</>} />
+          <CustomTab value={2} label={<>Consumables/Tools</>} />
         </CustomTabs>
         <Grid container spacing={2}>
           <Grid item xs={12}>

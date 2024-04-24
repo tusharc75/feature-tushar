@@ -126,10 +126,10 @@ export default function DeviceTemplatesDetails() {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab label={'Details'} index={0} />
-          <CustomTab label={routes.iotDataPoints.title} index={1} />
-          <CustomTab label={<div className="tab-font">Rules</div>} index={2} />
-          <CustomTab label={<div className="tab-font">Alerts</div>} index={3} />
+          <CustomTab value={0} label={'Details'} />
+          <CustomTab value={1} label={routes.iotDataPoints.title} />
+          <CustomTab value={2} label={'Rules'} />
+          <CustomTab value={3} label={'Alerts'} />
         </CustomTabs>
         {tabValue === 0 && (
           <Box>

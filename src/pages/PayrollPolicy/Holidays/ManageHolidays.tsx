@@ -3,7 +3,6 @@ import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaDiceOne } from 'react-icons/fa';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -12,7 +11,6 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
 import {

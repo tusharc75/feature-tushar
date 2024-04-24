@@ -530,35 +530,13 @@ const WorkOrderDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} value={0}>
-            Header
-          </CustomTab>
-          <CustomTab index={1} value={1}>
-            Services
-          </CustomTab>
-          {!user?.user?.brandPolicy?.workOrderConsumableHide && (
-            <CustomTab index={2} value={2}>
-              Products/Consumables
-            </CustomTab>
-          )}
-          {user?.user?.brandPolicy?.workOrderBom && (
-            <CustomTab index={3} value={3}>
-              BOM
-            </CustomTab>
-          )}
-          <CustomTab index={4} value={4}>
-            Drawings
-          </CustomTab>
-          {!(isMobile && !isTablet) && (
-            <CustomTab index={5} value={5}>
-              Views
-            </CustomTab>
-          )}
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab index={6} value={6}>
-              Associations
-            </CustomTab>
-          )}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Services</CustomTab>
+          {!user?.user?.brandPolicy?.workOrderConsumableHide && <CustomTab value={2}>Products/Consumables</CustomTab>}
+          {user?.user?.brandPolicy?.workOrderBom && <CustomTab value={3}>BOM</CustomTab>}
+          <CustomTab value={4}>Drawings</CustomTab>
+          {!(isMobile && !isTablet) && <CustomTab value={5}>Views</CustomTab>}
+          {resourceData && resourceData?.steps?.length && <CustomTab value={6}>Associations</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

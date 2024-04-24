@@ -188,14 +188,8 @@ const DynamicFormDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} value={0}>
-            Header
-          </CustomTab>
-          {resourceData && resourceData?.steps?.length > 0 && (
-            <CustomTab index={1} value={1}>
-              Associations
-            </CustomTab>
-          )}
+          <CustomTab value={0}>Header</CustomTab>
+          {resourceData && resourceData?.steps?.length > 0 && <CustomTab value={1}>Associations</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (

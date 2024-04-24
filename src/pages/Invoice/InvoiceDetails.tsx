@@ -94,7 +94,7 @@ const InvoiceDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -274,31 +274,16 @@ const InvoiceDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            index={0}
-          />
-          <CustomTab
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            index={1}
-          />
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
           {permissions?.creditMemo?.isRead && (
-            <CustomTab
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <BiFoodMenu className="mr-1" fontSize="inherit" /> {routes.creditMemo.title}
-                </div>
-              }
-              index={2}
-            />
+            <CustomTab value={2}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> {routes.creditMemo.title}
+            </CustomTab>
           )}
         </CustomTabs>
 

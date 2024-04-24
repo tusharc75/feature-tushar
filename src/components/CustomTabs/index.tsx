@@ -39,10 +39,10 @@ const CustomTabs: React.FC<CustomTabInterface> = ({ children, className = '', ..
 
 interface CustomTabProps extends TabProps {
   children?: React.ReactNode | string;
-  index: number;
+  value: number;
   primaryColor?: boolean;
 }
-const CustomTab: React.FC<CustomTabProps> = ({ children, label, className = '', index = 0, primaryColor = false, ...props }) => {
+const CustomTab: React.FC<CustomTabProps> = ({ children, label, className = '', value = 0, primaryColor = false, ...props }) => {
   return (
     <Tab
       label={
@@ -50,9 +50,10 @@ const CustomTab: React.FC<CustomTabProps> = ({ children, label, className = '', 
           {children || label}
         </div>
       }
+      value={value}
       className={`tabLayout ${className} ${primaryColor ? 'primaryColoredTab' : ''}`}
-      id={`main-tab-${index}`}
-      aria-controls={`main-tabpanel-${index}`}
+      id={`main-tab-${value}`}
+      aria-controls={`main-tabpanel-${value}`}
       {...props}
     />
   );
