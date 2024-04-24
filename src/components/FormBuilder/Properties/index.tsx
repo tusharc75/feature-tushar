@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Dialog, Box, Tab, Tabs } from '@material-ui/core';
-import FieldList from '../FieldList';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { Box, Button, Dialog, Tab, Tabs } from '@material-ui/core';
+import { Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomTabs, { TabPanel, CustomTab } from 'src/components/CustomTabs';
+import { object, string } from 'yup';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { object, string } from 'yup';
-import { Formik, Form } from 'formik';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, fieldLabelToFieldName } from '../../../constants/helpers';
-import { isEqual } from 'lodash';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { checkFormula } from '../../../constants/formulaUtility';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import TabPanel from 'src/components/TabPanel';
+import { CustomDialogTransition, fieldLabelToFieldName } from '../../../constants/helpers';
+import FieldList from '../FieldList';
 import General from './General';
 import Setting from './Setting';
 
@@ -532,33 +532,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               <Box>
                 <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
                   <Box pt={1}>
-                    <Tabs
-                      className="new-tab-container-v1"
-                      value={tabValue}
-                      onChange={handleTabChange}
-                      textColor="primary"
-                      TabIndicatorProps={{
-                        style: {
-                          height: 0
-                        }
-                      }}
-                    >
-                      <Tab
-                        className={'tabLayout'}
-                        style={{ padding: '0px' }}
-                        label={<div className="d-flex align-items-center tab-font">General</div>}
-                        value={0}
-                        aria-controls="a11y-tabpanel-0"
-                        id="a11y-tab-0"
-                      />
-                      <Tab
-                        className={'tabLayout'}
-                        label={<div className="d-flex align-items-center tab-font">Setting</div>}
-                        value={1}
-                        aria-controls="a11y-tabpanel-1"
-                        id="a11y-tab-1"
-                      />
-                    </Tabs>
+                    <CustomTabs value={tabValue} onChange={handleTabChange}>
+                      <CustomTab label={'General'} index={0} />
+                      <CustomTab label={'Setting'} index={1} />
+                    </CustomTabs>
                     <TabPanel value={tabValue} index={0}>
                       <General
                         values={values}
