@@ -106,7 +106,11 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
   }, [columns, renderCount, selectedServiceOption, tabValue]);
 
   const fetchColumns = async () => {
-    var fields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation);
+    var fields = await fetch_child_resource_fields(
+      CHILD_RESOURCE.fieldTicketMateial,
+      fieldTicketData?.currency,
+      allowedToEdit && !fieldTicketData?.quotation
+    );
     setAllFields(JSON.parse(JSON.stringify(fields)));
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     const column: any = [
@@ -560,8 +564,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
         </Box>
       )}
       <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-        <CustomTab index={0} label={'Products/Consumables'} value={0} primaryColor={true} />
-        <CustomTab index={1} label={'Technicians'} value={1} primaryColor={true} />
+        <CustomTab value={0} label={'Products/Consumables'} primaryColor={true} />
+        <CustomTab value={1} label={'Technicians'} primaryColor={true} />
       </CustomTabs>
 
       <TabPanel value={tabValue} index={0}>

@@ -524,12 +524,12 @@ const UserDetailsPage = () => {
               ) : (
                 <>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                    <CustomTab index={0} value={0} label={'Details asd'} />
-                    <CustomTab index={1} value={1} label={'Org Chart'} />
-                    {userData?.proxyDOA?.optionValue && <CustomTab index={2} value={2} label={'DOA Proxy'} />}
-                    <CustomTab index={3} value={3} label={'User Session'} />
-                    <CustomTab index={4} value={4} label={'Assigned Entity'} />
-                    <CustomTab index={5} value={5} label={'Approval Process'} />
+                    <CustomTab value={0} label={'Details asd'} />
+                    <CustomTab value={1} label={'Org Chart'} />
+                    {userData?.proxyDOA?.optionValue && <CustomTab value={2} label={'DOA Proxy'} />}
+                    <CustomTab value={3} label={'User Session'} />
+                    <CustomTab value={4} label={'Assigned Entity'} />
+                    <CustomTab value={5} label={'Approval Process'} />
                   </CustomTabs>
 
                   <TabPanel value={tabValue} index={0}>

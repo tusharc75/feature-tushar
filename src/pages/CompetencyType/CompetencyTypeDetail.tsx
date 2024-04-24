@@ -127,8 +127,8 @@ const CompetencyMasterDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab label={'Details'} index={0} />
-          {permissions?.competencies?.isRead && <CustomTab label={routes?.competencies.title} index={1} />}
+          <CustomTab value={0} label={'Details'} />
+          {permissions?.competencies?.isRead && <CustomTab value={1} label={routes?.competencies.title} />}
         </CustomTabs>
         {tabValue === 0 && (
           <Box>

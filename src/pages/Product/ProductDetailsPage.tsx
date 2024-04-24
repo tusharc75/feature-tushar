@@ -250,16 +250,16 @@ const ProductDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange} aria-label="Product Details Tab" variant="scrollable" scrollButtons="auto">
-          <CustomTab className={'tabLayout'} label={'Details'} index={0} value={0} />
-          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab label={'Child Products'} index={1} value={1} />}
-          {permissions?.serviceMaster && <CustomTab index={2} label={'Services/Consumables'} value={2} />}
-          {permissions?.serviceMaster && <CustomTab index={3} label={'Service Packages'} value={3} />}
-          {permissions?.repairType && <CustomTab index={4} label={'Repair Types'} value={4} />}
-          {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <CustomTab index={5} value={5} label={'Product Images'} />}
-          {permissions?.packages && <CustomTab index={6} label={'Product Packages'} value={6} />}
-          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab index={7} value={7} label={'Parent Products'} />}
-          {permissions?.productInventory?.isRead && <CustomTab index={8} label={'History'} value={8} />}
-          {productData?.digitalProduct && <CustomTab index={9} label={'Digital'} value={9} />}
+          <CustomTab value={0} className={'tabLayout'} label={'Details'} />
+          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={1} label={'Child Products'} />}
+          {permissions?.serviceMaster && <CustomTab value={2} label={'Services/Consumables'} />}
+          {permissions?.serviceMaster && <CustomTab value={3} label={'Service Packages'} />}
+          {permissions?.repairType && <CustomTab value={4} label={'Repair Types'} />}
+          {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <CustomTab value={5} label={'Product Images'} />}
+          {permissions?.packages && <CustomTab value={6} label={'Product Packages'} />}
+          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={7} label={'Parent Products'} />}
+          {permissions?.productInventory?.isRead && <CustomTab value={8} label={'History'} />}
+          {productData?.digitalProduct && <CustomTab value={9} label={'Digital'} />}
         </CustomTabs>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={12} lg={12}>

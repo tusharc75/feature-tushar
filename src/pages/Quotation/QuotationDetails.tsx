@@ -564,19 +564,19 @@ const QuotationDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0}>
+          <CustomTab value={0}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Header
           </CustomTab>
-          <CustomTab index={1}>
+          <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
           {!(isMobile && !isTablet) && (
-            <CustomTab index={2}>
+            <CustomTab value={2}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
           {resourceData && resourceData?.steps?.length && (
-            <CustomTab index={3}>
+            <CustomTab value={3}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
             </CustomTab>
           )}
@@ -609,10 +609,10 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-              <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
-                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-              </Box>
-            )}
+            <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
+              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+            </Box>
+          )}
           <div>
             <Steps
               isNextStep={false}
@@ -629,8 +629,8 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
-                    setCustomerAcceptable(true);
-                  }
+                      setCustomerAcceptable(true);
+                    }
                   : null
               }
             />
