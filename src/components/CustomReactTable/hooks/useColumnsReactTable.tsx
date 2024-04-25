@@ -377,7 +377,6 @@ export default function useColumns() {
             </div>
           ),
           disableFilters: true,
-          disableSortBy: true
         });
       } else if (field?.type === 'dateTime') {
         column.push({
@@ -394,7 +393,6 @@ export default function useColumns() {
             </div>
           ),
           disableFilters: true,
-          disableSortBy: true
         });
       } else if (field?.type === 'checkBox') {
         column.push({
