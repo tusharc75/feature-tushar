@@ -87,7 +87,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
                 permissions?.supplierAccount?.isRead ? (
                   <Link
                     className="link"
-                    target="_blanck"
+                    target="_blank"
                     title={row.original?.supplierAccount}
                     to={`${routes.supplierAccountDetail.path}/${row.original?.supplierAccountId}`}
                   >
