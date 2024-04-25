@@ -262,7 +262,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
 
     const { data: { data } } = await axiosInstance().get(`${fieldServiceOrder.api}/${fieldServiceOrderId}`);
 
-    const referenceData: any = cloneResourceData(fieldServiceOrderFields?.map((e) => e?.fieldData), initialData?.fields, data);
+    const referenceData: any = cloneResourceData(fieldServiceOrderFields?.map((e) => e?.fieldData), initialData?.fields, data, user.user?.brandCurrency);
 
     const tempInitialData = getObjKeys('', initialData?.fields);
     tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(initialData?.fields);

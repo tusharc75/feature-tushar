@@ -156,7 +156,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
             errors.storageLocation = 'Storage Location is required';
           }
         }
-        if (parseInt(d.inventoryQuantity)) {
+        if (parseInt(d.inventoryQuantity) && tempProduct?.serializedProduct) {
           if (d.serialNumber?.length > parseInt(d.inventoryQuantity)) {
             errors['serialNumber'] = `Please enter serial numbers same as quantity`;
           }

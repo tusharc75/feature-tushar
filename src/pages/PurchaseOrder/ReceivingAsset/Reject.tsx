@@ -129,17 +129,19 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
             errors.storageLocation = 'Storage Location is required';
           }
         }
-        if (tempProduct?.assetQty) {
-          if (tempProduct?.qty - (tempProduct?.actualReceived || 0) < parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0)) {
-            const removeActualReceivedQty =
-              parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
-            if (d?.assetIds?.length !== removeActualReceivedQty) {
-              errors.assetIds = `Selected ${routes.serializedAsset.title} must be equal to reject quantity`;
+        if (tempProduct?.serializedProduct) {
+          if (tempProduct?.assetQty) {
+            if (tempProduct?.qty - (tempProduct?.actualReceived || 0) < parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0)) {
+              const removeActualReceivedQty =
+                parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
+              if (d?.assetIds?.length !== removeActualReceivedQty) {
+                errors.assetIds = `Selected ${routes.serializedAsset.title} must be equal to reject quantity`;
+              }
             }
           }
-        }
-        if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && parseInt(d.rejectQuantity) !== d.serialNumber?.length) {
-          errors['serialNumber'] = `Please enter serial numbers same as reject quantity`;
+          if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && parseInt(d.rejectQuantity) !== d.serialNumber?.length) {
+            errors['serialNumber'] = `Please enter serial numbers same as reject quantity`;
+          }
         }
       });
     }

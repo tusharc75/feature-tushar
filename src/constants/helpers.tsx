@@ -2518,7 +2518,7 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'iotDataPoints',
     defaultColumn: true,
-    notMultiSelectFields: ['asset','interval']
+    notMultiSelectFields: ['asset', 'interval']
   }
 ];
 
@@ -3047,27 +3047,29 @@ export const DEAL_STAGE = {
   renewalSigned: 'Renewal Signed'
 };
 
-export const cloneResourceData = (fromFields, toFields, data) => {
+export const cloneResourceData = (fromFields, toFields, data, currency) => {
   const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName));
   const result: any = {};
   overlappingFields?.forEach((e) => {
-    if (data[e?.fieldName]) {
+    let fieldName = e?.fieldName;
+    if (e.type === 'currencyAmount') {
+      fieldName = `${e?.fieldName}_${currency?.toLowerCase()}`;
+    }
+    if (data[fieldName]) {
       if (e?.lookup) {
         if (e?.type === 'dropDown') {
-          result[e?.fieldName] = data[e?.fieldName]?.optionValue || '';
+          result[fieldName] = data[fieldName]?.optionValue || '';
         } else {
-          result[e?.fieldName] = isArray(data[e?.fieldName]) ? data[e?.fieldName]?.map((m) => m.optionValue) : [];
+          result[fieldName] = isArray(data[fieldName]) ? data[fieldName]?.map((m) => m.optionValue) : [];
         }
       } else {
-        result[e?.fieldName] = data[e?.fieldName];
+        result[fieldName] = data[fieldName];
       }
     }
   });
-
   delete result?.owner;
   delete result?.pdfTemplate;
   delete result?.status;
-
   return result;
 };
 

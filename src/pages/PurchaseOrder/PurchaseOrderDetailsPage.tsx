@@ -244,7 +244,7 @@ const PurchaseOrderDetailsPage = () => {
                     onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)}
                     disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
                   >
-                    {isMobile && !isTablet ? <Edit /> : 'Reopen'}
+                    {isMobile && !isTablet ? <Edit /> : 'Re-Open'}
                   </Button>
                 </span>
               </HtmlTooltip>
