@@ -4251,9 +4251,21 @@ body .btn-outline-red-v1 {
       background-color: var(--dark-primary, white);
     }
   }
+
   div[draggable='false'] {
     background-color: var(--dark-primary, white) !important;
   }
+  ul[role='menu'] {
+    background-color: var(--dark-primary, white) !important;
+    li {
+      background-color: var(--dark-primary, white) !important;
+      color: var(--primary-text) !important;
+      & + div[aria-hidden='true'] {
+        border-color: var(--common-border-color) !important;
+      }
+    }
+  }
+
   button {
     background-color: var(--dark-primary, white) !important;
     color: var(--primary-text) !important;
