@@ -1,5 +1,5 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Box, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -89,6 +89,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
 };
 
 const FieldServiceTechnician = () => {
+  const isMobileView = useMediaQuery('(max-width:768px)');
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.fieldServiceTechnician.title);
   const [view, setView] = useState<Views>('table');
@@ -281,12 +282,20 @@ const FieldServiceTechnician = () => {
     }
   };
 
-  const handleViewChange = (view: Views) => {
-    setView(view);
-    const updatedColumns = columns.filter((c) => c.accessor !== 'action');
-    updatedColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData }));
-    setColumns(updatedColumns);
-  };
+  const handleViewChange = useCallback(
+    (view: Views) => {
+      setView(view);
+      const updatedColumns = columns?.filter((c) => c.accessor !== 'action');
+      updatedColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData }));
+      setColumns(updatedColumns);
+    },
+    [colData, columns, handleCreateFieldTicket, isSubmitting, permissions]
+  );
+
+  useEffect(() => {
+    if (isMobileView && view === 'card') handleViewChange('table');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobileView, view, handleViewChange]);
 
   return (
     <section className="main-container-v1">
@@ -299,7 +308,7 @@ const FieldServiceTechnician = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           isAddButtonVisible={false}
-          rightSideContents={<ViewButtons handleViewChange={handleViewChange} view={view} />}
+          rightSideContents={isMobileView ? null : <ViewButtons handleViewChange={handleViewChange} view={view} />}
           actionMenuItems={<ActionMenuItems />}
         />
         {columns ? (
