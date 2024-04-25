@@ -304,7 +304,8 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
           refreshGrid={fetchData}
           enableGlobalSearch={enableGlobalSearch}
           isClientSideGrid={true}
-          hideAction={resource === sidebarResource.fieldServiceOrder ? false : true}
+          hideAction={resource === sidebarResource.fieldServiceOrder ? allowedToEdit : true}
+          hideSelection={resource === sidebarResource.fieldServiceOrder ? allowedToEdit : true}
         />
       ) : (
         <Box p={2} height={500}>
