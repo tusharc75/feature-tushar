@@ -167,7 +167,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                             )}
                             <div className="icon-layout  d-flex align-items-center gap-2">
                               {actionField && actionField?.cell?.({ row, table })}
-                              {otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE && (
+                              {collapsibleFields.length > 0 && (
                                 <IconButton
                                   size="small"
                                   onClick={(e) => {
@@ -182,7 +182,10 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                           </div>
                         </div>
                       </div>
-                      <div className="px-2 mt-2 pt-2 grid gap-2" style={{ borderTop: '1px dashed var(--common-border-color)' }}>
+                      <div
+                        className="px-2 mt-2 pt-2 grid gap-2"
+                        style={{ borderTop: collapsibleFields.length > 0 ? '1px dashed var(--common-border-color)' : '0px' }}
+                      >
                         <div className="grid gap-2 w-full">
                           {defaultDisplay.map((field) => {
                             return (
