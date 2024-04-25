@@ -126,7 +126,7 @@ const FieldServiceTechnician = () => {
     }
     try {
       insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
-    } catch (e) {}
+    } catch (e) { }
     setColData(data);
     const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
     newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }));
@@ -146,7 +146,7 @@ const FieldServiceTechnician = () => {
 
     const tempInitialData = getObjKeys('', fieldTicketField);
     tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldTicketField);
-    const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, data);
+    const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, data, user.user?.brandCurrency);
     for (const key in referenceData) {
       tempInitialData[key] = referenceData[key];
     }
@@ -339,9 +339,9 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => {}}
+                    setNextStep={() => { }}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => {}}
+                    handleChangeStatus={() => { }}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
                   />
