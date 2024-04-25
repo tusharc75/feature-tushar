@@ -10,9 +10,11 @@ import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { ASSET_STATUS, INVENTORY_OWNER_TYPE, REPAIR_ORDER_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
+import { ASSET_STATUS, COLOUR_MASTER, INVENTORY_OWNER_TYPE, REPAIR_ORDER_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
 import ManageRepairOrder from '../RepairOrder/ManageRepairOrder';
 import { Autocomplete } from '@material-ui/lab';
+import { Link } from 'react-router-dom';
+import moment from 'moment';
 
 const WorkOrderPlanning = () => {
   const renderedFrom = camelCase(routes?.workOrderPlanning.title);
@@ -26,7 +28,7 @@ const WorkOrderPlanning = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const statusOption = ['Pending', 'Completed'];
+  const statusOption = ['Pending', 'In-Progress', 'Completed'];
 
   const [columns, setColumns] = useState(null);
   const [openRepairOrderDialog, setOpenRepairOrderDialog] = useState(false);
@@ -37,6 +39,37 @@ const WorkOrderPlanning = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrderPlanning}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, null, true);
+    newColumns?.forEach((o) => {
+      if (o?.accessor === 'asset') {
+        const getBackgroundColor = (row) => {
+          const today = moment()
+          const dueDate = moment(row?.original?.dueDate)
+          const days = dueDate.diff(today, 'days');
+          let color = ''
+          if (row?.original?.status === 'Pending') {
+            if (days <= 1) {
+              color = COLOUR_MASTER.lostAssets.background;;
+            }
+            else if (days <= 7) {
+              color = COLOUR_MASTER.replaceAssetColor.background;;
+            }
+          }
+          return color;
+        }
+        o.cell = ({ row }) => (
+          <div style={{ backgroundColor: getBackgroundColor(row) }}  >
+            <Link
+              className="link text-truncate"
+              title={row?.original?.asset}
+              to={`${routes.serializedAssetDetail.path}/${row?.original?.assetId}`}
+            >
+              {row?.original?.asset}
+            </Link>
+          </div>
+        );
+      }
+    });
+
     setColumns([...newColumns]);
   };
 

@@ -224,8 +224,8 @@ const AssignServiceDialog = ({
         {pricingCondition && (
           <Box>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Services`} />
-              <CustomTab className={'tabLayout'} value={1} index={1} label={'All Services'} />
+              <CustomTab value={0} label={`${routes.pricingCondition.title} Services`} />
+              <CustomTab value={1} className={'tabLayout'} label={'All Services'} />
             </CustomTabs>
           </Box>
         )}

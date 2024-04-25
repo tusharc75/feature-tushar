@@ -134,9 +134,9 @@ const IrtTicketDetail = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab label={'Header'} index={0} />
-          <CustomTab label={'Details'} index={1} />
-          {!(isMobile && !isTablet) && <CustomTab label={'Views'} index={2} />}
+          <CustomTab value={0} label={'Header'} />
+          <CustomTab value={1} label={'Details'} />
+          {!(isMobile && !isTablet) && <CustomTab value={2} label={'Views'} />}
         </CustomTabs>
         {tabValue === 0 && (
           <Box>

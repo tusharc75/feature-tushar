@@ -71,8 +71,8 @@ const BulkAssetCreationDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${bulkAssetCreation.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   useEffect(() => {
@@ -183,24 +183,12 @@ const BulkAssetCreationDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            index={0}
-          />
-          <CustomTab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            index={1}
-          />
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

@@ -1,5 +1,5 @@
 import MomentUtils from '@date-io/moment';
-import { Box, Button, Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, useMediaQuery } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { isEmpty } from 'lodash';
@@ -22,6 +22,7 @@ import FormTypes from '../../Helpers/FormTypes';
 import { createFilterModel, fetchFieldOptions } from '../utils';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
+  const isMobileView = useMediaQuery('(max-width:768px)');
   const toastConfig = useContext(CustomToastContext);
   const [formValues, setFormValues] = useState({});
   const [coloums, setColoums] = useState(null);
@@ -179,7 +180,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
       <Dialog
         maxWidth={'md'}
         open={true}
-        fullScreen={isMobile && !isTablet}
+        fullScreen={(isMobile && !isTablet) || isMobileView}
         fullWidth
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {
@@ -391,7 +392,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
           }}
           filterData={isSaveFilter.data}
           filterValue={formValues}
-          fieldsData = {coloums}
+          fieldsData={coloums}
         />
       )}
     </MuiPickersUtilsProvider>

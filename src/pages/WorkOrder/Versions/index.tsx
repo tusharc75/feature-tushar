@@ -303,9 +303,9 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
           <Box mb={2} />
           <Box className="detail-container-v1">
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab label={'Services'} index={0} />
-              <CustomTab label={'Steps Data'} index={1} />
-              <CustomTab label={'Drawings'} index={2} />
+              <CustomTab label={'Services'} value={0} />
+              <CustomTab label={'Steps Data'} value={1} />
+              <CustomTab label={'Drawings'} value={2} />
             </CustomTabs>
             {tabValue === 0 &&
               (columns ? (

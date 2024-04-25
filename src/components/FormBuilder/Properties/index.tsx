@@ -225,7 +225,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.minValueServiceAdd = values.minValueServiceAdd ? values.minValueServiceAdd : '';
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
-            ele.visibilityCondition = values.visibilityCondition || [];
+            ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter(v => v?.fields?.length > 0) : [];
             ele.isSystemGenerate = values?.isSystemGenerate || false;
             if (values.isSystemGenerate) {
               ele.systemGeneratedAutoIncrement = values.systemGeneratedAutoIncrement;
@@ -535,9 +535,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
                   <Box pt={1}>
                     <CustomTabs value={tabValue} onChange={handleTabChange}>
-                      <CustomTab label={'General'} index={0} />
-                      <CustomTab label={'Visibility'} index={1} />
-                      <CustomTab label={'Setting'} index={2} />
+                      <CustomTab value={0} label={'General'} />
+                      <CustomTab value={1} label={'Visibility'} />
+                      <CustomTab value={2} label={'Setting'} />
                     </CustomTabs>
                     <TabPanel value={tabValue} index={0}>
                       <General

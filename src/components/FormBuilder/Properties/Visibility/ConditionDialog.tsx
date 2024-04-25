@@ -1,18 +1,17 @@
 import { Box, Button, CircularProgress, Dialog, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
-import { useCallback, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { getLookupOption } from '../../helper';
-import { debounce, isEmpty, map, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import { Form, Formik } from 'formik';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const ConditionDialog = ({ onClose, data, values, setValue, fields, fieldData }) => {
+const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, fieldData }) => {
   const [initialValues, setInitialValues] = useState({ fieldName: '', value: null });
   const [options, setOptions] = useState([]);
   const [selectedField, setSelectedField] = useState(null);
@@ -110,17 +109,22 @@ const ConditionDialog = ({ onClose, data, values, setValue, fields, fieldData })
   };
 
   const handleSubmit = (value) => {
-    let visibilityCondition = values?.visibilityCondition || [];
-    if (visibilityCondition?.some((c) => c?.fieldName === value?.fieldName)) {
-      visibilityCondition = visibilityCondition?.map((item) => {
-        if (item.fieldName === value?.fieldName) {
-          return { ...item, value: value?.value };
+    let visibilityCondition = fieldValue?.visibilityCondition || [];
+    visibilityCondition = visibilityCondition?.map((v) => {
+      if (v?.index === group) {
+        if (v?.fields?.some((_f) => _f?.fieldName === value?.fieldName)) {
+          v?.fields?.map((f) => {
+            if (f?.fieldName === value?.fieldName) {
+              f.value = value?.value;
+            }
+            return f;
+          });
+        } else {
+          v.fields = [...v?.fields, value];
         }
-        return item;
-      });
-    } else {
-      visibilityCondition = [...visibilityCondition, value];
-    }
+      }
+      return v;
+    });
     setValue('visibilityCondition', visibilityCondition);
     onClose();
   };
@@ -160,10 +164,25 @@ const ConditionDialog = ({ onClose, data, values, setValue, fields, fieldData })
                 <Box>
                   <Autocomplete
                     id="fields"
+                    disabled={data ? true : false}
                     options={
-                      fields?.filter((f) => f?.fieldName !== fieldData?.fieldName)?.length > 0
+                      fields?.filter(
+                        (f) =>
+                          f?.fieldName !== fieldData?.fieldName &&
+                          !fieldValue?.visibilityCondition
+                            ?.find((_f) => _f?.index === group)
+                            ?.fields?.map((d) => d?.fieldName)
+                            ?.includes(f?.fieldName)
+                      )?.length > 0
                         ? fields
-                            ?.filter((f) => f?.fieldName !== fieldData?.fieldName)
+                            ?.filter(
+                              (f) =>
+                                f?.fieldName !== fieldData?.fieldName &&
+                                !fieldValue?.visibilityCondition
+                                  ?.find((_f) => _f?.index === group)
+                                  ?.fields?.map((d) => d?.fieldName)
+                                  ?.includes(f?.fieldName)
+                            )
                             ?.map((_f) => ({ optionLabel: _f?.fieldLabel, optionValue: _f?.fieldName }))
                         : []
                     }
@@ -171,7 +190,14 @@ const ConditionDialog = ({ onClose, data, values, setValue, fields, fieldData })
                     getOptionSelected={(option: any, val) => option.optionValue === val}
                     value={
                       fields
-                        ?.filter((f) => f?.fieldName === values?.fieldName)
+                        ?.filter(
+                          (f) =>
+                            f?.fieldName === values?.fieldName &&
+                            !fieldValue?.visibilityCondition
+                              ?.find((_f) => _f?.index === group)
+                              ?.fields?.map((d) => d?.fieldName)
+                              ?.includes(f?.fieldName)
+                        )
                         ?.map((_f) => ({ optionLabel: _f?.fieldLabel, optionValue: _f?.fieldName }))[0]
                     }
                     onChange={(e: any, value) => {
@@ -259,7 +285,7 @@ const ConditionDialog = ({ onClose, data, values, setValue, fields, fieldData })
                         <Autocomplete
                           id="value"
                           options={options}
-                          disableCloseOnSelect={true}
+                          disableCloseOnSelect={selectedField?.type === 'checkBox' ? false : true}
                           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                           multiple={selectedField?.type === 'checkBox' ? false : true}
                           value={
@@ -316,30 +342,7 @@ const ConditionDialog = ({ onClose, data, values, setValue, fields, fieldData })
               <Button size="small" onClick={onClose} color="primary">
                 Cancel
               </Button>
-              <Button
-                size="small"
-                type="submit"
-                color="primary"
-                variant="contained"
-                // onClick={() => {
-                //   if (isEmpty(validate(condition))) {
-                //     let visibilityCondition = values?.visibilityCondition || [];
-                //     if (visibilityCondition?.some((c) => c?.fieldName === condition?.fieldName)) {
-                //       visibilityCondition = visibilityCondition?.map((item) => {
-                //         if (item.fieldName === condition?.fieldName) {
-                //           return { ...item, value: condition?.value };
-                //         }
-                //         return item;
-                //       });
-                //     } else {
-                //       visibilityCondition = [...visibilityCondition, condition];
-                //     }
-                //     setFieldValue('visibilityCondition', visibilityCondition);
-                //     onClose();
-                //   }
-                // }}
-                onClick={submitForm}
-              >
+              <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
                 Save
               </Button>
             </CustomDialogFooter>

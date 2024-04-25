@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, Dialog } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -10,7 +10,6 @@ import { getObjKeysWithValues, serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Form, Formik } from 'formik';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import { isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import InputField from 'src/components/Helpers/InputField';
@@ -82,23 +81,21 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
           />
           <Formik
             initialValues={initialData.values}
-            // validationSchema={yupSchema(initialData.fields)}
-            // validateOnMount
             onSubmit={handleSave}
           >
             {({ values, errors, touched, submitForm, setFieldValue }) => (
               <>
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    touched={touched}
-                    fieldsData={initialData.fields}
-                    size="small"
-                    fullWidth
-                  />
+                    <InputField
+                      errors={errors}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      fieldsData={initialData.fields}
+                      size="small"
+                      fullWidth
+                    />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
