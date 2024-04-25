@@ -249,7 +249,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const handleAdd = async (rows, rentalChildFields: any = []) => {
     setIsSubmitting(true);
     const material: any = [];
-    console.log(rows)
+
     if (assignRentalDataDialog.open) {
       rows?.forEach((d) => {
         const element: any = cloneResourceData(rentalChildFields, allFields, d, fieldTicketData?.currency);
@@ -516,7 +516,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             Add Manual Entry
           </MenuItem>
         )}
-        { fieldTicketData?.rentalJob?.optionValue && (
+        { user?.user?.brandPolicy?.fieldTicketRentalMaterialAdd && fieldTicketData?.rentalJob?.optionValue && (
           <>
             <MenuItem
               onClick={() => {
