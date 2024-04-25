@@ -3074,7 +3074,12 @@ export const cloneResourceData = (fromFields, toFields, data, currency) => {
 };
 
 export const getDefaultMyRecordType = (user, resource) => {
-  const userByDefaultRecord = user?.uiPreference?.byDefaultRecord;
+  let userByDefaultRecord = user?.uiPreference?.byDefaultRecord;
+  if (!isArray(userByDefaultRecord) || userByDefaultRecord?.length === 0) {
+    if (isArray(user?.brandPolicy?.brandByDefaultRecord)) {
+      userByDefaultRecord = user?.brandPolicy?.brandByDefaultRecord;
+    }
+  }
   if (isArray(userByDefaultRecord)) {
     const byDefaultRecord = userByDefaultRecord?.find((e) => e.resource === resource);
     if (byDefaultRecord) {
