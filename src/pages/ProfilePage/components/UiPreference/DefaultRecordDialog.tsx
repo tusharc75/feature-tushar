@@ -49,7 +49,7 @@ const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
     }, [])
 
     const fetchData = () => {
-        axiosInstance().get(`/user/my-record-resource`)
+        axiosInstance().get(`/sa-formbuilder/my-record-resource`)
             .then(({ data: { data } }) => {
                 setResources(data);
             })
