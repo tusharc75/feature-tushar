@@ -6,7 +6,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -155,11 +155,36 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       setPriceMethodListConst(pricingMethodOptions);
       await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
       data.forEach((element) => {
-        if (element.fieldName === 'unit') {
-          element.option = unitOptions;
+        if (rowData?.type === MATERIAL_TYPE.serializedAsset) {
+          if (element.fieldName === 'qty') {
+            element.disabled = true;
+          }
+          if (element.fieldName === 'unit') {
+            element.option = [
+              {
+                optionLabel: 'Piece',
+                optionValue: 'Piece'
+              }
+            ];
+            element.value = 'Piece';
+          }
+          if (element.fieldName === 'pricingMethod') {
+            const assetPricingMethod = {
+              optionValue: 'Per Job',
+              optionLabel: 'Per Job'
+            }
+            pricingMethodOptions.push(assetPricingMethod)
+            element.option = [assetPricingMethod];
+            element.value = 'Per Job';
+          }
         }
-        if (element.fieldName === 'pricingMethod') {
-          element.option = pricingMethodOptions;
+        else {
+          if (element.fieldName === 'unit') {
+            element.option = unitOptions;
+          }
+          if (element.fieldName === 'pricingMethod') {
+            element.option = pricingMethodOptions;
+          }
         }
       });
 
@@ -384,8 +409,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                             field.fieldName === 'pricingCondition'
                                               ? priceConditionList
                                               : field.fieldName === 'pricingMethod'
-                                              ? priceMethodList
-                                              : field.option
+                                                ? priceMethodList
+                                                : field.option
                                           }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
@@ -473,8 +498,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                           isTooltip={field.isTooltip}
                                           tooltipMessage={field.tooltipMessage}
                                           size="small"
-                                        minDate={fieldTicketData?.estimateStartDate}
-                                        maxDate={fieldTicketData?.estimateEndDate}
+                                          minDate={fieldTicketData?.estimateStartDate}
+                                          maxDate={fieldTicketData?.estimateEndDate}
                                         />
                                       </Box>
                                     </Box>

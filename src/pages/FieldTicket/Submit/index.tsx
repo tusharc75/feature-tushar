@@ -13,7 +13,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import ManageSubmit from './ManageSubmit';
 import ViewLogs from './ViewLogs';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -38,7 +38,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
   const fetchFields = async () => {
     setColumns(null);
     var fields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, false);
-  
+
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     let column: any = [
       {
@@ -72,15 +72,17 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p title={row.original.detail}>{row.original.detail}</p>
-            {['product', 'service'].includes(row.original.type) && (
+            {![MATERIAL_TYPE.manualEntry].includes(row.original.type) && (
               <Box ml={1} className="flex-shrink-0">
                 <IconButton
                   size="small"
                   onClick={() => {
-                    if (row.original.type === 'service') {
+                    if (row.original.type === MATERIAL_TYPE.service) {
                       window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
+                    } else if (row.original.type === MATERIAL_TYPE.product) {
                       window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                     }
                   }}
                 >
@@ -115,7 +117,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
 
     material?.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent?.productDetail?.productName || parent?.serviceDetail?.serviceName || '';
+      parent.detail = parent?.productDetail?.productName || parent?.serviceDetail?.serviceName || parent?.serializedAssetDetail?.assetNumber || '';
       parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || '';
       parent.qty = parent.qty;
       parent.type = parent.type;
@@ -124,9 +126,8 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
       ele.index = i + 1 + material?.length;
       ele.detail = ele.description || '';
       ele.description = ele.description || '';
-      ele.type = 'manualEntry';
+      ele.type = MATERIAL_TYPE.manualEntry;
     });
-
     dispatch({ type: 'initialize', data: [...material, ...costs], count: [...material, ...costs]?.length });
     dispatch({ type: 'loading', loading: false });
   };

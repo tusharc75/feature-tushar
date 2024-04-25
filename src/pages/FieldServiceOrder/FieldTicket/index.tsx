@@ -304,8 +304,8 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
           refreshGrid={fetchData}
           enableGlobalSearch={enableGlobalSearch}
           isClientSideGrid={true}
-          hideAction={resource === sidebarResource.fieldServiceOrder ? allowedToEdit : true}
-          hideSelection={resource === sidebarResource.fieldServiceOrder ? allowedToEdit : true}
+          hideAction={resource === sidebarResource.fieldServiceOrder ? !allowedToEdit : true}
+          hideSelection={resource === sidebarResource.fieldServiceOrder ? !allowedToEdit : true}
         />
       ) : (
         <Box p={2} height={500}>
@@ -330,6 +330,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
             shippingAddress: serviceOrderData?.shippingAddress?.optionValue || '',
             taxCode: serviceOrderData?.taxCode?.optionValue || '',
             pricingCondition: serviceOrderData?.pricingCondition?.optionValue || '',
+            rentalJob: serviceOrderData?.rentalJob?.optionValue || '',
             collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || []
           }}
           onSuccess={() => {

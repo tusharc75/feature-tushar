@@ -263,7 +263,7 @@ const RepairOrderDetails = () => {
                         }
                         disabled={permissions?.repairOrder?.isUpdate && allowedToEdit ? false : true}
                       >
-                        {'Reopen'}
+                        {'Re-Open'}
                       </Button>
                     </span>
                   </HtmlTooltip>
