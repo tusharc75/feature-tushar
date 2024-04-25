@@ -4244,3 +4244,24 @@ body .btn-outline-red-v1 {
     margin-bottom: 50px;
   }
 }
+.google-map-chart {
+  div[role='dialog'] {
+    background-color: var(--dark-primary, white);
+    & + div::after {
+      background-color: var(--dark-primary, white);
+    }
+  }
+  div[draggable='false'] {
+    background-color: var(--dark-primary, white) !important;
+  }
+  button {
+    background-color: var(--dark-primary, white) !important;
+    color: var(--primary-text) !important;
+  }
+  div[style='position: relative; overflow: hidden; width: 30px; height: 1px; margin: 0px 5px; background-color: rgb(230, 230, 230); top: 0px;'] {
+    background-color: var(--common-border-color) !important;
+  }
+  &* {
+    border-color: var(--common-border-color) !important;
+  }
+}
