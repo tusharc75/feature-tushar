@@ -201,6 +201,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       parent.index = i + 1;
       parent.detail = parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName :
         parent.type === MATERIAL_TYPE.serializedAsset ? parent.serializedAssetDetail?.assetNumber :
+         parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName :
           parent.type === MATERIAL_TYPE.manualEntry ? parent.detail || '' : '';
       parent.description =
         parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription || ''
@@ -248,6 +249,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const handleAdd = async (rows, rentalChildFields: any = []) => {
     setIsSubmitting(true);
     const material: any = [];
+    console.log(rows)
     if (assignRentalDataDialog.open) {
       rows?.forEach((d) => {
         const element: any = cloneResourceData(rentalChildFields, allFields, d, fieldTicketData?.currency);
@@ -514,7 +516,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             Add Manual Entry
           </MenuItem>
         )}
-        {user?.user?.brandPolicy?.fieldTicketRentalMaterialAdd && fieldTicketData?.rentalJob?.optionValue && (
+        { fieldTicketData?.rentalJob?.optionValue && (
           <>
             <MenuItem
               onClick={() => {
