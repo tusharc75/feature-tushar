@@ -517,7 +517,8 @@ export const RESOURCE_LABEL = {
   userAttendance: 'User Attendance',
   dataList: 'Data List',
   dataListitems: 'Data List Items',
-  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request'
+  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
+  serialNumber: 'Serial Number'
 };
 
 export const CHILD_RESOURCE = {
