@@ -504,7 +504,7 @@ const ReportFilters = (props: FiltersProps) => {
                         label={field.fieldLabel}
                         name={field.fieldName}
                         type={field.type === 'dropDown' ?
-                          reportConfig?.defaultColumn && !reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? 'multiSelect' : field.type
+                          reportConfig?.defaultColumn ? reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? field.type : 'multiSelect' : 'multiSelect'
                           : field.type}
                         options={field.option}
                         setFieldValue={(name, value) => {
