@@ -148,7 +148,8 @@ const RenderService = ({
           </>
         ) : (
           <>
-            <div className={`mb-1 gap-2 flex flex-wrap ${isColapsed ? 'justify-around' : 'justify-end'} mb-3`}>
+            <div className={`mb-1 gap-2 flex flex-wrap ${isColapsed ? 'justify-around' : 'justify-end'} mb-3 items-center`}>
+              {isColapsed ? null : <h6 className="mr-auto text-[16px]">Services</h6>}
               {servicesButtons.map(({ id, children, visible, ...rest }) => {
                 if (!visible) return null;
                 return (

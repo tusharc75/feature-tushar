@@ -10,12 +10,9 @@ import {
   ButtonGroup,
   makeStyles,
   InputAdornment,
-  Chip,
   Tooltip,
   FormControlLabel,
   Switch,
-  Tab,
-  Tabs,
   Dialog
 } from '@material-ui/core';
 import { Autocomplete, TabPanel, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
@@ -81,13 +78,6 @@ const useStyles = makeStyles((theme) => ({
     padding: '4px !important'
   }
 }));
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
 
 const DoaDialog = ({
   selectedEntity,

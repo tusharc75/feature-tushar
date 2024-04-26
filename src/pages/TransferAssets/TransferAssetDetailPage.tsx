@@ -1,31 +1,38 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, IconButton } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-import { useData } from 'src/StateProvider/Provider';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, TRANSFER_ASSET_STATUS, checkSuperAdminAccess, sidebarResource, transferAsset, transferAssetSteps } from 'src/constants/helpers';
-import ManageTransferAsset from './ManageTransferAsset';
+import { Box, Button, Grid } from '@material-ui/core';
+import EditIcon from '@material-ui/icons/Edit';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
+import React, { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from 'react-icons/fa';
+import { RiFlowChart } from 'react-icons/ri';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import routes from 'src/components/Helpers/Routes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import Steps from 'src/components/Steps';
+import {
+  ACTIVITY_RESOURCE,
+  TRANSFER_ASSET_STATUS,
+  checkSuperAdminAccess,
+  sidebarResource,
+  transferAsset,
+  transferAssetSteps
+} from 'src/constants/helpers';
 import AssetsGrid from './AssetGrid';
 import LoadingTicketGrid from './LoadingTicket';
+import ManageTransferAsset from './ManageTransferAsset';
 import ReceivingTicketGrid from './ReceivingTicket';
-import TabPanel from 'src/components/TabPanel';
-import { BiFoodMenu } from 'react-icons/bi';
-import EditIcon from '@material-ui/icons/Edit';
-import { FaWpforms } from 'react-icons/fa';
-import { camelCase } from 'lodash';
-import ContentFullScreen from 'src/components/ContentFullScreen';
-import Steps from 'src/components/Steps';
-import { RiFlowChart } from 'react-icons/ri';
 import TransferAssetViews from './RoadMapViews';
-import { isMobile, isTablet } from 'react-device-detect';
-import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const TransferAssetDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferAsset.title);
@@ -169,8 +176,8 @@ const TransferAssetDetailPage = () => {
           data?.transferType === 'Internal'
             ? data?.transfertoPlant?.entity
             : data?.transferType === 'External Customer'
-              ? data?.transfertoCustomer?.entity
-              : data?.transfertoSupplier?.entity;
+            ? data?.transfertoCustomer?.entity
+            : data?.transfertoSupplier?.entity;
 
         if (warehouseEntity?.length) {
           const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
@@ -197,7 +204,7 @@ const TransferAssetDetailPage = () => {
       .then(() => {
         setDeleting(false);
         setShowConfirmBox(false);
-        history.push(`${routes.transferAsset.path}`)
+        history.push(`${routes.transferAsset.path}`);
       })
       .catch((error) => {
         setDeleting(false);
@@ -206,19 +213,10 @@ const TransferAssetDetailPage = () => {
       });
   };
 
-
-
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
   };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const updateTransferStatus = (status) => {
     axiosInstance()
@@ -229,7 +227,7 @@ const TransferAssetDetailPage = () => {
           type: 'success',
           message: data.message
         });
-        fetchTransferAssetData()
+        fetchTransferAssetData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -245,10 +243,7 @@ const TransferAssetDetailPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                onClick={handleOpenUpdateDialog}
-                className={'btn-outline-v1'}>
+              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
               </Button>
             )}
@@ -271,47 +266,19 @@ const TransferAssetDetailPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
           {!(isMobile && !isTablet) && (
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-                </div>
-              }
-              {...a11yProps(2)}
-            />
+            <CustomTab value={2}>
+              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+            </CustomTab>
           )}
-        </Tabs>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !transferAssetData ? (
@@ -422,7 +389,7 @@ const TransferAssetDetailPage = () => {
             setShowReopenConfirmation(false);
           }}
           onOk={() => {
-            updateTransferStatus(TRANSFER_ASSET_STATUS.inProgress)
+            updateTransferStatus(TRANSFER_ASSET_STATUS.inProgress);
             setShowReopenConfirmation(false);
           }}
           okBtnLoading={false}

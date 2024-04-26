@@ -395,12 +395,12 @@ const ReportFilters = (props: FiltersProps) => {
         error['to_date'] = 'To date is required';
       }
       resources = defaultResource.filter((field: any) => field !== 'date');
+      resources?.forEach((field: any) => {
+        if (!formValues[field]) {
+          error[field] = `${startCase(field)} is required`;
+        }
+      })
     }
-    resources?.forEach((field: any) => {
-      if (!formValues[field]) {
-        error[field] = `${startCase(field)} is required`;
-      }
-    })
     setError(error);
     return error;
   };
@@ -503,7 +503,9 @@ const ReportFilters = (props: FiltersProps) => {
                         touched={error}
                         label={field.fieldLabel}
                         name={field.fieldName}
-                        type={reportConfig?.defaultColumn ? field?.multiple ? 'multiSelect' : field.type : field.type === 'dropDown' ? 'multiSelect' : field.type}
+                        type={field.type === 'dropDown' ?
+                          reportConfig?.defaultColumn && !reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? 'multiSelect' : field.type
+                          : field.type}
                         options={field.option}
                         setFieldValue={(name, value) => {
                           handleSelectFilter(field?.type, name, value);

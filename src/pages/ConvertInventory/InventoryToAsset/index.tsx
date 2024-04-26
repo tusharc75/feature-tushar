@@ -24,13 +24,14 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
   const [selectedStorageLocation, setSelectedStorageLocation] = useState(null);
   const [currentInventory, setCurrentInventory] = useState(null);
-  const [loadingInitialData, setLoadingInitialData] = useState(false);
+  const [loadingInitialData, setLoadingInitialData] = useState(true);
   const [assetNumberDialog, setAssetNumberDialog] = useState({ open: false, products: [], qty: 0, warehouse: null, storageLocation: null });
 
   const [initialData, setInitialData] = useState({
     qty: 1,
     comment: '',
-    storageLocation: storageLocation
+    storageLocation: storageLocation,
+    serialNumbers: []
   });
 
   const {
@@ -66,7 +67,6 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
   }, [warehouse]);
 
   const getStorageLocation = () => {
-    setLoadingInitialData(true);
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
@@ -82,12 +82,11 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
             setSelectedStorageLocation(storageLocation);
           }
         }
-        setLoadingInitialData(false);
       });
   };
 
   const getCurrentInventory = () => {
-
+    setLoadingInitialData(true)
     let api = `${productInventory.api}/current-inventory?warehouse=${warehouse}&product=${product[0]._id}`;
     if (selectedStorageLocation) {
       api = `${api}&storageLocation=${selectedStorageLocation}`;
@@ -97,9 +96,11 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
         .get(api)
         .then(({ data: { data } }) => {
           setCurrentInventory(data);
+          setLoadingInitialData(false)
         })
         .catch((err) => {
           setToastConfig(err);
+          setLoadingInitialData(false)
         });
     }
   };
@@ -161,6 +162,9 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
 
     const serialNumbersList = values['serialNumbers'];
     if (serialNumbersList?.length > parseInt(values?.qty)) {
+      errors['serialNumbers'] = `Please select serial numbers same as quantity`;
+    }
+    if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && serialNumbersList.length !== parseInt(values?.qty)) {
       errors['serialNumbers'] = `Please select serial numbers same as quantity`;
     }
 
@@ -242,6 +246,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                       onChange={(e) => {
                         setFieldValue('qty', e.target.value);
                       }}
+                      required={true}
                     />
                   </ListItem>
                 </List>
@@ -286,7 +291,6 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                       <Autocomplete
                         size="small"
                         options={serialNumbers.map((item: any) => item?.serialNumber)}
-                        freeSolo={false}
                         multiple={true}
                         disableCloseOnSelect
                         value={values['serialNumbers']}
@@ -298,12 +302,13 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                         renderInput={(props) => (
                           <TextField
                             {...props}
-                            placeholder={''}
+                            placeholder={'Select Serial Numbers'}
                             variant="outlined"
                             name="serialNumbers"
                             label={'Select Serial Numbers'}
                             error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
                             helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                            required={user?.user?.brandPolicy?.productInventorySerialNumberRequired ? true : false}
                           />
                         )}
                       />

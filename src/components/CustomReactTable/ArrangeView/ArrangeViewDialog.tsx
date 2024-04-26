@@ -13,7 +13,8 @@ import {
   Theme,
   Typography,
   createStyles,
-  makeStyles
+  makeStyles,
+  useMediaQuery
 } from '@material-ui/core';
 import { DragHandle } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
@@ -58,6 +59,7 @@ const ItemTypes = {
 };
 
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
+  const isMobileView = useMediaQuery('(max-width:768px)');
   const { onClose, columns = [], updateGridHiddenColumns, renderedFrom, dispatch, state, stickycolumns } = props;
   const { visibleColumns, columnOrder } = state;
   const isFirstRender = useRef(true);
@@ -170,12 +172,12 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   }, [searchVal]);
 
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet)}>
+    <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet) || isMobileView}>
       <CustomDialogHeader
         title="Arrange View"
         onClose={onClose}
         showRequiredLabel={false}
-        showManimizeMaximize={true}
+        showManimizeMaximize={isMobileView ? false : true}
         isMinimized={isMinimized}
         onMinimizeMaximize={() => setMinimized((prevState) => !prevState)}
       />

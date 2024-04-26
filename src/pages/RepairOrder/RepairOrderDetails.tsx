@@ -1,52 +1,45 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Menu, MenuItem, Typography, IconButton } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
+import EditIcon from '@material-ui/icons/Edit';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-import { useData } from 'src/StateProvider/Provider';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import {
-  repairOrder,
-  sidebarResource,
-  ACTIVITY_RESOURCE,
-  REPAIR_ORDER_STATUS,
-  repairOrderSteps,
-  REPAIR_ORDER_TYPE,
-  QUOTATION_STATUS,
-  checkSuperAdminAccess
-} from 'src/constants/helpers';
-import ManageRepairOrder from './ManageRepairOrder';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import React, { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { RiFlowChart } from 'react-icons/ri';
-import TabPanel from 'src/components/TabPanel';
-import Steps from 'src/components/Steps';
-import { camelCase } from 'lodash';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { isMobile, isTablet } from 'react-device-detect';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
-import View from './View';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import routes from 'src/components/Helpers/Routes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import Steps from 'src/components/Steps';
+import {
+  ACTIVITY_RESOURCE,
+  QUOTATION_STATUS,
+  REPAIR_ORDER_STATUS,
+  REPAIR_ORDER_TYPE,
+  checkSuperAdminAccess,
+  repairOrder,
+  repairOrderSteps,
+  sidebarResource
+} from 'src/constants/helpers';
+import LoadingTicket from './LoadingTicket';
+import ManageRepairOrder from './ManageRepairOrder';
 import Productpackage from './Productpackage';
 import Quotation from './Quotation';
+import View from './View';
 import WorkOrder from './WorkOrder';
-import LoadingTicket from './LoadingTicket';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import EditIcon from '@material-ui/icons/Edit';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
 
 const RepairOrderDetails = () => {
   const renderedFrom = camelCase(routes?.repairOrder.title);
@@ -200,8 +193,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -270,24 +263,22 @@ const RepairOrderDetails = () => {
                         }
                         disabled={permissions?.repairOrder?.isUpdate && allowedToEdit ? false : true}
                       >
-                        {'Reopen'}
+                        {'Re-Open'}
                       </Button>
                     </span>
                   </HtmlTooltip>
                 )}
-                {permissions?.repairOrder?.isUpdate
-                  && allowedToEdit && repairOrderData?.canComplete
-                  && stepNames[currentStep] === 'Slip' && (
-                    <ButtonWithPulse
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
-                      className={'btn-outline-v1'}
-                    >
-                      Complete
-                    </ButtonWithPulse>
-                  )}
+                {permissions?.repairOrder?.isUpdate && allowedToEdit && repairOrderData?.canComplete && stepNames[currentStep] === 'Slip' && (
+                  <ButtonWithPulse
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
+                    className={'btn-outline-v1'}
+                  >
+                    Complete
+                  </ButtonWithPulse>
+                )}
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
                   ['Add Assets', 'Work Order'].includes(stepNames[currentStep]) &&
@@ -338,47 +329,19 @@ const RepairOrderDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
           {!(isMobile && !isTablet) && (
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-                </div>
-              }
-              {...a11yProps(1)}
-            />
+            <CustomTab value={2}>
+              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+            </CustomTab>
           )}
-        </Tabs>
+        </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -447,10 +410,10 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
-                      ? false
-                      : allowedToEdit
+                        quotationVersionData?.status
+                      )
+                    ? false
+                    : allowedToEdit
                 }
                 isPostWorkService={Boolean(currentStep === 3)}
                 setCurrentStep={setCurrentStep}

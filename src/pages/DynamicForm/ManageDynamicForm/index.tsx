@@ -64,7 +64,6 @@ const ManageDynamicForm = ({
                 });
               });
             }
-
             setInitialData({
               fields: isClone ? fieldsDataForCreate : fieldsDataForUpdate,
               values: getObjKeysWithValues(data, isClone ? fieldsDataForCreate : fieldsDataForUpdate)
@@ -79,7 +78,6 @@ const ManageDynamicForm = ({
         if (primaryField) {
           tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
         }
-
         if (referenceData) {
           Object.keys(referenceData)?.forEach((_r) => {
             fieldsDataForCreate?.forEach((_f) => {
@@ -91,7 +89,6 @@ const ManageDynamicForm = ({
             });
           });
         }
-
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -107,47 +104,42 @@ const ManageDynamicForm = ({
     setSubmitting(true);
     if (id && !isClone) {
       values._id = id;
-      axiosInstance()
-        .put(`/dynamic-form`, values, {
-          headers: {
-            Resource: resource
-          }
-        })
-        .then(({ data }) => {
-          setSubmitting(false);
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().put(`/dynamic-form`, values, {
+        headers: {
+          Resource: resource
+        }
+      }).then(({ data }) => {
+        setSubmitting(false);
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+      }).catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     } else {
-      axiosInstance()
-        .post(`/dynamic-form`, values, {
-          headers: {
-            Resource: resource
-          }
-        })
-        .then(({ data: { data, message } }) => {
-          setLoading(false);
-          if (redirected) {
-            history.push(`${resourcePath}/detail/${data._id}`);
-            onSuccess(data.data);
-          } else {
-            onSuccess(data, primaryField);
-          }
-          setSubmitting(true);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-        })
+      axiosInstance().post(`/dynamic-form`, values, {
+        headers: {
+          Resource: resource
+        }
+      }).then(({ data: { data, message } }) => {
+        setLoading(false);
+        if (redirected) {
+          history.push(`${resourcePath}/detail/${data._id}`);
+          onSuccess(data.data);
+        } else {
+          onSuccess(data, primaryField);
+        }
+        setSubmitting(true);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: message
+        });
+      })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
@@ -160,6 +152,18 @@ const ManageDynamicForm = ({
     const errors = {};
     return errors;
   }
+
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(`input[name=${err[0]}]`);
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start'
+      });
+    }
+  };
 
   return (
     <Dialog
@@ -201,7 +205,7 @@ const ManageDynamicForm = ({
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
-                    onImageUploadCompletePercentage={(completePercentage)=>{
+                    onImageUploadCompletePercentage={(completePercentage) => {
                       setUploadingImageOrFileProgress(completePercentage)
                     }}
                   />
@@ -220,12 +224,16 @@ const ManageDynamicForm = ({
                   Cancel
                 </Button>
                 <Button
-                  disabled={uploadingImageOrFileProgress > 0 ||loading || submitting}
+                  disabled={uploadingImageOrFileProgress > 0 || loading || submitting}
                   variant="contained"
                   color="primary"
                   type="submit"
                   size="small"
-                  onClick={submitForm}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleScroll(errors);
+                    submitForm();
+                  }}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
                   {' '}
@@ -238,6 +246,7 @@ const ManageDynamicForm = ({
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
+                    handleScroll(errors);
                     submitForm();
                   }}
                   onClose={() => {

@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -15,16 +15,25 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
 import Versions from 'src/components/Versions';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, FIELD_TICKET_STATUS, checkSuperAdminAccess, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  CHILD_RESOURCE,
+  FIELD_TICKET_STATUS,
+  checkSuperAdminAccess,
+  fieldTicket,
+  fieldTicketSteps,
+  sidebarResource
+} from 'src/constants/helpers';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
+import Step from '../DynamicForm/Step';
 import ManageFieldTicket from './ManageFieldTicket';
 import Submit from './Submit';
 import Material from './material';
@@ -55,11 +64,13 @@ const FieldTicketDetail = () => {
   const [versionDialog, setVersionDialog] = useState(false);
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id, isOffline]);
 
@@ -101,6 +112,19 @@ const FieldTicketDetail = () => {
       setAllowedToDelete(permissions?.fieldTicket?.isDelete && data.owner.optionValue === user?.user?._id && data?.canDelete);
       setFieldTicketData(data);
       setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldTicket}`);
+      if (data) {
+        setResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -148,8 +172,8 @@ const FieldTicketDetail = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const handleChangeStatus = async (status) => {
@@ -224,40 +248,19 @@ const FieldTicketDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            value={0}
-            aria-controls="a11y-tabpanel-0"
-            id="a11y-tab-0"
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            value={1}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+          {resourceData && resourceData?.steps?.length && (
+            <CustomTab value={2}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
+            </CustomTab>
+          )}
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -291,6 +294,15 @@ const FieldTicketDetail = () => {
               <Submit stepFullScreen={stepFullScreen} fieldTicketData={fieldTicketData} allowedToEdit={allowedToEdit} fetchData={fetchData} />
             )}
           </ContentFullScreen>
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={sidebarResource.fieldTicket}
+            data={fieldTicketData}
+            allowedToEdit={permissions?.fieldTicket?.isUpdate}
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

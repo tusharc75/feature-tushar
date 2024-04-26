@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -11,13 +11,14 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE, PLANNING_STATUS, checkSuperAdminAccess, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
+import Step from '../DynamicForm/Step';
 import ManagePlanning from './ManagePlanning';
 import Material from './Material';
 
@@ -41,11 +42,13 @@ const PlanningDetail = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [reserveAssetWarning, setReserveAssetWarning] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -77,6 +80,19 @@ const PlanningDetail = () => {
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPlanningData(data);
       setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.planning}`);
+      if (data) {
+        setResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -167,40 +183,19 @@ const PlanningDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            value={0}
-            aria-controls="a11y-tabpanel-0"
-            id="a11y-tab-0"
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            value={1}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange} textColor="primary">
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+          {resourceData && resourceData?.steps?.length && (
+            <CustomTab value={2}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
+            </CustomTab>
+          )}
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
@@ -223,6 +218,15 @@ const PlanningDetail = () => {
             />
           )}
         </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={sidebarResource.planning}
+            data={planningData}
+            allowedToEdit={permissions?.planning?.isUpdate}
+          />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
@@ -237,7 +241,11 @@ const PlanningDetail = () => {
       {showConverConfirmBox && (
         <ConfirmationDialog
           open={true}
-          message={reserveAssetWarning ? 'Asset(s) are not available, should we allow to convert without asset(s) ?' : `Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
+          message={
+            reserveAssetWarning
+              ? 'Asset(s) are not available, should we allow to convert without asset(s) ?'
+              : `Are you sure you want to convert planning  ${planningData?.planningNumber} ?`
+          }
           onClose={() => {
             setShowConverConfirmBox(false);
           }}

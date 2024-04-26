@@ -322,13 +322,6 @@ const AddSerializedAsset = ({
       });
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
     if (((tabValue === 0 || tabValue === 1) && newValue === 2) || ((newValue === 0 || newValue === 1) && tabValue === 2)) {
@@ -657,9 +650,9 @@ const AddSerializedAsset = ({
             {['Rental Job'].includes(referenceType) && (
               <Box pt={1}>
                 <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                  <CustomTab value={0} index={0} label={'Assets'} {...a11yProps(0)} />
-                  {permissions?.sublease && <CustomTab className={'tabLayout'} value={1} index={1} label={'Sublease Assets'} {...a11yProps(1)} />}
-                  <CustomTab className={'tabLayout'} value={2} index={2} label={'In Use Assets'} {...a11yProps(2)} />
+                  <CustomTab value={0} label={'Assets'} />
+                  {permissions?.sublease && <CustomTab value={1} label={'Sublease Assets'} />}
+                  <CustomTab value={2} label={'In Use Assets'} />
                 </CustomTabs>
               </Box>
             )}

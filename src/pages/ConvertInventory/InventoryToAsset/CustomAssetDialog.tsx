@@ -118,16 +118,23 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
                     rowInsert['productName'] = row[1]?.toString();
                     if (resource === sidebarResource.purchaseOrder) {
                         rowInsert['createAsset'] = row[2]?.toString()?.trim() === 'TRUE' ? true : false;
+                        if (assetNumberTypeField) {
+                            rowInsert['assetNumberType'] = rowInsert['createAsset'] ? row[3]?.toString() : ASSET_NUMBER_TYPE.manual;
+                            rowInsert['assetNumber'] = row[4]?.toString();
+                        }
+                        else {
+                            rowInsert['assetNumber'] = row[3]?.toString();
+                        }
                     }
                     else {
                         rowInsert['createAsset'] = true;
-                    }
-                    if (assetNumberTypeField) {
-                        rowInsert['assetNumberType'] = rowInsert['createAsset'] ? row[3]?.toString() : ASSET_NUMBER_TYPE.manual;
-                        rowInsert['assetNumber'] = row[4]?.toString();
-                    }
-                    else {
-                        rowInsert['assetNumber'] = row[3]?.toString();
+                        if (assetNumberTypeField) {
+                            rowInsert['assetNumberType'] = row[2]?.toString();
+                            rowInsert['assetNumber'] = row[3]?.toString();
+                        }
+                        else {
+                            rowInsert['assetNumber'] = row[2]?.toString();
+                        }
                     }
                     option.push(rowInsert);
                 });

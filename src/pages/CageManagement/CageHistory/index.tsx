@@ -43,12 +43,8 @@ const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) 
       />
       <CustomDialogContent isFooterPresent={false}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0} index={0}>
-            History
-          </CustomTab>
-          <CustomTab value={1} index={1}>
-            Logs
-          </CustomTab>
+          <CustomTab value={0}>History</CustomTab>
+          <CustomTab value={1}>Logs</CustomTab>
         </CustomTabs>
         <TabPanel index={0} value={0}>
           {tabValue === 0 &&

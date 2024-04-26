@@ -328,11 +328,7 @@ const SerializedAssetsCertification = () => {
                 }}
               />
             </MuiPickersUtilsProvider>
-
             <SearchBox
-              InputProps={{
-                style: { minHeight: '38px' }
-              }}
               onChange={handleSearch}
               width={'150px'}
               value={search}

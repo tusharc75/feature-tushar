@@ -6,14 +6,13 @@ import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CHILD_RESOURCE, MATERIAL_TYPE, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField } from '@material-ui/core';
+import { Button, IconButton, MenuItem, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { useData } from 'src/StateProvider/Provider';
-import { BiChevronDown } from 'react-icons/bi';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
@@ -30,7 +29,6 @@ import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQtyDialog';
 import History from '../../ProductInventory/LedgerHistory';
 import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
-import { Add } from '@material-ui/icons';
 import { camelCase, isEmpty } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -108,7 +106,11 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
   }, [columns, renderCount, selectedServiceOption, tabValue]);
 
   const fetchColumns = async () => {
-    var fields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation);
+    var fields = await fetch_child_resource_fields(
+      CHILD_RESOURCE.fieldTicketMateial,
+      fieldTicketData?.currency,
+      allowedToEdit && !fieldTicketData?.quotation
+    );
     setAllFields(JSON.parse(JSON.stringify(fields)));
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     const column: any = [
@@ -561,8 +563,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
         </Box>
       )}
       <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-        <CustomTab index={0} label={'Products/Consumables'} value={0} primaryColor={true} />
-        <CustomTab index={1} label={'Technicians'} value={1} primaryColor={true} />
+        <CustomTab value={0} label={'Products/Consumables'} primaryColor={true} />
+        <CustomTab value={1} label={'Technicians'} primaryColor={true} />
       </CustomTabs>
 
       <TabPanel value={tabValue} index={0}>

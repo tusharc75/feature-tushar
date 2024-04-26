@@ -8,7 +8,7 @@ import Board from '../../components/Activity/Report/Board';
 import Roadmap from '../../components/Activity/Report/Roadmap';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
-import CustomTabs from '../../components/Helpers/CustomTabs';
+import CustomAntTabs from '../../components/Helpers/CustomAntTabs';
 import routes from '../../components/Helpers/Routes';
 import { SearchFilter } from '../../components/SearchFilter';
 import './style.scss';
@@ -57,7 +57,7 @@ const Activity = ({ type }) => {
         {filter && (
           <Fragment>
             <ListingPageHeader
-              leftSideContents={<CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />}
+              leftSideContents={<CustomAntTabs value={viewType} setValue={setViewType} tabs={tabs} />}
               rightSideContents={<SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} activityName={type} />}
               isActionButtonVisible={false}
               isAddButtonVisible={false}

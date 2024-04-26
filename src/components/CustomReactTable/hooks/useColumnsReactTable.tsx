@@ -192,8 +192,7 @@ export default function useColumns() {
       }
 
       if (hideColumns.indexOf(field?.fieldName) >= 0) {
-      }
-      else if (field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter === true) {
+      } else if (field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter === true) {
         const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
 
         if (field.type !== 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
@@ -209,7 +208,7 @@ export default function useColumns() {
               cell: ({ row }) => {
                 return row?.original[fieldName] ? <p>{row?.original[fieldName]}</p> : <NoDataCell />;
               },
-              editable: Boolean(field?.isColumnEditable),
+              editable: Boolean(field?.isColumnEditable)
             });
           });
         } else if (field.type === 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
@@ -319,8 +318,8 @@ export default function useColumns() {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
               : isObject(original?.[field?.fieldName])
-                ? original?.[field?.fieldName]?.optionLabel
-                : original?.[field?.fieldName];
+              ? original?.[field?.fieldName]?.optionLabel
+              : original?.[field?.fieldName];
           },
           cell: ({ row }) => <DataListCell field={field} original={row?.original} />
         });
@@ -331,8 +330,8 @@ export default function useColumns() {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
               : isObject(original?.[field?.fieldName])
-                ? original?.[field?.fieldName]?.optionLabel
-                : original?.[field?.fieldName];
+              ? original?.[field?.fieldName]?.optionLabel
+              : original?.[field?.fieldName];
           },
           cell: ({ row }) => <DropdownCell permissions={permissions} permissionForLinks={permissionForLinks} field={field} original={row?.original} />
         });
@@ -359,7 +358,7 @@ export default function useColumns() {
           disableSortBy: true,
           cell: ({ row }) => (
             <div>
-              <Avatar className="grid-avatar ml-auto min-[769px]:mx-auto" src={row?.original?.[field?.fieldName]}>
+              <Avatar className="grid-avatar min-[769px]:mx-auto" src={row?.original?.[field?.fieldName]}>
                 <Image style={{ fontSize: 18 }} />
               </Avatar>
             </div>
@@ -380,7 +379,6 @@ export default function useColumns() {
             </div>
           ),
           disableFilters: true,
-          disableSortBy: true
         });
       } else if (field?.type === 'dateTime') {
         column.push({
@@ -397,7 +395,6 @@ export default function useColumns() {
             </div>
           ),
           disableFilters: true,
-          disableSortBy: true
         });
       } else if (field?.type === 'checkBox') {
         column.push({
@@ -449,7 +446,8 @@ export default function useColumns() {
             <div>
               <h5 className="text-truncate">
                 {currencySymbol}
-                {formatAmountWithCurrency(currency, (row.original[field?.fieldName] || 0))?.amountWithouCurrencyCode ?? (row.original[field?.fieldName] || 0)}
+                {formatAmountWithCurrency(currency, row.original[field?.fieldName] || 0)?.amountWithouCurrencyCode ??
+                  (row.original[field?.fieldName] || 0)}
               </h5>
             </div>
           )

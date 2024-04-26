@@ -57,7 +57,7 @@ const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue
     case columnDef?.editable:
       return (
         <CellShell>
-          <div className="w-full">
+          <div className="w-fit">
             <div className=" [border-bottom:1px_dashed_#8a8a8a] [display:flex_!important] gap-[20px] justify-end ml-auto cursor-pointer max-w-[max-content]">
               <p>{flexRender(cell.column.columnDef.cell, cell?.getContext())}</p>
               <span>

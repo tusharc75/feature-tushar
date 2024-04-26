@@ -603,6 +603,9 @@ export const autoCalculateSpecificFields = (inputValues: any, values: any, field
                     }
                 }
             }
+            if (unit !== '' && fieldData.displayUnits?.length) {
+                unit = fieldData?.displayUnits?.find((e) => e?.toLowerCase() === unit?.toLowerCase()) || unit
+            }
             const calValues = handleAutoCalculation(fieldData, fieldList, { ...values, ...returnvalues }, _fieldName, currency?.toUpperCase(), unit, inputValues[_fieldName]);
             Object.assign(returnvalues, calValues);
         }
