@@ -1211,7 +1211,6 @@ const routes = {
     path: '/resource-doa-request'
   },
   serialNumber: {
-    title: storedRoutes && storedRoutes.serialNumber && storedRoutes.serialNumber.title ? storedRoutes.serialNumber?.title : RESOURCE_LABEL.serialNumber,
     path: '/product-inventory/serial-number/'
   },
 };
