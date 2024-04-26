@@ -139,8 +139,10 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
               }
             }
           }
-          if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && parseInt(d.rejectQuantity) !== d.serialNumber?.length) {
-            errors['serialNumber'] = `Please enter serial numbers same as reject quantity`;
+          if (user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory) {
+            if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && parseInt(d.rejectQuantity) !== d.serialNumber?.length) {
+              errors['serialNumber'] = `Please enter serial numbers same as reject quantity`;
+            }
           }
         }
       });
@@ -369,35 +371,36 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                             />
                                           )}
                                         />
-                                        <Autocomplete
-                                          size="small"
-                                          multiple
-                                          disableCloseOnSelect={true}
-                                          value={data?.serialNumber}
-                                          options={[{ optionLabel: 'All', optionValue: 'All' }, ...(materialSerialNumbers[data?._id] || [])]}
-                                          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                                          onChange={(_, newValue) => {
-                                            var tempValue = newValue;
-                                            if (newValue?.find((e) => e.optionValue === 'All')) {
-                                              tempValue = materialSerialNumbers[data?._id] || [];
-                                            }
-                                            arrayHelpers.replace(index, {
-                                              ...values.material[index],
-                                              ['serialNumber']: tempValue
-                                            });
-                                          }}
-                                          renderInput={(params) => (
-                                            <TextField
-                                              {...params}
-                                              variant="outlined"
-                                              name="serialNumber"
-                                              label="Serial Numbers"
-                                              error={validate([data]).serialNumber}
-                                              required={user?.user?.brandPolicy?.productInventorySerialNumberRequired ? true : false}
-                                              helperText={validate([data]).serialNumber}
-                                            />
-                                          )}
-                                        />
+                                        {user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory &&
+                                          <Autocomplete
+                                            size="small"
+                                            multiple
+                                            disableCloseOnSelect={true}
+                                            value={data?.serialNumber}
+                                            options={[{ optionLabel: 'All', optionValue: 'All' }, ...(materialSerialNumbers[data?._id] || [])]}
+                                            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                            onChange={(_, newValue) => {
+                                              var tempValue = newValue;
+                                              if (newValue?.find((e) => e.optionValue === 'All')) {
+                                                tempValue = materialSerialNumbers[data?._id] || [];
+                                              }
+                                              arrayHelpers.replace(index, {
+                                                ...values.material[index],
+                                                ['serialNumber']: tempValue
+                                              });
+                                            }}
+                                            renderInput={(params) => (
+                                              <TextField
+                                                {...params}
+                                                variant="outlined"
+                                                name="serialNumber"
+                                                label="Serial Numbers"
+                                                error={validate([data]).serialNumber}
+                                                required={user?.user?.brandPolicy?.productInventorySerialNumberRequired ? true : false}
+                                                helperText={validate([data]).serialNumber}
+                                              />
+                                            )}
+                                          />}
                                       </div>
                                     )}
                                   </div>
