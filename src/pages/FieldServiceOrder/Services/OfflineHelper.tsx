@@ -11,6 +11,15 @@ export const fieldServiceOfflineUpdate = async (ids) => {
         await asyncForEach(data?.data?.fieldTicket, async (element) => {
             await insertUpdate(objectStore.fieldTicket, element._id, element);
         })
+        await asyncForEach(data?.data?.serviceMaster, async (element) => {
+            await insertUpdate(objectStore.serviceMaster, element._id, element);
+        })
+        await asyncForEach(data?.data?.fieldTicketMaterial, async (element) => {
+            await insertUpdate(objectStore.fieldTicketMaterial, element._id, element);
+        })
+        await asyncForEach(data?.data?.fieldTicketCost, async (element) => {
+            await insertUpdate(objectStore.fieldTicketCost, element._id, element);
+        })
         return true
     }
     catch (e) {

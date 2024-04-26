@@ -10,6 +10,9 @@ export const objectStore = {
   fieldServiceTechnician: 'fieldServiceTechnician',
   fieldTicket: 'fieldTicket',
   fieldServiceOrder : 'fieldServiceOrder',
+  serviceMaster: 'serviceMaster',
+  fieldTicketMaterial: 'fieldTicketMaterial',
+  fieldTicketCost : 'fieldTicketCost',
 };
 
 export const setUpindexDB = () => {
@@ -76,6 +79,19 @@ export const clearAll = (store) => {
       var db = event.target.result;
       var transaction = db.transaction([store], 'readwrite');
       transaction.objectStore(store).clear();
+    };
+  } catch (e) {}
+};
+
+export const deleteMany = (store, keys) => {
+  try {
+    var db = indexedDB.open(DB_NAME, 1);
+    db.onsuccess = function (event: any) {
+      var db = event.target.result;
+      var transaction = db.transaction([store], 'readwrite');
+      keys.forEach((key) => {
+        transaction.objectStore(store).delete(key);
+      });
     };
   } catch (e) {}
 };

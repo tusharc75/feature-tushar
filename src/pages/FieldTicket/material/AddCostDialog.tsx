@@ -18,6 +18,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, handleUpdateCost, showSaveAndNext, loadingEdit }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -28,6 +29,7 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchFields();
@@ -48,11 +50,8 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true);
-    if (
-      fieldTicketData?.taxCode ||
-      (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))
-    ) {
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
+    if ( (fieldTicketData?.taxCode || (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))) && !isOffline) {
       const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       data?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {

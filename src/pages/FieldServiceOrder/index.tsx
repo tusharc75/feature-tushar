@@ -18,9 +18,9 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
-import { fieldServiceOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { CHILD_RESOURCE, fieldServiceOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import ManageServiceOrder from './ManageServiceOrder';
-import { clearAll, deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { fieldServiceOfflineUpdate } from './Services/OfflineHelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
@@ -61,6 +61,7 @@ const ServiceOrder = () => {
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
+    setUpindexDB();
     fetchGridColumns();
   }, []);
 
@@ -287,6 +288,15 @@ const ServiceOrder = () => {
     await fieldServiceOfflineUpdate(data);
     axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
       insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
+    });
+    axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}&view=true`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, objectStore.serviceMaster, data);
+    });
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketMateial}`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, objectStore.fieldTicketMaterial, data);
+    });
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, objectStore.fieldTicketCost, data);
     });
     dispatch({ type: 'selection', selectedRecords: [] });
   };
