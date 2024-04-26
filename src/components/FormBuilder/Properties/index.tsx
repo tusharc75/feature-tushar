@@ -218,6 +218,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.lookupResource = values.lookup ? values.lookupResource : '';
             ele.dataList = values.dataList || false;
             ele.dataListId = values.dataList ? values.dataListId : '';
+            ele.preFilters = values.preFilters?.length > 0 ? values.preFilters : []
+            ele.htmlDescription = values.htmlDescription || ''
             ele.entityWiseLookup = values?.entityWiseLookup || false;
             ele.isMinMaxValue = values?.isMinMaxValue || false;
             ele.minValue = values?.minValue || 0;
@@ -226,6 +228,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
             ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter(v => v?.fields?.length > 0) : [];
+            ele.subFields = values.subFields?.length > 0 ? values.subFields : [];
             ele.isSystemGenerate = values?.isSystemGenerate || false;
             if (values.isSystemGenerate) {
               ele.systemGeneratedAutoIncrement = values.systemGeneratedAutoIncrement;
