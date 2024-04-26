@@ -1,12 +1,24 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem, Typography, makeStyles } from '@material-ui/core';
 import ConditionDialog from './ConditionDialog';
 import { MoreHoriz, Settings } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { LOGIC } from '../../helper';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 
+
+const useStyles = makeStyles({
+  group: {
+    paddingTop: '2px',
+    paddingBottom: '2px',
+    paddingLeft: '10px',
+    paddingRight: '10px',
+  },
+});
+
+
 const Visibility = ({ values, setFieldValue, fields, fieldData }) => {
+  const classes = useStyles();
   const [open, setOpen] = useState({ open: false, group: null, data: null });
   const [anchorEl, setAnchorEl] = useState({});
   const [anchorElSetting, setAnchorElSetting] = useState({});
@@ -85,76 +97,64 @@ const Visibility = ({ values, setFieldValue, fields, fieldData }) => {
         values?.visibilityCondition?.map((c) => (
           <Box border={1} borderColor="var(--common-border-color)" mt={1} p={1}>
             <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
-              <Button
-                variant="outlined"
+              <Box>
+                <ToggleButtonGroup
+                  size="small"
+                  color="primary"
+                  classes={{ grouped: classes.group }}
+                  value={c?.logic || LOGIC[0]}
+                  exclusive
+                  onChange={(e, val) => {
+                    setFieldValue(
+                      'visibilityCondition',
+                      values?.visibilityCondition?.map((_c) => {
+                        if (_c?.index === c?.index) {
+                          return { ..._c, logic: val };
+                        }
+                        return _c;
+                      })
+                    );
+                  }}
+                  aria-label="logic"
+                >
+                  <ToggleButton size="small" value={LOGIC[0]}>
+                    {LOGIC[0]}
+                  </ToggleButton>
+                  <ToggleButton size="small" value={LOGIC[1]}>
+                    {LOGIC[1]}
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+              <IconButton
+                aria-label="setting"
                 size="small"
-                color="primary"
-                onClick={() => {
-                  setOpen({ open: true, group: c?.index, data: null });
+                onClick={(e) => {
+                  setAnchorElSetting({ ...anchorElSetting, [c?.index]: e.currentTarget });
                 }}
               >
-                Add Condition
-              </Button>
-              <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
-                <Box mr={2}>
-                  <ToggleButtonGroup
-                    size="small"
-                    color="primary"
-                    value={c?.logic || LOGIC[0]}
-                    exclusive
-                    onChange={(e, val) => {
-                      setFieldValue(
-                        'visibilityCondition',
-                        values?.visibilityCondition?.map((_c) => {
-                          if (_c?.index === c?.index) {
-                            return { ..._c, logic: val };
-                          }
-                          return _c;
-                        })
-                      );
-                    }}
-                    aria-label="logic"
-                  >
-                    <ToggleButton size="small" value={LOGIC[0]}>
-                      {LOGIC[0]}
-                    </ToggleButton>
-                    <ToggleButton size="small" value={LOGIC[1]}>
-                      {LOGIC[1]}
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                </Box>
-                <IconButton
-                  aria-label="setting"
-                  size="small"
-                  onClick={(e) => {
-                    setAnchorElSetting({ ...anchorElSetting, [c?.index]: e.currentTarget });
-                  }}
-                >
-                  <Settings fontSize="small" />
-                </IconButton>
-
-                <Menu
-                  id="simple-menu-setting"
-                  anchorEl={anchorElSetting[c?.index]}
-                  keepMounted
-                  open={Boolean(anchorElSetting[c?.index])}
-                  onClose={() => {
+                <Settings fontSize="small" />
+              </IconButton>
+              <Menu
+                id="simple-menu-setting"
+                anchorEl={anchorElSetting[c?.index]}
+                keepMounted
+                open={Boolean(anchorElSetting[c?.index])}
+                onClose={() => {
+                  handleCloseSetting(c?.index);
+                }}
+              >
+                <MenuItem
+                  onClick={() => {
+                    setFieldValue(
+                      'visibilityCondition',
+                      values?.visibilityCondition?.filter((_c) => _c?.index != c?.index)?.map((_c, i) => ({ ..._c, index: i }))
+                    );
                     handleCloseSetting(c?.index);
                   }}
                 >
-                  <MenuItem
-                    onClick={() => {
-                      setFieldValue(
-                        'visibilityCondition',
-                        values?.visibilityCondition?.filter((_c) => _c?.index != c?.index)?.map((_c, i) => ({ ..._c, index: i }))
-                      );
-                      handleCloseSetting(c?.index);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </Box>
+                  Delete
+                </MenuItem>
+              </Menu>
             </Box>
             {c?.fields?.map((_f, j) => (
               <Box
@@ -216,6 +216,18 @@ const Visibility = ({ values, setFieldValue, fields, fieldData }) => {
                 </Box>
               </Box>
             ))}
+            <Box mt={2}>
+              <Button
+                variant="outlined"
+                size="small"
+                color="primary"
+                onClick={() => {
+                  setOpen({ open: true, group: c?.index, data: null });
+                }}
+              >
+                Add Condition
+              </Button>
+            </Box>
           </Box>
         ))}
       <Box mt={2} mb={2}>
