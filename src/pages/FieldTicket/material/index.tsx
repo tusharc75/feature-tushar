@@ -18,7 +18,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
+import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, cloneResourceData, fieldTicket } from 'src/constants/helpers';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Consumables from './Consumables';
@@ -56,6 +56,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const { dataRows, selectedRecords } = state;
   const { isOffline } = useContext(CustomOfflineContext);
   const { generateColumns } = useColumns();
+
   const fetchFields = async () => {
     setColumns(null);
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
@@ -107,6 +108,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                       window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                     } else if (row.original.type === MATERIAL_TYPE.product) {
                       window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                     }
                   }}
                 >
@@ -204,22 +207,13 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     };
     data.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.manualEntry
-            ? parent.detail || ''
-            : ''
-        }`;
+      parent.detail = parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName :
+        parent.type === MATERIAL_TYPE.serializedAsset ? parent.serializedAssetDetail?.assetNumber :
+         parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName :
+          parent.type === MATERIAL_TYPE.manualEntry ? parent.detail || '' : '';
       parent.description =
-        parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productDescription || ''
-            : parent.description || '';
+        parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription || ''
+          : parent.description || '';
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
       parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
@@ -260,7 +254,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     }
   }, [columns]);
 
-  const handleAdd = async (rows) => {
+  const handleAdd = async (rows, rentalChildFields: any = []) => {
     setIsSubmitting(true);
     if (isOffline) {
       const material = [];
@@ -398,7 +392,6 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         }
       });
     }
-
     await axiosInstance()
       .post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: tempMaterial })
       .then(() => {
@@ -595,23 +588,23 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             Add Manual Entry
           </MenuItem>
         )}
-        {fieldTicketData?.rentalJob && user?.user?.brandPolicy?.fieldTicketRentalMaterialAdd && !isOffline && (
-          <MenuItem
-            onClick={() => {
-              setAssignRentalDataDialog({ open: true, type: 'asset' });
-            }}
-          >
-            Add Rental Asset
-          </MenuItem>
-        )}
-        {fieldTicketData?.rentalJob && user?.user?.brandPolicy?.fieldTicketRentalMaterialAdd && !isOffline && (
-          <MenuItem
-            onClick={() => {
-              setAssignRentalDataDialog({ open: true, type: MATERIAL_TYPE.product });
-            }}
-          >
-            Add Rental Consumable
-          </MenuItem>
+        { user?.user?.brandPolicy?.fieldTicketRentalMaterialAdd && fieldTicketData?.rentalJob?.optionValue && !isOffline && (
+          <>
+            <MenuItem
+              onClick={() => {
+                setAssignRentalDataDialog({ open: true, type: MATERIAL_TYPE.serializedAsset });
+              }}
+            >
+              Add Rental Assets
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAssignRentalDataDialog({ open: true, type: MATERIAL_TYPE.product });
+              }}
+            >
+              Add Rental Consumables
+            </MenuItem>
+          </>
         )}
       </>
     );
@@ -774,7 +767,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           }}
           onSuccess={handleAdd}
           rentalId={fieldTicketData?.rentalJob?.optionValue}
-          currency={fieldTicketData.currency}
+          currency={fieldTicketData?.currency}
           isSubmitting={isSubmitting}
         />
       )}

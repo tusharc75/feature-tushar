@@ -149,7 +149,7 @@ const MapView = (props: MapViewProps) => {
   if (!data || !Array.isArray(data) || data.length === 0) return <div>No data</div>;
 
   return (
-    <Box height={height} borderRadius={4} overflow="hidden" className="">
+    <Box height={height} borderRadius={4} overflow="hidden" className="google-map-chart">
       <GoogleMap
         key={themeColor}
         onClick={() => {

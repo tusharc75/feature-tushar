@@ -1095,21 +1095,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -2517,7 +2517,8 @@ export const REPORT_LIST = [
     permission: 'iotChart',
     key: 'standardReport',
     type: 'iotDataPoints',
-    defaultColumn: true
+    defaultColumn: true,
+    notMultiSelectFields: ['asset', 'interval']
   }
 ];
 
@@ -3046,32 +3047,39 @@ export const DEAL_STAGE = {
   renewalSigned: 'Renewal Signed'
 };
 
-export const cloneResourceData = (fromFields, toFields, data) => {
+export const cloneResourceData = (fromFields, toFields, data, currency) => {
   const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName));
   const result: any = {};
   overlappingFields?.forEach((e) => {
-    if (data[e?.fieldName]) {
+    let fieldName = e?.fieldName;
+    if (e.type === 'currencyAmount') {
+      fieldName = `${e?.fieldName}_${currency?.toLowerCase()}`;
+    }
+    if (data[fieldName]) {
       if (e?.lookup) {
         if (e?.type === 'dropDown') {
-          result[e?.fieldName] = data[e?.fieldName]?.optionValue || '';
+          result[fieldName] = data[fieldName]?.optionValue || '';
         } else {
-          result[e?.fieldName] = isArray(data[e?.fieldName]) ? data[e?.fieldName]?.map((m) => m.optionValue) : [];
+          result[fieldName] = isArray(data[fieldName]) ? data[fieldName]?.map((m) => m.optionValue) : [];
         }
       } else {
-        result[e?.fieldName] = data[e?.fieldName];
+        result[fieldName] = data[fieldName];
       }
     }
   });
-
   delete result?.owner;
   delete result?.pdfTemplate;
   delete result?.status;
-
   return result;
 };
 
 export const getDefaultMyRecordType = (user, resource) => {
-  const userByDefaultRecord = user?.uiPreference?.byDefaultRecord;
+  let userByDefaultRecord = user?.uiPreference?.byDefaultRecord;
+  if (!isArray(userByDefaultRecord) || userByDefaultRecord?.length === 0) {
+    if (isArray(user?.brandPolicy?.brandByDefaultRecord)) {
+      userByDefaultRecord = user?.brandPolicy?.brandByDefaultRecord;
+    }
+  }
   if (isArray(userByDefaultRecord)) {
     const byDefaultRecord = userByDefaultRecord?.find((e) => e.resource === resource);
     if (byDefaultRecord) {

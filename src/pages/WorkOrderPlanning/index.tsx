@@ -61,6 +61,7 @@ const WorkOrderPlanning = () => {
             <Link
               className="link text-truncate"
               title={row?.original?.asset}
+              target='_blank'
               to={`${routes.serializedAssetDetail.path}/${row?.original?.assetId}`}
             >
               {row?.original?.asset}

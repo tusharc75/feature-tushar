@@ -40,7 +40,6 @@ const PadMasterDetail = () => {
       fetchFields();
       fetchData();
       fetchPolicy();
-      getAssetsOnPad();
     }
   }, [id]);
 
@@ -67,19 +66,6 @@ const PadMasterDetail = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  };
-
-  const getAssetsOnPad = () => {
-    axiosInstance()
-      .get(`${routes?.padMaster?.path}/${id}/asset-in-use`)
-      .then(({ data: { data } }) => {
-        if (data?.length) {
-          setAssets(data);
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
   };
 
   const handleDelete = () => {
@@ -169,7 +155,6 @@ const PadMasterDetail = () => {
             resource={sidebarResource.padMaster}
             data={padMasterData}
             allowedToEdit={permissions?.padMaster?.isUpdate}
-            referenceData={assets ? { assets: assets } : null}
           />
         </TabPanel>
       </Box>

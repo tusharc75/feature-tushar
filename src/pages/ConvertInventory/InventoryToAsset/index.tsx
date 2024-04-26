@@ -67,7 +67,6 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
   }, [warehouse]);
 
   const getStorageLocation = () => {
-    setLoadingInitialData(true);
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
@@ -83,12 +82,11 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
             setSelectedStorageLocation(storageLocation);
           }
         }
-        setLoadingInitialData(false);
       });
   };
 
   const getCurrentInventory = () => {
-
+    setLoadingInitialData(true)
     let api = `${productInventory.api}/current-inventory?warehouse=${warehouse}&product=${product[0]._id}`;
     if (selectedStorageLocation) {
       api = `${api}&storageLocation=${selectedStorageLocation}`;
@@ -98,9 +96,11 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
         .get(api)
         .then(({ data: { data } }) => {
           setCurrentInventory(data);
+          setLoadingInitialData(false)
         })
         .catch((err) => {
           setToastConfig(err);
+          setLoadingInitialData(false)
         });
     }
   };

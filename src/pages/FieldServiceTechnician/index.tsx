@@ -1,5 +1,5 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
-import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Box, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -27,7 +27,7 @@ import { cloneDisable } from 'src/constants/messageHelpers';
 import ViewFieldTicketDialog from './ViewFieldTicketDialog';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { clearAll, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import { clearAll, deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { fieldServiceOfflineUpdate } from '../FieldServiceOrder/Services/OfflineHelper';
 import axios, { CancelTokenSource } from 'axios';
 import { Apps, FormatListNumbered } from '@material-ui/icons';
@@ -89,6 +89,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
 };
 
 const FieldServiceTechnician = () => {
+  const isMobileView = useMediaQuery('(max-width:768px)');
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.fieldServiceTechnician.title);
   const [view, setView] = useState<Views>('table');
@@ -110,6 +111,18 @@ const FieldServiceTechnician = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
 
   useEffect(() => {
+    setColumns((prev) => {
+      return prev?.map((c) => {
+        if (c.accessor === 'action') {
+          return getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData });
+        }
+        return c;
+      });
+    })
+
+  }, [isOffline])
+
+  useEffect(() => {
     const cancelToken = axios.CancelToken.source();
     fetchColumns(cancelToken);
     return () => cancelToken.cancel();
@@ -125,7 +138,7 @@ const FieldServiceTechnician = () => {
     }
     try {
       insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
-    } catch (e) {}
+    } catch (e) { }
     setColData(data);
     const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
     newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }));
@@ -145,7 +158,7 @@ const FieldServiceTechnician = () => {
 
     const tempInitialData = getObjKeys('', fieldTicketField);
     tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldTicketField);
-    const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, data);
+    const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, data, user.user?.brandCurrency);
     for (const key in referenceData) {
       tempInitialData[key] = referenceData[key];
     }
@@ -154,7 +167,18 @@ const FieldServiceTechnician = () => {
     }
     tempInitialData['fieldServiceOrder'] = data?._id;
 
-    axiosInstance()
+    if (isOffline) {
+      const _id: any = Math.floor(Math.random() * 1000000).toString();
+      tempInitialData['_id'] = _id;
+      await insertUpdate(objectStore.fieldTicket, _id, tempInitialData);
+      await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...tempInitialData, _id, offlineSyncStatus: 'new' } });
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Field Ticket will be created when you are online'
+      });
+    } else {
+      axiosInstance()
       .post(`${routes.fieldTicket?.path}`, tempInitialData)
       .then(({ data }) => {
         window.open(`${routes.fieldTicket.path}/detail/${data?.data?._id}`);
@@ -169,6 +193,7 @@ const FieldServiceTechnician = () => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
       });
+    }
   };
 
   useEffect(() => {
@@ -281,12 +306,20 @@ const FieldServiceTechnician = () => {
     }
   };
 
-  const handleViewChange = (view: Views) => {
-    setView(view);
-    const updatedColumns = columns.filter((c) => c.accessor !== 'action');
-    updatedColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData }));
-    setColumns(updatedColumns);
-  };
+  const handleViewChange = useCallback(
+    (view: Views) => {
+      setView(view);
+      const updatedColumns = columns?.filter((c) => c.accessor !== 'action');
+      updatedColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData }));
+      setColumns(updatedColumns);
+    },
+    [colData, columns, handleCreateFieldTicket, isSubmitting, permissions]
+  );
+
+  useEffect(() => {
+    if (isMobileView && view === 'card') handleViewChange('table');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobileView, view, handleViewChange]);
 
   return (
     <section className="main-container-v1">
@@ -299,7 +332,7 @@ const FieldServiceTechnician = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           isAddButtonVisible={false}
-          rightSideContents={<ViewButtons handleViewChange={handleViewChange} view={view} />}
+          rightSideContents={isMobileView ? null : <ViewButtons handleViewChange={handleViewChange} view={view} />}
           actionMenuItems={<ActionMenuItems />}
         />
         {columns ? (
@@ -330,9 +363,9 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => {}}
+                    setNextStep={() => { }}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => {}}
+                    handleChangeStatus={() => { }}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
                   />
