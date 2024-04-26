@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
@@ -15,26 +15,26 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import Steps, { getIndex } from 'src/components/Steps';
-import TabPanel from 'src/components/TabPanel';
-import { ACTIVITY_RESOURCE, PRODUCTION_ORDER_STATUS, checkSuperAdminAccess, productionOrder, productionOrderSteps, sidebarResource } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  PRODUCTION_ORDER_STATUS,
+  checkSuperAdminAccess,
+  productionOrder,
+  productionOrderSteps,
+  sidebarResource
+} from 'src/constants/helpers';
 import Invoice from './Invoice';
 import LoadingTicket from './LoadingTicket';
 import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
 
 const ProductionOrderDetails = () => {
   const renderedFrom = camelCase(routes?.productionOrder.title);
@@ -239,36 +239,14 @@ const ProductionOrderDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {productionOrderData && productionOrderFields.length ? (
@@ -292,7 +270,7 @@ const ProductionOrderDetails = () => {
             handleNext={
               productionOrderProcessStepsNames[currentStep] === 'Add'
                 ? () => {
-                    setNextStep(false)
+                    setNextStep(false);
                     axiosInstance()
                       .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
                       .then(({ data: { data } }) => {

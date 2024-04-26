@@ -1,45 +1,45 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Tab, Tabs } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-  sublease,
-  SUBLEASE_STATUS,
-  sublease_Vendor_Steps,
-  sublease_InterCompany_Steps,
-  ACTIVITY_RESOURCE,
-  SUBLEASE_TYPE,
-  DELIVERY_TICKET_TYPE,
-  sidebarResource,
-  checkSuperAdminAccess
-} from '../../constants/helpers';
-import ManageSublease from './ManageSublease';
-import { FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
-import TabPanel from '../../components/TabPanel';
+import { Box, Button, Grid } from '@material-ui/core';
+import EditIcon from '@material-ui/icons/Edit';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
+import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from 'react-icons/fa';
+import { GiAbstract055 } from 'react-icons/gi';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import Steps, { getIndex } from 'src/components/Steps';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import {
+  ACTIVITY_RESOURCE,
+  DELIVERY_TICKET_TYPE,
+  SUBLEASE_STATUS,
+  SUBLEASE_TYPE,
+  checkSuperAdminAccess,
+  sidebarResource,
+  sublease,
+  sublease_InterCompany_Steps,
+  sublease_Vendor_Steps
+} from '../../constants/helpers';
+import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
+import LoadingTicket from './DeliveryTicket';
+import ManageSublease from './ManageSublease';
 import Productpackage from './Productpackage';
+import SerializedAsset from './SerializedAsset';
+import Slip from './Slip';
 import SubleaseAsset from './SubleaseAsset';
 import Tickets from './Tickets';
-import { GiAbstract055 } from 'react-icons/gi';
-import { camelCase } from 'lodash';
-import ContentFullScreen from 'src/components/ContentFullScreen';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import Steps, { getIndex } from 'src/components/Steps';
-import EditIcon from '@material-ui/icons/Edit';
-import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
-import SerializedAsset from './SerializedAsset';
-import LoadingTicket from './DeliveryTicket';
-import Slip from './Slip';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -69,13 +69,6 @@ const SubleaseDetailsPage = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -218,56 +211,22 @@ const SubleaseDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <GiAbstract055 className="mr-1" fontSize="inherit" />
-                {routes.deliveryTicket.title}
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <GiAbstract055 className="mr-1" fontSize="inherit" />
-                Invoices
-              </div>
-            }
-            {...a11yProps(3)}
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+          <CustomTab value={2}>
+            <GiAbstract055 className="mr-1" fontSize="inherit" />
+            {routes.deliveryTicket.title}
+          </CustomTab>
+          <CustomTab value={3}>
+            <GiAbstract055 className="mr-1" fontSize="inherit" />
+            Invoices
+          </CustomTab>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {subleaseData && fields.length ? (

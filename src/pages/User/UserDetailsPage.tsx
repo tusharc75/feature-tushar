@@ -22,7 +22,6 @@ import { Skeleton } from '@material-ui/lab';
 import { startCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { FcFlowChart } from 'react-icons/fc';
 import { RiSettingsFill } from 'react-icons/ri';
 import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
@@ -136,13 +135,6 @@ const UserDetailsPage = () => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
   };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   useEffect(() => {
     if (id) {
@@ -532,14 +524,12 @@ const UserDetailsPage = () => {
               ) : (
                 <>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                    <CustomTab index={0} value={0} className={'tabLayout'} label={'Details'} {...a11yProps(0)} />
-                    <CustomTab index={1} value={1} className={'tabLayout'} label={'Org Chart'} {...a11yProps(1)} />
-                    {userData?.proxyDOA?.optionValue && (
-                      <CustomTab index={2} value={2} className={'tabLayout'} label={'DOA Proxy'} {...a11yProps(2)} />
-                    )}
-                    <CustomTab index={3} value={3} className={'tabLayout'} label={'User Session'} {...a11yProps(3)} />
-                    <CustomTab index={4} value={4} className={'tabLayout'} label={'Assigned Entity'} {...a11yProps(4)} />
-                    <CustomTab index={5} value={5} className={'tabLayout'} label={'Approval Process'} {...a11yProps(5)} />
+                    <CustomTab value={0} label={'Details asd'} />
+                    <CustomTab value={1} label={'Org Chart'} />
+                    {userData?.proxyDOA?.optionValue && <CustomTab value={2} label={'DOA Proxy'} />}
+                    <CustomTab value={3} label={'User Session'} />
+                    <CustomTab value={4} label={'Assigned Entity'} />
+                    <CustomTab value={5} label={'Approval Process'} />
                   </CustomTabs>
 
                   <TabPanel value={tabValue} index={0}>
@@ -873,8 +863,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
-                : ''
+              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
+              : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

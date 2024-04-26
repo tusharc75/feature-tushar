@@ -1,14 +1,14 @@
-import { Box, Grid, Tab, Tabs  } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
+import { FaWpforms } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import DataListItems from './DataListItems';
 import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { FaWpforms } from 'react-icons/fa';
-import TabPanel from '../../components/TabPanel';
+import routes from 'src/components/Helpers/Routes';
+import DataListItems from './DataListItems';
 
 const DataListDetail = () => {
   const { id } = useParams();
@@ -21,7 +21,6 @@ const DataListDetail = () => {
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
-
 
   useEffect(() => {
     fetchData();
@@ -49,38 +48,20 @@ const DataListDetail = () => {
         </Box>
       </Box>
       <Box className={'detail-container-v1'}>
-      <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Data List Items
-              </div>
-            }
-            value={0}
-            aria-controls="a11y-tabpanel-0"
-            id="a11y-tab-0"
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Data List Items
+          </CustomTab>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(13).keys()]} />
-          </Grid>
-        ) : (
-          <DataListItems dataListId={id} />
-        )}
-        </TabPanel>  
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(13).keys()]} />
+            </Grid>
+          ) : (
+            <DataListItems dataListId={id} />
+          )}
+        </TabPanel>
       </Box>
     </Box>
   );

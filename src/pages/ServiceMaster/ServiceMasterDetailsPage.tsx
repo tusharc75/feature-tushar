@@ -1,10 +1,11 @@
-import { Box, Button, Grid, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Grid, useMediaQuery } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
 
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -131,27 +132,11 @@ const ServiceMasterDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          <Tab label={<div className="tab-font">Steps</div>} value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className={'tabLayout'} />
-          <Tab
-            label={<div className="tab-font">Consumables/Tools</div>}
-            value={2}
-            aria-controls="a11y-tabpanel-2"
-            id="a11y-tab-2"
-            className={'tabLayout'}
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0} label={<>Details</>} />
+          <CustomTab value={1} label={<>Steps</>} />
+          <CustomTab value={2} label={<>Consumables/Tools</>} />
+        </CustomTabs>
         <Grid container spacing={2}>
           <Grid item xs={12}>
             {tabValue === 0 && (

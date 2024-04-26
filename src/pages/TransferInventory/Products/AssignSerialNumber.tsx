@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Button, Grid, Tab, Tabs, TextField, Typography } from '@material-ui/core';
+import { Box, TextField } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, transferInventory } from '../../../constants/helpers';
+import { transferInventory } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import axiosInstance from 'src/axios/axiosInstance';

@@ -1,10 +1,9 @@
 import { Box, Button, Grid } from '@material-ui/core';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
 import { Edit } from '@material-ui/icons';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -16,22 +15,6 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CreateZone from './CreateZone';
 import Zipcode from './zip';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
-    </div>
-  );
-}
 
 const ZoneDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -150,20 +133,10 @@ const ZoneDetailPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          <Tab label={<div className="tab-font">Zip Code</div>} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className={'tabLayout'} />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab label={'Details'} value={0} />
+          <CustomTab label={'Zip Code'} value={1} />
+        </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
           <Box>

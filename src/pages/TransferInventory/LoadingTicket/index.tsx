@@ -241,7 +241,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
     if (transferInventoryData?.processor?.optionValue) {
       data['processor'] = transferInventoryData?.processor?.optionValue;
     }
-    data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+    data['status'] = DELIVERY_TICKET_STATUS.inTransit;
 
     if (user?.user?.brandPolicy?.storageLocation) {
       if (transferInventoryData?.transferFromStorageLocation?.optionValue) {
@@ -341,7 +341,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                   }}
                   disabled={
                     selectedRecords.length === 0 ||
-                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
                   }
                 >
                   {`Receive`}

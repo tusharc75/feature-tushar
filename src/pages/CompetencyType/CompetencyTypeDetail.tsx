@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -8,6 +8,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
@@ -125,28 +126,10 @@ const CompetencyMasterDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          {permissions?.competencies?.isRead && (
-            <Tab
-              label={<div className="tab-font">{routes?.competencies.title}</div>}
-              value={1}
-              aria-controls="a11y-tabpanel-1"
-              id="a11y-tab-1"
-              className={'tabLayout'}
-            />
-          )}
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0} label={'Details'} />
+          {permissions?.competencies?.isRead && <CustomTab value={1} label={routes?.competencies.title} />}
+        </CustomTabs>
         {tabValue === 0 && (
           <Box>
             {loading || !fields?.length ? (

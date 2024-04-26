@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem, TextField, Tooltip } from '@material-ui/core';
+import { Box, IconButton, MenuItem, TextField } from '@material-ui/core';
 import CachedIcon from '@material-ui/icons/Cached';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
@@ -16,6 +16,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { convertInventory, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import InventoryToAsset from './InventoryToAsset';
 import axios, { CancelTokenSource } from 'axios';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const ConvertInventory = () => {
   const renderedFrom = camelCase(routes?.inventoryToAsset.title);
@@ -63,9 +64,9 @@ const ConvertInventory = () => {
 
   useEffect(() => {
     if (warehouseId) {
-    const cencelToken = axios.CancelToken.source();
-    fetchProductInventory(cencelToken);
-    return () => cencelToken.cancel();
+      const cencelToken = axios.CancelToken.source();
+      fetchProductInventory(cencelToken);
+      return () => cencelToken.cancel();
     }
   }, [search, warehouseId, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
 
@@ -74,23 +75,21 @@ const ConvertInventory = () => {
     const response = await axiosInstance().get(`/field?resource=Product&view=true`);
     data = response?.data?.data;
     let columns = [];
-    let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
     columns = [...columns, ...newColumns];
     columns?.forEach((e) => {
       if (!['productName', 'serializedProduct'].includes(e.accessor)) {
         e.show = false;
       }
     });
-
     columns.push({
       accessor: 'availableInventory',
       Header: 'Available Inventory',
       width: 120,
       show: true,
-      sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => <p className="text-truncate">{row.original.availableInventory}</p>
     });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    columns = [...columns, ActionsRenderer];
     setColumns(columns);
   };
 
@@ -174,7 +173,7 @@ const ConvertInventory = () => {
         {permissions?.inventoryToAsset?.isUpdate && (
           <Fragment>
             <Box pl={1}>
-              <Tooltip title="Convert Inventory">
+              <HtmlTooltip title="Convert Inventory">
                 <IconButton
                   size="small"
                   aria-label="Clone"
@@ -185,7 +184,7 @@ const ConvertInventory = () => {
                 >
                   <CachedIcon fontSize="small" color="primary" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             </Box>
           </Fragment>
         )}

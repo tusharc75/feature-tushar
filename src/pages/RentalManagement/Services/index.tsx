@@ -295,7 +295,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
       const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-      setIsRateRequired(isPriceRequired)
+      setIsRateRequired(isPriceRequired);
 
       rows.forEach((parent, i) => {
         parent.index = i + 1;
@@ -668,7 +668,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           </Box>
           <Box mt={3}>
             <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-              <CustomTab index={0} label={'Technicians'} value={0} primaryColor={true} />
+              <CustomTab value={0} label={'Technicians'} primaryColor={true} />
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Technicians

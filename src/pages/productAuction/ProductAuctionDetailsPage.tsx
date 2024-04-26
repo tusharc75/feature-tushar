@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -6,6 +6,7 @@ import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -18,29 +19,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { ACTIVITY_RESOURCE, productAuction } from '../../constants/helpers';
 import BidsPage from './Bids';
 import ManageProductAuction from './ManageProductAuction';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
-    </div>
-  );
-}
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
 
 const ProductAuctionDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -138,36 +116,14 @@ const ProductAuctionDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         {productAuctionData && fields.length ? (
           <>
-            <Tabs
-              className="new-tab-container-v1"
-              value={tabValue}
-              onChange={handleMainTabChange}
-              textColor="primary"
-              TabIndicatorProps={{
-                style: {
-                  display: 'none'
-                }
-              }}
-            >
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                  </div>
-                }
-                {...a11yProps(0)}
-              />
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Bids
-                  </div>
-                }
-                {...a11yProps(1)}
-              />
-            </Tabs>
+            <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+              <CustomTab value={0}>
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </CustomTab>
+              <CustomTab value={1}>
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Bids
+              </CustomTab>
+            </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <DetailsPage data={productAuctionData} fields={fields} />
             </TabPanel>

@@ -266,7 +266,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
       if (repairOrderData?.processor?.optionValue) {
         data['processor'] = repairOrderData?.processor?.optionValue;
       }
-      data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+      data['status'] = DELIVERY_TICKET_STATUS.inTransit;
       setShowTicketDialog({ open: true, data: data });
     }
   };
@@ -337,7 +337,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
                 <MenuItem
                   disabled={
                     selectedRecords.length === 0 ||
-                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
                   }
                   onClick={() => {
                     handelProcessTickets();

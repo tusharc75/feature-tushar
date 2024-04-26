@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Box, Button, Grid, Tab, Tabs, TextField, Typography } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
-import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, productInventory } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -21,8 +20,9 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
   }, []);
 
   const fetchRecords = () => {
+    let api = `${productInventory.api}/product/${product}?warehouse=${warehouse}`;
     axiosInstance()
-      .get(`${productInventory.api}/product/${product}?warehouse=${warehouse}`)
+      .get(api)
       .then(({ data: { data } }) => {
         const count = data?.inventory - (data?.softHold || 0) - data?.serialNumber;
         if (count > 0) {
@@ -31,7 +31,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
           setSerialNumberCount(0);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   return (

@@ -47,7 +47,7 @@ interface StyledTabProps {
   label: string;
 }
 
-const CustomTabs = ({ value, setValue, tabs }) => {
+const CustomAntTabs = ({ value, setValue, tabs }) => {
   const handleTabChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -63,4 +63,4 @@ const CustomTabs = ({ value, setValue, tabs }) => {
   );
 };
 
-export default CustomTabs;
+export default CustomAntTabs;

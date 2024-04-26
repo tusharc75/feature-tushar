@@ -1,39 +1,40 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-import { useData } from 'src/StateProvider/Provider';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { repairJob, sidebarResource, repairJobProcessSteps, REPAIR_JOB_STATUS, ACTIVITY_RESOURCE, serializedAsset, checkSuperAdminAccess } from 'src/constants/helpers';
-import ManageRepairJob from './ManageRepairJob';
+import { Box, Button, Grid } from '@material-ui/core';
+import EditIcon from '@material-ui/icons/Edit';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import React, { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import TabPanel from 'src/components/TabPanel';
+import { GiAbstract055 } from 'react-icons/gi';
+import { RiFlowChart } from 'react-icons/ri';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import routes from 'src/components/Helpers/Routes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import Steps, { getIndex } from 'src/components/Steps';
+import {
+  ACTIVITY_RESOURCE,
+  REPAIR_JOB_STATUS,
+  checkSuperAdminAccess,
+  repairJob,
+  repairJobProcessSteps,
+  serializedAsset,
+  sidebarResource
+} from 'src/constants/helpers';
 import AddSerializedAsset from './AddSerializedAsset';
+import ManageRepairJob from './ManageRepairJob';
+import RepairJobViews from './RoadMapViews/index';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
-import Steps, { getIndex } from 'src/components/Steps';
-import { GiAbstract055 } from 'react-icons/gi';
-import { camelCase } from 'lodash';
-import { RiFlowChart } from 'react-icons/ri';
-import RepairJobViews from './RoadMapViews/index';
-import ContentFullScreen from 'src/components/ContentFullScreen';
-import { isMobile, isTablet } from 'react-device-detect';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import EditIcon from '@material-ui/icons/Edit';
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
 
 const RepairJobDetails = () => {
   const renderedFrom = camelCase(routes?.repairJob.title);
@@ -64,7 +65,6 @@ const RepairJobDetails = () => {
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
   const [alloweOperation, setAlloweOperation] = useState(true);
-
 
   const repairJobProcessStepsNames = React.useMemo(() => {
     return repairJobProcessSteps.map((item) => item.name);
@@ -131,7 +131,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const fetchRepairJobData = () => {
@@ -144,7 +144,7 @@ const RepairJobDetails = () => {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);
-        setAlloweOperation(data?.workOrder ? false : true)
+        setAlloweOperation(data?.workOrder ? false : true);
         setRepairJobData({ ...data });
       })
       .catch((err) => {
@@ -161,7 +161,7 @@ const RepairJobDetails = () => {
       .put(`${repairJob.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.repairJob.path}`)
+        history.push(`${routes.repairJob.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -180,14 +180,14 @@ const RepairJobDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => { })
+      .then(({ data: { data } }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -225,56 +225,22 @@ const RepairJobDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <GiAbstract055 className="mr-1" fontSize="inherit" /> {routes.deliveryTicket.title}
-              </div>
-            }
-            {...a11yProps(2)}
-          />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+          <CustomTab value={2}>
+            <GiAbstract055 className="mr-1" fontSize="inherit" /> {routes.deliveryTicket.title}
+          </CustomTab>
           {!(isMobile && !isTablet) && (
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-                </div>
-              }
-              {...a11yProps(3)}
-            />
+            <CustomTab value={3}>
+              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+            </CustomTab>
           )}
-        </Tabs>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {repairJobData && repairJobFields.length ? (
@@ -298,7 +264,7 @@ const RepairJobDetails = () => {
               setStepFullScreen={() => setStepFullScreen(true)}
             />
             <ContentFullScreen title={repairJobProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-              {(currentStep === 0 && repairJobData) && (
+              {currentStep === 0 && repairJobData && (
                 <AddSerializedAsset
                   repairJobData={repairJobData}
                   setNextStep={setNextStep}
@@ -309,7 +275,7 @@ const RepairJobDetails = () => {
                   alloweOperation={alloweOperation}
                 />
               )}
-              {(currentStep === 1 && repairJobData) && (
+              {currentStep === 1 && repairJobData && (
                 <SerializedAsset
                   repairJobData={repairJobData}
                   fetchRepairJobData={fetchRepairJobData}

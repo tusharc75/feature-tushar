@@ -10,9 +10,11 @@ import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { ASSET_STATUS, INVENTORY_OWNER_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
+import { ASSET_STATUS, COLOUR_MASTER, INVENTORY_OWNER_TYPE, REPAIR_ORDER_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
 import ManageRepairOrder from '../RepairOrder/ManageRepairOrder';
 import { Autocomplete } from '@material-ui/lab';
+import { Link } from 'react-router-dom';
+import moment from 'moment';
 
 const WorkOrderPlanning = () => {
   const renderedFrom = camelCase(routes?.workOrderPlanning.title);
@@ -26,7 +28,7 @@ const WorkOrderPlanning = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const statusOption = ['Pending', 'Completed'];
+  const statusOption = ['Pending', 'In-Progress', 'Completed'];
 
   const [columns, setColumns] = useState(null);
   const [openRepairOrderDialog, setOpenRepairOrderDialog] = useState(false);
@@ -37,6 +39,38 @@ const WorkOrderPlanning = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrderPlanning}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, null, true);
+    newColumns?.forEach((o) => {
+      if (o?.accessor === 'asset') {
+        const getBackgroundColor = (row) => {
+          const today = moment()
+          const dueDate = moment(row?.original?.dueDate)
+          const days = dueDate.diff(today, 'days');
+          let color = ''
+          if (row?.original?.status === 'Pending') {
+            if (days <= 1) {
+              color = COLOUR_MASTER.lostAssets.background;;
+            }
+            else if (days <= 7) {
+              color = COLOUR_MASTER.replaceAssetColor.background;;
+            }
+          }
+          return color;
+        }
+        o.cell = ({ row }) => (
+          <div style={{ backgroundColor: getBackgroundColor(row) }}  >
+            <Link
+              className="link text-truncate"
+              title={row?.original?.asset}
+              target='_blank'
+              to={`${routes.serializedAssetDetail.path}/${row?.original?.assetId}`}
+            >
+              {row?.original?.asset}
+            </Link>
+          </div>
+        );
+      }
+    });
+
     setColumns([...newColumns]);
   };
 
@@ -83,29 +117,23 @@ const WorkOrderPlanning = () => {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     axiosInstance()
       .get(`${workOrder.api}/work-order-planning${queryString}`)
-      .then(
-        ({
-          data: {
-            data: { data, count }
-          }
-        }) => {
-          let rows = data.map((u) => {
-            let finalObject = prepareDataForGrid(u, user);
-            finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-            finalObject['asset'] = u?.asset?.assetNumber;
-            finalObject['assetId'] = u?.asset?._id;
-            finalObject['warehouse'] = u?.asset?.warehouse;
-            finalObject['warehouseId'] = u?.asset?.warehouseId;
-            finalObject['assetStatus'] = u?.asset?.status;
-            finalObject['currentOwnerType'] = u?.asset?.currentOwnerType;
-            finalObject['ownerType'] = u?.asset?.ownerType;
-            return finalObject;
-          });
-          dispatch({ type: 'initialize', data: rows, count: count });
-        }
+      .then(({ data: { data: { data, count } } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['asset'] = u?.asset?.assetNumber;
+          finalObject['assetId'] = u?.asset?._id;
+          finalObject['warehouse'] = u?.asset?.warehouse;
+          finalObject['warehouseId'] = u?.asset?.warehouseId;
+          finalObject['assetStatus'] = u?.asset?.status;
+          finalObject['currentOwnerType'] = u?.asset?.currentOwnerType;
+          finalObject['ownerType'] = u?.asset?.ownerType;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+      }
       )
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -117,19 +145,21 @@ const WorkOrderPlanning = () => {
       });
   };
 
-  const addMaterial = async (repairOrder) => {
-    axiosInstance()
-      .post(`${workOrder.api}/work-order-planning/material`, {
-        repairOrderId: repairOrder?._id,
-        material: selectedRecords?.map((r) => ({ asset: r?.assetId, _id: r?._id }))
-      })
-      .then((res) => {
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
+  const handleAddAssets = async (repairOrder) => {
+    axiosInstance().post(`${workOrder.api}/work-order-planning/material`, {
+      repairOrderId: repairOrder?._id,
+      _ids: selectedRecords?.map((e) => e?._id)
+    }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+      dispatch({ type: 'selection', selectedRecords: [] });
+      fetchData();
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
   };
 
   const handleSearch = (e) => {
@@ -208,7 +238,6 @@ const WorkOrderPlanning = () => {
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -227,18 +256,17 @@ const WorkOrderPlanning = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-
         {openRepairOrderDialog && (
           <ManageRepairOrder
             onClose={() => {
               setOpenRepairOrderDialog(false);
             }}
             onSuccess={(data) => {
-              addMaterial(data);
+              handleAddAssets(data);
               setOpenRepairOrderDialog(false);
             }}
-            referenceType={'workOrderPlanning'}
-            referenceData={{warehouse: selectedRecords[0]?.warehouseId}}
+            referenceType={sidebarResource.workOrderPlanning}
+            referenceData={{ warehouse: selectedRecords[0]?.warehouseId, type: REPAIR_ORDER_TYPE.internal }}
           />
         )}
       </CustomContainer>

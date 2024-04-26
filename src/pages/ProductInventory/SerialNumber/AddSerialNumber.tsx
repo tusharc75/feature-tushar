@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Box, Button, Divider, Grid, Tab, Tabs, TextField, Typography } from '@material-ui/core';
+import { Box, Divider, TextField, Typography } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, productInventory } from '../../../constants/helpers';

@@ -48,6 +48,14 @@ const getWarningList = (row?: any) => {
       title: 'Contract Start Date has set but Contract not Signed',
       label: 'Contract Start Date has set but Contract not Signed',
       isVisible: row?.original?.dealstage === DEAL_STAGE.proposalSent && row?.original?.start_set_date
+    },
+    {
+      warningFilter: 5,
+      icon,
+      title: 'Quote is expired but Unit is still assigned',
+      label: 'Quote is expired but Unit is still assigned',
+      isVisible: row?.original?.dealstage === DEAL_STAGE.proposalSent && row?.original?.unit !== '' &&
+        new Date(row?.original?.quote_expiration_date)?.getTime() <= new Date()?.getTime()
     }
   ];
   return list;

@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -7,18 +7,17 @@ import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { checkSuperAdminAccess, getResourceLabel } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDynamicForm from './ManageDynamicForm';
-import TabPanel from 'src/components/TabPanel';
 import Step from './Step';
-import { checkSuperAdminAccess, getResourceLabel } from 'src/constants/helpers';
-import PreviewDownload from 'src/components/PreviewDownload';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 
 const DynamicFormDetail = () => {
   const { route, id } = useParams();
@@ -189,13 +188,8 @@ const DynamicFormDetail = () => {
       </Box>
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} value={0}>
-            Header
-          </CustomTab>
-          {resourceData && resourceData?.steps?.length > 0 &&
-            <CustomTab index={1} value={1}>
-              Associations
-            </CustomTab>}
+          <CustomTab value={0}>Header</CustomTab>
+          {resourceData && resourceData?.steps?.length > 0 && <CustomTab value={1}>Associations</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (

@@ -138,11 +138,11 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
           product.length > 1
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: [] }))
             : product?.map((e) => ({
-                product: e._id,
-                qty: parseInt(values.qty),
-                price: parseFloat(values.price),
-                serialNumber: values['serialNumbers']
-              })),
+              product: e._id,
+              qty: parseInt(values.qty),
+              price: parseFloat(values.price),
+              serialNumber: values['serialNumbers']
+            })),
         warehouse: warehouse,
         storageLocation: values.storageLocation,
         receiveDate: values.customDate,
@@ -230,8 +230,12 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
 
     if (serialNumbersList.length > Number(values['qty'])) {
       errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
-    } else if (duplicates.length > 0) {
+    }
+    else if (duplicates.length > 0) {
       errors['serialNumbers'] = `Serial numbers cannot be duplicate`;
+    }
+    if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && serialNumbersList.length !== Number(values['qty'])) {
+      errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
     }
 
     if (lockDate) {
@@ -544,6 +548,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                                 label={type === 'add' ? 'Serial Numbers' : 'Select Serial Numbers'}
                                 error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
                                 helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                                required={user?.user?.brandPolicy?.productInventorySerialNumberRequired ? true : false}
                               />
                             )}
                           />

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import _, { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { Box, Button, IconButton, MenuItem, Typography } from '@material-ui/core';
@@ -24,9 +24,9 @@ import routes from 'src/components/Helpers/Routes';
 import { flattenArray } from 'src/constants/columns';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 
-const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = null, fromAccordian = false, stepFullScreen = false }) => {
+const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = null, fromAccordian = false, stepFullScreen = false, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = `${_.camelCase(resource)}`;
+  const renderedFrom = `${camelCase(resource)}`;
 
   const [open, setOpen] = useState({ open: false, id: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -53,54 +53,54 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
       },
       ...(step?.linkWithMaterial
         ? [
-            {
-              accessor: 'type',
-              Header: 'Type',
-              disableFilters: true,
-              disabled: true,
-              sticky: isMobile || isTablet ? 'none' : 'left',
-              width: 200,
-              Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
-            },
-            {
-              accessor: 'detail',
-              Header: 'Details',
-              minWidth: 300,
-              width: 300,
-              disabled: true,
-              sticky: isMobile || isTablet ? 'none' : 'left',
-              Cell: ({ row, table }) => (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <p className="text-truncate" title={row.original.detail}>
-                    {row.original.detail}
-                  </p>
-                  <Box ml={1}>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        if (row.original.type === MATERIAL_TYPE.product) {
-                          window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                        }
-                        if (row.original.type === MATERIAL_TYPE.service) {
-                          window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                        }
-                        if (row.original.type === MATERIAL_TYPE.package) {
-                          window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                        }
-                      }}
-                    >
-                      <OpenInNewIcon fontSize="small" color="primary" />
-                    </IconButton>
-                  </Box>
-                </div>
-              )
-            },
-            {
-              accessor: 'description',
-              Header: 'Description',
-              Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'type',
+            Header: 'Type',
+            disableFilters: true,
+            disabled: true,
+            sticky: isMobile || isTablet ? 'none' : 'left',
+            width: 200,
+            Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+          },
+          {
+            accessor: 'detail',
+            Header: 'Details',
+            minWidth: 300,
+            width: 300,
+            disabled: true,
+            sticky: isMobile || isTablet ? 'none' : 'left',
+            Cell: ({ row, table }) => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <p className="text-truncate" title={row.original.detail}>
+                  {row.original.detail}
+                </p>
+                <Box ml={1}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      if (row.original.type === MATERIAL_TYPE.product) {
+                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                      }
+                      if (row.original.type === MATERIAL_TYPE.service) {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                      }
+                      if (row.original.type === MATERIAL_TYPE.package) {
+                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                      }
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </Box>
+              </div>
+            )
+          },
+          {
+            accessor: 'description',
+            Header: 'Description',
+            Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
+          }
+        ]
         : [])
     ];
     return [
@@ -172,18 +172,18 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
             u?.type === MATERIAL_TYPE.product
               ? u?.productDetail?.productName
               : u?.type === MATERIAL_TYPE.service
-              ? u?.serviceDetail?.serviceName
-              : u?.type === MATERIAL_TYPE.package
-              ? u?.packageDetail?.packageName
-              : '';
+                ? u?.serviceDetail?.serviceName
+                : u?.type === MATERIAL_TYPE.package
+                  ? u?.packageDetail?.packageName
+                  : '';
           finalObject['description'] =
             u?.type === MATERIAL_TYPE.product
               ? u?.productDetail?.productDescription
               : u?.type === MATERIAL_TYPE.service
-              ? u?.serviceDetail?.serviceDescription
-              : u?.type === MATERIAL_TYPE.package
-              ? u?.packageDetail?.packageDescription
-              : '';
+                ? u?.serviceDetail?.serviceDescription
+                : u?.type === MATERIAL_TYPE.package
+                  ? u?.packageDetail?.packageDescription
+                  : '';
           finalObject['subRows'] = generateNestedData(data, finalObject);
           return finalObject;
         });
@@ -216,18 +216,18 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
         _subRow?.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productName
           : _subRow?.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageName
-          : '';
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
+              : '';
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
     });
 
     return subRows;
@@ -241,27 +241,23 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
 
   const handleAdd = (rows) => {
     const values = rows?.map((r) => ({ type: openMaterial?.type, materialId: r?._id, parentId: null, qty: r?.qty, stepId: step?._id }));
-
     setIsSubmitting(true);
-    axiosInstance()
-      .post(`/dynamic-form/step/${resourceId}`, values, {
-        headers: {
-          Resource: resource
-        }
-      })
-      .then(({ data }) => {
-        setIsSubmitting(false);
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
+    axiosInstance().post(`/dynamic-form/step/${resourceId}`, values, {
+      headers: {
+        Resource: resource
+      }
+    }).then(({ data }) => {
+      setIsSubmitting(false);
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+    }).catch((error) => {
+      setIsSubmitting(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleDelete = async () => {
@@ -271,60 +267,47 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
     } else {
       ids = selectedRecords.map((m) => m._id);
     }
-
-    axiosInstance()
-      .put(
-        `/dynamic-form/step/remove/${resourceId}`,
-        { ids: ids, stepId: step?._id },
-        {
-          headers: {
-            Resource: resource
-          }
+    axiosInstance().put(`/dynamic-form/step/remove/${resourceId}`, { ids: ids, stepId: step?._id },
+      {
+        headers: {
+          Resource: resource
         }
-      )
-      .then(({ data }) => {
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+      }
+    ).then(({ data }) => {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      fetchData();
+      setShowDeleteConfirmBox(false);
+      setDeleteRecord(null);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
       });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, step?.fields || [], updatedData);
-
-    axiosInstance()
-      .put(
-        `/dynamic-form/step/${resourceId}`,
-
-        { ...rows[0], stepId: step?._id },
-        {
-          headers: {
-            Resource: resource
-          }
+    axiosInstance().put(`/dynamic-form/step/${resourceId}`, { ...rows[0], stepId: step?._id },
+      {
+        headers: {
+          Resource: resource
         }
-      )
-      .then(({ data }) => {
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+      }
+    ).then(({ data }) => {
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const actionButtonMenuItems = () => {
@@ -338,15 +321,22 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   const addButtonMenuItems = () => {
     return step?.linkWithMaterial
       ? step?.linkedMaterial?.map((m) => (
-          <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
-        ))
+        <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
+      ))
       : null;
   };
 
   return (
     <>
       {step?.linkWithResource ? (
-        <ResourceField step={step} allowedToEdit={allowedToEdit} renderedFrom={renderedFrom} data={data} stepFullScreen={stepFullScreen} />
+        <ResourceField
+          step={step}
+          allowedToEdit={allowedToEdit}
+          renderedFrom={renderedFrom}
+          data={data}
+          stepFullScreen={stepFullScreen}
+          referenceData={referenceData}
+        />
       ) : (
         <>
           {step?.fields?.length || step?.linkWithMaterial ? (
@@ -415,7 +405,6 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
               <Typography>No Fields</Typography>
             </Box>
           )}
-
           {open?.open && (
             <ManageStep
               onClose={() => {
@@ -432,7 +421,6 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
               fields={step?.fields || []}
             />
           )}
-
           {showDeleteConfirmBox && (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
@@ -444,7 +432,6 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
               onOk={handleDelete}
             />
           )}
-
           {openMaterial?.open && openMaterial?.type === MATERIAL_TYPE.product && (
             <AssignProductDialog
               handleCloseDialog={() => setOpenMaterial({ open: false, type: '' })}
@@ -456,7 +443,6 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
               ids={dataRows?.filter((d) => d?.type === MATERIAL_TYPE.product)?.map((e) => e?.materialId)}
             />
           )}
-
           {openMaterial.open && openMaterial.type === MATERIAL_TYPE.service && (
             <AssignServiceDialog
               handleClose={() => setOpenMaterial({ open: false, type: '' })}
@@ -468,7 +454,6 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
               ids={dataRows?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e?.materialId)}
             />
           )}
-
           {openMaterial.open && openMaterial.type === MATERIAL_TYPE.package && (
             <AssignPackageDialog
               handleClose={() => setOpenMaterial({ open: false, type: '' })}
