@@ -30,7 +30,7 @@ const getWarningList = (row?: any) => {
       icon,
       title: 'Unit is assigned to multiple deals',
       label: 'Unit is assigned to multiple deals',
-      isVisible: row?.original?.secondaryStatus === 'Allocated' && row?.original?.restdeal?.length > 0
+      isVisible: row?.original?.restdeal?.length > 0
     },
     {
       warningFilter: 2,
