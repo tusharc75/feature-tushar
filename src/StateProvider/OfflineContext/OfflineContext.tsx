@@ -91,28 +91,25 @@ export const CustomOfflineProvider = ({ children }) => {
           if (d?.type === 'fieldTicketMaterial') {
             if (d?.data?.length) {
               await axiosInstance()
-                .post(`${routes?.fieldTicket?.path}/${d?.data[0]?.fieldTicketId}/material/offline-data-sync`, d.data)
+                .post(`${routes?.fieldTicket?.path}/${d?._id}/material-offline-data-sync`, d.data)
                 .then(({ data: { data } }) => {
-                  deleteOne(objectStore.offlineDataSync, d.id);
-                  let ids = d?.data?.map((e) => e?.offlineId);
+                  let ids = d?.data?.map((e) => e?._id);
                   deleteMany(objectStore.fieldTicketMaterial, ids);
                 })
                 .catch((error) => { });
               await new Promise((resolve) => setTimeout(resolve, 2000));
             }
+            deleteOne(objectStore.offlineDataSync, d._id);
           }
-          if (d?.type === 'fieldTicketCost') {
-            if (d?.data?.length) {
-              await axiosInstance()
-                .post(`${routes?.fieldTicket?.path}/${d?.data[0]?.fieldTicketId}/cost/offline-data-sync`, d.data)
-                .then(({ data: { data } }) => {
-                  deleteOne(objectStore.offlineDataSync, d.id);
-                  let ids = d?.data?.map((e) => e?.offlineId);
-                  deleteMany(objectStore.fieldTicketCost, ids);
-                })
-                .catch((error) => { });
-              await new Promise((resolve) => setTimeout(resolve, 2000));
-            }
+          if (d?.type === 'fieldTicketMaterialDelete') {
+            await axiosInstance()
+              .post(`${routes?.fieldTicket?.path}/${d?.data?.fieldTicketId}/material-offline-data-sync`, d.data)
+              .then(({ data: { data } }) => {
+                deleteOne(objectStore.offlineDataSync, d._id);
+              })
+              .catch((error) => { });
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
           }
         });
         await rentalJobOfflineUpdate([]);

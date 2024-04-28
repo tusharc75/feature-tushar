@@ -89,14 +89,16 @@ const AssignServiceDialog = ({
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     try {
       dispatch({ type: 'loading', loading: true });
-      let data;
+      let data, count;
       if (isOffline) {
         data = await findAll(objectStore.serviceMaster);
         data = data?.filter((d: any) => !ids?.includes(d?._id?.toString()));
+        count = data?.length;
       } else {
         const queryString = getQueryString();
         const response = await axiosInstance().get(`${serviceMaster.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
         data = response?.data?.data;
+        count = response?.data?.count;
       }
       let rows = data?.map((u) => {
         let finalObject = prepareDataForGrid(u);
@@ -112,7 +114,7 @@ const AssignServiceDialog = ({
           ...finalObject
         };
       });
-      dispatch({ type: 'initialize', data: rows, count: data.count });
+      dispatch({ type: 'initialize', data: rows, count: count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);

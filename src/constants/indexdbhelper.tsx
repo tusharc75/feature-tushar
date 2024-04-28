@@ -12,7 +12,7 @@ export const objectStore = {
   fieldServiceOrder : 'fieldServiceOrder',
   serviceMaster: 'serviceMaster',
   fieldTicketMaterial: 'fieldTicketMaterial',
-  fieldTicketCost : 'fieldTicketCost',
+  product: 'product',
 };
 
 export const setUpindexDB = () => {
@@ -95,3 +95,12 @@ export const deleteMany = (store, keys) => {
     };
   } catch (e) {}
 };
+
+export const ifExists = async (store, key) => {
+  try {
+    const db = await openDB(DB_NAME, 1);
+    var transaction = db.transaction([store], 'readwrite');
+    const result = await transaction.objectStore(store).get(key);
+    return result;
+  } catch (e) {}
+}

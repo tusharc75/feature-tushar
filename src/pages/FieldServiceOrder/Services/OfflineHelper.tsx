@@ -1,6 +1,6 @@
 import { objectStore, insertUpdate, findOne, findAll, clearAll } from '../../../constants/indexdbhelper';
 import axiosInstance from '../../../axios/axiosInstance';
-import { asyncForEach, fieldServiceOrder } from '../../../constants/helpers';
+import { MATERIAL_TYPE, asyncForEach, fieldServiceOrder } from '../../../constants/helpers';
 
 export const fieldServiceOfflineUpdate = async (ids) => {
     try {
@@ -18,7 +18,10 @@ export const fieldServiceOfflineUpdate = async (ids) => {
             await insertUpdate(objectStore.fieldTicketMaterial, element._id, element);
         })
         await asyncForEach(data?.data?.fieldTicketCost, async (element) => {
-            await insertUpdate(objectStore.fieldTicketCost, element._id, element);
+            await insertUpdate(objectStore.fieldTicketMaterial, element._id, {...element, type: MATERIAL_TYPE.manualEntry});
+        })
+        await asyncForEach(data?.data?.product, async (element) => {
+            await insertUpdate(objectStore.product, element._id, element);
         })
         return true
     }

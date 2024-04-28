@@ -296,7 +296,13 @@ const ServiceOrder = () => {
       insertUpdate(objectStore.resource, objectStore.fieldTicketMaterial, data);
     });
     axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`).then(({ data: { data } }) => {
-      insertUpdate(objectStore.resource, objectStore.fieldTicketCost, data);
+      insertUpdate(objectStore.resource, 'fieldTicketCost', data);
+    });
+    axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, objectStore.product, data);
+    });
+    axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription']}]}).then(({data : {data}}) => {
+      insertUpdate(objectStore.resource, 'fieldTicketMaterialProduct', data);
     });
     dispatch({ type: 'selection', selectedRecords: [] });
   };
@@ -304,6 +310,10 @@ const ServiceOrder = () => {
   const handleRemoveoffline = async () => {
     await clearAll(objectStore.fieldServiceOrder);
     await clearAll(objectStore.fieldTicket);
+    await clearAll(objectStore.serviceMaster);
+    await clearAll(objectStore.fieldTicketMaterial);
+    await clearAll(objectStore.product);
+    
   };
 
   const ActionMenuItems = () => {

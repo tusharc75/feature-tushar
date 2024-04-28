@@ -5,8 +5,8 @@ import { camelCase } from 'lodash';
 
 export const fetch_child_resource_fields = async (childResource, currency, allowedToEdit, isOffline= false) => {
     let data;
-    if (isOffline && objectStore[camelCase(childResource)]) {
-        data = await findOne(objectStore.resource, objectStore[camelCase(childResource)]);
+    if (isOffline) {
+        data = await findOne(objectStore.resource, camelCase(childResource));
     } else {
         const response = await axiosInstance().get(`/field/child?resource=${childResource}`);
         data = response?.data?.data;
