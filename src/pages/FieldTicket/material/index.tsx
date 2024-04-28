@@ -737,7 +737,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       <Box mt={3}>
         <Consumables
           allowedToEdit={allowedToEdit}
-          services={dataRows}
+          services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
           fieldTicketData={fieldTicketData}
           fetchMaterial={fetchMaterial}
         />
