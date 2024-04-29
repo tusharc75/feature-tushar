@@ -81,11 +81,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
                   <IconButton
                     size="small"
                     onClick={() => {
-                      if(isOffline) {
-                        window.location.href = `${routes.fieldTicketDetail.path}/${row?.original?._id}`;
-                      } else {
                         window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
-                      }
                     }}
                   >
                     <OpenInNewIcon fontSize="small" color="primary" />
