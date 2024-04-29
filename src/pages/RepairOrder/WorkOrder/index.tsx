@@ -1286,7 +1286,7 @@ const WorkOrder = ({
               }
               title={'Arrange Services'}
               handleClose={() => setArrangeView(false)}
-              handleSubmit={(data) => handleArrangeUpdate(data, selectedServices[currIndex]?.workOrder?._id)}
+              handleSubmit={(data) => handleArrangeUpdate(data, uniqWorkOrders[currIndex])}
               loading={false}
               isLast={currIndex===uniqWorkOrders.length-1?true:false}
               currInd={currIndex}
