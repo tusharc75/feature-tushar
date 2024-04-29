@@ -972,6 +972,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'decimal') {
       obj[key.fieldName] = value && value !== '' ? parseFloat(value) : 0;
     } else if (key.type === 'lookUpDisplay') {
+    } else if (key.type === 'counter') {
+      obj[key.fieldName] = [];
     } else {
       obj[key.fieldName] = value;
     }

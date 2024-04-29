@@ -8,7 +8,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
@@ -130,7 +130,7 @@ const CompetencyMasterDetail = () => {
           <CustomTab value={0} label={'Details'} />
           {permissions?.competencies?.isRead && <CustomTab value={1} label={routes?.competencies.title} />}
         </CustomTabs>
-        {tabValue === 0 && (
+        <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -140,8 +140,10 @@ const CompetencyMasterDetail = () => {
               <DetailsPage data={competencyMasterData} fields={fields} />
             )}
           </Box>
-        )}
-        {tabValue === 1 && <Competencies competencyType={id} />}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Competencies competencyType={id} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

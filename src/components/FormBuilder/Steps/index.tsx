@@ -23,6 +23,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Actions from './Actions';
 import Notifications from './Notifications';
 import PolicyDialog from './policyDialog';
+import { resourcePolicy } from './helper';
+import PolicyIcon from '@material-ui/icons/Policy';
 
 const DND_NAME = 'Box';
 
@@ -41,7 +43,7 @@ const Steps = ({ resource }) => {
   const [openSetting, setOpenSetting] = useState(false);
   const [openAction, setOpenAction] = useState(false);
   const [openNotifications, setOpenNotifications] = useState(false);
-  const [openPolicy,setOpenPolicy] = useState(false)
+  const [openPolicy, setOpenPolicy] = useState(false)
 
   const fetchData = async () => {
     setStepsLoading(true);
@@ -122,16 +124,18 @@ const Steps = ({ resource }) => {
           Add Step
         </Button>
         <Box>
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          onClick={() => {
-            setOpenPolicy(true);
-          }}
-        >
-          Policy
-        </Button>
+          {resourcePolicy.find((e) => e.resource === resource) &&
+            <HtmlTooltip title={'Policy'}>
+              <IconButton
+                aria-label="Policy"
+                onClick={() => {
+                  setOpenPolicy(true);
+                }}
+              >
+                <PolicyIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          }
           <HtmlTooltip title={'Setting'}>
             <IconButton
               aria-label="Setting"
@@ -209,18 +213,17 @@ const Steps = ({ resource }) => {
         />
       )}
       {openPolicy && (
-        <PolicyDialog 
-        onClose={()=>{
-          setOpenPolicy(false);
-        }}
-        onSuccess={()=>{
-          fetchData();
-          setOpenPolicy(false);
-        }}
-        resource={resource}
-        resourceData={resourceData}
+        <PolicyDialog
+          onClose={() => {
+            setOpenPolicy(false);
+          }}
+          onSuccess={() => {
+            fetchData();
+            setOpenPolicy(false);
+          }}
+          resource={resource}
+          resourceData={resourceData}
         />
-
       )}
 
       {openSetting && (

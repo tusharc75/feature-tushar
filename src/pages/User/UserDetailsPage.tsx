@@ -544,8 +544,8 @@ const UserDetailsPage = () => {
                       }}
                     />
                   </TabPanel>
-                  {userData?.proxyDOA && (
-                    <TabPanel value={tabValue} index={2}>
+                  <TabPanel value={tabValue} index={2}>
+                    {userData?.proxyDOA ? (
                       <TableContainer>
                         <Table aria-label="DOA Proxy Table" size="small">
                           <TableHead>
@@ -570,31 +570,31 @@ const UserDetailsPage = () => {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            <TableRow key={userData.proxyDOA.user}>
+                            <TableRow key={userData.proxyDOA?.user}>
                               <TableCell>
                                 <Link
                                   className="link"
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  to={`${routes.userDetail.path}/${userData.proxyDOA.user}`}
+                                  to={`${routes.userDetail.path}/${userData.proxyDOA?.user}`}
                                 >
-                                  {userData.proxyDOA.user}
+                                  {userData.proxyDOA?.user}
                                 </Link>
                               </TableCell>
                               <TableCell align="center">
-                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
+                                <span className={classes.dataValue}>{displayDate(userData?.proxyDOA?.startDate)}</span>
                               </TableCell>
                               <TableCell align="center">
-                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.endDate)}</span>
+                                <span className={classes.dataValue}>{displayDate(userData?.proxyDOA?.endDate)}</span>
                               </TableCell>
                             </TableRow>
                           </TableBody>
                         </Table>
                       </TableContainer>
+                    ) : null}
 
-                      {/* </div> */}
-                    </TabPanel>
-                  )}
+                    {/* </div> */}
+                  </TabPanel>
                   <TabPanel value={tabValue} index={3}>
                     <UserSession id={id} />
                   </TabPanel>

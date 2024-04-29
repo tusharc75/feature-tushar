@@ -42,7 +42,7 @@ import {
 } from './../../constants/helpers';
 import AddReportsToContact from './AddReportsToContact';
 import ManageContactDialog from './ManageContact';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -623,14 +623,14 @@ const ContactDetailsPage = (props) => {
                 <CustomTab value={1} label={'Org Charts'} />
                 {contactResource === 'customerContact' && permissions?.productInventory && <CustomTab value={2} label={'Plants'} />}
               </CustomTabs>
-              <Box hidden={currentTabIndex !== 0}>
+              <TabPanel value={currentTabIndex} index={0}>
                 {showAtLast ? (
                   <DetailsPage data={contactData} fields={contactFields} />
                 ) : (
                   <DetailsPage data={contactData} fields={filteredContactFields} />
                 )}
-              </Box>
-              <Box hidden={currentTabIndex !== 1}>
+              </TabPanel>
+              <TabPanel value={currentTabIndex} index={1}>
                 <OrgChartContainer
                   data={orgChartData}
                   onClick={(id) => {
@@ -640,7 +640,7 @@ const ContactDetailsPage = (props) => {
                   setShowAddContact={setShowAddContact}
                   isInContact={true}
                 />
-              </Box>
+              </TabPanel>
               {contactResource === 'customerContact' && permissions?.productInventory && (
                 <Box hidden={currentTabIndex !== 2}>
                   <Warehouse reference={contactResource} api={contactApi} id={id} accountId={contactData?.accountName?.optionValue} />
