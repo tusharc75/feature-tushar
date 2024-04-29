@@ -198,6 +198,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
       element.uniqueId = selectedService?._id;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.status = 'Assigned';
+      element.warehouse = fieldTicketData?.warehouse?.optionValue;
       element.startDate = fieldTicketData?.estimateStartDate || new Date();
       element.endDate = fieldTicketData?.estimateEndDate || new Date();
       technician.push(element);
@@ -288,9 +289,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
           handleClose={() => {
             setTechnicianDialog(false);
           }}
-          defaultCompetency={[]}
-          filterByPlant={fieldTicketData?.warehouse}
-          ids={[]}
+          warehouse={fieldTicketData?.warehouse?.optionValue}
         />
       )}
 

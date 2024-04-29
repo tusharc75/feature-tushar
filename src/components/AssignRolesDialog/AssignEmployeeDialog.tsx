@@ -13,7 +13,9 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, defaultCompetency = [], extraStaticFilter = [], filterByPlant = null }) => {
+const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [],
+  defaultCompetency = [], extraStaticFilter = [], warehouse = null }) => {
+
   const renderedFrom = `${routes.employeeMaster.title}_${reference}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -30,13 +32,12 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   const [columns, setColumns] = useState(null);
   const [competencyOptions, setCompetencyOptions] = useState(null);
   const [warehouseOptions, setWarehouseOptions] = useState([]);
-  const [selectedWarehouse,setSelectedWarehouse] = useState(filterByPlant?.optionValue);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse);
   const [selectedCompetency, setSelectedCompetency] = useState(defaultCompetency);
 
   useEffect(() => {
     fetchGridColumns();
-    fetchCompetencyMaster();
-    fetchWarehouse();
+    fetchOptionsData();
   }, []);
 
   useEffect(() => {
@@ -49,22 +50,12 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
     return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetency, selectedWarehouse]);
 
-  const fetchCompetencyMaster = () => {
+  const fetchOptionsData = () => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Competency Type`)
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.competencyType},${sidebarResource.warehouse}`)
       .then(({ data: { data } }) => {
-        setCompetencyOptions(data['Competency Type'] || []);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const fetchWarehouse = () => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse}`)
-      .then(({ data: { data } }) => {
-        setWarehouseOptions(data[`${sidebarResource.warehouse}`] || []);
+        setWarehouseOptions(data[sidebarResource.warehouse] || []);
+        setCompetencyOptions(data[sidebarResource.competencyType] || []);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -129,7 +120,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
         term: { $in: selectedCompetency?.map((e) => e?.optionValue) }
       });
     }
-    if (selectedWarehouse && selectedWarehouse!=='') {
+    if (selectedWarehouse && selectedWarehouse !== '') {
       updatedFilterByIds.push({
         field: 'warehouse',
         term: selectedWarehouse
@@ -194,7 +185,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   const leftSideContents = () => {
     return (
       <>
-      <Autocomplete
+        <Autocomplete
           fullWidth
           className="max-w-[300px]"
           options={competencyOptions}
@@ -210,33 +201,33 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
             <TextField {...params} margin="none" size={'small'} name="competencyType" label="Competency Type" variant="outlined" fullWidth />
           )}
         />
-           <Autocomplete
-               fullWidth
-               className="max-w-[300px]"
-               options={warehouseOptions}
-               getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-               getOptionSelected={(option: any, val) => option.optionValue === val}
-               value={
-                      warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                       ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
-                            : ''
-                      }
-               onChange={(e, val) => {
-                      setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
-                       }}
-               renderInput={(params) => (
-              <TextField
-                {...params}
-                margin="dense"
-                name="plant"
-                placeholder={routes.warehouse.title}
-                label={routes.warehouse.title}
-                variant="outlined"
-                fullWidth
-                className="m-0"
-                  />
-              )}
+        <Autocomplete
+          fullWidth
+          className="max-w-[300px]"
+          options={warehouseOptions}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+          getOptionSelected={(option: any, val) => option.optionValue === val}
+          value={
+            warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+              ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="dense"
+              name="plant"
+              placeholder={routes.warehouse.title}
+              label={routes.warehouse.title}
+              variant="outlined"
+              fullWidth
+              className="m-0"
             />
+          )}
+        />
       </>
     );
   };
@@ -267,7 +258,6 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
               isAddButtonVisible
               setQueryString={false}
             />
-
             <CustomReactTable
               height={'calc(100vh - 200px)'}
               columns={columns}
