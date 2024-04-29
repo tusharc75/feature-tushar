@@ -69,15 +69,13 @@ export default function AccountHierarchy({
                 </Link>
               )}
               {row.original._id === currentAccountId ? (
-                <>
-                  &nbsp;
-                  <Chip
-                    style={{ color: 'white', backgroundColor: '#298B88', padding: 4, fontWeight: 600 }}
-                    label="Current"
-                    size="small"
-                    className="ml-2"
-                  />
-                </>
+                <Chip
+                  style={{ color: 'white', backgroundColor: '#298B88', padding: 4, fontWeight: 600 }}
+                  label="Current"
+                  size="small"
+                  data-hide-in-export={true}
+                  className="ml-2"
+                />
               ) : (
                 ''
               )}
