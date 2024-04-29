@@ -33,7 +33,6 @@ import { capitalize, map, orderBy, uniq } from 'lodash';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { flattenArray } from 'src/constants/columns';
 import EditIcon from '@material-ui/icons/Edit';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
@@ -74,7 +73,7 @@ const WorkOrder = ({
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
-  const [arrangeView, setArrangeView] = useState(false);
+  const [arrangeView, setArrangeView] = useState({ open: false, workOrderIds: [], currentIndex: 0 });
   const [isUpdating, setUpdating] = useState(false);
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
   const [allAssignedWorkStations, setAllAssignedWorkStations] = useState([]);
@@ -86,10 +85,6 @@ const WorkOrder = ({
   const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedServiceOption, setSelectedServiceOption] = useState(null);
   const [showServiceActionConfirmBox, setShowServiceActionConfirmBox] = useState({ open: false, action: '' });
-
-  const [uniqWorkOrders,setUniqWorkOrders]=useState([]);
-  const [currIndex,setCurrIndex]=useState(0);
-  const [selectedServices,setSelectedServices]=useState([]);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -132,7 +127,7 @@ const WorkOrder = ({
   }, [selectedRecords]);
 
   const fetchFields = async () => {
-    var data =  await fetch_child_resource_fields(CHILD_RESOURCE.workOrderService, repairOrderData?.currency, allowedToEdit);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderService, repairOrderData?.currency, allowedToEdit);
     const newColumns = generateColumns(renderedFrom, data, null, false, repairOrderData?.currency || 'USD');
     let coloum: any = [
       {
@@ -749,31 +744,32 @@ const WorkOrder = ({
       }
     }
   };
-  
+
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
+    setSubmitting(true);
     rows?.forEach((e: any) => {
       delete e.name;
       delete e.preWork;
     });
-    axiosInstance()
-      .put(`${workOrder.api}/service/${workOrderId}/order`, { data: rows || [] })
+    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/order`, { data: rows || [] })
       .then(({ data }) => {
-        fetchData();
+        if (arrangeView.currentIndex + 1 < arrangeView.workOrderIds.length) {
+          setArrangeView((prev) => ({ ...prev, currentIndex: arrangeView.currentIndex + 1 }));
+        } else {
+          setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 });
+          fetchData();
+        }
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
           severity: 'success'
         });
+        setSubmitting(false);
       })
       .catch((err) => {
+        setSubmitting(false);
         toastConfig.setToastConfig(err);
       });
-
-      if (currIndex + 1 < uniqWorkOrders.length) {
-        setCurrIndex(currIndex + 1); 
-      } else {
-        setArrangeView(false);
-      }
   };
 
   const handleSaveData = async (rows: any) => {
@@ -858,15 +854,7 @@ const WorkOrder = ({
         toastConfig.setToastConfig(error);
       });
   };
-  
-  const handleArrange=()=>{
-    setArrangeView(true);
-    setCurrIndex(0);
-    const ids=selectedRecords.filter(s=>s.type==="service").map(s=>s.workOrder._id);
-    const uniqueIds = [...new Set(ids)];
-    setUniqWorkOrders(uniqueIds);
-    setSelectedServices(selectedRecords.filter(s=>s.type==="service"));
-  }
+
   const checkUniqWorkOrder = () => {
     if (selectedRecords.length === 0) {
       return false;
@@ -1044,7 +1032,9 @@ const WorkOrder = ({
         )}
         <MenuItem
           onClick={() => {
-            handleArrange();
+            const ids = selectedRecords.filter(s => s.type === MATERIAL_TYPE.service).map(s => s.workOrder._id);
+            const uniqueIds = [...new Set(ids)];
+            setArrangeView({ open: true, workOrderIds: uniqueIds, currentIndex: 0 });
           }}
           disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords)
             ? false : true}
@@ -1276,21 +1266,19 @@ const WorkOrder = ({
             />
           )}
 
-          {arrangeView && (
+          {arrangeView.open && (
             <ArrangeView
               data={
-                selectedServices
-                  ?.map((d) => {
-                    return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork,parentId:d.workOrder._id};
+                selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service
+                  && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])?.map((d) => {
+                    return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork, parentId: d.workOrder._id };
                   }) || []
               }
               title={'Arrange Services'}
-              handleClose={() => setArrangeView(false)}
-              handleSubmit={(data) => handleArrangeUpdate(data, uniqWorkOrders[currIndex])}
-              loading={false}
-              isLast={currIndex===uniqWorkOrders.length-1?true:false}
-              currInd={currIndex}
-              uniqIds={uniqWorkOrders}
+              handleClose={() => setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 })}
+              handleSubmit={(data) => handleArrangeUpdate(data, arrangeView.workOrderIds[arrangeView.currentIndex])}
+              loading={isSubmitting}
+              isLast={arrangeView.currentIndex === arrangeView.workOrderIds.length - 1 ? true : false}
             />
           )}
           {updateDialog.open && (
