@@ -52,7 +52,8 @@ const WorkOrder = ({
   allowedToEdit,
   isPostWorkService,
   setCurrentStep,
-  createNewVersionQuote
+  createNewVersionQuote,
+  resourcePolicy
 }) => {
   const renderedFrom = 'repair_order_workorder';
   const toastConfig = useContext(CustomToastContext);
@@ -970,6 +971,7 @@ const WorkOrder = ({
   const actionButtonMenuItems = () => {
     return (
       <>
+        {!resourcePolicy?.hideAddExistingServices && (
         <MenuItem
           disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
           onClick={() => {
@@ -978,6 +980,8 @@ const WorkOrder = ({
         >
           Add Existing Services
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideAddNewService && (
         <MenuItem
           disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
           onClick={() => {
@@ -986,6 +990,8 @@ const WorkOrder = ({
         >
           Add New Service
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideAssignTechnician && (
         <MenuItem
           disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 && !isWorkOrderCompleted(selectedRecords)
             ? false : true}
@@ -995,7 +1001,8 @@ const WorkOrder = ({
         >
           Assign Technician
         </MenuItem>
-        {allowedToEdit && permissions?.workStations?.isRead && (
+      )}
+        {!resourcePolicy?.hideAssignWorkstation && allowedToEdit && permissions?.workStations?.isRead && (
           <MenuItem
             disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 && !isWorkOrderCompleted(selectedRecords) ? false : true}
             onClick={() => {
@@ -1005,7 +1012,7 @@ const WorkOrder = ({
             Assign Work Station
           </MenuItem>
         )}
-        {!user?.brandPolicy?.workOrderConsumableHide && (
+        {!resourcePolicy?.hideAddConsumables && !user?.brandPolicy?.workOrderConsumableHide && (
           <MenuItem
             disabled={
               selectedRecords?.filter((d) => d?.workOrder && [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
@@ -1030,6 +1037,7 @@ const WorkOrder = ({
             Add Products/Consumables
           </MenuItem>
         )}
+        {!resourcePolicy?.hideArrangeServices && (
         <MenuItem
           onClick={() => {
             const ids = selectedRecords.filter(s => s.type === MATERIAL_TYPE.service).map(s => s.workOrder._id);
@@ -1041,6 +1049,8 @@ const WorkOrder = ({
         >
           Arrange Services
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideAutoCompleteWorkOrder && (
         <MenuItem
           onClick={() => {
             setAutoCompleteData(selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset));
@@ -1057,6 +1067,8 @@ const WorkOrder = ({
         >
           Auto Complete Work Order(s)
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideCompleteSkipRevertService && (
         <MenuItem
           onClick={() => {
             setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
@@ -1065,6 +1077,8 @@ const WorkOrder = ({
         >
           Complete Service
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideCompleteSkipRevertService && (
         <MenuItem
           onClick={() => {
             setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
@@ -1073,6 +1087,8 @@ const WorkOrder = ({
         >
           Skip Service
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideCompleteSkipRevertService && (
         <MenuItem
           disabled={
             selectedRecords?.length && selectedRecords?.some((e) =>
@@ -1086,6 +1102,7 @@ const WorkOrder = ({
         >
           Revert Service
         </MenuItem >
+      )}
         <MenuItem
           onClick={() => {
             setIsBulkEdit(true);

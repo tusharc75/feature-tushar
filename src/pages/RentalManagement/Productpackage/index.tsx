@@ -146,12 +146,12 @@ const Productpackage = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === MATERIAL_TYPE.service
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === MATERIAL_TYPE.service
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -328,25 +328,24 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.product
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.type === MATERIAL_TYPE.manualEntry
-          ? parent.detail
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.detail
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.description;
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.description;
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
@@ -356,7 +355,8 @@ const Productpackage = ({
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-      parent.hideSelection = parent?.assetQty > 0 ? true : parent?.status ? true : false;
+      parent.hideSelection = parent?.assetQty > 0 ||
+        data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent, isPriceRequired);
       if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
         nextStepMessage = rentalManagementMessage.addProductInPackage;
@@ -378,23 +378,22 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.package
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === MATERIAL_TYPE.package
           ? _subRow.packageDetail?.packageName
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : ''
-      } `;
+            ? _subRow.productDetail?.productName
+            : ''
+        } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;

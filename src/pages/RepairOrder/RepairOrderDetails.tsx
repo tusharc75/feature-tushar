@@ -439,6 +439,7 @@ const RepairOrderDetails = () => {
                 isPostWorkService={Boolean(currentStep === 3)}
                 setCurrentStep={setCurrentStep}
                 createNewVersionQuote={createNewVersionQuote}
+                resourcePolicy={resourceData?.policy}
               />
             )}
             {stepNames[currentStep] === 'Quotation' && repairOrderData && (
