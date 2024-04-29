@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 import axiosInstance from '../../axios/axiosInstance';
 import { deliveryTicket, rentalManagement, asyncForEach } from '../../constants/helpers';
-import { objectStore, findAll, deleteOne, setUpindexDB } from '../../constants/indexdbhelper';
+import { objectStore, findAll, deleteOne, setUpindexDB, deleteMany } from '../../constants/indexdbhelper';
 import { rentalJobOfflineUpdate } from '../../pages/RentalManagement/rentalOfflineHelper';
 import { sortBy } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
@@ -87,6 +87,29 @@ export const CustomOfflineProvider = ({ children }) => {
               })
               .catch((error) => { });
             await new Promise((resolve) => setTimeout(resolve, 2000));
+          }
+          if (d?.type === 'fieldTicketMaterial') {
+            if (d?.data?.length) {
+              await axiosInstance()
+                .post(`${routes?.fieldTicket?.path}/${d?._id}/material-offline-data-sync`, d.data)
+                .then(({ data: { data } }) => {
+                  let ids = d?.data?.map((e) => e?._id);
+                  deleteMany(objectStore.fieldTicketMaterial, ids);
+                })
+                .catch((error) => { });
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+            deleteOne(objectStore.offlineDataSync, d._id);
+          }
+          if (d?.type === 'fieldTicketMaterialDelete') {
+            await axiosInstance()
+              .post(`${routes?.fieldTicket?.path}/${d?.data?.fieldTicketId}/material-offline-data-sync`, d.data)
+              .then(({ data: { data } }) => {
+                deleteOne(objectStore.offlineDataSync, d._id);
+              })
+              .catch((error) => { });
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
           }
         });
         await rentalJobOfflineUpdate([]);

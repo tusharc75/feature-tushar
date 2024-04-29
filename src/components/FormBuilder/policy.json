@@ -1,0 +1,44 @@
+{
+  "resourcePolicy": [
+    {
+      "resource": "Repair Order",
+      "policy": [
+        {
+          "fieldName": "disableAddExistingServices",
+          "fieldLabel": "Disable Add Existing Services",
+          "type": "checkBox"
+        },
+        {
+          "fieldName": "disableAddNewService",
+          "fieldLabel": "Disable Add New Service",
+          "type": "checkBox"
+        },
+        {
+          "fieldName": "disableAssignTechnician",
+          "fieldLabel": "Disable Assign Technician",
+          "type": "checkBox"
+        },
+        {
+          "fieldName": "disableAssignWorkstation",
+          "fieldLabel": "Disable Assign Work Station",
+          "type": "checkBox"
+        },
+        {
+          "fieldName": "disableAddConsumables",
+          "fieldLabel": "Disable Add Consumables",
+          "type": "checkBox"
+        },
+        {
+          "fieldName": "disableArrangeServices",
+          "fieldLabel": "Disable Arrange Services",
+          "type": "checkBox"
+        },
+        {
+          "fieldName": "disableAutocompleteWorkOrder",
+          "fieldLabel": "Disable Autocomplete Work Order",
+          "type": "checkBox"
+        }
+      ]
+    }
+  ]
+}

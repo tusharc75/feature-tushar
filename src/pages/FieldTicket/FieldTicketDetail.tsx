@@ -118,6 +118,7 @@ const FieldTicketDetail = () => {
   };
 
   const fetchPolicy = async () => {
+    if (isOffline) return;
     try {
       const {
         data: { data }
@@ -275,7 +276,7 @@ const FieldTicketDetail = () => {
             isNextStep={false}
             nextStep={nextStep}
             isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
-            steps={fieldTicketSteps}
+            steps={isOffline ? fieldTicketSteps.filter(s => s.name === 'Add') : fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
