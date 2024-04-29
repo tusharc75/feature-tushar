@@ -24,7 +24,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
-import { ASSET_STATUS, MATERIAL_TYPE, TRANSFER_ASSET_STATUS, rentalManagement, sidebarResource, treeToFlatArray } from '../../../constants/helpers';
+import { ASSET_STATUS, INVENTORY_OWNER_TYPE, MATERIAL_TYPE, TRANSFER_ASSET_STATUS, rentalManagement, sidebarResource, treeToFlatArray } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import ManageBulkAssetCreation from '../../BulkAssetCreation/ManageBulkAssetCreation';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
@@ -458,6 +458,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         if (
           [ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.reserved].includes(_inventory?.inventoryDetail?.status) &&
           (!_inventory?.status || _inventory?.status === ASSET_STATUS.reserved)
+          && _inventory?.inventoryDetail?.currentOwnerType === INVENTORY_OWNER_TYPE.brand
         ) {
           canRemove = true;
         }
