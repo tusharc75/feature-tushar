@@ -179,9 +179,8 @@ const ListingPageHeader = ({
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
         <div
-          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${
-            !isLeftSidePresent && isMobile ? '-mt-2' : ''
-          }`}
+          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
+            }`}
         >
           {onSearch ? (
             <HideWhenOffline>
@@ -205,30 +204,31 @@ const ListingPageHeader = ({
           {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
             <>
               <div className="flex gap-[8px] flex-wrap items-center min-w-fit">
+                {/* <HideWhenOffline> */}
+                {isAddButtonVisible ? (
+                  <HtmlTooltip title={addButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
+                    <Button
+                      variant={'contained'}
+                      color="primary"
+                      size="small"
+                      disabled={addButtonLoading || addButtonDisabled}
+                      {...restOfAddButtonProps}
+                      onClick={(e) => {
+                        addButtonOnclick && addButtonOnclick(e);
+                      }}
+                      className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px] max-[600px]:[padding:4px_!important]`}
+                      startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
+                    >
+                      {renderButtonText({
+                        text: `Add`,
+                        loading: addButtonLoading,
+                        iconText: addButtonText,
+                        mobileIcon: <AddOutlined />
+                      })}
+                    </Button>
+                  </HtmlTooltip>
+                ) : null}
                 <HideWhenOffline>
-                  {isAddButtonVisible ? (
-                    <HtmlTooltip title={addButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
-                      <Button
-                        variant={'contained'}
-                        color="primary"
-                        size="small"
-                        disabled={addButtonLoading || addButtonDisabled}
-                        {...restOfAddButtonProps}
-                        onClick={(e) => {
-                          addButtonOnclick && addButtonOnclick(e);
-                        }}
-                        className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px] max-[600px]:[padding:4px_!important]`}
-                        startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
-                      >
-                        {renderButtonText({
-                          text: `Add`,
-                          loading: addButtonLoading,
-                          iconText: addButtonText,
-                          mobileIcon: <AddOutlined />
-                        })}
-                      </Button>
-                    </HtmlTooltip>
-                  ) : null}
                   {isActionButtonVisible ? (
                     <>
                       <HtmlTooltip title={actionButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>

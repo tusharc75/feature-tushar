@@ -22,6 +22,7 @@ import { bulkUpdate, calculatePrice, calculateRowsField } from '../../../compone
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -67,6 +68,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchData();
@@ -93,7 +95,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   const fetchData = async () => {
     setFetchingData(true);
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, true);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, true, isOffline);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       let unitArray: any = [];
@@ -153,7 +155,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       setPriceMethodListConst(pricingMethodOptions);
-      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      if(!isOffline) await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
       data.forEach((element) => {
         if (rowData?.type === MATERIAL_TYPE.serializedAsset) {
           if (element.fieldName === 'qty') {
@@ -225,10 +227,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       return { name, sectionFields };
     });
 
-    if (
-      fieldTicketData?.taxCode ||
-      (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))
-    ) {
+    if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))) && !isOffline) {
       const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {

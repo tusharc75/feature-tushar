@@ -13,6 +13,8 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
 
 const AssignProductDialog = ({
   onSuccess,
@@ -40,6 +42,7 @@ const AssignProductDialog = ({
   const [columns, setColumns] = useState(null);
   const [isProductType, setIsProductType] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const defaultColumns = [
     {
@@ -64,55 +67,67 @@ const AssignProductDialog = ({
     return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Product&view=true')
-      .then(({ data: { data } }) => {
-        const productTypes = data.find((e) => e.fieldData.fieldName === 'productType');
-        if (productTypes) {
-          setIsProductType(true);
-        } else {
-          setIsProductType(false);
-        }
-        let columns = [];
-        let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
-        columns = [...newColumns, ...getStaticFields()];
-        if (hideQty) {
-          setColumns([...columns]);
-        } else {
-          setColumns([...defaultColumns, ...columns]);
-        }
-      });
+  const fetchGridColumns = async () => {
+    try {
+      let data;
+      if (isOffline) {
+        data = await findOne(objectStore.resource, objectStore.product);
+      } else {
+        const response = await axiosInstance().get('/field?resource=Product&view=true');
+        data = response?.data?.data;
+      }
+      const productTypes = data.find((e) => e.fieldData.fieldName === 'productType');
+      if (productTypes) {
+        setIsProductType(true);
+      } else {
+        setIsProductType(false);
+      }
+      let columns = [];
+      let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
+      columns = [...newColumns, ...getStaticFields()];
+      if (hideQty) {
+        setColumns([...columns]);
+      } else {
+        setColumns([...defaultColumns, ...columns]);
+      }
+    } catch (err) {
+      toastConfig.setToastConfig(err);
+    }
+
   };
 
-  const fetchProduct = (cancelTokenSource?: CancelTokenSource) => {
-    dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
-    axiosInstance()
-      .get(`${product.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['qty'] = 1;
-          finalObject['unitMain'] = u?.unit;
-          finalObject['pricingMethodMain'] = u?.pricingMethod;
-          const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
-          if (qtyAdded.length) {
-            finalObject['qty'] = qtyAdded[0].qty;
-          }
-          return {
-            ...finalObject
-          };
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+  const fetchProduct = async (cancelTokenSource?: CancelTokenSource) => {
+    try {
+      dispatch({ type: 'loading', loading: true });
+      let data, count;
+      if (isOffline) {
+        data = await findAll(objectStore.product);
+        data = data?.filter((d: any) => !ids?.includes(d?._id?.toString()));
+        count = data?.length;
+      } else {
+        const queryString = getQueryString();
+        const response = await axiosInstance().get(`${product.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      let rows = data.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+        finalObject['qty'] = 1;
+        finalObject['unitMain'] = u?.unit;
+        finalObject['pricingMethodMain'] = u?.pricingMethod;
+        const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
+        if (qtyAdded.length) finalObject['qty'] = qtyAdded[0].qty;
+        return {...finalObject};
       });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    } catch (err) {
+      dispatch({ type: 'loading', loading: false });
+      toastConfig.setToastConfig(err);
+    }
   };
 
   const getQueryString = () => {
@@ -242,7 +257,7 @@ const AssignProductDialog = ({
             setQueryString={false}
           />
 
-          {pricingCondition && (
+          {pricingCondition && !isOffline && (
             <Box>
               <CustomTabs value={tabValue} onChange={handleMainTabChange}>
                 <CustomTab value={0} label={`${routes.pricingCondition.title} Products`} />
@@ -260,8 +275,9 @@ const AssignProductDialog = ({
               onSaveEdit={onSaveEdit}
               refreshGrid={fetchProduct}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
+              showFilters={!isOffline}
               resource={sidebarResource.product}
+              isClientSideGrid={isOffline}
             />
           ) : (
             <Box p={2} height={500}>
