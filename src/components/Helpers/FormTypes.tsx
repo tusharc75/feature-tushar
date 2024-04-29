@@ -65,6 +65,7 @@ import Dropdown from './FormTypes/Dropdown';
 import Signature from './FormTypes/Signature';
 import { Image } from '@material-ui/icons';
 import DataList from './FormTypes/DataList';
+import Counter from './FormTypes/Counter';
 
 type MultiFileType = {
   fileName: string;
@@ -2682,6 +2683,14 @@ const FormTypes = (props) => {
         isTooltip={isTooltip}
         tooltipMessage={tooltipMessage}
         setFieldValue={setFieldValue}
+      />
+    ) : type === 'counter' ? (
+      <Counter 
+        label={label}
+        values={values}
+        name={name}
+        setFieldValue={setFieldValue}
+        fieldData={fieldData}
       />
     ) : null
   ) : null;

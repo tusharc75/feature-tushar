@@ -14,6 +14,7 @@ import { CustomDialogTransition, fieldLabelToFieldName } from '../../../constant
 import FieldList from '../FieldList';
 import General from './General';
 import Setting from './Setting';
+import Visibility from './Visibility';
 
 const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
@@ -217,6 +218,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.lookupResource = values.lookup ? values.lookupResource : '';
             ele.dataList = values.dataList || false;
             ele.dataListId = values.dataList ? values.dataListId : '';
+            ele.preFilters = values.preFilters?.length > 0 ? values.preFilters : []
+            ele.htmlDescription = values.htmlDescription || ''
             ele.entityWiseLookup = values?.entityWiseLookup || false;
             ele.isMinMaxValue = values?.isMinMaxValue || false;
             ele.minValue = values?.minValue || 0;
@@ -224,6 +227,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.minValueServiceAdd = values.minValueServiceAdd ? values.minValueServiceAdd : '';
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
+            ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter(v => v?.fields?.length > 0) : [];
+            ele.subFields = values.subFields?.length > 0 ? values.subFields : [];
             ele.isSystemGenerate = values?.isSystemGenerate || false;
             if (values.isSystemGenerate) {
               ele.systemGeneratedAutoIncrement = values.systemGeneratedAutoIncrement;
@@ -534,7 +539,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   <Box pt={1}>
                     <CustomTabs value={tabValue} onChange={handleTabChange}>
                       <CustomTab value={0} label={'General'} />
-                      <CustomTab value={1} label={'Setting'} />
+                      <CustomTab value={1} label={'Visibility'} />
+                      <CustomTab value={2} label={'Setting'} />
                     </CustomTabs>
                     <TabPanel value={tabValue} index={0}>
                       <General
@@ -550,6 +556,14 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
+                      <Visibility
+                        values={values}
+                        setFieldValue={setFieldValue}
+                        fields={fields}
+                        fieldData={fieldData}
+                      />
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={2}>
                       <Setting
                         initialValues={initialValues}
                         values={values}
