@@ -500,7 +500,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         let fieldTicketOfflineMaterial = await findAll(objectStore.fieldTicketMaterial);
 
         const productsToDelete = fieldTicketOfflineMaterial?.map((e: any) => {
-          if (e?.type === MATERIAL_TYPE.product && materialIdsToDelete.includes(e?.service?.optionValue)) {
+          if (e?.type === MATERIAL_TYPE.product && materialIdsToDelete.includes(e?.service?.optionValue || e?.service?._id)) {
             return e._id;
           }
           return null;
