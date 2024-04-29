@@ -85,8 +85,9 @@ const GridHeader = ({
           .then(({ data: { data } }) => {
             const defaultFilter = data.filter((d) => d.default)[0];
             setSelectedFilter(defaultFilter);
-            const deepFilter = createFilterModel(defaultFilter.filterValue, columns);
-            if (defaultFilter) {
+            let deepFilter;
+            if (defaultFilter?.filterValue) deepFilter = createFilterModel(defaultFilter?.filterValue, columns);
+            if (defaultFilter && deepFilter) {
               dispatch({ type: 'filter', filters: deepFilter });
               if (defaultFilter.sortBy) {
                 dispatch({
