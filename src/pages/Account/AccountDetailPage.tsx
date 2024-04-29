@@ -11,7 +11,7 @@ import { FcApproval, FcDisapprove } from 'react-icons/fc';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { AccountHierarchyIcon, AccountsTeamsIcon, ContactsIcon, OpportunityIcon, ProjectsIcon, QuoteIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -161,21 +161,6 @@ export default function AccountDetailPage(props) {
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
-  interface TabPanelProps {
-    children?: React.ReactNode;
-    index: any;
-    value: any;
-  }
-
-  function TabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
-
-    return (
-      <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-        {children}
-      </div>
-    );
-  }
 
   useEffect(() => {
     setShowAccountHierarchyInFullScreenDialog(false);

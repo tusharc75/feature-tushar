@@ -9,7 +9,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -307,8 +307,8 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
               <CustomTab label={'Steps Data'} value={1} />
               <CustomTab label={'Drawings'} value={2} />
             </CustomTabs>
-            {tabValue === 0 &&
-              (columns ? (
+            <TabPanel value={tabValue} index={0}>
+              {columns ? (
                 <Box zIndex={5} width={'100%'}>
                   <CustomReactTable
                     height={'calc(100vh - 300px)'}
@@ -327,9 +327,12 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 <Box p={2} height={500}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
-              ))}
-            {tabValue === 1 && <ServiceStepsData stepsData={stepData} servicesData={servicesData?.filter((s) => s.type === MATERIAL_TYPE.service)} />}
-            {tabValue === 2 && (
+              )}
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              <ServiceStepsData stepsData={stepData} servicesData={servicesData?.filter((s) => s.type === MATERIAL_TYPE.service)} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={2}>
               <Diagram
                 resource={ACTIVITY_RESOURCE.workOrder}
                 referenceId={workOrderId}
@@ -337,7 +340,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 fromVersions={true}
                 workOrderData={workOrderData}
               />
-            )}
+            </TabPanel>
           </Box>
         </CustomDialogContent>
       </Dialog>

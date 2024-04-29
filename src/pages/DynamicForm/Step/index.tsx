@@ -20,7 +20,6 @@ const Step = ({ resourceData, resourceId, resource, data, allowedToEdit, referen
   const [index, setIndex] = useState({});
   const [isExpanded, setIsExpanded] = useState(true);
 
-  console.log({ resourceData });
   useEffect(() => {
     resourceData?.steps?.forEach((step) => {
       step.fields = CURReplaceByCurrencySingle(step?.fields, data?.currency ? data?.currency : 'USD');
