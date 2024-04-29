@@ -123,30 +123,25 @@ const ManageTransferAsset: FC<Props> = (props) => {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
           setAllFields(fieldsDataForCreate);
           createValues.transferAssetNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-          if (referenceType === 'Rental Job') {
-            createValues['transferFromPlant'] = referenceData?.transferFromPlant;
-            createValues['transfertoPlant'] = referenceData?.transferToPlant;
+          if (referenceType === 'Rental Job' && referenceData) {
+            for (const key in referenceData) {
+              if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+                createValues[key] = referenceData[key];
+              }
+            }
             fieldsDataForCreate?.forEach((e) => {
               if (e.fieldName === 'transfertoPlant') {
-                const plantAddress = e?.option?.filter((e) => e.optionValue === referenceData?.transferToPlant);
+                const plantAddress = e?.option?.filter((e) => e.optionValue === referenceData?.transfertoPlant);
                 if (plantAddress.length) {
                   createValues['plantShipTo'] = plantAddress[0].address;
                 }
               }
+              if (['transferFromPlant', 'transfertoPlant', 'plantShipTo', 'transferType']?.includes(e.fieldName)) {
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
             });
             createValues['rentalJob'] = referenceId;
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
-              createValues['wellName'] = referenceData?.wellName;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellNumber') && referenceData?.wellNumber) {
-              createValues['wellNumber'] = referenceData?.wellNumber;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'afeNumber')) {
-              createValues['afeNumber'] = referenceData?.afeNumber;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'processor')) {
-              createValues['processor'] = referenceData?.processor;
-            }
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
