@@ -13,7 +13,7 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, defaultCompetency = [], extraStaticFilter = [] }) => {
+const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, defaultCompetency = [], extraStaticFilter = [], filterByPlant = null }) => {
   const renderedFrom = `${routes.employeeMaster.title}_${reference}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -29,11 +29,14 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   const [disableSaveButton, setDisableSaveButton] = useState(false);
   const [columns, setColumns] = useState(null);
   const [competencyOptions, setCompetencyOptions] = useState(null);
+  const [warehouseOptions, setWarehouseOptions] = useState([]);
+  const [selectedWarehouse,setSelectedWarehouse] = useState(filterByPlant?.optionValue);
   const [selectedCompetency, setSelectedCompetency] = useState(defaultCompetency);
 
   useEffect(() => {
     fetchGridColumns();
     fetchCompetencyMaster();
+    fetchWarehouse();
   }, []);
 
   useEffect(() => {
@@ -44,13 +47,24 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
     const cencelToken = axios.CancelToken.source();
     fetchData(cencelToken);
     return () => cencelToken.cancel();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetency]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetency, selectedWarehouse]);
 
   const fetchCompetencyMaster = () => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=Competency Type`)
       .then(({ data: { data } }) => {
         setCompetencyOptions(data['Competency Type'] || []);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const fetchWarehouse = () => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse}`)
+      .then(({ data: { data } }) => {
+        setWarehouseOptions(data[`${sidebarResource.warehouse}`] || []);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -115,6 +129,12 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
         term: { $in: selectedCompetency?.map((e) => e?.optionValue) }
       });
     }
+    if (selectedWarehouse && selectedWarehouse!=='') {
+      updatedFilterByIds.push({
+        field: 'warehouse',
+        term: selectedWarehouse
+      });
+    }
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {
         updatedDeepFilters.push(e);
@@ -174,7 +194,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   const leftSideContents = () => {
     return (
       <>
-        <Autocomplete
+      <Autocomplete
           fullWidth
           className="max-w-[300px]"
           options={competencyOptions}
@@ -190,6 +210,33 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
             <TextField {...params} margin="none" size={'small'} name="competencyType" label="Competency Type" variant="outlined" fullWidth />
           )}
         />
+           <Autocomplete
+               fullWidth
+               className="max-w-[300px]"
+               options={warehouseOptions}
+               getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+               getOptionSelected={(option: any, val) => option.optionValue === val}
+               value={
+                      warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                       ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                            : ''
+                      }
+               onChange={(e, val) => {
+                      setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+                       }}
+               renderInput={(params) => (
+              <TextField
+                {...params}
+                margin="dense"
+                name="plant"
+                placeholder={routes.warehouse.title}
+                label={routes.warehouse.title}
+                variant="outlined"
+                fullWidth
+                className="m-0"
+                  />
+              )}
+            />
       </>
     );
   };

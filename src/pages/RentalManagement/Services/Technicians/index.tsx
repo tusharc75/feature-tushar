@@ -408,6 +408,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
             setTechnicianDialog(false);
           }}
           defaultCompetency={[]}
+          filterByPlant={rentalManagementData?.warehouse}
           ids={[]}
         />
       )}

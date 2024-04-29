@@ -356,6 +356,7 @@ const Technician = ({
             setAddEmployeeMasterDialog({ open: false, data: null });
           }}
           defaultCompetency={[addEmployeeMasterDialog?.data?.mainCompetencyType]}
+          filterByPlant={serviceOrderData?.warehouse}
           ids={[]}
         />
       )}
