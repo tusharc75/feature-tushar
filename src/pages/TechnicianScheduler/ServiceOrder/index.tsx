@@ -73,6 +73,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
           obj.index = index + 1;
           obj._id = ele?.service?.uniqueId,
           obj.resourceId = ele._id;
+          obj.warehouse = ele?.warehouse?.optionValue;
           obj.fieldServiceOrder = ele?.fieldServiceOrder?.optionLabel;
           obj.fieldServiceOrderId = ele?.fieldServiceOrder?.optionValue;
           obj.serviceName = ele?.service?.serviceName;
