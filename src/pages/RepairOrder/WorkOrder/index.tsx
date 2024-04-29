@@ -87,6 +87,10 @@ const WorkOrder = ({
   const [selectedServiceOption, setSelectedServiceOption] = useState(null);
   const [showServiceActionConfirmBox, setShowServiceActionConfirmBox] = useState({ open: false, action: '' });
 
+  const [uniqWorkOrders,setUniqWorkOrders]=useState([]);
+  const [currIndex,setCurrIndex]=useState(0);
+  const [selectedServices,setSelectedServices]=useState([]);
+
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -745,7 +749,7 @@ const WorkOrder = ({
       }
     }
   };
-
+  
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
     rows?.forEach((e: any) => {
       delete e.name;
@@ -755,7 +759,6 @@ const WorkOrder = ({
       .put(`${workOrder.api}/service/${workOrderId}/order`, { data: rows || [] })
       .then(({ data }) => {
         fetchData();
-        setArrangeView(false);
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
@@ -765,6 +768,12 @@ const WorkOrder = ({
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+
+      if (currIndex + 1 < uniqWorkOrders.length) {
+        setCurrIndex(currIndex + 1); 
+      } else {
+        setArrangeView(false);
+      }
   };
 
   const handleSaveData = async (rows: any) => {
@@ -849,7 +858,15 @@ const WorkOrder = ({
         toastConfig.setToastConfig(error);
       });
   };
-
+  
+  const handleArrange=()=>{
+    setArrangeView(true);
+    setCurrIndex(0);
+    const ids=selectedRecords.filter(s=>s.type==="service").map(s=>s.workOrder._id);
+    const uniqueIds = [...new Set(ids)];
+    setUniqWorkOrders(uniqueIds);
+    setSelectedServices(selectedRecords.filter(s=>s.type==="service"));
+  }
   const checkUniqWorkOrder = () => {
     if (selectedRecords.length === 0) {
       return false;
@@ -1027,9 +1044,9 @@ const WorkOrder = ({
         )}
         <MenuItem
           onClick={() => {
-            setArrangeView(true);
+            handleArrange();
           }}
-          disabled={checkUniqWorkOrder() && selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords)
+          disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords)
             ? false : true}
         >
           Arrange Services
@@ -1262,16 +1279,18 @@ const WorkOrder = ({
           {arrangeView && (
             <ArrangeView
               data={
-                selectedRecords
-                  ?.filter((e) => e.type === MATERIAL_TYPE.service)
+                selectedServices
                   ?.map((d) => {
-                    return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
+                    return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork,parentId:d.workOrder._id};
                   }) || []
               }
               title={'Arrange Services'}
               handleClose={() => setArrangeView(false)}
-              handleSubmit={(data) => handleArrangeUpdate(data, selectedRecords[0]?.workOrder?._id)}
+              handleSubmit={(data) => handleArrangeUpdate(data, uniqWorkOrders[currIndex])}
               loading={false}
+              isLast={currIndex===uniqWorkOrders.length-1?true:false}
+              currInd={currIndex}
+              uniqIds={uniqWorkOrders}
             />
           )}
           {updateDialog.open && (

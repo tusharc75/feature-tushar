@@ -17,17 +17,26 @@ const ItemTypes = {
   CARD: 'card'
 };
 
-const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
+const ArrangeView = ({ data,title, handleClose, handleSubmit, loading, isLast=true, currInd=0, uniqIds=[]}) => {
+
   const [valid, setValid] = React.useState(false);
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
 
   const [preRows, setPreRows] = React.useState([]);
   const [postRows, setPostRows] = React.useState([]);
+  
+  const buttonText = isLast ? 'Save' : 'Save and Next';
 
   useEffect(() => {
-    setPreRows(data?.filter((e) => e.preWork)?.sort((a, b) => a.order - b.order));
-    setPostRows(data?.filter((e) => !e.preWork)?.sort((a, b) => a.order - b.order));
-  }, [data]);
+    if(uniqIds.length){
+      setPreRows(data?.filter((d)=>d.parentId===uniqIds[currInd])?.filter((e) => e.preWork)?.sort((a, b) => a.order - b.order));
+      setPostRows(data?.filter((d)=>d.parentId===uniqIds[currInd])?.filter((e) => !e.preWork)?.sort((a, b) => a.order - b.order));
+    }
+    else{
+      setPreRows(data?.filter((e) => e.preWork)?.sort((a, b) => a.order - b.order));
+      setPostRows(data?.filter((e) => !e.preWork)?.sort((a, b) => a.order - b.order));
+    }
+  }, [data,currInd]);
 
   useEffect(() => {
     if (preRows?.find((x) => isNaN(x.order) || x.order <= 0 || x.order === undefined)) {
@@ -168,7 +177,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
           }}
           disabled={loading || !valid}
         >
-          Save
+          {buttonText}
         </CustomButton>
       </CustomDialogFooter>
     </Dialog>

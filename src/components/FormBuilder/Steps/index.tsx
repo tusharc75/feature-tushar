@@ -22,6 +22,7 @@ import Setting from './Setting';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Actions from './Actions';
 import Notifications from './Notifications';
+import PolicyDialog from './policyDialog';
 
 const DND_NAME = 'Box';
 
@@ -40,6 +41,7 @@ const Steps = ({ resource }) => {
   const [openSetting, setOpenSetting] = useState(false);
   const [openAction, setOpenAction] = useState(false);
   const [openNotifications, setOpenNotifications] = useState(false);
+  const [openPolicy,setOpenPolicy] = useState(false)
 
   const fetchData = async () => {
     setStepsLoading(true);
@@ -120,6 +122,16 @@ const Steps = ({ resource }) => {
           Add Step
         </Button>
         <Box>
+        <Button
+          variant="contained"
+          color="primary"
+          size="small"
+          onClick={() => {
+            setOpenPolicy(true);
+          }}
+        >
+          Policy
+        </Button>
           <HtmlTooltip title={'Setting'}>
             <IconButton
               aria-label="Setting"
@@ -195,6 +207,20 @@ const Steps = ({ resource }) => {
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
         />
+      )}
+      {openPolicy && (
+        <PolicyDialog 
+        onClose={()=>{
+          setOpenPolicy(false);
+        }}
+        onSuccess={()=>{
+          fetchData();
+          setOpenPolicy(false);
+        }}
+        resource={resource}
+        resourceData={resourceData}
+        />
+
       )}
 
       {openSetting && (
