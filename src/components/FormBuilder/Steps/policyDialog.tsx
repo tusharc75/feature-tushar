@@ -16,7 +16,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import policyData from '../policy.json';
+import { resourcePolicy } from './helper';
 
 const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,7 +26,7 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
 
   useEffect(() => {
     let currentPolicy = resourceData?.policy || {};
-    let defaultPolicy = policyData.resourcePolicy.find((policy) => policy.resource === resource);
+    let defaultPolicy = resourcePolicy.find((e) => e.resource === resource);
     setInitialValues({
       data: defaultPolicy.policy.map((e) => {
         return {
@@ -42,10 +42,10 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
   const updateData = (values) => {
     setIsSubmitting(true);
     let updatedPolicy = (values.data).reduce((acc, { fieldName, checked }) => {
-        return {...acc,[fieldName]:checked}
+      return { ...acc, [fieldName]: checked }
     }, {});
     let data = {
-      policy: {...updatedPolicy},
+      policy: { ...updatedPolicy },
     };
     axiosInstance()
       .put(`/sa-formbuilder/steps/policy/${resource}`, data)
@@ -84,7 +84,7 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
             <>
               <CustomDialogHeader
                 onClose={onClose}
-                title={'Default Policy'}
+                title={'Policy'}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -94,7 +94,7 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
               />
               <CustomDialogContent>
                 <Form>
-                <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1">
                     <FieldArray
                       name="data"
                       render={(arrayHelpers) =>
