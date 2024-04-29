@@ -147,7 +147,7 @@ const CreateProductBuilder = () => {
                     {/* <CustomTab value={2} label="All" /> */}
                   </CustomTabs>
                 </Box>
-                {tabIndex === 0 && (
+                <TabPanel value={tabIndex} index={0}>
                   <Fragment>
                     <Box p={1}>
                       <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
@@ -196,9 +196,8 @@ const CreateProductBuilder = () => {
                       )}
                     </Box>
                   </Fragment>
-                )}
-
-                {tabIndex === 1 && (
+                </TabPanel>
+                <TabPanel value={tabIndex} index={1}>
                   <Fragment>
                     <Box mt={1}>
                       {isUpdating ? null : (
@@ -218,9 +217,8 @@ const CreateProductBuilder = () => {
                       )}
                     </Box>
                   </Fragment>
-                )}
-
-                {tabIndex === 2 && (
+                </TabPanel>
+                <TabPanel value={tabIndex} index={2}>
                   <Fragment>
                     <Box p={1}>
                       <Grid item xs={6} className="d-flex align-items-center gap-1">
@@ -268,7 +266,7 @@ const CreateProductBuilder = () => {
                       )}
                     </Box>
                   </Fragment>
-                )}
+                </TabPanel>
               </Form>
             )}
           </Formik>

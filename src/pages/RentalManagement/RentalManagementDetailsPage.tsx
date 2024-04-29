@@ -204,7 +204,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -345,8 +345,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -596,12 +596,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -617,12 +617,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -714,10 +714,7 @@ const RentalManagementDetailsPage = () => {
           </TabPanel>
           <TabPanel value={tabValue} index={4}>
             <Box>
-              <RentalManagementViews
-                rentalName={rentalManagementData?.rentalJobName}
-                rentalId={id}
-                status={rentalManagementData?.status} />
+              <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
             </Box>
           </TabPanel>
         </Box>
