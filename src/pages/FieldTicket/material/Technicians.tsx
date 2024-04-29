@@ -289,6 +289,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
             setTechnicianDialog(false);
           }}
           defaultCompetency={[]}
+          filterByPlant={fieldTicketData?.warehouse}
           ids={[]}
         />
       )}
