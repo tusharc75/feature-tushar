@@ -546,7 +546,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       setUpdating(true);
       if (isOffline) {
         const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
-        const alreadyOfflineDataSyncStoredRows = result?.data;
+        const alreadyOfflineDataSyncStoredRows = result?.data || [];
         const toAddOfflineDataSyncStoreRows = [];
         for (const row of rows) {
           row.fieldTicketId = fieldTicketData?._id;
