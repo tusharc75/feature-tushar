@@ -1013,22 +1013,18 @@ export default function AccountDetailPage(props) {
                 />
               </Box>
             </TabPanel>
-            {accountResource === 'supplierAccount' && tabValue === 3 && (
-              <TabPanel value={tabValue} index={3}>
-                <SupplierItems
-                  api={accountApi}
-                  id={id}
-                  allowedToEdit={permissions[accountResource].isUpdate}
-                  permission={permissions[accountResource]}
-                />
-              </TabPanel>
-            )}
-            {accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
-              <TabPanel value={tabValue} index={3}>
-                <Warehouse reference={accountResource} api={accountApi} id={id} />
-              </TabPanel>
-            )}
+            <TabPanel value={tabValue} index={3}>
+              <SupplierItems
+                api={accountApi}
+                id={id}
+                allowedToEdit={permissions[accountResource].isUpdate}
+                permission={permissions[accountResource]}
+              />
+            </TabPanel>
             <TabPanel value={tabValue} index={4}>
+              <Warehouse reference={accountResource} api={accountApi} id={id} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={5}>
               <Step
                 resourceData={resourceData}
                 resourceId={id}
