@@ -127,7 +127,7 @@ const AddRentalDataDialog = ({
     }
     else {
       let inventoryData = data?.inventory;
-      inventoryData = inventoryData.filter((e)=>!dataRows?.some((ele)=> ele.materialId===e?.inventoryDetail?._id))
+      inventoryData = inventoryData.filter((e)=>!dataRows?.some((ele)=> ele.type===MATERIAL_TYPE.serializedAsset && ele.materialId===e?.inventoryDetail?._id))
       inventoryData.forEach((parent, i) => {
         const product = data?.material?.find((e) => e._id === parent._id);
         const obj: any = { ...product }
