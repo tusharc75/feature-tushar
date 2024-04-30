@@ -821,6 +821,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           rentalId={fieldTicketData?.rentalJob?.optionValue}
           currency={fieldTicketData?.currency}
           isSubmitting={isSubmitting}
+          ids={dataRows?.filter((ele)=> ele.type===MATERIAL_TYPE.serializedAsset)?.map((ele)=> ele.materialId) || []}
         />
       )}
     </>
