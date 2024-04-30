@@ -450,7 +450,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         transferData = transferFilter[0];
       }
       var canRemove = false;
-      if (user?.user?.brandPolicy?.rentalPlanning) {
+      if (user?.user?.brandPolicy?.rentalPlanning || user?.user?.brandPolicy?.rentalAllStatusAssetsAdd) {
         if (_inventory?.status === ASSET_STATUS.reserved) {
           canRemove = true;
         }
