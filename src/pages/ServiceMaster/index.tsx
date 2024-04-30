@@ -201,7 +201,7 @@ const ServiceMaster = () => {
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
         <MenuItem
-          disabled={!selectedRecords?.length}
+          disabled={selectedRecords?.some((e) => !e?.steps?.length)}
           onClick={() => {
             setOpenFieldDialog({ open: true, serviceIds: selectedRecords?.map((e) => e._id) });
           }}
