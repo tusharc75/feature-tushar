@@ -53,6 +53,7 @@ export const getStaticFields = () => {
         row?.original?.createdBy ? (
           <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}`}>
             {row?.original?.createdBy}
+            <span className="hidden">&nbsp;-&nbsp;</span>
             <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}</span>
           </h5>
         ) : (
@@ -72,7 +73,7 @@ export const getStaticFields = () => {
       cell: ({ row }) =>
         row?.original?.updatedBy ? (
           <h5 className="updateBy" title={`${row?.original?.updatedBy} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`}>
-            {row?.original?.updatedBy}
+            {row?.original?.updatedBy}&nbsp;
             <span className="updatedAtTime badge-date">{moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}</span>
           </h5>
         ) : (
@@ -101,6 +102,7 @@ export const getCompletedByField = () => {
             title={`${row?.original?.completedBy} • ${moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}`}
           >
             {row?.original?.completedBy}
+            <span className="hidden">&nbsp;-&nbsp;</span>
             <span className="createdAtTime badge-date">{moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}</span>
           </h5>
         ) : (
@@ -378,7 +380,7 @@ export default function useColumns() {
               )}
             </div>
           ),
-          disableFilters: true,
+          disableFilters: true
         });
       } else if (field?.type === 'dateTime') {
         column.push({
@@ -394,7 +396,7 @@ export default function useColumns() {
               )}
             </div>
           ),
-          disableFilters: true,
+          disableFilters: true
         });
       } else if (field?.type === 'checkBox') {
         column.push({

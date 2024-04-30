@@ -25,7 +25,6 @@ const SerialNumber = ({ product, warehouse }) => {
     } else {
       setRenderCount(renderCount + 1);
     }
-
   }, [page, limit, filters, sorting]);
 
   const getQueryString = () => {
@@ -45,7 +44,6 @@ const SerialNumber = ({ product, warehouse }) => {
     }
     return deepFilter;
   };
-
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -114,6 +112,7 @@ const SerialNumber = ({ product, warehouse }) => {
           {row?.original?.createdBy ? (
             <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate).format(dateFormat)}`}>
               {row?.original?.createdBy}
+              <span className="hidden">&nbsp;-&nbsp;</span>
               <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate)?.format(dateFormat)}</span>
             </h5>
           ) : (

@@ -271,6 +271,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
           ids={assignDialog?.data?.map((item) => item._id) || []}
           handleCloseDialog={() => setAssignDialog({ open: false, type: null, data: null })}
           onSuccess={(data) => {
+            setAssignDialog({ open: false, type: null, data: null });
             assignItems({ products: data?.map((item) => item._id) || [] });
           }}
           serialized={true}
@@ -287,6 +288,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
           handleSucess={(data) => {
             const assignData = data?.map((item) => item.id);
             assignItems({ serializedAssets: assignData || [] });
+            setAssignDialog({ open: false, type: null, data: null });
           }}
         />
       )}

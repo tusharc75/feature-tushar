@@ -168,6 +168,7 @@ const Email = () => {
         Cell: ({ row }) => (
           <p>
             {row.original?.createdByUser?.concatedName}
+            <span className="hidden">&nbsp;-&nbsp;</span>
             <span className="createdAtTime badge-date">{displayDate(row.original?.createdByDate)}</span>
           </p>
         )
