@@ -93,7 +93,6 @@ const AssignProductDialog = ({
     } catch (err) {
       toastConfig.setToastConfig(err);
     }
-
   };
 
   const fetchProduct = async (cancelTokenSource?: CancelTokenSource) => {
@@ -118,7 +117,7 @@ const AssignProductDialog = ({
         finalObject['pricingMethodMain'] = u?.pricingMethod;
         const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
         if (qtyAdded.length) finalObject['qty'] = qtyAdded[0].qty;
-        return {...finalObject};
+        return { ...finalObject };
       });
       dispatch({ type: 'initialize', data: rows, count: count });
       setTimeout(() => {

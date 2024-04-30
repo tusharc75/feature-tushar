@@ -88,7 +88,10 @@ const User: FC = () => {
                 {row?.original?.regionalWideRole}
               </Link>
               {row?.original?.restRegionalWideRoles.length > 0 && (
-                <span className="createdAtTime badge-date">{`+${row?.original?.restRegionalWideRoles.length} more..`}</span>
+                <span className="createdAtTime badge-date">
+                  <span className="hidden">&nbsp;&nbsp;</span>
+                  {`+${row?.original?.restRegionalWideRoles.length} more..`}
+                </span>
               )}
             </h5>
           </>
