@@ -322,7 +322,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingStatus });
         } else if (!checkUniqueWarehouse()) {
           errorMessages.push({ index: e.index, message: subleaseMessage.sameWarehouse });
-        } else if (e?.warehouse?.optionValue !== subleaseData?.fromWarehouse?.optionValue) {
+        } else if (e?.warehouse?.optionValue === subleaseData?.fromWarehouse?.optionValue) {
           errorMessages.push({ index: e.index, message: subleaseMessage.pickupDeliveryDifferent });
         }
       }
