@@ -36,7 +36,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
 
   return (
     <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
-      <CustomDialogHeader title={`Serial Number - ${productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
+      <CustomDialogHeader title={`Serial Numbers - ${productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         {serialNumberCount ? (
           <Box>
