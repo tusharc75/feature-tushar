@@ -817,7 +817,17 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           onClose={() => {
             setAssignRentalDataDialog({ open: false, type: '' });
           }}
-          onSuccess={handleAdd}
+          onSuccess={(rows)=>{
+            if(rows?.some((e)=> e.type===MATERIAL_TYPE.serializedAsset && dataRows?.some((ele)=> ele?.materialId===e?.materialId))){
+              toastConfig.setToastConfig({
+                  open: true,
+                  type: 'error',
+                  message: 'Asset is already added'
+              })
+            }else{
+              handleAdd(rows)
+            }
+          }}
           rentalId={fieldTicketData?.rentalJob?.optionValue}
           currency={fieldTicketData?.currency}
           isSubmitting={isSubmitting}
