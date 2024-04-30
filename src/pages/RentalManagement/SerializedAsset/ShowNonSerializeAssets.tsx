@@ -20,7 +20,7 @@ import {
   Typography
 } from '@material-ui/core';
 
-const ShowNonSerializeAssets = ({ data, onClose }) => {
+const ShowNonSerializeAssets = ({ data, onClose, title = `Non-${routes.serializedAsset.title}` }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   return (
     <Dialog
@@ -32,7 +32,7 @@ const ShowNonSerializeAssets = ({ data, onClose }) => {
       fullWidth
     >
       <CustomDialogHeader
-        title={`Non-${routes.serializedAsset.title} - ${data?.productName}`}
+        title={`${title} - ${data?.productName}`}
         onClose={() => {
           onClose();
         }}
