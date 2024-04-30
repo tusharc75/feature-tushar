@@ -51,8 +51,8 @@ const SerialNumber = ({ product, warehouse }) => {
     dispatch({ type: 'loading', loading: true });
     let data;
     const queryString = getQueryString();
-    const query = warehouse ? `?wareHouse=${warehouse}&isAll=true` : `?isAll=true`;
-    const response = await axiosInstance().get(`${routes?.serialNumber?.path}${product}${query}${queryString}`);   
+    const query = warehouse ? `&warehouse=${warehouse}&isAll=true` : `?isAll=true`;
+    const response = await axiosInstance().get(`${routes?.serialNumber?.path}?products=${product}${query}${queryString}`);   
     // const response = await axiosInstance().get(`${productInventory.api}/serial-number/${product}${query}`);
     data = response?.data?.data;
     let count = response?.data?.count;
