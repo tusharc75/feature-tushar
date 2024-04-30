@@ -107,4 +107,7 @@ export const subleaseMessage = {
     assetStatusSendSupplier: 'Only New,Available and Under Review asset status can send to supplier',
     assetsIsWithCustomer: 'Assets are at customer location',
     assetsAlradyReturned: 'Assets are already returned to supplier',
+
+    sameWarehouse:`Selected Assets must be in same ${routes.warehouse.title} to perform this action`,
+    pickupDeliveryDifferent : 'Pickup and Delivery must be different',
 };
