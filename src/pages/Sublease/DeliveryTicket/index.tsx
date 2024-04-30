@@ -320,10 +320,8 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyCreated });
         } else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingStatus });
-        } else if (!checkUniqueWarehouse()) {
-          errorMessages.push({ index: e.index, message: `Selected Assets are at different locations` });
-        } else if (e?.warehouse?.optionValue === subleaseData?.fromWarehouse?.optionValue) {
-          errorMessages.push({ index: e.index, message: subleaseMessage.pickUpDeliverySame });
+        } else if (!(checkUniqueWarehouse() && e?.warehouse?.optionValue !== subleaseData?.fromWarehouse?.optionValue)) {
+          errorMessages.push({ index: e.index, message: `Selected Assets must be in same ${routes.warehouse.title} to perform this action` });
         }
       }
       else if (action === subleaseActions.deliveredToWarehouse) {
