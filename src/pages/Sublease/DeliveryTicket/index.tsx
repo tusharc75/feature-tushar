@@ -318,9 +318,12 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
       else if (action === subleaseActions.createReceivingTicket) {
         if (e.hasOwnProperty('ReceivingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyCreated });
-        }
-        else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
+        } else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingStatus });
+        } else if (!checkUniqueWarehouse()) {
+          errorMessages.push({ index: e.index, message: `Selected Assets are at different locations` });
+        } else if (e?.warehouse?.optionValue === subleaseData?.fromWarehouse?.optionValue) {
+          errorMessages.push({ index: e.index, message: subleaseMessage.pickUpDeliverySame });
         }
       }
       else if (action === subleaseActions.deliveredToWarehouse) {
@@ -365,7 +368,6 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         )}
         {ticketType === DELIVERY_TICKET_TYPE.receiving && (
           <MenuItem
-            disabled={!(checkUniqueWarehouse() && selectedRecords[0]?.warehouse?.optionValue !== subleaseData?.fromWarehouse?.optionValue)}
             onClick={() => {
               if (!validateAction(subleaseActions.createReceivingTicket)) {
                 handleDeliveryTicketDialog();
