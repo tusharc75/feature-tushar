@@ -125,7 +125,9 @@ const LoadingTicket = ({
       var deliveryTicketList: any = [];
       var material: any = [];
       var products: any = [];
+      var serializedProducts: any = [];
       var nonSerializeAsset: any = [];
+      var productSerialNumbers: any = [];
       var invoiceData: any = [];
       var consumeProducts: any = [];
 
@@ -192,6 +194,7 @@ const LoadingTicket = ({
         material = productResponse?.data?.data?.material;
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
+        productSerialNumbers = productResponse?.data?.data?.productSerialNumbers;
 
 
         const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`);
@@ -289,6 +292,26 @@ const LoadingTicket = ({
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
           productAssets.push(obj);
+        }
+      });
+
+      material?.filter((e) => e?.productDetail?.serializedProduct && e.type === "product").forEach(ele => {
+        if(ele?.qty > 0 && productSerialNumbers?.map(p => p?.uniqueId)?.includes(ele?.materialId)){
+          productAssets.push({
+            _id: ele?.materialId,
+            type: 'Product',
+            displayType: 'Product (Serialized)',
+            qty: ele?.qty,
+            description: ele?.productDetail?.productDescription || '',
+            parentId: ele?.parentId,
+            parentName: ele?.parentName,
+            assetNumber: ele?.productDetail?.productName,
+            productName: ele?.productDetail?.productName,
+            productId: ele?.productDetail?._id,
+            warehouse: rentalManagementData?.warehouse?.optionLabel,
+            warehouseId: rentalManagementData?.warehouse?.optionValue,
+            productSerialNumbers: productSerialNumbers?.filter(p => p?.uniqueId === ele?.materialId)
+          })
         }
       });
 
@@ -455,6 +478,21 @@ const LoadingTicket = ({
                     open: true,
                     data: { productName: row?.original?.productName, nonSerializeAsset: row?.original?.nonSerializeAsset }
                   });
+                }}
+              >
+                <InfoIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          {row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0 && (
+            <HtmlTooltip title={`${routes.serializedAsset.title}`}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  // setShowNonSerializeAsset({
+                  //   open: true,
+                  //   data: { productName: row?.original?.productName, nonSerializeAsset: row?.original?.nonSerializeAsset }
+                  // });
                 }}
               >
                 <InfoIcon fontSize="small" color={'primary'} />
