@@ -321,7 +321,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         } else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingStatus });
         } else if (!(checkUniqueWarehouse() && e?.warehouse?.optionValue !== subleaseData?.fromWarehouse?.optionValue)) {
-          errorMessages.push({ index: e.index, message: `Selected Assets must be in same ${routes.warehouse.title} to perform this action` });
+          errorMessages.push({ index: e.index, message: subleaseMessage.sameWarehouse });
         }
       }
       else if (action === subleaseActions.deliveredToWarehouse) {
