@@ -14,7 +14,7 @@ import { dateFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constant
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 
-const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleSucess, isAssigning, filterByPlant = null }) => {
+const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleSucess, isAssigning, filterByPlant = null, ids }) => {
   const renderedFrom = `serialNumbers_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -25,6 +25,7 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
     state: { permissions, selectedEntity }
   }: any = useData();
 
+  const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [warehouseOption, setWarehouseOption] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant?.optionValue);
@@ -120,7 +121,8 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    const ignoreIds = ids && ids?.length > 0 ? ids : [];
+    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
     if (!selectedProduct) {
       deepFilter = `${deepFilter}&products=${selectedProducts?.map((p) => p?.id).join(',')}`;
     } else {
@@ -166,8 +168,40 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
   }, []);
 
   const handleAdd = () => {
-    handleSucess(selectedRecords);
+    if (selectedProducts?.length) {
+      const data = [];
+      selectedProducts?.forEach((ele) => {
+        let qty = ele.qty;
+        while (qty) {
+          const result = selectedRecords?.filter((f) => f.product === ele.id && !f.isCounted);
+          if (result.length) {
+            data.push({ ...ele, asset: result[0]._id });
+            result[0].isCounted = true;
+          }
+          qty--;
+        }
+      });
+      handleSucess(data);
+    } else {
+      handleSucess(selectedRecords);
+    }
   };
+
+  useEffect(() => {
+    let tempProducts = [];
+    selectedProducts?.map((d) => {
+      const alreadyAdded = tempProducts.find((obj) => obj.id === d.id);
+      if (alreadyAdded) {
+        alreadyAdded.qty = d?.qty + alreadyAdded.qty;
+      } else {
+        tempProducts.push({ id: d.id, name: d.productName, qty: d?.qty });
+      }
+    });
+    tempProducts?.forEach((e) => {
+      e.qty = e?.qty - selectedRecords?.filter((obj) => obj.product === e.id).length;
+    });
+    setProducts(tempProducts);
+  }, [selectedRecords]);
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
@@ -178,8 +212,8 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
       <>
         <Box display={'flex'} width={'100%'} justifyContent={'space-between'}>
           <Box style={{ display: 'inline' }}>
-            {selectedProducts.length > 0
-              ? selectedProducts?.map((d) => (
+            {products.length > 0
+              ? products?.map((d) => (
                   <Box
                     m={0.5}
                     p={1}
@@ -197,10 +231,12 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
                     }}
                     style={{ display: 'inline-block' }}
                   >
-                    {selectedRecords.some((r) => r?.product === d.id) ? (
-                      <span key={d.productName} className="text-success">{`${d.productName}`}</span>
+                    {d?.qty < 0 ? (
+                      <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                    ) : d?.qty === 0 ? (
+                      <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
                     ) : (
-                      <span key={d.productName}>{`${d.productName}`}</span>
+                      <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
                     )}
                   </Box>
                 ))
@@ -250,7 +286,7 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
           leftSideContents={leftSideContents()}
           addButtonProps={{
             iconsEnabled: false,
-            disabled: isAssigning || selectedRecords?.length === 0,
+            disabled: isAssigning || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0),
             loading: isAssigning,
             text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
           }}
@@ -258,7 +294,9 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
           isAddButtonVisible
           setQueryString={false}
         />
-
+        {products.length > 0 && products.some((s) => s.qty < 0) ? (
+          <div className="text-error font-weight-bold">You have selected more Serail Numbers than required</div>
+        ) : null}
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

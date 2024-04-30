@@ -56,6 +56,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [assignSerialNumbersDialog, setAssignSerialNumbersDialog] = useState(false)
   const [serializedAssetProduct, setSerializedAssetProduct] = useState([]);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [productSerialNumbers, setProductSerialNumbers] = useState([]);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -343,6 +344,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         data = response?.data?.data;
         data.inventory = data.inventory?.filter((e) => !e.isReplaced);
         offlineAssetErrorLog = data?.offlineAssetErrorLog;
+
+        setProductSerialNumbers(data.productSerialNumbers)
 
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
         const transactionData = result?.data?.data;
@@ -828,7 +831,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const handleAssignSerialNumbers = (rows) => {
     setIsAssigning(true)
     axiosInstance()
-      .post(`${rentalManagement.api}/${rentalManagementData._id}/add-serial-numbers`, rows?.map(r => ({ uniqueId: r?.product, serialNumber: r?._id, status: 'Reserved' })))
+      .post(`${rentalManagement.api}/${rentalManagementData._id}/add-serial-numbers`, rows?.map(r => ({ uniqueId: r?.materialId, serialNumber: r?.asset, status: 'Reserved' })))
       .then(() => {
         setIsAssigning(false)
         fetchData();
@@ -928,7 +931,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         >
           {`Assign Serial Number`}
         </MenuItem>
-        {user?.user?.brandPolicy?.productInventorySerialNumberRequired && (
+        {!user?.user?.brandPolicy?.productInventorySerialNumberRequired && (
           <MenuItem
             disabled={selectedRecords.length === 0 || serializedAssetProduct?.length === 0}
             onClick={() => {
@@ -1212,6 +1215,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           }}
           isAssigning={isAssigning}
           filterByPlant={rentalManagementData?.warehouse}
+          ids={productSerialNumbers?.filter(p => selectedRecords?.filter(s => !s?.parentId)?.map(_p => _p?.materialId).includes(p?.uniqueId))?.map(e => e?.serialNumber)}
         />
       )}
     </Fragment>
