@@ -2311,7 +2311,7 @@ const ActionButtonMenuItems = ({
             }
           }}
         >
-          {`Receive Items to ${routes.warehouse.title}`}
+          {`Receive Items`}
         </MenuItem>
       }
       {!isOffline && ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
