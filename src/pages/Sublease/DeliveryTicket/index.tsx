@@ -365,7 +365,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         )}
         {ticketType === DELIVERY_TICKET_TYPE.receiving && (
           <MenuItem
-            disabled={!(checkUniqueWarehouse() && selectedRecords[0]?.warehouse?.optionValue !== subleaseData?.toWarehouse?.optionValue)}
+            disabled={!(checkUniqueWarehouse() && selectedRecords[0]?.warehouse?.optionValue !== subleaseData?.fromWarehouse?.optionValue)}
             onClick={() => {
               if (!validateAction(subleaseActions.createReceivingTicket)) {
                 handleDeliveryTicketDialog();
