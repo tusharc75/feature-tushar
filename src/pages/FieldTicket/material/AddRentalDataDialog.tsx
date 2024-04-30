@@ -22,7 +22,7 @@ const AddRentalDataDialog = ({
   type,
   isSubmitting = false,
   currency,
-  assetIds = []
+  ids = []
 }) => {
 
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Rental_Material`;
@@ -127,7 +127,7 @@ const AddRentalDataDialog = ({
     }
     else {
       let inventoryData = data?.inventory || [];
-      inventoryData = inventoryData?.filter((e)=>!assetIds?.some((ele)=> ele===e?.inventoryDetail?._id))
+      inventoryData = inventoryData?.filter((e)=>!ids?.some((ele)=> ele===e?.inventoryDetail?._id))
       inventoryData.forEach((parent, i) => {
         const product = data?.material?.find((e) => e._id === parent._id);
         const obj: any = { ...product }
