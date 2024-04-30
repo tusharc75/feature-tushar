@@ -45,6 +45,7 @@ export const rentalManagementMessage = {
     loadingAlreadyCreated: 'Loading Ticket is already created',
     loadingNotCreated: 'Loading Ticket is not created',
     loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+    loadingReservedAssetStatus: 'Loading Ticket can create for only Reserved asset status',
     loadingNotDelivered: 'Loading Ticket is not delivered',
     inTransitDeliveredLoadingTicket: 'Only In-Transit/Delivered tickets can be cancelled',
     receivingAlreadyCreated: 'Receiving Ticket is already created',
@@ -108,6 +109,6 @@ export const subleaseMessage = {
     assetsIsWithCustomer: 'Assets are at customer location',
     assetsAlradyReturned: 'Assets are already returned to supplier',
 
-    sameWarehouse:`Selected Assets must be in same ${routes.warehouse.title} to perform this action`,
-    pickupDeliveryDifferent : 'Pickup and Delivery must be different',
+    sameWarehouse: `Selected Assets must be in same ${routes.warehouse.title} to perform this action`,
+    pickupDeliveryDifferent: 'Pickup and Delivery must be different',
 };

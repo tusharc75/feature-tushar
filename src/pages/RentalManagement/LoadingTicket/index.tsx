@@ -849,10 +849,14 @@ const LoadingTicket = ({
       records = [...selectedRecords?.filter((e) => !e?.loadingTicketId),
       ...dataRows?.filter((e) => loadingTicketIds?.includes(e?.loadingTicketId))]
     }
+    console.log(records)
     records?.forEach((e) => {
       if (action === rentalManagementActions.createLoadingTicket) {
         if (e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyCreated });
+        }
+        else if (e.type === 'Asset' && (e?.status !== ASSET_STATUS.reserved || e?.rentalAssetStatus !== RENTAL_INTERNAL_ASSET_STATUS.reserved)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingReservedAssetStatus });
         }
       }
       else if (action === rentalManagementActions.deliveredToCustomer) {
