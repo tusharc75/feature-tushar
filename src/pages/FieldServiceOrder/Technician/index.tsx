@@ -15,7 +15,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, SERVICE_ORDER_STATUS, fieldServiceOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, SERVICE_ORDER_STATUS, fieldServiceOrder, warehouse } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Technician = ({
@@ -171,8 +171,8 @@ const Technician = ({
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent?.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent?.packageDetail?.packageName;
       parent.competencies = parent.type === 'service' ? parent?.serviceDetail?.competencies?.map((e) => e?.optionLabel)?.join(', ') : null;
       parent.competencyType = parent.type === 'service' ? parent?.serviceDetail?.competencyType?.optionLabel : null;
       parent.mainCompetencyType = parent.type === 'service' ? parent?.serviceDetail?.competencyType : {};
@@ -213,8 +213,8 @@ const Technician = ({
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.subRows = generateNestedData(material, technician, _subRow);
     });
 
@@ -229,7 +229,8 @@ const Technician = ({
         service: selectedRecords[0]?.materialId,
         technician: e?._id,
         estimateStartDate: selectedRecords[0]?.estimateStartDate,
-        estimateEndDate: selectedRecords[0]?.estimateEndDate
+        estimateEndDate: selectedRecords[0]?.estimateEndDate,
+        warehouse: selectedRecords[0]?.warehouse,
       });
     });
     axiosInstance()
@@ -356,7 +357,7 @@ const Technician = ({
             setAddEmployeeMasterDialog({ open: false, data: null });
           }}
           defaultCompetency={[addEmployeeMasterDialog?.data?.mainCompetencyType]}
-          ids={[]}
+          warehouse={serviceOrderData?.warehouse?.optionValue}
         />
       )}
     </Fragment>

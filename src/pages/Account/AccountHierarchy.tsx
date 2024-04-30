@@ -28,7 +28,7 @@ export default function AccountHierarchy({
 
   useEffect(() => {
     fetchGridColumns();
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -73,6 +73,7 @@ export default function AccountHierarchy({
                   style={{ color: 'white', backgroundColor: '#298B88', padding: 4, fontWeight: 600 }}
                   label="Current"
                   size="small"
+                  data-hide-in-export={true}
                   className="ml-2"
                 />
               ) : (
@@ -161,7 +162,13 @@ export default function AccountHierarchy({
               {row.original.parentId === currentAccountId ? (
                 <span className="text-truncate ">{row.original.parentAccountText}</span>
               ) : (
-                <Link className="link text-truncate" to={`/${accountRoute}/detail/${row.original.parentId}`}>
+                <Link
+                  title={row.original.parentAccountText}
+                  target={'_blank'}
+                  rel="noreferrer"
+                  className="link text-truncate"
+                  to={`/${accountRoute}/detail/${row.original.parentId}`}
+                >
                   <CustomRenderCell value={row.original.parentAccountText} />
                 </Link>
               )}
@@ -187,7 +194,7 @@ export default function AccountHierarchy({
       }
     ];
     setColumns(customColumns);
-  }
+  };
 
   return (
     <Box style={{ display: 'flex' }}>

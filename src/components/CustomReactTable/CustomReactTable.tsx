@@ -411,7 +411,14 @@ const CustomReactTable = ({
     exportTimeout = setTimeout(() => {
       if (!tableRef.current) return;
       const wb = xlsx.utils.book_new();
-      const ws = xlsx.utils.table_to_sheet(tableRef.current, { cellStyles: true, cellDates: true, raw: true });
+
+      // Remove Hidden Elements "data-hide-in-export="true""
+      const table = tableRef.current;
+      table?.querySelectorAll('[data-hide-in-export="true"]').forEach((e) => {
+        if (typeof e?.remove === 'function') e.remove();
+      });
+
+      const ws = xlsx.utils.table_to_sheet(table, { cellStyles: true, cellDates: true, raw: true, display: true });
 
       const columns = getExcelColumnNameFromRange(ws['!ref']);
 
@@ -471,7 +478,7 @@ const CustomReactTable = ({
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
       {exportTableView && (
-        <div className="hidden">
+        <div className="hidden [&_.hide-in-export]:!hidden">
           <TableComponent
             ref={tableRef}
             virtualization={virtualization}

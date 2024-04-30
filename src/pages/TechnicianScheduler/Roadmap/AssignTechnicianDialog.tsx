@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { fieldServiceOrder, fieldTicket, rentalManagement } from 'src/constants/helpers';
+import { fieldServiceOrder, fieldTicket, rentalManagement, warehouse } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleClose, handleSucess }) {
@@ -18,6 +18,7 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         uniqueId: ele?.service?.uniqueId,
         service: ele?.serviceId,
         technician: technicianData?._id,
+        warehouse: ele?.warehouse,
         ...(type === 'fieldTicket' ? {
           fieldTicket: ele?.resourceId,
           startDate: ele?.service?.estimateStartDate,
