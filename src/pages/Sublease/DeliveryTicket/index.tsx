@@ -269,8 +269,8 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         data['deliveryToAddress'] = subleaseData?.toWarehouse?.optionValue;
       } else {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-        data['pickupFrom'] = subleaseData?.toWarehouse?.optionValue;
-        data['pickupFromAddress'] = subleaseData?.toWarehouse?.optionValue;
+        data['pickupFrom'] = selectedRecords[0]?.warehouse?.optionValue;
+        data['pickupFromAddress'] = selectedRecords[0]?.warehouse?.optionValue;
         data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
         data['deliveryTo'] = subleaseData?.fromWarehouse?.optionValue;
         data['deliveryToAddress'] = subleaseData?.fromWarehouse?.optionValue;
@@ -345,6 +345,10 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
     return false;
   };
 
+  const checkUniqueWarehouse = (): Boolean => {
+    return new Set(selectedRecords.map((e) => e?.warehouse?.optionValue))?.size === 1;
+  }
+
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -361,6 +365,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         )}
         {ticketType === DELIVERY_TICKET_TYPE.receiving && (
           <MenuItem
+            disabled={!(checkUniqueWarehouse() && selectedRecords[0]?.warehouse?.optionValue !== subleaseData?.fromWarehouse?.optionValue)}
             onClick={() => {
               if (!validateAction(subleaseActions.createReceivingTicket)) {
                 handleDeliveryTicketDialog();
