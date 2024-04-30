@@ -82,8 +82,6 @@ const WorkOrderPlanning = () => {
     fetchData();
   }, [page, limit, filters, search, sorting, selectedEntity, showFilteredRecordsOnly, selectedStatus]);
 
-  console.log(columns);
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (isExport) {
