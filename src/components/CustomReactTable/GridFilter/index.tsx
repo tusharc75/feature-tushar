@@ -317,7 +317,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                       ) : (
                         <Grid item xs={12} sm={6} md={6}>
                           <FormTypes
-                            disabled={resource===sidebarResource.workOrderPlanning && field.fieldName === 'assetStatus' ? true : false}
+                            disabled={false}
                             values={formValues}
                             errors={{}}
                             touched={{}}

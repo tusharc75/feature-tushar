@@ -68,6 +68,8 @@ const WorkOrderPlanning = () => {
             </Link>
           </div>
         );
+      } else if(o.accessor === 'assetStatus') {
+        o.disableFilters = true;
       }
     });
 
