@@ -37,9 +37,13 @@ function DataListCell({ field, original }) {
           <h5 className="text-truncate" title={optionLabel}>
             {optionLabel}
           </h5>
+
           {more?.length > 0 && (
             <HtmlTooltip title={getTitle(more)} enterTouchDelay={0}>
-              <span className="createdAtTime badge-date">{`+${more?.length} more..`}</span>
+              <span className="createdAtTime badge-date">
+                <span className="hidden">&nbsp;&nbsp;</span>
+                {`+${more?.length} more..`}
+              </span>
             </HtmlTooltip>
           )}
         </>
