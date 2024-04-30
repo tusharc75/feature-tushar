@@ -26,7 +26,7 @@ const AssignSerialNumber = ({ handleClose, qty, handleSuccess, serialNumber, pro
 
     const fetchData = () => {
         axiosInstance()
-            .get(`${productInventory.api}/serial-number/${product}?warehouse=${warehouse}`)
+            .get(`${productInventory.api}/serial-number?products=${product}&warehouse=${warehouse}`)
             .then(({ data: { data } }) => {
                 setSerialNumbers([...serialNumber, ...data]);
             })

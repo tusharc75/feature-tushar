@@ -1211,7 +1211,7 @@ const routes = {
     path: '/resource-doa-request'
   },
   serialNumber: {
-    path: '/product-inventory/serial-number/'
+    path: '/product-inventory/serial-number'
   },
 };
 

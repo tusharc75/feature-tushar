@@ -47,7 +47,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
   const fetchData = () => {
     setLoading(true);
     axiosInstance()
-      .get(`${productInventory.api}/serial-number/${product[0]._id}?warehouse=${warehouse}`)
+      .get(`${productInventory.api}/serial-number?products=${product[0]._id}&warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         if (data?.length) {
           setSerialNumbers(data);

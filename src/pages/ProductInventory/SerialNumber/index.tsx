@@ -13,46 +13,46 @@ import moment from 'moment';
 
 const SerialNumber = ({ product, warehouse }) => {
   const { state, dispatch } = useTableReducer();
-  const { page, limit, filters, sorting} = state;
-  const [ renderCount, setRenderCount] = useState(0);
+  const { page, limit, filters, sorting } = state;
+  const [renderCount, setRenderCount] = useState(0);
   const {
     state: { user }
   }: any = useData();
 
   useEffect(() => {
-    if(renderCount > 0){
+    if (renderCount > 0) {
       fetchRecords();
-    }else{
+    } else {
       setRenderCount(renderCount + 1);
     }
-    
+
   }, [page, limit, filters, sorting]);
 
   const getQueryString = () => {
-   let deepFilter = `&page=${page}&limit=${limit}`;
-   const { filterByIds, deepFilters } = gridFilterParser(filters);
-   if (filterByIds?.length) {
-     deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-   }
-   if (deepFilters?.length) {
-     deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-   }
-   if (filterByIds?.length || deepFilters?.length) {
-     deepFilter = `${deepFilter}&filterType=and`;
-   }
-   if (sorting.length > 0) {
-     deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-   }
-   return deepFilter;
- };
+    let deepFilter = `&page=${page}&limit=${limit}`;
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    return deepFilter;
+  };
 
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
     let data;
     const queryString = getQueryString();
-    const query = warehouse ? `?wareHouse=${warehouse}&isAll=true` : `?isAll=true`;
-    const response = await axiosInstance().get(`${routes?.serialNumber?.path}${product}${query}${queryString}`);   
+    const query = warehouse ? `&warehouse=${warehouse}&isAll=true` : `?isAll=true`;
+    const response = await axiosInstance().get(`${routes?.serialNumber?.path}?products=${product}${query}${queryString}`);
     // const response = await axiosInstance().get(`${productInventory.api}/serial-number/${product}${query}`);
     data = response?.data?.data;
     let count = response?.data?.count;
@@ -129,7 +129,7 @@ const SerialNumber = ({ product, warehouse }) => {
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 300px)'}
+            height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
