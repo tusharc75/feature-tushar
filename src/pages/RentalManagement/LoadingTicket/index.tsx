@@ -125,7 +125,6 @@ const LoadingTicket = ({
       var deliveryTicketList: any = [];
       var material: any = [];
       var products: any = [];
-      var serializedProducts: any = [];
       var nonSerializeAsset: any = [];
       var productSerialNumbers: any = [];
       var invoiceData: any = [];
