@@ -931,7 +931,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         >
           {`Assign Serial Number`}
         </MenuItem>
-        {!user?.user?.brandPolicy?.productInventorySerialNumberRequired && (
+        {user?.user?.brandPolicy?.productInventorySerialNumberRequired && (
           <MenuItem
             disabled={selectedRecords.length === 0 || serializedAssetProduct?.length === 0}
             onClick={() => {
