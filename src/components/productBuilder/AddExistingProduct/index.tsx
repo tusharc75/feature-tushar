@@ -69,7 +69,6 @@ const AddExistingProduct = (props) => {
     }
   }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate, showFilteredRecordsOnly]);
 
-
   useEffect(() => {
     axiosInstance()
       .get('/field?resource=Product&view=true')
@@ -81,16 +80,9 @@ const AddExistingProduct = (props) => {
         newColumns?.forEach((ele) => {
           ele.leval = 'product';
         });
-        // setProductRendererNames(rendererNames);
         setProductColoums(newColumns);
       });
   }, []);
-
-  const ProductNameRenderer = (params) => (
-    <Link className="link" target='_blank' title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -146,15 +138,18 @@ const AddExistingProduct = (props) => {
           };
           return res;
         });
-        let columns = [...productColoums];
+
         const fields: any = []
         data.productTemplate?.forEach((ele) => {
           ele.fields.forEach((field) => {
             fields.push(field)
           })
         });
-        const newColumns =  generateColumns(renderedFrom, fields, `${routes.productDetail.path}`);
-        columns = [...columns, ...newColumns]
+        const newColumns = generateColumns(renderedFrom, fields, `${routes.productDetail.path}`);
+        newColumns?.forEach((ele) => {
+          ele.leval = 'product-template';
+        });
+        let columns = [...productColoums, ...newColumns]
         columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index);
         columns.push({
           accessor: 'inventoryCount',
@@ -185,6 +180,7 @@ const AddExistingProduct = (props) => {
         dispatch({ type: 'loading', loading: false });
       });
   };
+
   const handleAdd = () => {
     const orderIds = selectedRecords?.sort((a, b) => a?.sequenceOrder - b?.sequenceOrder)?.map((m) => m._id);
 

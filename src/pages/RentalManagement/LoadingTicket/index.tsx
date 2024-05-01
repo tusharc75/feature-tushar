@@ -849,7 +849,6 @@ const LoadingTicket = ({
       records = [...selectedRecords?.filter((e) => !e?.loadingTicketId),
       ...dataRows?.filter((e) => loadingTicketIds?.includes(e?.loadingTicketId))]
     }
-    console.log(records)
     records?.forEach((e) => {
       if (action === rentalManagementActions.createLoadingTicket) {
         if (e.hasOwnProperty('loadingTicketId')) {
