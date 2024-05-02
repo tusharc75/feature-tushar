@@ -331,7 +331,6 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
       {step?.linkWithResource ? (
         <ResourceField
           step={step}
-          allowedToEdit={allowedToEdit}
           renderedFrom={renderedFrom}
           data={data}
           stepFullScreen={stepFullScreen}
