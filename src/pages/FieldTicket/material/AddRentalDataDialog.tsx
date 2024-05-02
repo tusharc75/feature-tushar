@@ -152,7 +152,6 @@ const AddRentalDataDialog = ({
         parent.description = parent?.packageDetail?.packageDescription;
         parent.qtyDisplay = parent.qty;
       });
-      console.log(rows);
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
