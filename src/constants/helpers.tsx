@@ -21,7 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { camelCase, isArray, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, isArray, isEmpty, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
 import { stepIconInterface } from 'src/components/Steps/icons';
 
 interface stepInterface extends stepIconInterface {
@@ -1870,16 +1870,16 @@ export const prepareDataForGrid = (data, user = {}) => {
     finalObject['isAllowedToUpdate'] = [...(data?.collaborator ?? []), data?.owner ?? {}].some((obj) => obj.optionValue === user['user']?._id);
   }
 
-  if (data?.createdBy) {
-    finalObject['createdBy'] = data.createdBy?.user?.concatedName;
+  if (!isEmpty(data?.createdBy)) {
+    finalObject['createdBy'] = data.createdBy?.user?.concatedName || data.createdBy?.user?.firstName + ' ' + data.createdBy?.user?.lastName;
     finalObject['createdByDate'] = data.createdBy?.date;
     finalObject['createdById'] = data.createdBy?.user?._id;
     if (!finalObject['isAllowedToUpdate']) {
       finalObject['isAllowedToUpdate'] = data.createdBy?.user?._id === user['user']?._id;
     }
   }
-  if (data?.updatedBy) {
-    finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName;
+  if (!isEmpty(data?.updatedBy)) {
+    finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName || data?.updatedBy?.user?.firstName + ' ' + data?.updatedBy?.user?.lastName;
     finalObject['updatedByDate'] = data?.updatedBy?.date;
   }
   if (data?.completedBy) {

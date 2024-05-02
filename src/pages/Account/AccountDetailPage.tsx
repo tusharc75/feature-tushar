@@ -288,7 +288,6 @@ export default function AccountDetailPage(props) {
               optionLabel: o.owner
             };
           }
-          o.parentAccount = o.parentAccount ? { _id: o.parentAccount.optionValue, accountName: o.parentAccount.optionLabel }: null;
           o.canEdit = [...(data?.collaborator ?? []), o.owner].some((obj) => obj.optionValue === user.user._id);
           parentHierarchyData.push(o);
         }
@@ -307,12 +306,12 @@ export default function AccountDetailPage(props) {
           ...data,
           type: 'child',
           current: true,
-          parentAccount: data.parentAccount
-            ? {
-                _id: data.parentAccount.optionValue,
-                accountName: data.parentAccount.optionLabel
-              }
-            : null,
+          // parentAccount: data.parentAccount
+          //   ? {
+          //       _id: data.parentAccount.optionValue,
+          //       accountName: data.parentAccount.optionLabel
+          //     }
+          //   : null,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }
       ];
@@ -334,12 +333,12 @@ export default function AccountDetailPage(props) {
           canEdit: account?.canEdit ?? [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         };
 
-        if (account.parentAccount) {
-          updatedAccount['parentAccountText'] = account.parentAccount.accountName;
-          updatedAccount['parentId'] = account.parentAccount._id;
-        } else {
-          updatedAccount['type'] = 'parent';
-        }
+        // if (account.parentAccount) {
+        //   updatedAccount['parentAccountText'] = account.parentAccount.accountName;
+        //   updatedAccount['parentId'] = account.parentAccount._id;
+        // } else {
+        //   updatedAccount['type'] = 'parent';
+        // }
         newData.push(updatedAccount);
       });
 

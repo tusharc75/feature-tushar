@@ -54,7 +54,7 @@ export default function AccountHierarchy({
 
   useEffect(() => {
     if (data) {
-      let rows = data.filter((e) => !e.parentId);
+      let rows = data.filter((e) => !e?.parentAccount?.optionValue);
       rows = rows?.map((parent, i) => {
         let finalObject = prepareDataForGrid(parent, user);
         let res = {
@@ -64,12 +64,13 @@ export default function AccountHierarchy({
         };
         return res;
       })
+      console.log('rows', rows);
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
     }
   }, [data]);
 
   const generateNestedData = (data, parent) => {
-    let subRows: any = data.filter((e) => e.parentId === parent._id);
+    let subRows: any = data.filter((e) => e?.parentAccount?.optionValue === parent._id);
     subRows = subRows?.map((subRow, i) => {
       let finalObject = prepareDataForGrid(subRow, user);
       let res = {
