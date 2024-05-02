@@ -288,6 +288,7 @@ export default function AccountDetailPage(props) {
               optionLabel: o.owner
             };
           }
+          o.parentAccount = o.parentAccount ? { _id: o.parentAccount.optionValue, accountName: o.parentAccount.optionLabel }: null;
           o.canEdit = [...(data?.collaborator ?? []), o.owner].some((obj) => obj.optionValue === user.user._id);
           parentHierarchyData.push(o);
         }
@@ -297,13 +298,13 @@ export default function AccountDetailPage(props) {
       let accounts = [
         ...data.parentHierarchy,
         {
-          _id: data._id,
-          accountName: data.accountName,
-          typeOfAccount: data.typeOfAccount,
-          industry: data.industry,
-          typeOfBusiness: data.typeOfBusiness,
-          phone: data.phone,
-
+          // _id: data._id,
+          // accountName: data.accountName,
+          // typeOfAccount: data.typeOfAccount,
+          // industry: data.industry,
+          // typeOfBusiness: data.typeOfBusiness,
+          // phone: data.phone,
+          ...data,
           type: 'child',
           current: true,
           parentAccount: data.parentAccount
@@ -320,15 +321,16 @@ export default function AccountDetailPage(props) {
         if (isObjectEmpty(account)) return true;
 
         const updatedAccount = {
-          _id: account._id,
-          accountName: account.accountName,
-          typeOfAccount: account.typeOfAccount,
-          industry: account.industry,
-          parentId: null,
-          typeOfBusiness: account.typeOfBusiness,
-          phone: account.phone,
+          // _id: account._id,
+          // accountName: account.accountName,
+          // typeOfAccount: account.typeOfAccount,
+          // industry: account.industry,
+          // parentId: null,
+          // typeOfBusiness: account.typeOfBusiness,
+          // phone: account.phone,
+          ...account,
           type: 'child',
-          current: account.current,
+          // current: account.current,
           canEdit: account?.canEdit ?? [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         };
 
@@ -345,12 +347,13 @@ export default function AccountDetailPage(props) {
     } else {
       setAccountHierarchyData([
         {
-          _id: data._id,
-          accountName: data.accountName,
-          typeOfAccount: data.typeOfAccount,
-          industry: data.industry,
-          typeOfBusiness: data.typeOfBusiness,
-          phone: data.phone,
+          // _id: data._id,
+          // accountName: data.accountName,
+          // typeOfAccount: data.typeOfAccount,
+          // industry: data.industry,
+          // typeOfBusiness: data.typeOfBusiness,
+          // phone: data.phone,
+          ...data,
           current: true,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }
