@@ -195,8 +195,10 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                       row?.original?.materialType === 'Product'
                         ? routes.productDetail.path
                         : row?.original?.materialType === 'Service'
-                        ? routes.serviceMasterDetail.path
-                        : routes.packagesDetail.path
+                          ? routes.serviceMasterDetail.path
+                          : row?.original?.materialType === 'Package'
+                            ? routes.packagesDetail.path
+                            : routes?.competenciesDetail.path  
                     }/${row?.original?.materialId}`
                   );
                 }}
