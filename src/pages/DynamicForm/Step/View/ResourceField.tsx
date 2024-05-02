@@ -15,7 +15,7 @@ import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialo
 import ManageDynamicForm from '../../ManageDynamicForm';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen = false, referenceData }) => {
+const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -31,6 +31,10 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen
   const { state, dispatch } = useTableReducer();
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  const [allowedToEdit, setAllowedToEdit] = useState(permissions?.[camelCase(step?.linkResourceName)]?.isUpdate);
+  const [allowedToDelete, setAllowedToDelete] = useState(permissions?.[camelCase(step?.linkResourceName)]?.isDelete);
+
 
   const [linkResourceFieldType, setLinkResourceFieldType] = useState(null);
 
@@ -77,18 +81,18 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen
                     </span>
                   </HtmlTooltip>
 
-                  <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
+                  <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
                     <span>
                       <IconButton
                         size="small"
                         aria-label="Delete"
-                        disabled={allowedToEdit ? false : true}
+                        disabled={allowedToDelete ? false : true}
                         onClick={() => {
                           setDeleteRecord(row?.original);
                           setShowDeleteConfirmBox(true);
                         }}
                       >
-                        <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                        <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
                       </IconButton>
                     </span>
                   </HtmlTooltip>
@@ -120,8 +124,8 @@ const ResourceField = ({ step, allowedToEdit, renderedFrom, data, stepFullScreen
         let rows = data.map((u, i) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions[camelCase(step?.linkResourceName)]?.isUpdate;
-          finalObject['canDelete'] = permissions[camelCase(step?.linkResourceName)]?.isDelete;
+          finalObject['allowedToEdit'] = permissions?.[camelCase(step?.linkResourceName)]?.isUpdate;
+          finalObject['canDelete'] = permissions?.[camelCase(step?.linkResourceName)]?.isDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
