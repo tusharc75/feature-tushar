@@ -979,6 +979,7 @@ export default function AccountDetailPage(props) {
                   handleDelete={(data) => {
                     setDeleteAccountId(data);
                   }}
+                  accountResource={accountResource}
                 />
               </Box>
             </TabPanel>
@@ -1125,7 +1126,7 @@ export default function AccountDetailPage(props) {
             setShowAccountHierarchyInFullScreenDialog(false);
           }}
         >
-          <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} accountRoute={accountRoute} />
+          <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} accountRoute={accountRoute} accountResource={accountResource} />
         </FullScreenDialog>
       )}
       {showCreateAccountDialog ? (
