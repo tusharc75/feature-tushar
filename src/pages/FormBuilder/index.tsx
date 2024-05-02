@@ -12,6 +12,9 @@ import { gridLoadingTimeout } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ArrangeView from './ArrangeView';
+import { AddOutlined } from '@material-ui/icons';
+import { useData } from 'src/StateProvider/Provider';
+import { useHistory } from 'react-router-dom';
 
 const FormBuilder = () => {
   const renderedFrom = 'form-builder';
@@ -20,6 +23,11 @@ const FormBuilder = () => {
   const [resource, setResource] = useState([]);
   const [columns, setColumns] = useState([]);
   const { state, dispatch } = useTableReducer();
+  const history = useHistory();
+
+  const {
+    state: { permissions, user }
+  }: any = useData();
 
   useEffect(() => {
     fetchGridColumns();
@@ -92,7 +100,18 @@ const FormBuilder = () => {
 
   const RightSideContents = () => {
     return (
-      <>
+      <>{permissions.formBuilder?.isCreate &&
+        <Button
+          variant="contained"
+          color='primary'
+          size='small'
+          onClick={() => {
+            history.push('/form-builder/0')
+          }}
+          startIcon={<AddOutlined />}
+        >
+          Add
+        </Button>}
         <Button
           variant="outlined"
           className={'btn-outline-v1'}
