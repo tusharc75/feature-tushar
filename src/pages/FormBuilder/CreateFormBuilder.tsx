@@ -71,12 +71,7 @@ const CreateFormBuilder = () => {
   const {
     state: { permissions, user }
   }: any = useData();
-  const [formBuilderPermissions, setFormBuilderPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false
-  });
+
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
   const history = useHistory();
@@ -93,6 +88,9 @@ const CreateFormBuilder = () => {
   const [sectionName, setsectionName] = useState('');
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
   const [steppers, setSteppers] = useState([]);
+
+  const [isNew, setIsNew] = useState(resource === '0' ? true : false);
+
 
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (event: React.ChangeEvent<{}>, value: any) => {
@@ -118,16 +116,12 @@ const CreateFormBuilder = () => {
     setAnchorEl(null);
   };
 
-  useEffect(() => {
-    if (permissions && permissions.formBuilder) {
-      setFormBuilderPermissions(permissions.formBuilder);
-    }
-  }, [permissions]);
-
   const onBackButtonEvent = (e) => {
     e.preventDefault();
     window.history.pushState(null, null, window.location.pathname);
-    if (formBuilderPermissions.isUpdate) setShowConfirmDialog(true);
+    if (permissions.formBuilder?.isUpdate) {
+      setShowConfirmDialog(true);
+    }
   };
 
   const handleOpenHistoryDialog = () => {
@@ -151,19 +145,29 @@ const CreateFormBuilder = () => {
   }, []);
 
   const fetchBrandResourceData = async () => {
-    axiosInstance()
-      .get(`/sa-formbuilder/resourcedata/` + resource)
-      .then(({ data: { data } }) => {
-        setSection(data.section);
-        setsectionName(data.sectionName || '');
-        setResourceLabel(data.resourceLabel);
-        setHomePageLabel(data?.homePageLabel || '');
-        setOriSection(JSON.parse(JSON.stringify(data.section)));
-        setSteppers(data?.resourcePolicy?.steppers || []);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    if (isNew) {
+      setSection([]);
+      setsectionName('');
+      setResourceLabel('');
+      setHomePageLabel('');
+      setOriSection([]);
+      setSteppers([]);
+    }
+    else {
+      axiosInstance()
+        .get(`/sa-formbuilder/resourcedata/` + resource)
+        .then(({ data: { data } }) => {
+          setSection(data.section);
+          setsectionName(data.sectionName || '');
+          setResourceLabel(data.resourceLabel);
+          setHomePageLabel(data?.homePageLabel || '');
+          setOriSection(JSON.parse(JSON.stringify(data.section)));
+          setSteppers(data?.resourcePolicy?.steppers || []);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const handleSave = async () => {
@@ -196,7 +200,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => {});
+          .catch((error) => { });
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -231,21 +235,40 @@ const CreateFormBuilder = () => {
       };
     }
     setIsUpdating(true);
-    axiosInstance()
-      .put(`/sa-formbuilder/resourcedata`, sendData)
-      .then(({ data: { message } }) => {
+    if (isNew) {
+      sendData.resource = resourceLabel;
+      sendData.brandId = user.user.brand;
+      axiosInstance().post(`/sa-formbuilder`, sendData).then(({ data: { message } }) => {
         setIsUpdating(false);
-        fetchBrandResourceData();
+        history.push('/form-builder')
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: message
         });
       })
-      .catch((error) => {
-        setIsUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
+        .catch((error) => {
+          setIsUpdating(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+    else {
+      axiosInstance()
+        .put(`/sa-formbuilder/resourcedata`, sendData)
+        .then(({ data: { message } }) => {
+          setIsUpdating(false);
+          fetchBrandResourceData();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: message
+          });
+        })
+        .catch((error) => {
+          setIsUpdating(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const handleExportFields = () => {
@@ -275,10 +298,10 @@ const CreateFormBuilder = () => {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <CustomBreadCrumbs
-              routes={[routes.formBuilder, { title: resource }]}
+              routes={[routes.formBuilder, { title: isNew ? 'New' : resource }]}
               isConfirmBeforeClick={true}
               onBreadCrumbClick={(path) => {
-                if (!isEqual(orisection, section) && formBuilderPermissions.isUpdate) {
+                if (!isEqual(orisection, section) && permissions?.isUpdate?.isUpdate) {
                   setShowConfirmDialog(true);
                 } else history.push({ pathname: path });
               }}
@@ -348,10 +371,6 @@ const CreateFormBuilder = () => {
             <Fragment>
               <Box mb={2}>
                 <Grid container spacing={1}>
-                  {/* <Grid item xs={2}>
-                    <Typography variant="caption">Resource</Typography>
-                    <Typography variant="body1">{resource}</Typography>
-                  </Grid> */}
                   <Grid item xs={3}>
                     <TextField
                       variant="outlined"
@@ -388,7 +407,14 @@ const CreateFormBuilder = () => {
                       autoSelect
                       options={sectionNameList}
                       getOptionLabel={(option) => option}
-                      renderInput={(params) => <TextField {...params} label="Section Name" variant="outlined" margin="dense" fullWidth />}
+                      renderInput={(params) => <TextField
+                        {...params}
+                        label="Section Name"
+                        variant="outlined"
+                        required
+                        margin="dense"
+                        fullWidth />
+                      }
                       value={sectionName}
                       onChange={(e, value) => {
                         setsectionName(value);
@@ -397,7 +423,7 @@ const CreateFormBuilder = () => {
                   </Grid>
                   <Grid item xs={3} container justifyContent="flex-end">
                     <Box>
-                      {formBuilderPermissions.isUpdate && (
+                      {permissions?.formBuilder?.isUpdate && (
                         <Button
                           disabled={isUpdating}
                           color="primary"
@@ -418,7 +444,7 @@ const CreateFormBuilder = () => {
                         size="small"
                         style={isMobile && !isTablet ? { color: 'var(--error)' } : {}}
                         onClick={() => {
-                          if (!isEqual(orisection, section) && formBuilderPermissions.isUpdate) {
+                          if (!isEqual(orisection, section) && permissions?.formBuilder?.isUpdate) {
                             setShowConfirmDialog(true);
                           } else {
                             history.push({ pathname: routes.formBuilder.path });
