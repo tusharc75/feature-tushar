@@ -64,7 +64,6 @@ export default function AccountHierarchy({
         };
         return res;
       })
-      console.log('rows', rows);
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
     }
   }, [data]);

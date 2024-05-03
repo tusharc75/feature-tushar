@@ -1870,16 +1870,16 @@ export const prepareDataForGrid = (data, user = {}) => {
     finalObject['isAllowedToUpdate'] = [...(data?.collaborator ?? []), data?.owner ?? {}].some((obj) => obj.optionValue === user['user']?._id);
   }
 
-  if (!isEmpty(data?.createdBy)) {
-    finalObject['createdBy'] = data.createdBy?.user?.concatedName || data.createdBy?.user?.firstName + ' ' + data.createdBy?.user?.lastName;
+  if (data?.createdBy) {
+    finalObject['createdBy'] = data.createdBy?.user?.concatedName;
     finalObject['createdByDate'] = data.createdBy?.date;
     finalObject['createdById'] = data.createdBy?.user?._id;
     if (!finalObject['isAllowedToUpdate']) {
       finalObject['isAllowedToUpdate'] = data.createdBy?.user?._id === user['user']?._id;
     }
   }
-  if (!isEmpty(data?.updatedBy)) {
-    finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName || data?.updatedBy?.user?.firstName + ' ' + data?.updatedBy?.user?.lastName;
+  if (data?.updatedBy) {
+    finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName;
     finalObject['updatedByDate'] = data?.updatedBy?.date;
   }
   if (data?.completedBy) {
