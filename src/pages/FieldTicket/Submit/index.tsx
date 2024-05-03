@@ -108,6 +108,29 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
     setColumns(column);
   };
 
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
+              : _subRow.type === MATERIAL_TYPE.manualEntry ? _subRow?.detail || ''
+                : '';
+      _subRow.description = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || ''
+        : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
+            : _subRow.description || '';
+      _subRow.competencyType = `${_subRow?.serviceDetail?.competencyType?.optionLabel || ''}`;
+      _subRow.qty = _subRow.qty * parent.qty;
+      _subRow.isValid = _subRow['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
+      _subRow.canDelete = _subRow.canDelete ?? true;
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    return subRows;
+  };
+
   const fetchGridData = async () => {
     dispatch({ type: 'loading', loading: true });
 
@@ -116,13 +139,13 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
 
     const material = [...materialResponse?.data?.data?.material];
     const costs = costResponse?.data?.data || [];
+    const materialRows = material?.filter((e) => !e.parentId);
 
-    material?.forEach((parent, i) => {
+    materialRows?.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent?.productDetail?.productName || parent?.serviceDetail?.serviceName || parent?.serializedAssetDetail?.assetNumber || parent?.packageDetail?.packageName || '';
       parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || parent?.packageDetail?.packageDescription || '';
-      parent.qty = parent.qty;
-      parent.type = parent.type;
+      parent.subRows = generateNestedData(material, parent);
     });
     costs?.forEach((ele, i) => {
       ele.index = i + 1 + material?.length;
@@ -130,7 +153,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
       ele.description = ele.description || '';
       ele.type = MATERIAL_TYPE.manualEntry;
     });
-    dispatch({ type: 'initialize', data: [...material, ...costs], count: [...material, ...costs]?.length });
+    dispatch({ type: 'initialize', data: [...materialRows, ...costs], count: [...materialRows, ...costs]?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -156,7 +179,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
 
   const previewDownloadProps = {
     fileName: `${routes.fieldTicket.title}-${fieldTicketData?.fieldTicketNumber}`,
-    hideDetailButton: true,
+    // hideDetailButton: true,
     resource: sidebarResource.fieldTicket,
     referenceId: fieldTicketData?._id,
     columns: columns,
@@ -228,6 +251,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
             hideAction={true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
+            expander={true}
           />
         </Box>
       ) : (

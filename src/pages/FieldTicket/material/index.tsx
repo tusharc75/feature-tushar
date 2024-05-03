@@ -252,7 +252,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       }
     }
 
-    dispatch({ type: 'initialize', data: data, count: data?.length });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -771,6 +771,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchMaterial}
+            expander={true}
           />
         </Box>
       ) : (
