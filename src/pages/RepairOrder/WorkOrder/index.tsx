@@ -1291,7 +1291,12 @@ const WorkOrder = ({
                     return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork, parentId: d.workOrder._id };
                   }) || []
               }
-              title={'Arrange Services'}
+              title={`Arrange Services (${
+                selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset
+                  && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])?.map((d) => {
+                    return d.serializedAssetDetail.assetNumber;
+                  })[0]
+              })`}
               handleClose={() => setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 })}
               handleSubmit={(data) => handleArrangeUpdate(data, arrangeView.workOrderIds[arrangeView.currentIndex])}
               loading={isSubmitting}
