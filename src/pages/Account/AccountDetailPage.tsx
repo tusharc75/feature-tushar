@@ -297,21 +297,21 @@ export default function AccountDetailPage(props) {
       let accounts = [
         ...data.parentHierarchy,
         {
-          _id: data._id,
-          accountName: data.accountName,
-          typeOfAccount: data.typeOfAccount,
-          industry: data.industry,
-          typeOfBusiness: data.typeOfBusiness,
-          phone: data.phone,
-
+          // _id: data._id,
+          // accountName: data.accountName,
+          // typeOfAccount: data.typeOfAccount,
+          // industry: data.industry,
+          // typeOfBusiness: data.typeOfBusiness,
+          // phone: data.phone,
+          ...data,
           type: 'child',
           current: true,
-          parentAccount: data.parentAccount
-            ? {
-                _id: data.parentAccount.optionValue,
-                accountName: data.parentAccount.optionLabel
-              }
-            : null,
+          // parentAccount: data.parentAccount
+          //   ? {
+          //       _id: data.parentAccount.optionValue,
+          //       accountName: data.parentAccount.optionLabel
+          //     }
+          //   : null,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }
       ];
@@ -320,24 +320,25 @@ export default function AccountDetailPage(props) {
         if (isObjectEmpty(account)) return true;
 
         const updatedAccount = {
-          _id: account._id,
-          accountName: account.accountName,
-          typeOfAccount: account.typeOfAccount,
-          industry: account.industry,
-          parentId: null,
-          typeOfBusiness: account.typeOfBusiness,
-          phone: account.phone,
+          // _id: account._id,
+          // accountName: account.accountName,
+          // typeOfAccount: account.typeOfAccount,
+          // industry: account.industry,
+          // parentId: null,
+          // typeOfBusiness: account.typeOfBusiness,
+          // phone: account.phone,
+          ...account,
           type: 'child',
-          current: account.current,
+          // current: account.current,
           canEdit: account?.canEdit ?? [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         };
 
-        if (account.parentAccount) {
-          updatedAccount['parentAccountText'] = account.parentAccount.accountName;
-          updatedAccount['parentId'] = account.parentAccount._id;
-        } else {
-          updatedAccount['type'] = 'parent';
-        }
+        // if (account.parentAccount) {
+        //   updatedAccount['parentAccountText'] = account.parentAccount.accountName;
+        //   updatedAccount['parentId'] = account.parentAccount._id;
+        // } else {
+        //   updatedAccount['type'] = 'parent';
+        // }
         newData.push(updatedAccount);
       });
 
@@ -345,12 +346,13 @@ export default function AccountDetailPage(props) {
     } else {
       setAccountHierarchyData([
         {
-          _id: data._id,
-          accountName: data.accountName,
-          typeOfAccount: data.typeOfAccount,
-          industry: data.industry,
-          typeOfBusiness: data.typeOfBusiness,
-          phone: data.phone,
+          // _id: data._id,
+          // accountName: data.accountName,
+          // typeOfAccount: data.typeOfAccount,
+          // industry: data.industry,
+          // typeOfBusiness: data.typeOfBusiness,
+          // phone: data.phone,
+          ...data,
           current: true,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }

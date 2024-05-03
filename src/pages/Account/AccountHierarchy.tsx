@@ -11,7 +11,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import axiosInstance from 'src/axios/axiosInstance';
-import { sidebarResource } from 'src/constants/helpers';
+import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from 'src/StateProvider/actionTypes';
 import routes from 'src/components/Helpers/Routes';
@@ -54,22 +54,30 @@ export default function AccountHierarchy({
 
   useEffect(() => {
     if (data) {
-      let rows = data.filter((e) => e.parentId === null);
-      rows.forEach((parent, i) => {
-        parent.index = i + 1;
-        parent.hideSelection = true;
-        parent.subRows = generateNestedData(data, parent);
-      });
+      let rows = data.filter((e) => !e?.parentAccount?.optionValue);
+      rows = rows?.map((parent, i) => {
+        let finalObject = prepareDataForGrid(parent, user);
+        let res = {
+          ...finalObject,
+          index: `${i + 1}`,
+          subRows: generateNestedData(data, parent)
+        };
+        return res;
+      })
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
     }
   }, [data]);
 
   const generateNestedData = (data, parent) => {
-    const subRows: any = data.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, index) => {
-      _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.hideSelection = true;
-      _subRow.subRows = generateNestedData(data, _subRow);
+    let subRows: any = data.filter((e) => e?.parentAccount?.optionValue === parent._id);
+    subRows = subRows?.map((subRow, i) => {
+      let finalObject = prepareDataForGrid(subRow, user);
+      let res = {
+        ...finalObject,
+        index: parent.index + '.' + `${i + 1}`,
+        subRows: generateNestedData(data, subRow)
+      };
+      return res;
     });
     return subRows;
   };
