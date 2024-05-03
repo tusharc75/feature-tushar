@@ -4,6 +4,8 @@ import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { TColType } from './TableComponents/TableHelperComponents';
 import xlsx from 'xlsx-js-style';
+import { FilterModel } from './types';
+import { snakeCase } from 'lodash';
 
 export const childrenProperty = 'subRows';
 
@@ -466,4 +468,17 @@ export const createFilterModel = (formValues, coloums) => {
   }
 
   return Object.fromEntries(filterModel);
+};
+
+export const filtermodelToFormValue = (filtermodel: FilterModel) => {
+  const formValues = {};
+  for (const [key, value] of Object.entries(filtermodel)) {
+    if (value.filter['from'] || value.filter['to']) {
+      formValues[`from_${snakeCase(key)}`] = new Date(value.filter['from']);
+      formValues[`to_${snakeCase(key)}`] = new Date(value.filter['to']);
+    } else if (value.filter) {
+      formValues[key] = value.filter;
+    }
+  }
+  return formValues;
 };

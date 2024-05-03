@@ -59,7 +59,7 @@ const GridHeader = ({
   hideExportTable = false
 }: GridHeaderProps) => {
   const toastConfig = useContext(CustomToastContext);
-  const { selectedRecords, loading, filters: customFilters, dataRows, page }: TInitialState = state;
+  const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
   const isMobileView = useMediaQuery('(max-width:768px)');
 
   const [selectedFilter, setSelectedFilter] = useState(null);
