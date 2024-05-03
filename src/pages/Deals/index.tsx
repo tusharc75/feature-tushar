@@ -17,37 +17,42 @@ import routes from './../../components/Helpers/Routes';
 import WarningFilter from 'src/components/WarningFilter';
 import axios, { CancelTokenSource } from 'axios';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import InfoIcon from '@material-ui/icons/Info';
 
 const getWarningList = (row?: any) => {
   const icon = <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />;
   const list = [
     {
       warningFilter: 1,
-      icon,
-      title: 'Deal Expired',
-      label: 'Deal Expired',
-      isVisible: ['Expired'].includes(row?.original?.contractStatus)
+      icon: <InfoIcon style={{ fontSize: '16px' }} fontSize="small" color="primary" />,
+      title: 'Contract Expired',
+      label: 'Contract Expired',
+      isVisible: ['Expired'].includes(row?.original?.contractStatus),
+      color: ''
     },
     {
       warningFilter: 2,
       icon,
-      title: 'Unit is assigned to multiple deals',
-      label: 'Unit is assigned to multiple deals',
-      isVisible: row?.original?.unitInOtherDeal
+      title: 'Unit is assigned to multiple active contracts',
+      label: 'Unit is assigned to multiple active contracts',
+      isVisible: row?.original?.unitInOtherDeal,
+      color: COLOUR_MASTER.lostAssets.background
     },
     {
       warningFilter: 3,
-      icon,
-      title: 'Contract Start Date has not set',
-      label: 'Contract Start Date has not set',
-      isVisible: row?.original?.dealstage === DEAL_STAGE.contractSigned && !row?.original?.start_set_date
+      icon: <WarningIcon style={{ fontSize: '16px' }} fontSize="small" />,
+      title: 'Pending Delivery',
+      label: 'Pending Delivery',
+      isVisible: row?.original?.dealstage === DEAL_STAGE.contractSigned && !row?.original?.start_set_date,
+      color: COLOUR_MASTER.replaceAssetColor.background
     },
     {
       warningFilter: 4,
       icon,
       title: 'Contract Start Date has set but Contract not Signed',
       label: 'Contract Start Date has set but Contract not Signed',
-      isVisible: row?.original?.dealstage === DEAL_STAGE.proposalSent && row?.original?.start_set_date
+      isVisible: row?.original?.dealstage === DEAL_STAGE.proposalSent && row?.original?.start_set_date,
+      color: COLOUR_MASTER.lostAssets.background
     },
     {
       warningFilter: 5,
@@ -55,7 +60,8 @@ const getWarningList = (row?: any) => {
       title: 'Quote is expired but Unit is still assigned',
       label: 'Quote is expired but Unit is still assigned',
       isVisible: row?.original?.dealstage === DEAL_STAGE.proposalSent && row?.original?.unit !== '' &&
-        new Date(row?.original?.quote_expiration_date)?.getTime() <= new Date()?.getTime()
+        new Date(row?.original?.quote_expiration_date)?.getTime() <= new Date()?.getTime(),
+      color: COLOUR_MASTER.lostAssets.background
     }
   ];
   return list;
@@ -107,11 +113,7 @@ const Deals = () => {
             o.cell = ({ row }) => {
               const warnings = getVisibleWarnings(row);
               return (
-                <div
-                  style={{
-                    backgroundColor: warnings.length > 0 ? COLOUR_MASTER.lostAssets.background : ''
-                  }}
-                >
+                <div style={{ backgroundColor: warnings?.find((e) => e.color !== '')?.color || '' }}   >
                   <Link className="link text-truncate" title={row?.original?.dealname} to={`${routes.dealDetail.path}/${row?.original?._id}`}>
                     {row?.original?.dealname}
                   </Link>
