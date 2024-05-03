@@ -67,13 +67,13 @@ const GridHeader = ({
   const [currentFomValue, setCurrentFomValue] = useState({});
 
   useEffect(() => {
-    if (customFilters) {
+    if (customFilters && !selectedFilter) {
       const newformValues = filtermodelToFormValue(customFilters);
       if (newformValues) {
         setCurrentFomValue(newformValues);
       }
     }
-  }, [customFilters]);
+  }, [customFilters, selectedFilter]);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
