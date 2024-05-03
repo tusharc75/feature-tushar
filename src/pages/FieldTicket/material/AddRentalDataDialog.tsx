@@ -4,7 +4,7 @@ import { camelCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { MATERIAL_TYPE, rentalManagement } from 'src/constants/helpers';
+import { MATERIAL_TYPE, RENTAL_INTERNAL_ASSET_STATUS, rentalManagement } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -86,6 +86,8 @@ const AddRentalDataDialog = ({
                   }
                   else if (row.original['type'] === MATERIAL_TYPE.serializedAsset) {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else if (row.original['type'] === MATERIAL_TYPE.package) {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
                 }}
               >
@@ -116,7 +118,8 @@ const AddRentalDataDialog = ({
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}`);
     data = response?.data?.data;
     if (type === MATERIAL_TYPE.product) {
-      rows = data?.material?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.productDetail?.serializedProduct);
+      rows = data?.material?.filter((e) => e?.status && e?.status !== RENTAL_INTERNAL_ASSET_STATUS.reserved &&
+        e.type === MATERIAL_TYPE.product && !e?.productDetail?.serializedProduct && !ids?.some((ele) => ele === e.materialId));
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.type = MATERIAL_TYPE.product;
@@ -124,10 +127,9 @@ const AddRentalDataDialog = ({
         parent.description = parent?.productDetail?.productDescription;
         parent.qtyDisplay = parent.qty;
       });
-    }
-    else {
+    } else if (type === MATERIAL_TYPE.serializedAsset) {
       let inventoryData = data?.inventory || [];
-      inventoryData = inventoryData?.filter((e)=>!ids?.some((ele)=> ele===e?.inventoryDetail?._id))
+      inventoryData = inventoryData?.filter((e) => e?.status !== RENTAL_INTERNAL_ASSET_STATUS.reserved && !ids?.some((ele) => ele === e?.inventoryDetail?._id))
       inventoryData.forEach((parent, i) => {
         const product = data?.material?.find((e) => e._id === parent._id);
         const obj: any = { ...product }
@@ -141,6 +143,15 @@ const AddRentalDataDialog = ({
         obj.materialId = parent?.inventoryDetail?._id;
         obj._id = parent?.inventoryDetail?._id;
         rows.push(obj);
+      });
+    } else if (type === MATERIAL_TYPE.package) {
+      rows = data?.material?.filter((e) => e.type === MATERIAL_TYPE.package && !ids?.some((ele) => ele === e.materialId));
+      rows.forEach((parent, i) => {
+        parent.index = i + 1;
+        parent.type = MATERIAL_TYPE.package;
+        parent.detail = parent?.packageDetail?.packageName;
+        parent.description = parent?.packageDetail?.packageDescription;
+        parent.qtyDisplay = parent.qty;
       });
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -160,7 +171,7 @@ const AddRentalDataDialog = ({
       onClose={onClose}
       aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader
-        title={type === MATERIAL_TYPE.product ? `Add Rental Consumables` : `Add Rental Assets`}
+        title={type === MATERIAL_TYPE.product ? `Add Rental Consumables` : type === MATERIAL_TYPE.package ? `Add Rental Packages` : `Add Rental Assets`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={onClose} />
