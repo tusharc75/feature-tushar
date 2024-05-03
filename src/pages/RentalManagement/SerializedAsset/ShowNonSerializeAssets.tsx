@@ -52,7 +52,7 @@ const ShowNonSerializeAssets = ({ data, onClose, title = `Non-${routes.serialize
               </TableRow>
             </TableHead>
             <TableBody>
-              {data?.nonSerializeAsset?.map((element, index) => (
+              {data?.data?.map((element, index) => (
                 <TableRow key={data.id}>
                   <TableCell component="th" scope="row">
                     {index + 1}

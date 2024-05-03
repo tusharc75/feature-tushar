@@ -117,7 +117,7 @@ const ReceivingTicket = ({
   const [showRepairOrderDialog, setShowRepairOrderDialog] = useState(false);
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
-  const [showSerialNumber, setShowSerialNumber] = useState({ open: false, data: {}, type: null });
+  const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [invoiceData, setInvoiceData] = useState(null);
   const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, loading: false });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
@@ -687,19 +687,19 @@ const ReceivingTicket = ({
             {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
               (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
               <HtmlTooltip
-                title={row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `${routes.serializedAsset.title}`}
+                title={row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `Serial Numbers`}
               >
                 <IconButton
                   size="small"
                   onClick={() => {
-                    setShowSerialNumber({
+                    setShowInfo({
                       open: true,
                       data: {
                         productName: row?.original?.productName,
-                        nonSerializeAsset:
+                        data:
                           row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
                       },
-                      type: row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `${routes.serializedAsset.title}`
+                      type: row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `Serial Numbers`
                     });
                   }}
                 >
@@ -1882,8 +1882,8 @@ const ReceivingTicket = ({
           }}
         />
       )}
-      {showSerialNumber.open && (
-        <ShowNonSerializeAssets data={showSerialNumber.data} onClose={() => setShowSerialNumber({ open: false, data: {}, type: null })} title={showSerialNumber?.type} />
+      {showInfo.open && (
+        <ShowNonSerializeAssets data={showInfo.data} onClose={() => setShowInfo({ open: false, data: {}, type: null })} title={showInfo?.type} />
       )}
       {showConformationConsumeMultiple && (
         <ConfirmationDialog
