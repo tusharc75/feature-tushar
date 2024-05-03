@@ -205,6 +205,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
             : _subRow.description || '';
       _subRow.competencyType = `${_subRow?.serviceDetail?.competencyType?.optionLabel || ''}`;
+      _subRow.qty = _subRow.qty * parent.qty;
       _subRow.isValid = _subRow['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
       _subRow.canDelete = _subRow.canDelete ?? true;
       _subRow.subRows = generateNestedData(material, _subRow);
