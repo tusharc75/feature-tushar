@@ -85,8 +85,6 @@ const Report = () => {
     const fetchGridColumns = async () => {
         try {
             setLoadingColumns(true);
-
-
             let columns = [];
             let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${type}/column`);
             let newColumns = generateColumns(type, columnFields);
@@ -642,7 +640,7 @@ const Report = () => {
                     <CustomBreadCrumbs
                         routes={[
                             { title: 'Reports', path: '/reports' },
-                            { title: resourceStartCase, path: '' }
+                            { title: reportConfig?.title }
                         ]}
                     />
                     {showGrid && (

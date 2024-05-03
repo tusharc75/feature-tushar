@@ -83,6 +83,8 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
                       window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                     } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                       window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.package) {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                     }
                   }}
                 >
@@ -117,8 +119,8 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
 
     material?.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent?.productDetail?.productName || parent?.serviceDetail?.serviceName || parent?.serializedAssetDetail?.assetNumber || '';
-      parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || '';
+      parent.detail = parent?.productDetail?.productName || parent?.serviceDetail?.serviceName || parent?.serializedAssetDetail?.assetNumber || parent?.packageDetail?.packageName || '';
+      parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || parent?.packageDetail?.packageDescription || '';
       parent.qty = parent.qty;
       parent.type = parent.type;
     });
