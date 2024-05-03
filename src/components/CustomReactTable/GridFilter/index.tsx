@@ -46,7 +46,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
       }
     }
     if (selectedFilter) {
-      setFormValues(selectedFilter.filterValue);
+      setFormValues(selectedFilter?.filterValue || {});
     } else {
       setFormValues(currentFomValue || {});
     }
