@@ -19,7 +19,7 @@ import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import FormTypes from '../../Helpers/FormTypes';
-import { createFilterModel, fetchFieldOptions, filtermodelToFormValue } from '../utils';
+import { createFilterModel, fetchFieldOptions } from '../utils';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -34,17 +34,6 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
 
   const [statusTimeFrame, setStatusTimeFrame] = useState<any>({});
   const [betweenDate, setBetweenDate] = useState(null);
-
-  useEffect(() => {
-    if (customFilters && Object.keys(formValues).length === 0) {
-      const newformValues = filtermodelToFormValue(customFilters);
-      if (newformValues) {
-        setFormValues(newformValues);
-      }
-    }
-  }, [customFilters, formValues]);
-
-  console.log(formValues);
 
   useEffect(() => {
     fetchAllColumns();

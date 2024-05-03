@@ -13,7 +13,7 @@ import { sidebarResource } from 'src/constants/helpers';
 
 import { Table } from '@tanstack/react-table';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
-import { createFilterModel, fetchFieldOptions } from '../utils';
+import { createFilterModel, fetchFieldOptions, filtermodelToFormValue } from '../utils';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 
@@ -65,6 +65,15 @@ const GridHeader = ({
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentFomValue, setCurrentFomValue] = useState({});
+
+  useEffect(() => {
+    if (customFilters) {
+      const newformValues = filtermodelToFormValue(customFilters);
+      if (newformValues) {
+        setCurrentFomValue(newformValues);
+      }
+    }
+  }, [customFilters]);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
