@@ -2509,6 +2509,13 @@ export const REPORT_LIST = [
     defaultColumn: true
   },
   {
+    title: 'Weekly/Monthly Volume Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'historicalReport',
+    defaultColumn: true,
+  },
+  {
     title: 'Unit Downtime Report',
     permission: 'iotChart',
     key: 'standardReport',
