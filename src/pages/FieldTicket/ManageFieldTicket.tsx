@@ -55,7 +55,7 @@ export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
         obj[field.fieldName] = option;
       }
     } else if (field.type === 'date') {
-      obj[field.fieldName] = moment(dataObj[field.fieldName]);
+      obj[field.fieldName] = moment(dataObj[field.fieldName]).format("YYYY-MM-DDTHH:mm:ss.SSSZ");;
     } else {
       obj[field.fieldName] = dataObj[field.fieldName];
     }
