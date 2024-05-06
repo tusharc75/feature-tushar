@@ -269,8 +269,8 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         data['deliveryToAddress'] = subleaseData?.toWarehouse?.optionValue;
       } else {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-        data['pickupFrom'] = subleaseData?.toWarehouse?.optionValue;
-        data['pickupFromAddress'] = subleaseData?.toWarehouse?.optionValue;
+        data['pickupFrom'] = selectedRecords[0]?.warehouse?.optionValue;
+        data['pickupFromAddress'] = selectedRecords[0]?.warehouse?.optionValue;
         data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
         data['deliveryTo'] = subleaseData?.fromWarehouse?.optionValue;
         data['deliveryToAddress'] = subleaseData?.fromWarehouse?.optionValue;
@@ -318,9 +318,12 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
       else if (action === subleaseActions.createReceivingTicket) {
         if (e.hasOwnProperty('ReceivingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyCreated });
-        }
-        else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
+        } else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingStatus });
+        } else if (!checkUniqueWarehouse()) {
+          errorMessages.push({ index: e.index, message: subleaseMessage.sameWarehouse });
+        } else if (e?.warehouse?.optionValue === subleaseData?.fromWarehouse?.optionValue) {
+          errorMessages.push({ index: e.index, message: subleaseMessage.pickupDeliveryDifferent });
         }
       }
       else if (action === subleaseActions.deliveredToWarehouse) {
@@ -344,6 +347,10 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
     }
     return false;
   };
+
+  const checkUniqueWarehouse = (): Boolean => {
+    return new Set(selectedRecords.map((e) => e?.warehouse?.optionValue))?.size === 1;
+  }
 
   const actionButtonMenuItems = () => {
     return (

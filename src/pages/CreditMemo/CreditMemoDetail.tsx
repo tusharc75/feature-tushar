@@ -5,7 +5,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -122,7 +122,7 @@ const creditMemoDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
         </CustomTabs>
-        {tabValue === 0 && (
+        <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -132,7 +132,7 @@ const creditMemoDetail = () => {
               <DetailsPage data={creditMemoData} fields={fields} />
             )}
           </Box>
-        )}
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

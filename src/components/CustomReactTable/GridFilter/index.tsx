@@ -45,7 +45,11 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
         }
       }
     }
-    setFormValues(currentFomValue || {});
+    if (selectedFilter) {
+      setFormValues(selectedFilter?.filterValue || {});
+    } else {
+      setFormValues(currentFomValue || {});
+    }
     setSelectedUserFilter(selectedFilter);
   }, []);
 

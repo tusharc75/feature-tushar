@@ -17,12 +17,15 @@ const ItemTypes = {
   CARD: 'card'
 };
 
-const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
+const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast = true }) => {
+
   const [valid, setValid] = React.useState(false);
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
 
   const [preRows, setPreRows] = React.useState([]);
   const [postRows, setPostRows] = React.useState([]);
+
+  const buttonText = isLast ? 'Save' : 'Save and Next';
 
   useEffect(() => {
     setPreRows(data?.filter((e) => e.preWork)?.sort((a, b) => a.order - b.order));
@@ -168,7 +171,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
           }}
           disabled={loading || !valid}
         >
-          Save
+          {buttonText}
         </CustomButton>
       </CustomDialogFooter>
     </Dialog>

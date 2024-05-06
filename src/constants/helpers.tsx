@@ -55,7 +55,7 @@ export const rentalManagementSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
   { name: 'Add Services', title: 'Services', icon: 'add' },
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
-  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
+  { name: 'Serialized Asset', title: 'Assign', icon: 'serializedAssets' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
   { name: 'On Field', title: 'On Field', icon: 'onField' },
   { name: 'Receiving Ticket', title: 'Receiving', icon: 'ticket' },
@@ -972,6 +972,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'decimal') {
       obj[key.fieldName] = value && value !== '' ? parseFloat(value) : 0;
     } else if (key.type === 'lookUpDisplay') {
+    } else if (key.type === 'counter') {
+      obj[key.fieldName] = [];
     } else {
       obj[key.fieldName] = value;
     }
@@ -2505,6 +2507,13 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'dayWiseVolumeReport',
     defaultColumn: true
+  },
+  {
+    title: 'Weekly/Monthly Volume Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'historicalReport',
+    defaultColumn: true,
   },
   {
     title: 'Unit Downtime Report',

@@ -1210,6 +1210,9 @@ const routes = {
     title: storedRoutes && storedRoutes.resourceDoaRequest && storedRoutes.resourceDoaRequest.title ? storedRoutes.resourceDoaRequest?.title : sidebarResource.resourceDoaRequest,
     path: '/resource-doa-request'
   },
+  serialNumber: {
+    path: '/product-inventory/serial-number'
+  },
 };
 
 export default routes;

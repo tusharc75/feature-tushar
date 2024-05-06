@@ -22,11 +22,11 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { checkSuperAdminAccess, displayCardDate, formatAmountWithCurrency, projectSales, sidebarResource } from '../../constants/helpers';
+import Step from '../DynamicForm/Step';
 import AssignDataDialog from './AssignDataDialog';
 import CreateProjectSales from './CreateProjectSales';
 import CustomerAccounts from './CustomerAccounts';
 import TeamUsers from './TeamUsers';
-import Step from '../DynamicForm/Step';
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -415,7 +415,6 @@ const ProjectSalesDetails = () => {
                 </Box>
               </Box>
             </TabPanel>
-
             <TabPanel value={currentTabIndex} index={3}>
               <Box>
                 <CustomerAccounts

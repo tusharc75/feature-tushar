@@ -33,7 +33,6 @@ import { capitalize, map, orderBy, uniq } from 'lodash';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { flattenArray } from 'src/constants/columns';
 import EditIcon from '@material-ui/icons/Edit';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
@@ -53,7 +52,8 @@ const WorkOrder = ({
   allowedToEdit,
   isPostWorkService,
   setCurrentStep,
-  createNewVersionQuote
+  createNewVersionQuote,
+  resourcePolicy
 }) => {
   const renderedFrom = 'repair_order_workorder';
   const toastConfig = useContext(CustomToastContext);
@@ -74,7 +74,7 @@ const WorkOrder = ({
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
-  const [arrangeView, setArrangeView] = useState(false);
+  const [arrangeView, setArrangeView] = useState({ open: false, workOrderIds: [], currentIndex: 0 });
   const [isUpdating, setUpdating] = useState(false);
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
   const [allAssignedWorkStations, setAllAssignedWorkStations] = useState([]);
@@ -128,7 +128,7 @@ const WorkOrder = ({
   }, [selectedRecords]);
 
   const fetchFields = async () => {
-    var data =  await fetch_child_resource_fields(CHILD_RESOURCE.workOrderService, repairOrderData?.currency, allowedToEdit);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderService, repairOrderData?.currency, allowedToEdit);
     const newColumns = generateColumns(renderedFrom, data, null, false, repairOrderData?.currency || 'USD');
     let coloum: any = [
       {
@@ -747,22 +747,28 @@ const WorkOrder = ({
   };
 
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
+    setSubmitting(true);
     rows?.forEach((e: any) => {
       delete e.name;
       delete e.preWork;
     });
-    axiosInstance()
-      .put(`${workOrder.api}/service/${workOrderId}/order`, { data: rows || [] })
+    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/order`, { data: rows || [] })
       .then(({ data }) => {
-        fetchData();
-        setArrangeView(false);
+        if (arrangeView.currentIndex + 1 < arrangeView.workOrderIds.length) {
+          setArrangeView((prev) => ({ ...prev, currentIndex: arrangeView.currentIndex + 1 }));
+        } else {
+          setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 });
+          fetchData();
+        }
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
           severity: 'success'
         });
+        setSubmitting(false);
       })
       .catch((err) => {
+        setSubmitting(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -965,6 +971,7 @@ const WorkOrder = ({
   const actionButtonMenuItems = () => {
     return (
       <>
+        {!resourcePolicy?.hideAddExistingServices && (
         <MenuItem
           disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
           onClick={() => {
@@ -973,6 +980,8 @@ const WorkOrder = ({
         >
           Add Existing Services
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideAddNewService && (
         <MenuItem
           disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
           onClick={() => {
@@ -981,6 +990,8 @@ const WorkOrder = ({
         >
           Add New Service
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideAssignTechnician && (
         <MenuItem
           disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 && !isWorkOrderCompleted(selectedRecords)
             ? false : true}
@@ -990,7 +1001,8 @@ const WorkOrder = ({
         >
           Assign Technician
         </MenuItem>
-        {allowedToEdit && permissions?.workStations?.isRead && (
+      )}
+        {!resourcePolicy?.hideAssignWorkstation && allowedToEdit && permissions?.workStations?.isRead && (
           <MenuItem
             disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 && !isWorkOrderCompleted(selectedRecords) ? false : true}
             onClick={() => {
@@ -1000,7 +1012,7 @@ const WorkOrder = ({
             Assign Work Station
           </MenuItem>
         )}
-        {!user?.brandPolicy?.workOrderConsumableHide && (
+        {!resourcePolicy?.hideAddConsumables && !user?.brandPolicy?.workOrderConsumableHide && (
           <MenuItem
             disabled={
               selectedRecords?.filter((d) => d?.workOrder && [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
@@ -1025,15 +1037,20 @@ const WorkOrder = ({
             Add Products/Consumables
           </MenuItem>
         )}
+        {!resourcePolicy?.hideArrangeServices && (
         <MenuItem
           onClick={() => {
-            setArrangeView(true);
+            const ids = selectedRecords.filter(s => s.type === MATERIAL_TYPE.service).map(s => s.workOrder._id);
+            const uniqueIds = [...new Set(ids)];
+            setArrangeView({ open: true, workOrderIds: uniqueIds, currentIndex: 0 });
           }}
-          disabled={checkUniqWorkOrder() && selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords)
+          disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords)
             ? false : true}
         >
           Arrange Services
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideAutoCompleteWorkOrder && (
         <MenuItem
           onClick={() => {
             setAutoCompleteData(selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset));
@@ -1050,6 +1067,8 @@ const WorkOrder = ({
         >
           Auto Complete Work Order(s)
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideCompleteSkipRevertService && (
         <MenuItem
           onClick={() => {
             setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
@@ -1058,6 +1077,8 @@ const WorkOrder = ({
         >
           Complete Service
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideCompleteSkipRevertService && (
         <MenuItem
           onClick={() => {
             setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
@@ -1066,6 +1087,8 @@ const WorkOrder = ({
         >
           Skip Service
         </MenuItem>
+      )}
+        {!resourcePolicy?.hideCompleteSkipRevertService && (
         <MenuItem
           disabled={
             selectedRecords?.length && selectedRecords?.some((e) =>
@@ -1079,6 +1102,7 @@ const WorkOrder = ({
         >
           Revert Service
         </MenuItem >
+      )}
         <MenuItem
           onClick={() => {
             setIsBulkEdit(true);
@@ -1259,19 +1283,24 @@ const WorkOrder = ({
             />
           )}
 
-          {arrangeView && (
+          {arrangeView.open && (
             <ArrangeView
               data={
-                selectedRecords
-                  ?.filter((e) => e.type === MATERIAL_TYPE.service)
-                  ?.map((d) => {
-                    return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
+                selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service
+                  && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])?.map((d) => {
+                    return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork, parentId: d.workOrder._id };
                   }) || []
               }
-              title={'Arrange Services'}
-              handleClose={() => setArrangeView(false)}
-              handleSubmit={(data) => handleArrangeUpdate(data, selectedRecords[0]?.workOrder?._id)}
-              loading={false}
+              title={`Arrange Services (${
+                selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset
+                  && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])?.map((d) => {
+                    return d.serializedAssetDetail.assetNumber;
+                  })[0]
+              })`}
+              handleClose={() => setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 })}
+              handleSubmit={(data) => handleArrangeUpdate(data, arrangeView.workOrderIds[arrangeView.currentIndex])}
+              loading={isSubmitting}
+              isLast={arrangeView.currentIndex === arrangeView.workOrderIds.length - 1 ? true : false}
             />
           )}
           {updateDialog.open && (

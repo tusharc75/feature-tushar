@@ -1,32 +1,33 @@
-import { useEffect, useState, useContext, Fragment } from 'react';
-import { Box, Button, Grid, Tooltip, InputAdornment } from '@material-ui/core';
-import { Formik, Form } from 'formik';
+import { Box, Button, Grid, InputAdornment } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
-import axiosInstance from '../../axios/axiosInstance';
-import {
-  getObjKeys,
-  yupSchema,
-  getObjKeysWithValues,
-  budget,
-  setFieldsInAscendingOrder,
-  getUniqueCurrencies,
-} from '../../constants/helpers';
+import InfoIcon from '@material-ui/icons/Info';
+import { Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import moment from 'moment';
+import PropTypes from 'prop-types';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import FormTypes from '../../components/Helpers/FormTypes';
-import CustomButton from '../../components/Helpers/CustomButton';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import PropTypes from 'prop-types';
-import InfoIcon from '@material-ui/icons/Info';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../constants/helpers';
-import { useData } from '../../StateProvider/Provider';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { FaDiceOne } from 'react-icons/fa';
-import moment from 'moment';
-import { isEqual } from 'lodash';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import CustomButton from '../../components/Helpers/CustomButton';
+import FormTypes from '../../components/Helpers/FormTypes';
+import {
+  CustomDialogTransition,
+  budget,
+  getObjKeys,
+  getObjKeysWithValues,
+  getUniqueCurrencies,
+  setFieldsInAscendingOrder,
+  yupSchema
+} from '../../constants/helpers';
 
 const budgetMonths = [
   'januaryBudget',
@@ -124,7 +125,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                 newFields.push(_f.fieldData);
               });
 
-
               let clonedData = { ...data };
 
               if (isClone) {
@@ -142,7 +142,10 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
         } else {
           setInitialData({
             fields: filterData.map((m) => m.fieldData),
-            values: getObjKeys('', filterData.map((m) => m.fieldData))
+            values: getObjKeys(
+              '',
+              filterData.map((m) => m.fieldData)
+            )
           });
         }
       });
@@ -189,7 +192,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
     }
   };
 
-
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
@@ -227,8 +229,8 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                     isClone
                       ? 'Clone'
                       : budgetId
-                        ? `Editing ${initialData.values && initialData.values['name'] ? initialData.values['name'] : ''}`
-                        : 'Create Budget'
+                      ? `Editing ${initialData.values && initialData.values['name'] ? initialData.values['name'] : ''}`
+                      : 'Create Budget'
                   }
                   onClose={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -355,9 +357,9 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                                           </Grid>
                                           {field?.tooltipMessage ? (
                                             <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title={field?.tooltipMessage ?? ''}>
+                                              <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                 <InfoIcon color="disabled" />
-                                              </Tooltip>
+                                              </HtmlTooltip>
                                             </Grid>
                                           ) : null}
                                         </Grid>

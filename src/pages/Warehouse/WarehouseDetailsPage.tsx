@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -159,20 +159,22 @@ const WarehouseDetailsPage = () => {
           {user?.user?.brandPolicy?.warehouseAccessByUser && <CustomTab label={'Users'} value={2} />}
           {resourceData && resourceData?.steps?.length && <CustomTab label={'Associations'} value={3} />}
         </CustomTabs>
-        {tabValue === 0 && (
-          <Box>
-            {loading || !warehouseFields.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={warehouseData} fields={warehouseFields} />
-            )}
-          </Box>
-        )}
-        {tabValue === 1 && <StorageLocation warehouse={id} />}
-        {tabValue === 2 && <Users warehouse={id} />}
-        {tabValue === 3 && (
+        <TabPanel value={tabValue} index={0}>
+          {loading || !warehouseFields.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={warehouseData} fields={warehouseFields} />
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <StorageLocation warehouse={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Users warehouse={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
           <Step
             resourceData={resourceData}
             resourceId={id}
@@ -180,7 +182,7 @@ const WarehouseDetailsPage = () => {
             data={warehouseData}
             allowedToEdit={permissions?.warehouse?.isUpdate}
           />
-        )}
+        </TabPanel>
       </Box>
       {openUpdateDialog && (
         <ManageWarehouse

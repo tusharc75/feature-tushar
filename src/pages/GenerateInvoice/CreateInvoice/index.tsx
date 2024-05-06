@@ -246,7 +246,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
             ? parent?.serviceDetail?.serviceName
             : parent.type === MATERIAL_TYPE.serializedAsset
               ? parent?.serializedAssetDetail?.assetNumber
-              : parent.type === 'manualEntry'
+              : parent.type === MATERIAL_TYPE.manualEntry
                 ? parent?.description
                 : parent.packageDetail?.packageName;
       parent.description =
@@ -258,7 +258,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
               ? parent?.packageDetail?.packageDescription || ''
               : parent.type === MATERIAL_TYPE.serializedAsset
                 ? parent?.description || ''
-                : parent.type === 'manualEntry'
+                : parent.type === MATERIAL_TYPE.manualEntry
                   ? parent?.description || ''
                   : '';
       parent.qtyDisplay = parent.qty;
@@ -460,7 +460,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                   renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                   hideSelection={!progressiveBilling}
-                  expander={resource === sidebarResource.fieldTicket ? false : true}
+                  expander={true}
                   refreshGrid={fetchData}
                   dispatch={dispatch}
                   hideAction={true}

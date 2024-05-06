@@ -118,6 +118,7 @@ const FieldTicketDetail = () => {
   };
 
   const fetchPolicy = async () => {
+    if (isOffline) return;
     try {
       const {
         data: { data }
@@ -172,8 +173,8 @@ const FieldTicketDetail = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const handleChangeStatus = async (status) => {
@@ -275,7 +276,7 @@ const FieldTicketDetail = () => {
             isNextStep={false}
             nextStep={nextStep}
             isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
-            steps={fieldTicketSteps}
+            steps={isOffline ? fieldTicketSteps.filter(s => s.name === 'Add') : fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
@@ -288,10 +289,19 @@ const FieldTicketDetail = () => {
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
                 handleChangeStatus={handleChangeStatus}
+                resourcePolicy={resourceData?.policy}
+                stepFullScreen={stepFullScreen}
+
               />
             )}
             {currentStep === 1 && fieldTicketData && (
-              <Submit stepFullScreen={stepFullScreen} fieldTicketData={fieldTicketData} allowedToEdit={allowedToEdit} fetchData={fetchData} />
+              <Submit
+                stepFullScreen={stepFullScreen}
+                fieldTicketData={fieldTicketData}
+                allowedToEdit={allowedToEdit}
+                fetchData={fetchData}
+                resourcePolicy={resourceData?.policy}
+              />
             )}
           </ContentFullScreen>
         </TabPanel>

@@ -289,6 +289,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       element.uniqueId = selectedService?._id;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.status = 'Assigned';
+      element.warehouse = rentalManagementData?.warehouse?.optionValue;
       element.startDate = rentalManagementData?.estimateStartDate || new Date();
       element.endDate = rentalManagementData?.estimateEndDate || new Date();
       if (allFields?.length) {
@@ -407,8 +408,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           handleClose={() => {
             setTechnicianDialog(false);
           }}
-          defaultCompetency={[]}
-          ids={[]}
+          warehouse={rentalManagementData?.warehouse?.optionValue}
         />
       )}
 

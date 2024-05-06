@@ -20,3 +20,5 @@ export const getLookupOption = async (brandId, resource) => {
     const { data: { data } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=` + resource)
     return data[resource] || [];
 }
+
+export const LOGIC = ['AND', 'OR']

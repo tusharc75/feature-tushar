@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { ACTIVITY_RESOURCE, wellMaster } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -116,18 +116,18 @@ const WellMasterDetailsPage = () => {
           <CustomTab label={'Details'} value={0} />
           {permissions?.wellNumber?.isRead && <CustomTab label={'Well Number'} value={1} />}
         </CustomTabs>
-        {tabValue === 0 && (
-          <Box>
-            {loading || !wellMasterFields.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={wellMasterData} fields={wellMasterFields} />
-            )}
-          </Box>
-        )}
-        {tabValue === 1 && <WellNumber wellName={id} />}
+        <TabPanel value={tabValue} index={0}>
+          {loading || !wellMasterFields.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={wellMasterData} fields={wellMasterFields} />
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <WellNumber wellName={id} />
+        </TabPanel>
       </Box>
       {showManageDialog.open && (
         <ManageWellMaster

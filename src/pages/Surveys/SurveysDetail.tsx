@@ -18,7 +18,7 @@ import FieldDialog from './FieldDialog';
 import ManageSurveys from './ManageSurveys';
 import SurveysData from './SurveysData';
 import { checkSuperAdminAccess, sidebarResource } from 'src/constants/helpers';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const SurveysDetail = () => {
   const { id } = useParams();
@@ -156,18 +156,18 @@ const SurveysDetail = () => {
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
         </CustomTabs>
-        {tabValue === 0 && (
-          <Box>
-            {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={SurveyData} fields={fields} />
-            )}
-          </Box>
-        )}
-        {tabValue === 1 && <SurveysData surveyId={id} />}
+        <TabPanel value={tabValue} index={0}>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={SurveyData} fields={fields} />
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <SurveysData surveyId={id} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

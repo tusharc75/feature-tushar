@@ -8,7 +8,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
@@ -131,7 +131,7 @@ export default function DeviceTemplatesDetails() {
           <CustomTab value={2} label={'Rules'} />
           <CustomTab value={3} label={'Alerts'} />
         </CustomTabs>
-        {tabValue === 0 && (
+        <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -141,10 +141,16 @@ export default function DeviceTemplatesDetails() {
               <DetailsPage data={deviceTemplatesData} fields={fields} />
             )}
           </Box>
-        )}
-        {tabValue === 1 && <IotDataPoints deviceTemplate={id} />}
-        {tabValue === 2 && <Rules deviceTemplate={id} />}
-        {tabValue === 3 && <Alerts deviceTemplate={id} />}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <IotDataPoints deviceTemplate={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Rules deviceTemplate={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <Alerts deviceTemplate={id} />
+        </TabPanel>
       </Box>
       {openUpdateDialog && (
         <ManageDeviceTemplates
