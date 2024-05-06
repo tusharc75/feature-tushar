@@ -321,6 +321,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp, pricingMethod: element.pricingMethod }, element, allFields);
         Object.assign(element, calValues);
       }
+      delete element.materialId
     });
   
     axiosInstance()
