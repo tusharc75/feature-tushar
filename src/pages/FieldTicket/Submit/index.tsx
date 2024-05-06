@@ -18,7 +18,7 @@ import ManageSubmit from './ManageSubmit';
 import ViewLogs from './ViewLogs';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
-const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) => {
+const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, resourcePolicy }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Submit`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -251,7 +251,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
             hideAction={true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            expander={true}
+            expander={resourcePolicy?.showAddPackages ? true : false}
           />
         </Box>
       ) : (
