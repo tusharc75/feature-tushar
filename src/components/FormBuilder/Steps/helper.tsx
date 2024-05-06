@@ -45,5 +45,20 @@ export const resourcePolicy = [
                 type: "checkBox"
             }
         ]
+    },
+    {
+        resource: sidebarResource.fieldTicket,
+        policy: [
+            {
+                fieldName: "showAddPackages",
+                fieldLabel: "Show Add Packages",
+                type: "checkBox"
+            },
+            {
+                fieldName: "showRentalAddMaterial",
+                fieldLabel: "Show Rental Add Material",
+                type: "checkBox"
+            }
+        ]
     }
 ]
