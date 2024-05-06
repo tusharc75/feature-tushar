@@ -1,49 +1,56 @@
-import { useContext, useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
-import { Box, Grid, Button, IconButton, Tooltip } from '@material-ui/core';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import queryString from 'query-string';
-import { deliveryTicket, getObjKeysWithValues, dateTimeFormat, ACTIVITY_RESOURCE, ASSET_STATUS, rentalManagement } from '../../constants/helpers';
-import { useData } from '../../StateProvider/Provider';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import routes from '../../components/Helpers/Routes';
-import axiosInstance from '../../axios/axiosInstance';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ManageDeliveryTicket from './ManageDeliveryTicket';
-import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
-import { serializedAsset, gridLoadingTimeout } from '../../constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
-import SignatureDialog from '../../components/Helpers/SignatureDialog';
-import ViewSignsDialog from './ViewSignsDialog';
+import { Box, Button, Grid, IconButton } from '@material-ui/core';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
-import moment from 'moment';
-import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
-import { FaSignature, FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
 import EditIcon from '@material-ui/icons/Edit';
+import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
+import { camelCase } from 'lodash';
+import moment from 'moment';
+import queryString from 'query-string';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaSignature, FaWpforms } from 'react-icons/fa';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import SignatureDialog from '../../components/Helpers/SignatureDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
 import {
-  prepareDataForGrid,
+  ACTIVITY_RESOURCE,
+  ASSET_STATUS,
+  DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_MAPPED_STATUS,
-  sidebarResource,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
-  DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_FROM_TO_TYPE
+  dateTimeFormat,
+  deliveryTicket,
+  getObjKeysWithValues,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  rentalManagement,
+  serializedAsset,
+  sidebarResource
 } from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
-import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
-import { camelCase } from 'lodash';
-import DeliveryTicketProduct from './DeliveryTicketProduct';
-import DeliveryTicketAdditionalCost from './DeliveryTicketAdditionalCost';
-import ActivityButton from 'src/components/Activity/ActivityButton';
+import { findOne, objectStore } from '../../constants/indexdbhelper';
 import DateDialog from '../RentalManagement/LoadingTicket/DateDialog';
-import PreviewDownload from 'src/components/PreviewDownload';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
+import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
+import DeliveryTicketAdditionalCost from './DeliveryTicketAdditionalCost';
+import DeliveryTicketProduct from './DeliveryTicketProduct';
+import ManageDeliveryTicket from './ManageDeliveryTicket';
+import ViewSignsDialog from './ViewSignsDialog';
+import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
 
 export default function DeliveryTicketDetail(props) {
   const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-1`;
@@ -708,9 +715,9 @@ export default function DeliveryTicketDetail(props) {
                       color="primary"
                       size="small"
                     >
-                      <Tooltip title="Add More Serialized Assets">
+                      <HtmlTooltip title="Add More Serialized Assets">
                         <AddBoxRoundedIcon />
-                      </Tooltip>
+                      </HtmlTooltip>
                     </IconButton>
                   )}
                   {deliveryTicketData?.status === 'New' && (
@@ -722,9 +729,9 @@ export default function DeliveryTicketDetail(props) {
                       color="primary"
                       size="small"
                     >
-                      <Tooltip title="Remove Serialized Assets">
+                      <HtmlTooltip title="Remove Serialized Assets">
                         <RemoveCircleRoundedIcon />
-                      </Tooltip>
+                      </HtmlTooltip>
                     </IconButton>
                   )}
                   <Box mx={1} />

@@ -13,7 +13,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
   Typography,
   makeStyles
 } from '@material-ui/core';
@@ -28,6 +27,7 @@ import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
 import { GeneratePasswordIcon, ResetPasswordIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -671,7 +671,7 @@ const UserDetailsPage = () => {
                               ))
                             ) : userPermissions ? (
                               Object.keys(userPermissions).map((key) => (
-                                <Tooltip
+                                <HtmlTooltip
                                   title={
                                     !hasPermissionToUpdateApprovalProcess
                                       ? `You do not have permission to update ${key === 'doaSetup' ? 'DOA Setup' : startCase(key)}`
@@ -690,7 +690,7 @@ const UserDetailsPage = () => {
                                     }
                                     label={key === 'doaSetup' ? 'DOA Setup' : startCase(key)}
                                   />
-                                </Tooltip>
+                                </HtmlTooltip>
                               ))
                             ) : (
                               <Typography>There are no permissions</Typography>

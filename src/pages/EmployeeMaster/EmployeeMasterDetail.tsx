@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, Tooltip } from '@material-ui/core';
+import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -11,6 +11,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import AssignEntityDialog from 'src/components/AssignRolesDialog/AssignEntityDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
@@ -153,7 +154,7 @@ const EmployeeMasterDetail = () => {
                 </Button>
               ) : (
                 permissions?.employeeMaster?.isUpdate && (
-                  <Tooltip title="Give Portal Access" arrow placement="top">
+                  <HtmlTooltip title="Give Portal Access" arrow placement="top">
                     <Button
                       size="small"
                       variant={'outlined'}
@@ -165,7 +166,7 @@ const EmployeeMasterDetail = () => {
                     >
                       Give Portal Access
                     </Button>
-                  </Tooltip>
+                  </HtmlTooltip>
                 )
               )}
               {permissions?.employeeMaster?.isUpdate && (

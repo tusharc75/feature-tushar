@@ -1,4 +1,4 @@
-import { IconButton, Tooltip } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import PreviewIcon from '@material-ui/icons/Visibility';
@@ -8,9 +8,10 @@ import mimeDb from 'mime-db';
 import { Fragment, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { fileIcons, FileIcon } from 'src/assets/fileIcons';
+import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) => {
   const {
@@ -218,13 +219,13 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                           : 'attachment'}
                       </p>
                       <div className="flex justify-between">
-                        <Tooltip title="Download" placement="top" enterTouchDelay={0}>
+                        <HtmlTooltip title="Download" placement="top" enterTouchDelay={0}>
                           <IconButton size={'small'} onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
                             {<GetAppIcon />}
                           </IconButton>
-                        </Tooltip>
+                        </HtmlTooltip>
                         {_.endsWith(attachment?.url, '.pdf') && (
-                          <Tooltip title="Preview" placement="top" enterTouchDelay={0}>
+                          <HtmlTooltip title="Preview" placement="top" enterTouchDelay={0}>
                             <IconButton
                               size={'small'}
                               onClick={(e) => {
@@ -233,10 +234,10 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             >
                               <PreviewIcon color="primary" />
                             </IconButton>
-                          </Tooltip>
+                          </HtmlTooltip>
                         )}
                         {canEdit && permissions?.attachment?.isDelete ? (
-                          <Tooltip title="Delete" placement="top" enterTouchDelay={0}>
+                          <HtmlTooltip title="Delete" placement="top" enterTouchDelay={0}>
                             <IconButton
                               size={'small'}
                               onClick={() => {
@@ -246,13 +247,13 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             >
                               {<DeleteIcon color="error" />}
                             </IconButton>
-                          </Tooltip>
+                          </HtmlTooltip>
                         ) : (
-                          <Tooltip className="cursor-stop" title={"You don't have permissions to delete attachment"} enterTouchDelay={0}>
+                          <HtmlTooltip className="cursor-stop" title={"You don't have permissions to delete attachment"} enterTouchDelay={0}>
                             <IconButton size={'small'}>
                               <DeleteIcon color="disabled" />
                             </IconButton>
-                          </Tooltip>
+                          </HtmlTooltip>
                         )}
                       </div>
                     </div>
