@@ -27,8 +27,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 let cancelTokenSource = null;
 
 const Report = () => {
-  const history = useHistory();
-  const theme = useTheme();
+
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {

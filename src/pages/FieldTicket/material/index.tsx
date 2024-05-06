@@ -9,6 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -110,6 +111,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                       window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                     } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                       window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.package) {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                     }
                   }}
                 >
@@ -187,6 +190,29 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     setColumns(column);
   };
 
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
+              : _subRow.type === MATERIAL_TYPE.manualEntry ? _subRow?.detail || ''
+                : '';
+      _subRow.description = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || ''
+        : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
+            : _subRow.description || '';
+      _subRow.competencyType = `${_subRow?.serviceDetail?.competencyType?.optionLabel || ''}`;
+      _subRow.qty = _subRow.qty * parent.qty;
+      _subRow.isValid = _subRow['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
+      _subRow.canDelete = _subRow.canDelete ?? true;
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    return subRows;
+  };
+
   const fetchMaterial = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -196,22 +222,27 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       data = data?.filter((d: any) => d?.fieldTicketId === fieldTicketData?._id && (d?.type === MATERIAL_TYPE.service || d?.isRental || !d?.type || d?.type === MATERIAL_TYPE.manualEntry)); //d?.type === MATERIAL_TYPE.manualEntry for offline added material
     } else {
       const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=${MATERIAL_TYPE.service}`);
+      const packageResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=${MATERIAL_TYPE.package}`);
       const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
       let costData = costResponse?.data?.data;
       costData = costData?.map((e: any) => { return { ...e, type: MATERIAL_TYPE.manualEntry } });
-      data = [...response?.data?.data?.material, ...costData];
+      data = [...response?.data?.data?.material, ...packageResponse?.data?.data?.material, ...costData];
     };
-    data.forEach((parent, i) => {
+    let rows = data?.filter((d: any) => !d.parentId);
+    rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName :
         parent.type === MATERIAL_TYPE.serializedAsset ? parent.serializedAssetDetail?.assetNumber :
           parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName :
-            parent.type === MATERIAL_TYPE.manualEntry ? parent.detail || '' : '';
-      parent.description = parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription || '' : parent.description || '';
+            parent.type === MATERIAL_TYPE.package ? parent.packageDetail?.packageName :
+              parent.type === MATERIAL_TYPE.manualEntry ? parent.detail || '' : '';
+      parent.description = parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription || '' :
+        parent.type === MATERIAL_TYPE.package ? parent?.packageDetail?.packageDescription || '' :
+          parent.description || '';
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
-      parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
       parent.canDelete = parent.canDelete ?? true;
+      parent.subRows = generateNestedData(data, parent);
     });
     if (data?.length) {
       if (data.filter((_rows) => _rows.isValid === false).length > 0) {
@@ -221,7 +252,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       }
     }
 
-    dispatch({ type: 'initialize', data: data, count: data?.length });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -248,14 +279,14 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     }
   }, [columns]);
 
-  const handleAdd = async (rows, rentalChildFields: any = []) => {
+  const handleAdd = async (rows: any, type: string) => {
     setIsSubmitting(true);
     if (isOffline) {
       const material = [];
       for (const d of rows) {
         const element: any = {};
         element.materialId = d._id;
-        element.type = MATERIAL_TYPE.service;
+        element.type = type;
         element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
         element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
         element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -296,7 +327,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         const {
           data: { data }
         } = await axiosInstance().get(
-          `${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.service}`
+          `${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${type}`
         );
         if (data?.length) {
           taxCodeData = data[0];
@@ -308,7 +339,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         rows?.forEach((d) => {
           const element: any = {};
           element.materialId = d.materialId;
-          element.type = d.type;
+          element.type = type;
           element.unit = d.unit ? d.unit : '';
           element.pricingMethod = d.pricingMethod ? d.pricingMethod : '';
           element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -332,7 +363,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         rows.forEach((d) => {
           const element: any = {};
           element.materialId = d._id;
-          element.type = MATERIAL_TYPE.service;
+          element.type = type;
           element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
           element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -341,12 +372,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           element.isRental = false;
           const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
           element.estimateJobDuration = 1;
-          if (calValues && calValues['estimateJobDuration']) {
-            element.estimateJobDuration = calValues['estimateJobDuration'];
-          }
-          if (calValues && calValues['finalQty']) {
-            element.finalQty = calValues['finalQty'];
-          }
+          if (calValues && calValues['estimateJobDuration']) element.estimateJobDuration = calValues['estimateJobDuration'];
+          if (calValues && calValues['finalQty']) element.finalQty = calValues['finalQty'];
           if (taxCodeData) {
             element.taxCode = taxCodeData?.optionValue;
             element.taxPercentage = taxCodeData?.taxRate || 0;
@@ -619,7 +646,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       <>
         <MenuItem
           onClick={() => {
-            setServiceDialog({ open: true, type: 'service' });
+            setServiceDialog({ open: true, type: MATERIAL_TYPE.service });
           }}
         >
           Add Existing Service
@@ -631,6 +658,15 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             }}
           >
             Add New Service
+          </MenuItem>
+        )}
+        {permissions?.packages?.isCreate && !isOffline && (
+          <MenuItem
+            onClick={() => {
+              setServiceDialog({ open: true, type: MATERIAL_TYPE.package });
+            }}
+          >
+            Add Existing Package
           </MenuItem>
         )}
         {costFields?.length > 0 && (
@@ -657,6 +693,13 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
               }}
             >
               Add Rental Consumables
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAssignRentalDataDialog({ open: true, type: MATERIAL_TYPE.package });
+              }}
+            >
+              Add Rental Packages
             </MenuItem>
           </>
         )}
@@ -728,6 +771,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchMaterial}
+            expander={true}
           />
         </Box>
       ) : (
@@ -745,7 +789,9 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       </Box>
       {serviceDialog?.open && serviceDialog?.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
-          onSuccess={handleAdd}
+          onSuccess={(rows, type = MATERIAL_TYPE.service) => {
+            handleAdd(rows, type);
+          }}
           handleClose={() => {
             setServiceDialog({ open: false, type: '' });
           }}
@@ -753,6 +799,18 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
           isSubmitting={isSubmitting}
           pricingCondition={fieldTicketData?.pricingCondition?.optionValue || null}
+        />
+      )}
+      {serviceDialog?.open && serviceDialog?.type === MATERIAL_TYPE.package && (
+        <AssignPackageDialog
+          onSuccess={(rows, type = MATERIAL_TYPE.package) => {
+            handleAdd(rows, type);
+          }}
+          handleClose={() => {
+            setServiceDialog({ open: false, type: '' });
+          }}
+          ids={dataRows?.map((row) => row?.materialId)}
+          isSubmitting={isSubmitting}
         />
       )}
       {serviceDialog.open && serviceDialog.type === 'newService' && (
@@ -764,7 +822,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             const row = data?.data;
             row.unitMain = row?.unit;
             row.pricingMethodMain = row?.pricingMethod;
-            handleAdd([row]);
+            handleAdd([row], MATERIAL_TYPE.service);
             setServiceDialog({ open: false, type: '' });
           }}
           isRedirectToDetailPage={false}
@@ -817,11 +875,13 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           onClose={() => {
             setAssignRentalDataDialog({ open: false, type: '' });
           }}
-          onSuccess={handleAdd}
+          onSuccess={(rows) => {
+            handleAdd(rows, assignRentalDataDialog?.type);
+          }}
           rentalId={fieldTicketData?.rentalJob?.optionValue}
           currency={fieldTicketData?.currency}
           isSubmitting={isSubmitting}
-          ids={dataRows?.filter((ele)=> ele.type===MATERIAL_TYPE.serializedAsset)?.map((ele)=> ele.materialId) || []}
+          ids={dataRows?.map((row) => row?.materialId)}
         />
       )}
     </>

@@ -261,7 +261,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     let newMaterial: any = [];
     data?.material?.forEach((d) => {
-      if (d?.type === MATERIAL_TYPE.service && d?.parentId === null && !d?.actualStartDate) {
+      if (d?.type === MATERIAL_TYPE.service && !d?.actualStartDate) {
         d['actualStartDate'] = new Date(d?.estimateStartDate).toISOString();
       } else if (d?.type === MATERIAL_TYPE.package && d?.packageDetail?.packageType === 'Service' && d?.parentId === null && !d?.actualStartDate) {
         d['actualStartDate'] = d?.estimateStartDate;
@@ -660,6 +660,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       delete element?.isAppliedBill;
       if (element.type !== MATERIAL_TYPE.manualEntry) {
         delete element?.description;
+      }
+      if (element.type === MATERIAL_TYPE.service && element?.parentId) {
+        if (!rowsApplied?.find((e) => e._id === element?.parentId)) {
+          element.parentId = null
+        }
       }
     });
 

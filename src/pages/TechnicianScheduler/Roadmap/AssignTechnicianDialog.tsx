@@ -48,8 +48,7 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
       <CustomDialogContent>
         <Box p={2}>
           <Typography variant="body1" color="textPrimary">
-            Do You want to assign {technicianData?.firstName || ''} {technicianData?.lastName || ''} to{' '}
-            {`${selectedServiceOrder[0]?.service?.serviceName} (${selectedServiceOrder[0]?.fieldTicketNumber || selectedServiceOrder[0]?.rentalJobName})`}?{' '}
+            Do You want to assign {`${selectedServiceOrder[0]?.service?.serviceName} (${selectedServiceOrder[0]?.fieldTicketNumber || selectedServiceOrder[0]?.rentalJobName})`}{' '} to {technicianData?.firstName || ''} {technicianData?.lastName || ''}?
           </Typography>
         </Box>
       </CustomDialogContent>
