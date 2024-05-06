@@ -95,7 +95,7 @@ const FieldTicketDetail = () => {
       let data;
       if (isOffline) {
         data = await findOne(objectStore.fieldTicket, id);
-      } else {
+      } else if (/^[0-9a-fA-F]{24}$/.test(id)) {
         const response = await axiosInstance().get(`${routes.fieldTicket.path}/${id}`);
         data = response?.data?.data;
       }

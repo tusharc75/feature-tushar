@@ -32,6 +32,37 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
 
+export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
+  const obj = { ...dataObj };
+  fields.forEach((field) => {
+    if (field.type === 'dropDown' && field.lookup) {
+      let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
+      if (filter.length) {
+        obj[field.fieldName] = {
+          optionLabel: filter[0].optionLabel,
+          optionValue: filter[0].optionValue
+        };
+      }
+    } else if (field.type === 'multiSelect') {
+      if (dataObj[field.fieldName] && dataObj[field.fieldName].length) {
+        let option = [];
+        dataObj[field.fieldName].forEach((e: any) => {
+          option.push({
+            optionLabel: e,
+            optionValue: e
+          });
+        });
+        obj[field.fieldName] = option;
+      }
+    } else if (field.type === 'date') {
+      obj[field.fieldName] = moment(dataObj[field.fieldName]);
+    } else {
+      obj[field.fieldName] = dataObj[field.fieldName];
+    }
+  });
+  return obj;
+};
+
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
     state: { user }
@@ -147,37 +178,6 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  };
-
-  const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
-    const obj = { ...dataObj };
-    fields.forEach((field) => {
-      if (field.type === 'dropDown' && field.lookup) {
-        let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
-        if (filter.length) {
-          obj[field.fieldName] = {
-            optionLabel: filter[0].optionLabel,
-            optionValue: filter[0].optionValue
-          };
-        }
-      } else if (field.type === 'multiSelect') {
-        if (dataObj[field.fieldName] && dataObj[field.fieldName].length) {
-          let option = [];
-          dataObj[field.fieldName].forEach((e: any) => {
-            option.push({
-              optionLabel: e,
-              optionValue: e
-            });
-          });
-          obj[field.fieldName] = option;
-        }
-      } else if (field.type === 'date') {
-        obj[field.fieldName] = moment(dataObj[field.fieldName]).format('YYYY-MM-DD');
-      } else {
-        obj[field.fieldName] = dataObj[field.fieldName];
-      }
-    });
-    return obj;
   };
 
   const handleSubmit = async (values) => {
