@@ -1,14 +1,17 @@
 import { Button, Dialog, Typography, Box } from '@material-ui/core';
-import React, { useContext } from 'react';
+import { useContext, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { fieldServiceOrder, fieldTicket, rentalManagement, warehouse } from 'src/constants/helpers';
+import CustomButton from 'src/components/Helpers/CustomButton';
+import { fieldTicket, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleClose, handleSucess }) {
+  
   const toastConfig = useContext(CustomToastContext);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAssign = () => {
     const type = selectedServiceOrder[0]?.fieldTicketNumber ? 'fieldTicket' : selectedServiceOrder[0]?.rentalJobName ?
@@ -32,12 +35,15 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
       }
     })
     const baseApi = type === 'fieldTicket' ? fieldTicket.api : type === "rentalJob" ? rentalManagement.api : "";
+    setIsSubmitting(true)
     axiosInstance()
       .post(`${baseApi}/technician`, { technician: data })
       .then(() => {
         handleSucess();
+        setIsSubmitting(false)
       })
       .catch((error) => {
+        setIsSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -56,9 +62,16 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         <Button size="small" color="primary" onClick={handleClose}>
           Close
         </Button>
-        <Button size="small" variant="contained" color="primary" onClick={handleAssign}>
+        <CustomButton
+          loading={isSubmitting}
+          variant="contained"
+          color="primary"
+          type="submit"
+          onClick={handleAssign}
+          disabled={isSubmitting}
+        >
           Assign
-        </Button>
+        </CustomButton>
       </CustomDialogFooter>
     </Dialog>
   );
