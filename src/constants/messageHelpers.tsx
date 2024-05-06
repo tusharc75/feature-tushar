@@ -45,7 +45,7 @@ export const rentalManagementMessage = {
     loadingAlreadyCreated: 'Loading Ticket is already created',
     loadingNotCreated: 'Loading Ticket is not created',
     loadingAlreadyDelivered: 'Loading Ticket is already delivered',
-    loadingReservedAssetStatus: 'Loading Ticket can create for only Reserved asset status',
+    loadingReservedAssetStatus: 'Loading Ticket can create for only New/Available/Under Review/Reserved asset status',
     loadingNotDelivered: 'Loading Ticket is not delivered',
     inTransitDeliveredLoadingTicket: 'Only In-Transit/Delivered tickets can be cancelled',
     receivingAlreadyCreated: 'Receiving Ticket is already created',
