@@ -169,6 +169,16 @@ const FieldList = {
     type: "lookUpDisplay",
     icon: "far fa-calendar-check",
   },
+  COUNTER: {
+    label: "Counter",
+    type: "counter",
+    icon: "far fa-calendar-check",
+  },
+  DESCRIPTION: {
+    label: "Description",
+    type: "description",
+    icon: "far fa-calendar-check",
+  },
 };
 
 export default FieldList;

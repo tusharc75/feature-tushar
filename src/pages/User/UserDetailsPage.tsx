@@ -13,7 +13,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
   Typography,
   makeStyles
 } from '@material-ui/core';
@@ -28,6 +27,7 @@ import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
 import { GeneratePasswordIcon, ResetPasswordIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -544,8 +544,8 @@ const UserDetailsPage = () => {
                       }}
                     />
                   </TabPanel>
-                  {userData?.proxyDOA && (
-                    <TabPanel value={tabValue} index={2}>
+                  <TabPanel value={tabValue} index={2}>
+                    {userData?.proxyDOA ? (
                       <TableContainer>
                         <Table aria-label="DOA Proxy Table" size="small">
                           <TableHead>
@@ -570,31 +570,31 @@ const UserDetailsPage = () => {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            <TableRow key={userData.proxyDOA.user}>
+                            <TableRow key={userData.proxyDOA?.user}>
                               <TableCell>
                                 <Link
                                   className="link"
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  to={`${routes.userDetail.path}/${userData.proxyDOA.user}`}
+                                  to={`${routes.userDetail.path}/${userData.proxyDOA?.user}`}
                                 >
-                                  {userData.proxyDOA.user}
+                                  {userData.proxyDOA?.user}
                                 </Link>
                               </TableCell>
                               <TableCell align="center">
-                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
+                                <span className={classes.dataValue}>{displayDate(userData?.proxyDOA?.startDate)}</span>
                               </TableCell>
                               <TableCell align="center">
-                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.endDate)}</span>
+                                <span className={classes.dataValue}>{displayDate(userData?.proxyDOA?.endDate)}</span>
                               </TableCell>
                             </TableRow>
                           </TableBody>
                         </Table>
                       </TableContainer>
+                    ) : null}
 
-                      {/* </div> */}
-                    </TabPanel>
-                  )}
+                    {/* </div> */}
+                  </TabPanel>
                   <TabPanel value={tabValue} index={3}>
                     <UserSession id={id} />
                   </TabPanel>
@@ -671,7 +671,7 @@ const UserDetailsPage = () => {
                               ))
                             ) : userPermissions ? (
                               Object.keys(userPermissions).map((key) => (
-                                <Tooltip
+                                <HtmlTooltip
                                   title={
                                     !hasPermissionToUpdateApprovalProcess
                                       ? `You do not have permission to update ${key === 'doaSetup' ? 'DOA Setup' : startCase(key)}`
@@ -690,7 +690,7 @@ const UserDetailsPage = () => {
                                     }
                                     label={key === 'doaSetup' ? 'DOA Setup' : startCase(key)}
                                   />
-                                </Tooltip>
+                                </HtmlTooltip>
                               ))
                             ) : (
                               <Typography>There are no permissions</Typography>

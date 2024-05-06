@@ -1,33 +1,33 @@
-import { useRef, useState, useEffect, Fragment, useContext } from 'react';
+import { Collapse } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { Formik, Form } from 'formik';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import Dialog from '@material-ui/core/Dialog';
-import FormTypes from '../Helpers/FormTypes';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import axiosInstance from '../../axios/axiosInstance';
-import { getObjKeys, yupSchema } from '../../constants/helpers';
-import CustomButton from '../Helpers/CustomButton';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import { AddField } from '../FormBuilder/AddField';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from './../../constants/helpers';
-import Tooltip from '@material-ui/core/Tooltip';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import { autoCalculateSpecificFields } from '../../constants/formulaUtility';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLess from '@material-ui/icons/ExpandLess';
-import { Collapse } from '@material-ui/core';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import { Form, Formik } from 'formik';
+import { isEqual, map, orderBy, sortBy, uniq } from 'lodash';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
-import { FaDiceOne } from 'react-icons/fa';
-import { uniq, map, orderBy, sortBy, isEqual } from 'lodash';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { autoCalculateSpecificFields } from '../../constants/formulaUtility';
+import { getObjKeys, yupSchema } from '../../constants/helpers';
+import HtmlTooltip from '../CustomTooltipTitle';
+import { AddField } from '../FormBuilder/AddField';
+import CustomButton from '../Helpers/CustomButton';
+import FormTypes from '../Helpers/FormTypes';
+import { CustomDialogTransition } from './../../constants/helpers';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -351,7 +351,12 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                         touched={touched}
                                         label={
                                           field.isUneditable
-                                            ? `${replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit, values?.tertiaryUnit)} (Auto Calculated Field)`
+                                            ? `${replaceUnit(
+                                                field.fieldLabel,
+                                                values?.unit,
+                                                values?.secondaryUnit,
+                                                values?.tertiaryUnit
+                                              )} (Auto Calculated Field)`
                                             : replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit, values?.tertiaryUnit)
                                         }
                                         name={field.fieldName}
@@ -374,8 +379,8 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                               ? true
                                               : false
                                             : ['productCategory', 'productTemplate', 'entity', 'priceTemplate'].includes(field.fieldName)
-                                              ? true
-                                              : false
+                                            ? true
+                                            : false
                                         }
                                       />
                                     ) : (
@@ -394,7 +399,12 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                               touched={touched}
                                               label={
                                                 field.isUneditable
-                                                  ? `${replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit, values?.tertiaryUnit)} (Auto Calculated Field)`
+                                                  ? `${replaceUnit(
+                                                      field.fieldLabel,
+                                                      values?.unit,
+                                                      values?.secondaryUnit,
+                                                      values?.tertiaryUnit
+                                                    )} (Auto Calculated Field)`
                                                   : replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit, values?.tertiaryUnit)
                                               }
                                               name={field.fieldName}
@@ -414,14 +424,14 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                                     ? true
                                                     : false
                                                   : ['productCategory', 'productTemplate', 'entity', 'priceTemplate'].includes(field.fieldName)
-                                                    ? true
-                                                    : false
+                                                  ? true
+                                                  : false
                                               }
                                               imageOrFileUploadCompletePercentage={
                                                 ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                                   ? (completePercentage) => {
-                                                    setUploadingImageOrFileProgress(completePercentage);
-                                                  }
+                                                      setUploadingImageOrFileProgress(completePercentage);
+                                                    }
                                                   : null
                                               }
                                               setValues={setValues}
@@ -429,11 +439,11 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                           </Box>
                                           {(field.leval === 'product-builder-custom' || field.leval === 'price-builder-custom') && (
                                             <Box>
-                                              <Tooltip title="Remove" className="mt-1">
+                                              <HtmlTooltip title="Remove" className="mt-1">
                                                 <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small">
                                                   <HighlightOffIcon color="error" />
                                                 </IconButton>
-                                              </Tooltip>
+                                              </HtmlTooltip>
                                             </Box>
                                           )}
                                         </Box>

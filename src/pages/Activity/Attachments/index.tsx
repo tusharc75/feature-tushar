@@ -167,6 +167,7 @@ export default function Attachment() {
         row.original?.createdBy ? (
           <p>
             {row.original?.createdBy?.user?.concatedName}
+            <span className="hidden">&nbsp;-&nbsp;</span>
             <span className="createdAtTime badge-date">{displayDate(row.original?.createdBy?.date)}</span>
           </p>
         ) : (
@@ -184,6 +185,7 @@ export default function Attachment() {
         row.original?.updatedBy ? (
           <p>
             {row.original?.updatedBy?.user?.concatedName}
+            <span className="hidden">&nbsp;-&nbsp;</span>
             <span className="createdAtTime badge-date">{displayDate(row.original?.updatedBy?.date)}</span>
           </p>
         ) : (

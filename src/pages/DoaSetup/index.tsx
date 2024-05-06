@@ -1,60 +1,54 @@
-import React, { useContext, useEffect, useState, Fragment } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  Box,
-  Grid,
-  Checkbox,
-  Button,
-  Dialog,
-} from "@material-ui/core";
-import { Link } from 'react-router-dom'
-import { DataGrid } from "@material-ui/data-grid";
-import Container from "../../components/CustomContainer";
-import BoxWithBorder from "../../components/BoxWithBorder";
-import NewStepper from "../../components/Helpers/NewStepper";
+import React, { useContext, useEffect, useState, Fragment } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import { Box, Grid, Checkbox, Button, Dialog } from '@material-ui/core';
+import { Link } from 'react-router-dom';
+import { DataGrid } from '@material-ui/data-grid';
+import Container from '../../components/CustomContainer';
+import BoxWithBorder from '../../components/BoxWithBorder';
+import NewStepper from '../../components/Helpers/NewStepper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import DoaDialog from "./ManageDoa/ManageDoaDialog";
-import DoaHeader from "./DoaHeader";
-import { GiHiveMind } from "react-icons/gi";
+import DoaDialog from './ManageDoa/ManageDoaDialog';
+import DoaHeader from './DoaHeader';
+import { GiHiveMind } from 'react-icons/gi';
 import routes from './../../components/Helpers/Routes';
-import { useData } from "../../StateProvider/Provider";
-import { useCallback } from "react";
-import { getSearchQuery } from "../../services/util";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import moment from "moment";
-import { FaUserAltSlash, FaUserCheck } from "react-icons/fa";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
-import { dateFormat } from "../../constants/helpers"
+import { useData } from '../../StateProvider/Provider';
+import { useCallback } from 'react';
+import { getSearchQuery } from '../../services/util';
+import axiosInstance from '../../axios/axiosInstance';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import moment from 'moment';
+import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
+import CustomDataGridNoDataFound from '../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import CustomDataGridToolbar from '../../components/Helpers/DataGridHelpers/CustomDataGridToolbar';
+import { dateFormat } from '../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   actionBtn: {
-    background: theme.palette.primary.light,  //  lightBg
+    background: theme.palette.primary.light, //  lightBg
     color: theme.palette.error.contrastText,
-    "&:hover": {
-      background: theme.palette.primary.light,  //  lightBg
-    },
+    '&:hover': {
+      background: theme.palette.primary.light //  lightBg
+    }
   },
 
   backButton: {
-    marginRight: theme.spacing(1),
+    marginRight: theme.spacing(1)
   },
 
   tabsContainer: {
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(2)
   },
 
   tab: {
-    margin: theme.spacing(0, 2),
+    margin: theme.spacing(0, 2)
   },
 
   infoContainer: {
-    display: "flex",
+    display: 'flex',
     marginTop: theme.spacing(2),
-    justifyContent: "space-evenly",
-    [theme.breakpoints.down("sm")]: "flex-start",
+    justifyContent: 'space-evenly',
+    [theme.breakpoints.down('sm')]: 'flex-start'
   },
 
   box: {
@@ -62,9 +56,9 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: 8,
     padding: theme.spacing(1.5, 2),
     margin: theme.spacing(0, 2),
-    fontWeight: "normal",
-    width: "141",
-    height: "51"
+    fontWeight: 'normal',
+    width: '141',
+    height: '51'
   },
 
   btnMargin: {
@@ -75,10 +69,10 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.light,
     borderRadius: 5,
     color: theme.palette.error.contrastText,
-    display: "flex",
+    display: 'flex',
     padding: theme.spacing(1, 4),
-    justifyContent: "space-evenly",
-    [theme.breakpoints.down("sm")]: "flex-start",
+    justifyContent: 'space-evenly',
+    [theme.breakpoints.down('sm')]: 'flex-start'
   },
 
   container: {
@@ -96,39 +90,40 @@ const useStyles = makeStyles((theme) => ({
   },
 
   actionIcon: {
-    "&:hover": {
-      cursor: "pointer"
+    '&:hover': {
+      cursor: 'pointer'
     },
     width: 18,
     height: 18,
     margin: 2
   },
   links: {
-    color: theme.palette.primary.main,  //  textDark
+    color: theme.palette.primary.main //  textDark
   },
 
   no_doa: {
-    color: theme.palette.error.main,  //  textDark
+    color: theme.palette.error.main //  textDark
   },
   linkDivider: {
-    backgroundColor: theme.palette.primary.main,  //  darkBg
-    margin: "0 1rem",
-  },
+    backgroundColor: theme.palette.primary.main, //  darkBg
+    margin: '0 1rem'
+  }
 }));
 
 export default function Doa() {
-
   const classes = useStyles();
   const [dataRows, setDataRows] = useState<any[]>([]);
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
   const [userSingleSelect, setUserSingleSelect] = useState(null);
   const [open, setOpen] = useState(false);
-  const [searchVal, setSearchVal] = useState("");
+  const [searchVal, setSearchVal] = useState('');
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [doaPermissions, setDoaPermissions] = useState({ isCreate: true, isUpdate: true, isRead: true, isDelete: true });
-  const [, setIsConformDialogVisible] = useState(false)
-  const [, setDeleteRec] = useState<any>({})
-  const [, setShowDeleteWarningConfirmBox] = useState(false)
+  const [, setIsConformDialogVisible] = useState(false);
+  const [, setDeleteRec] = useState<any>({});
+  const [, setShowDeleteWarningConfirmBox] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checkAllUsers, setCheckAllUsers] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -139,7 +134,7 @@ export default function Doa() {
     const data = user?.role?.sideBar;
 
     if (data) {
-      const hasOpportunityPermission = data.find(d => d.name == "DOA");
+      const hasOpportunityPermission = data.find((d) => d.name == 'DOA');
       if (hasOpportunityPermission) {
         setDoaPermissions({
           isCreate: hasOpportunityPermission.isCreate,
@@ -153,10 +148,8 @@ export default function Doa() {
 
   const fetchUsers = useCallback(() => {
     let searchParams: any = { ...query };
-    searchParams = searchVal
-      ? { ...searchParams, search: searchVal }
-      : { ...searchParams };
-    let api = getSearchQuery("/user", searchParams);
+    searchParams = searchVal ? { ...searchParams, search: searchVal } : { ...searchParams };
+    let api = getSearchQuery('/user', searchParams);
     setLoading(true);
     axiosInstance()
       .get(api)
@@ -176,39 +169,39 @@ export default function Doa() {
   }, [fetchUsers]);
 
   const fetchDoa = (id) => {
-    setDoa([])
+    setDoa([]);
     axiosInstance()
       .get(`/doa/${id}`)
       .then(({ data: { data } }) => {
-        setDoa(data?.doa.map(item => {
-          return {
-            id: item.user?._id,
-            name: `${item.user.firstName} ${item.user.lastName}`,
-            firstName: item.user.firstName,
-            lastName: item.user.lastName,
-            currency: item.currency ? item.currency : "USD",
-            amount: item.amount
-          };
-        })
+        setDoa(
+          data?.doa.map((item) => {
+            return {
+              id: item.user?._id,
+              name: `${item.user.firstName} ${item.user.lastName}`,
+              firstName: item.user.firstName,
+              lastName: item.user.lastName,
+              currency: item.currency ? item.currency : 'USD',
+              amount: item.amount
+            };
+          })
         );
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setLoading(false);
       });
-  }
-
+  };
 
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        isChecked: false,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        createdAt: moment(user.createdAt).format(dateFormat),
-        status: user.blocked ? user.blocked : false,
-      }))
+          id: user._id,
+          isChecked: false,
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          createdAt: moment(user.createdAt).format(dateFormat),
+          status: user.blocked ? user.blocked : false
+        }))
       : [];
 
     setDataRows(rows);
@@ -218,13 +211,12 @@ export default function Doa() {
     if (query.page !== params.page) {
       setQuery((prevState) => ({ ...prevState, page: params.page }));
     }
-  }
+  };
   const handlePageSize = (params) => {
     if (params.pageSize !== query.limit) {
       setQuery({ page: 0, limit: params.pageSize });
     }
   };
-
 
   const handleSearch = (e) => {
     if (query.page !== 0) {
@@ -235,19 +227,18 @@ export default function Doa() {
 
   const showConfirmBox = (row) => {
     if (row) {
-      setIsConformDialogVisible(true)
+      setIsConformDialogVisible(true);
       if (row && row._id) {
-        setDeleteRec(row)
+        setDeleteRec(row);
       }
-    }
-    else {
+    } else {
       if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
-        setIsConformDialogVisible(true)
+        setIsConformDialogVisible(true);
       }
     }
-  }
+  };
 
   const handleSortModelChange = (params) => {
     if (params?.sortModel && params.sortModel.length > 0) {
@@ -256,15 +247,15 @@ export default function Doa() {
         ...prevState,
         page: 0,
         sortBy: temp.field,
-        orderBy: temp.sort,
+        orderBy: temp.sort
       }));
     }
-  }
+  };
 
   const columns = [
     {
-      field: "isChecked",
-      headerName: "Checkbox",
+      field: 'isChecked',
+      headerName: 'Checkbox',
       renderHeader: () => (
         <Checkbox
           color="primary"
@@ -292,11 +283,11 @@ export default function Doa() {
       disableColumnMenu: true,
       sortable: false,
       filterable: false,
-      width: 75,
+      width: 75
     },
     {
-      field: "name",
-      headerName: "Name",
+      field: 'name',
+      headerName: 'Name',
       width: 400,
       renderCell: (params: any) => (
         <Link
@@ -304,55 +295,48 @@ export default function Doa() {
           className="text-truncate link"
           onClick={() => {
             // setOpen(true)
-            setUserSingleSelect(params?.row)
-            fetchDoa(params?.row?.id)
-          }
-          }
+            setUserSingleSelect(params?.row);
+            fetchDoa(params?.row?.id);
+          }}
         >
           {params.value}
         </Link>
-      ),
+      )
     },
     {
-      field: "status",
-      headerName: "Status",
+      field: 'status',
+      headerName: 'Status',
       width: 150,
       sortable: false,
       filterable: false,
-      align: "center",
-      headerAlign: "center",
+      align: 'center',
+      headerAlign: 'center',
       disableColumnMenu: true,
       renderCell: (params: any) => (
-        <div style={{ width: 150 }}>
-          {params.value ? (
-            <FaUserCheck className="text-success" />
-          ) : (
-            <FaUserAltSlash className="text-error" />
-          )}{" "}
-        </div>
-      ),
+        <div style={{ width: 150 }}>{params.value ? <FaUserCheck className="text-success" /> : <FaUserAltSlash className="text-error" />} </div>
+      )
     },
 
     {
-      field: "email",
-      headerName: "Email",
+      field: 'email',
+      headerName: 'Email',
       width: 300,
       renderCell: (params: any) => (
         <p title={params.value} className="text-truncate">
           <CustomRenderCell value={params?.value} isCopyToClipboard={true} />
         </p>
-      ),
+      )
     },
     {
-      field: "createdAt",
-      headerName: "Created At",
+      field: 'createdAt',
+      headerName: 'Created At',
       width: 200,
       renderCell: (params: any) => (
         <p title={`Created At • ${params.value}`} className="text-truncate">
           {params.value}
         </p>
-      ),
-    },
+      )
+    }
 
     // {
     //   field: "actions",
@@ -366,7 +350,7 @@ export default function Doa() {
     //       <>
     //         {
     //           doaPermissions.isUpdate ?
-    //             <Tooltip title="Edit">
+    //             <HtmlTooltip title="Edit">
     //               <IconButton aria-label="Edit" onClick={() => {
     //                 // setSingleApproveDisapproveAccount({ show: true, approved: true, id: params.row._id, accountName: params.row.accountName })
     //                 setOpen(true)
@@ -375,26 +359,26 @@ export default function Doa() {
     //               }}>
     //                 <FcPlus />
     //               </IconButton>
-    //             </Tooltip> : ""
+    //             </HtmlTooltip> : ""
     //         }
     //         {doaPermissions.isDelete ? (
-    //           <Tooltip title="Delete">
+    //           <HtmlTooltip title="Delete">
     //             <IconButton
     //               aria-label="Delete"
     //               onClick={() => showConfirmBox(params.row)}
     //             >
     //               <DeleteIcon fontSize="small" color="error" />
     //             </IconButton>
-    //           </Tooltip>
+    //           </HtmlTooltip>
     //         ) : (
-    //           <Tooltip
+    //           <HtmlTooltip
     //             className="cursor-stop"
     //             title="You do not have permission to delete user"
     //           >
     //             <IconButton aria-label="Delete">
     //               <DeleteIcon fontSize="small" />
     //             </IconButton>
-    //           </Tooltip>
+    //           </HtmlTooltip>
     //         )}
     //       </>
     //     ),
@@ -430,7 +414,6 @@ export default function Doa() {
     setSelectedUsers(tempSelectedRecs);
   };
 
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -452,24 +435,18 @@ export default function Doa() {
         </div>
       </Container>
       <Box component="div">
-        {(userSingleSelect) && (
-          <Dialog
-            open={open}
-            onClose={() => setOpen(false)}
-            scroll="body"
-            maxWidth="md"
-            fullWidth
-          >
+        {userSingleSelect && (
+          <Dialog open={open} onClose={() => setOpen(false)} scroll="body" maxWidth="md" fullWidth>
             <DoaDialog
               userList={dataRows}
               doa={doa}
-              doaCurrency={"USD"}
+              doaCurrency={'USD'}
               selectedEntity={userSingleSelect.id}
               open={open}
               onClose={() => setOpen(false)}
               onSuccess={() => {
-                setOpen(false)
-                fetchDoa(userSingleSelect.id)
+                setOpen(false);
+                fetchDoa(userSingleSelect.id);
               }}
             />
           </Dialog>
@@ -489,7 +466,7 @@ export default function Doa() {
             <DataGrid
               components={{
                 Toolbar: CustomDataGridToolbar,
-                NoRowsOverlay: CustomDataGridNoDataFound,
+                NoRowsOverlay: CustomDataGridNoDataFound
               }}
               rows={loading ? [] : dataRows}
               columns={columns}
@@ -509,43 +486,29 @@ export default function Doa() {
             />
           </div>
           <Box marginY={5} />
-          <BoxWithBorder styles={{ minHeight: "300px", padding: "0px" }}>
-
+          <BoxWithBorder styles={{ minHeight: '300px', padding: '0px' }}>
             {userSingleSelect ? (
-              doa.length > 0
-                ? (
-                  <>
-                    <Button
-                      color="inherit"
-                      size="small"
-                      className={classes.actionBtn}
-                      onClick={() => setOpen(true)}
-                    >
-                      Edit Doa
-                    </Button>
-                    <NewStepper
-                      heading={"DOA Details of " + userSingleSelect?.name}
-                      doaCurrency={"USD"}
-                      steps={doa}
-                    />
-                  </>
-                ) : (
-                  <React.Fragment>
-                    <div className={classes.no_doa}>No DOA created </div>
-                    <Button
-                      size="small"
-                      color="inherit"
-                      className={classes.actionBtn}
-                      onClick={() => setOpen(true)}
-                    >
-                      Add Doa
-                    </Button>
-                  </React.Fragment>
-                )) : "Select a DOA"
-            }
+              doa.length > 0 ? (
+                <>
+                  <Button color="inherit" size="small" className={classes.actionBtn} onClick={() => setOpen(true)}>
+                    Edit Doa
+                  </Button>
+                  <NewStepper heading={'DOA Details of ' + userSingleSelect?.name} doaCurrency={'USD'} steps={doa} />
+                </>
+              ) : (
+                <React.Fragment>
+                  <div className={classes.no_doa}>No DOA created </div>
+                  <Button size="small" color="inherit" className={classes.actionBtn} onClick={() => setOpen(true)}>
+                    Add Doa
+                  </Button>
+                </React.Fragment>
+              )
+            ) : (
+              'Select a DOA'
+            )}
           </BoxWithBorder>
         </Container>
       </Box>
     </Fragment>
-  )
-};
+  );
+}

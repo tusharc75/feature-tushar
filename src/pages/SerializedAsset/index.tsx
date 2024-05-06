@@ -99,6 +99,7 @@ const SerializedAsset = () => {
     redirectProduct,
     fromPurchaseOrder,
     productCategory,
+    productFilter,
     subleaseAsset,
     showFilteredRecordsOnly
   ]);

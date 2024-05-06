@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from 'react';
 
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -137,34 +137,34 @@ const ServiceMasterDetailsPage = () => {
           <CustomTab value={1} label={<>Steps</>} />
           <CustomTab value={2} label={<>Consumables/Tools</>} />
         </CustomTabs>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            {tabValue === 0 && (
-              <Box className="form-v1">
-                {loading || (!fields.length && serviceMasterDetailData != null) ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <>
-                    <DetailsPage data={serviceMasterDetailData} fields={fields} />
-                    {permissions?.leadTimeMaster?.isRead && (
-                      <Box mb={2} mt={2}>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <LeadTimeMaster Id={id} type={'service'} />
-                          </Grid>
-                        </Grid>
-                      </Box>
-                    )}
-                  </>
+        <TabPanel value={tabValue} index={0}>
+          <Box className="form-v1">
+            {loading || (!fields.length && serviceMasterDetailData != null) ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <>
+                <DetailsPage data={serviceMasterDetailData} fields={fields} />
+                {permissions?.leadTimeMaster?.isRead && (
+                  <Box mb={2} mt={2}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <LeadTimeMaster Id={id} type={'service'} />
+                      </Grid>
+                    </Grid>
+                  </Box>
                 )}
-              </Box>
+              </>
             )}
-            {tabValue === 1 && <Steps serviceId={id} />}
-            {tabValue === 2 && <Product id={id} />}
-          </Grid>
-        </Grid>
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Steps serviceId={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Product id={id} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

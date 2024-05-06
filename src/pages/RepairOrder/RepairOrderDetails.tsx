@@ -40,6 +40,7 @@ import Productpackage from './Productpackage';
 import Quotation from './Quotation';
 import View from './View';
 import WorkOrder from './WorkOrder';
+import Step from '../DynamicForm/Step';
 
 const RepairOrderDetails = () => {
   const renderedFrom = camelCase(routes?.repairOrder.title);
@@ -75,6 +76,7 @@ const RepairOrderDetails = () => {
 
   const [stepList, setStepList] = useState(repairOrderSteps);
   const [stepNames, setStepNames] = useState(repairOrderSteps.map((item) => item.name));
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -99,6 +101,7 @@ const RepairOrderDetails = () => {
   useEffect(() => {
     if (id) {
       fetchRepairOrderData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -123,6 +126,19 @@ const RepairOrderDetails = () => {
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.repairOrder}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const fetchRepairOrderData = () => {
@@ -341,6 +357,11 @@ const RepairOrderDetails = () => {
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
+          {resourceData && resourceData?.steps?.length && (
+            <CustomTab value={3}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
+            </CustomTab>
+          )}
         </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -418,6 +439,7 @@ const RepairOrderDetails = () => {
                 isPostWorkService={Boolean(currentStep === 3)}
                 setCurrentStep={setCurrentStep}
                 createNewVersionQuote={createNewVersionQuote}
+                resourcePolicy={resourceData?.policy}
               />
             )}
             {stepNames[currentStep] === 'Quotation' && repairOrderData && (
@@ -459,6 +481,17 @@ const RepairOrderDetails = () => {
         <TabPanel value={tabValue} index={2}>
           <Box>
             <View repairOrderNumber={repairOrderData?.repairOrderNumber || ''} repairOrderId={id} repairOrderStatus={repairOrderData?.status} />
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <Box>
+          <Step
+              resourceData={resourceData}
+              resourceId={id}
+              resource={sidebarResource.repairOrder}
+              data={repairOrderData}
+              allowedToEdit={permissions?.repairOrder?.isUpdate}
+            />
           </Box>
         </TabPanel>
       </Box>

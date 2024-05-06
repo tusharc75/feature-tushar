@@ -7,7 +7,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
@@ -123,18 +123,18 @@ const WorkStationsDetail = () => {
           <CustomTab label={'Details'} value={0} />
           <CustomTab label={'Active Services'} value={1} />
         </CustomTabs>
-        {tabValue === 0 && (
-          <Box>
-            {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={workStationsData} fields={fields} />
-            )}
-          </Box>
-        )}
-        {tabValue === 1 && <CurrentStatus id={id} />}
+        <TabPanel value={tabValue} index={0}>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={workStationsData} fields={fields} />
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <CurrentStatus id={id} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

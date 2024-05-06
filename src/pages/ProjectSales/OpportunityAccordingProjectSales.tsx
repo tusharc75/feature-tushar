@@ -1,47 +1,28 @@
-import { useState, useContext } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import {
-  Grid,
-  Button,
-  Box,
-  IconButton,
-  Typography,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Tooltip
-} from '@material-ui/core';
-import { HiExternalLink } from 'react-icons/hi';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import MoreVert from '@material-ui/icons/MoreVert';
-import { Link, useHistory } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
+import { useContext, useState } from 'react';
 import { BiCustomize } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
+import { IoCalendarOutline } from 'react-icons/io5';
+import { useHistory } from 'react-router-dom';
 
+import DisplayData from 'src/components/CardDisplayData';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { formatAmountWithCurrency } from '../../constants/helpers';
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes';
 import NewOpportunityProjectSales from './NewOpportunityProjectSales';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../StateProvider/Provider';
-import { formatAmountWithCurrency } from '../../constants/helpers';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import styles from './ProjectSales.module.scss';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import DisplayData from 'src/components/CardDisplayData';
 
 export default function OpportunityAccordianProjectSales({
   opportunities,
@@ -226,9 +207,9 @@ export default function OpportunityAccordianProjectSales({
                                   ) : (
                                     <span className="d-flex gap-2 align-items-center">
                                       <Typography className="detailName">{obj.opportunityName}</Typography>{' '}
-                                      <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
+                                      <HtmlTooltip title={`${obj.opportunityName} belongs to different entity`}>
                                         <InfoOutlinedIcon fontSize="small" />
-                                      </Tooltip>
+                                      </HtmlTooltip>
                                     </span>
                                   )}
                                 </Grid>

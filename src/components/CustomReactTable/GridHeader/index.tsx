@@ -13,7 +13,7 @@ import { sidebarResource } from 'src/constants/helpers';
 
 import { Table } from '@tanstack/react-table';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
-import { createFilterModel, fetchFieldOptions } from '../utils';
+import { createFilterModel, fetchFieldOptions, filtermodelToFormValue } from '../utils';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 
@@ -59,12 +59,21 @@ const GridHeader = ({
   hideExportTable = false
 }: GridHeaderProps) => {
   const toastConfig = useContext(CustomToastContext);
-  const { selectedRecords, loading, filters: customFilters, dataRows, page }: TInitialState = state;
+  const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
   const isMobileView = useMediaQuery('(max-width:768px)');
 
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentFomValue, setCurrentFomValue] = useState({});
+
+  useEffect(() => {
+    if (customFilters && !selectedFilter) {
+      const newformValues = filtermodelToFormValue(customFilters);
+      if (newformValues) {
+        setCurrentFomValue(newformValues);
+      }
+    }
+  }, [customFilters, selectedFilter]);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -85,8 +94,9 @@ const GridHeader = ({
           .then(({ data: { data } }) => {
             const defaultFilter = data.filter((d) => d.default)[0];
             setSelectedFilter(defaultFilter);
-            const deepFilter = createFilterModel(defaultFilter.filterValue, columns);
-            if (defaultFilter) {
+            let deepFilter;
+            if (defaultFilter?.filterValue) deepFilter = createFilterModel(defaultFilter?.filterValue, columns);
+            if (defaultFilter && deepFilter) {
               dispatch({ type: 'filter', filters: deepFilter });
               if (defaultFilter.sortBy) {
                 dispatch({

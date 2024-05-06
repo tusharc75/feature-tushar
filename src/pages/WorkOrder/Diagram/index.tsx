@@ -1,26 +1,25 @@
-import { Box, Button, Collapse, Dialog, IconButton, Tooltip, Typography } from '@material-ui/core';
+import { Box, Button, Collapse, Dialog, IconButton, Typography } from '@material-ui/core';
 import { Add, Delete } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
-import ShowPdf from './ShowPdf';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import ShowPdf from './ShowPdf';
 
-import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { DownloadIcon, FileCopyIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ACTIVITY_RESOURCE, ATTACHMENT_TYPE, CustomDialogTransition, WORK_ORDER_TYPE } from 'src/constants/helpers';
+import PdfPreview from './ShowPdf/PdfPreview';
 import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { FileCopyIcon } from 'src/assets/svg/svgIcons';
-import PdfPreview from './ShowPdf/PdfPreview';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVersions = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -241,14 +240,14 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                                     selectedAttachment?.url === f?.url ? 'var(--dark-active-border-color,#0F9FA9 )' : 'var(--common-border-color)'
                                 }}
                               >
-                                <Tooltip enterTouchDelay={0} title={f.name} placement={'top'} arrow>
+                                <HtmlTooltip title={f.name}>
                                   <div className="flex gap-2 items-center">
                                     <div className="w-[20px]">
                                       <Icon size={20} />
                                     </div>
                                     <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(f)}</p>
                                   </div>
-                                </Tooltip>
+                                </HtmlTooltip>
                               </Box>
                             );
                           })}

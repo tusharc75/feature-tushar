@@ -11,7 +11,7 @@ import { FcApproval, FcDisapprove } from 'react-icons/fc';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { AccountHierarchyIcon, AccountsTeamsIcon, ContactsIcon, OpportunityIcon, ProjectsIcon, QuoteIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -161,21 +161,6 @@ export default function AccountDetailPage(props) {
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
-  interface TabPanelProps {
-    children?: React.ReactNode;
-    index: any;
-    value: any;
-  }
-
-  function TabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
-
-    return (
-      <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-        {children}
-      </div>
-    );
-  }
 
   useEffect(() => {
     setShowAccountHierarchyInFullScreenDialog(false);
@@ -312,21 +297,21 @@ export default function AccountDetailPage(props) {
       let accounts = [
         ...data.parentHierarchy,
         {
-          _id: data._id,
-          accountName: data.accountName,
-          typeOfAccount: data.typeOfAccount,
-          industry: data.industry,
-          typeOfBusiness: data.typeOfBusiness,
-          phone: data.phone,
-
+          // _id: data._id,
+          // accountName: data.accountName,
+          // typeOfAccount: data.typeOfAccount,
+          // industry: data.industry,
+          // typeOfBusiness: data.typeOfBusiness,
+          // phone: data.phone,
+          ...data,
           type: 'child',
           current: true,
-          parentAccount: data.parentAccount
-            ? {
-                _id: data.parentAccount.optionValue,
-                accountName: data.parentAccount.optionLabel
-              }
-            : null,
+          // parentAccount: data.parentAccount
+          //   ? {
+          //       _id: data.parentAccount.optionValue,
+          //       accountName: data.parentAccount.optionLabel
+          //     }
+          //   : null,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }
       ];
@@ -335,24 +320,25 @@ export default function AccountDetailPage(props) {
         if (isObjectEmpty(account)) return true;
 
         const updatedAccount = {
-          _id: account._id,
-          accountName: account.accountName,
-          typeOfAccount: account.typeOfAccount,
-          industry: account.industry,
-          parentId: null,
-          typeOfBusiness: account.typeOfBusiness,
-          phone: account.phone,
+          // _id: account._id,
+          // accountName: account.accountName,
+          // typeOfAccount: account.typeOfAccount,
+          // industry: account.industry,
+          // parentId: null,
+          // typeOfBusiness: account.typeOfBusiness,
+          // phone: account.phone,
+          ...account,
           type: 'child',
-          current: account.current,
+          // current: account.current,
           canEdit: account?.canEdit ?? [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         };
 
-        if (account.parentAccount) {
-          updatedAccount['parentAccountText'] = account.parentAccount.accountName;
-          updatedAccount['parentId'] = account.parentAccount._id;
-        } else {
-          updatedAccount['type'] = 'parent';
-        }
+        // if (account.parentAccount) {
+        //   updatedAccount['parentAccountText'] = account.parentAccount.accountName;
+        //   updatedAccount['parentId'] = account.parentAccount._id;
+        // } else {
+        //   updatedAccount['type'] = 'parent';
+        // }
         newData.push(updatedAccount);
       });
 
@@ -360,12 +346,13 @@ export default function AccountDetailPage(props) {
     } else {
       setAccountHierarchyData([
         {
-          _id: data._id,
-          accountName: data.accountName,
-          typeOfAccount: data.typeOfAccount,
-          industry: data.industry,
-          typeOfBusiness: data.typeOfBusiness,
-          phone: data.phone,
+          // _id: data._id,
+          // accountName: data.accountName,
+          // typeOfAccount: data.typeOfAccount,
+          // industry: data.industry,
+          // typeOfBusiness: data.typeOfBusiness,
+          // phone: data.phone,
+          ...data,
           current: true,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }
@@ -994,6 +981,7 @@ export default function AccountDetailPage(props) {
                   handleDelete={(data) => {
                     setDeleteAccountId(data);
                   }}
+                  accountResource={accountResource}
                 />
               </Box>
             </TabPanel>
@@ -1013,22 +1001,18 @@ export default function AccountDetailPage(props) {
                 />
               </Box>
             </TabPanel>
-            {accountResource === 'supplierAccount' && tabValue === 3 && (
-              <TabPanel value={tabValue} index={3}>
-                <SupplierItems
-                  api={accountApi}
-                  id={id}
-                  allowedToEdit={permissions[accountResource].isUpdate}
-                  permission={permissions[accountResource]}
-                />
-              </TabPanel>
-            )}
-            {accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
-              <TabPanel value={tabValue} index={3}>
-                <Warehouse reference={accountResource} api={accountApi} id={id} />
-              </TabPanel>
-            )}
+            <TabPanel value={tabValue} index={3}>
+              <SupplierItems
+                api={accountApi}
+                id={id}
+                allowedToEdit={permissions[accountResource].isUpdate}
+                permission={permissions[accountResource]}
+              />
+            </TabPanel>
             <TabPanel value={tabValue} index={4}>
+              <Warehouse reference={accountResource} api={accountApi} id={id} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={5}>
               <Step
                 resourceData={resourceData}
                 resourceId={id}
@@ -1144,7 +1128,7 @@ export default function AccountDetailPage(props) {
             setShowAccountHierarchyInFullScreenDialog(false);
           }}
         >
-          <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} accountRoute={accountRoute} />
+          <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} accountRoute={accountRoute} accountResource={accountResource} />
         </FullScreenDialog>
       )}
       {showCreateAccountDialog ? (

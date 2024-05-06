@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
 import { Currency } from '../../AddField/currency';
 import { Fragment, useEffect, useState } from 'react';
 import { Autocomplete } from '@material-ui/lab';
@@ -18,6 +18,9 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import IconButton from '@material-ui/core/IconButton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import FieldNameDialog from './FieldNameDialog';
+import Description from '../../AddField/description';
+import PreFilter from '../../AddField/preFilter';
+import SubFieldsDialog from './SubFieldsDialog';
 
 const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField, handleChangeFieldName }) => {
   const [isInitialUpdated, setIsInitialUpdated] = useState({
@@ -28,6 +31,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
   const [lookupResource, setLookupResource] = useState([]);
   const [changeFieldNameDialog, setChangeFieldNameDialog] = useState(false);
   const [dataList, setDataList] = useState([]);
+  const [subFieldOpen, setSubFieldOpen] = useState(false);
 
   useEffect(() => {
     getLookupList();
@@ -237,6 +241,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
                   setFieldValue(name, value);
                 }}
               />
+              {values['lookupResource'] && <PreFilter lookupResource={values['lookupResource']} values={values} setFieldValue={setFieldValue} />}
             </Box>
           )}
         </Box>
@@ -291,6 +296,8 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
                   />
                 )}
               />
+
+              {values['dataListId'] && <PreFilter dataList={true} dataListId={values['dataListId']} values={values} setFieldValue={setFieldValue} />}
             </Box>
           )}
         </Box>
@@ -495,6 +502,30 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
       )}
       {fieldData.type === 'signature' && <SignatureUser values={values} setFieldValue={setFieldValue} />}
       {fieldData.type === 'decimal' && <MinMax values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />}
+      {fieldData.type === 'description' && <Description values={values} setFieldValue={setFieldValue} />}
+      {fieldData.type === 'counter' && (
+        <Box mt={1}>
+          <Button
+            variant="outlined"
+            size="small"
+            color="primary"
+            onClick={() => {
+              setSubFieldOpen(true);
+            }}
+          >
+            Sub Fields
+          </Button>
+        </Box>
+      )}
+      {subFieldOpen && (
+        <SubFieldsDialog
+          handleClose={() => {
+            setSubFieldOpen(false);
+          }}
+          fields={values?.subFields || []}
+          setFieldValue={setFieldValue}
+        />
+      )}
     </Box>
   );
 };

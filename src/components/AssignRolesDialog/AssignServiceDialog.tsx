@@ -13,6 +13,8 @@ import CustomTabs, { CustomTab } from '../CustomTabs';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
 
 const AssignServiceDialog = ({
   onSuccess,
@@ -37,6 +39,7 @@ const AssignServiceDialog = ({
 
   const [columns, setColumns] = useState(null);
   const [tabValue, setTabValue] = useState(0);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const defaultColumns = [
     {
@@ -61,50 +64,64 @@ const AssignServiceDialog = ({
     return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Service Master&view=true')
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
-        columns = [...newColumns, ...getStaticFields()];
-        if (hideQty) {
-          setColumns([...columns]);
-        } else {
-          setColumns([...defaultColumns, ...columns]);
-        }
-      });
+  const fetchGridColumns = async () => {
+    try {
+      let data;
+      if (isOffline) {
+        data = await findOne(objectStore.resource, objectStore.serviceMaster);
+      } else {
+        const response = await axiosInstance().get('/field?resource=Service Master&view=true');
+        data = response?.data?.data;
+      }
+      let columns = [];
+      let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
+      columns = [...newColumns, ...getStaticFields()];
+      if (hideQty) {
+        setColumns([...columns]);
+      } else {
+        setColumns([...defaultColumns, ...columns]);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
-  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
-    dispatch({ type: 'loading', loading: true });
-
-    const queryString = getQueryString();
-    axiosInstance()
-      .get(`${serviceMaster.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
-      .then(({ data }) => {
-        let rows = data.data.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['qty'] = 1;
-          finalObject['unitMain'] = u?.unit;
-          finalObject['pricingMethodMain'] = u?.pricingMethod;
-          const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
-          if (qtyAdded.length) {
-            finalObject['qty'] = qtyAdded[0].qty;
-          }
-          return {
-            ...finalObject
-          };
-        });
-        dispatch({ type: 'initialize', data: rows, count: data.count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
+    try {
+      dispatch({ type: 'loading', loading: true });
+      let data, count;
+      if (isOffline) {
+        data = await findAll(objectStore.serviceMaster);
+        data = data?.filter((d: any) => !ids?.includes(d?._id?.toString()));
+        count = data?.length;
+      } else {
+        const queryString = getQueryString();
+        const response = await axiosInstance().get(`${serviceMaster.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      let rows = data?.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+        finalObject['qty'] = 1;
+        finalObject['unitMain'] = u?.unit;
+        finalObject['pricingMethodMain'] = u?.pricingMethod;
+        const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
+        if (qtyAdded.length) {
+          finalObject['qty'] = qtyAdded[0].qty;
+        }
+        return {
+          ...finalObject
+        };
       });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+      dispatch({ type: 'loading', loading: false });
+    }
   };
 
   const getQueryString = () => {
@@ -221,7 +238,7 @@ const AssignServiceDialog = ({
           isAddButtonVisible={true}
           setQueryString={false}
         />
-        {pricingCondition && (
+        {pricingCondition && !isOffline && (
           <Box>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
               <CustomTab value={0} label={`${routes.pricingCondition.title} Services`} />
@@ -239,8 +256,9 @@ const AssignServiceDialog = ({
             onSaveEdit={onSaveEdit}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
+            showFilters={!isOffline}
             resource={sidebarResource.serviceMaster}
+            isClientSideGrid={isOffline}
           />
         ) : (
           <Box p={2} height={500}>

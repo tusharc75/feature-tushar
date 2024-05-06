@@ -1,5 +1,6 @@
-import { Box, Chip, Dialog, IconButton, MenuItem, Tooltip, Typography } from '@material-ui/core';
+import { Box, Chip, Dialog, IconButton, MenuItem, Typography } from '@material-ui/core';
 import { Delete as DeleteIcon } from '@material-ui/icons';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
 import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
@@ -27,7 +28,6 @@ import ApprovalProcessDialog from './ApprovalProcessDialog';
 import GenerateAutoPassword from './GenerateAutoPassword';
 import ManageUserDialog from './ManageUserDialog';
 import UserSetupDialog from './UserSetupDialog';
-import axios, { CancelTokenSource } from 'axios';
 
 const User: FC = () => {
   const renderedFrom = camelCase(routes?.user.title);
@@ -88,7 +88,10 @@ const User: FC = () => {
                 {row?.original?.regionalWideRole}
               </Link>
               {row?.original?.restRegionalWideRoles.length > 0 && (
-                <span className="createdAtTime badge-date">{`+${row?.original?.restRegionalWideRoles.length} more..`}</span>
+                <span className="createdAtTime badge-date">
+                  <span className="hidden">&nbsp;&nbsp;</span>
+                  {`+${row?.original?.restRegionalWideRoles.length} more..`}
+                </span>
               )}
             </h5>
           </>
@@ -106,17 +109,17 @@ const User: FC = () => {
       Cell: ({ row }) => (
         <div style={{ width: 150 }}>
           {row?.original?.status ? (
-            <Tooltip title="Inactive">
+            <HtmlTooltip title="Inactive">
               <Typography>
                 <FaUserAltSlash className="text-error ml-2" />
               </Typography>
-            </Tooltip>
+            </HtmlTooltip>
           ) : (
-            <Tooltip title="Active">
+            <HtmlTooltip title="Active">
               <Typography>
                 <FaUserCheck className="text-success ml-2" />
               </Typography>
-            </Tooltip>
+            </HtmlTooltip>
           )}{' '}
         </div>
       )

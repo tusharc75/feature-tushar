@@ -1,9 +1,10 @@
-import { flatMapDeep, isEmpty } from 'lodash';
+import { flatMapDeep, isEmpty, snakeCase } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { TColType } from './TableComponents/TableHelperComponents';
 import xlsx from 'xlsx-js-style';
+import { TColType } from './TableComponents/TableHelperComponents';
+import { FilterModel } from './types';
 
 export const childrenProperty = 'subRows';
 
@@ -419,7 +420,7 @@ export const createFilterModel = (formValues, coloums) => {
       case 'multiSelect':
       case 'dropDown':
         if ((col.lookup || col.dataList) && formValues[fieldName]) {
-          const options = coloums?.find((item) => item.fieldName == fieldName)?.option || [];
+          const options = coloums?.find((item) => item.fieldName === fieldName)?.option || [];
           if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
             filterModel.set(fieldName, {
               operator: 'OR',
@@ -466,4 +467,17 @@ export const createFilterModel = (formValues, coloums) => {
   }
 
   return Object.fromEntries(filterModel);
+};
+
+export const filtermodelToFormValue = (filtermodel: FilterModel) => {
+  const formValues = {};
+  for (const [key, value] of Object.entries(filtermodel)) {
+    if (value.filter?.['from'] || value.filter?.['to']) {
+      formValues[`from_${snakeCase(key)}`] = new Date(value.filter['from']);
+      formValues[`to_${snakeCase(key)}`] = new Date(value.filter['to']);
+    } else if (value.filter) {
+      formValues[key] = value.filter;
+    }
+  }
+  return formValues;
 };

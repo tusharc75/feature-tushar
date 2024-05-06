@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, MATERIAL_TYPE, fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, asyncForEach, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, MenuItem, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -29,11 +29,14 @@ import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQtyDialog';
 import History from '../../ProductInventory/LedgerHistory';
 import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
-import { camelCase, isEmpty } from 'lodash';
+import { camelCase } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import HideWhenOffline from 'src/components/HideWhenOffline';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -58,6 +61,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     setServiceOption([
@@ -106,11 +111,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
   }, [columns, renderCount, selectedServiceOption, tabValue]);
 
   const fetchColumns = async () => {
-    var fields = await fetch_child_resource_fields(
-      CHILD_RESOURCE.fieldTicketMateial,
-      fieldTicketData?.currency,
-      allowedToEdit && !fieldTicketData?.quotation
-    );
+    var fields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
     setAllFields(JSON.parse(JSON.stringify(fields)));
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     const column: any = [
@@ -126,16 +127,13 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
       }
     ];
 
-    const {
-      data: { data }
-    } = await axiosInstance().put(`/field/find-field-labels`, {
-      fields: [
-        {
-          resource: 'Product',
-          fieldNames: ['productName', 'productNumber', 'productDescription']
-        }
-      ]
-    });
+    let data;
+    if (isOffline) {
+      data = await findOne(objectStore.resource, 'fieldTicketMaterialProduct');
+    } else {
+      const response = await axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }] });
+      data = response?.data?.data;
+    }
     const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
     productFields?.forEach((e) => {
       if (e?.fieldName === 'productName') {
@@ -247,7 +245,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
-            {row.original?.isqtyRequestLog && (
+            {row.original?.isqtyRequestLog && !isOffline && (
               <HtmlTooltip title="View Requests">
                 <IconButton
                   size="small"
@@ -260,22 +258,24 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
                 </IconButton>
               </HtmlTooltip>
             )}
-            <HtmlTooltip title="History">
-              <IconButton
-                size="small"
-                aria-label="History"
-                onClick={() => {
-                  setHistoryDialog({
-                    open: true,
-                    _id: row?.original?._id,
-                    product: row?.original?.materialId,
-                    productName: row?.original?.productName
-                  });
-                }}
-              >
-                <HistoryIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </HtmlTooltip>
+            {!isOffline && (
+              <HtmlTooltip title="History">
+                <IconButton
+                  size="small"
+                  aria-label="History"
+                  onClick={() => {
+                    setHistoryDialog({
+                      open: true,
+                      _id: row?.original?._id,
+                      product: row?.original?.materialId,
+                      productName: row?.original?.productName
+                    });
+                  }}
+                >
+                  <HistoryIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
             <HtmlTooltip title={'Delete'}>
               <span>
                 <IconButton
@@ -299,76 +299,122 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
   };
 
   const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
-
-    let api = `${fieldTicket.api}/${fieldTicketData?._id}/material?type=product`;
-    if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
-      api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
-    }
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data } }) => {
-        const consumables = data?.material;
-        consumables?.forEach((parent, i) => {
-          parent.index = i + 1;
-          parent.productName = parent?.productDetail?.productName;
-          parent.productDescription = parent?.productDetail?.productDescription;
-          parent.productNumber = parent?.productDetail?.productNumber;
-          parent.serviceId = parent?.service?.optionValue;
-          parent.service = parent?.service?.optionLabel;
-        });
-        dispatch({ type: 'initialize', data: consumables, count: consumables?.length });
-        dispatch({ type: 'loading', loading: false });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    try {
+      dispatch({ type: 'loading', loading: true });
+      dispatch({ type: 'selection', selectedRecords: [] });
+      let consumables;
+      if (isOffline) {
+        consumables = await findAll(objectStore.fieldTicketMaterial);
+        consumables = consumables?.filter((e) => e?.fieldTicketId === fieldTicketData?._id && (e?.type === MATERIAL_TYPE.product && !e?.isRental));
+        if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
+          consumables = consumables?.filter((e) => e?.service?.optionValue === selectedServiceOption?.optionValue);
+        }
+      } else {
+        let api = `${fieldTicket.api}/${fieldTicketData?._id}/material?type=${MATERIAL_TYPE.product}`;
+        if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
+          api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
+        }
+        const response = await axiosInstance().get(api);
+        consumables = response?.data?.data?.material;
+      }
+      consumables?.forEach((parent, i) => {
+        parent.index = i + 1;
+        parent.productName = parent?.productDetail?.productName;
+        parent.productDescription = parent?.productDetail?.productDescription;
+        parent.productNumber = parent?.productDetail?.productNumber;
+        parent.serviceId = parent?.service?.optionValue;
+        parent.service = parent?.service?.optionLabel;
       });
+      dispatch({ type: 'initialize', data: consumables, count: consumables?.length });
+      dispatch({ type: 'loading', loading: false });
+    } catch (error) {
+      dispatch({ type: 'loading', loading: false });
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleSubmit = async (rows) => {
     setSubmitting(true);
-    var taxCodeData: any = null;
-    if (fieldTicketData?.taxCode) {
-      const {
-        data: { data }
-      } = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.product}`
-      );
-      if (data?.length) {
-        taxCodeData = data[0];
+    if (isOffline) {
+      const material = [];
+      for (const d of rows) {
+        const element: any = {};
+        element.materialId = d._id;
+        element.type = MATERIAL_TYPE.product;
+        element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption : null;
+        element.qty = d.qty ? parseFloat(d.qty) : 1;
+        element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+        element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
+        element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
+        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+        element.estimateJobDuration = 1;
+        if (calValues && calValues['estimateJobDuration']) element.estimateJobDuration = calValues['estimateJobDuration'];
+        let id = Math.floor(Math.random() * 1000000).toString();
+        element.productDetail = {
+          productName: d.productName,
+          productDescription: d.productDescription,
+          productNumber: d.productNumber,
+        }
+        element.fieldTicketId = fieldTicketData?._id;
+        element._id = id;
+        await insertUpdate(objectStore.fieldTicketMaterial, id, element);
+        material.push(element);
+      };
+      let updatedData = [];
+      const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+      if (result?.data) {
+        updatedData = [...result?.data, ...material];
+      } else {
+        updatedData = [...material];
       }
-    }
-    const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = MATERIAL_TYPE.product;
-      element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-      element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
-      element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
-      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      element.estimateJobDuration = 1;
-      if (calValues && calValues['estimateJobDuration']) {
-        element.estimateJobDuration = calValues['estimateJobDuration'];
-      }
-      if (taxCodeData) {
-        element.taxCode = taxCodeData?.optionValue;
-        element.taxPercentage = taxCodeData?.taxRate || 0;
-      }
-      material.push(element);
-    });
-    if (fieldTicketData?.pricingCondition?.optionValue) {
-      const priceData: any = await calculatePrice(fieldTicketData, material);
-      AddMaterial(
-        material,
-        priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue)
-      );
+      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { type: 'fieldTicketMaterial', data: updatedData, _id: fieldTicketData?._id });
+      setConsumablesDialog(false);
+      fetchData();
+      setSubmitting(false);
     } else {
-      AddMaterial(material, null);
+      var taxCodeData: any = null;
+      if (fieldTicketData?.taxCode) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(
+          `${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.product}`
+        );
+        if (data?.length) {
+          taxCodeData = data[0];
+        }
+      }
+      const material: any = [];
+      rows.forEach((d) => {
+        const element: any = {};
+        element.materialId = d._id;
+        element.type = MATERIAL_TYPE.product;
+        element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
+        element.qty = d.qty ? parseFloat(d.qty) : 1;
+        element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+        element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
+        element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
+        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+        element.estimateJobDuration = 1;
+        if (calValues && calValues['estimateJobDuration']) {
+          element.estimateJobDuration = calValues['estimateJobDuration'];
+        }
+        if (taxCodeData) {
+          element.taxCode = taxCodeData?.optionValue;
+          element.taxPercentage = taxCodeData?.taxRate || 0;
+        }
+        material.push(element);
+      });
+      if (fieldTicketData?.pricingCondition?.optionValue) {
+        const priceData: any = await calculatePrice(fieldTicketData, material);
+        AddMaterial(
+          material,
+          priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue)
+        );
+      } else {
+        AddMaterial(material, null);
+      }
     }
   };
 
@@ -413,50 +459,85 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
   };
 
   const handleDelete = async (rows) => {
-    setDeleting(true);
-    axiosInstance()
-      .put(`${fieldTicket.api}/${fieldTicketData?._id}/material/delete`, { ids: rows })
-      .then(({ data }) => {
+    try {
+      setDeleting(true);
+      if (isOffline) {
+        const materialIdsToDelete = rows.map((d) => d.id);
+        await asyncForEach(materialIdsToDelete, async (id) => {
+          await deleteOne(objectStore.fieldTicketMaterial, id);
+        });
+
+        const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+        const alreadyOfflineDataSyncStoredRows = result?.data || [];
+        let updatedData = alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id));
+        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { type: 'fieldTicketMaterial', data: updatedData, _id: fieldTicketData?._id });
+        //for onlineSync
+        const deleteData = {
+          "cost": [],
+          "material": materialIdsToDelete,
+          "fieldTicketId": fieldTicketData?._id
+        }
+        let id = Math.floor(Math.random() * 1000000).toString();
+        await insertUpdate(objectStore.offlineDataSync, id, { type: 'fieldTicketMaterialDelete', data: deleteData, _id: id })
+      } else {
+        const response = await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material/delete`, { ids: rows });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: data?.message
+          message: response?.data?.message
         });
-        setDeleting(false);
-        fetchData();
-        setDeleteData(null);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-        setDeleteData(null);
-      });
+      }
+      setDeleting(false);
+      fetchData();
+      setDeleteData(null);
+    } catch (error) {
+      setDeleting(false);
+      toastConfig.setToastConfig(error);
+      setDeleteData(null);
+    }
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    setUpdating(true);
-    axiosInstance()
-      .put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows })
-      .then(({ data }) => {
+    try {
+      setUpdating(true);
+      if (isOffline) {
+        const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+        const alreadyOfflineDataSyncStoredRows = result?.data || [];
+        const toAddOfflineDataSyncStoreRows = [];
+        for (const row of rows) {
+          row.fieldTicketId = fieldTicketData?._id;
+          row.type = MATERIAL_TYPE.product;
+          const existingRow = await findOne(objectStore.fieldTicketMaterial, row._id);
+          await insertUpdate(objectStore.fieldTicketMaterial, row._id, { ...existingRow, ...row });
+          const foundIndex = alreadyOfflineDataSyncStoredRows.findIndex((d: any) => d._id === row._id);
+          if (foundIndex !== -1) {
+            alreadyOfflineDataSyncStoredRows[foundIndex] = { ...existingRow, ...row };
+          } else {
+            toAddOfflineDataSyncStoreRows.push({ ...existingRow, ...row });
+          }
+        }
+        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { type: 'fieldTicketMaterial', data: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows], _id: fieldTicketData?._id });
+      } else {
+        const response = await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: data?.message
+          message: response?.data?.data?.message
         });
-        fetchData();
-        if (saveAndNext) {
-          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
-          setIsConsumableEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
-        } else {
-          setIsConsumableEdit({ open: false, data: null, showSaveAndNext: false });
-        }
-        setUpdating(false);
-        setIsBulkEdit(false);
-      })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
+      }
+      fetchData();
+      if (saveAndNext) {
+        const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
+        setIsConsumableEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+      } else {
+        setIsConsumableEdit({ open: false, data: null, showSaveAndNext: false });
+      }
+      setUpdating(false);
+      setIsBulkEdit(false);
+    } catch (err) {
+      setUpdating(false);
+      toastConfig.setToastConfig(err);
+    }
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
@@ -494,15 +575,17 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
   const rightSideContents = () => {
     return (
       <>
-        <Button
-          disabled={!Boolean(selectedRecords?.length)}
-          onClick={() => setOpenConsumablesQtyDialog(true)}
-          color="primary"
-          size="small"
-          variant="contained"
-        >
-          {consumeRequest ? 'Request ' : 'Consume '} {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
-        </Button>
+        <HideWhenOffline>
+          <Button
+            disabled={!Boolean(selectedRecords?.length)}
+            onClick={() => setOpenConsumablesQtyDialog(true)}
+            color="primary"
+            size="small"
+            variant="contained"
+          >
+            {consumeRequest ? 'Request ' : 'Consume '} {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
+          </Button>
+        </HideWhenOffline>
       </>
     );
   };
@@ -564,7 +647,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
       )}
       <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
         <CustomTab value={0} label={'Products/Consumables'} primaryColor={true} />
-        <CustomTab value={1} label={'Technicians'} primaryColor={true} />
+        {!isOffline && <CustomTab value={1} label={'Technicians'} primaryColor={true} />}
       </CustomTabs>
 
       <TabPanel value={tabValue} index={0}>
@@ -574,7 +657,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
               <DetailsPageHeader
                 isAddButtonVisible={true}
                 addButtonProps={{ onClick: () => setConsumablesDialog(true) }}
-                isActionButtonVisible={true}
+                isActionButtonVisible={!isOffline}
                 actionButtonMenuItems={actionButtonMenuItems()}
                 actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
                 rightSideContents={rightSideContents()}
@@ -586,7 +669,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
             <Grid item xs={12} md={12} sm={12}>
               {columns ? (
                 <CustomReactTable
-                  height={'300px'}
+                  height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
                   columns={columns}
                   state={state}
                   dispatch={dispatch}
@@ -607,7 +690,12 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
         </Box>
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        <Technicians allowedToEdit={allowedToEdit} fieldTicketData={fieldTicketData} selectedService={selectedServiceOption} />
+        <Technicians
+          allowedToEdit={allowedToEdit}
+          fieldTicketData={fieldTicketData}
+          selectedService={selectedServiceOption}
+          stepFullScreen={stepFullScreen}
+        />
       </TabPanel>
       {consumablesDialog && (
         <AssignProductDialog

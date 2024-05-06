@@ -7,7 +7,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
-import { dateFormat, dateTimeFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
+import { dateFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
@@ -78,6 +78,26 @@ const History = ({ id }) => {
       )
     },
     {
+      accessor: 'warehouse',
+      Header: routes.warehouse.title,
+      minWidth: 200,
+      width: 200,
+      Cell: ({ row }) => (
+        <div>
+          {row?.original?.warehouse ? (
+            <a
+              className="link text-truncate"
+              href={`${routes.warehouseDetail.path}/${row?.original?.warehouse?.optionValue}`}
+              target="_blank">
+              {row?.original?.warehouse?.optionLabel}
+            </a>
+          ) : (
+            <NoDataCell />
+          )}
+        </div>
+      )
+    },
+    {
       accessor: 'service',
       Header: 'Service',
       minWidth: 150,
@@ -108,8 +128,8 @@ const History = ({ id }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.startDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.startDate)?.format(dateTimeFormat)}>
-              {moment(row?.original?.startDate)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={moment(row?.original?.startDate)?.format(dateFormat)}>
+              {moment(row?.original?.startDate)?.format(dateFormat)}
             </h5>
           ) : (
             <NoDataCell />
@@ -128,8 +148,8 @@ const History = ({ id }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.endDate ? (
-            <h5 className="text-truncate" title={moment(row?.original?.endDate)?.format(dateTimeFormat)}>
-              {moment(row?.original?.endDate)?.format(dateTimeFormat)}
+            <h5 className="text-truncate" title={moment(row?.original?.endDate)?.format(dateFormat)}>
+              {moment(row?.original?.endDate)?.format(dateFormat)}
             </h5>
           ) : (
             <NoDataCell />
@@ -137,25 +157,25 @@ const History = ({ id }) => {
         </>
       )
     },
-    {
-      accessor: 'status',
-      Header: 'Status',
-      minWidth: 150,
-      width: 150,
-      disableFilters: true,
-      disableSortBy: true,
-      Cell: ({ row }) => (
-        <>
-          {row?.original?.status ? (
-            <h5 className="text-truncate" title={row?.original?.status}>
-              {row?.original?.status}
-            </h5>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    }
+    // {
+    //   accessor: 'status',
+    //   Header: 'Status',
+    //   minWidth: 150,
+    //   width: 150,
+    //   disableFilters: true,
+    //   disableSortBy: true,
+    //   Cell: ({ row }) => (
+    //     <>
+    //       {row?.original?.status ? (
+    //         <h5 className="text-truncate" title={row?.original?.status}>
+    //           {row?.original?.status}
+    //         </h5>
+    //       ) : (
+    //         <NoDataCell />
+    //       )}
+    //     </>
+    //   )
+    // }
   ];
 
   useEffect(() => {

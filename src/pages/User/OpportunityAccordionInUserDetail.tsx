@@ -1,38 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Grid,
-  Box,
-  IconButton,
-  Typography,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Tooltip,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  Button
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { MoreVert } from '@material-ui/icons';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import { displayDate } from '../../services/util';
-import routes from './../../components/Helpers/Routes';
-import { useHistory } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { useEffect, useState } from 'react';
 import { BiCustomize } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
-import ManageOpportunityDialog from './../Opportunities/ManageOpportunityDialog';
-import { useData } from '../../StateProvider/Provider';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { MoreVert } from '@material-ui/icons';
-import { formatAmountWithCurrency } from '../../constants/helpers';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import { IoCalendarOutline } from 'react-icons/io5';
+import { Link, useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import { formatAmountWithCurrency } from '../../constants/helpers';
+import { displayDate } from '../../services/util';
+import routes from './../../components/Helpers/Routes';
+import ManageOpportunityDialog from './../Opportunities/ManageOpportunityDialog';
 
 export default function OpportunityAccordionInUserDetail({ opportunities, expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit }) {
   const history = useHistory();
@@ -180,9 +164,9 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                                 ) : (
                                   <span className="d-flex gap-2 align-items-center">
                                     <Typography className="detailName">{obj.opportunityName}</Typography>{' '}
-                                    <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
+                                    <HtmlTooltip title={`${obj.opportunityName} belongs to different entity`}>
                                       <InfoOutlinedIcon fontSize="small" />
-                                    </Tooltip>
+                                    </HtmlTooltip>
                                   </span>
                                 )}
                               </Grid>

@@ -35,6 +35,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
+import WarningIcon from '@material-ui/icons/Warning';
 
 
 let cancelTokenSource = null;
@@ -85,8 +86,6 @@ const Report = () => {
     const fetchGridColumns = async () => {
         try {
             setLoadingColumns(true);
-
-
             let columns = [];
             let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${type}/column`);
             let newColumns = generateColumns(type, columnFields);
@@ -97,6 +96,11 @@ const Report = () => {
                     }
                     if (o?.accessor === 'qty') {
                         o.cell = ({ row }) => CreditDebitRenderer(row)
+                    }
+                }
+                if (type === "fleet-report") {
+                    if (o?.accessor === 'unitNumber') {
+                        o.cell = ({ row }) => UnitNameRenderer(row)
                     }
                 }
                 if (o?.accessor === 'reference') {
@@ -347,6 +351,27 @@ const Report = () => {
                 }
             </div>
         )
+    }
+
+    const UnitNameRenderer = (row) => {
+        return <div>
+            <Link
+                className="link text-truncate"
+                title={row?.original?.unitNumber}
+                to={`${routes.unitDetail.path}/${row?.original?._id}`}
+                target="_blank">
+                {row?.original?.unitNumber}
+            </Link>
+            {row?.original?.unitInOtherDeal &&
+                <Box ml={1} >
+                    <HtmlTooltip title={"Unit is assigned to multiple active contracts"} placement="top" arrow>
+                        <WarningIcon
+                            style={{ fontSize: '16px' }}
+                            fontSize="small" color="error" />
+                    </HtmlTooltip>
+                </Box>
+            }
+        </div>
     }
 
     const CreditDebitTypeRenderer = (row) => {
@@ -642,7 +667,7 @@ const Report = () => {
                     <CustomBreadCrumbs
                         routes={[
                             { title: 'Reports', path: '/reports' },
-                            { title: resourceStartCase, path: '' }
+                            { title: reportConfig?.title }
                         ]}
                     />
                     {showGrid && (

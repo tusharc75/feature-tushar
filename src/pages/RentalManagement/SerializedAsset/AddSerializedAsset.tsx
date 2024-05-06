@@ -473,32 +473,31 @@ const AddSerializedAsset = ({
                   <Box style={{ display: 'inline' }}>
                     {serializedProducts.length > 0
                       ? serializedProducts.map((d) => (
-                          <Box
-                            m={0.5}
-                            p={1}
-                            border={1}
-                            className={`cursor-pointer ${
-                              selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                        <Box
+                          m={0.5}
+                          p={1}
+                          border={1}
+                          className={`cursor-pointer ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                             }`}
-                            borderColor="var(--common-border-color)"
-                            onClick={() => {
-                              if (selectedProduct === d.id) {
-                                setSelectedProduct(null);
-                              } else {
-                                setSelectedProduct(d.id);
-                              }
-                            }}
-                            style={{ display: 'inline-block' }}
-                          >
-                            {d?.qty < 0 ? (
-                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                            ) : d?.qty === 0 ? (
-                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                            ) : (
-                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                            )}
-                          </Box>
-                        ))
+                          borderColor="var(--common-border-color)"
+                          onClick={() => {
+                            if (selectedProduct === d.id) {
+                              setSelectedProduct(null);
+                            } else {
+                              setSelectedProduct(d.id);
+                            }
+                          }}
+                          style={{ display: 'inline-block' }}
+                        >
+                          {d?.qty < 0 ? (
+                            <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                          ) : d?.qty === 0 ? (
+                            <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                          ) : (
+                            <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                          )}
+                        </Box>
+                      ))
                       : null}
                   </Box>
                 </Box>
@@ -574,10 +573,10 @@ const AddSerializedAsset = ({
                           selectedRecords?.length !== 0 && !checkUniqWarehouse()
                             ? 'Direct transfer to customer location'
                             : referenceType === 'Rental Job'
-                            ? 'Add to Job'
-                            : replaceAssets
-                            ? 'Replace'
-                            : 'Add'
+                              ? 'Add to Job'
+                              : replaceAssets
+                                ? 'Replace'
+                                : 'Add'
                         }
                       >
                         <Button
@@ -689,10 +688,11 @@ const AddSerializedAsset = ({
           referenceType={referenceType}
           referenceData={{
             transferFromPlant: selectedRecords[0]?.warehouseId,
-            transferToPlant: referenceData?.warehouse,
+            transfertoPlant: referenceData?.warehouse,
             wellName: referenceData?.wellName,
             wellNumber: referenceData?.wellNumber,
-            afeNumber: referenceData?.afeNumber
+            afeNumber: referenceData?.afeNumber,
+            transferType: 'Internal'
           }}
         />
       ) : null}

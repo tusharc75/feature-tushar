@@ -81,7 +81,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
                   <IconButton
                     size="small"
                     onClick={() => {
-                      window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
+                        window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
                     }}
                   >
                     <OpenInNewIcon fontSize="small" color="primary" />
