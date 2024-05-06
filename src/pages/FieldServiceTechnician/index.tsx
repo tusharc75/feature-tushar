@@ -171,7 +171,7 @@ const FieldServiceTechnician = () => {
     if (isOffline) {
       const _id: any = Math.floor(Math.random() * 1000000).toString();
       const formattedValue: any = restoreObjKeysWithValues(tempInitialData, fieldTicketField);
-      formattedValue._id = _id;
+      formattedValue['_id'] = _id;
       await insertUpdate(objectStore.fieldTicket, _id, formattedValue);
       await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...tempInitialData, _id, offlineSyncStatus: 'new' } });
       setIsSubmitting(false);
