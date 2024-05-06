@@ -44,7 +44,9 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
           <div
             className={`${styles.singleService} singlePriority ${bgColor}`}
             style={{ minWidth: '100px', minHeight: '50px', ...pos }}
-            onClick={handleSelect}
+            onClick={()=>{
+              handleSelect(null, {_id: service?.technician, technicianHistoryId: service?._id}, '')
+            }}
           >
             <HtmlTooltip
               title={

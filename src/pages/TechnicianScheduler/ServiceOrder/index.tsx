@@ -6,12 +6,13 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { dateFormat, sidebarResource } from 'src/constants/helpers';
+import { dateFormat, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from 'src/StateProvider/Provider';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 
 const TECHNICIAN_RESOURCE = [
   {
@@ -26,7 +27,7 @@ const TECHNICIAN_RESOURCE = [
   }
 ];
 
-function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
+function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
   const {
     state: { permissions }
   }: any = useData();
@@ -37,6 +38,8 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
   const [selectedType, setSelectedType] = useState(serviceTypes[0]?.key || '');
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
+
+  const [isUnAssigning, setIsUnAssigning] = useState(false)
 
   useEffect(() => {
     const options: any = [];
@@ -49,9 +52,9 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
     setSelectedType(options[0]?.key || '');
   }, []);
 
-  useEffect(()=>{
-    updateSelectedRecord(selectedRecords) 
-  },[selectedRecords])
+  useEffect(() => {
+    updateSelectedRecord(selectedRecords);
+  }, [selectedRecords]);
 
   useEffect(() => {
     fetchData();
@@ -71,8 +74,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
         data?.forEach((ele, index) => {
           const obj: any = { ...ele };
           obj.index = index + 1;
-          obj._id = ele?.service?.uniqueId,
-          obj.resourceId = ele._id;
+          (obj._id = ele?.service?.uniqueId), (obj.resourceId = ele._id);
           obj.warehouse = ele?.warehouse?.optionValue;
           obj.fieldServiceOrder = ele?.fieldServiceOrder?.optionLabel;
           obj.fieldServiceOrderId = ele?.fieldServiceOrder?.optionValue;
@@ -263,6 +265,20 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
     setColumns(columns);
   };
 
+  const handleUnAssign = () => {
+    setIsUnAssigning(true)
+    axiosInstance()
+      .put(`${rentalManagement.api}/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?.technicianHistoryId }] })
+      .then(() => {
+        handleSucess();
+        setIsUnAssigning(false)
+      })
+      .catch((error) => {
+        setIsUnAssigning(false)
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const height = 400;
   return (
     <Box pt={3}>
@@ -284,7 +300,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
         />
       </Box>
 
-      {columns  ? (
+      {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={`${height}px`}
@@ -313,6 +329,16 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
           handleClose={() => {
             handleClose();
           }}
+        />
+      )}
+
+      {unAssignTechnicianDialog.open && (
+        <ConfirmationDialogRaw
+          open={true}
+          message={`Are you sure you want to un-assign ?`}
+          okBtnLoading={isUnAssigning}
+          onClose={handleClose}
+          onOk={handleUnAssign}
         />
       )}
     </Box>
