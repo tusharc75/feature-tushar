@@ -2514,6 +2514,7 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'historicalReport',
     defaultColumn: true,
+    notMultiSelectFields: ['frequency']
   },
   {
     title: 'Unit Downtime Report',
