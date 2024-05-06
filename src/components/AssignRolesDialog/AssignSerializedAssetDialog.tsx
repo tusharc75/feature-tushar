@@ -135,6 +135,9 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       if (referenceData?.warehouse) {
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
       }
+      if (referenceData?.rentalJob) {
+        deepFilter = `${deepFilter}&rentalJobId=${referenceData?.rentalJob}`;
+      }
     }
 
     if (showFilteredRecordsOnly) {
