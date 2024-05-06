@@ -215,7 +215,7 @@ const CalendarData: React.FC<TCalendarProps> = ({ activity }) => {
               <span className="text-[#6B6B6B] dark:text-gray-200">{moment(service.startDate).format(dateTimeFormat)}</span>
             </span>
             <Tooltip title={<p>{service?.fieldTicket[0]?.fieldTicketNumber}</p>} placement="top">
-              <div className=" rounded-md px-3 py-2 min-h-[20px] flex flex-wrap" style={{ ...bgColor }}>
+              <div className={`rounded-md px-3 py-2 min-h-[20px] flex flex-wrap ${bgColor}`}>
                 <h6 className={`${styles.servicesText} truncate text-sm`} title={service?.serviceDetail?.serviceName}>
                   {service?.serviceDetail?.serviceName}
                 </h6>
