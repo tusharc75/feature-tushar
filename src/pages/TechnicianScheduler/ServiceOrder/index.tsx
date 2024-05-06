@@ -12,6 +12,7 @@ import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from 'src/StateProvider/Provider';
+import UnAssignTechnicianDialog from '../Roadmap/UnAssignTechnicianDialog';
 
 const TECHNICIAN_RESOURCE = [
   {
@@ -26,7 +27,7 @@ const TECHNICIAN_RESOURCE = [
   }
 ];
 
-function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
+function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
   const {
     state: { permissions }
   }: any = useData();
@@ -306,6 +307,18 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updat
         <AssignTechnicianDialog
           technicianData={assignTechnicianDialog.data}
           selectedServiceOrder={selectedRecords}
+          handleSucess={() => {
+            fetchData();
+            handleSucess();
+          }}
+          handleClose={() => {
+            handleClose();
+          }}
+        />
+      )}
+      {unAssignTechnicianDialog.open && (
+        <UnAssignTechnicianDialog
+          technicianData={unAssignTechnicianDialog.data}
           handleSucess={() => {
             fetchData();
             handleSucess();
