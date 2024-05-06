@@ -1,6 +1,6 @@
 import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
+import { isArray, isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -65,17 +65,18 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
           });
       } else {
         const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
-        if (referenceData?.customerAccount) {
-          fieldsDataForCreate?.forEach((e) => {
-            if (e.fieldName === 'customerAccount') {
-              if (e.type === 'multiSelect') {
-                tempInitialData.customerAccount = [referenceData?.customerAccount];
-              } else {
-                tempInitialData.customerAccount = referenceData?.customerAccount;
-              }
-              e.isUneditable = true;
+        for (const key in referenceData) {
+          if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+            const field: any = fieldsDataForCreate?.find((e) => e.fieldName === key);
+            if (field.type === 'multiSelect' && !isArray(referenceData[key])) {
+              tempInitialData[key] = [referenceData[key]];
             }
-          });
+            else {
+              tempInitialData[key] = referenceData[key];
+            }
+            field.disableOnEdit = true;
+            field.isUneditable = true;
+          }
         }
         setInitialData({
           fields: fieldsDataForCreate,

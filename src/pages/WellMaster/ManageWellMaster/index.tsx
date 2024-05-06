@@ -20,7 +20,7 @@ import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../../StateProvider/Provider';
-import { isEqual } from 'lodash';
+import { isArray, isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import InputField from 'src/components/Helpers/InputField';
@@ -77,22 +77,24 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
             });
         } else {
           setTitle(`Create ${routes.wellMaster.title}`);
-          let initialData: any = { ...getObjKeys('', fieldsDataForCreate) };
-          if (referenceData?.customerAccount) {
-            fieldsDataForCreate?.forEach((e) => {
-              if (e.fieldName === 'customerAccount') {
-                if (e.type === 'multiSelect') {
-                  initialData.customerAccount = [referenceData?.customerAccount];
-                } else {
-                  initialData.customerAccount = referenceData?.customerAccount;
-                }
+          let tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+          for (const key in referenceData) {
+            if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+              const field: any = fieldsDataForCreate?.find((e) => e.fieldName === key);
+              if (field.type === 'multiSelect' && !isArray(referenceData[key])) {
+                tempInitialData[key] = [referenceData[key]];
               }
-            });
+              else {
+                tempInitialData[key] = referenceData[key];
+              }
+              field.disableOnEdit = true;
+              field.isUneditable = true;
+            }
           }
           setAllFields(fieldsDataForCreate);
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-            values: initialData
+            values: tempInitialData
           });
           setLoading(false);
         }
@@ -191,7 +193,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}
