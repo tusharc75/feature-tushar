@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover, Tooltip } from '@material-ui/core';
+import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import AppsIcon from '@material-ui/icons/Apps';
 import DonutLargeIcon from '@material-ui/icons/DonutLarge';
@@ -181,11 +181,11 @@ const StatusSelector: React.FC<StatusSelectorProps> = ({ selectedServiceStatus, 
         <div className="">
           <div className="[border-bottom:1px_solid_var(--common-border-color)] flex justify-between items-center px-[20px] py-[10px]">
             <h6 className="text-[16px] font-semibold">Status</h6>
-            <Tooltip title="Close" arrow placement="top" enterTouchDelay={0}>
+            <HtmlTooltip title="Close" arrow placement="top" enterTouchDelay={0}>
               <IconButton size="small" onClick={handleStatusSelectorClose}>
                 <Close />
               </IconButton>
-            </Tooltip>
+            </HtmlTooltip>
           </div>
           <div className="p-[0_20px_20px]">
             {Object.values(WORKORDER_TECHNICIAN_SERVICE_STATUS).map((s) => {

@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import Chip from '@material-ui/core/Chip';
-import { Link, useHistory } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import EditOutlined from '@material-ui/icons/EditOutlined';
-import AddOutlined from '@material-ui/icons/AddOutlined';
+import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
+import AddOutlined from '@material-ui/icons/AddOutlined';
 import DeleteIcon from '@material-ui/icons/Delete';
-import Tooltip from '@material-ui/core/Tooltip';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import axiosInstance from 'src/axios/axiosInstance';
-import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import EditOutlined from '@material-ui/icons/EditOutlined';
+import { useEffect, useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from 'src/StateProvider/actionTypes';
-import routes from 'src/components/Helpers/Routes';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 
 export default function AccountHierarchy({
   data,
@@ -27,7 +27,7 @@ export default function AccountHierarchy({
   onCreateNewAccount = null,
   canDelete = false,
   handleDelete = null,
-  accountResource,
+  accountResource
 }) {
   const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer();
@@ -63,7 +63,7 @@ export default function AccountHierarchy({
           subRows: generateNestedData(data, parent)
         };
         return res;
-      })
+      });
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
     }
   }, [data]);
@@ -113,7 +113,7 @@ export default function AccountHierarchy({
               )}
               {
                 <span style={{ display: 'flex', marginLeft: '4px' }}>
-                  <Tooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
+                  <HtmlTooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
                     <IconButton
                       size="small"
                       aria-label="Edit"
@@ -122,18 +122,18 @@ export default function AccountHierarchy({
                     >
                       <EditOutlined fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'} />
                     </IconButton>
-                  </Tooltip>
+                  </HtmlTooltip>
                   <Box mt={1} ml="2" />
-                  <Tooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
+                  <HtmlTooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
                     <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => onCreateNewAccount(row.original._id)}>
                       <AddOutlined fontSize="small" color={canCreate ? 'primary' : 'disabled'} />
                     </IconButton>
-                  </Tooltip>
-                  <Tooltip title={canDelete ? 'Delete' : "You don't have permission to delete"}>
+                  </HtmlTooltip>
+                  <HtmlTooltip title={canDelete ? 'Delete' : "You don't have permission to delete"}>
                     <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => handleDelete(row.original)}>
                       <DeleteIcon fontSize="small" color={canCreate ? 'error' : 'disabled'} />
                     </IconButton>
-                  </Tooltip>
+                  </HtmlTooltip>
                 </span>
               }
             </div>
@@ -212,7 +212,7 @@ export default function AccountHierarchy({
   //             )}
   //             {
   //               <span style={{ display: 'flex', marginLeft: '4px' }}>
-  //                 <Tooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
+  //                 <HtmlTooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
   //                   <IconButton
   //                     size="small"
   //                     aria-label="Edit"
@@ -221,18 +221,18 @@ export default function AccountHierarchy({
   //                   >
   //                     <EditOutlined fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'} />
   //                   </IconButton>
-  //                 </Tooltip>
+  //                 </HtmlTooltip>
   //                 <Box mt={1} ml="2" />
-  //                 <Tooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
+  //                 <HtmlTooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
   //                   <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => onCreateNewAccount(row.original._id)}>
   //                     <AddOutlined fontSize="small" color={canCreate ? 'primary' : 'disabled'} />
   //                   </IconButton>
-  //                 </Tooltip>
-  //                 <Tooltip title={canDelete ? 'Delete' : "You don't have permission to delete"}>
+  //                 </HtmlTooltip>
+  //                 <HtmlTooltip title={canDelete ? 'Delete' : "You don't have permission to delete"}>
   //                   <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => handleDelete(row.original)}>
   //                     <DeleteIcon fontSize="small" color={canCreate ? 'error' : 'disabled'} />
   //                   </IconButton>
-  //                 </Tooltip>
+  //                 </HtmlTooltip>
   //               </span>
   //             }
   //           </div>

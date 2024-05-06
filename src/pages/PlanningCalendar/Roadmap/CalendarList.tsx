@@ -1,8 +1,9 @@
+import { Box, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Box, Tooltip, Typography } from '@material-ui/core';
-import { TreeView, TreeItem } from '@material-ui/lab';
+import { TreeItem, TreeView } from '@material-ui/lab';
 import moment from 'moment';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useAppTheme } from 'src/constants/AppConfig';
 
 const useStyles = makeStyles((theme) => ({
@@ -59,7 +60,7 @@ export default function CalendarList(props) {
         <Box key={i} width={'100%'} height={30} className="d-flex align-items-center">
           {child?.map((data, index) => {
             return (
-              <Tooltip title={data.qty} placement="right">
+              <HtmlTooltip title={data.qty} placement="right">
                 <Box
                   key={index}
                   minWidth={calendarType !== 'week' ? '100px' : ''}
@@ -77,7 +78,7 @@ export default function CalendarList(props) {
                     {data.qty}
                   </Typography>
                 </Box>
-              </Tooltip>
+              </HtmlTooltip>
             );
           })}
         </Box>
