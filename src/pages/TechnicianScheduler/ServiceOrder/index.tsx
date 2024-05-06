@@ -35,11 +35,11 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
-  const [selectedType, setSelectedType] = useState(serviceTypes[0]?.key || '');
+  const [selectedType, setSelectedType] = useState(null);
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
 
-  const [isUnAssigning, setIsUnAssigning] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const options: any = [];
@@ -57,8 +57,10 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
   }, [selectedRecords]);
 
   useEffect(() => {
-    fetchData();
-    fetchGridColumns();
+    if (selectedType) {
+      fetchData();
+      fetchGridColumns();
+    }
   }, [selectedType]);
 
   const fetchData = (type = '') => {
@@ -109,52 +111,52 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
       },
       ...(selectedType === 'fieldTicket'
         ? [
-            {
-              accessor: 'fieldServiceOrderNumber',
-              Header: 'Field Service Order',
-              width: 200,
-              Cell: ({ row }) => (
+          {
+            accessor: 'fieldServiceOrderNumber',
+            Header: 'Field Service Order',
+            width: 200,
+            Cell: ({ row }) => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <p title={row.original.fieldServiceOrder}>{row.original.fieldServiceOrder}</p>
+                <Box ml={1}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </Box>
+              </div>
+            )
+          },
+          {
+            accessor: 'fieldTicketNumber',
+            Header: 'Field Ticket',
+            width: 200,
+            Cell: ({ row }) =>
+              row.original['fieldTicketNumber'] ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <p title={row.original.fieldServiceOrder}>{row.original.fieldServiceOrder}</p>
+                  <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
                   <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
-                        window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
+                        window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
                       }}
                     >
                       <OpenInNewIcon fontSize="small" color="primary" />
                     </IconButton>
                   </Box>
                 </div>
+              ) : (
+                <NoDataCell />
               )
-            },
-            {
-              accessor: 'fieldTicketNumber',
-              Header: 'Field Ticket',
-              width: 200,
-              Cell: ({ row }) =>
-                row.original['fieldTicketNumber'] ? (
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
-                    <Box ml={1}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
-                        }}
-                      >
-                        <OpenInNewIcon fontSize="small" color="primary" />
-                      </IconButton>
-                    </Box>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          }
+        ]
         : selectedType === 'rentalManagement'
-        ? [
+          ? [
             {
               accessor: 'rentalJobName',
               Header: 'Rental Job',
@@ -179,7 +181,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
                 )
             }
           ]
-        : []),
+          : []),
       {
         accessor: 'serviceName',
         Header: 'Service Name',
@@ -266,15 +268,15 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
   };
 
   const handleUnAssign = () => {
-    setIsUnAssigning(true)
+    setIsSubmitting(true)
     axiosInstance()
       .put(`${rentalManagement.api}/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?.technicianHistoryId }] })
       .then(() => {
         handleSucess();
-        setIsUnAssigning(false)
+        setIsSubmitting(false)
       })
       .catch((error) => {
-        setIsUnAssigning(false)
+        setIsSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -331,12 +333,11 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
           }}
         />
       )}
-
       {unAssignTechnicianDialog.open && (
         <ConfirmationDialogRaw
           open={true}
-          message={`Are you sure you want to un-assign ?`}
-          okBtnLoading={isUnAssigning}
+          message={`Are you sure you want to un-assign technician ?`}
+          okBtnLoading={isSubmitting}
           onClose={handleClose}
           onOk={handleUnAssign}
         />

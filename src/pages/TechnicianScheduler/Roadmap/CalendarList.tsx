@@ -39,13 +39,13 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
       {services?.map((service) => {
         const priority = getPriority(service.status);
         const bgColor = getColorFromPriority(priority);
-        const pos = getPositionOfDate(service.estimateStartDate, service.estimateEndDate, startDate, endDate, totalDay);
+        const pos = getPositionOfDate(service.startDate, service.endDate, startDate, endDate, totalDay);
         return (
           <div
             className={`${styles.singleService} singlePriority ${bgColor}`}
-            style={{ minWidth: '100px', minHeight: '50px', ...pos }}
-            onClick={()=>{
-              handleSelect(null, {_id: service?.technician, technicianHistoryId: service?._id}, '')
+            style={{ minHeight: '50px', ...pos }}
+            onClick={() => {
+              handleSelect(null, { _id: service?.technician, technicianHistoryId: service?._id }, '')
             }}
           >
             <HtmlTooltip

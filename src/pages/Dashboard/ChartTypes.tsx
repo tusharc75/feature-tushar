@@ -54,7 +54,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     const defaultFilters = filters?.filter((f) => f.default);
     return defaultFilters?.length ? defaultFilters[0] : {};
   };
-  
+
   const currency = user?.user?.currency || 'USD';
   const [chartData, setChartData] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
@@ -299,7 +299,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                         color="primary"
                         size="small"
                       >
-                        <BsFillPinFill fontSize="16px" />
+                        <BsFillPinFill fontSize="18px" />
                       </IconButton>
                     </HtmlTooltip>
                   ) : (
@@ -313,7 +313,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                         color="primary"
                         size="small"
                       >
-                        <TbPinnedOff fontSize="16px" />
+                        <TbPinnedOff fontSize="18px" />
                       </IconButton>
                     </HtmlTooltip>
                   )
@@ -331,9 +331,14 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   </IconButton>
                 </HtmlTooltip>
                 {setSelectedChart && (
-                  <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
-                    <FiMaximize2 fontSize="16px" />
-                  </IconButton>
+                  <HtmlTooltip title='Full Screen'>
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={() => setSelectedChart(chart)}>
+                      <FiMaximize2 fontSize="18px" />
+                    </IconButton>
+                  </HtmlTooltip>
                 )}
               </Box>
             </Box>
@@ -447,7 +452,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
         </Box>
       )}
 
-      {chart.hasFilters && !isEmpty(filterData) &&(
+      {chart.hasFilters && !isEmpty(filterData) && (
         <FiltersDropdown
           closeAnchor={() => setAnchorElFilter(null)}
           anchorEl={anchorElFilter}
