@@ -11,7 +11,7 @@ import MapView from '../Map';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import MobileRoadmap from './MobileRoadmap';
 
-function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
+function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, handleUnAssignTechnician }) {
   const scrollRef = React.useRef(null);
   const executeScroll = () => {
     var pageElement = document.getElementById('dayLiner');
@@ -97,6 +97,8 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
       setSelected(data?._id);
     } else if (selectedRecords?.length === 1) {
       handleAssignTechnician(data);
+    } else if (selectedRecords?.length === 0) {
+      handleUnAssignTechnician(data);
     }
   };
 
