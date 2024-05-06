@@ -1,6 +1,6 @@
 import { useAccount, useMsal } from '@azure/msal-react';
 import DateUtils from '@date-io/date-fns';
-import { CircularProgress, IconButton, Tooltip } from '@material-ui/core';
+import { CircularProgress, IconButton } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
@@ -17,6 +17,7 @@ import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { AiOutlineSend } from 'react-icons/ai';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { array, object, string } from 'yup';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -373,7 +374,7 @@ export const ViewEmail = ({
                               maxWidth: 'max-content'
                             }}
                           >
-                            <Tooltip title="Refresh" placement="top">
+                            <HtmlTooltip title="Refresh">
                               <IconButton
                                 onClick={() => fetchEmailDetail()}
                                 style={{
@@ -388,7 +389,7 @@ export const ViewEmail = ({
                               >
                                 <RefreshIcon />
                               </IconButton>
-                            </Tooltip>
+                            </HtmlTooltip>
                           </Box>
                           <Box mb={1} style={{ marginTop: '-31px', paddingRight: '52px' }}>
                             <Grid container spacing={1} justifyContent="space-between">

@@ -1,6 +1,7 @@
-import { Tooltip, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { getColorFromPriority, getPositionOfDate, getPriority } from './helperFunctions';
 import styles from './roadmap.module.scss';
-import { getPriority, getColorFromPriority, getPositionOfDate } from './helperFunctions';
 
 export default function CalendarList(props) {
   const { activity, handleSelect, startDate, endDate, totalDay, calendarType } = props;
@@ -45,7 +46,7 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
             style={{ minWidth: '100px', minHeight: '50px', ...pos }}
             onClick={handleSelect}
           >
-            <Tooltip
+            <HtmlTooltip
               title={
                 <>
                   <p>{service?.fieldTicket[0]?.fieldTicketNumber ?? service?.rentalJob[0]?.rentalJobName}</p>
@@ -61,7 +62,7 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
                   <Typography component={'span'}>{service.status}</Typography>
                 </span>
               </div>
-            </Tooltip>
+            </HtmlTooltip>
           </div>
         );
       })}

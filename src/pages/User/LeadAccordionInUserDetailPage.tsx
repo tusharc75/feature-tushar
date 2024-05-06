@@ -1,25 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Grid, Box, IconButton, Typography, Card, CardContent, Tooltip, MenuItem, Menu, Button } from '@material-ui/core';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
-import { withStyles } from '@material-ui/core/styles';
-import routes from './../../components/Helpers/Routes';
-import { Link, useHistory } from 'react-router-dom';
-import { BiCustomize } from 'react-icons/bi';
-import { HiOutlineUser } from 'react-icons/hi';
-import { BiPhone } from 'react-icons/bi';
-import { BsBuilding } from 'react-icons/bs';
-import { useData } from '../../StateProvider/Provider';
-import ManageLeadDialog from '../Leads/ManageLeadDialog/ManageLeadDialog';
-import { FaArrowAltCircleDown } from 'react-icons/fa';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
 import { MoreVert } from '@material-ui/icons';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { useEffect, useState } from 'react';
+import { BiCustomize, BiPhone } from 'react-icons/bi';
+import { BsBuilding } from 'react-icons/bs';
+import { FaArrowAltCircleDown } from 'react-icons/fa';
+import { HiOutlineUser } from 'react-icons/hi';
+import { Link, useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import ManageLeadDialog from '../Leads/ManageLeadDialog/ManageLeadDialog';
+import routes from './../../components/Helpers/Routes';
 
 export default function LeadAccordionInUserDetailPage({ leads, expanded = true, recordsPerLine = 3, userId, onSuccess, isAllowedToEdit }) {
   const history = useHistory();
@@ -157,9 +153,9 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                                   <Typography>
                                     {obj.firstName} {obj.lastName}
                                   </Typography>{' '}
-                                  <Tooltip title={`${obj.firstName} ${obj.lastName} belongs to different entity`}>
+                                  <HtmlTooltip title={`${obj.firstName} ${obj.lastName} belongs to different entity`}>
                                     <InfoOutlinedIcon fontSize="small" />
-                                  </Tooltip>
+                                  </HtmlTooltip>
                                 </span>
                               )}
                             </Grid>
