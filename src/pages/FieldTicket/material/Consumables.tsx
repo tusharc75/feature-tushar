@@ -36,7 +36,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -671,7 +671,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
             <Grid item xs={12} md={12} sm={12}>
               {columns ? (
                 <CustomReactTable
-                  height={'300px'}
+                  height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
                   columns={columns}
                   state={state}
                   dispatch={dispatch}
@@ -692,7 +692,12 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial }
         </Box>
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        <Technicians allowedToEdit={allowedToEdit} fieldTicketData={fieldTicketData} selectedService={selectedServiceOption} />
+        <Technicians
+          allowedToEdit={allowedToEdit}
+          fieldTicketData={fieldTicketData}
+          selectedService={selectedServiceOption}
+          stepFullScreen={stepFullScreen}
+        />
       </TabPanel>
       {consumablesDialog && (
         <AssignProductDialog

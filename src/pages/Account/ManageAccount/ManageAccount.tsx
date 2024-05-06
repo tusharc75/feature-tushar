@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid, IconButton } from '@material-ui/core';
-import { Formik, Form } from 'formik';
-import { CustomDialogTransition, setFieldsInAscendingOrder, yupSchema } from '../../../constants/helpers';
-import FormTypes from '../../../components/Helpers/FormTypes';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import Dialog from '@material-ui/core/Dialog';
-import { useData } from '../../../StateProvider/Provider';
-import { NewAddressOptionList } from 'src/StateProvider/AddressProvider';
-import CustomButton from '../../../components/Helpers/CustomButton';
-import Tooltip from '../../../components/CustomTooltipTitle';
-import { isMobile, isTablet } from 'react-device-detect';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import AddIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
-import { FaDiceOne } from 'react-icons/fa';
-import ManageAccountDialog from './index';
-import ManageAddressDialog from '../../../components/Address/ManageAddressDialog';
-import routes from 'src/components/Helpers/Routes';
+import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
+import { NewAddressOptionList } from 'src/StateProvider/AddressProvider';
+import routes from 'src/components/Helpers/Routes';
+import { useData } from '../../../StateProvider/Provider';
+import ManageAddressDialog from '../../../components/Address/ManageAddressDialog';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import CustomButton from '../../../components/Helpers/CustomButton';
+import FormTypes from '../../../components/Helpers/FormTypes';
+import { CustomDialogTransition, setFieldsInAscendingOrder, yupSchema } from '../../../constants/helpers';
+import ManageAccountDialog from './index';
 
 const arr = [...Array(9).keys()];
 
@@ -259,7 +259,7 @@ export default function ManageAccount(props) {
                                             />
                                           </Box>
 
-                                          <Tooltip title="Add Address" className="mt-1">
+                                          <HtmlTooltip title="Add Address" className="mt-1">
                                             <IconButton
                                               onClick={() => {
                                                 setShowAddAddresstDialog(true);
@@ -270,12 +270,12 @@ export default function ManageAccount(props) {
                                             >
                                               <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
                                             </IconButton>
-                                          </Tooltip>
+                                          </HtmlTooltip>
 
                                           {field?.tooltipMessage ? (
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
+                                            <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                               <InfoIcon color="disabled" />
-                                            </Tooltip>
+                                            </HtmlTooltip>
                                           ) : null}
                                         </div>
                                       ) : field.fieldName === 'shippingAddress' ? (
@@ -303,7 +303,7 @@ export default function ManageAccount(props) {
                                             />
                                           </div>
 
-                                          <Tooltip title="Add Address" className="mt-1">
+                                          <HtmlTooltip title="Add Address" className="mt-1">
                                             <IconButton
                                               onClick={() => {
                                                 setShowAddAddresstDialog(true);
@@ -314,13 +314,13 @@ export default function ManageAccount(props) {
                                             >
                                               <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
                                             </IconButton>
-                                          </Tooltip>
+                                          </HtmlTooltip>
 
                                           {field?.tooltipMessage ? (
                                             <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title={field?.tooltipMessage ?? ''}>
+                                              <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                 <InfoIcon color="disabled" />
-                                              </Tooltip>
+                                              </HtmlTooltip>
                                             </Grid>
                                           ) : null}
                                         </div>
@@ -351,7 +351,7 @@ export default function ManageAccount(props) {
                                             </Grid>
                                             {permissions[accountResource]?.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title="Add Parent Account" className="mt-1">
+                                                <HtmlTooltip title="Add Parent Account" className="mt-1">
                                                   <IconButton
                                                     onClick={() => {
                                                       setIsAccDialogVisible(true);
@@ -361,14 +361,14 @@ export default function ManageAccount(props) {
                                                   >
                                                     <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
                                                   </IconButton>
-                                                </Tooltip>
+                                                </HtmlTooltip>
                                               </Grid>
                                             )}
                                             {field?.tooltipMessage ? (
                                               <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ''}>
+                                                <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                   <InfoIcon color="disabled" />
-                                                </Tooltip>
+                                                </HtmlTooltip>
                                               </Grid>
                                             ) : null}
                                           </Grid>

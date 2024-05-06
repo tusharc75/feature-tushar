@@ -60,7 +60,7 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
         height={60}
         display="flex"
         width={totalDay * dayPixel}
-        bgcolor="var(--dark-secondary, grey.200)"
+        bgcolor="var(--dark-secondary, white)"
         style={{ position: 'sticky', top: 0, zIndex: 2 }}
       >
         {calendarType === 'week'

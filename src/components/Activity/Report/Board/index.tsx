@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton, TextField, Tooltip, Typography } from '@material-ui/core';
+import { Box, Dialog, IconButton, TextField, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Add } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
@@ -9,6 +9,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from '../../../../StateProvider/Provider';
 import axiosInstance from '../../../../axios/axiosInstance';
 import { CustomDialogTransition, sidebarResource } from '../../../../constants/helpers';
@@ -233,7 +234,7 @@ const Board = ({ type, filter }) => {
                         ')'}
                     </Typography>
                     {permissions && permissions[type?.toLowerCase()]?.isCreate ? (
-                      <Tooltip title={`Create ${type}`}>
+                      <HtmlTooltip title={`Create ${type}`}>
                         <IconButton
                           size="small"
                           style={{ float: 'right', marginTop: '-25px' }}
@@ -245,7 +246,7 @@ const Board = ({ type, filter }) => {
                         >
                           <Add fontSize="small" />
                         </IconButton>
-                      </Tooltip>
+                      </HtmlTooltip>
                     ) : null}
                   </Box>
                 )}

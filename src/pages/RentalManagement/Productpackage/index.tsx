@@ -925,7 +925,7 @@ const Productpackage = ({
       {addExistingAssets && (
         <AssignSerializedAssetDialog
           reference={'rentalJob'}
-          referenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue }}
+          referenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue, rentalJob: rentalManagementData._id }}
           isAssigning={isAddingProducts}
           handleClose={() => setAddExistingAssets(false)}
           handleSucess={handleAddAsset}

@@ -1,46 +1,28 @@
-import React, { useState, useEffect, useContext } from 'react';
-import {
-  Grid,
-  Box,
-  IconButton,
-  Typography,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Tooltip,
-  MenuItem,
-  Menu,
-  Button
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { MoreVert } from '@material-ui/icons';
+import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
-import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
-import { withStyles } from '@material-ui/core/styles';
-import axiosInstance from '../../axios/axiosInstance';
-import { Link, useHistory } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
-import { useData } from '../../StateProvider/Provider';
-import { displayDate } from '../../services/util';
-import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
-import { MoreVert } from '@material-ui/icons';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import React, { useContext, useEffect, useState } from 'react';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { formatAmountWithCurrency } from '../../constants/helpers';
-import routes from '../../components/Helpers/Routes';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import styles from './ProjectSales.module.scss';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import { IoCalendarOutline } from 'react-icons/io5';
+import { useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import { formatAmountWithCurrency } from '../../constants/helpers';
+import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
+import { displayDate } from '../../services/util';
+import styles from './ProjectSales.module.scss';
 
 export default function QuotesAccordionInProjectSale({
   expanded = true,
@@ -167,9 +149,9 @@ export default function QuotesAccordionInProjectSale({
     ) : (
       <span className="d-flex gap-2 align-items-center">
         <Typography className="detailName">{obj.quoteName}</Typography>{' '}
-        <Tooltip title={`${obj.quoteName} belongs to different entity`}>
+        <HtmlTooltip title={`${obj.quoteName} belongs to different entity`}>
           <InfoOutlinedIcon fontSize="small" />
-        </Tooltip>
+        </HtmlTooltip>
       </span>
     );
   return (
@@ -241,9 +223,9 @@ export default function QuotesAccordionInProjectSale({
                                     ) : (
                                       <span className="d-flex gap-2 align-items-center">
                                         <Typography className="detailName">{obj.quoteName}</Typography>{' '}
-                                        <Tooltip title={`${obj.quoteName} is a Private Quote`}>
+                                        <HtmlTooltip title={`${obj.quoteName} is a Private Quote`}>
                                           <InfoOutlinedIcon fontSize="small" />
-                                        </Tooltip>
+                                        </HtmlTooltip>
                                       </span>
                                     )
                                   ) : (

@@ -1,17 +1,24 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Tooltip } from '@material-ui/core';
-import CustomReactTable, { useTableReducer, getStaticFields, useColumns } from 'src/components/CustomReactTable';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { objectStore, findOne, findAll } from '../../../constants/indexdbhelper';
-import axiosInstance from '../../../axios/axiosInstance';
-import { sidebarResource, prepareDataForGrid, DELIVERY_TICKET_STATUS } from '../../../constants/helpers';
-import routes from '.././../../components/Helpers/Routes';
-import { DELIVERY_TICKET_MAPPED_STATUS, gridLoadingTimeout, deliveryTicket } from '../../../constants/helpers';
-import { useData } from '../../../StateProvider/Provider';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import SignatureDialog from '../../../components/Helpers/SignatureDialog';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { Box, Button, Grid } from '@material-ui/core';
 import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import SignatureDialog from '../../../components/Helpers/SignatureDialog';
+import {
+  DELIVERY_TICKET_MAPPED_STATUS,
+  DELIVERY_TICKET_STATUS,
+  deliveryTicket,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from '../../../constants/helpers';
+import { findAll, findOne, objectStore } from '../../../constants/indexdbhelper';
+import routes from '.././../../components/Helpers/Routes';
 
 const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => {
   const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-2`;
@@ -35,9 +42,9 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
     fetchGridColumns();
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchDeliveryTicket();
-  },[])
+  }, []);
 
   const fetchGridColumns = async () => {
     let data;
@@ -129,7 +136,7 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
     <>
       <Box display="flex" justifyContent="flex-end" pt={1}>
         <Box display="flex" alignItems="center">
-          <Tooltip title="Sign-off - Dispatch">
+          <HtmlTooltip title="Sign-off - Dispatch">
             <Button
               variant="outlined"
               color="primary"
@@ -141,9 +148,9 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
             >
               Sign-off - Dispatch
             </Button>
-          </Tooltip>
+          </HtmlTooltip>
           <Box mx={1} />
-          <Tooltip title="Sign-off - Delivery">
+          <HtmlTooltip title="Sign-off - Delivery">
             <Button
               variant="outlined"
               color="primary"
@@ -155,25 +162,27 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
             >
               Sign-off - Delivery
             </Button>
-          </Tooltip>
+          </HtmlTooltip>
           <Box mx={1} />
         </Box>
       </Box>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
-      {columns ? (
+        {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid = {true}
+            isClientSideGrid={true}
             refreshGrid={fetchDeliveryTicket}
-            hideAction = {true}
+            hideAction={true}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </Grid>
       {openSignatureDialog.open && (
         <SignatureDialog
