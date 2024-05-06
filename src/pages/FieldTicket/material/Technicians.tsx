@@ -17,7 +17,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 
-const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
+const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Technicians`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -261,7 +261,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
           <Grid item xs={12} md={12} sm={12}>
             {columns ? (
               <CustomReactTable
-                height={'300px'}
+                height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
                 columns={columns}
                 state={state}
                 dispatch={dispatch}

@@ -1,23 +1,24 @@
-import { useEffect, useState, useContext } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import { Box, Button, Dialog, IconButton, Typography, useMediaQuery } from '@material-ui/core';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, Button, Dialog, Grid, IconButton, Tooltip, Typography, useMediaQuery } from '@material-ui/core';
+import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { GiVintageRobot } from 'react-icons/gi';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import PerformanceTuningImg from '../../assets/PerformanceTuning.png';
-import { CustomDialogTransition, formatAmountWithCurrency, defaultActivityShow, quoteBuilder, sidebarResource } from '../../constants/helpers';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
+import PerformanceTuningImg from '../../assets/PerformanceTuning.png';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import { isMobile, isTablet } from 'react-device-detect';
-import DOAReasonDialog from './DOAReasonDialog';
 import ProductBuilder from '../../components/productBuilder';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import PreviewDownload from 'src/components/PreviewDownload';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomDialogTransition, defaultActivityShow, formatAmountWithCurrency, quoteBuilder, sidebarResource } from '../../constants/helpers';
+import DOAReasonDialog from './DOAReasonDialog';
 
 const DOAApproval = () => {
   const {
@@ -203,7 +204,7 @@ const DOAApproval = () => {
                 `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
               ]}
             />
-            <Tooltip title="AI Suggestion" arrow placement="top">
+            <HtmlTooltip title="AI Suggestion" arrow placement="top">
               <IconButton
                 size="small"
                 className="btn-outline-v1"
@@ -213,10 +214,10 @@ const DOAApproval = () => {
               >
                 <GiVintageRobot />
               </IconButton>
-            </Tooltip>
+            </HtmlTooltip>
             {QData && QStatus && QData?.DOA.requestTo.find((u) => u === currentUser._id) ? (
               <>
-                <Tooltip title={'Accept'} arrow placement="top">
+                <HtmlTooltip title={'Accept'} arrow placement="top">
                   <Button
                     onClick={() => {
                       QuoteStatusChange('Accepted', '', '');
@@ -229,8 +230,8 @@ const DOAApproval = () => {
                   >
                     {isMobile && !isTablet ? <ThumbUpIcon /> : 'Accept'}
                   </Button>
-                </Tooltip>
-                <Tooltip title={'Reject'} arrow placement="top">
+                </HtmlTooltip>
+                <HtmlTooltip title={'Reject'} arrow placement="top">
                   <Button
                     onClick={() => {
                       setQuoteStatusChangeData('Rejected');
@@ -244,7 +245,7 @@ const DOAApproval = () => {
                   >
                     {isMobile && !isTablet ? <ThumbDownIcon /> : 'Reject'}
                   </Button>
-                </Tooltip>
+                </HtmlTooltip>
               </>
             ) : null}
             <ActivityButton referenceId={QData?.quoteBuilderId} resource="DOA" resourceLabel={QData?.quoteName} />

@@ -1,15 +1,16 @@
-import { Box, Button, Chip, Grid, IconButton, Tooltip, Typography, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Chip, Grid, IconButton, Typography } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import PersonIcon from '@material-ui/icons/Person';
+import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import PersonIcon from '@material-ui/icons/Person';
-import AssignUserDialog from './AssignUserDialog';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import moment from 'moment';
-import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
+import AssignUserDialog from './AssignUserDialog';
 
 const Approver = ({ irtTicketData }) => {
   const [approver, setAapprover] = useState(null);
@@ -114,7 +115,7 @@ const Approver = ({ irtTicketData }) => {
                       </Grid>
                       <Grid item>
                         {item?.status === 'Send' && (
-                          <Tooltip title="Delete">
+                          <HtmlTooltip title="Delete">
                             <IconButton
                               aria-label="Delete"
                               size="small"
@@ -124,7 +125,7 @@ const Approver = ({ irtTicketData }) => {
                             >
                               <DeleteIcon fontSize="small" color="error" />
                             </IconButton>
-                          </Tooltip>
+                          </HtmlTooltip>
                         )}
                       </Grid>
                     </Grid>

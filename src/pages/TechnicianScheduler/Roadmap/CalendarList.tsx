@@ -1,6 +1,7 @@
-import { Tooltip, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { getColorFromPriority, getPositionOfDate, getPriority } from './helperFunctions';
 import styles from './roadmap.module.scss';
-import { getPriority, getColorFromPriority, getPositionOfDate } from './helperFunctions';
 
 export default function CalendarList(props) {
   const { activity, handleSelect, startDate, endDate, totalDay, calendarType } = props;
@@ -11,8 +12,9 @@ export default function CalendarList(props) {
         {activity.map((item) => {
           const name = item.firstName + ' ' + item.lastName;
           const createDate = item.createDate;
+
           return (
-            <div className={styles.singleUserRoadmap}>
+            <div className={styles.singleUserRoadmap} key={item._id}>
               <RenderServices
                 createDate={createDate}
                 name={name}
@@ -40,17 +42,16 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
         const pos = getPositionOfDate(service.estimateStartDate, service.estimateEndDate, startDate, endDate, totalDay);
         return (
           <div
-            className={`${styles.singleService} singlePriority`}
-            style={{ ...bgColor, minWidth: '100px', minHeight: '50px', ...pos }}
+            className={`${styles.singleService} singlePriority ${bgColor}`}
+            style={{ minWidth: '100px', minHeight: '50px', ...pos }}
             onClick={()=>{
               handleSelect(null, {_id: service?.technician, technicianHistoryId: service?._id}, '')
             }}
           >
-            <Tooltip
+            <HtmlTooltip
               title={
                 <>
-                  <p>{service?.fieldTicket[0]?.fieldTicketNumber ?? service?.rentalJob[0]?.rentalJobName
-                  }</p>
+                  <p>{service?.fieldTicket[0]?.fieldTicketNumber ?? service?.rentalJob[0]?.rentalJobName}</p>
                 </>
               }
               placement="top"
@@ -63,7 +64,7 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
                   <Typography component={'span'}>{service.status}</Typography>
                 </span>
               </div>
-            </Tooltip>
+            </HtmlTooltip>
           </div>
         );
       })}

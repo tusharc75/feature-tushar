@@ -1,4 +1,4 @@
-import { Button, Dialog, Grid, MenuItem, Tooltip, Typography } from '@material-ui/core';
+import { Button, Dialog, Grid, MenuItem, Typography } from '@material-ui/core';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillEdit } from 'react-icons/ai';
@@ -6,6 +6,7 @@ import { BiMailSend } from 'react-icons/bi';
 import { GiVintageRobot } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../../StateProvider/Provider';
@@ -225,10 +226,10 @@ export default function QuoteProcess(props) {
               setDOAApproved(data.canApprove);
               setDOARequestId(data.requestId);
             })
-            .catch((err) => { });
+            .catch((err) => {});
         }
       })
-      .catch((error) => { });
+      .catch((error) => {});
   }, [currentVersion]);
 
   useEffect(() => {
@@ -336,7 +337,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -645,7 +646,7 @@ export default function QuoteProcess(props) {
   const addButtonMenuItems = () => {
     return (
       <>
-        <Tooltip title="Add New Product">
+        <HtmlTooltip title="Add New Product">
           <MenuItem
             disabled={!permissions.product?.isCreate}
             onClick={() => {
@@ -654,8 +655,8 @@ export default function QuoteProcess(props) {
           >
             Add New Product
           </MenuItem>
-        </Tooltip>
-        <Tooltip title="Add Existing Product">
+        </HtmlTooltip>
+        <HtmlTooltip title="Add Existing Product">
           <MenuItem
             onClick={() => {
               setIsAddExistingProduct(true);
@@ -663,43 +664,43 @@ export default function QuoteProcess(props) {
           >
             Add Existing Product
           </MenuItem>
-        </Tooltip>
+        </HtmlTooltip>
       </>
     );
   };
 
   const previewDownloadProps = ![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus)
     ? {
-      resource: sidebarResource.quoteBuilder,
-      referenceId: quoteData?._id,
-      fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
-      columns: columns,
-      hideDetailButton: true,
-      isSendEmail:
-        processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
+        resource: sidebarResource.quoteBuilder,
+        referenceId: quoteData?._id,
+        fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
+        columns: columns,
+        hideDetailButton: true,
+        isSendEmail:
+          processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
           versionStatus !== 'Send To Customer' &&
           !ifQuoteApproved.approved &&
           !quoteData?.versions[currentVersion]?.offered &&
           allowedToEdit
-          ? true
-          : false,
-      isExcelDownload: true,
-      extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
-      versionNumber: currentVersion,
-      subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
-      defaultColumns: [
-        'productName',
-        'unit',
-        'qty',
-        `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
-      ],
-      handleRefresh: () => {
-        fetchQuoteData(currentVersion);
-      },
-      toEmails: userEmails?.to,
-      ccEmails: userEmails?.cc ?? []
-    }
+            ? true
+            : false,
+        isExcelDownload: true,
+        extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
+        versionNumber: currentVersion,
+        subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
+        defaultColumns: [
+          'productName',
+          'unit',
+          'qty',
+          `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
+          `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+        ],
+        handleRefresh: () => {
+          fetchQuoteData(currentVersion);
+        },
+        toEmails: userEmails?.to,
+        ccEmails: userEmails?.cc ?? []
+      }
     : null;
 
   const leftSideContents = () => {
@@ -707,7 +708,7 @@ export default function QuoteProcess(props) {
       <>
         {[QUOTE_PROCESS_STATUS.sendToCustomer].includes(processStatus) && (
           <>
-            <Tooltip title="AI Suggestion">
+            <HtmlTooltip title="AI Suggestion">
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'outlined'}
                 className="btn-outline-v1"
@@ -720,10 +721,10 @@ export default function QuoteProcess(props) {
               >
                 {isMobile && !isTablet ? '' : 'AI Suggestion'}
               </Button>
-            </Tooltip>
+            </HtmlTooltip>
             {permissions[qbResource]?.isUpdate &&
               (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
-                <Tooltip title="Edit Quote PDF Template">
+                <HtmlTooltip title="Edit Quote PDF Template">
                   <Button
                     onClick={() => {
                       quoteData?.pDFTemplate.optionValue &&
@@ -740,7 +741,7 @@ export default function QuoteProcess(props) {
                     {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
                     {isMobile && !isTablet ? '' : 'Quote Template'}
                   </Button>
-                </Tooltip>
+                </HtmlTooltip>
               )}
           </>
         )}
@@ -795,8 +796,8 @@ export default function QuoteProcess(props) {
             DOAneeded
               ? DOASteps.findIndex((d) => d?.key === processStatus)
               : processStatus === QUOTE_PROCESS_STATUS.doaProcess
-                ? OtherSteps.findIndex((d) => d?.key === QUOTE_PROCESS_STATUS.quoteBuilder)
-                : OtherSteps.findIndex((d) => d?.key === processStatus)
+              ? OtherSteps.findIndex((d) => d?.key === QUOTE_PROCESS_STATUS.quoteBuilder)
+              : OtherSteps.findIndex((d) => d?.key === processStatus)
           }
           id={quoteData._id}
           version={currentVersion}
