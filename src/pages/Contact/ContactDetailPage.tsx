@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Tooltip, Typography } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Typography } from '@material-ui/core';
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { Edit } from '@material-ui/icons';
@@ -14,6 +14,9 @@ import { RiLayoutFill } from 'react-icons/ri';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { AccountHierarchyIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -21,7 +24,6 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
 import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';
@@ -42,7 +44,6 @@ import {
 } from './../../constants/helpers';
 import AddReportsToContact from './AddReportsToContact';
 import ManageContactDialog from './ManageContact';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -542,7 +543,7 @@ const ContactDetailsPage = (props) => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.eCommercePolicy?.isRead && contactResource === customerContact.contactResource && (
-              <Tooltip title="E-Commerce Access" arrow placement="top">
+              <HtmlTooltip title="E-Commerce Access" arrow placement="top">
                 <Button
                   size="small"
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -552,10 +553,10 @@ const ContactDetailsPage = (props) => {
                 >
                   {isMobile && !isTablet ? <HiShoppingCart /> : 'E-Commerce Access'}
                 </Button>
-              </Tooltip>
+              </HtmlTooltip>
             )}
             {contactPermissions?.isUpdate && contactData?.owner?.optionValue === user?.user?._id && (
-              <Tooltip title="Give Portal Access" arrow placement="top">
+              <HtmlTooltip title="Give Portal Access" arrow placement="top">
                 <Button
                   size="small"
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -565,10 +566,10 @@ const ContactDetailsPage = (props) => {
                 >
                   {isMobile && !isTablet ? <RiLayoutFill /> : 'Give Portal Access'}
                 </Button>
-              </Tooltip>
+              </HtmlTooltip>
             )}
             {contactPermissions?.isUpdate && allowedToEdit ? (
-              <Tooltip title="Edit" arrow placement="top">
+              <HtmlTooltip title="Edit" arrow placement="top">
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   size="small"
@@ -577,7 +578,7 @@ const ContactDetailsPage = (props) => {
                 >
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
-              </Tooltip>
+              </HtmlTooltip>
             ) : null}
 
             {contactPermissions?.isDelete && contactData?.owner?.optionValue && user?.user?._id && contactData.owner.optionValue === user.user._id ? (

@@ -1,26 +1,27 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Grid, Box, IconButton, Typography, Card, CardContent, Tooltip, MenuItem, Menu, Button } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { MoreVert } from '@material-ui/icons';
+import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
-import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
-import axiosInstance from '../../axios/axiosInstance';
-import { IoCalendarOutline } from 'react-icons/io5';
-import { useData } from '../../StateProvider/Provider';
-import { displayDate } from '../../services/util';
-import { MoreVert } from '@material-ui/icons';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import React, { useContext, useEffect, useState } from 'react';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { customerAccount, formatAmountWithCurrency } from '../../constants/helpers';
-import routes from '../../components/Helpers/Routes';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import styles from './ProjectSales.module.scss';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import { IoCalendarOutline } from 'react-icons/io5';
 import DisplayData from 'src/components/CardDisplayData';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import { formatAmountWithCurrency } from '../../constants/helpers';
 import ManageQuotationDialog from '../../pages/Quotation/ManageQuotationDialog';
+import { displayDate } from '../../services/util';
+import styles from './ProjectSales.module.scss';
 
 export default function QuotationAccordionInProjectSales({
   expanded = true,
@@ -139,9 +140,9 @@ export default function QuotationAccordionInProjectSales({
     ) : (
       <span className="d-flex gap-2 align-items-center">
         <Typography className="detailName">{obj.quotationNumber}</Typography>{' '}
-        <Tooltip title={`${obj.quotationNumber} belongs to different entity`}>
+        <HtmlTooltip title={`${obj.quotationNumber} belongs to different entity`}>
           <InfoOutlinedIcon fontSize="small" />
-        </Tooltip>
+        </HtmlTooltip>
       </span>
     );
   return (
@@ -207,9 +208,9 @@ export default function QuotationAccordionInProjectSales({
                                     ) : (
                                       <span className="d-flex gap-2 align-items-center">
                                         <Typography className="detailName">{obj.quotationNumber}</Typography>{' '}
-                                        <Tooltip title={`${obj.quotationNumber} is a Private Quotation`}>
+                                        <HtmlTooltip title={`${obj.quotationNumber} is a Private Quotation`}>
                                           <InfoOutlinedIcon fontSize="small" />
-                                        </Tooltip>
+                                        </HtmlTooltip>
                                       </span>
                                     )
                                   ) : (

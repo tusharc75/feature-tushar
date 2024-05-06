@@ -1,21 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Box, Card, CardContent, Grid, IconButton, Typography } from '@material-ui/core';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
-import { withStyles } from '@material-ui/core/styles';
-import { displayDate } from '../../services/util';
-import routes from '../../components/Helpers/Routes';
-import { Link } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
-import { BiCustomize } from 'react-icons/bi';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { useData } from '../../StateProvider/Provider';
-import { formatAmountWithCurrency } from '../../constants/helpers';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import { useEffect, useState } from 'react';
+import { BiCustomize } from 'react-icons/bi';
+import { IoCalendarOutline } from 'react-icons/io5';
+import { Link } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useData } from '../../StateProvider/Provider';
+import routes from '../../components/Helpers/Routes';
+import { formatAmountWithCurrency } from '../../constants/helpers';
+import { displayDate } from '../../services/util';
 
 export default function AccordionOfOpportunity({ opportunity, expanded = true, recordsPerLine = 2 }) {
   const {
@@ -85,9 +82,9 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                               ) : (
                                 <span className="d-flex gap-2 align-items-center">
                                   <Typography>{opportunity.opportunityName}</Typography>{' '}
-                                  <Tooltip title={`${opportunity.opportunityName} belongs to different entity`}>
+                                  <HtmlTooltip title={`${opportunity.opportunityName} belongs to different entity`}>
                                     <InfoOutlinedIcon fontSize="small" />
-                                  </Tooltip>
+                                  </HtmlTooltip>
                                 </span>
                               )}
                             </div>

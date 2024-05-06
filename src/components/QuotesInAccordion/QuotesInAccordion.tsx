@@ -1,45 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
-import {
-  Grid,
-  Box,
-  IconButton,
-  Typography,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Tooltip,
-  MenuItem,
-  Menu,
-  ListItemIcon,
-  Button
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { MoreVert } from '@material-ui/icons';
+import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import TrendingUpOutlinedIcon from '@material-ui/icons/TrendingUpOutlined';
-import BusinessOutlinedIcon from '@material-ui/icons/BusinessOutlined';
-import { withStyles } from '@material-ui/core/styles';
-import { Link } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
-import { useData } from '../../StateProvider/Provider';
-import { displayDate } from '../../services/util';
-import { HiExternalLink } from 'react-icons/hi';
-import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
-import { MoreVert } from '@material-ui/icons';
-import { formatAmountWithCurrency, opportunity } from '../../constants/helpers';
-import AssignQuoteDialog from './AssignQuoteDialog';
-import routes from '../Helpers/Routes';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
+import { useEffect, useState } from 'react';
+import { IoCalendarOutline } from 'react-icons/io5';
+import { Link, useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import { formatAmountWithCurrency } from '../../constants/helpers';
+import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
+import { displayDate } from '../../services/util';
+import HtmlTooltip from '../CustomTooltipTitle';
+import routes from '../Helpers/Routes';
+import AssignQuoteDialog from './AssignQuoteDialog';
 
 export default function QuotesInAccordion({
   expanded = false,
@@ -154,9 +133,9 @@ export default function QuotesInAccordion({
     ) : (
       <span className="d-flex gap-2 align-items-center">
         <Typography className="detailName">{obj.quoteName}</Typography>{' '}
-        <Tooltip title={`${obj.quoteName} belongs to different entity`}>
+        <HtmlTooltip title={`${obj.quoteName} belongs to different entity`}>
           <InfoOutlinedIcon fontSize="small" />
-        </Tooltip>
+        </HtmlTooltip>
       </span>
     );
 
@@ -262,9 +241,9 @@ export default function QuotesInAccordion({
                               ) : (
                                 <span className="d-flex gap-2 align-items-center">
                                   <Typography className="detailName">{obj.quoteName}</Typography>{' '}
-                                  <Tooltip title={`${obj.quoteName} is a Private Quote`}>
+                                  <HtmlTooltip title={`${obj.quoteName} is a Private Quote`}>
                                     <InfoOutlinedIcon fontSize="small" />
-                                  </Tooltip>
+                                  </HtmlTooltip>
                                 </span>
                               )
                             ) : (
