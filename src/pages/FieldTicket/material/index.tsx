@@ -112,7 +112,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                     } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                       window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                     } else if (row.original.type === MATERIAL_TYPE.package) {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);                  
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                     }
                   }}
                 >
@@ -190,6 +190,29 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     setColumns(column);
   };
 
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
+              : _subRow.type === MATERIAL_TYPE.manualEntry ? _subRow?.detail || ''
+                : '';
+      _subRow.description = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || ''
+        : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
+            : _subRow.description || '';
+      _subRow.competencyType = `${_subRow?.serviceDetail?.competencyType?.optionLabel || ''}`;
+      _subRow.qty = _subRow.qty * parent.qty;
+      _subRow.isValid = _subRow['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
+      _subRow.canDelete = _subRow.canDelete ?? true;
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    return subRows;
+  };
+
   const fetchMaterial = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -205,7 +228,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       costData = costData?.map((e: any) => { return { ...e, type: MATERIAL_TYPE.manualEntry } });
       data = [...response?.data?.data?.material, ...packageResponse?.data?.data?.material, ...costData];
     };
-    data.forEach((parent, i) => {
+    let rows = data?.filter((d: any) => !d.parentId);
+    rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName :
         parent.type === MATERIAL_TYPE.serializedAsset ? parent.serializedAssetDetail?.assetNumber :
@@ -216,9 +240,9 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         parent.type === MATERIAL_TYPE.package ? parent?.packageDetail?.packageDescription || '' :
           parent.description || '';
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
-      parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
       parent.canDelete = parent.canDelete ?? true;
+      parent.subRows = generateNestedData(data, parent);
     });
     if (data?.length) {
       if (data.filter((_rows) => _rows.isValid === false).length > 0) {
@@ -228,7 +252,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       }
     }
 
-    dispatch({ type: 'initialize', data: data, count: data?.length });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -747,6 +771,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchMaterial}
+            expander={true}
           />
         </Box>
       ) : (
