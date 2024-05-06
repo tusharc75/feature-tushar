@@ -639,7 +639,11 @@ function Dropdown({
                   </HtmlTooltip>
                   {lookupDialog && (
                     <ManagePadMaster
-                      referenceData={{ customerAccount: values[fieldData.lookupDependentOn] }}
+                      referenceData={
+                        fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
+                          ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
+                          : null
+                      }
                       onClose={() => setLookupDialog(false)}
                       onSuccess={(data) => {
                         setLookupDialog(false);
@@ -686,7 +690,11 @@ function Dropdown({
                   </HtmlTooltip>
                   {lookupDialog && (
                     <ManageWellMaster
-                      referenceData={{ customerAccount: values[fieldData.lookupDependentOn] }}
+                      referenceData={
+                        fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
+                          ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
+                          : null
+                      }
                       isClone={false}
                       wellMasterId={null}
                       onClose={() => setLookupDialog(false)}
@@ -699,6 +707,7 @@ function Dropdown({
                             optionValue: data._id,
                             order: option.length,
                             customerAccount: data?.customerAccount,
+                            padName: data?.padName,
                             address: data?.address
                           };
                           setOptionsList([tempNewOption, ...option]);
