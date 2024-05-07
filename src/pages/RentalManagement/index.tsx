@@ -406,8 +406,9 @@ const RentalManagement = () => {
     return (
       <>
         {permissions?.planning?.isRead && (
-          <ToggleButtonGroup size="small" className="align-items-center">
-            <ToggleButton
+          <>
+            <Button
+              className={'toggleButton-v1'}
               onClick={() => {
                 history.push({
                   pathname: routes.planning.path,
@@ -415,25 +416,24 @@ const RentalManagement = () => {
                 });
               }}
             >
-              <span>{`Planned Rental`}</span>
-            </ToggleButton>
-          </ToggleButtonGroup>
+              Planned Rental
+            </Button>
+          </>
         )}
         {permissions?.planningView?.isRead && (
-          <ToggleButtonGroup size="small" className="align-items-center">
-            <ToggleButton
-              onClick={() => {
-                history.push({
-                  pathname: routes.planningView.path,
-                  state: {
-                    resource: sidebarResource?.rentalManagement
-                  }
-                });
-              }}
-            >
-              <span>{`Calendar`}</span>
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push({
+                pathname: routes.planningView.path,
+                state: {
+                  resource: sidebarResource?.rentalManagement
+                }
+              });
+            }}
+          >
+            <span>{`Calendar`}</span>
+          </Button>
         )}
       </>
     );
