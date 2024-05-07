@@ -2,7 +2,7 @@ import { Box, Dialog, Typography, Grid } from '@material-ui/core';
 import routes from 'src/components/Helpers/Routes';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { useData } from 'src/StateProvider/Provider';
-import { CustomDialogTransition, WORK_ORDER_STATUS, checkSuperAdminAccess, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, WORK_ORDER_STATUS, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useContext, useEffect, useState } from 'react';
 import Service from '../WorkOrder/Service';
@@ -29,11 +29,8 @@ const TechnicianDialog = ({ handleClose, workOrderId, uniqueId, canPerform }) =>
     axiosInstance()
       .get(`${routes.workOrder.path}/${workOrderId}`)
       .then(({ data: { data } }) => {
-        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (checkSuperAdminAccess(user, sidebarResource.workOrder)) {
-          isAllowedToEdit = true;
-        }
-        setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
+       
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.workOrder, data) && permissions?.workOrder?.isUpdate ? true : false);
         setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
         setWorkOrderData({ ...data });
       })

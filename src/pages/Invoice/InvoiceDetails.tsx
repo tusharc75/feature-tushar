@@ -28,7 +28,7 @@ import {
   ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   INVOICE_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   invoice,
   invoiceProcessSteps,
   sidebarResource
@@ -128,11 +128,8 @@ const InvoiceDetails = () => {
       }
       setHeadingLabel(data.invoiceNumber);
       setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.invoice)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+      
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data));
       setInvoiceData(data);
       setLoading(false);
     } catch (error) {

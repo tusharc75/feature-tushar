@@ -27,7 +27,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import {
   ACTIVITY_RESOURCE,
   SERVICE_ORDER_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   fieldServiceOrder,
   serviceOrderSteps,
   sidebarResource
@@ -132,11 +132,8 @@ const ServiceOrderDetailsPage = () => {
         data = response?.data?.data;
       }
       setLoadingDetails(false);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.fieldServiceOrder)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
+      
+      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
           data.owner.optionValue === user?.user?._id &&

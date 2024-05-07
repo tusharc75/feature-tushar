@@ -34,7 +34,7 @@ import {
   QUOTATION_STATUS,
   QUOTATION_TYPE,
   RENTAL_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   quotation,
   quotationProcessSteps,
   sidebarResource
@@ -191,11 +191,8 @@ const QuotationDetails = () => {
             [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status) &&
             quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
           ) {
-            var isAllowedToEdit = [...(quotationData.collaborator ?? []), quotationData.owner].some((d) => d?.optionValue === user?.user?._id);
-            if (checkSuperAdminAccess(user, sidebarResource.quotation)) {
-              isAllowedToEdit = true;
-            }
-            setAllowedToEdit(isAllowedToEdit);
+            
+            setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quotation, quotationData));
             setCanConvert(true);
           } else if (!quotationData?.rentalJob && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
@@ -232,10 +229,7 @@ const QuotationDetails = () => {
       const response: any = await axiosInstance().get(`${quotation.api}/${id}`);
       data = response?.data?.data;
 
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.quotation)) {
-        isAllowedToEdit = true;
-      }
+      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.quotation, data)
       if ([QUOTATION_STATUS.converted].includes(data.status)) {
         isAllowedToEdit = false;
       }

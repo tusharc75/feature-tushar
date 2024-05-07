@@ -22,7 +22,7 @@ import {
   ACTIVITY_RESOURCE,
   bulkAssetCreation,
   bulkAssetCreationSteps,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   getObjKeysWithValues,
   sidebarResource
 } from '../../constants/helpers';
@@ -94,11 +94,8 @@ const BulkAssetCreationDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${bulkAssetCreation.api}/${id}`);
-      var isAllowedToEdit = [...(data?.collaborator ?? []), data?.owner, data?.processor].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.bulkAssetCreation)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+      
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.bulkAssetCreation, data));
       setCurrentStep(getIndex(data?.processStatus, bulkAssetCreationSteps));
       setBulkAssetCreationData(data);
       setLoadingBulkAssetCreation(false);

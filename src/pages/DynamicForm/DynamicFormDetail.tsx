@@ -12,7 +12,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { checkSuperAdminAccess, getResourceLabel } from 'src/constants/helpers';
+import { checkIsAllowedToEdit, getResourceLabel } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -80,10 +80,7 @@ const DynamicFormDetail = () => {
       let isAllowedToEdit = true;
       let isAllowedToDelete = true;
       if (data.hasOwnProperty('collaborator') || data.hasOwnProperty('owner')) {
-        isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (checkSuperAdminAccess(user, resource)) {
-          isAllowedToEdit = true;
-        }
+        isAllowedToEdit = checkIsAllowedToEdit(user, resource, data)
         isAllowedToDelete = data.owner.optionValue === user?.user?._id;
       }
       setAllowedToEdit(isAllowedToEdit);
