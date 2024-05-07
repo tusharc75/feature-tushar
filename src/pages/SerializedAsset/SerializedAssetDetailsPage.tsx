@@ -330,10 +330,24 @@ const SerializedAssetDetailsPage = () => {
         }
       } else if (assetDetails.status === ASSET_STATUS.lost) {
         tempStatus = [ASSET_STATUS.available, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.scrap];
+      } else if (!Object.values(ASSET_STATUS).includes(assetDetails.status)) {
+        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
       }
       setManualStatus(tempStatus);
     }
   }, [assetDetails]);
+
+  useEffect(() => {
+    let tempStatus = [];
+    if([ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(assetDetails?.status) && Object.values(ASSET_STATUS).includes(assetDetails.status) ){
+      statusOptions?.forEach((o: any) => {
+        if (!Object.values(ASSET_STATUS).includes(o.optionLabel)) {
+          tempStatus.push(o.optionLabel);
+        }     
+      })
+    }
+    setManualStatus((prev) => [...prev, ...tempStatus]);
+  }, [statusOptions])
 
   return (
     <Box className="main-container-v1">
@@ -372,7 +386,7 @@ const SerializedAssetDetailsPage = () => {
                     {permissions?.repairJob?.isCreate &&
                       assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
                       [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                        assetDetails.status
+                        assetDetails?.status
                       ) && (
                         <Button
                           variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -385,7 +399,7 @@ const SerializedAssetDetailsPage = () => {
                         </Button>
                       )}
                     {allowUpdateStatus ? (
-                      assetDetails.status === ASSET_STATUS.lost ? (
+                      assetDetails?.status === ASSET_STATUS.lost ? (
                         <Button
                           variant="outlined"
                           color="default"
@@ -433,7 +447,7 @@ const SerializedAssetDetailsPage = () => {
                       open={Boolean(anchorEl)}
                       onClose={closeActions}
                     >
-                      {statusOptions.map((o) => {
+                      {statusOptions?.map((o) => {
                         return (
                           <MenuItem
                             key={o?.optionValue}
