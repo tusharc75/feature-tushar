@@ -380,8 +380,6 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
-      _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
-      _subRow.pricingCondition = _subRow.pricingCondition?.optionValue;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length

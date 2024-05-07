@@ -41,7 +41,17 @@ interface Props {
   fetchKpiFilters: any;
 }
 
-const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen, selectedDashboardId, fetchDashboards, kpiFilters, fetchKpiFilters }: Props) => {
+const ChartTypes = ({
+  chart,
+  filterData,
+  globalFilters,
+  setSelectedChart,
+  fullScreen,
+  selectedDashboardId,
+  fetchDashboards,
+  kpiFilters,
+  fetchKpiFilters
+}: Props) => {
   const [themeColor] = useAppTheme();
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
@@ -54,7 +64,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     const defaultFilters = filters?.filter((f) => f.default);
     return defaultFilters?.length ? defaultFilters[0] : {};
   };
-  
+
   const currency = user?.user?.currency || 'USD';
   const [chartData, setChartData] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
@@ -243,8 +253,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
           sx={{ border: '1px solid var(--common-border-color)', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
         >
           <Box style={{ padding: '15px 10px' }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Box display="flex">
+            <div className="flex justify-between items-center">
+              <div>
                 {chart.hasFilters && (
                   <Badge color="secondary" variant="dot" invisible={invisible}>
                     <Button
@@ -259,8 +269,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                     </Button>
                   </Badge>
                 )}
-              </Box>
-              <Box display="flex">
+              </div>
+              <div className="flex items-center">
                 {chart.hasExport && (
                   <Button
                     disabled={loading}
@@ -299,7 +309,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                         color="primary"
                         size="small"
                       >
-                        <BsFillPinFill fontSize="16px" />
+                        <BsFillPinFill fontSize="18px" />
                       </IconButton>
                     </HtmlTooltip>
                   ) : (
@@ -313,17 +323,17 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                         color="primary"
                         size="small"
                       >
-                        <TbPinnedOff fontSize="16px" />
+                        <TbPinnedOff fontSize="18px" />
                       </IconButton>
                     </HtmlTooltip>
                   )
                 ) : null}
-                <HtmlTooltip title='Refresh'>
+                <HtmlTooltip title="Refresh">
                   <IconButton
                     color="primary"
                     size="small"
                     onClick={() => {
-                      fetchData()
+                      fetchData();
                     }}
                     style={{ marginRight: 10 }}
                   >
@@ -331,12 +341,14 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   </IconButton>
                 </HtmlTooltip>
                 {setSelectedChart && (
-                  <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
-                    <FiMaximize2 fontSize="16px" />
-                  </IconButton>
+                  <HtmlTooltip title="Full Screen">
+                    <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
+                      <FiMaximize2 fontSize="18px" />
+                    </IconButton>
+                  </HtmlTooltip>
                 )}
-              </Box>
-            </Box>
+              </div>
+            </div>
 
             {chart.chartTitle && (
               <Typography component="div" align="center" color="textPrimary">
@@ -395,8 +407,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                             color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                           }
                         },
-                        ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') &&
-                        {
+                        ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') && {
                           y1: {
                             position: 'right',
                             grid: {
@@ -407,28 +418,28 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                             ticks: {
                               callback: function (value) {
                                 return value + '%';
-                              },
+                              }
                             }
                           }
                         })
                       },
                       ...(chart.stack &&
                         !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                        scales: {
-                          x: {
-                            stacked: true,
-                            grid: {
-                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                            }
-                          },
-                          y: {
-                            stacked: true,
-                            grid: {
-                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                          scales: {
+                            x: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
+                            },
+                            y: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
                             }
                           }
-                        }
-                      })
+                        })
                     }}
                   />
                 </>
@@ -447,7 +458,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
         </Box>
       )}
 
-      {chart.hasFilters && !isEmpty(filterData) &&(
+      {chart.hasFilters && !isEmpty(filterData) && (
         <FiltersDropdown
           closeAnchor={() => setAnchorElFilter(null)}
           anchorEl={anchorElFilter}

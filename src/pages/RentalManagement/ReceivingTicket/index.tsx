@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField, Tooltip } from '@material-ui/core';
+import { Button, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
 import Grid from '@material-ui/core/Grid/Grid';
 import { makeStyles } from '@material-ui/core/styles';
@@ -8,17 +8,19 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import Edit from '@material-ui/icons/Edit';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
+import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import { groupBy, map, uniq } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import VisibilityIcon from '@material-ui/icons/Visibility';
 import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
 import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -58,15 +60,13 @@ import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import MultipleTicket from '../../DeliveryTicket/MultipleTicket';
 import ManageRepairJob from '../../RepairJob/ManageRepairJob';
+import DateDialog from '../LoadingTicket/DateDialog';
 import AddSerializedAsset from '../SerializedAsset/AddSerializedAsset';
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import { getRentalDeliveryTicket, getRentalProductAssets, uniqueProduct } from './../rentalOfflineHelper';
 import ChangeActualDateDialog from './ChangeActualDateDialog';
 import ExistingRentalJob from './ExistingRentalJob';
 import ReturnTicketDialog from './ReturnTicketDialog';
-import DateDialog from '../LoadingTicket/DateDialog';
-import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -318,8 +318,11 @@ const ReceivingTicket = ({
           const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
 
           var consumeQty = 0;
-          consumeProducts?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)?.forEach((e) => {
-            consumeQty = consumeQty + e.qty
+
+          consumeProducts
+            ?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)
+            ?.forEach((e) => {
+              consumeQty = consumeQty + e.qty;
             });
 
           const obj: any = {};
@@ -554,16 +557,13 @@ const ReceivingTicket = ({
         }
       });
 
-
       if (user?.user?.brandPolicy?.rentalOnFieldStep && currentStep === RENTAL_STEPS.onField) {
         if (productAssets.filter((e) => e?.receivingTicketId || e?.returnTicketId).length) {
           setNextStep(true);
-        }
-        else {
+        } else {
           setNextStepToolTip(rentalManagementMessage.receivingCreateToProceed);
         }
-      }
-      else {
+      } else {
         if (
           productAssets.filter(
             (e) =>
@@ -605,7 +605,7 @@ const ReceivingTicket = ({
   };
 
   const getColumn = async () => {
-    setColumns(null)
+    setColumns(null);
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -641,16 +641,16 @@ const ReceivingTicket = ({
             }}
           >
             <h5 className="text-truncate">{row?.original?.index}</h5>
-            {row?.original?.receivingTicketId &&
-              <HtmlTooltip title={`Receiving Ticket ${row?.original?.receivingTicketStatus}`}  >
+            {row?.original?.receivingTicketId && (
+              <HtmlTooltip title={`Receiving Ticket ${row?.original?.receivingTicketStatus}`}>
                 <LocalShippingIcon fontSize="small" color={'primary'} />
               </HtmlTooltip>
-            }
-            {row?.original?.returnTicketId &&
-              <HtmlTooltip title={`Return Ticket ${row?.original?.returnTicketStatus}`}  >
+            )}
+            {row?.original?.returnTicketId && (
+              <HtmlTooltip title={`Return Ticket ${row?.original?.returnTicketStatus}`}>
                 <LocalShippingIcon fontSize="small" color={'primary'} />
               </HtmlTooltip>
-            }
+            )}
             {row?.original?.warehouseId && row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
               <HtmlTooltip title="This asset will be shipped from different facility">
                 <IconButton size="small">
@@ -659,7 +659,9 @@ const ReceivingTicket = ({
               </HtmlTooltip>
             )}
             {row?.original?.isReplaced && (
-              <HtmlTooltip title={`This Asset has been Replaced by ${row?.original?.replaceAsset} (Due to following reason-"${row?.original?.replaceReason}")`}   >
+              <HtmlTooltip
+                title={`This Asset has been Replaced by ${row?.original?.replaceAsset} (Due to following reason-"${row?.original?.replaceReason}")`}
+              >
                 <InfoIcon fontSize="small" color={'primary'} />
               </HtmlTooltip>
             )}
@@ -677,7 +679,8 @@ const ReceivingTicket = ({
               size="small"
               onClick={() => {
                 window.open(
-                  `${row?.original?.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${row?.original?._id?.split('_')[0]
+                  `${row?.original?.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${
+                    row?.original?._id?.split('_')[0]
                   }`
                 );
               }}
@@ -936,7 +939,7 @@ const ReceivingTicket = ({
         accessor: 'consumeQty',
         Header: 'Consumed Qty',
         Cell: ({ row }) => (row?.original?.consumeQty ? <h5 className="text-truncate">{row?.original?.consumeQty}</h5> : <NoDataCell />)
-      })
+      });
     }
     column.push({
       accessor: 'action',
@@ -971,8 +974,8 @@ const ReceivingTicket = ({
             </span>
           </HtmlTooltip>
         ) : null
-    })
-    setColumns(column)
+    });
+    setColumns(column);
   };
 
   const handleTicketDialog = (ticketType, deliveryToType, open = true) => {
@@ -1026,7 +1029,7 @@ const ReceivingTicket = ({
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-          .then(({ data: { data } }) => { })
+          .then(({ data: { data } }) => {})
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
@@ -1063,7 +1066,10 @@ const ReceivingTicket = ({
       data['signatures'] = [];
       data['warehouse'] = rentalManagementData?.warehouse?.optionValue;
       data['receiveDate'] = date;
-      axiosInstance().post(`${deliveryTicket.api}/updatebulk`, data).then(({ data: { data } }) => {
+
+      axiosInstance()
+        .post(`${deliveryTicket.api}/updatebulk`, data)
+        .then(({ data: { data } }) => {
           if (status) {
             handleChangeStatusInUse(status, openDateDialog.prevStatus, date);
           } else {
@@ -1263,18 +1269,40 @@ const ReceivingTicket = ({
   const handelCancleTickets = async () => {
     setOkBtnLoading(true);
     try {
-      const inTransitReceivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.inTransit), 'receivingTicketId'));
-      const inTransitReturnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketStatus === DELIVERY_TICKET_STATUS.inTransit), 'returnTicketId'));
+      const inTransitReceivingTicketIds = uniq(
+        map(
+          selectedRecords?.filter((e) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.inTransit),
+          'receivingTicketId'
+        )
+      );
+      const inTransitReturnTicketIds = uniq(
+        map(
+          selectedRecords?.filter((e) => e?.returnTicketStatus === DELIVERY_TICKET_STATUS.inTransit),
+          'returnTicketId'
+        )
+      );
 
       if (inTransitReceivingTicketIds.length || inTransitReturnTicketIds.length) {
-        await axiosInstance().put(`${deliveryTicket.api}/revert`, { ids: [...inTransitReceivingTicketIds, ...inTransitReturnTicketIds] })
+        await axiosInstance().put(`${deliveryTicket.api}/revert`, { ids: [...inTransitReceivingTicketIds, ...inTransitReturnTicketIds] });
       }
 
-      const deliveredReceivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered), 'receivingTicketId'));
-      const deliveredReturnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered), 'returnTicketId'));
+      const deliveredReceivingTicketIds = uniq(
+        map(
+          selectedRecords?.filter((e) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered),
+          'receivingTicketId'
+        )
+      );
+      const deliveredReturnTicketIds = uniq(
+        map(
+          selectedRecords?.filter((e) => e?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered),
+          'returnTicketId'
+        )
+      );
 
       if (deliveredReceivingTicketIds.length || deliveredReturnTicketIds.length) {
-        await axiosInstance().post(`${deliveryTicket.api}/cancel-delivered-ticket`, { _ids: [...deliveredReceivingTicketIds, ...deliveredReturnTicketIds] })
+        await axiosInstance().post(`${deliveryTicket.api}/cancel-delivered-ticket`, {
+          _ids: [...deliveredReceivingTicketIds, ...deliveredReturnTicketIds]
+        });
       }
 
       toastConfig.setToastConfig({
@@ -1286,8 +1314,7 @@ const ReceivingTicket = ({
       setShowConformationCancleTicket({ open: false });
       fetchRecords();
       fetchRentalData();
-    }
-    catch (error) {
+    } catch (error) {
       setOkBtnLoading(false);
       toastConfig.setToastConfig(error);
     }
@@ -1396,7 +1423,8 @@ const ReceivingTicket = ({
 
   const handleReplaceAsset = (reason) => {
     setIsSubmitting(true);
-    axiosInstance().post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
+    axiosInstance()
+      .post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
       .then(({ data }) => {
         setShowReplaceReason({ open: false, data: [] });
         setAddSerializedAssetDialog({ open: false, products: [], type: '' });
@@ -1517,7 +1545,7 @@ const ReceivingTicket = ({
         )}
         {showProcessDeliveryTicket && !isOffline && (
           <>
-            <Tooltip title="Process Multiple Receiving/Return Ticket(s)">
+            <HtmlTooltip title="Process Multiple Receiving/Return Ticket(s)">
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                 color="primary"
@@ -1528,7 +1556,7 @@ const ReceivingTicket = ({
               >
                 {isMobile && !isTablet ? <AddBoxRoundedIcon /> : 'Process Ticket'}
               </Button>
-            </Tooltip>
+            </HtmlTooltip>
           </>
         )}
       </>
@@ -1948,10 +1976,9 @@ const ReceivingTicket = ({
         <AddSerializedAsset
           addSerializedAsset={(rows) => {
             if (addSerializedAssetDialog.type === 'ReplaceAsset') {
-              handleOpenReplaceAssetReason(rows)
-            }
-            else {
-              handleSwapAssets(rows)
+              handleOpenReplaceAssetReason(rows);
+            } else {
+              handleSwapAssets(rows);
             }
           }}
           handleSerializedAssetClose={() => {
@@ -2035,7 +2062,6 @@ const ActionButtonMenuItems = ({
   setOpenDateDialog,
   currentStep
 }) => {
-
   const checkUniqWarehouse = () => {
     if (selectedRecords.length === 0) {
       return false;
@@ -2049,7 +2075,14 @@ const ActionButtonMenuItems = ({
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
       return false;
-    } else if (uniq(map(selectedRecords?.filter((e: any) => e.type === 'Asset'), 'status')).length === 1) {
+    } else if (
+      uniq(
+        map(
+          selectedRecords?.filter((e: any) => e.type === 'Asset'),
+          'status'
+        )
+      ).length === 1
+    ) {
       return true;
     } else {
       return false;
@@ -2073,8 +2106,7 @@ const ActionButtonMenuItems = ({
         } else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyDelivered });
         }
-      }
-      else if (action === rentalManagementActions.replaceAsset) {
+      } else if (action === rentalManagementActions.replaceAsset) {
         if (e?.type !== 'Asset') {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.productsCanNotReplace });
         } else if (!e.hasOwnProperty('loadingTicketId')) {
@@ -2084,8 +2116,7 @@ const ActionButtonMenuItems = ({
         } else if (e?.status !== ASSET_STATUS.inUse || e?.rentalAssetStatus !== ASSET_STATUS.inUse) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplaceInUse });
         }
-      }
-      else if (action === rentalManagementActions.createReceivingTicket) {
+      } else if (action === rentalManagementActions.createReceivingTicket) {
         if (e?.type !== 'Asset') {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotProduct });
         } else if (!e?.hasOwnProperty('loadingTicketId')) {
@@ -2171,8 +2202,10 @@ const ActionButtonMenuItems = ({
       } else if (action === rentalManagementActions.cancelReceivingReturnTicket) {
         if (!e.hasOwnProperty('receivingTicketId') && !e.hasOwnProperty('returnTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingReturnNotCreated });
-        } else if (![DELIVERY_TICKET_STATUS.inTransit, DELIVERY_TICKET_STATUS.delivered]?.includes(e?.receivingTicketStatus)
-          && ![DELIVERY_TICKET_STATUS.inTransit, DELIVERY_TICKET_STATUS.delivered]?.includes(e?.returnTicketStatus)) {
+        } else if (
+          ![DELIVERY_TICKET_STATUS.inTransit, DELIVERY_TICKET_STATUS.delivered]?.includes(e?.receivingTicketStatus) &&
+          ![DELIVERY_TICKET_STATUS.inTransit, DELIVERY_TICKET_STATUS.delivered]?.includes(e?.returnTicketStatus)
+        ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.inTransitDeliveredLoadingTicket });
         } else if (e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           if (![ASSET_STATUS.underReview]?.includes(e?.status) && e?.type === 'Asset') {
@@ -2200,12 +2233,12 @@ const ActionButtonMenuItems = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        } else if (([ASSET_STATUS.inUse].includes(e.status)
-          && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus) ||
-          ([ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status)
-            && [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(e.rentalAssetStatus)))) {
-        }
-        else {
+        } else if (
+          ([ASSET_STATUS.inUse].includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus)) ||
+          ([ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status) &&
+            [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(e.rentalAssetStatus))
+        ) {
+        } else {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
         }
       } else if (action === rentalManagementActions.swapInUseAssets) {
@@ -2219,19 +2252,25 @@ const ActionButtonMenuItems = ({
     });
     if (action === rentalManagementActions.transferToAnotherRental && errorMessages?.length === 0) {
       if (records?.find((e) => [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))) {
-        if (records?.filter((e) => [ASSET_STATUS.inUse]?.includes(e.status)
-          && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))?.length !== records?.length) {
+        if (
+          records?.filter((e) => [ASSET_STATUS.inUse]?.includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))
+            ?.length !== records?.length
+        ) {
           records?.forEach((e) => {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAssetSame });
-          })
+          });
         }
-      }
-      else {
-        if (records?.filter((e) => [ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)
-          && [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return]?.includes(e.rentalAssetStatus))?.length !== records?.length) {
+      } else {
+        if (
+          records?.filter(
+            (e) =>
+              [ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status) &&
+              [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return]?.includes(e.rentalAssetStatus)
+          )?.length !== records?.length
+        ) {
           records?.forEach((e) => {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAssetSame });
-          })
+          });
         }
       }
     }
@@ -2242,10 +2281,9 @@ const ActionButtonMenuItems = ({
     return false;
   };
 
-
   return (
     <>
-      {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep &&
+      {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (
         <MenuItem
           onClick={() => {
             if (!validateAction(rentalManagementActions.deliveredToCustomer)) {
@@ -2265,7 +2303,8 @@ const ActionButtonMenuItems = ({
           }}
         >
           Delivered to Customer
-        </MenuItem>}
+        </MenuItem>
+      )}
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.assetDeliveredStatus && user?.user?.brandPolicy?.rentalOnFieldStep && (
         <Box>
           {selectedRecords.length > 0 &&
@@ -2273,7 +2312,11 @@ const ActionButtonMenuItems = ({
               (e: any) =>
                 e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
                 [ASSET_STATUS.delivered, ASSET_STATUS.inUse, ASSET_STATUS.standByNotChargeable].includes(e?.status) &&
-                [RENTAL_INTERNAL_ASSET_STATUS.delivered, RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable].includes(e?.rentalAssetStatus)
+                [
+                  RENTAL_INTERNAL_ASSET_STATUS.delivered,
+                  RENTAL_INTERNAL_ASSET_STATUS.inUse,
+                  RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
+                ].includes(e?.rentalAssetStatus)
             ).length === selectedRecords.length &&
             checkUniqStatus() && (
               <MenuItem
@@ -2296,7 +2339,9 @@ const ActionButtonMenuItems = ({
               (e: any) =>
                 e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
                 [ASSET_STATUS.delivered, ASSET_STATUS.inUse, ASSET_STATUS.standBy].includes(e?.status) &&
-                [RENTAL_INTERNAL_ASSET_STATUS.delivered, RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy].includes(e?.rentalAssetStatus)
+                [RENTAL_INTERNAL_ASSET_STATUS.delivered, RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy].includes(
+                  e?.rentalAssetStatus
+                )
             ).length === selectedRecords.length &&
             checkUniqStatus() && (
               <MenuItem
@@ -2319,7 +2364,11 @@ const ActionButtonMenuItems = ({
               (e: any) =>
                 e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
                 [ASSET_STATUS.delivered, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable].includes(e?.status) &&
-                [RENTAL_INTERNAL_ASSET_STATUS.delivered, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable].includes(e?.rentalAssetStatus)
+                [
+                  RENTAL_INTERNAL_ASSET_STATUS.delivered,
+                  RENTAL_INTERNAL_ASSET_STATUS.standBy,
+                  RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
+                ].includes(e?.rentalAssetStatus)
             ).length === selectedRecords.length &&
             checkUniqStatus() && (
               <MenuItem
@@ -2366,7 +2415,7 @@ const ActionButtonMenuItems = ({
         </Box>
       )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
-        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
+        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
         <>
           <MenuItem
             onClick={() => {
@@ -2402,7 +2451,7 @@ const ActionButtonMenuItems = ({
           >
             Create Return Ticket (Non-Chargeable)
           </MenuItem>
-          {permissions?.sublease?.isRead &&
+          {permissions?.sublease?.isRead && (
             <MenuItem
               onClick={() => {
                 if (!validateAction(rentalManagementActions.createSupplierDeliveryTicket)) {
@@ -2412,10 +2461,10 @@ const ActionButtonMenuItems = ({
             >
               Create Delivery Ticket for Supplier
             </MenuItem>
-          }
+          )}
         </>
-      }
-      {currentStep === RENTAL_STEPS.receiving &&
+      )}
+      {currentStep === RENTAL_STEPS.receiving && (
         <MenuItem
           onClick={() => {
             if (!validateAction(rentalManagementActions.receiveItems)) {
@@ -2425,7 +2474,6 @@ const ActionButtonMenuItems = ({
         >
           {`Receive Items`}
         </MenuItem>
-      }
       {!isOffline && ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
           (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <MenuItem
@@ -2438,7 +2486,7 @@ const ActionButtonMenuItems = ({
             {`Transfer to another ${routes.rentalManagement.title}`}
           </MenuItem>
         )}
-      {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep &&
+      {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (
         <MenuItem
           onClick={() => {
             if (!validateAction(rentalManagementActions.replaceAsset)) {
@@ -2462,7 +2510,6 @@ const ActionButtonMenuItems = ({
         >
           Replace Asset
         </MenuItem>
-      }
       {!isOffline && ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
           (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <MenuItem
@@ -2512,7 +2559,7 @@ const ActionButtonMenuItems = ({
         </MenuItem>
       )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
-        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
+        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
         <>
           <MenuItem
             onClick={() => {
@@ -2533,11 +2580,15 @@ const ActionButtonMenuItems = ({
             Cancel Receiving/Return Ticket(s)
           </MenuItem>
         </>
-      }
-      {selectedRecords?.filter((f) => f.type === 'Product' && f.hasOwnProperty('loadingTicketId')
-        && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
-        && Number(f?.consumeQty) + Number(f?.returnQty) < Number(f?.qty)).length === selectedRecords.length
-        && user?.user?.brandPolicy?.rentalReceivingStepConsume && (
+      )}
+      {selectedRecords?.filter(
+        (f) =>
+          f.type === 'Product' &&
+          f.hasOwnProperty('loadingTicketId') &&
+          f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+          Number(f?.consumeQty) + Number(f?.returnQty) < Number(f?.qty)
+      ).length === selectedRecords.length &&
+        user?.user?.brandPolicy?.rentalReceivingStepConsume && (
           <MenuItem
             onClick={() => {
               if (selectedRecords?.length === 1) {
@@ -2551,9 +2602,14 @@ const ActionButtonMenuItems = ({
           </MenuItem>
         )}
       {selectedRecords.length === 1 &&
-        selectedRecords?.filter((f) => f.type === 'Product' && f.hasOwnProperty('loadingTicketId')
-          && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && f?.consumeQty > 0
-        ).length === selectedRecords.length && user?.user?.brandPolicy?.rentalReceivingStepConsume && (
+        selectedRecords?.filter(
+          (f) =>
+            f.type === 'Product' &&
+            f.hasOwnProperty('loadingTicketId') &&
+            f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+            f?.consumeQty > 0
+        ).length === selectedRecords.length &&
+        user?.user?.brandPolicy?.rentalReceivingStepConsume && (
           <MenuItem
             onClick={() => {
               setShowConformationConsume({ open: true, type: 'revert' });

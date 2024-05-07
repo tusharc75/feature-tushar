@@ -16,7 +16,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, asyncForEach, fieldTicket } from 'src/constants/helpers';
@@ -29,15 +29,16 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import AddRentalDataDialog from './AddRentalDataDialog';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
-import HideWhenOffline from 'src/components/HideWhenOffline';
+import { ownerAndColaborator } from 'src/constants/messageHelpers';
+import Add from '@material-ui/icons/Add';
 
-const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeStatus }) => {
+const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
-  const [serviceDialog, setServiceDialog] = useState({ open: false, type: '' });
+  const [materialDialog, setMaterialDialog] = useState({ open: false, type: '', parentId: null });
   const [allFields, setAllFields] = useState([]);
   const [isServiceEdit, setIsServiceEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
@@ -58,8 +59,17 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   const { isOffline } = useContext(CustomOfflineContext);
   const { generateColumns } = useColumns();
 
+  useEffect(() => {
+    fetchFields();
+  }, [fieldTicketData]);
+
+  useEffect(() => {
+    if (columns) {
+      fetchMaterial();
+    }
+  }, [columns]);
+
   const fetchFields = async () => {
-    setColumns(null);
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
     let costField: any = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
     setCostFields(costField);
@@ -100,6 +110,27 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             ) : (
               <NoDataCell />
             )}
+            {row.original.type === MATERIAL_TYPE.package && (
+              <Box ml={1} className="d-flex align-items-center">
+                <span>
+                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+                </span>
+                {!isOffline && allowedToEdit && (
+                  <Box ml={1}>
+                    <HtmlTooltip title={`Add ${routes.packages.title}`}>
+                      <IconButton
+                        onClick={() => {
+                          setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: row.original._id });
+                        }}
+                        size="small"
+                      >
+                        <Add color="primary" fontSize="small" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </Box>
+                )}
+              </Box>
+            )}
             {row.original.type !== MATERIAL_TYPE.manualEntry && !isOffline && (
               <Box ml={1} className=" flex-shrink-0">
                 <IconButton
@@ -112,15 +143,16 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                     } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                       window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                     } else if (row.original.type === MATERIAL_TYPE.package) {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);                  
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                     }
                   }}
                 >
                   <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>
               </Box>
-            )}
-          </div>
+            )
+            }
+          </div >
         )
       },
       {
@@ -157,7 +189,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       Cell: ({ row, table }) => {
         return (
           <>
-            <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
+            <HtmlTooltip title={allowedToEdit ? 'Edit' : ownerAndColaborator}>
               <IconButton
                 size="small"
                 aria-label="Delete"
@@ -176,7 +208,9 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
                   aria-label="Delete"
                   disabled={!allowedToEdit || !row?.original?.canDelete}
                   onClick={() => {
-                    setDeleteData([{ id: row.original._id, service: row?.original?.materialId, type: row?.original?.type }]);
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    getNestedSubRows(obj, row.original);
+                    setDeleteData(obj);
                   }}
                 >
                   <DeleteIcon fontSize="small" color={!allowedToEdit || !row?.original?.canDelete ? 'disabled' : 'error'} />
@@ -191,6 +225,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
   };
 
   const fetchMaterial = async () => {
+    setNextStep(false);
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     let data;
@@ -199,13 +234,13 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       data = data?.filter((d: any) => d?.fieldTicketId === fieldTicketData?._id && (d?.type === MATERIAL_TYPE.service || d?.isRental || !d?.type || d?.type === MATERIAL_TYPE.manualEntry)); //d?.type === MATERIAL_TYPE.manualEntry for offline added material
     } else {
       const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=${MATERIAL_TYPE.service}`);
-      const packageResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=${MATERIAL_TYPE.package}`);
       const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
       let costData = costResponse?.data?.data;
       costData = costData?.map((e: any) => { return { ...e, type: MATERIAL_TYPE.manualEntry } });
-      data = [...response?.data?.data?.material, ...packageResponse?.data?.data?.material, ...costData];
+      data = [...response?.data?.data?.material, ...costData];
     };
-    data.forEach((parent, i) => {
+    let rows = data?.filter((d: any) => !d.parentId);
+    rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName :
         parent.type === MATERIAL_TYPE.serializedAsset ? parent.serializedAssetDetail?.assetNumber :
@@ -216,20 +251,34 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         parent.type === MATERIAL_TYPE.package ? parent?.packageDetail?.packageDescription || '' :
           parent.description || '';
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
-      parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
       parent.canDelete = parent.canDelete ?? true;
+      parent.subRows = generateNestedData(data, parent);
     });
-    if (data?.length) {
-      if (data.filter((_rows) => _rows.isValid === false).length > 0) {
+    if (rows?.length) {
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
         setNextStep(false);
       } else {
         setNextStep(true);
       }
     }
-
-    dispatch({ type: 'initialize', data: data, count: data?.length });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
+  };
+
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName : '';
+      _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || '' : '';
+      _subRow.competencyType = `${_subRow?.serviceDetail?.competencyType?.optionLabel || ''}`;
+      _subRow.qty = _subRow.qty * parent.qty;
+      _subRow.isValid = _subRow['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
+      _subRow.canDelete = _subRow.canDelete ?? true;
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    return subRows;
   };
 
   const openMaterial = (data, rows) => {
@@ -245,16 +294,6 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
     }
   };
 
-  useEffect(() => {
-    fetchFields();
-  }, [fieldTicketData]);
-
-  useEffect(() => {
-    if (columns) {
-      fetchMaterial();
-    }
-  }, [columns]);
-
   const handleAdd = async (rows: any, type: string) => {
     setIsSubmitting(true);
     if (isOffline) {
@@ -266,8 +305,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
         element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
         element.qty = d.qty ? parseFloat(d.qty) : 1;
-        element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
-        element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
+        element.estimateStartDate = fieldTicketData ? new Date(fieldTicketData?.estimateStartDate) : new Date();
+        element.estimateEndDate = fieldTicketData ? new Date(fieldTicketData?.estimateEndDate) : new Date();
         element.isRental = false;
         const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
         element.estimateJobDuration = 1;
@@ -284,27 +323,22 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         material.push(element);
         await insertUpdate(objectStore.fieldTicketMaterial, id, element);
         fetchMaterial();
-        setServiceDialog({ open: false, type: '' });
+        setMaterialDialog({ open: false, type: '', parentId: null });
         setAssignRentalDataDialog({ open: false, type: '' });
         setIsSubmitting(false);
-      };
-      let updatedData = [];
-      const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
-      if (result?.data) {
-        updatedData = [...result?.data, ...material];
-      } else {
-        updatedData = [...material];
       }
-      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { type: 'fieldTicketMaterial', data: updatedData, _id: fieldTicketData?._id });
+      let updatedData;
+      const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+      if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...(result?.data || []), ...material];
+      else updatedData = {...result?.data, material: [...(result?.data?.material || []), ...material]};
+      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, {...result, data: updatedData});
     } else {
       const isRental = assignRentalDataDialog.open;
       var taxCodeData: any = null;
       if (fieldTicketData?.taxCode) {
         const {
           data: { data }
-        } = await axiosInstance().get(
-          `${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${type}`
-        );
+        } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${type}`);
         if (data?.length) {
           taxCodeData = data[0];
         }
@@ -334,12 +368,13 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             element.taxPercentage = taxCodeData?.taxRate || 0;
           }
           material.push(element);
-        })
+        });
       } else {
         rows.forEach((d) => {
           const element: any = {};
           element.materialId = d._id;
           element.type = type;
+          element.parentId = materialDialog.parentId;
           element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
           element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -398,7 +433,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           handleChangeStatus(FIELD_TICKET_STATUS.inProgress);
         }
         fetchMaterial();
-        setServiceDialog({ open: false, type: '' });
+        setMaterialDialog({ open: false, type: '', parentId: null });
         setAssignRentalDataDialog({ open: false, type: '' });
         setIsSubmitting(false);
       })
@@ -420,15 +455,12 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         fetchMaterial();
         setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
         setUpdating(false);
-      };
-      const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
-      let updatedData = [];
-      if (result?.data) {
-        updatedData = [...result?.data, ...rows];
-      } else {
-        updatedData = [...rows];
       }
-      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { type: 'fieldTicketMaterial', data: updatedData, _id: fieldTicketData?._id });
+      const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+      let updatedData;
+      if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...(result?.data || []), ...rows];
+      else updatedData = {...result?.data, cost: [...(result?.data?.cost || []), ...rows]}; 
+      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, {...result, data: updatedData });  
     } else {
       axiosInstance()
         .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [...rows])
@@ -449,13 +481,12 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       setUpdating(true);
       if (isOffline) {
         const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
-        const alreadyOfflineDataSyncStoredRows = result?.data || [];
+        const alreadyOfflineDataSyncStoredRows = result?.data?.cost || result?.data || [];
         const toAddOfflineDataSyncStoreRows = [];
         for (const row of rows) {
           row.fieldTicketId = fieldTicketData?._id;
           row.type = MATERIAL_TYPE.manualEntry;
           await insertUpdate(objectStore.fieldTicketMaterial, row._id, row);
-
           const foundIndex = alreadyOfflineDataSyncStoredRows.findIndex((d: any) => d._id === row._id);
           if (foundIndex !== -1) {
             alreadyOfflineDataSyncStoredRows[foundIndex] = row;
@@ -463,7 +494,10 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             toAddOfflineDataSyncStoreRows.push(row);
           }
         }
-        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { type: 'fieldTicketMaterial', data: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows], _id: fieldTicketData?._id });
+        let updatedData;
+        if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows];
+        else updatedData = {...result?.data, cost: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows]}; 
+        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       } else {
         await axiosInstance().put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [...rows]);
       }
@@ -484,23 +518,20 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       } else {
         setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
       }
-
     } catch (error) {
       setUpdating(false);
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
   const handleDelete = async (rows) => {
     try {
       setDeleting(true);
+      const material = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry)?.map((ele) => ({ id: ele.id, materialId: ele.materialId }));
       const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id);
-      const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry);
-      const updatedProducts = products?.map((ele) => ({ id: ele.id, service: ele.service }));
-
       if (isOffline) {
-        let materialIdsToDelete = products.map((e) => e.id);
-        let serviceIdsOfMaterialToDelete = products.map((e) => e.service);
+        let materialIdsToDelete = material.map((e) => e.id);
+        let serviceIdsOfMaterialToDelete = material.map((e) => e.materialId);
         let fieldTicketOfflineMaterial = await findAll(objectStore.fieldTicketMaterial);
 
         const productsToDelete = fieldTicketOfflineMaterial?.map((e: any) => {
@@ -508,7 +539,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             return e._id;
           }
           return null;
-        }).filter(Boolean);;
+        }).filter(Boolean);
 
         materialIdsToDelete = [...materialIdsToDelete, ...productsToDelete];
 
@@ -518,21 +549,35 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         });
         //Updating offlineDataSync Store
         const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
-        const alreadyOfflineDataSyncStoredRows = result?.data || [];
-        let updatedData = alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id));
-        updatedData = updatedData?.filter((d: any) => !cost.includes(d._id));
-        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { type: 'fieldTicketMaterial', data: updatedData, _id: fieldTicketData?._id });
+        let updatedData;
+        if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
+          const alreadyOfflineDataSyncStoredRows = result?.data || [];
+          updatedData = alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id));
+          updatedData = updatedData?.filter((d: any) => !cost.includes(d._id));
+          
+        } else {
+          const material = result?.data?.material || [];
+          const costs = result?.data?.cost || [];
+          const updatedMaterial = material.filter((d: any) => !materialIdsToDelete.includes(d._id));
+          const updatedCost = costs.filter((d: any) => !cost.includes(d._id));
+          updatedData = {...result?.data, material: updatedMaterial, cost: updatedCost};
+          await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
+        }
         //for onlineSync
         const deleteData = {
-          "cost": cost,
-          "material": materialIdsToDelete,
-          "fieldTicketId": fieldTicketData?._id
-        }
+          cost: cost,
+          material: materialIdsToDelete,
+          fieldTicketId: fieldTicketData?._id
+        };
         let id = Math.floor(Math.random() * 1000000).toString();
-        await insertUpdate(objectStore.offlineDataSync, id, { type: 'fieldTicketMaterialDelete', data: deleteData, _id: id })
+        await insertUpdate(objectStore.offlineDataSync, id, { type: 'fieldTicketMaterialDelete', data: deleteData, _id: id });
       } else {
-        if (updatedProducts?.length) await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material/delete`, { ids: updatedProducts });
-        if (cost?.length) await axiosInstance().put(`${routes?.fieldTicket?.path}/${fieldTicketData?._id}/cost/remove`, { ids: cost });
+        if (material?.length) {
+          await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material/delete`, { ids: material });
+        }
+        if (cost?.length) {
+          await axiosInstance().put(`${routes?.fieldTicket?.path}/${fieldTicketData?._id}/cost/remove`, { ids: cost });
+        }
       }
       setDeleting(false);
       fetchMaterial();
@@ -549,7 +594,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       setUpdating(true);
       if (isOffline) {
         const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
-        const alreadyOfflineDataSyncStoredRows = result?.data || [];
+        const alreadyOfflineDataSyncStoredRows = result?.data?.material || result?.data || [];
         const toAddOfflineDataSyncStoreRows = [];
         for (const row of rows) {
           row.fieldTicketId = fieldTicketData?._id;
@@ -563,7 +608,10 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             toAddOfflineDataSyncStoreRows.push({ ...existingRow, ...row });
           }
         }
-        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { type: 'fieldTicketMaterial', data: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows], _id: fieldTicketData?._id });
+        let updatedData;
+        if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows];
+        else updatedData = {...result?.data, material: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows]}; 
+        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       } else {
         await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });
       }
@@ -622,7 +670,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       <>
         <MenuItem
           onClick={() => {
-            setServiceDialog({ open: true, type: MATERIAL_TYPE.service });
+            setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
           }}
         >
           Add Existing Service
@@ -630,16 +678,16 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         {permissions?.serviceMaster?.isCreate && !isOffline && (
           <MenuItem
             onClick={() => {
-              setServiceDialog({ open: true, type: 'newService' });
+              setMaterialDialog({ open: true, type: 'newService', parentId: null });
             }}
           >
             Add New Service
           </MenuItem>
         )}
-        {permissions?.packages?.isCreate && !isOffline && (
+        {permissions?.packages?.isRead && resourcePolicy?.showAddPackages && !isOffline && (
           <MenuItem
             onClick={() => {
-              setServiceDialog({ open: true, type: MATERIAL_TYPE.package });
+              setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
           >
             Add Existing Package
@@ -654,7 +702,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             Add Manual Entry
           </MenuItem>
         )}
-        {user?.user?.brandPolicy?.fieldTicketRentalMaterialAdd && fieldTicketData?.rentalJob?.optionValue && !isOffline && (
+        {resourcePolicy?.showRentalAddMaterial && fieldTicketData?.rentalJob?.optionValue && !isOffline && (
           <>
             <MenuItem
               onClick={() => {
@@ -701,15 +749,15 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           <MenuItem
             disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
             onClick={() => {
-              setDeleteData(
-                selectedRecords?.map((d) => {
-                  return {
-                    id: d?._id,
-                    service: d?.materialId,
-                    type: d?.type
-                  };
-                })
-              );
+              const obj: any = [];
+              const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
+              dataToDelete?.forEach((ele) => {
+                obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
+              });
+              dataToDelete?.forEach((ele) => {
+                getNestedSubRows(obj, ele);
+              });
+              setDeleteData(obj);
             }}
           >
             Delete
@@ -736,7 +784,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
-            height={'300px'}
+            height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
             columns={columns}
             state={state}
             dispatch={dispatch}
@@ -747,6 +795,7 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchMaterial}
+            expander={resourcePolicy?.showAddPackages ? true : false}
           />
         </Box>
       ) : (
@@ -760,15 +809,16 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
           fieldTicketData={fieldTicketData}
           fetchMaterial={fetchMaterial}
+          stepFullScreen={stepFullScreen}
         />
       </Box>
-      {serviceDialog?.open && serviceDialog?.type === MATERIAL_TYPE.service && (
+      {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
-          onSuccess={(rows, type = MATERIAL_TYPE.service) => {
-            handleAdd(rows, type);
+          onSuccess={(rows,) => {
+            handleAdd(rows, MATERIAL_TYPE.service);
           }}
           handleClose={() => {
-            setServiceDialog({ open: false, type: '' });
+            setMaterialDialog({ open: false, type: '', parentId: null });
           }}
           ids={dataRows?.map((row) => row?.materialId)}
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
@@ -776,29 +826,29 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
           pricingCondition={fieldTicketData?.pricingCondition?.optionValue || null}
         />
       )}
-      {serviceDialog?.open && serviceDialog?.type === MATERIAL_TYPE.package && (
+      {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
-          onSuccess={(rows, type = MATERIAL_TYPE.package) => {
-            handleAdd(rows, type);
+          onSuccess={(rows) => {
+            handleAdd(rows, MATERIAL_TYPE.package);
           }}
           handleClose={() => {
-            setServiceDialog({ open: false, type: '' });
+            setMaterialDialog({ open: false, type: '', parentId: null });
           }}
           ids={dataRows?.map((row) => row?.materialId)}
           isSubmitting={isSubmitting}
         />
       )}
-      {serviceDialog.open && serviceDialog.type === 'newService' && (
+      {materialDialog.open && materialDialog.type === 'newService' && (
         <ManageServiceMaster
           isClone={false}
           serviceMasterId={null}
-          onClose={() => setServiceDialog({ open: false, type: '' })}
+          onClose={() => setMaterialDialog({ open: false, type: '', parentId: null })}
           onSuccess={(data) => {
             const row = data?.data;
             row.unitMain = row?.unit;
             row.pricingMethodMain = row?.pricingMethod;
             handleAdd([row], MATERIAL_TYPE.service);
-            setServiceDialog({ open: false, type: '' });
+            setMaterialDialog({ open: false, type: '', parentId: null });
           }}
           isRedirectToDetailPage={false}
           referenceData={{ serviceType: SERVICE_TYPE.fieldService }}

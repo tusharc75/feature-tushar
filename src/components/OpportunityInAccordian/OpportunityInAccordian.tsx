@@ -1,41 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Grid,
-  Box,
-  IconButton,
-  Typography,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Tooltip,
-  Menu,
-  MenuItem,
-  Button,
-  ListItemIcon
-} from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Box, Button, Card, CardContent, Grid, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { useEffect, useState } from 'react';
 
-import { displayDate } from '../../services/util';
-import routes from './../../components/Helpers/Routes';
-import { Link } from 'react-router-dom';
-import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog';
-import { useHistory } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
-import { BiCustomize } from 'react-icons/bi';
-import { useData } from '../../StateProvider/Provider';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { HiExternalLink } from 'react-icons/hi';
-import { customerAccount, customerContact, formatAmountWithCurrency } from '../../constants/helpers';
 import { MoreVert } from '@material-ui/icons';
-import AssignOpportunityDialog from '../AssignRolesDialog/AssignOpportunityDialog';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
+import { BiCustomize } from 'react-icons/bi';
+import { IoCalendarOutline } from 'react-icons/io5';
+import { Link, useHistory } from 'react-router-dom';
 import DisplayData from 'src/components/CardDisplayData';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import { customerAccount, customerContact, formatAmountWithCurrency } from '../../constants/helpers';
+import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog';
+import { displayDate } from '../../services/util';
+import AssignOpportunityDialog from '../AssignRolesDialog/AssignOpportunityDialog';
+import HtmlTooltip from '../CustomTooltipTitle';
+import routes from './../../components/Helpers/Routes';
 
 export default function OpportunityInAccordian({
   opportunities,
@@ -221,9 +204,9 @@ export default function OpportunityInAccordian({
                               ) : (
                                 <span className="d-flex gap-2 align-items-center">
                                   <Typography className="detailName">{obj.opportunityName}</Typography>{' '}
-                                  <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
+                                  <HtmlTooltip title={`${obj.opportunityName} belongs to different entity`}>
                                     <InfoOutlinedIcon fontSize="small" />
-                                  </Tooltip>
+                                  </HtmlTooltip>
                                 </span>
                               )}
 

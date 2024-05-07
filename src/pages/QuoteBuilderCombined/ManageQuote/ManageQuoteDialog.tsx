@@ -1,40 +1,41 @@
-import React, { useEffect, useState, useContext, useRef, Fragment } from 'react';
-import { Box, Button, Grid, IconButton, Tooltip, InputAdornment } from '@material-ui/core';
-import { Formik, Form } from 'formik';
+import { Box, Button, Grid, IconButton, InputAdornment } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
-import axiosInstance from '../../../axios/axiosInstance';
-import {
-  getObjKeys,
-  yupSchema,
-  getObjKeysWithValues,
-  initializeDropdownById,
-  quoteBuilder,
-  customerAccount,
-  getUniqueCurrencies,
-  formFieldNames,
-  setFieldsInAscendingOrder,
-  GenerateResourceLineNumber
-} from '../../../constants/helpers';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import FormTypes from '../../../components/Helpers/FormTypes';
-import CustomButton from '../../../components/Helpers/CustomButton';
-import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { useData } from '../../../StateProvider/Provider';
-import { useHistory } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import AddIcon from '@material-ui/icons/AddCircle';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import InfoIcon from '@material-ui/icons/Info';
-import ManageOpportunityDialog from '../../Opportunities/ManageOpportunityDialog';
-import { isMobile, isTablet } from 'react-device-detect';
-import routes from '../../../components/Helpers/Routes';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import CreateProjectSales from '../../ProjectSales/CreateProjectSales';
-import { FaDiceOne } from 'react-icons/fa';
+import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
+import PropTypes from 'prop-types';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
+import { useHistory } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import CustomButton from '../../../components/Helpers/CustomButton';
+import FormTypes from '../../../components/Helpers/FormTypes';
+import routes from '../../../components/Helpers/Routes';
+import {
+  GenerateResourceLineNumber,
+  customerAccount,
+  formFieldNames,
+  getObjKeys,
+  getObjKeysWithValues,
+  getUniqueCurrencies,
+  initializeDropdownById,
+  quoteBuilder,
+  setFieldsInAscendingOrder,
+  yupSchema
+} from '../../../constants/helpers';
+import ManageOpportunityDialog from '../../Opportunities/ManageOpportunityDialog';
+import CreateProjectSales from '../../ProjectSales/CreateProjectSales';
 export default function ManageQuoteDialog({
   open,
   onSuccess,
@@ -138,7 +139,6 @@ export default function ManageQuoteDialog({
       if (isNew && opportunityId) {
         setOpportunityDataSource(opportunityDropDownData.option.filter((d) => d.customerAccountName === initialData.values['customerAccount']));
       }
-
     }
 
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
@@ -263,10 +263,10 @@ export default function ManageQuoteDialog({
     isCreateQuoteFromCart
       ? onHandleSubmit(values)
       : isClone
-        ? handleCloneQuote(values)
-        : isNew
-          ? handleCreateQuote(values)
-          : handleUpdateQuote(values);
+      ? handleCloneQuote(values)
+      : isNew
+      ? handleCreateQuote(values)
+      : handleUpdateQuote(values);
   };
 
   const handleCloneQuote = (values) => {
@@ -403,7 +403,6 @@ export default function ManageQuoteDialog({
     }
   };
 
-
   const handleErrors = (values) => {
     let tempErrors = customError;
 
@@ -513,108 +512,183 @@ export default function ManageQuoteDialog({
                   <Form autoComplete="off" autoCorrect="off" noValidate>
                     {formsData &&
                       formsData.map((form, index1) => {
-                        return form.name && (
-                          <div key={index1}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
+                        return (
+                          form.name && (
+                            <div key={index1}>
+                              <div className={'detail-box-content'}>
+                                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                              </div>
 
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field, index2) => (
-                                  <Grid key={index2} item xs={12} sm={6} md={6}>
-                                    {field.fieldName === 'quoteName' ? (
-                                      <FormTypes
-                                        {...field}
-                                        isNew={isNew}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        disabled={field.isUneditable || isRenderedFromOpportunity || (!isNew && field.disableOnEdit)}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      // doNotShowInfoTooltip={true}
-                                      // onChange={(e, value) => {
-                                      //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-                                      //   setFieldValue("customerContactName", [])
-                                      // }}
-                                      />
-                                    ) : field.fieldName === 'opportunity' ? (
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11}
-                                          sm={permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11}
-                                          md={permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11}
-                                        >
-                                          <FormTypes
-                                            {...field}
-                                            isNew={isNew}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={opportunityDataSource}
-                                            disabled={!isClone ? isRenderedFromOpportunity || (!isNew && field.disableOnEdit) : false}
-                                            setFieldValue={(name, value) => {
-                                              setFieldValue(name, value);
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            doNotShowInfoTooltip={true}
-                                            size="small"
-                                            onOpen={() => onOpportunityDropDownOpen(values.customerAccountName)}
-                                          />
-                                        </Grid>
-                                        {permissions.opportunity?.isCreate && !isRenderedFromOpportunity && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title="Create Opportunity" className="mt-1">
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowCreateOpportunity(true);
-                                                }}
-                                                disabled={!isClone ? isRenderedFromOpportunity || (!isNew && field.disableOnEdit) : false}
-                                                size="small"
-                                              >
-                                                <AddIcon
-                                                  color={
-                                                    isClone
-                                                      ? 'primary'
-                                                      : isRenderedFromOpportunity || (!isNew && field.disableOnEdit)
+                              <Box marginY={2}>
+                                <Grid spacing={3} container>
+                                  {form.sectionFields.map((field, index2) => (
+                                    <Grid key={index2} item xs={12} sm={6} md={6}>
+                                      {field.fieldName === 'quoteName' ? (
+                                        <FormTypes
+                                          {...field}
+                                          isNew={isNew}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          disabled={field.isUneditable || isRenderedFromOpportunity || (!isNew && field.disableOnEdit)}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          // doNotShowInfoTooltip={true}
+                                          // onChange={(e, value) => {
+                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                          //   setFieldValue("customerContactName", [])
+                                          // }}
+                                        />
+                                      ) : field.fieldName === 'opportunity' ? (
+                                        <Grid container spacing={1}>
+                                          <Grid
+                                            item
+                                            xs={permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11}
+                                            sm={permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11}
+                                            md={permissions.opportunity?.isCreate && !isRenderedFromOpportunity ? 11 : 11}
+                                          >
+                                            <FormTypes
+                                              {...field}
+                                              isNew={isNew}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={opportunityDataSource}
+                                              disabled={!isClone ? isRenderedFromOpportunity || (!isNew && field.disableOnEdit) : false}
+                                              setFieldValue={(name, value) => {
+                                                setFieldValue(name, value);
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              doNotShowInfoTooltip={true}
+                                              size="small"
+                                              onOpen={() => onOpportunityDropDownOpen(values.customerAccountName)}
+                                            />
+                                          </Grid>
+                                          {permissions.opportunity?.isCreate && !isRenderedFromOpportunity && (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <HtmlTooltip title="Create Opportunity" className="mt-1">
+                                                <IconButton
+                                                  onClick={() => {
+                                                    setShowCreateOpportunity(true);
+                                                  }}
+                                                  disabled={!isClone ? isRenderedFromOpportunity || (!isNew && field.disableOnEdit) : false}
+                                                  size="small"
+                                                >
+                                                  <AddIcon
+                                                    color={
+                                                      isClone
+                                                        ? 'primary'
+                                                        : isRenderedFromOpportunity || (!isNew && field.disableOnEdit)
                                                         ? 'disabled'
                                                         : 'primary'
-                                                  }
-                                                />
-                                              </IconButton>
-                                            </Tooltip>
+                                                    }
+                                                  />
+                                                </IconButton>
+                                              </HtmlTooltip>
+                                            </Grid>
+                                          )}
+                                          {field?.tooltipMessage ? (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <HtmlTooltip title={field?.tooltipMessage ?? ''}>
+                                                <InfoIcon color="disabled" />
+                                              </HtmlTooltip>
+                                            </Grid>
+                                          ) : null}
+                                        </Grid>
+                                      ) : field.fieldName === 'pDFTemplate' ? (
+                                        <Grid container spacing={1}>
+                                          <Grid item xs={11} sm={11} md={11}>
+                                            <FormTypes
+                                              {...field}
+                                              isNew={isNew}
+                                              disabled={!isClone ? !isNew && field.disableOnEdit : false}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              setFieldValue={(name, value) => {
+                                                setFieldValue(name, value);
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              doNotShowInfoTooltip={true}
+                                              size="small"
+                                            />
                                           </Grid>
-                                        )}
-                                        {field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
+                                            <HtmlTooltip title="Preview PDF Template" className="mt-1">
+                                              <IconButton
+                                                disabled={!values.pDFTemplate}
+                                                onClick={() => {
+                                                  previewPdfTemplate(values.pDFTemplate);
+                                                }}
+                                                size="small"
+                                              >
+                                                <GetAppIcon color={values.pDFTemplate ? 'primary' : 'disabled'} />
+                                              </IconButton>
+                                            </HtmlTooltip>
                                           </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    ) : field.fieldName === 'pDFTemplate' ? (
-                                      <Grid container spacing={1}>
-                                        <Grid item xs={11} sm={11} md={11}>
+                                          {field?.tooltipMessage ? (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <HtmlTooltip title={field?.tooltipMessage ?? ''}>
+                                                <InfoIcon color="disabled" />
+                                              </HtmlTooltip>
+                                            </Grid>
+                                          ) : null}
+                                        </Grid>
+                                      ) : field.fieldName === 'probability' ? (
+                                        <FormTypes
+                                          {...field}
+                                          // {...rest}
+                                          isNew={isNew}
+                                          disabled={!isClone ? !isNew && field.disableOnEdit : false}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          onChange={(e) => {
+                                            if (e.target.value && parseFloat(e.target.value) > 100) {
+                                              setFieldValue('probability', '100');
+                                            } else {
+                                              setFieldValue('probability', e.target.value);
+                                            }
+                                          }}
+                                        />
+                                      ) : field.fieldName === 'lostReason' ? (
+                                        values['stage'] === 'Closed Lost' ? (
                                           <FormTypes
                                             {...field}
                                             isNew={isNew}
@@ -633,62 +707,181 @@ export default function ManageQuoteDialog({
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
                                             tooltipMessage={field?.tooltipMessage}
-                                            doNotShowInfoTooltip={true}
                                             size="small"
                                           />
-                                        </Grid>
-                                        <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title="Preview PDF Template" className="mt-1">
-                                            <IconButton
-                                              disabled={!values.pDFTemplate}
-                                              onClick={() => {
-                                                previewPdfTemplate(values.pDFTemplate);
-                                              }}
-                                              size="small"
-                                            >
-                                              <GetAppIcon color={values.pDFTemplate ? 'primary' : 'disabled'} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </Grid>
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    ) : field.fieldName === 'probability' ? (
-                                      <FormTypes
-                                        {...field}
-                                        // {...rest}
-                                        isNew={isNew}
-                                        disabled={!isClone ? !isNew && field.disableOnEdit : false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onChange={(e) => {
-                                          if (e.target.value && parseFloat(e.target.value) > 100) {
-                                            setFieldValue('probability', '100');
-                                          } else {
-                                            setFieldValue('probability', e.target.value);
+                                        ) : null
+                                      ) : field.fieldName === 'currency' ? (
+                                        <FormTypes
+                                          {...field}
+                                          isNew={isNew}
+                                          disabled={!isClone && !isNew ? !editCurrency || field.disableOnEdit : false}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          onChange={(e, val) => {
+                                            if (val && val.currencyCode) {
+                                              setFieldValue(field.fieldName, val.currencyCode);
+                                              setCurrencySymbol(val.symbolNative);
+                                            } else {
+                                              setFieldValue(field.fieldName, '');
+                                              setCurrencySymbol(null);
+                                            }
+                                          }}
+                                        />
+                                      ) : field.fieldName === 'estimatedAmount' || field.fieldName === 'invoiceAmount' ? (
+                                        <FormTypes
+                                          {...field}
+                                          // {...rest}
+                                          isNew={isNew}
+                                          disabled={!isClone ? !isNew && field.disableOnEdit : false}
+                                          selectedCurrencyCode={values['currency']}
+                                          startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                        />
+                                      ) : field.fieldName === 'expiryDate' ? (
+                                        <FormTypes
+                                          {...field}
+                                          // {...rest}
+                                          disablePast={true}
+                                          isNew={isNew}
+                                          disabled={!isClone ? !isNew && field.disableOnEdit : false}
+                                          selectedCurrencyCode={values['currency']}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                        />
+                                      ) : ['quoteAcceptDate', 'salesOrderCreationDate', 'invoiceCreationDate', 'invoicedDate'].indexOf(
+                                          field?.fieldName
+                                        ) >= 0 ? (
+                                        <FormTypes
+                                          {...field}
+                                          // {...rest}
+                                          isNew={isNew}
+                                          disabled={!isClone ? !isNew && field.disableOnEdit : false}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          imageOrFileUploadCompletePercentage={
+                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                              ? (completePercentage) => {
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
+                                              : null
                                           }
-                                        }}
-                                      />
-                                    ) : field.fieldName === 'lostReason' ? (
-                                      values['stage'] === 'Closed Lost' ? (
+                                          customError={customError}
+                                          onChange={(date) => {
+                                            setFieldValue(field.fieldName, date);
+                                            handleErrors({
+                                              ...values,
+                                              [field.fieldName]: date
+                                            });
+                                          }}
+                                        />
+                                      ) : field.fieldName == 'projectSales' ? (
+                                        <Grid container spacing={1}>
+                                          <Grid
+                                            item
+                                            xs={permissions?.projectSales?.isCreate ? 10 : 11}
+                                            sm={permissions?.projectSales?.isCreate ? 10 : 11}
+                                            md={permissions?.projectSales?.isCreate ? 10 : 11}
+                                          >
+                                            <FormTypes
+                                              {...field}
+                                              isNew={isNew}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={projectSalesDataSource}
+                                              disabled={!isClone ? !isNew && field.disableOnEdit : false}
+                                              setFieldValue={(name, value) => {
+                                                setFieldValue(name, value);
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              doNotShowInfoTooltip={true}
+                                              size="small"
+                                              onOpen={() => onProjectSalesDropDownOpen(values.customerAccountName)}
+                                            />
+                                          </Grid>
+                                          {permissions?.projectSales?.isCreate && (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <HtmlTooltip title="Add Project List" className="mt-1">
+                                                <IconButton
+                                                  onClick={() => {
+                                                    setShowAddProjectSalesDialog(true);
+                                                  }}
+                                                  disabled={!isClone ? !isNew && field.disableOnEdit : false}
+                                                  size="small"
+                                                >
+                                                  <AddIcon color={isClone ? 'primary' : !isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                </IconButton>
+                                              </HtmlTooltip>
+                                            </Grid>
+                                          )}
+                                          {field?.tooltipMessage ? (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <HtmlTooltip title={field?.tooltipMessage ?? ''}>
+                                                <InfoIcon color="disabled" />
+                                              </HtmlTooltip>
+                                            </Grid>
+                                          ) : null}
+                                        </Grid>
+                                      ) : (
                                         <FormTypes
                                           {...field}
                                           isNew={isNew}
@@ -708,216 +901,24 @@ export default function ManageQuoteDialog({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                        />
-                                      ) : null
-                                    ) : field.fieldName === 'currency' ? (
-                                      <FormTypes
-                                        {...field}
-                                        isNew={isNew}
-                                        disabled={!isClone && !isNew ? !editCurrency || field.disableOnEdit : false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onChange={(e, val) => {
-                                          if (val && val.currencyCode) {
-                                            setFieldValue(field.fieldName, val.currencyCode);
-                                            setCurrencySymbol(val.symbolNative);
-                                          } else {
-                                            setFieldValue(field.fieldName, '');
-                                            setCurrencySymbol(null);
+                                          imageOrFileUploadCompletePercentage={
+                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                              ? (completePercentage) => {
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
+                                              : null
                                           }
-                                        }}
-                                      />
-                                    ) : field.fieldName === 'estimatedAmount' || field.fieldName === 'invoiceAmount' ? (
-                                      <FormTypes
-                                        {...field}
-                                        // {...rest}
-                                        isNew={isNew}
-                                        disabled={!isClone ? !isNew && field.disableOnEdit : false}
-                                        selectedCurrencyCode={values['currency']}
-                                        startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : field.fieldName === 'expiryDate' ? (
-                                      <FormTypes
-                                        {...field}
-                                        // {...rest}
-                                        disablePast={true}
-                                        isNew={isNew}
-                                        disabled={!isClone ? !isNew && field.disableOnEdit : false}
-                                        selectedCurrencyCode={values['currency']}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : ['quoteAcceptDate', 'salesOrderCreationDate', 'invoiceCreationDate', 'invoicedDate'].indexOf(
-                                      field?.fieldName
-                                    ) >= 0 ? (
-                                      <FormTypes
-                                        {...field}
-                                        // {...rest}
-                                        isNew={isNew}
-                                        disabled={!isClone ? !isNew && field.disableOnEdit : false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
-                                            : null
-                                        }
-                                        customError={customError}
-                                        onChange={(date) => {
-                                          setFieldValue(field.fieldName, date);
-                                          handleErrors({
-                                            ...values,
-                                            [field.fieldName]: date
-                                          });
-                                        }}
-                                      />
-                                    ) : field.fieldName == 'projectSales' ? (
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions?.projectSales?.isCreate ? 10 : 11}
-                                          sm={permissions?.projectSales?.isCreate ? 10 : 11}
-                                          md={permissions?.projectSales?.isCreate ? 10 : 11}
-                                        >
-                                          <FormTypes
-                                            {...field}
-                                            isNew={isNew}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={projectSalesDataSource}
-                                            disabled={!isClone ? !isNew && field.disableOnEdit : false}
-                                            setFieldValue={(name, value) => {
-                                              setFieldValue(name, value);
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            doNotShowInfoTooltip={true}
-                                            size="small"
-                                            onOpen={() => onProjectSalesDropDownOpen(values.customerAccountName)}
-                                          />
-                                        </Grid>
-                                        {permissions?.projectSales?.isCreate && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title="Add Project List" className="mt-1">
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowAddProjectSalesDialog(true);
-                                                }}
-                                                disabled={!isClone ? !isNew && field.disableOnEdit : false}
-                                                size="small"
-                                              >
-                                                <AddIcon color={isClone ? 'primary' : !isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        )}
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    ) : (
-                                      <FormTypes
-                                        {...field}
-                                        isNew={isNew}
-                                        disabled={!isClone ? !isNew && field.disableOnEdit : false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
-                                            : null
-                                        }
-                                        fieldData={field}
-                                        fields={initialData?.fields}
-                                      />
-                                    )}
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
+                                          fieldData={field}
+                                          fields={initialData?.fields}
+                                        />
+                                      )}
+                                    </Grid>
+                                  ))}
+                                </Grid>
+                              </Box>
+                            </div>
+                          )
+                        );
                       })}
                   </Form>
                 </CustomDialogContent>

@@ -17,6 +17,7 @@ import { TResource, TSidebarItem, TSidebarSection } from './type';
 import { isSectionActive, isSectionVisible, staticSidebarData } from './utils';
 import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
 import { BsChatLeftTextFill } from 'react-icons/bs';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 function SideBar({ location }) {
   const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
@@ -185,7 +186,7 @@ function SideBar({ location }) {
 
               return (
                 <React.Fragment key={listItem.name}>
-                  <Tooltip title={!isSidebarOpen ? listItem.name : ''}>
+                  <HtmlTooltip title={!isSidebarOpen ? listItem.name : ''}>
                     <ListItem
                       className={`${styles.listItem} dropdown-items ${isSectionActive(pathName, location.pathname, listItem) && styles.activeList}`}
                       button
@@ -211,7 +212,7 @@ function SideBar({ location }) {
                         <>{open[listItem.name] ? <ExpandLess className={styles.listArrowIcon} /> : <ExpandMore className={styles.listArrowIcon} />}</>
                       )}
                     </ListItem>
-                  </Tooltip>
+                  </HtmlTooltip>
                   {hasChild && (
                     <Collapse in={open[listItem.name]} timeout="auto" unmountOnExit>
                       <List

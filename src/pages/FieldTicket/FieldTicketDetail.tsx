@@ -95,7 +95,7 @@ const FieldTicketDetail = () => {
       let data;
       if (isOffline) {
         data = await findOne(objectStore.fieldTicket, id);
-      } else {
+      } else if (/^[0-9a-fA-F]{24}$/.test(id)) {
         const response = await axiosInstance().get(`${routes.fieldTicket.path}/${id}`);
         data = response?.data?.data;
       }
@@ -173,8 +173,8 @@ const FieldTicketDetail = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const handleChangeStatus = async (status) => {
@@ -289,10 +289,19 @@ const FieldTicketDetail = () => {
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
                 handleChangeStatus={handleChangeStatus}
+                resourcePolicy={resourceData?.policy}
+                stepFullScreen={stepFullScreen}
+
               />
             )}
             {currentStep === 1 && fieldTicketData && (
-              <Submit stepFullScreen={stepFullScreen} fieldTicketData={fieldTicketData} allowedToEdit={allowedToEdit} fetchData={fetchData} />
+              <Submit
+                stepFullScreen={stepFullScreen}
+                fieldTicketData={fieldTicketData}
+                allowedToEdit={allowedToEdit}
+                fetchData={fetchData}
+                resourcePolicy={resourceData?.policy}
+              />
             )}
           </ContentFullScreen>
         </TabPanel>

@@ -279,26 +279,24 @@ const Job = () => {
     return (
       <>
         {permissions?.fleetDispatch?.isRead && (
-          <ToggleButtonGroup size="small">
-            <ToggleButton
-              onClick={() => {
-                history.push(`${routes.fleetDispatch.path}`);
-              }}
-            >
-              <span>{routes.fleetDispatch.title}</span>
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push(`${routes.fleetDispatch.path}`);
+            }}
+          >
+            <span>{routes.fleetDispatch.title}</span>
+          </Button>
         )}
         {permissions?.fleetReceiver?.isRead && (
-          <ToggleButtonGroup size="small">
-            <ToggleButton
-              onClick={() => {
-                history.push(`${routes.fleetReceiver.path}`);
-              }}
-            >
-              <span>{routes.fleetReceiver.title}</span>
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push(`${routes.fleetReceiver.path}`);
+            }}
+          >
+            <span>{routes.fleetReceiver.title}</span>
+          </Button>
         )}
 
         <IconButton

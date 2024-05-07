@@ -1,30 +1,29 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
-  TextField,
-  Grid,
-  Container,
-  DialogContent,
-  IconButton,
   ButtonGroup,
-  makeStyles,
-  InputAdornment,
-  Tooltip,
+  Container,
+  Dialog,
+  DialogContent,
   FormControlLabel,
+  Grid,
+  IconButton,
+  InputAdornment,
   Switch,
-  Dialog
+  TextField,
+  makeStyles
 } from '@material-ui/core';
-import { Autocomplete, TabPanel, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { Formik, Form, Field, FieldArray, FormikProps } from 'formik';
-import { Add, Delete, SyncDisabled } from '@material-ui/icons';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { getUniqueCurrencies, removeEmptyKeys } from '../../../constants/helpers';
-import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import React from 'react';
+import { Add, Delete } from '@material-ui/icons';
+import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { FieldArray, Form, Formik, FormikProps } from 'formik';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { getUniqueCurrencies, removeEmptyKeys } from '../../../constants/helpers';
 
 const DoaApproveType = [
   {
@@ -570,7 +569,7 @@ const DoaDialog = ({
                                                   >
                                                     <Delete />
                                                   </IconButton>
-                                                  <Tooltip title={userVal.disable ? 'User Disabled' : 'User Enabled'}>
+                                                  <HtmlTooltip title={userVal.disable ? 'User Disabled' : 'User Enabled'}>
                                                     <FormControlLabel
                                                       key={1}
                                                       control={
@@ -588,7 +587,7 @@ const DoaDialog = ({
                                                       }
                                                       label=""
                                                     />
-                                                  </Tooltip>
+                                                  </HtmlTooltip>
                                                 </ButtonGroup>
                                               </Grid>
                                             </Grid>
