@@ -11,7 +11,6 @@ import {
   GenerateResourceLineNumber,
   SERVICE_ORDER_STATUS,
   checkIsAllowedToEdit,
-  checkSuperAdminAccess,
   cloneResourceData,
   fieldServiceOrder,
   getObjKeys,
