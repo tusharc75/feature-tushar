@@ -327,6 +327,9 @@ const ManageDeliveryTicket = ({
             if (ele?.uniqueId) {
               obj.uniqueId = ele.uniqueId;
             }
+            if(ele?.productSerialNumbers?.length > 0){
+              obj.serialNumber = ele?.productSerialNumbers?.map(s => s?.serialNumber)
+            }
             tempInitialData['products'].push(obj);
           });
           tempInitialData['serialNumber'] = [];

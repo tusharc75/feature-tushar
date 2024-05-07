@@ -79,14 +79,14 @@ export const CustomOfflineProvider = ({ children }) => {
             await new Promise((resolve) => setTimeout(resolve, 2000));
           }
           if (d?.type === 'fieldTicket') {
-            await axiosInstance()
-              .post(`${routes?.fieldTicket?.path}/offlinedatasync`, d.data)
-              .then(({ data: { data } }) => {
-                deleteOne(objectStore.offlineDataSync, d.data._id);
-                deleteOne(objectStore.fieldTicket, d.data._id);
-              })
-              .catch((error) => { });
+            await axiosInstance().post(`${routes?.fieldTicket?.path}/offlinedatasync`, d.data);
+            deleteOne(objectStore.offlineDataSync, d.data._id);
+            deleteOne(objectStore.fieldTicket, d.data._id);
+            let fieldTicketMaterial = await findAll(objectStore.fieldTicketMaterial);
+            fieldTicketMaterial = fieldTicketMaterial?.filter((e) => e?.fieldTicketId === d?.data?._id)?.map((e) => e?._id);
+            deleteMany(objectStore.fieldTicketMaterial, fieldTicketMaterial);
             await new Promise((resolve) => setTimeout(resolve, 2000));
+            window.location.href = routes.fieldTicket.path;
           }
           if (d?.type === 'fieldTicketMaterial') {
             if (d?.data?.length) {
