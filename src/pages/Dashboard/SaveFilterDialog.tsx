@@ -15,6 +15,11 @@ const schema = object().shape({
   access: string().oneOf(['private','everyone']).required("Please select access option")
 });
 
+const ACCESS_OPTIONS = {
+  private: "private",
+  everyone: "everyone"
+}
+
 function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterData }) {
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
@@ -102,17 +107,17 @@ function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterD
                   error={touched['title'] && Boolean(errors['title'])}
                   helperText={touched['title'] && errors['title']}
                 />
-                  <RadioGroup>
+                 <RadioGroup>
                     <FormControlLabel
                       control={<Radio
-                        checked={values['access']==='private'}
-                        onChange={(e) => setFieldValue('access', e.target.checked ? 'private' : 'everyone')} name="private" />}
+                        checked={values['access']===ACCESS_OPTIONS.private}
+                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)} name="private" />}
                       label="Private"
                     />
                     <FormControlLabel
                       control={<Radio
-                        checked={values['access']==='everyone'}
-                        onChange={(e) => setFieldValue('access', e.target.checked ? 'everyone' : 'private')} name="everyone"
+                        checked={values['access']===ACCESS_OPTIONS.everyone}
+                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)} name="everyone"
                         />}
                       label="Everyone"
                     />
