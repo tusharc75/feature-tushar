@@ -117,7 +117,7 @@ const ReceivingTicket = ({
   const [showRepairOrderDialog, setShowRepairOrderDialog] = useState(false);
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
-  const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
+  const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [invoiceData, setInvoiceData] = useState(null);
   const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, loading: false });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
@@ -174,6 +174,7 @@ const ReceivingTicket = ({
       var material: any = [];
       var products: any = [];
       var nonSerializeAsset: any = [];
+      var productSerialNumbers: any = [];
       var consumeProducts: any = [];
       var transactionData: any = [];
 
@@ -252,6 +253,7 @@ const ReceivingTicket = ({
         material = productResponse?.data?.data?.material;
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
+        productSerialNumbers = productResponse?.data?.data?.productSerialNumbers;
 
         const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`);
         invoiceData = invoiceResponse?.data?.data?.material || [];
@@ -316,6 +318,7 @@ const ReceivingTicket = ({
           const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
 
           var consumeQty = 0;
+
           consumeProducts
             ?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)
             ?.forEach((e) => {
@@ -415,6 +418,108 @@ const ReceivingTicket = ({
           productAssets.push(obj);
         }
       });
+
+      material
+        ?.filter((e) => e?.productDetail?.serializedProduct && e.type === 'product')
+        .forEach((element) => {
+          var qty = element.qty;
+
+          const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+          ticketProduct?.forEach((ele) => {
+            const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
+
+            var consumeQty = 0;
+            consumeProducts
+              ?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)
+              ?.forEach((e) => {
+                consumeQty = consumeQty + e.qty;
+              });
+
+            const obj: any = {};
+            obj.uniqueId = element._id;
+            obj.serialized = element?.productDetail?.serializedProduct;
+            obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
+            obj.materialId = element?.productDetail?._id;
+            obj.type = 'Product';
+            obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
+            obj.description =
+              element.type === 'service'
+                ? element?.serviceDetail?.serviceDescription || ''
+                : element.type === 'product'
+                ? element?.productDetail?.productDescription || ''
+                : element.type === 'package'
+                ? element?.packageDetail?.packageDescription || ''
+                : '';
+            obj.qty = ele.qty;
+            obj.consumeQty = consumeQty;
+            obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicket?.qty || 0 : 0;
+            obj.assetNumber = element?.productDetail?.productName;
+            obj.productName = element?.productDetail?.productName;
+            obj.productId = element?.productDetail?._id;
+            obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
+            obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
+            obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
+            obj.parentId = element?.parentId;
+            obj.parentName = element?.parentName;
+            obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
+              ? ele.qty === consumeQty
+                ? RENTAL_INTERNAL_ASSET_STATUS.consumed
+                : consumeQty < ele.qty && consumeQty > 0
+                ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
+                : ele.qty === (returnTicket?.qty || 0)
+                ? 'Returned'
+                : element?.status
+              : element?.status;
+            obj.startDate = element?.actualStartDate;
+            obj.endDate = element?.actualEndDate;
+            obj.manualStartDate = element?.manualStartDate;
+            obj.manualEndDate = element?.manualEndDate;
+            obj.productSerialNumbers = productSerialNumbers?.filter((p) => p?.uniqueId === element?.materialId)?.map(_p => ({..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber}));
+            obj.loadingTicket = ele?.loadingTicket;
+            obj.loadingTicketId = ele?.loadingTicketId;
+            obj.loadingTicketStatus = ele?.loadingTicketStatus;
+            obj.currentLocation =
+              element?.currentLocation?.optionValue ||
+              rentalManagementData?.shippingAddress?.optionValue ||
+              rentalManagementData?.billingAddress?.optionValue;
+
+            if (returnTicket) {
+              returnTicket.isCount = true;
+              obj.returnTicket = returnTicket?.returnTicket;
+              obj.returnTicketId = returnTicket?.returnTicketId;
+              obj.returnTicketStatus = returnTicket?.returnTicketStatus;
+            }
+            productAssets.push(obj);
+            qty = qty - ele.qty;
+          });
+
+          if (qty > 0 && productSerialNumbers?.map((p) => p?.uniqueId)?.includes(element?.materialId)) {
+            productAssets.push({
+              _id: element?.materialId,
+              materialId: element?.materialId,
+              type: 'Product',
+              displayType: 'Product (Serialized)',
+              qty: element?.qty,
+              description: element?.productDetail?.productDescription || '',
+              parentId: element?.parentId,
+              parentName: element?.parentName,
+              consumeQty: 0,
+              returnQty: 0,
+              assetNumber: element?.productDetail?.productName,
+              productName: element?.productDetail?.productName,
+              productId: element?.productDetail?._id,
+              warehouse: rentalManagementData?.warehouse?.optionLabel,
+              warehouseId: rentalManagementData?.warehouse?.optionValue,
+              productSerialNumbers: productSerialNumbers?.filter((p) => p?.uniqueId === element?.materialId)?.map(_p => ({..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber})),
+              status: element?.productDetail?.serializedProduct === true ? element?.status : 'N/A',
+              rentalAssetStatus: element?.productDetail?.serializedProduct ? element?.status : '',
+              currentLocation:
+                element?.currentLocation?.optionValue ||
+                rentalManagementData?.shippingAddress?.optionValue ||
+                rentalManagementData?.billingAddress?.optionValue
+            });
+          }
+        });
 
       deliveryTicketList?.map((obj) => {
         productAssets?.map((d, index) => {
@@ -582,14 +687,22 @@ const ReceivingTicket = ({
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
-            {row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0 && (
-              <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
+            {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
+              (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
+              <HtmlTooltip
+                title={row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `Serial Numbers`}
+              >
                 <IconButton
                   size="small"
                   onClick={() => {
-                    setShowNonSerializeAsset({
+                    setShowInfo({
                       open: true,
-                      data: { productName: row?.original?.productName, nonSerializeAsset: row?.original?.nonSerializeAsset }
+                      data: {
+                        productName: row?.original?.productName,
+                        data:
+                          row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
+                      },
+                      type: row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `Serial Numbers`
                     });
                   }}
                 >
@@ -953,6 +1066,7 @@ const ReceivingTicket = ({
       data['signatures'] = [];
       data['warehouse'] = rentalManagementData?.warehouse?.optionValue;
       data['receiveDate'] = date;
+
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)
         .then(({ data: { data } }) => {
@@ -1796,8 +1910,8 @@ const ReceivingTicket = ({
           }}
         />
       )}
-      {showNonSerializeAsset.open && (
-        <ShowNonSerializeAssets data={showNonSerializeAsset.data} onClose={() => setShowNonSerializeAsset({ open: false, data: {} })} />
+      {showInfo.open && (
+        <ShowNonSerializeAssets data={showInfo.data} onClose={() => setShowInfo({ open: false, data: {}, type: null })} title={showInfo?.type} />
       )}
       {showConformationConsumeMultiple && (
         <ConfirmationDialog
@@ -1979,23 +2093,11 @@ const ActionButtonMenuItems = ({
     const errorMessages = [];
     var records = selectedRecords;
     if (action === rentalManagementActions.cancelReceivingReturnTicket) {
-      const receivingTicketIds = uniq(
-        map(
-          selectedRecords?.filter((e) => e?.receivingTicketId),
-          'receivingTicketId'
-        )
-      );
-      const returnTicketIds = uniq(
-        map(
-          selectedRecords?.filter((e) => e?.returnTicketId),
-          'returnTicketId'
-        )
-      );
-      records = [
-        ...selectedRecords?.filter((e) => !e?.receivingTicketId && !e?.returnTicketId),
+      const receivingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.receivingTicketId), 'receivingTicketId'));
+      const returnTicketIds = uniq(map(selectedRecords?.filter((e) => e?.returnTicketId), 'returnTicketId'));
+      records = [...selectedRecords?.filter((e) => !e?.receivingTicketId && !e?.returnTicketId),
         ...dataRows?.filter((e) => receivingTicketIds?.includes(e?.receivingTicketId)),
-        ...dataRows?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))
-      ];
+      ...dataRows?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))]
     }
     records.forEach((e) => {
       if (action === rentalManagementActions.deliveredToCustomer) {
@@ -2372,9 +2474,7 @@ const ActionButtonMenuItems = ({
         >
           {`Receive Items`}
         </MenuItem>
-      )}
-      {!isOffline &&
-        ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
+      {!isOffline && ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
           (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <MenuItem
             onClick={() => {
@@ -2410,9 +2510,7 @@ const ActionButtonMenuItems = ({
         >
           Replace Asset
         </MenuItem>
-      )}
-      {!isOffline &&
-        ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
+      {!isOffline && ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
           (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <MenuItem
             onClick={() => {
