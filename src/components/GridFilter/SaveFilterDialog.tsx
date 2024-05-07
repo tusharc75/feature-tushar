@@ -1,10 +1,10 @@
-import { Box, Button, Checkbox, Dialog, FormControlLabel, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { Form, Formik } from 'formik';
 import { Fragment, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { boolean, object, string } from 'yup';
+import { array, boolean, object, string } from 'yup';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
@@ -26,10 +26,16 @@ const schema = object().shape({
       is: true,
       then: string().required('Please select sort by'),
       otherwise: string().notRequired()
-    })
+    }),
+    access: string().oneOf(['private','everyone']).required("Please select access option")
 });
 
 const orderByOptions = ['asc', 'desc'];
+
+const ACCESS_OPTIONS = {
+  private: "private",
+  everyone: "everyone"
+}
 
 function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, filterData, columns }) {
   const toastConfig = useContext(CustomToastContext);
@@ -40,7 +46,8 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
     default: filterData?.default || false,
     sorting: filterData?.sorting || false,
     sortBy: filterData?.sortBy || '',
-    orderBy: filterData?.orderBy || ''
+    orderBy: filterData?.orderBy || '',
+    access: filterData?.access || ''
   });
 
   const handleSubmit = (values) => {
@@ -51,7 +58,8 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
       default: values.default,
       sorting: values.sorting || false,
       sortBy: values.sortBy,
-      orderBy: values.orderBy
+      orderBy: values.orderBy,
+      access: values.access
     };
     setLoading(true);
     if (filterData) {
@@ -138,6 +146,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                     />
                   </Box>
                 }
+                  
                 {values['sorting'] && columns.length && (
                   <div className="flex flex-wrap gap-2 my-2">
                     <Autocomplete
@@ -188,6 +197,24 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                     />
                   </div>
                 )}
+                 <Box>
+                  <RadioGroup>
+                    <FormControlLabel
+                      control={<Radio
+                        checked={values['access']===ACCESS_OPTIONS.private}
+                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)} name="private" />}
+                      label="Private"
+                    />
+                    <FormControlLabel
+                      control={<Radio
+                        checked={values['access']===ACCESS_OPTIONS.everyone}
+                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)} name="everyone"
+                        />}
+                      label="Everyone"
+                    />
+                    </RadioGroup>
+                    {errors.access && <div style={{ color: 'red' }}>{errors.access}</div>}
+                  </Box>
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
