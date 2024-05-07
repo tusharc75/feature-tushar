@@ -106,8 +106,14 @@ function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterD
                   }}
                   error={touched['title'] && Boolean(errors['title'])}
                   helperText={touched['title'] && errors['title']}
+                />   
+                <FormControlLabel
+                  control={<Checkbox checked={values['default']}
+                    onChange={(e) => setFieldValue('default', e.target.checked)}
+                    name="default" />}
+                  label="Set this as default"
                 />
-                 <RadioGroup>
+                <RadioGroup>
                     <FormControlLabel
                       control={<Radio
                         checked={values['access']===ACCESS_OPTIONS.private}
@@ -123,13 +129,6 @@ function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterD
                     />
                     </RadioGroup>
                     {errors.access && <div style={{ color: 'red' }}>{errors.access}</div>}
-                  
-                <FormControlLabel
-                  control={<Checkbox checked={values['default']}
-                    onChange={(e) => setFieldValue('default', e.target.checked)}
-                    name="default" />}
-                  label="Set this as default"
-                />
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>

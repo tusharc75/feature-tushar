@@ -146,24 +146,6 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                     />
                   </Box>
                 }
-                 <Box>
-                  <RadioGroup>
-                    <FormControlLabel
-                      control={<Radio
-                        checked={values['access']===ACCESS_OPTIONS.private}
-                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)} name="private" />}
-                      label="Private"
-                    />
-                    <FormControlLabel
-                      control={<Radio
-                        checked={values['access']===ACCESS_OPTIONS.everyone}
-                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)} name="everyone"
-                        />}
-                      label="Everyone"
-                    />
-                    </RadioGroup>
-                    {errors.access && <div style={{ color: 'red' }}>{errors.access}</div>}
-                  </Box>
                   
                 {values['sorting'] && columns.length && (
                   <div className="flex flex-wrap gap-2 my-2">
@@ -215,6 +197,24 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                     />
                   </div>
                 )}
+                 <Box>
+                  <RadioGroup>
+                    <FormControlLabel
+                      control={<Radio
+                        checked={values['access']===ACCESS_OPTIONS.private}
+                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)} name="private" />}
+                      label="Private"
+                    />
+                    <FormControlLabel
+                      control={<Radio
+                        checked={values['access']===ACCESS_OPTIONS.everyone}
+                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)} name="everyone"
+                        />}
+                      label="Everyone"
+                    />
+                    </RadioGroup>
+                    {errors.access && <div style={{ color: 'red' }}>{errors.access}</div>}
+                  </Box>
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
