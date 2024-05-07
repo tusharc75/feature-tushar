@@ -4290,4 +4290,7 @@ body .btn-outline-red-v1 {
     background: #282845 !important;
     color: #ffffff !important;
   }
+  @media all and (max-width: 1030px) {
+    padding: 4px 8px !important;
+  }
 }
