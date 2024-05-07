@@ -16,7 +16,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
-import { ACTIVITY_RESOURCE, checkSuperAdminAccess, jobProcessSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, checkIsAllowedToEdit, jobProcessSteps, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -75,11 +75,8 @@ const JobDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.job.path}/${id}`);
       setCurrentStep(getIndex(data?.processStatus, jobProcessSteps));
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.job)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+  
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.job, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setJobData(data);
       setCustomizedRoutes([routes.job, { title: data?.jobNumber }]);

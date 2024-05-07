@@ -16,7 +16,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
-import { ACTIVITY_RESOURCE, checkSuperAdminAccess, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, checkIsAllowedToEdit, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -85,10 +85,7 @@ const PurchaseRequisitionDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.purchaseRequisition.path}/${id}`);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.purchaseRequisition)) {
-        isAllowedToEdit = true;
-      }
+     
       var tempStepList = purchaseRequisitionSteps;
       if (!data?.doaSetup) {
         tempStepList = purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA');
@@ -97,7 +94,7 @@ const PurchaseRequisitionDetail = () => {
       setStepNames(tempStepList?.map((item) => item.name));
 
       setCurrentStep(getIndex(data?.processStatus, purchaseRequisitionSteps));
-      setAllowedToEdit(isAllowedToEdit);
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPurchaseRequisitionData(data);
       setCustomizedRoutes([routes.purchaseRequisition, { title: data?.purchaseRequisitionNumber }]);

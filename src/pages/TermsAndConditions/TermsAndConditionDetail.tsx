@@ -9,7 +9,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { checkSuperAdminAccess, sidebarResource, termsAndCondition } from 'src/constants/helpers';
+import { checkIsAllowedToEdit, sidebarResource, termsAndCondition } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -57,11 +57,8 @@ const TermsAndConditionDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${termsAndCondition.api}/${id}`);
 
-      let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.termsAndConditions)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+     
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.termsAndConditions, data));
       setAllowedToDelete(data.owner.optionValue === user?.user?._id);
 
       setTermsAndConditionData(data);

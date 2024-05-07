@@ -29,7 +29,6 @@ import {
   RENTAL_STATUS,
   RENTAL_STEPS,
   checkIsAllowedToEdit,
-  checkSuperAdminAccess,
   deliveryTicket,
   rentalManagement,
   rentalManagementSteps,
