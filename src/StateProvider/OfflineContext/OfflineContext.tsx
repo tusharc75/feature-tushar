@@ -87,6 +87,7 @@ export const CustomOfflineProvider = ({ children }) => {
               })
               .catch((error) => { });
             await new Promise((resolve) => setTimeout(resolve, 2000));
+            window.location.href = routes.fieldTicket.path;
           }
           if (d?.type === 'fieldTicketMaterial') {
             if (d?.data?.length) {
