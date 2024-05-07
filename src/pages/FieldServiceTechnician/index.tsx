@@ -175,7 +175,7 @@ const FieldServiceTechnician = () => {
       await insertUpdate(objectStore.fieldTicket, _id, formattedValue);
       await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...tempInitialData, _id, offlineSyncStatus: 'new' } });
       setIsSubmitting(false);
-      window.open(`${routes.fieldTicketDetail.path}/${_id}`);
+      window.location.href = `${routes.fieldTicketDetail.path}/${_id}`;
     } else {
       axiosInstance()
         .post(`${routes.fieldTicket?.path}`, tempInitialData)
