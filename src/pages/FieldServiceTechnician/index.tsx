@@ -10,6 +10,7 @@ import {
   CHILD_RESOURCE,
   GenerateResourceLineNumber,
   SERVICE_ORDER_STATUS,
+  checkIsAllowedToEdit,
   checkSuperAdminAccess,
   cloneResourceData,
   fieldServiceOrder,
@@ -306,12 +307,8 @@ const FieldServiceTechnician = () => {
 
   const onRowClick = (row) => {
     if (!selectedData || row._id !== selectedData._id) {
-      setSelectedData(row);
-      var isAllowedToEdit = [...(row?.orignalData?.collaborator ?? []), row?.orignalData?.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.fieldTicket)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status));
+      setSelectedData(row); 
+      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) && ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status));
     } else {
       setSelectedData(null);
       setAllowedToEdit(false);
