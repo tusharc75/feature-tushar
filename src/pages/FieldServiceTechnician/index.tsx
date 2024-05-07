@@ -7,6 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomContainer from 'src/components/CustomContainer';
 import {
+  CHILD_RESOURCE,
   GenerateResourceLineNumber,
   SERVICE_ORDER_STATUS,
   checkSuperAdminAccess,
@@ -32,6 +33,7 @@ import { fieldServiceOfflineUpdate } from '../FieldServiceOrder/Services/Offline
 import axios, { CancelTokenSource } from 'axios';
 import { Apps, FormatListNumbered } from '@material-ui/icons';
 import FieldTicket from '../FieldServiceOrder/FieldTicket';
+import { restoreObjKeysWithValues } from '../FieldTicket/ManageFieldTicket';
 
 type Views = 'card' | 'table';
 
@@ -118,9 +120,8 @@ const FieldServiceTechnician = () => {
         }
         return c;
       });
-    })
-
-  }, [isOffline])
+    });
+  }, [isOffline]);
 
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
@@ -138,7 +139,7 @@ const FieldServiceTechnician = () => {
     }
     try {
       insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
-    } catch (e) { }
+    } catch (e) {}
     setColData(data);
     const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
     newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }));
@@ -169,30 +170,28 @@ const FieldServiceTechnician = () => {
 
     if (isOffline) {
       const _id: any = Math.floor(Math.random() * 1000000).toString();
-      tempInitialData['_id'] = _id;
-      await insertUpdate(objectStore.fieldTicket, _id, tempInitialData);
+      const formattedValue: any = restoreObjKeysWithValues(tempInitialData, fieldTicketField);
+      formattedValue['_id'] = _id;
+      await insertUpdate(objectStore.fieldTicket, _id, formattedValue);
       await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...tempInitialData, _id, offlineSyncStatus: 'new' } });
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: 'Field Ticket will be created when you are online'
-      });
+      setIsSubmitting(false);
+      window.open(`${routes.fieldTicketDetail.path}/${_id}`);
     } else {
       axiosInstance()
-      .post(`${routes.fieldTicket?.path}`, tempInitialData)
-      .then(({ data }) => {
-        window.open(`${routes.fieldTicket.path}/detail/${data?.data?._id}`);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        .post(`${routes.fieldTicket?.path}`, tempInitialData)
+        .then(({ data }) => {
+          window.open(`${routes.fieldTicket.path}/detail/${data?.data?._id}`);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setIsSubmitting(false);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setIsSubmitting(false);
         });
-        setIsSubmitting(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setIsSubmitting(false);
-      });
     }
   };
 
@@ -268,11 +267,24 @@ const FieldServiceTechnician = () => {
       data.push(element._id);
     });
     await fieldServiceOfflineUpdate(data);
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.fieldTicket}`)
-      .then(({ data: { data } }) => {
+    axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
         insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
-      });
+    });
+    axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}&view=true`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, objectStore.serviceMaster, data);
+    });
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketMateial}`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, objectStore.fieldTicketMaterial, data);
+    });
+    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, 'fieldTicketCost', data);
+    });
+    axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`).then(({ data: { data } }) => {
+      insertUpdate(objectStore.resource, objectStore.product, data);
+    });
+    axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription']}]}).then(({data : {data}}) => {
+      insertUpdate(objectStore.resource, 'fieldTicketMaterialProduct', data);
+    });
     dispatch({ type: 'selection', selectedRecords: [] });
   };
 
@@ -363,9 +375,9 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => { }}
+                    setNextStep={() => {}}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => { }}
+                    handleChangeStatus={() => {}}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
                   />
