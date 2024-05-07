@@ -28,6 +28,7 @@ import {
   QUOTATION_STATUS,
   RENTAL_STATUS,
   RENTAL_STEPS,
+  checkIsAllowedToEdit,
   checkSuperAdminAccess,
   deliveryTicket,
   rentalManagement,
@@ -204,7 +205,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -240,11 +241,7 @@ const RentalManagementDetailsPage = () => {
         setCurrentStep(getIndex(data?.processStatus, steps));
       }
       setLoadingDetails(false);
-      let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.rentalManagement)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, data));
       setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
@@ -345,8 +342,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
@@ -596,12 +593,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -617,12 +614,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
