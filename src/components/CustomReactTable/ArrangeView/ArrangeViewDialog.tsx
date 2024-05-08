@@ -20,7 +20,7 @@ import { DragHandle } from '@material-ui/icons';
 import update from 'immutability-helper';
 import { startCase } from 'lodash';
 import React, { Dispatch, useEffect, useRef, useState } from 'react';
-import { DragDropContext, Draggable, DraggableProvidedDragHandleProps, DropResult, Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable, DraggableProvidedDragHandleProps, DropResult, Droppable } from '@hello-pangea/dnd';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
