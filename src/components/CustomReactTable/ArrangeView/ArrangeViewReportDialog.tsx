@@ -20,7 +20,7 @@ import { DragHandle } from '@material-ui/icons';
 import update from 'immutability-helper';
 import { startCase } from 'lodash';
 import React, { Dispatch, useEffect } from 'react';
-import { DragDropContext, Draggable, DraggableProvidedDragHandleProps, DropResult, Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable, DraggableProvidedDragHandleProps, DropResult, Droppable } from '@hello-pangea/dnd';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';

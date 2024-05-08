@@ -4,12 +4,13 @@ import TextField from '@material-ui/core/TextField';
 import { DragIndicator } from '@material-ui/icons';
 import update from 'immutability-helper';
 import React, { useEffect } from 'react';
-import { DragDropContext, Draggable, DropResult, Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable, DropResult, Droppable } from '@hello-pangea/dnd';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
+import { changeItemIndex } from 'src/constants/helpers';
 
 const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast = true }) => {
   const [valid, setValid] = React.useState(false);
@@ -41,48 +42,35 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
     }
   }, [postRows]);
 
-  const moveItemPre = React.useCallback(
-    (result: DropResult) => {
-      if (!result.destination) return;
-      const dragIndex = result.source.index;
-      const dropIndex = result.destination?.index;
-
-      const dragCard = preRows[dragIndex];
-      let updatedIndexColumns = update(preRows, {
-        $splice: [
-          [dragIndex, 1],
-          [dropIndex, 0, dragCard]
-        ]
-      });
-      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 }));
-      setPreRows(updatedIndexColumns);
-    },
-    [preRows]
-  );
-
   const onChangeValuePre = (index, field, value) => {
     let data = [...preRows];
     data[index][field] = value;
     setPreRows(data);
   };
 
-  const moveItemPost = React.useCallback(
+  const moveItem = React.useCallback(
     (result: DropResult) => {
       if (!result.destination) return;
-      const dragIndex = result.source.index;
-      const dropIndex = result.destination?.index;
+      const { destination, source } = result;
+      const dragIndex = source.index;
+      const dropIndex = destination?.index;
 
-      const dragCard = postRows[dragIndex];
-      let updatedIndexColumns = update(postRows, {
-        $splice: [
-          [dragIndex, 1],
-          [dropIndex, 0, dragCard]
-        ]
-      });
-      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 + preRows.length }));
-      setPostRows(updatedIndexColumns);
+      if (destination.droppableId !== source.droppableId) return;
+
+      if (source.droppableId === 'arrangeViewPost') {
+        const dragCard = postRows[dragIndex];
+        let updatedIndexColumns = changeItemIndex(postRows, dragCard, dragIndex, dropIndex);
+        updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 + preRows.length }));
+        setPostRows(updatedIndexColumns);
+      }
+      if (source.droppableId === 'arrangeViewPre') {
+        const dragCard = preRows[dragIndex];
+        let updatedIndexColumns = changeItemIndex(preRows, dragCard, dragIndex, dropIndex);
+        updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 }));
+        setPreRows(updatedIndexColumns);
+      }
     },
-    [postRows]
+    [postRows, preRows]
   );
 
   const onChangeValuePost = (index, field, value) => {
@@ -114,15 +102,16 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
         onClose={handleClose}
       />
       <CustomDialogContent>
-        {preRows?.length > 0 && (
-          <Box mb={2} p={1} border={1} borderColor="var(--common-border-color)" bgcolor="var(--dark-secondary, grey.100)">
-            {postRows?.length > 0 ? (
-              <Typography variant="subtitle2" gutterBottom>
-                Pre Work
-              </Typography>
-            ) : null}
+        {' '}
+        <DragDropContext onDragEnd={moveItem}>
+          {preRows?.length > 0 && (
+            <Box mb={2} p={1} border={1} borderColor="var(--common-border-color)" bgcolor="var(--dark-secondary, white)">
+              {postRows?.length > 0 ? (
+                <Typography variant="subtitle2" gutterBottom>
+                  Pre Work
+                </Typography>
+              ) : null}
 
-            <DragDropContext onDragEnd={moveItemPre}>
               {preRows?.length && (
                 <Droppable droppableId="arrangeViewPre">
                   {(provided) => (
@@ -151,17 +140,16 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
                   )}
                 </Droppable>
               )}
-            </DragDropContext>
-          </Box>
-        )}
-        {postRows?.length > 0 && (
-          <Box mb={2} p={1} border={1} borderColor="var(--common-border-color)" bgcolor="var(--dark-secondary, grey.100)">
-            {preRows?.length > 0 ? (
-              <Typography variant="subtitle2" gutterBottom>
-                Post Work
-              </Typography>
-            ) : null}
-            <DragDropContext onDragEnd={moveItemPost}>
+            </Box>
+          )}
+          {postRows?.length > 0 && (
+            <Box mb={2} p={1} border={1} borderColor="var(--common-border-color)" bgcolor="var(--dark-secondary, white)">
+              {preRows?.length > 0 ? (
+                <Typography variant="subtitle2" gutterBottom>
+                  Post Work
+                </Typography>
+              ) : null}
+
               {postRows?.length && (
                 <Droppable droppableId="arrangeViewPost">
                   {(provided) => (
@@ -190,9 +178,9 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
                   )}
                 </Droppable>
               )}
-            </DragDropContext>
-          </Box>
-        )}
+            </Box>
+          )}
+        </DragDropContext>
       </CustomDialogContent>
       <CustomDialogFooter>
         <Button variant="outlined" size="small" color="primary" onClick={handleClose}>
