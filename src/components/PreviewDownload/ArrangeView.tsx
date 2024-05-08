@@ -1,21 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, CircularProgress, Dialog, IconButton, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
-import HtmlTooltip from '../CustomTooltipTitle';
-import SwapVertIcon from '@material-ui/icons/SwapVert';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import { DndProvider, useDrop, DropTargetMonitor, useDrag } from 'react-dnd';
-import { XYCoord } from 'dnd-core';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import { isMobile, isTablet } from 'react-device-detect';
+import { DragDropContext, Draggable, DraggableProvidedDragHandleProps, DropResult, Droppable } from '@hello-pangea/dnd';
+import { Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText } from '@material-ui/core';
 import { DragIndicator } from '@material-ui/icons';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import SwapVertIcon from '@material-ui/icons/SwapVert';
 import update from 'immutability-helper';
-import { TouchBackend } from 'react-dnd-touch-backend';
-
-const ItemTypes = {
-  CARD: 'card'
-};
+import { useCallback, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomDialogContent from '../CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 export default function ArrangeView({ columns, setColumns }) {
   const [open, setOpen] = useState(false);
@@ -29,13 +22,17 @@ export default function ArrangeView({ columns, setColumns }) {
   }, [columns]);
 
   const moveCard = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
+    (result: DropResult) => {
+      if (!result.destination) return;
+      const dragIndex = result.source.index;
+      const dropIndex = result.destination?.index;
+
       const dragCard = column[dragIndex];
       setColumn(
         update(column, {
           $splice: [
             [dragIndex, 1],
-            [hoverIndex, 0, dragCard]
+            [dropIndex, 0, dragCard]
           ]
         })
       );
@@ -86,13 +83,34 @@ export default function ArrangeView({ columns, setColumns }) {
             showRequiredLabel={false}
           />
           <CustomDialogContent>
-            <List component="nav" aria-label="main mailbox folders">
-              <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-                {column.map(({ fieldLabel, id }, index) => (
-                  <RenderListItem key={id} index={index} id={id} fieldLabel={fieldLabel} moveCard={moveCard} />
-                ))}
-              </DndProvider>
-            </List>
+            <DragDropContext onDragEnd={moveCard}>
+              <Droppable droppableId="arrangeView">
+                {(provided) => (
+                  <ul className="list-none" {...provided.droppableProps} ref={provided.innerRef}>
+                    {column.map((col, index) => (
+                      <Draggable key={col.id} draggableId={`${col.id}`} index={index}>
+                        {(provided, snapshot) => (
+                          <li
+                            {...provided.draggableProps}
+                            ref={provided.innerRef}
+                            className={`${snapshot.isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}
+                          >
+                            <RenderListItem
+                              key={col.id}
+                              index={index}
+                              id={col.id}
+                              fieldLabel={col.fieldLabel}
+                              dragHandleProps={provided.dragHandleProps}
+                            />
+                          </li>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </ul>
+                )}
+              </Droppable>
+            </DragDropContext>
           </CustomDialogContent>
           <CustomDialogFooter>
             <Button disabled={isSubmitting} color="primary" variant="outlined" size="small" onClick={onClose}>
@@ -112,68 +130,21 @@ interface ItemProps {
   id: any;
   fieldLabel: string;
   index: number;
-  moveCard: (dragIndex: number, hoverIndex: number) => void;
+  dragHandleProps: DraggableProvidedDragHandleProps;
 }
 
-interface DragItem {
-  index: number;
-  id: string;
-  type: string;
-}
-
-const RenderListItem = ({ index, id, fieldLabel, moveCard }: ItemProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [{ handlerId }, drop] = useDrop({
-    accept: ItemTypes.CARD,
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId()
-      };
-    },
-    hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (!ref.current) {
-        return;
-      }
-      const dragIndex = item.index;
-      const hoverIndex = index;
-
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      moveCard(dragIndex, hoverIndex);
-      item.index = hoverIndex;
-    }
-  });
-
-  const [{ isDragging }, drag] = useDrag({
-    type: ItemTypes.CARD,
-    item: () => {
-      return { id, index };
-    },
-    collect: (monitor: any) => ({
-      isDragging: monitor.isDragging()
-    })
-  });
-
-  drag(drop(ref));
+const RenderListItem = ({ index, id, fieldLabel, dragHandleProps }: ItemProps) => {
   return (
-    <div ref={ref} data-handler-id={handlerId}>
-      <ListItem key={id}>
-        <ListItemIcon>
-          <DragIndicator />
-        </ListItemIcon>
-        <ListItemText primary={fieldLabel} />
-      </ListItem>
+    <div
+      key={id}
+      className={`p-[8px_17px_8px_0] flex items-center [border-bottom:1px_solid_var(--common-border-color)] ${
+        index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+      } `}
+    >
+      <ListItemIcon {...dragHandleProps}>
+        <DragIndicator />
+      </ListItemIcon>
+      <ListItemText primary={fieldLabel} />
     </div>
   );
 };
