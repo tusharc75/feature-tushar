@@ -285,6 +285,7 @@ const ReceivingTicket = ({
 
       const loadingTicketProducts = [];
       const returnTicketProducts = [];
+      const receiveTicketProducts = [];
 
       deliveryTicketList?.forEach((element) => {
         if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products && element?.products?.length) {
@@ -304,6 +305,16 @@ const ReceivingTicket = ({
               returnTicketId: element._id,
               returnTicket: element?.ticketName,
               returnTicketStatus: element?.status
+            });
+          });
+        }
+        if (element.ticketType === DELIVERY_TICKET_TYPE.receiving && element?.products && element?.products?.length) {
+          element?.products?.forEach((ele) => {
+            receiveTicketProducts.push({
+              ...ele,
+              receivingTicketId: element._id,
+              receivingTicket: element?.ticketName,
+              receivingTicketStatus: element?.status
             });
           });
         }
@@ -419,14 +430,14 @@ const ReceivingTicket = ({
         }
       });
 
-      material
-        ?.filter((e) => e?.productDetail?.serializedProduct && e.type === 'product')
-        .forEach((element) => {
+      if (productSerialNumbers?.length) {
+        material?.filter((e) => e?.productDetail?.serializedProduct && e.type === 'product').forEach((element) => {
           var qty = element.qty;
 
           const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
           ticketProduct?.forEach((ele) => {
             const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
+            const receiveTicket = receiveTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
 
             var consumeQty = 0;
             consumeProducts
@@ -436,9 +447,9 @@ const ReceivingTicket = ({
               });
 
             const obj: any = {};
+            obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
             obj.uniqueId = element._id;
             obj.serialized = element?.productDetail?.serializedProduct;
-            obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
             obj.materialId = element?.productDetail?._id;
             obj.type = 'Product';
             obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
@@ -474,7 +485,7 @@ const ReceivingTicket = ({
             obj.endDate = element?.actualEndDate;
             obj.manualStartDate = element?.manualStartDate;
             obj.manualEndDate = element?.manualEndDate;
-            obj.productSerialNumbers = productSerialNumbers?.filter((p) => p?.uniqueId === element?.materialId)?.map(_p => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber }));
+            obj.productSerialNumbers = productSerialNumbers?.filter((p) => p?._id === element?._id)?.map(_p => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber }));
             obj.loadingTicket = ele?.loadingTicket;
             obj.loadingTicketId = ele?.loadingTicketId;
             obj.loadingTicketStatus = ele?.loadingTicketStatus;
@@ -489,14 +500,21 @@ const ReceivingTicket = ({
               obj.returnTicketId = returnTicket?.returnTicketId;
               obj.returnTicketStatus = returnTicket?.returnTicketStatus;
             }
+            if (receiveTicket) {
+              receiveTicket.isCount = true;
+              obj.receivingTicketId = receiveTicket?.receivingTicketId;
+              obj.receivingTicket = receiveTicket?.receivingTicket;
+              obj.receivingTicketStatus = receiveTicket?.receivingTicketStatus;
+            }
             productAssets.push(obj);
             qty = qty - ele.qty;
           });
 
-          if (qty > 0 && productSerialNumbers?.map((p) => p?.uniqueId)?.includes(element?.materialId)) {
+          if (qty > 0 && productSerialNumbers?.map((p) => p?._id)?.includes(element?._id)) {
             productAssets.push({
-              _id: element?.materialId,
+              _id: element?._id,
               materialId: element?.materialId,
+              uniqueId: element?.uniqueId,
               type: 'Product',
               displayType: 'Product (Serialized)',
               qty: element?.qty,
@@ -510,7 +528,7 @@ const ReceivingTicket = ({
               productId: element?.productDetail?._id,
               warehouse: rentalManagementData?.warehouse?.optionLabel,
               warehouseId: rentalManagementData?.warehouse?.optionValue,
-              productSerialNumbers: productSerialNumbers?.filter((p) => p?.uniqueId === element?.materialId)?.map(_p => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber })),
+              productSerialNumbers: productSerialNumbers?.filter((p) => p?._id === element?._id)?.map(_p => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber })),
               status: element?.productDetail?.serializedProduct === true ? element?.status : 'N/A',
               rentalAssetStatus: element?.productDetail?.serializedProduct ? element?.status : '',
               currentLocation:
@@ -520,6 +538,7 @@ const ReceivingTicket = ({
             });
           }
         });
+      }
 
       deliveryTicketList?.map((obj) => {
         productAssets?.map((d, index) => {
@@ -754,11 +773,11 @@ const ReceivingTicket = ({
         disabled: true,
         Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
       },
-      {
+      ...(assetFields?.find((f) => f.fieldName === 'serialNumber') ? [{
         accessor: 'serialNumber',
         Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
         Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
-      },
+      }] : []),
       {
         accessor: 'productName',
         Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product',
@@ -1726,10 +1745,16 @@ const ReceivingTicket = ({
           referenceData={showTicketDialog.data}
           assets={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={
-            showQtyDialog?.data && showQtyDialog?.data?.length > 0
-              ? showQtyDialog.data.map((d) => ({ ...d, _id: d?.productId, qty: d.returnQuantity }))
-              : []
-          }
+            showTicketDialog.ticketType === DELIVERY_TICKET_TYPE.return ?
+              showQtyDialog?.data && showQtyDialog?.data?.length > 0
+                ? showQtyDialog.data.map((d) => ({ ...d, _id: d?.productId, qty: d.returnQuantity }))
+                : []
+              : selectedRecords?.filter((e) => e.type === 'Product').map((d) => ({
+                _id: d?.materialId,
+                qty: d?.qty,
+                uniqueId: d?.uniqueId,
+                productSerialNumbers: d?.productSerialNumbers
+              }))}
           onClose={() => setShowTicketDialog({ open: false, ticketType: '', data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, ticketType: '', data: {} });
@@ -2116,7 +2141,7 @@ const ActionButtonMenuItems = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplaceInUse });
         }
       } else if (action === rentalManagementActions.createReceivingTicket) {
-        if (e?.type !== 'Asset') {
+        if (e?.type !== 'Asset' && (e?.type === 'Product' && !e?.serialized)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotProduct });
         } else if (!e?.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
