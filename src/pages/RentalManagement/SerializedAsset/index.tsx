@@ -302,15 +302,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     if (child?.some((e) => e?.type === 'product')) {
       return true;
     }
-    if(child?.filter(e => e?.type === 'package')?.length > 0){
-      let isProductAvailable = false;
-      child?.filter(e => e?.type === 'package')?.forEach(ele => {
-        if(checkProductInside(ele, material)){
-          isProductAvailable = true
-          return
-        }
-      });
-      return isProductAvailable
+    if(child?.filter(e => e?.type === 'package')?.some(ele => checkProductInside(ele, material))){
+      return true
     }
     return false
   };
