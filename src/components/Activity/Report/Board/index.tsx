@@ -201,7 +201,7 @@ const Board = ({ type, filter }) => {
               return o.status === data.status;
             });
             return (
-              <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px]`} key={data.status}>
+              <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px] group`} key={data.status}>
                 {!loading && (
                   <Box className="bg-[var(--dark-secondary,#f1f5ff)] sticky top-0 z-10 rounded-[8px] px-[13px] py-[14px]">
                     <Typography variant="subtitle2" style={{ width: '50%', fontSize: '0.95rem', fontWeight: 700 }} className=" capitalize">
