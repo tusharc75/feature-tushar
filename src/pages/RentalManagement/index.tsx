@@ -129,13 +129,6 @@ const RentalManagement = () => {
             >
               {row?.original?.rentalJobName}
             </Link>
-            {row?.original?.assetsNotReceivedInPo && (
-              <Box ml={1}>
-                <HtmlTooltip title={`Assets on PO not received`}>
-                  <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
-                </HtmlTooltip>
-              </Box>
-            )}
           </div>
         );
       } else {

@@ -45,10 +45,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.isDefaultValue = false;
         values.defaultValue = '';
       }
-      if (!values.isShowFieldDependentOn) {
-        values.isShowFieldDependentOn = false;
-        values.showFieldDependentOn = null;
-      }
       if (!values.isFieldEntityWise) {
         values.isFieldEntityWise = false;
         values.fieldEntity = [];
@@ -200,10 +196,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isMulitFormula = values.isMulitFormula;
             ele.isUneditable = values.isUneditable;
             ele.isVlookup = values.isVlookup;
-            ele.isShowFieldDependentOn = values.isShowFieldDependentOn;
-            if (values.isShowFieldDependentOn) {
-              ele.showFieldDependentOn = values.showFieldDependentOn;
-            }
             ele.hiddenField = values.hiddenField;
             ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
             ele.additionalInfoSection = values.additionalInfoSection;
@@ -437,10 +429,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
     if (values.isWarningTooltip && !values.warningTooltipMessage) {
       errors['warningTooltipMessage'] = 'Please enter warning message.';
-    }
-
-    if (values.isShowFieldDependentOn && !values.showFieldDependentOn) {
-      errors['showFieldDependentOn'] = 'Please select Show Field Dependent On.';
     }
 
     if (values.isFieldEntityWise && !values.fieldEntity?.length) {

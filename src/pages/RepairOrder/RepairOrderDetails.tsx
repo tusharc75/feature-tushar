@@ -29,7 +29,7 @@ import {
   QUOTATION_STATUS,
   REPAIR_ORDER_STATUS,
   REPAIR_ORDER_TYPE,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   repairOrder,
   repairOrderSteps,
   sidebarResource
@@ -147,11 +147,8 @@ const RepairOrderDetails = () => {
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
         setisAnyMaterial(data?.canDelete ? false : true);
-        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (checkSuperAdminAccess(user, sidebarResource.repairOrder)) {
-          isAllowedToEdit = true;
-        }
-        setAllowedToEdit(isAllowedToEdit);
+        
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.repairOrder, data));
         var steps: any = JSON.parse(JSON.stringify(repairOrderSteps));
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
           steps = steps?.filter((e) => !['Loading Ticket']?.includes(e.name));

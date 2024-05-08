@@ -25,7 +25,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   PRODUCTION_ORDER_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   productionOrder,
   productionOrderSteps,
   sidebarResource
@@ -124,14 +124,11 @@ const ProductionOrderDetails = () => {
         } else {
           setCurrentStep(getIndex(data?.processStatus, tempStepList));
         }
-        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (checkSuperAdminAccess(user, sidebarResource.productionOrder)) {
-          isAllowedToEdit = true;
-        }
+      
         // if (!data?.customerAccount) {
         //   setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
         // }
-        setAllowedToEdit(isAllowedToEdit);
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.productionOrder, data));
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setProductionOrderData({ ...data });
       })

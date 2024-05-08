@@ -3135,3 +3135,38 @@ export const DOA_STATUS = {
   acceptedbyDOA: 'Accepted by DOA',
   rejectedbyDOA: 'Rejected by DOA'
 }
+
+export const checkIsAllowedToEdit = (user, resource, data) => {
+  let userIds = []
+  if (data?.owner?.optionValue) {
+    userIds.push(data?.owner?.optionValue)
+  }
+  if (data?.collaborator) {
+    userIds = [...userIds, ...data.collaborator?.map((e) => e.optionValue)]
+  }
+  if (data?.processor?.optionValue) {
+    userIds.push(data?.processor?.optionValue)
+  }
+
+  if (data?.userGroup) {
+    if (isArray(data?.userGroup)) {
+      data?.userGroup?.forEach((e) => {
+        if (e?.users?.length) {
+          userIds = [...userIds, ...e.users]
+        }
+      })
+    }
+    else if (data?.userGroup?.users?.length) {
+      userIds = [...userIds, ...data.userGroup.users]
+    }
+  }
+
+  let isAllowedToEdit = userIds.includes(user?.user?._id) ? true : false;
+
+  if (user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource)) {
+    isAllowedToEdit = true;
+  }
+
+  return isAllowedToEdit;
+};
+
