@@ -410,6 +410,48 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     };
   };
 
+  const renderFilter = (filtered) => {
+    return (
+      <Grid item xs={12} sm={6} md={4} lg={4} key={filtered?.value}>
+        <Autocomplete
+          options={lookupResource ? lookupResource[filtered?.value] : []}
+          multiple
+          disableCloseOnSelect
+          getOptionLabel={(option: any) => option?.optionLabel}
+          value={selectedLookUpResourceData && selectedLookUpResourceData[filtered.key] ? selectedLookUpResourceData[filtered.key] : []}
+          onChange={(event, newValue) => {
+            if (newValue?.length > 0) {
+              setSelectedLookUpResourceData((preVal) => ({
+                ...preVal,
+                [filtered.key]: newValue
+              }));
+            } else {
+              const { [filtered.key]: _, ...remainObj } = selectedLookUpResourceData;
+              setSelectedLookUpResourceData(remainObj);
+            }
+          }}
+          size="small"
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={`Select ${filtered?.label}`}
+              variant="outlined"
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                )
+              }}
+            />
+          )}
+        />
+      </Grid>
+    );
+  };
+
   return (
     <>
       <div>
@@ -429,7 +471,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
               />
             </Box>
             {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) && (
-              <Box ml={1}>
+              <Box>
                 <Autocomplete
                   style={{ width: '350px' }}
                   multiple
@@ -451,90 +493,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 />
               </Box>
             )}
-             {[sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) && selectedFilters?.map((filtered) => {
-                return (
-                  <Grid item xs={12} sm={6} md={4} lg={4} key={filtered?.value}>
-                    <Autocomplete
-                      options={lookupResource ? lookupResource[filtered?.value] : []}
-                      multiple
-                      disableCloseOnSelect
-                      getOptionLabel={(option: any) => option?.optionLabel}
-                      value={selectedLookUpResourceData && selectedLookUpResourceData[filtered.key] ? selectedLookUpResourceData[filtered.key] : []}
-                      onChange={(event, newValue) => {
-                        if (newValue?.length > 0) {
-                          setSelectedLookUpResourceData((preVal) => ({
-                            ...preVal,
-                            [filtered.key]: newValue
-                          }));
-                        } else {
-                          const { [filtered.key]: _, ...remainObj } = selectedLookUpResourceData;
-                          setSelectedLookUpResourceData(remainObj);
-                        }
-                      }}
-                      size="small"
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label={`Select ${filtered?.label}`}
-                          variant="outlined"
-                          InputProps={{
-                            ...params.InputProps,
-                            endAdornment: (
-                              <>
-                                {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                                {params.InputProps.endAdornment}
-                              </>
-                            )
-                          }}
-                        />
-                      )}
-                    />
-                  </Grid>
-                );
-              })}
+            {[sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) && selectedFilters?.map((filtered) => {
+              return renderFilter(filtered);
+            })}
           </Box>
           <Box display="flex" flexDirection="row" ml={1} mt={2}>
             <Grid container spacing={2}>
               {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) && selectedFilters?.map((filtered) => {
-                return (
-                  <Grid item xs={12} sm={6} md={4} lg={4} key={filtered?.value}>
-                    <Autocomplete
-                      options={lookupResource ? lookupResource[filtered?.value] : []}
-                      multiple
-                      disableCloseOnSelect
-                      getOptionLabel={(option: any) => option?.optionLabel}
-                      value={selectedLookUpResourceData && selectedLookUpResourceData[filtered.key] ? selectedLookUpResourceData[filtered.key] : []}
-                      onChange={(event, newValue) => {
-                        if (newValue?.length > 0) {
-                          setSelectedLookUpResourceData((preVal) => ({
-                            ...preVal,
-                            [filtered.key]: newValue
-                          }));
-                        } else {
-                          const { [filtered.key]: _, ...remainObj } = selectedLookUpResourceData;
-                          setSelectedLookUpResourceData(remainObj);
-                        }
-                      }}
-                      size="small"
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label={`Select ${filtered?.label}`}
-                          variant="outlined"
-                          InputProps={{
-                            ...params.InputProps,
-                            endAdornment: (
-                              <>
-                                {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                                {params.InputProps.endAdornment}
-                              </>
-                            )
-                          }}
-                        />
-                      )}
-                    />
-                  </Grid>
-                );
+                return renderFilter(filtered);
               })}
             </Grid>
           </Box>
