@@ -19,10 +19,6 @@ import HtmlTooltip from '../CustomTooltipTitle';
 import FormTypes from '../Helpers/FormTypes';
 import { CustomDialogTransition } from './../../constants/helpers';
 
-const ProductBuilderSchema = object().shape({
-  // productTemplate: string()
-  //     .required("please select product template"),
-});
 
 const SelectionDialog = (props) => {
   const {
@@ -148,13 +144,13 @@ const SelectionDialog = (props) => {
       axiosInstance()
         .get(
           `${api}/template?productCategory=` +
-            values.productCategory +
-            '&productTemplate=' +
-            values.productTemplate +
-            '&priceTemplate=' +
-            values.priceTemplate +
-            '&refrenceId=' +
-            refrenceId,
+          values.productCategory +
+          '&productTemplate=' +
+          values.productTemplate +
+          '&priceTemplate=' +
+          values.priceTemplate +
+          '&refrenceId=' +
+          refrenceId,
           { responseType: 'arraybuffer' }
         )
         .then((response) => {
@@ -205,7 +201,6 @@ const SelectionDialog = (props) => {
         innerRef={ref}
         enableReinitialize={true}
         initialValues={initialData}
-        validationSchema={ProductBuilderSchema}
         validateOnMount
         validate={validate}
         onSubmit={handleSubmit}
@@ -219,10 +214,7 @@ const SelectionDialog = (props) => {
                   <Grid container spacing={1}>
                     <Grid
                       item
-                      xs={
-                        //  TODO: Product category is not added in role, once implementation is done, please uncomment below lines
-                        permissions.productCategory.isCreate ? 11 : 12
-                      }
+                      xs={permissions.productCategory.isCreate ? 11 : 12}
                       sm={permissions.productCategory.isCreate ? 11 : 12}
                       md={permissions.productCategory.isCreate ? 11 : 12}
                     >

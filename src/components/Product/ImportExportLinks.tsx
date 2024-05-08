@@ -8,6 +8,7 @@ import SelectionDialog from './SelectionDialog';
 import { isEmpty } from 'lodash';
 import { useEffect } from 'react';
 import { ImportIcon, ExportIcon, DownloadIcon } from 'src/assets/svg/svgIcons';
+import { useData } from 'src/StateProvider/Provider';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ImportExportLinks({
   ids = [],
-  permissions,
+  permission,
   module,
   api,
   refrenceId,
@@ -43,7 +44,7 @@ export default function ImportExportLinks({
   recordsToExport = 0,
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   extraImportExportLinks = [],
@@ -59,6 +60,10 @@ export default function ImportExportLinks({
   const [anchorExtraEl, setAnchorExtraEl] = useState(null);
 
   const [imptExptDnldMenuDta, setImptExptDnldMenuDta] = useState({ anchorEl: null, action: null, open: false });
+
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const handleOpenMenu = (e, action) => {
     setImptExptDnldMenuDta({ action, anchorEl: e.currentTarget, open: true });
@@ -252,7 +257,7 @@ export default function ImportExportLinks({
           horizontal: 'right'
         }}
       >
-        {permissions?.isCreate && imptExptDnldMenuDta.action === 'import' && (
+        {permission?.isCreate && imptExptDnldMenuDta.action === 'import' && (
           <MenuItem
             onClick={() => {
               setIsSelection(true);
@@ -335,30 +340,60 @@ export default function ImportExportLinks({
     );
   };
 
+  const handleDownloadTemplate = () => {
+    axiosInstance().get(`${api}/template`, { responseType: 'arraybuffer' })
+      .then((response) => {
+        const fileName = response.headers['content-disposition'].split('filename=')[1];
+        downloadExcel(response.data, fileName);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  const ImportInput = (
+    <input
+      onClick={(e: any) => (e.target.value = null)}
+      id="importFromExcel"
+      name="importFromExcel"
+      onChange={uploadData}
+      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+      style={{
+        opacity: '0',
+        position: 'absolute',
+        zIndex: -1
+      }}
+      type="file"
+    />
+  );
+
   return (
-    <div
-      className={`${module !== 'builder' ? classes.root : classes.custom_root} ${small ? '[padding-right:0_!important]' : ''} ${
-        inverted ? 'inverted' : ''
-      }`}
-    >
+    <div className={`${module !== 'builder' ? classes.root : classes.custom_root} ${small ? '[padding-right:0_!important]' : ''} ${inverted ? 'inverted' : ''}`} >
       <div className={classes.linksContainer}>
-        {permissions?.isCreate && (
-          <label
-            onClick={(e) => {
-              if (api === 'product') {
-                handleOpenMenu(e, 'import');
-              } else {
-                setIsSelection(true);
-                setIsUploadDialog(true);
-                handleClose();
-              }
-            }}
-            htmlFor={api === 'product' ? '' : 'importFromExcel'}
-            className={` new-headerbox-button-v1 ${small ? 'small' : ''}`}
-          >
-            Import from Excel
-            <ImportIcon />
-          </label>
+        {permission?.isCreate && (
+          permissions?.productCategory?.isRead ?
+            <label
+              onClick={(e) => {
+                if (api === 'product') {
+                  handleOpenMenu(e, 'import');
+                } else {
+                  setIsSelection(true);
+                  setIsUploadDialog(true);
+                  handleClose();
+                }
+              }}
+              htmlFor={api === 'product' ? '' : 'importFromExcel'}
+              className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
+            >
+              Import from Excel
+              <ImportIcon />
+            </label>
+            : <>
+              {ImportInput}
+              <label htmlFor="importFromExcel" className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}>
+                <span>Import from Excel</span>
+              </label>
+            </>
         )}
         <label
           onClick={(e) => {
@@ -379,10 +414,15 @@ export default function ImportExportLinks({
             if (api === 'product') {
               handleOpenMenu(e, 'download');
             } else {
-              setIsSelection(true);
+              if (permissions?.productCategory?.isRead) {
+                setIsSelection(true);
+              }
+              else {
+                handleDownloadTemplate()
+              }
             }
           }}
-          className={` new-headerbox-button-v1 ${small ? 'small' : ''}`}
+          className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
         >
           Download Template
           <DownloadIcon />
@@ -448,6 +488,11 @@ export default function ImportExportLinks({
           </>
         )}
       </div>
+      {isMobile && (
+        <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
+          <IoIosArrowDropdown />
+        </IconButton>
+      )}
       <Menu
         id="import-export-links"
         anchorEl={anchorEl}
@@ -464,18 +509,26 @@ export default function ImportExportLinks({
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        {permissions?.isCreate && (
-          <MenuItem
-            onClick={() => {
-              setIsSelection(true);
-              setIsUploadDialog(true);
-              handleClose();
-            }}
-          >
-            <label htmlFor="importFromExcel" className="cursor-pointer">
-              Import from Excel
-            </label>
-          </MenuItem>
+        {permission?.isCreate && (
+          permissions?.productCategory?.isRead ?
+            <MenuItem
+              onClick={() => {
+                setIsSelection(true);
+                setIsUploadDialog(true);
+                handleClose();
+              }}
+            >
+              <label htmlFor="importFromExcel" className="cursor-pointer">
+                Import from Excel
+              </label>
+            </MenuItem>
+            :
+            <MenuItem>
+              {ImportInput}
+              <label htmlFor="importFromExcel" className="cursor-pointer">
+                Import from Excel
+              </label>
+            </MenuItem>
         )}
         <MenuItem
           onClick={() => {
@@ -487,13 +540,17 @@ export default function ImportExportLinks({
         </MenuItem>
         <MenuItem
           onClick={() => {
-            setIsSelection(true);
+            if (permissions?.productCategory?.isRead) {
+              setIsSelection(true);
+            }
+            else {
+              handleDownloadTemplate()
+            }
             handleClose();
           }}
         >
           Download Template
         </MenuItem>
-
         {extraImportExportLinks?.map((d, idx) => {
           if (d.type === 'import') {
             return (
@@ -530,18 +587,12 @@ export default function ImportExportLinks({
           }
         })}
       </Menu>
-      {isMobile && (
-        <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
-          <IoIosArrowDropdown />
-        </IconButton>
-      )}
       {isSelection && (
         <SelectionDialog
           uploadData={uploadData}
           isUpload={isUpladDialog}
           refrenceId={refrenceId}
           handleClose={() => {
-            setIsSelection(false);
             setIsSelection(false);
           }}
           api={api}
