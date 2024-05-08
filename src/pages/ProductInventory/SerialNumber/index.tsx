@@ -1,5 +1,5 @@
 import Box from '@material-ui/core/Box/Box';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import Grid from '@material-ui/core/Grid/Grid';
@@ -10,8 +10,10 @@ import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const SerialNumber = ({ product, warehouse }) => {
+  
   const { state, dispatch } = useTableReducer();
   const { page, limit, filters, sorting } = state;
   const [renderCount, setRenderCount] = useState(0);
@@ -27,8 +29,21 @@ const SerialNumber = ({ product, warehouse }) => {
     }
   }, [page, limit, filters, sorting]);
 
+  const toastConfig = useContext(CustomToastContext);
+
+
   const getQueryString = () => {
-    let deepFilter = `&page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (warehouse) {
+      deepFilter = `${deepFilter}&warehouse=${warehouse}&isAll=true`;
+    } else {
+      deepFilter = `${deepFilter}&isAll=true`;
+    }
+    if (product) {
+      deepFilter = `${deepFilter}&products=${product}`;
+    }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -47,22 +62,25 @@ const SerialNumber = ({ product, warehouse }) => {
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
-    let data;
-    const queryString = getQueryString();
-    const query = warehouse ? `&warehouse=${warehouse}&isAll=true` : `?isAll=true`;
-    const response = await axiosInstance().get(`${routes?.serialNumber?.path}?products=${product}${query}${queryString}`);
-    // const response = await axiosInstance().get(`${productInventory.api}/serial-number/${product}${query}`);
-    data = response?.data?.data;
-    let count = response?.data?.count;
-    let rows = data.map((u) => {
-      let finalObject: any = prepareDataForGrid(u, user);
-      return finalObject;
-    });
-    dispatch({ type: 'initialize', data: rows, count });
-    setTimeout(() => {
-      dispatch({ type: 'loading', loading: false });
-    }, gridLoadingTimeout);
+    let queryString = getQueryString();
+    axiosInstance().get(`/product-inventory/serial-number${queryString}`).then(({ data }) => {
+      let rows = data.data.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        return {
+          ...finalObject
+        };
+      });
+
+      dispatch({ type: 'initialize', data: rows, count: data.count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
+
   const columns = [
     {
       accessor: 'serialNumber',

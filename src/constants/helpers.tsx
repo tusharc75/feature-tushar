@@ -65,8 +65,8 @@ export const rentalManagementSteps: stepInterface[] = [
 export const RENTAL_STEPS = {
   loading: 'Loading',
   onField: 'On Field',
-  receiving: 'Receiving',
-}
+  receiving: 'Receiving'
+};
 
 export const fieldTicketSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
@@ -1097,21 +1097,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -2188,7 +2188,7 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket',
+  irtTicket: 'irtTicket'
 };
 
 export const LOG_RESOURCE = {
@@ -3134,4 +3134,56 @@ export const DOA_STATUS = {
   sentForDoa: 'Sent for DOA',
   acceptedbyDOA: 'Accepted by DOA',
   rejectedbyDOA: 'Rejected by DOA'
+};
+
+export const checkIsAllowedToEdit = (user, resource, data) => {
+  let userIds = [];
+  if (data?.owner?.optionValue) {
+    userIds.push(data?.owner?.optionValue);
+  }
+  if (data?.collaborator) {
+    userIds = [...userIds, ...data.collaborator?.map((e) => e.optionValue)];
+  }
+  if (data?.processor?.optionValue) {
+    userIds.push(data?.processor?.optionValue);
+  }
+
+  if (data?.userGroup) {
+    if (isArray(data?.userGroup)) {
+      data?.userGroup?.forEach((e) => {
+        if (e?.users?.length) {
+          userIds = [...userIds, ...e.users];
+        }
+      });
+    } else if (data?.userGroup?.users?.length) {
+      userIds = [...userIds, ...data.userGroup.users];
+    }
+  }
+
+  let isAllowedToEdit = userIds.includes(user?.user?._id) ? true : false;
+
+  if (user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource)) {
+    isAllowedToEdit = true;
+  }
+
+  return isAllowedToEdit;
+};
+
+export function changeItemIndex<T>(array: T[], item: T, sourceIndex: number, destinationIndex: number) {
+  const newArray = [...array];
+  newArray.splice(sourceIndex, 1); // remove the item at index
+  newArray.splice(destinationIndex, 0, item);
+  return newArray;
+}
+
+export function addItemAtIndex<T>(array: T[], item: T, destinationIndex: number) {
+  const newArray = [...array];
+  newArray.splice(destinationIndex, 0, item);
+  return newArray;
+}
+
+export function removeItemAtIndex<T>(array: T[], index: number) {
+  const newArray = [...array];
+  newArray.splice(index, 1);
+  return newArray;
 }

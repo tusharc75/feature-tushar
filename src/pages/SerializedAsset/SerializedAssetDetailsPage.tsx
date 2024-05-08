@@ -68,7 +68,7 @@ const SerializedAssetDetailsPage = () => {
   const [manualStatus, setManualStatus] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [status, setStatus] = useState('');
-  const [statusOptions, setStatusOptions] = useState([]);
+  const [statusOptions, setStatusOptions] = useState(null);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [customField, setCustomField] = useState(null);
@@ -271,7 +271,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -315,25 +315,43 @@ const SerializedAssetDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (assetDetails) {
-      let tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
-      if (assetDetails.status === ASSET_STATUS.underReview) {
-        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
-      } else if (assetDetails.status === ASSET_STATUS.needRepair) {
-        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRecert];
-      } else if (assetDetails.status === ASSET_STATUS.needRecert) {
-        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair];
-      } else if (assetDetails.status === ASSET_STATUS.scrap) {
-        tempStatus = [ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
+    if (assetDetails && statusOptions) {
+      const otherStatus = [];
+      statusOptions?.forEach((o: any) => {
+        if (!Object.values(ASSET_STATUS).includes(o.optionLabel)) {
+          otherStatus.push(o.optionLabel);
+        }
+      })
+
+      const systemStatus = [ASSET_STATUS.reserved, ASSET_STATUS.readyToShip, ASSET_STATUS.inTransit, ASSET_STATUS.inUse
+        , ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered, ASSET_STATUS.customer, ASSET_STATUS.supplier
+        , ASSET_STATUS.returned, ASSET_STATUS.repair, ASSET_STATUS.inRepair, ASSET_STATUS.customerPossession
+      ]
+
+      let tempStatus = [];
+      if (systemStatus?.includes(assetDetails.status)) {
+        tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
+      }
+      else if ([ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(assetDetails.status)) {
+        tempStatus = [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview,
+        ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
+      }
+      else if ([ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(assetDetails.status)) {
+        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ...otherStatus];
+      }
+      else if (assetDetails.status === ASSET_STATUS.scrap) {
+        tempStatus = [ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
         if (assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
           tempStatus.push(ASSET_STATUS.available);
         }
-      } else if (assetDetails.status === ASSET_STATUS.lost) {
-        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.scrap];
+      }
+      else if (otherStatus?.includes(assetDetails.status)) {
+        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.underReview,
+        ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
       }
       setManualStatus(tempStatus);
     }
-  }, [assetDetails]);
+  }, [assetDetails, statusOptions]);
 
   return (
     <Box className="main-container-v1">
@@ -372,7 +390,7 @@ const SerializedAssetDetailsPage = () => {
                     {permissions?.repairJob?.isCreate &&
                       assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
                       [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                        assetDetails.status
+                        assetDetails?.status
                       ) && (
                         <Button
                           variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -385,7 +403,7 @@ const SerializedAssetDetailsPage = () => {
                         </Button>
                       )}
                     {allowUpdateStatus ? (
-                      assetDetails.status === ASSET_STATUS.lost ? (
+                      assetDetails?.status === ASSET_STATUS.lost ? (
                         <Button
                           variant="outlined"
                           color="default"
@@ -433,7 +451,7 @@ const SerializedAssetDetailsPage = () => {
                       open={Boolean(anchorEl)}
                       onClose={closeActions}
                     >
-                      {statusOptions.map((o) => {
+                      {statusOptions?.map((o) => {
                         return (
                           <MenuItem
                             key={o?.optionValue}
@@ -521,7 +539,7 @@ const SerializedAssetDetailsPage = () => {
           />
         </TabPanel>
         <TabPanel value={tabValue} index={6}>
-          <AssetHistory id={id} />
+          <AssetHistory id={id} status={assetDetails?.status} />
         </TabPanel>
         <TabPanel value={tabValue} index={7}>
           <CertificationHistory

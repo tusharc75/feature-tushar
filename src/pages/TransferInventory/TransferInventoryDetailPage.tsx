@@ -22,7 +22,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   TRANSFER_INVENTORY_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   sidebarResource,
   transferInventory,
   transferInventorySteps
@@ -126,11 +126,8 @@ const TransferInventoryDetailPage = () => {
         } else {
           setCurrentStep(getIndex(data?.processStatus, transferInventorySteps));
         }
-        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (checkSuperAdminAccess(user, sidebarResource.transferInventory)) {
-          isAllowedToEdit = true;
-        }
-        setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
+        
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
         setTransferInventoryData(data);
       })
       .catch((err) => {

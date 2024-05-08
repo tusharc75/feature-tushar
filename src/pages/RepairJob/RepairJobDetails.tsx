@@ -24,7 +24,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   REPAIR_JOB_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   repairJob,
   repairJobProcessSteps,
   serializedAsset,
@@ -139,11 +139,8 @@ const RepairJobDetails = () => {
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
         setCurrentStep(getIndex(data?.processStatus, repairJobProcessSteps));
-        let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (checkSuperAdminAccess(user, sidebarResource.repairJob)) {
-          isAllowedToEdit = true;
-        }
-        setAllowedToEdit(isAllowedToEdit);
+        
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.repairJob, data));
         setAlloweOperation(data?.workOrder ? false : true);
         setRepairJobData({ ...data });
       })

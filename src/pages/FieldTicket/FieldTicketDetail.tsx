@@ -24,7 +24,7 @@ import {
   ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   FIELD_TICKET_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   fieldTicket,
   fieldTicketSteps,
   sidebarResource
@@ -95,7 +95,7 @@ const FieldTicketDetail = () => {
       let data;
       if (isOffline) {
         data = await findOne(objectStore.fieldTicket, id);
-      } else {
+      } else if (/^[0-9a-fA-F]{24}$/.test(id)) {
         const response = await axiosInstance().get(`${routes.fieldTicket.path}/${id}`);
         data = response?.data?.data;
       }
@@ -104,11 +104,8 @@ const FieldTicketDetail = () => {
       } else {
         setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
       }
-      let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.fieldTicket)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && isAllowedToEdit);
+     
+      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, data));
       setAllowedToDelete(permissions?.fieldTicket?.isDelete && data.owner.optionValue === user?.user?._id && data?.canDelete);
       setFieldTicketData(data);
       setLoading(false);

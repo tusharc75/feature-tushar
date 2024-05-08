@@ -13,7 +13,7 @@ import moment from 'moment';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 
-const AssetHistory = ({ id }) => {
+const AssetHistory = ({ id, status }) => {
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assetHistory`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -289,7 +289,7 @@ const AssetHistory = ({ id }) => {
     if (id) {
       fetchData();
     }
-  }, [id, page, limit, filters, sorting, duration]);
+  }, [id, status, page, limit, filters, sorting, duration]);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;

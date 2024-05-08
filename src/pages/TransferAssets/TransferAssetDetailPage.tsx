@@ -23,7 +23,7 @@ import Steps from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   TRANSFER_ASSET_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   sidebarResource,
   transferAsset,
   transferAssetSteps
@@ -160,11 +160,7 @@ const TransferAssetDetailPage = () => {
           steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
         );
 
-        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (checkSuperAdminAccess(user, sidebarResource.transferAsset)) {
-          isAllowedToEdit = true;
-        }
-        setAllowedToEdit(isAllowedToEdit);
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferAsset, data));
 
         if (data.processor) {
           const processor = [data.processor].some((d) => d?.optionValue === user?.user?._id);

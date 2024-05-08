@@ -41,7 +41,7 @@ import routes from '../../../components/Helpers/Routes';
 import ProjectInAccordion from '../../../components/ProjectInAccordion/ProjectInAccordion';
 import {
   ACTIVITY_RESOURCE,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   customerAccount,
   formatAmountWithCurrency,
   gridLoadingTimeout,
@@ -337,11 +337,8 @@ export default function QuoteDetail() {
               });
             }
             setTypeCreateProjectSalesDialog(dataOfTyoes);
-            var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-            if (checkSuperAdminAccess(user, sidebarResource.quoteBuilder)) {
-              isAllowedToEdit = true;
-            }
-            setAllowedToEdit(isAllowedToEdit);
+            
+            setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quoteBuilder, data));
             let keys = Object.keys(data.versions);
             let tempCurrentVersion;
             if (version == 0) {

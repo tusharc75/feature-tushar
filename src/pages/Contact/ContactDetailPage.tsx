@@ -35,7 +35,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import Warehouse from '../Account/Warehouse';
 import axiosInstance from './../../axios/axiosInstance';
 import {
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   customerAccount,
   customerContact,
   getObjKeysWithValues,
@@ -210,11 +210,8 @@ const ContactDetailsPage = (props) => {
           phone: data.phone,
           current: true
         });
-        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (checkSuperAdminAccess(user, contactResource)) {
-          isAllowedToEdit = true;
-        }
-        setAllowedToEdit(isAllowedToEdit);
+       
+        setAllowedToEdit(checkIsAllowedToEdit(user, contactResource, data));
         setOrgChartData(orgChartData);
       })
       .catch((err) => {

@@ -18,7 +18,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import ProcessFlow from '../../components/ProcessFlow';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, checkSuperAdminAccess, getObjKeysWithValues, lead, processFieldName, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, checkIsAllowedToEdit, getObjKeysWithValues, lead, processFieldName, sidebarResource } from '../../constants/helpers';
 import { leadPage } from '../../routes/Lead';
 import axiosInstance from './../../axios/axiosInstance';
 import AccordionOfOpportunity from './AccordionOfOpportunity';
@@ -102,11 +102,8 @@ const LeadDetailsPage = () => {
           const userId = user?.user?._id;
           handleMainPoints(data);
           let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
-          var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-          if (checkSuperAdminAccess(user, sidebarResource.lead)) {
-            isAllowedToEdit = true;
-          }
-          setAllowedToEdit(isAllowedToEdit);
+        
+          setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.lead, data));
           let dontHavePermissions = [];
 
           if (!permissions['customerAccount'].isCreate) {

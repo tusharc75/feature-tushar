@@ -4277,3 +4277,20 @@ body .btn-outline-red-v1 {
     border-color: var(--common-border-color) !important;
   }
 }
+
+.toggleButton-v1 {
+  padding: 4px 22px !important;
+  background: #f0f0f0 !important;
+  color: #5b5b5b !important;
+  border: 0;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  [data-mode='dark'] & {
+    background: #282845 !important;
+    color: #ffffff !important;
+  }
+  @media all and (max-width: 1030px) {
+    padding: 4px 8px !important;
+  }
+}

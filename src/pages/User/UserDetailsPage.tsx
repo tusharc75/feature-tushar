@@ -524,7 +524,7 @@ const UserDetailsPage = () => {
               ) : (
                 <>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                    <CustomTab value={0} label={'Details asd'} />
+                    <CustomTab value={0} label={'Details'} />
                     <CustomTab value={1} label={'Org Chart'} />
                     {userData?.proxyDOA?.optionValue && <CustomTab value={2} label={'DOA Proxy'} />}
                     <CustomTab value={3} label={'User Session'} />

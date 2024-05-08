@@ -28,7 +28,7 @@ import {
   MATERIAL_SUB_TYPE,
   WORK_ORDER_STATUS,
   WORK_ORDER_TYPE,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   repairJob,
   sidebarResource,
   workOrder
@@ -172,11 +172,8 @@ const WorkOrderDetails = () => {
     axiosInstance()
       .get(`${routes.workOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (checkSuperAdminAccess(user, sidebarResource.workOrder)) {
-          isAllowedToEdit = true;
-        }
-        setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
+        
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.workOrder, data) && permissions?.workOrder?.isUpdate ? true : false);
         setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.status === WORK_ORDER_STATUS.onHold || data?.deleted ? true : false);
         setWorkOrderData({ ...data });
       })

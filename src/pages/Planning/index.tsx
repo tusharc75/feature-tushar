@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, Chip, IconButton, MenuItem } from '@material-ui/core';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -391,26 +391,22 @@ const LeftSideContents = ({ permissions, history, selectedPlanningType, setSelec
   return (
     <>
       {permissions?.planningView?.isRead && (
-        <Box ml={1}>
-          <ToggleButtonGroup size="small">
-            <ToggleButton
-              onClick={() => {
-                history.push({
-                  pathname: routes.planningView.path,
-                  state: {
-                    resource: sidebarResource?.planning
-                  }
-                });
-              }}
-            >
-              <span>{`Calendar`}</span>
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Box>
+        <Button
+          className={'toggleButton-v1'}
+          onClick={() => {
+            history.push({
+              pathname: routes.planningView.path,
+              state: {
+                resource: sidebarResource?.planning
+              }
+            });
+          }}
+        >
+          <span>{`Calendar`}</span>
+        </Button>
       )}
       {selectedPlanningType && (
         <Chip
-          className="ml-3"
           color="primary"
           label={'Type: Rental Job'}
           onDelete={() => {
