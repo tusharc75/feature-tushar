@@ -225,6 +225,7 @@ const EcommerceHome = () => {
                       {ECOM_SECTIONS?.map((i, index) => {
                         return <DragBox key={index} item={i} index={index} />;
                       })}
+                      {provided.placeholder}
                     </ul>
                   )}
                 </Droppable>
