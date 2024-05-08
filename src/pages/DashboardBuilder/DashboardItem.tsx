@@ -1,8 +1,8 @@
-import { Grid, Paper, Box, IconButton, makeStyles, ThemeOptions, Typography, Button } from '@material-ui/core';
-import { Edit, Delete } from '@material-ui/icons';
-import { useDrop, useDrag } from 'react-dnd';
-import { IFormDataType } from './builderHelpers';
+import { Draggable } from '@hello-pangea/dnd';
+import { Box, Grid, IconButton, ThemeOptions, Typography, makeStyles } from '@material-ui/core';
+import { Delete, Edit } from '@material-ui/icons';
 import RenderIcon from './RenderIcon';
+import { IFormDataType } from './builderHelpers';
 
 const useClasses = makeStyles((theme: ThemeOptions) => ({
   paper: {
@@ -36,90 +36,62 @@ const useClasses = makeStyles((theme: ThemeOptions) => ({
 
 interface DashboardProps {
   id: string;
+  index: number;
   formData: IFormDataType;
   selectedData?: IFormDataType | null;
-  findCard: (id: string) => { card: IFormDataType; index: number };
-  moveCard: (id: string, index: number) => void;
-  itemTypes: { CARD: string };
   handleEdit: (data: IFormDataType) => void;
   handleRemove: (id: string) => void;
 }
 
-interface Item {
-  id: string;
-  originalIndex: number;
-}
-
-const DashboardItem = ({ id, formData, findCard, moveCard, itemTypes, handleEdit, handleRemove, selectedData }: DashboardProps) => {
+const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, index }: DashboardProps) => {
   const classes = useClasses();
-  const originalIndex = findCard(formData.uniqueId).index;
-  const [{ isDragging }, drag] = useDrag(
-    () => ({
-      type: itemTypes.CARD,
-      item: { id, originalIndex },
-      collect: (monitor) => ({
-        isDragging: monitor.isDragging()
-      }),
-      end: (item, monitor) => {
-        const { id: droppedId, originalIndex } = item;
-        const didDrop = monitor.didDrop();
-        if (!didDrop) {
-          moveCard(droppedId, originalIndex);
-        }
-      }
-    }),
-    [id, originalIndex, moveCard]
-  );
 
-  const [, drop] = useDrop(
-    () => ({
-      accept: itemTypes.CARD,
-      hover({ id: draggedId }: Item) {
-        if (draggedId !== id) {
-          const { index: overIndex } = findCard(id);
-          moveCard(draggedId, overIndex);
-        }
-      }
-    }),
-    [findCard, moveCard]
-  );
-
-  const opacity = isDragging ? 0.8 : 1;
   const isEditing = selectedData?.uniqueId === id;
   const CHART_TYPE = formData.chartType || formData.graphType;
 
   return (
-    <Grid ref={(node) => drag(drop(node))} item xs={formData.column}>
-      <Box
-        className={classes.paper}
-        style={{
-          backgroundColor: isEditing ? 'var(--dark-primary,#dedede)' : 'var(--dark-secondary, white)'
-        }}
-      >
-        <Box style={{ opacity }}>
-          <Typography className={classes.title}>{formData.chartTitle}</Typography>
-          <p>
-            col = {formData.column} ({CHART_TYPE})
-          </p>
+    <Draggable key={id} draggableId={`${id}`} index={index}>
+      {(provided, snapshot) => (
+        <li
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          ref={provided.innerRef}
+          className={`${snapshot.isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}
+        >
+          <Grid item xs={formData.column}>
+            <Box
+              className={classes.paper}
+              style={{
+                backgroundColor: isEditing ? 'var(--dark-primary,#dedede)' : 'var(--dark-secondary, white)'
+              }}
+            >
+              <Box>
+                <Typography className={classes.title}>{formData.chartTitle}</Typography>
+                <p>
+                  col = {formData.column} ({CHART_TYPE})
+                </p>
 
-          <Box mt={2} display="flex" flexDirection="column" alignItems="center">
-            <RenderIcon type={CHART_TYPE} style={{ color: 'var(--new_theme_secondary_color)' }} className={classes.chartIcon} />
-            {isEditing && <Typography className={classes.title}>Editing...</Typography>}
-          </Box>
-        </Box>
+                <Box mt={2} display="flex" flexDirection="column" alignItems="center">
+                  <RenderIcon type={CHART_TYPE} style={{ color: 'var(--new_theme_secondary_color)' }} className={classes.chartIcon} />
+                  {isEditing && <Typography className={classes.title}>Editing...</Typography>}
+                </Box>
+              </Box>
 
-        {!isEditing && (
-          <Box display={'flex'} justifyContent="space-between">
-            <IconButton size="small" onClick={() => handleEdit(formData)}>
-              <Edit color="primary" />
-            </IconButton>
-            <IconButton size="small" onClick={() => handleRemove(id)}>
-              <Delete color="error" />
-            </IconButton>
-          </Box>
-        )}
-      </Box>
-    </Grid>
+              {!isEditing && (
+                <Box display={'flex'} justifyContent="space-between">
+                  <IconButton size="small" onClick={() => handleEdit(formData)}>
+                    <Edit color="primary" />
+                  </IconButton>
+                  <IconButton size="small" onClick={() => handleRemove(id)}>
+                    <Delete color="error" />
+                  </IconButton>
+                </Box>
+              )}
+            </Box>
+          </Grid>
+        </li>
+      )}
+    </Draggable>
   );
 };
 

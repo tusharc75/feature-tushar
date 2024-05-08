@@ -1,21 +1,19 @@
-import React from 'react';
-import { Grid, Box, Button, TextField, CircularProgress, Typography, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import { MdDashboardCustomize } from 'react-icons/md';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import queryString from 'query-string';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
+import { Box, Button, CircularProgress, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@material-ui/core';
 import { saveAs } from 'file-saver';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import Builder from './Builder';
-import { IFormDataType, baseURL } from './builderHelpers';
-import DashboardView from './DashboardView';
-import axiosInstance from 'src/axios/axiosInstance';
+import update from 'immutability-helper';
+import queryString from 'query-string';
+import React from 'react';
+import { MdDashboardCustomize } from 'react-icons/md';
+import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { ImportIcon, ExportIcon } from 'src/assets/svg/svgIcons';
-import { TouchBackend } from 'react-dnd-touch-backend';
-import { isMobile, isTablet } from 'react-device-detect';
+import { ExportIcon, ImportIcon } from 'src/assets/svg/svgIcons';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import Builder from './Builder';
+import DashboardView from './DashboardView';
+import { IFormDataType, baseURL } from './builderHelpers';
 
 const DashboardBuilder = () => {
   const history = useHistory();
@@ -79,19 +77,21 @@ const DashboardBuilder = () => {
 
   const createDashboard = () => {
     setSubmitting(true);
-    axiosInstance().post(baseURL, {
-      name: name.trim(),
-      defaultDuration: defaultDuration,
-      charts: formData
-    }).then(() => {
-      setToastConfig({
-        open: true,
-        message: 'Successfully created dashboard',
-        type: 'success'
-      });
-      setSubmitting(false);
-      history.push('/dashboard-master');
-    })
+    axiosInstance()
+      .post(baseURL, {
+        name: name.trim(),
+        defaultDuration: defaultDuration,
+        charts: formData
+      })
+      .then(() => {
+        setToastConfig({
+          open: true,
+          message: 'Successfully created dashboard',
+          type: 'success'
+        });
+        setSubmitting(false);
+        history.push('/dashboard-master');
+      })
       .catch((error) => {
         setSubmitting(false);
         setToastConfig(error);
@@ -102,26 +102,26 @@ const DashboardBuilder = () => {
     const dataToExport =
       formData?.length > 0
         ? {
-          name,
-          charts: formData
-        }
+            name,
+            charts: formData
+          }
         : {
-          name: '',
-          charts: [
-            {
-              graphyType: '', // Valid types ["Chart", "Map", "Table"]
-              chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
-              column: 6,
-              chartTitle: '',
-              kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
-              hasFilters: false,
-              hasTableView: false,
-              hasExport: false,
-              statusOptions: [],
-              filters: []
-            }
-          ]
-        };
+            name: '',
+            charts: [
+              {
+                graphyType: '', // Valid types ["Chart", "Map", "Table"]
+                chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
+                column: 6,
+                chartTitle: '',
+                kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
+                hasFilters: false,
+                hasTableView: false,
+                hasExport: false,
+                statusOptions: [],
+                filters: []
+              }
+            ]
+          };
     let blob = new Blob([JSON.stringify(dataToExport)], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, `${name || 'Dashboard Fields'}.json`);
   };
@@ -172,6 +172,25 @@ const DashboardBuilder = () => {
       createDashboard();
     }
   };
+
+  const moveCard = React.useCallback(
+    (result: DropResult) => {
+      if (!result.destination) return;
+      const dragIndex = result.source.index;
+      const dropIndex = result.destination?.index;
+
+      const card = formData[dragIndex];
+      setFormData(
+        update(formData, {
+          $splice: [
+            [dragIndex, 1],
+            [dropIndex, 0, card]
+          ]
+        })
+      );
+    },
+    [formData, setFormData]
+  );
 
   return (
     <Box className="main-container-v1">
@@ -273,7 +292,7 @@ const DashboardBuilder = () => {
                     )}
                   </Box>
                 )}
-                <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
+                <DragDropContext onDragEnd={moveCard}>
                   <DashboardView
                     selectedData={selectedData}
                     formData={formData}
@@ -281,7 +300,7 @@ const DashboardBuilder = () => {
                     handleEdit={handleEdit}
                     handleRemove={handleRemove}
                   />
-                </DndProvider>
+                </DragDropContext>
               </Box>
             </Grid>
           </Grid>
