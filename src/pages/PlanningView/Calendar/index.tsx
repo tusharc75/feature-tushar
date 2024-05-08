@@ -451,7 +451,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 />
               </Box>
             )}
-             {[sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&selectedFilters?.map((filtered) => {
+             {[sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) && selectedFilters?.map((filtered) => {
                 return (
                   <Grid item xs={12} sm={6} md={4} lg={4} key={filtered?.value}>
                     <Autocomplete
