@@ -15,7 +15,6 @@ const useClasses = makeStyles((theme: ThemeOptions) => ({
     justifyContent: 'space-between',
     flexDirection: 'column',
     position: 'relative',
-    border: '1px solid var(--common-border-color)',
     borderRadius: '8px',
 
     '&:hover': {
@@ -52,15 +51,12 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
   return (
     <Draggable key={id} draggableId={`${id}`} index={index}>
       {(provided, snapshot) => (
-        <li
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          ref={provided.innerRef}
-          className={`${snapshot.isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}
-        >
+        <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
           <Grid item xs={formData.column}>
             <Box
-              className={classes.paper}
+              className={`${classes.paper} ${
+                snapshot.isDragging ? ' [border:1px_dashed_var(--common-border-color)]' : '[border:1px_solid_var(--common-border-color)]'
+              }`}
               style={{
                 backgroundColor: isEditing ? 'var(--dark-primary,#dedede)' : 'var(--dark-secondary, white)'
               }}
