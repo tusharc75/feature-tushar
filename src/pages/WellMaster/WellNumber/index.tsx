@@ -45,7 +45,7 @@ const WellNumber = ({ wellName }) => {
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.wellNumber}`);
-    data = response?.data?.data;
+    data = response?.data?.data?.filter((e) => e.fieldData.fieldName !== 'wellName');
     const newColumns = generateColumns(renderedFrom, data, routes.wellNumberDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -62,18 +62,18 @@ const WellNumber = ({ wellName }) => {
     Cell: ({ row }) => (
       <>
         {permissions?.wellNumber?.isUpdate && (
-        <HtmlTooltip title="Edit">
-          <IconButton
-            size="small"
-            aria-label="Edit"
-            onClick={() => {
-              setOpenDialog({ open: true, id: row?.original?._id });
-            }}
-          >
-            <EditIcon color="primary" fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
+          <HtmlTooltip title="Edit">
+            <IconButton
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                setOpenDialog({ open: true, id: row?.original?._id });
+              }}
+            >
+              <EditIcon color="primary" fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
         {permissions?.wellNumber?.isDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
@@ -98,6 +98,7 @@ const WellNumber = ({ wellName }) => {
       deepFilter = `?`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+    filterByIds.push({ field: "wellName", term: { "$in": [wellName] } })
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -154,7 +155,7 @@ const WellNumber = ({ wellName }) => {
     }
     axiosInstance()
       .put(`${routes.wellNumber.path}/remove`, { ids: ids })
-      .then(({data}) => {
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -257,7 +258,7 @@ const WellNumber = ({ wellName }) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-         {openDialog.open && (
+      {openDialog.open && (
         <ManageWellNumber
           id={openDialog.id}
           onClose={() => setOpenDialog({ open: false, id: null })}
