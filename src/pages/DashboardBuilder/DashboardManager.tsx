@@ -189,7 +189,7 @@ const DashboardBuilder = () => {
           <CustomBreadCrumbs
             routes={[
               { title: 'Dashboard Master', path: '/dashboard-master' },
-              { title: type && type === 'clone' ? 'Clone' : !isNew ? name : 'New', path: '' }
+              { title: type && type === 'clone' ? 'Clone' : !isNew ? values.name : 'New', path: '' }
             ]}
           />
         </Box>
