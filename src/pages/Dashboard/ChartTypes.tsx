@@ -22,6 +22,7 @@ import StaticCards from './StaticCards';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useAppTheme } from 'src/constants/AppConfig';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import { formatAmountWithCurrency } from 'src/constants/helpers';
 
 export interface ChartDataType extends IFormDataType {
   _id: any;
@@ -387,6 +388,25 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                       })
                     }}
                     options={{
+                      plugins: {
+                        ...(chart?.currency &&
+                        {
+                          tooltip: {
+                            callbacks: {
+                              label: function (context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                  label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                  label += formatAmountWithCurrency((globalFilters.currency || currency), Number(context.parsed.y) ? context.parsed.y : '00').fullFormatAmountWithoutSpace;
+                                }
+                                return label;
+                              }
+                            }
+                          }
+                        }),
+                      },
                       maintainAspectRatio: false,
                       indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
                       scales: {
@@ -398,7 +418,14 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                         y: {
                           grid: {
                             color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                          }
+                          },
+                          ticks: {
+                            callback: function (value) {
+                              return chart?.currency ?
+                                formatAmountWithCurrency((globalFilters.currency || currency), Number(value) ? value : '00').fullFormatAmountWithoutSpace
+                                : value;
+                            }
+                          },
                         },
                         ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') &&
                         {
