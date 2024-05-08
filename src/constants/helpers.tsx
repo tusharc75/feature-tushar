@@ -1524,6 +1524,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
       .format(amount)
       .replace(/^(\D+)/, '$1 '),
     fullFormatAmount: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, options).format(amount).replace(/^(\D+)/, '$1 '),
+    fullFormatAmountWithoutSpace: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, options).format(amount).replace(/^(\D+)/, '$1'),
     fullFormatAmountWithCurrencyName: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, {
       currencyDisplay: 'code',
       ...options
