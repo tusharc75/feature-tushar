@@ -298,17 +298,21 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     if (item?.type === 'product') {
       return true;
     }
-    const child = material?.filter((e) => e.parentId === item?._id);
+    const child = material?.filter((e) => e.parentId === item?._id)
     if (child?.some((e) => e?.type === 'product')) {
       return true;
     }
-    if (child?.length) {
-      for (var ele in child) {
-        return checkProductInside(child[ele], material);
-      }
-    } else {
-      return false;
+    if(child?.filter(e => e?.type === 'package')?.length > 0){
+      let isProductAvailable = false;
+      child?.filter(e => e?.type === 'package')?.forEach(ele => {
+        if(checkProductInside(ele, material)){
+          isProductAvailable = true
+          return
+        }
+      });
+      return isProductAvailable
     }
+    return false
   };
 
   const fetchData = async () => {
