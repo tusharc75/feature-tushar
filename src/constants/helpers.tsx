@@ -23,6 +23,7 @@ import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
 import { camelCase, isArray, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
 import { stepIconInterface } from 'src/components/Steps/icons';
+import { v4 as uuid } from 'uuid';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -2918,24 +2919,34 @@ export const convertMsToTime = (milliseconds: any) => {
 
 export const ECOM_SECTIONS = [
   {
+    _id: uuid(),
     type: 'imageSlider',
-    label: 'Image Slider'
+    label: 'Image Slider',
+    column: '12'
   },
   {
+    _id: uuid(),
     type: 'image',
-    label: 'Image'
+    label: 'Image',
+    column: '12'
   },
   {
+    _id: uuid(),
     type: 'menu',
-    label: 'Menu'
+    label: 'Menu',
+    column: '12'
   },
   {
+    _id: uuid(),
     type: 'productCategory',
-    label: 'Product Category'
+    label: 'Product Category',
+    column: '12'
   },
   {
+    _id: uuid(),
     type: 'productList',
-    label: 'Product List'
+    label: 'Product List',
+    column: '12'
   }
 ];
 

@@ -98,73 +98,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch }) => {
+const FleetDispatchBox = ({ data, id, index, cardType, handleDispatch }) => {
   const classes = useStyles();
-  const ref = React.useRef(null);
-
-  const [{ handlerId }, drop] = useDrop({
-    accept: 'move',
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId()
-      };
-    },
-    hover: (item: any, monitor) => {
-      if (!ref.current) {
-        return;
-      }
-      if (item.type !== cardType) {
-        return;
-      }
-      const dragIndex = item.index;
-      const hoverIndex = index;
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      moveCard(dragIndex, hoverIndex);
-      item.index = hoverIndex;
-    },
-    drop: (item: any) => {
-      if (item?.cardType === cardType) {
-        return;
-      }
-      if (cardType === 'fleet') {
-        handleDispatch(data, item?.data);
-      } else {
-        handleDispatch(item?.data, data);
-      }
-    }
-  });
-
-  const [{ isDragging }, drag] = useDrag({
-    type: 'move',
-    item: () => {
-      return { id, index, cardType, data };
-    },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging()
-    })
-  });
-
-  const opacity = isDragging ? 0 : 1;
-  drag(drop(ref));
-
-  const colors = ['#39EA75', '#2AC656', '#FFD92E', '#FCBE00', '#F95353', '#FF3636'];
 
   return (
-    <div ref={ref} key={index}>
+    <div key={index}>
       {cardType === 'fleet' ? (
-        <Box className={`${classes.fleetBox} p-[15px]  min-[1201px]:p-[18px_14px_24px_18px]`} style={{ opacity }}>
+        <Box className={`${classes.fleetBox} p-[15px]  min-[1201px]:p-[18px_14px_24px_18px]`}>
           <div>
             <div className="mb-[14px] md:mb-[24px]">
               <Typography className={classes.primaryText}>Fleet : {data?.fleetNumber}</Typography>
