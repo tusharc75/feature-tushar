@@ -1054,7 +1054,7 @@ const routes = {
       : RESOURCE_LABEL.sendOutboundMessage,
     path: '/send-outbound-message'
   },
- 
+
   deviceTemplates: {
     title: storedRoutes && storedRoutes.deviceTemplates && storedRoutes.deviceTemplates?.title ? storedRoutes.deviceTemplates?.title
       : RESOURCE_LABEL.deviceTemplates,
@@ -1209,9 +1209,6 @@ const routes = {
   resourceDoaRequest: {
     title: storedRoutes && storedRoutes.resourceDoaRequest && storedRoutes.resourceDoaRequest.title ? storedRoutes.resourceDoaRequest?.title : sidebarResource.resourceDoaRequest,
     path: '/resource-doa-request'
-  },
-  serialNumber: {
-    path: '/product-inventory/serial-number'
   },
 };
 

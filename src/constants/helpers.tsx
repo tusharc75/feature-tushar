@@ -1525,6 +1525,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
       .format(amount)
       .replace(/^(\D+)/, '$1 '),
     fullFormatAmount: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, options).format(amount).replace(/^(\D+)/, '$1 '),
+    fullFormatAmountWithoutSpace: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, options).format(amount).replace(/^(\D+)/, '$1'),
     fullFormatAmountWithCurrencyName: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, {
       currencyDisplay: 'code',
       ...options
@@ -2366,6 +2367,12 @@ export const REPORT_LIST = [
     title: sidebarResource.serializedAsset,
     permission: 'serializedAsset',
     key: 'serializedAsset',
+    type: 'dynamic'
+  },
+  {
+    title: sidebarResource.transferAsset,
+    permission: 'transferAsset',
+    key: 'transferAsset',
     type: 'dynamic'
   },
   {

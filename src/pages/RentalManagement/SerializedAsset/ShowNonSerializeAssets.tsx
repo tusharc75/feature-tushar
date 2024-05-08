@@ -41,6 +41,7 @@ const ShowNonSerializeAssets = ({ data, onClose, title = `Non-${routes.serialize
           setFullScreen((prevState) => !prevState);
         }}
         showManimizeMaximize={true}
+        showRequiredLabel={false}
       ></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         <TableContainer component={Paper}>
