@@ -17,7 +17,6 @@ import { ImportIcon, ExportIcon } from 'src/assets/svg/svgIcons';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import { AnyObject } from 'yup/lib/types';
 
 const DashboardBuilder = () => {
   const history = useHistory();
@@ -143,7 +142,7 @@ const DashboardBuilder = () => {
     e.target.value = null;
   };
 
-  const updateDashboard = (values: AnyObject) => {
+  const updateDashboard = (values: any) => {
     setSubmitting(true);
     axiosInstance()
       .put(`${baseURL}`, {
