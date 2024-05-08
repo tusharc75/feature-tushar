@@ -103,6 +103,7 @@ const EcommerceHome = () => {
       if (!result.destination) return;
       const { draggableId, destination, source } = result;
       const dropIndex = destination?.index;
+      const sourceIndex = source.index;
 
       if (source.droppableId === 'field') {
         let draggedField = Array.from(ECOM_SECTIONS).find((s) => s._id === draggableId);
@@ -110,18 +111,18 @@ const EcommerceHome = () => {
         setFormData(newData);
         return;
       } else {
-        const { card, index } = findCard(draggableId);
+        const card = formData[source.index];
         setFormData(
           update(formData, {
             $splice: [
-              [index, 1],
+              [sourceIndex, 1],
               [dropIndex, 0, card]
             ]
           })
         );
       }
     },
-    [findCard, formData, setFormData]
+    [formData, setFormData]
   );
 
   const handleImport = (event) => {
