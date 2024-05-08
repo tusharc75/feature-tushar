@@ -20,7 +20,6 @@ export const BoardList = ({ status, type, activity, selectedResource, resource, 
     }
   } = useData();
 
-  const [isCreateButton, setCreateButton] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
@@ -35,121 +34,117 @@ export const BoardList = ({ status, type, activity, selectedResource, resource, 
   };
 
   return (
-    <div style={{ height: 'calc(100% - 42px)' }}>
-      <Box minHeight="100%" onMouseEnter={() => setCreateButton(true)} onMouseLeave={() => setCreateButton(false)}>
-        {!loading ? (
-          <>
-            <Droppable droppableId={status}>
-              {(provided, snapshot) => (
-                <ul
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className={`h-full list-none min-h-[475px] ${
-                    snapshot.draggingOverWith ? 'bg-blue-200 dark:bg-gray-900' : ''
-                  } transition-colors duration-200`}
-                >
-                  {activity.map((element, index) => (
-                    <BoardBox
-                      data={element}
-                      key={element?._id}
-                      id={element?._id}
-                      index={index}
-                      type={type}
-                      canUpdate={permissions[type?.toLowerCase()]?.isUpdate}
-                      canDelete={permissions[type?.toLowerCase()]?.isDelete}
-                      fetchBoard={fetchBoard}
-                      handleActivityOpen={handleActivityOpen}
-                    />
-                  ))}
-                  {provided.placeholder}
-                </ul>
-              )}
-            </Droppable>
+    <>
+      <div style={{ height: 'calc(100% - 110px)' }}>
+        <>
+          {!loading ? (
+            <>
+              <Droppable droppableId={status}>
+                {(provided, snapshot) => (
+                  <ul
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`list-none h-full min-h-[475px] ${
+                      snapshot.draggingOverWith ? 'bg-blue-200 dark:bg-gray-900' : ''
+                    } transition-colors duration-200`}
+                  >
+                    {activity.map((element, index) => (
+                      <BoardBox
+                        data={element}
+                        key={element?._id}
+                        id={element?._id}
+                        index={index}
+                        type={type}
+                        canUpdate={permissions[type?.toLowerCase()]?.isUpdate}
+                        canDelete={permissions[type?.toLowerCase()]?.isDelete}
+                        fetchBoard={fetchBoard}
+                        handleActivityOpen={handleActivityOpen}
+                      />
+                    ))}
+                    {provided.placeholder}
+                  </ul>
+                )}
+              </Droppable>
+            </>
+          ) : (
+            <Box p={1}></Box>
+          )}
+        </>
 
-            {permissions && permissions[type?.toLowerCase()]?.isCreate ? (
-              <Box
-                p={1}
-                style={{
-                  opacity: isCreateButton || status === 'To Do' ? 1 : 0
-                }}
-              >
-                <Button
-                  fullWidth
-                  style={{ justifyContent: 'flex-start' }}
-                  startIcon={<Add />}
-                  onClick={() => {
-                    setOpenDialog(true);
-                    setFullScreen(false);
-                  }}
-                >
-                  Create {type}
-                </Button>
-              </Box>
-            ) : null}
-          </>
-        ) : (
-          <Box p={1}></Box>
-        )}
-      </Box>
-
-      {selectedId && <ActivityModelHandler setActivityData={setSelectedId} activityType={type} fetchBoard={fetchBoard} activityId={selectedId} />}
-      <Dialog
-        open={openDialog}
-        onClose={(e, reason) => {
-          if (reason !== 'backdropClick') {
-            handleCloseDialog();
-            setFullScreen(false);
-          }
-        }}
-        fullWidth
-        maxWidth="md"
-        fullScreen={fullScreen || isMobile || isTablet}
-        TransitionComponent={CustomDialogTransition}
-      >
-        {type === 'task' ? (
-          <CreateTask
-            status={status}
-            taskId={null}
-            relatedTo={[
-              {
-                type: resource && selectedResource ? camelCase(resource) : 'user',
-                referenceId: resource && selectedResource ? selectedResource.id : user._id,
-                access: true
-              }
-            ]}
-            handleClose={() => {
+        {selectedId && <ActivityModelHandler setActivityData={setSelectedId} activityType={type} fetchBoard={fetchBoard} activityId={selectedId} />}
+        <Dialog
+          open={openDialog}
+          onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
               handleCloseDialog();
               setFullScreen(false);
-            }}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-              setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-          />
-        ) : type === 'case' ? (
-          <CreateCase
-            status={status}
-            caseId={null}
-            relatedTo={[
-              {
-                type: resource && selectedResource ? camelCase(resource) : 'user',
-                referenceId: resource && selectedResource ? selectedResource.id : user._id,
-                access: true
-              }
-            ]}
-            handleClose={() => {
-              handleCloseDialog();
+            }
+          }}
+          fullWidth
+          maxWidth="md"
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+        >
+          {type === 'task' ? (
+            <CreateTask
+              status={status}
+              taskId={null}
+              relatedTo={[
+                {
+                  type: resource && selectedResource ? camelCase(resource) : 'user',
+                  referenceId: resource && selectedResource ? selectedResource.id : user._id,
+                  access: true
+                }
+              ]}
+              handleClose={() => {
+                handleCloseDialog();
+                setFullScreen(false);
+              }}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            />
+          ) : type === 'case' ? (
+            <CreateCase
+              status={status}
+              caseId={null}
+              relatedTo={[
+                {
+                  type: resource && selectedResource ? camelCase(resource) : 'user',
+                  referenceId: resource && selectedResource ? selectedResource.id : user._id,
+                  access: true
+                }
+              ]}
+              handleClose={() => {
+                handleCloseDialog();
+                setFullScreen(false);
+              }}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            />
+          ) : null}
+        </Dialog>
+      </div>
+      {permissions && permissions[type?.toLowerCase()]?.isCreate && !loading ? (
+        <Box p={1} className=" group-hover:opacity-100 opacity-0">
+          <Button
+            fullWidth
+            style={{ justifyContent: 'flex-start' }}
+            startIcon={<Add />}
+            onClick={() => {
+              setOpenDialog(true);
               setFullScreen(false);
             }}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-              setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-          />
-        ) : null}
-      </Dialog>
-    </div>
+          >
+            Create {type}
+          </Button>
+        </Box>
+      ) : null}
+    </>
   );
 };
