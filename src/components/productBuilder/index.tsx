@@ -529,8 +529,8 @@ const ProductBuilder = (props) => {
           {typeof rightSideContents === 'function' ? rightSideContents() : null}
           {permissions?.isUpdate && (
             <ImportExportLinks
-              permissions={permissions}
               module="builder"
+              permission={permissions.quoteBuilder}
               api={'productbuilder'}
               refrenceId={productBuilderId}
               onSuccessfulImport={(isImportedSuccessfully) => {

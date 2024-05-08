@@ -1,19 +1,17 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
-import { DndProvider } from 'react-dnd';
-import { isMobile, isTablet } from 'react-device-detect';
-import { TouchBackend } from 'react-dnd-touch-backend';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import DispatchList from './DispatchList';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import DispatchDialog from './DispatchDialog';
+import { Box, IconButton } from '@material-ui/core';
 import { Map } from '@material-ui/icons';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import DispatchDialog from './DispatchDialog';
+import DispatchList from './DispatchList';
 import MapView from './Map';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
+import update from 'immutability-helper';
 
 const FleetDispatch = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -43,6 +41,34 @@ const FleetDispatch = () => {
     setDispatchDialogOpen({ open: true, fleet: fleet, job: job });
   };
 
+  const moveCard = useCallback(
+    (result: DropResult) => {
+      if (!result.destination) return;
+      if (result.destination.droppableId !== result.source.droppableId) return;
+      const { source, destination } = result;
+      const dragIndex = source.index;
+      const dropIndex = destination?.index;
+      function updateList(list, setList) {
+        const dragCard = list[dragIndex];
+        setList(
+          update(list, {
+            $splice: [
+              [dragIndex, 1],
+              [dropIndex, 0, dragCard]
+            ]
+          })
+        );
+      }
+      if (source.droppableId === 'fleet') {
+        updateList(fleets, setFleets);
+      }
+      if (source.droppableId === 'job') {
+        updateList(jobs, setJobs);
+      }
+    },
+    [fleets, jobs]
+  );
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -67,10 +93,12 @@ const FleetDispatch = () => {
           </Box>
         </Box>
         {fleets && jobs ? (
-          <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-            <DispatchList activity={fleets} cardType="fleet" handleDispatch={handleDispatch} />
-            <DispatchList activity={jobs} cardType="job" handleDispatch={handleDispatch} />
-          </DndProvider>
+          <DragDropContext onDragEnd={moveCard}>
+            <div className="grid grid-cols-1 min-[725px]:grid-cols-2 min-[1195px]:md:grid-cols-3">
+              <DispatchList activity={fleets} cardType="fleet" handleDispatch={handleDispatch} />
+              <DispatchList activity={jobs} cardType="job" handleDispatch={handleDispatch} />
+            </div>
+          </DragDropContext>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

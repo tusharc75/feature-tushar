@@ -1,19 +1,18 @@
-import { Box, Button, CircularProgress, Grid, Typography } from '@material-ui/core';
+import { DragDropContext, DropResult, Droppable } from '@hello-pangea/dnd';
+import { Box, Button, CircularProgress, Grid } from '@material-ui/core';
+import { makeStyles } from '@material-ui/styles';
+import update from 'immutability-helper';
 import React, { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
-import { makeStyles } from '@material-ui/styles';
-import { DndProvider } from 'react-dnd';
-import { isMobile, isTablet } from 'react-device-detect';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { TouchBackend } from 'react-dnd-touch-backend';
+import { ECOM_SECTIONS, addItemAtIndex } from 'src/constants/helpers';
+import { v4 as uuid } from 'uuid';
 import DragBox from './DragBox';
-import axiosInstance from 'src/axios/axiosInstance';
 import DropBox from './DropBox';
-import update from 'immutability-helper';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ECOM_SECTIONS } from 'src/constants/helpers';
-import { MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 
 const useClasses = makeStyles(() => ({
   root: {
@@ -100,18 +99,30 @@ const EcommerceHome = () => {
   );
 
   const moveCard = React.useCallback(
-    (id: string, atIndex: number) => {
-      const { card, index } = findCard(id);
-      setFormData(
-        update(formData, {
-          $splice: [
-            [index, 1],
-            [atIndex, 0, card]
-          ]
-        })
-      );
+    (result: DropResult) => {
+      if (!result.destination) return;
+      const { draggableId, destination, source } = result;
+      const dropIndex = destination?.index;
+      const sourceIndex = source.index;
+
+      if (source.droppableId === 'field') {
+        let draggedField = Array.from(ECOM_SECTIONS).find((s) => s._id === draggableId);
+        const newData = addItemAtIndex(formData, { ...draggedField, _id: uuid() }, destination.index);
+        setFormData(newData);
+        return;
+      } else {
+        const card = formData[source.index];
+        setFormData(
+          update(formData, {
+            $splice: [
+              [sourceIndex, 1],
+              [dropIndex, 0, card]
+            ]
+          })
+        );
+      }
     },
-    [findCard, formData, setFormData]
+    [formData, setFormData]
   );
 
   const handleImport = (event) => {
@@ -200,7 +211,7 @@ const EcommerceHome = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
+        <DragDropContext onDragEnd={moveCard}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={5} md={4} lg={3}>
               <Box
@@ -209,11 +220,16 @@ const EcommerceHome = () => {
                 style={{ maxHeight: 'calc(100vh - 200px)', height: '100%', overflow: 'auto' }}
                 border={'1px solid var(--common-border-color)'}
               >
-                <Grid container spacing={1}>
-                  {ECOM_SECTIONS?.map((i, index) => (
-                    <DragBox key={index} type={i.type} label={i.label} setFormData={setFormData} />
-                  ))}
-                </Grid>
+                <Droppable droppableId="field" isDropDisabled={true}>
+                  {(provided) => (
+                    <ul className="list-none grid gap-2" {...provided.droppableProps} ref={provided.innerRef}>
+                      {ECOM_SECTIONS?.map((i, index) => {
+                        return <DragBox key={index} item={i} index={index} />;
+                      })}
+                      {provided.placeholder}
+                    </ul>
+                  )}
+                </Droppable>
               </Box>
             </Grid>
             <Grid item xs={12} sm={7} md={8} lg={9}>
@@ -234,7 +250,7 @@ const EcommerceHome = () => {
               )}
             </Grid>
           </Grid>
-        </DndProvider>
+        </DragDropContext>
       </Box>
     </Box>
   );

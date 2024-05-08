@@ -56,7 +56,7 @@ export const rentalManagementMessage = {
     returnAlreadyDelivered: 'Return Ticket is already delivered',
     receivingOrReturnNotCreated: 'Receiving or Return Ticket is not created',
     receivingOrReturnNotDelivered: 'Receiving or Return Ticket is not delivered',
-    receivingNotProduct: `Receiving Ticket cannot be created for product(s)`,
+    receivingNotProduct: `Receiving Ticket cannot be created for Non-Serialized Product(s)`,
     receivingNotValidStatus: `Ticket cannot be created as asset status is not valid`,
     ticketNotForLost: `Ticket cannot be created for lost assets`,
     onlySubleaseAsset: "Only Sublease assets can be selected for this action",
