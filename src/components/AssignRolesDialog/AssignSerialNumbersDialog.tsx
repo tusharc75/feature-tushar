@@ -14,7 +14,8 @@ import { dateFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constant
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 
-const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleSucess, isAssigning, filterByPlant = null, ids }) => {
+const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleSucess, isAssigning, warehouse = null, ids }) => {
+
   const renderedFrom = `serialNumbers_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -22,13 +23,13 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
-    state: { permissions, selectedEntity }
+    state: { selectedEntity }
   }: any = useData();
 
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [warehouseOption, setWarehouseOption] = useState([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant?.optionValue);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse);
 
   const columns = [
     {
@@ -97,7 +98,7 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
     dispatch({ type: 'loading', loading: true });
     let queryString = getQueryString();
     axiosInstance()
-      .get(`${routes.serialNumber.path}${queryString}`)
+      .get(`/product-inventory/serial-number${queryString}`)
       .then(({ data }) => {
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -175,7 +176,7 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
         while (qty) {
           const result = selectedRecords?.filter((f) => f.product === ele.id && !f.isCounted);
           if (result.length) {
-            data.push({ ...ele, asset: result[0]._id });
+            data.push({ ...ele, serialNumber: result[0]._id });
             result[0].isCounted = true;
           }
           qty--;
@@ -209,75 +210,71 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
 
   const leftSideContents = () => {
     return (
-      <>
-        <Box display={'flex'} width={'100%'} justifyContent={'space-between'}>
-          <Box style={{ display: 'inline' }}>
-            {products.length > 0
-              ? products?.map((d) => (
-                  <Box
-                    m={0.5}
-                    p={1}
-                    border={1}
-                    className={`cursor-pointer rounded-sm ${
-                      selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
-                    }`}
-                    borderColor="var(--common-border-color)"
-                    onClick={() => {
-                      if (selectedProduct === d.id) {
-                        setSelectedProduct(null);
-                      } else {
-                        setSelectedProduct(d.id);
-                      }
-                    }}
-                    style={{ display: 'inline-block' }}
-                  >
-                    {d?.qty < 0 ? (
-                      <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                    ) : d?.qty === 0 ? (
-                      <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                    ) : (
-                      <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                    )}
-                  </Box>
-                ))
-              : null}
-          </Box>
-          <Box width={'40%'}>
-            <Autocomplete
-              fullWidth
-              options={warehouseOption}
-              getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
-              value={
-                warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
-                  ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
-                  : ''
-              }
-              onChange={(e, val) => {
-                setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  margin="dense"
-                  name="plant"
-                  placeholder={routes.warehouse.title}
-                  label={routes.warehouse.title}
-                  variant="outlined"
-                  fullWidth
-                  className="m-0"
-                />
-              )}
-            />
-          </Box>
+      <Box display={'flex'} width={'100%'} justifyContent={'space-between'}>
+        <Box style={{ display: 'inline' }}>
+          {products.length > 0
+            ? products?.map((d) => (
+              <Box
+                m={0.5}
+                p={1}
+                border={1}
+                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+                  }`}
+                borderColor="var(--common-border-color)"
+                onClick={() => {
+                  if (selectedProduct === d.id) {
+                    setSelectedProduct(null);
+                  } else {
+                    setSelectedProduct(d.id);
+                  }
+                }}
+                style={{ display: 'inline-block' }}
+              >
+                {d?.qty < 0 ? (
+                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                ) : d?.qty === 0 ? (
+                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                ) : (
+                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                )}
+              </Box>
+            ))
+            : null}
         </Box>
-      </>
+        <Box pt={1} width={'40%'}>
+          <Autocomplete
+            fullWidth
+            options={warehouseOption}
+            getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+            getOptionSelected={(option: any, val) => option.optionValue === val}
+            value={
+              warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
+                ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
+                : ''
+            }
+            onChange={(e, val) => {
+              setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                margin="dense"
+                name="plant"
+                placeholder={routes.warehouse.title}
+                label={routes.warehouse.title}
+                variant="outlined"
+                fullWidth
+              />
+            )}
+          />
+        </Box>
+      </Box>
     );
   };
 
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
-      <CustomDialogHeader title={`Add Serial Numbers`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
+      <CustomDialogHeader title={`Assign Serial Numbers`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           searchValue={search}
@@ -295,11 +292,11 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
           setQueryString={false}
         />
         {products.length > 0 && products.some((s) => s.qty < 0) ? (
-          <div className="text-error font-weight-bold">You have selected more Serail Numbers than required</div>
+          <div className="text-error font-weight-bold">You have selected more Serial Numbers than required</div>
         ) : null}
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 250px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
