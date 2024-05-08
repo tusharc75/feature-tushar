@@ -67,8 +67,7 @@ const Board = ({ type, filter }) => {
     axiosInstance()
       .get(`/activity/board?type=${type}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
-        setActivities(data.sort((a, b) => statusList.findIndex((s) => s.status === a.status) - statusList.findIndex((s) => s.status === b.status)));
-        setSubActivities(groupBy(data, 'status'));
+        setActivities(data);
         setLoading(false);
       })
       .catch((err) => {
