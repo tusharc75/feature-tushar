@@ -3,7 +3,7 @@ import { Box, Dialog, IconButton, TextField, Typography } from '@material-ui/cor
 import { Add } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
 import axios, { CancelTokenSource } from 'axios';
-import { camelCase, groupBy } from 'lodash';
+import { camelCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
