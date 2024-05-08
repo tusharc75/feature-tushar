@@ -2368,6 +2368,12 @@ export const REPORT_LIST = [
     type: 'dynamic'
   },
   {
+    title: sidebarResource.transferAsset,
+    permission: 'transferAsset',
+    key: 'transferAsset',
+    type: 'dynamic'
+  },
+  {
     title: sidebarResource.lead,
     permission: 'lead',
     key: 'lead',
