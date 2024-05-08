@@ -1,7 +1,4 @@
-import React from 'react';
 import { makeStyles, Typography, Box, Grid } from '@material-ui/core';
-import { useDrag, useDrop } from 'react-dnd';
-import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import WorkIcon from '@material-ui/icons/Work';
 
 import MetricsWithIcon from 'src/components/MetricsWithIcon';
@@ -120,7 +117,7 @@ const FleetDispatchBox = ({ data, id, index, cardType, handleDispatch }) => {
           </div>
         </Box>
       ) : (
-        <Box className={classes.jobBox} style={{ opacity }}>
+        <Box className={classes.jobBox}>
           <Box mr="10px" className={classes.contentContainer}>
             <Box>
               <WorkIcon className={classes.icon} />
