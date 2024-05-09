@@ -49,8 +49,13 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
       if (pricingMethodData?.length){
         pricingMethodOptions = arrayToDropwdownOption(pricingMethodData);
       }
+    
       setPriceMethodListConst(pricingMethodOptions);
-      await getAllPricingCondition(technicianData, pricingMethodOptions);
+      if(data.some((ele)=> ele.fieldName==='pricingCondition')){
+        await getAllPricingCondition(technicianData, pricingMethodOptions);
+      }else{
+        setPriceMethodList(pricingMethodOptions);
+      } 
       data.forEach((element) => {
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
@@ -289,15 +294,22 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                           setFieldValue={async (name, value) => {
                                             setFieldValue(name, value);
                                             setFieldValue('pricingMethod', '');
-                                            setFieldValue('pricingCondition', '');
-                                            if(value!==''){
-                                              const pricingMethodData = technicianData?.pricingMethodData?.find((ele)=> ele._id===value)?.pricingMethod || []
-                                              const newMethodOptions = arrayToDropwdownOption(pricingMethodData);
-                                              setPriceMethodListConst(newMethodOptions);
-                                              await getAllPricingCondition({...values,competence:value,pricingCondition:'', pricingMethod:''}, newMethodOptions)
+                                            const isPricingConditionField = initialData?.fields?.some((ele)=> ele.fieldName==='pricingCondition')
+
+                                            const pricingMethodData = technicianData?.pricingMethodData?.find((ele)=> ele._id===value)?.pricingMethod || []
+                                            const newMethodOptions = arrayToDropwdownOption(pricingMethodData);
+                                    
+                                            setPriceMethodListConst(newMethodOptions);
+                                            if(isPricingConditionField){
+                                              setFieldValue('pricingCondition', '');
+                                              if(value!==''){
+                                                await getAllPricingCondition({...values,competence:value,pricingCondition:'', pricingMethod:''}, newMethodOptions)
+                                              }
+                                            }else{
+                                              setPriceMethodList(newMethodOptions)
                                             }
-                                           
-                                              let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+                                            
+                                            let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
                                               
                                               const result = autoCalculateSpecificFields(
                                                 { [priceFieldName]: 0 },
