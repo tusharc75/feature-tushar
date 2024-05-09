@@ -74,7 +74,6 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     try {
       let data: any = [],
         count;
@@ -111,7 +110,6 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
           renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
         />
       </div>
-
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 300px)'}
@@ -126,10 +124,10 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
           resource={selectedResource?.resource}
         />
       ) : selectedResource ? (
-        <Box p={2} height={500}>
+        <Box height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      ) : null}
+      ) : <Box mt={2}><span>Please Select Resource</span></Box>}
     </>
   );
 }
