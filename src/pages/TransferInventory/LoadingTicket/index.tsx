@@ -410,11 +410,12 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           assets={selectedRecords?.filter((e) => e.type === 'Asset')}
-          products={selectedRecords?.filter((e) => e.type === 'Product')}
-          serialNumber={selectedRecords
-            ?.filter((e) => e.type === 'Product')
-            ?.map((e) => e?.serialNumber?.map((e) => e._id))
-            ?.flat()}
+          products={selectedRecords?.filter((e) => e.type === 'Product')?.map((e) => {
+            return {
+              ...e,
+              productSerialNumbers: e?.serialNumber?.map((e) => { return { serialNumber: e._id } })
+            }
+          })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchData();
