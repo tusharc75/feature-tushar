@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
-import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -67,14 +66,14 @@ const FieldTicket = () => {
   const fetchGridColumns = async () => {
     let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.fieldTicket);
+      data = await findOne(objectStore.resource, sidebarResource?.fieldTicket);
     } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
       data = response?.data?.data;
       try {
-        insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
-      } catch (ex) {
-        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`);
+        insertUpdate(objectStore.resource, sidebarResource?.fieldTicket, data);
+      } catch (e) {
+        console.error(`Field Ticket: : ${e.message}`);
       }
     }
     const newColumns = generateColumns(renderedFrom, data, routes.fieldTicketDetail.path, true);
@@ -85,8 +84,8 @@ const FieldTicket = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     if (isOffline) {
-      const getAllData = await findAll(objectStore.fieldTicket);
-      let rows = getAllData?.map((u: any) => {
+      const data = await findAll(objectStore.fieldTicket);
+      let rows = data?.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
         finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
         finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
@@ -273,22 +272,24 @@ const FieldTicket = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: routes.fieldTicket.title }]} />
-        <ImportExportLinks
-          permissions={permissions.fieldTicket}
-          module={routes.fieldTicket.title}
-          api={'field-ticket'}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          total={rowCount}
-          recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {
-            fetchData();
-          }}
-          additionalParams={getQueryString(true)}
-        />
+        {!isOffline &&
+          <ImportExportLinks
+            permissions={permissions.fieldTicket}
+            module={routes.fieldTicket.title}
+            api={'field-ticket'}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords?.length}
+            ids={selectedRecords?.map((obj) => obj._id)}
+            onExportToExcelSuccess={() => {
+              fetchData();
+            }}
+            additionalParams={getQueryString(true)}
+          />
+        }
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -296,21 +297,17 @@ const FieldTicket = () => {
           onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
           addButtonOnclick={() => {
             setFieldTicketId(null);
             setOpen({ open: true, isClone: false });
           }}
           isAddButtonVisible={permissions?.fieldTicket.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -320,8 +317,9 @@ const FieldTicket = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
+            showFilters={!isOffline}
             resource={sidebarResource.fieldTicket}
+            isClientSideGrid={isOffline ? true : false}
           />
         ) : (
           <Box p={2} height={500}>
@@ -331,9 +329,8 @@ const FieldTicket = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.fieldTicket.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-              deleteRecord?.fieldTicketNumber || ''
-            } ?`}
+            message={`Are you sure you want to delete ${routes?.fieldTicket.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.fieldTicketNumber || ''
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

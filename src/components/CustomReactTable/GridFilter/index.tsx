@@ -167,8 +167,8 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
           betweenDate && betweenDate[`from_${f?.fieldName}`]
             ? betweenDate[`from_${f?.fieldName}`]
             : formValues[`from_${f?.fieldName}`]
-            ? formValues[`from_${f?.fieldName}`]
-            : new Date();
+              ? formValues[`from_${f?.fieldName}`]
+              : new Date();
 
         if (new Date(minDate).getTime() > new Date(formValues[`to_${f?.fieldName}`]).getTime()) {
           isValid = false;
@@ -312,8 +312,8 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                                 betweenDate && betweenDate[`from_${field.fieldName}`]
                                   ? betweenDate[`from_${field.fieldName}`]
                                   : formValues[`from_${field.fieldName}`]
-                                  ? formValues[`from_${field.fieldName}`]
-                                  : new Date()
+                                    ? formValues[`from_${field.fieldName}`]
+                                    : new Date()
                               }
                             />
                           </Grid>
@@ -396,7 +396,6 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
           }}
           filterData={isSaveFilter.data}
           filterValue={formValues}
-          fieldsData={coloums}
         />
       )}
     </MuiPickersUtilsProvider>

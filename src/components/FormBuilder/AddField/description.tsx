@@ -1,9 +1,7 @@
 import { Box } from '@material-ui/core';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
 import TinyMCE from 'src/components/TinyMCE';
-import { imageUploadMaxSize } from 'src/constants/helpers';
 
 const Description = ({ values, setFieldValue }) => {
   const toastConfig = useContext(CustomToastContext);

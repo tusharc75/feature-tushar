@@ -975,6 +975,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'counter') {
       obj[key.fieldName] = [];
+    } else if (key.type === 'description') {
     } else {
       obj[key.fieldName] = value;
     }
@@ -1076,6 +1077,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = new Date();
       }
     } else if (key.type === 'lookUpDisplay') {
+    } else if (key.type === 'description') {
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
@@ -1164,6 +1166,8 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
     } else if (input.type === 'multiFileUpload') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
+    } else if (input.type === 'counter') {
+      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
     }
@@ -3227,3 +3231,34 @@ export function groupByKey<T>(arr: T[] = [], keyGetter: ((d: T) => string) | str
   }, Object.create(null));
   return result;
 }
+
+export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
+  const obj = { ...dataObj };
+  fields.forEach((field) => {
+    if (field.type === 'dropDown' && field.lookup) {
+      let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
+      if (filter.length) {
+        obj[field.fieldName] = {
+          optionLabel: filter[0].optionLabel,
+          optionValue: filter[0].optionValue
+        };
+      }
+    } else if (field.type === 'multiSelect') {
+      if (dataObj[field.fieldName] && dataObj[field.fieldName].length) {
+        let option = [];
+        dataObj[field.fieldName].forEach((e: any) => {
+          option.push({
+            optionLabel: e,
+            optionValue: e
+          });
+        });
+        obj[field.fieldName] = option;
+      }
+    } else if (field.type === 'date') {
+      obj[field.fieldName] = moment(dataObj[field.fieldName]).format('YYYY-MM-DD');
+    } else {
+      obj[field.fieldName] = dataObj[field.fieldName];
+    }
+  });
+  return obj;
+};
