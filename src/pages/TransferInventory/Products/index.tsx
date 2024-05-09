@@ -518,22 +518,6 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           onOk={handleRemoveAssets}
         />
       )}
-      {/* {assignNumber.open && (
-        <AssignSerialNumber
-          handleClose={() => {
-            setAssignNumber({ open: false, serialNumber: [], qty: 0, product: '' });
-          }}
-          handleSuccess={() => {
-            setAssignNumber({ open: false, serialNumber: [], qty: 0, product: '' });
-            fetchData();
-          }}
-          product={assignNumber.product}
-          serialNumber={assignNumber.serialNumber}
-          qty={assignNumber.qty}
-          warehouse={transferInventoryData?.transferFromPlant?.optionValue}
-          transferInventoryData={transferInventoryData}
-        />
-      )} */}
       {assignSerialNumbersDialog.open && (
         <AssignSerialNumbersDialog
           selectedProducts={assignSerialNumbersDialog?.data?.map((s) => ({ ...s, id: s?.product, qty: s?.qty }))}
