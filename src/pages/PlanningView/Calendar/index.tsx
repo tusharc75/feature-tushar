@@ -456,52 +456,50 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     <>
       <div>
         <Box display="flex" flexDirection="column">
-          <Box display="flex" flexDirection="row">
-            <Box ml={1} mr={1}>
-              <Autocomplete
-                options={resourceList}
-                getOptionLabel={(option) => (option && option?.title) || ''}
-                style={{ width: '350px' }}
-                value={selectedResource}
-                onChange={(event, newValue) => {
-                  setSelectedResource(newValue);
-                }}
-                size="small"
-                renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
-              />
-            </Box>
+          <div className="flex gap-2 pr-[66px] flex-wrap">
+            <Autocomplete
+              options={resourceList}
+              getOptionLabel={(option) => (option && option?.title) || ''}
+              style={{ width: '350px' }}
+              value={selectedResource}
+              onChange={(event, newValue) => {
+                setSelectedResource(newValue);
+              }}
+              size="small"
+              renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
+            />
             {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) && (
-              <Box>
-                <Autocomplete
-                  style={{ width: '350px' }}
-                  multiple
-                  options={filters}
-                  disableCloseOnSelect
-                  getOptionLabel={(option) => option?.label}
-                  renderOption={(option: any) => (
-                    <React.Fragment>
-                      <Checkbox checked={selectedFilters?.some((_s) => _s.key === option.key)} />
-                      {option?.label}
-                    </React.Fragment>
-                  )}
-                  size="small"
-                  renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
-                  value={selectedFilters}
-                  onChange={(event: any, newValue: any) => {
-                    setSelectedFilters(newValue);
-                  }}
-                />
-              </Box>
+              <Autocomplete
+                style={{ width: '350px' }}
+                multiple
+                options={filters}
+                disableCloseOnSelect
+                getOptionLabel={(option) => option?.label}
+                renderOption={(option: any) => (
+                  <React.Fragment>
+                    <Checkbox checked={selectedFilters?.some((_s) => _s.key === option.key)} />
+                    {option?.label}
+                  </React.Fragment>
+                )}
+                size="small"
+                renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
+                value={selectedFilters}
+                onChange={(event: any, newValue: any) => {
+                  setSelectedFilters(newValue);
+                }}
+              />
             )}
-            {[sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) && selectedFilters?.map((filtered) => {
-              return renderFilter(filtered);
-            })}
-          </Box>
-          <Box display="flex" flexDirection="row" ml={1} mt={2}>
-            <Grid container spacing={2}>
-              {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) && selectedFilters?.map((filtered) => {
+            {[sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
+              selectedFilters?.map((filtered) => {
                 return renderFilter(filtered);
               })}
+          </div>
+          <Box display="flex" flexDirection="row" ml={1} mt={2}>
+            <Grid container spacing={2}>
+              {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
+                selectedFilters?.map((filtered) => {
+                  return renderFilter(filtered);
+                })}
             </Grid>
           </Box>
         </Box>
