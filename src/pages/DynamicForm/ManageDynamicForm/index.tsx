@@ -150,14 +150,24 @@ const ManageDynamicForm = ({
 
   function validate(values) {
     const errors = {};
+    const counterFields = initialData?.fields?.filter((f) => f?.type === 'counter');
+    if (counterFields?.length) {
+      counterFields?.forEach((field) => {
+        field?.subFields.forEach((_field) => {
+          if (_field?.required && values[field?.fieldName]?.some((v) => !v[_field?.fieldName])) {
+            errors[field?.fieldName] = `${field?.fieldLabel} is required`;
+          }
+        });
+      });
+    }
     return errors;
   }
 
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
-    if (err.length) {
+    if (err?.length) {
       const input = document.querySelector(`input[name=${err[0]}]`);
-      input.scrollIntoView({
+      input?.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
         inline: 'start'
@@ -206,7 +216,7 @@ const ManageDynamicForm = ({
                     size="small"
                     fullWidth
                     onImageUploadCompletePercentage={(completePercentage) => {
-                      setUploadingImageOrFileProgress(completePercentage)
+                      setUploadingImageOrFileProgress(completePercentage);
                     }}
                   />
                 </Form>
