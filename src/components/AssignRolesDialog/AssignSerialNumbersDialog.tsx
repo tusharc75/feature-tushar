@@ -252,8 +252,10 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
                 ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
                 : ''
             }
+            disableClearable={true}
             onChange={(e, val) => {
               setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+              dispatch({ type: 'selection', selectedRecords: [] });
             }}
             renderInput={(params) => (
               <TextField
