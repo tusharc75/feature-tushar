@@ -976,7 +976,6 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'counter') {
       obj[key.fieldName] = [];
     } else if (key.type === 'description') {
-
     } else {
       obj[key.fieldName] = value;
     }
@@ -1079,7 +1078,6 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       }
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'description') {
-
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
@@ -1102,21 +1100,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1168,7 +1166,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
     } else if (input.type === 'multiFileUpload') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
-    } else if(input.type === 'counter') {
+    } else if (input.type === 'counter') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
@@ -3194,7 +3192,7 @@ export const checkIsAllowedToEdit = (user, resource, data) => {
 };
 
 export function changeItemIndex<T>(array: T[], item: T, sourceIndex: number, destinationIndex: number) {
-  const newArray = [...array];
+  const newArray = Array.from(array);
   newArray.splice(sourceIndex, 1); // remove the item at index
   newArray.splice(destinationIndex, 0, item);
   return newArray;
@@ -3210,6 +3208,28 @@ export function removeItemAtIndex<T>(array: T[], index: number) {
   const newArray = [...array];
   newArray.splice(index, 1);
   return newArray;
+}
+
+export function reorder<T>(list: T[], startIndex: number, endIndex: number) {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+}
+
+export function groupByKey<T>(arr: T[] = [], keyGetter: ((d: T) => string) | string) {
+  let result = [];
+  result = arr.reduce((r, a) => {
+    const key = typeof keyGetter === 'string' ? keyGetter : keyGetter(a);
+    if (r[key]) {
+      r[key].push(a);
+    } else {
+      r[key] = [];
+    }
+    return r;
+  }, Object.create(null));
+  return result;
 }
 
 export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
