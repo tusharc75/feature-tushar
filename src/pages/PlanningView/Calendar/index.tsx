@@ -1,16 +1,17 @@
 import React, { useEffect, useCallback, useMemo, useState, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import './calendarView.scss';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import moment from 'moment';
-import { Grid, Checkbox, TextField, Box, CircularProgress } from '@material-ui/core';
+import { Checkbox, TextField, Box, CircularProgress, Popover, Typography, TableContainer, Table, TableHead, Paper, TableCell, TableRow, TableBody } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { sidebarResource } from 'src/constants/helpers';
 import { useAppTheme } from 'src/constants/AppConfig';
+import routes from 'src/components/Helpers/Routes';
+import { Link } from 'react-router-dom';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
 const localizer = momentLocalizer(moment);
@@ -71,7 +72,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
   const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
 
-  const history = useHistory();
   const [events, setEvents] = useState([]);
   const [view, setView] = useState<View>('month');
   const [lookupResource, setLookUpResource] = useState(null);
@@ -107,6 +107,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     startDate: moment().startOf('day').format('MM/DD/YYYY'),
     endDate: moment().add(1, 'months').format('MM/DD/YYYY')
   });
+
+  const [isOpen, setOpen] = useState({ open: false, data: [], type: '' });
+  const [anchor, setAnchor] = useState(null);
 
   const [lookupLoading, setLookupLoading] = useState(false);
 
@@ -241,6 +244,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 allDay: true,
                 resource: selectedResource.resource,
                 isCredit: true,
+                credit: d?.credit,
               })
             }
             if (d?.debit?.length) {
@@ -251,6 +255,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 allDay: true,
                 resource: selectedResource.resource,
                 isDebit: true,
+                debit: d?.debit,
               })
             }
             return {
@@ -590,9 +595,18 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
             onNavigate={(date) => {
               onNavigate(date);
             }}
-            onSelectEvent={(event: any) => {
-              if (selectedResource.resource !== sidebarResource.product) {
-                if (event.resource) {
+            onSelectEvent={(data: any, event: any) => {
+              if (selectedResource.resource === sidebarResource.product) {
+                setAnchor(event.nativeEvent.target);
+                if (data?.isCredit) {
+                  setOpen({ open: true, data: data.credit, type: "Credit" })
+                }
+                else if (data?.isDebit) {
+                  setOpen({ open: true, data: data.debit, type: "Debit" })
+                }
+              }
+              else {
+                if (data.resource) {
                   const resource = resourceList?.find((r) => r.resource === event.resource);
                   window.open(`${resource.path}/${event.id}`);
                 } else {
@@ -602,6 +616,60 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
             }}
           />
         )}
+        {isOpen.open &&
+          <Popover
+            open={isOpen.open}
+            anchorEl={anchor}
+            onClose={() => {
+              setOpen({ open: false, data: [], type: "" })
+            }}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+            style={{ minWidth: '300px' }}
+          >
+            <Box >
+              <TableContainer component={Paper}>
+                <Table aria-label="simple table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Job</TableCell>
+                      <TableCell>Qty</TableCell>
+                      <TableCell>{routes.warehouse.title}</TableCell>
+                      <TableCell>{routes.customerAccount.title}</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {isOpen.data.map((row) => (
+                      <TableRow key={row.referenceId}  >
+                        <TableCell component="th" scope="row">
+                          <Link
+                            className="link"
+                            target="_blank"
+                            title={row?.resourceLabel}
+                            to={`${routes.rentalManagementDetail.path}/${row?.referenceId}`}
+                          >
+                            {row.resourceLabel}
+                          </Link>
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          {row.qty}
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          {row?.warehouse?.optionLabel}
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          {row?.customerAccount?.optionLabel}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          </Popover >
+        }
       </div>
     </>
   );
