@@ -86,7 +86,6 @@ export const CustomOfflineProvider = ({ children }) => {
             fieldTicketMaterial = fieldTicketMaterial?.filter((e) => e?.fieldTicketId === d?.data?._id)?.map((e) => e?._id);
             deleteMany(objectStore.fieldTicketMaterial, fieldTicketMaterial);
             await new Promise((resolve) => setTimeout(resolve, 2000));
-            window.location.href = routes.fieldTicket.path;
           }
           if (d?.type === 'fieldTicketMaterial') {
             if (d?.data?.length) {
@@ -109,7 +108,6 @@ export const CustomOfflineProvider = ({ children }) => {
               })
               .catch((error) => { });
             await new Promise((resolve) => setTimeout(resolve, 2000));
-
           }
         });
         await rentalJobOfflineUpdate([]);

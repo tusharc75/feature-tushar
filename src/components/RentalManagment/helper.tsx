@@ -8,7 +8,7 @@ import { unionBy, uniq, map, isArray } from 'lodash';
 export const fetch_rental_product_fields = async (currency, isOffline) => {
     var data;
     if (isOffline) {
-        data = await findOne(objectStore.resource, 'rentalManagementProduct');
+        data = await findOne(objectStore.resource, CHILD_RESOURCE.rentalManagementProduct);
     } else {
         const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`);
         data = response?.data?.data;
@@ -20,7 +20,7 @@ export const fetch_rental_product_fields = async (currency, isOffline) => {
 export const fetch_rental_cost_fields = async (currency, isOffline) => {
     var data;
     if (isOffline) {
-        data = await findOne(objectStore.resource, 'rentalManagementCost');
+        data = await findOne(objectStore.resource, CHILD_RESOURCE.rentalManagementCost);
     } else {
         const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`);
         data = response?.data?.data;
@@ -36,19 +36,19 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
         const material: any = []
         arr?.forEach((ele) => {
             const obj = {
-              materialId: ele?.materialId,
-              materialType: ele?.type,
-              qty: ele?.qty,
-              pricingMethod: ele?.pricingMethod,
-              currency: rentalManagementData?.currency
+                materialId: ele?.materialId,
+                materialType: ele?.type,
+                qty: ele?.qty,
+                pricingMethod: ele?.pricingMethod,
+                currency: rentalManagementData?.currency
             }
             if (isArray(ele?.unit)) {
-              ele?.unit?.forEach((e) => {
-                material.push({ ...obj, unit: e })
-              })
+                ele?.unit?.forEach((e) => {
+                    material.push({ ...obj, unit: e })
+                })
             }
             else {
-              material.push({ ...obj, unit: ele?.unit })
+                material.push({ ...obj, unit: ele?.unit })
             }
         })
         data.material = material;

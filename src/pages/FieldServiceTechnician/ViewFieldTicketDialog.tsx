@@ -23,7 +23,6 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData }) {
     <>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
         <CustomDialogHeader
-          // title={`${routes.fieldServiceOrder.title} - ${serviceOrderData?.fieldServiceOrderNumber}`}
           title={`Field Ticket - ${serviceOrderData?.fieldServiceOrderNumber}`}
           onClose={onClose}
           showRequiredLabel={false}
@@ -31,9 +30,9 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData }) {
         <CustomDialogContent>
           <FieldTicket
             serviceOrderData={serviceOrderData}
-            setNextStep={() => {}}
+            setNextStep={() => { }}
             allowedToEdit={allowedToEdit}
-            handleChangeStatus={() => {}}
+            handleChangeStatus={() => { }}
             resource={sidebarResource.fieldServiceTechnician}
           />
         </CustomDialogContent>

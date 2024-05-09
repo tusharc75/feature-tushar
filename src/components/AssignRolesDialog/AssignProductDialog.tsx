@@ -14,7 +14,7 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
+import { findOne, objectStore } from 'src/constants/indexdbhelper';
 
 const AssignProductDialog = ({
   onSuccess,
@@ -71,7 +71,7 @@ const AssignProductDialog = ({
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.product);
+        data = await findOne(objectStore.resource, sidebarResource.product);
       } else {
         const response = await axiosInstance().get('/field?resource=Product&view=true');
         data = response?.data?.data;
@@ -100,7 +100,7 @@ const AssignProductDialog = ({
       dispatch({ type: 'loading', loading: true });
       let data, count;
       if (isOffline) {
-        data = await findAll(objectStore.product);
+        data = await findOne(objectStore.resourceData, sidebarResource.product);
         data = data?.filter((d: any) => !ids?.includes(d?._id?.toString()));
         count = data?.length;
       } else {

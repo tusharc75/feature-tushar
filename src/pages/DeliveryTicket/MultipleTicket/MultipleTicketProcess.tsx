@@ -49,10 +49,10 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
   const fetchGridColumns = async () => {
     let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.deliveryTicket);
+      data = await findOne(objectStore.resource, sidebarResource.deliveryTicket);
     } else {
       const response = await axiosInstance().get(
-        `/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`
+        `/field?resource=${sidebarResource.deliveryTicket}&entity=${selectedEntity}&view=true&showHiddenFields=true`
       );
       data = response?.data?.data;
     }
