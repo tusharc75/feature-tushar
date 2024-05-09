@@ -229,7 +229,11 @@ const RenderSubItems = ({ section }) => {
   return (
     <Droppable droppableId={section.section} type={`item`}>
       {(provided, snapshot) => (
-        <ul className="list-none" {...provided.droppableProps} ref={provided.innerRef}>
+        <ul
+          className={`list-none ${snapshot.isDraggingOver ? 'bg-blue-100 dark:bg-[var(--dark-primary)] ' : ''} rounded-md`}
+          {...provided.droppableProps}
+          ref={provided.innerRef}
+        >
           {section.subItems?.map((item, nestedIndex) => (
             <Draggable key={item.id} draggableId={`${item.id}`} index={nestedIndex}>
               {(provided, snapshot) => (
@@ -257,8 +261,8 @@ const RenderListItems = ({ sectionData, dragHandleProps, provided, snapshot }: I
       {...provided.draggableProps}
       ref={provided.innerRef}
       className={`${
-        snapshot.isDragging ? ' [border:1px_solid_var(--common-border-color)_!important] bg-blue-200 dark:bg-[var(--dark-secondary)]' : ''
-      } transition-colors `}
+        snapshot.isDragging ? ' [border:1px_solid_var(--common-border-color)_!important] ' : ''
+      } transition-colors rounded-md bg-[var(--dark-secondary,white)]`}
     >
       <ListItemIcon {...dragHandleProps}>
         <DragHandle />
