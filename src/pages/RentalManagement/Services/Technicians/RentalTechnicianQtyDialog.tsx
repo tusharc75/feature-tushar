@@ -44,14 +44,19 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
     } else {
       setAllFields(JSON.parse(JSON.stringify(data)));
       let pricingMethodOptions: any = [];
-      if (technicianData?.[`${technicianData.type}Detail`]?.pricingMethod) {
-        pricingMethodOptions = arrayToDropwdownOption(technicianData?.[`${technicianData.type}Detail`]?.pricingMethod);
+      let pricingMethodData = technicianData.pricingMethodData?.find((ele)=> ele._id===technicianData.competenceId)?.pricingMethod || []
+
+      if (pricingMethodData?.length){
+        pricingMethodOptions = arrayToDropwdownOption(pricingMethodData);
       }
       setPriceMethodListConst(pricingMethodOptions);
       await getAllPricingCondition(technicianData, pricingMethodOptions);
       data.forEach((element) => {
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
+        }
+        if(element.fieldName=== 'competence'){
+          element.option = technicianData.competenciesWithIds;
         }
       });
       setInitialData({
@@ -76,7 +81,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
     if (technicianData) {
       const priceData: any = await calculatePrice(rentalManagementData, [
         {
-          materialId: technicianData.materialId,
+          materialId: values.competence,
           type: technicianData.type,
           pricingMethod: pricingMethodOptions?.map((d) => d.optionLabel).join() || '',
         }
@@ -241,12 +246,11 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                               }
                                               let priceValue
                                               if (field.fieldName === 'pricingCondition') {
-                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] );
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.materialId === values['competence'] );
                                               } else if (field.fieldName === 'pricingMethod') {
-                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value);
-                                              } else {
-                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === values['pricingMethod']);
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.materialId === values['competence'] );
                                               }
+                                              
                                               let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
                                               const result = autoCalculateSpecificFields(
                                                 { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
@@ -268,6 +272,55 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                         </Box>
                                       </Box>
                                     </Grid>
+                                  ) : field.fieldName==='competence' ? (
+                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex">
+                                      <Box flexGrow={1}>
+                                        <FormTypes
+                                          {...field}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={async (name, value) => {
+                                            setFieldValue(name, value);
+                                            setFieldValue('pricingMethod', '');
+                                            setFieldValue('pricingCondition', '');
+                                            if(value!==''){
+                                              const pricingMethodData = technicianData?.pricingMethodData?.find((ele)=> ele._id===value)?.pricingMethod || []
+                                              const newMethodOptions = arrayToDropwdownOption(pricingMethodData);
+                                              setPriceMethodListConst(newMethodOptions);
+                                              await getAllPricingCondition({...values,competence:value,pricingCondition:'', pricingMethod:''}, newMethodOptions)
+                                            }
+                                           
+                                              let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+                                              
+                                              const result = autoCalculateSpecificFields(
+                                                { [priceFieldName]: 0 },
+                                                values,
+                                                initialData.fields
+                                              );
+                                              
+                                              if (Object.keys(result).length >= 1) {
+                                                for (var x in result) {
+                                                  setFieldValue(x, result[x]);
+                                                }
+                                              }
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                          fields={initialData.fields}
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Grid>
                                   ) : (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                       <Box display="flex">

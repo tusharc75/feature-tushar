@@ -22,6 +22,7 @@ import StaticCards from './StaticCards';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useAppTheme } from 'src/constants/AppConfig';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import { formatAmountWithCurrency } from 'src/constants/helpers';
 
 export interface ChartDataType extends IFormDataType {
   _id: any;
@@ -394,6 +395,25 @@ const ChartTypes = ({
                       })
                     }}
                     options={{
+                      plugins: {
+                        ...(chart?.currency &&
+                        {
+                          tooltip: {
+                            callbacks: {
+                              label: function (context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                  label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                  label += formatAmountWithCurrency((globalFilters.currency || currency), Number(context.parsed.y) ? context.parsed.y : '00').fullFormatAmountWithoutSpace;
+                                }
+                                return label;
+                              }
+                            }
+                          }
+                        }),
+                      },
                       maintainAspectRatio: false,
                       indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
                       scales: {
@@ -405,7 +425,14 @@ const ChartTypes = ({
                         y: {
                           grid: {
                             color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                          }
+                          },
+                          ticks: {
+                            callback: function (value) {
+                              return chart?.currency ?
+                                formatAmountWithCurrency((globalFilters.currency || currency), Number(value) ? value : '00').fullFormatAmountWithoutSpace
+                                : value;
+                            }
+                          },
                         },
                         ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') && {
                           y1: {
@@ -425,21 +452,21 @@ const ChartTypes = ({
                       },
                       ...(chart.stack &&
                         !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                          scales: {
-                            x: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
-                            },
-                            y: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
+                        scales: {
+                          x: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                            }
+                          },
+                          y: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                             }
                           }
-                        })
+                        }
+                      })
                     }}
                   />
                 </>

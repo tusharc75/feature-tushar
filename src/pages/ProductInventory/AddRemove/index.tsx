@@ -224,20 +224,23 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     if (user?.user?.brandPolicy?.storageLocation && !values['storageLocation']) {
       errors['storageLocation'] = 'Please select Storage Location';
     }
-    // find duplicates serial numbers
-    const serialNumbersList = values['serialNumbers'];
-    const duplicates = serialNumbersList.filter((item, index) => serialNumbersList.indexOf(item) != index);
 
-    if (serialNumbersList.length > Number(values['qty'])) {
-      errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
-    }
-    else if (duplicates.length > 0) {
-      errors['serialNumbers'] = `Serial numbers cannot be duplicate`;
-    }
-    if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && serialNumbersList.length !== Number(values['qty'])) {
-      errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
-    }
+    if (product[0]?.serializedProduct) {
+      // find duplicates serial numbers
+      const serialNumbersList = values['serialNumbers'];
+      const duplicates = serialNumbersList.filter((item, index) => serialNumbersList.indexOf(item) != index);
 
+      if (serialNumbersList.length > Number(values['qty'])) {
+        errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
+      }
+      else if (duplicates.length > 0) {
+        errors['serialNumbers'] = `Serial numbers cannot be duplicate`;
+      }
+      if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && serialNumbersList.length !== Number(values['qty'])) {
+        errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
+      }
+    }
+    
     if (lockDate) {
       if (!moment(values['customDate']).isSameOrAfter(moment(lockDate))) {
         errors['customDate'] = `Date entered prior to the locked date`;

@@ -431,111 +431,114 @@ const ReceivingTicket = ({
       });
 
       if (productSerialNumbers?.length) {
-        material?.filter((e) => e?.productDetail?.serializedProduct && e.type === 'product').forEach((element) => {
-          var qty = element.qty;
+        material?.filter((e) => e?.productDetail?.serializedProduct && e.type === MATERIAL_TYPE.product).forEach((element) => {
 
-          const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
-          ticketProduct?.forEach((ele) => {
-            const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
-            const receiveTicket = receiveTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
+          var qty = productSerialNumbers?.filter((e) => e?._id === element?._id)?.length;
 
-            var consumeQty = 0;
-            consumeProducts
-              ?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)
-              ?.forEach((e) => {
-                consumeQty = consumeQty + e.qty;
-              });
+          if (qty) {
+            const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+            ticketProduct?.forEach((ele) => {
+              const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
+              const receiveTicket = receiveTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
 
-            const obj: any = {};
-            obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
-            obj.uniqueId = element._id;
-            obj.serialized = element?.productDetail?.serializedProduct;
-            obj.materialId = element?.productDetail?._id;
-            obj.type = 'Product';
-            obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
-            obj.description =
-              element.type === 'service'
-                ? element?.serviceDetail?.serviceDescription || ''
-                : element.type === 'product'
-                  ? element?.productDetail?.productDescription || ''
-                  : element.type === 'package'
-                    ? element?.packageDetail?.packageDescription || ''
-                    : '';
-            obj.qty = ele.qty;
-            obj.consumeQty = consumeQty;
-            obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicket?.qty || 0 : 0;
-            obj.assetNumber = element?.productDetail?.productName;
-            obj.productName = element?.productDetail?.productName;
-            obj.productId = element?.productDetail?._id;
-            obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
-            obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-            obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
-            obj.parentId = element?.parentId;
-            obj.parentName = element?.parentName;
-            obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
-              ? ele.qty === consumeQty
-                ? RENTAL_INTERNAL_ASSET_STATUS.consumed
-                : consumeQty < ele.qty && consumeQty > 0
-                  ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
-                  : ele.qty === (returnTicket?.qty || 0)
-                    ? 'Returned'
-                    : element?.status
-              : element?.status;
-            obj.startDate = element?.actualStartDate;
-            obj.endDate = element?.actualEndDate;
-            obj.manualStartDate = element?.manualStartDate;
-            obj.manualEndDate = element?.manualEndDate;
-            obj.productSerialNumbers = productSerialNumbers?.filter((p) => p?._id === element?._id)?.map(_p => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber }));
-            obj.loadingTicket = ele?.loadingTicket;
-            obj.loadingTicketId = ele?.loadingTicketId;
-            obj.loadingTicketStatus = ele?.loadingTicketStatus;
-            obj.currentLocation =
-              element?.currentLocation?.optionValue ||
-              rentalManagementData?.shippingAddress?.optionValue ||
-              rentalManagementData?.billingAddress?.optionValue;
+              var consumeQty = 0;
+              consumeProducts
+                ?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)
+                ?.forEach((e) => {
+                  consumeQty = consumeQty + e.qty;
+                });
 
-            if (returnTicket) {
-              returnTicket.isCount = true;
-              obj.returnTicket = returnTicket?.returnTicket;
-              obj.returnTicketId = returnTicket?.returnTicketId;
-              obj.returnTicketStatus = returnTicket?.returnTicketStatus;
-            }
-            if (receiveTicket) {
-              receiveTicket.isCount = true;
-              obj.receivingTicketId = receiveTicket?.receivingTicketId;
-              obj.receivingTicket = receiveTicket?.receivingTicket;
-              obj.receivingTicketStatus = receiveTicket?.receivingTicketStatus;
-            }
-            productAssets.push(obj);
-            qty = qty - ele.qty;
-          });
-
-          if (qty > 0 && productSerialNumbers?.map((p) => p?._id)?.includes(element?._id)) {
-            productAssets.push({
-              _id: element?._id,
-              materialId: element?.materialId,
-              uniqueId: element?.uniqueId,
-              type: 'Product',
-              displayType: 'Product (Serialized)',
-              qty: element?.qty,
-              description: element?.productDetail?.productDescription || '',
-              parentId: element?.parentId,
-              parentName: element?.parentName,
-              consumeQty: 0,
-              returnQty: 0,
-              assetNumber: element?.productDetail?.productName,
-              productName: element?.productDetail?.productName,
-              productId: element?.productDetail?._id,
-              warehouse: rentalManagementData?.warehouse?.optionLabel,
-              warehouseId: rentalManagementData?.warehouse?.optionValue,
-              productSerialNumbers: productSerialNumbers?.filter((p) => p?._id === element?._id)?.map(_p => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber })),
-              status: element?.productDetail?.serializedProduct === true ? element?.status : 'N/A',
-              rentalAssetStatus: element?.productDetail?.serializedProduct ? element?.status : '',
-              currentLocation:
+              const obj: any = {};
+              obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
+              obj.uniqueId = element._id;
+              obj.serialized = element?.productDetail?.serializedProduct;
+              obj.materialId = element?.productDetail?._id;
+              obj.type = 'Product';
+              obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
+              obj.description =
+                element.type === 'service'
+                  ? element?.serviceDetail?.serviceDescription || ''
+                  : element.type === 'product'
+                    ? element?.productDetail?.productDescription || ''
+                    : element.type === 'package'
+                      ? element?.packageDetail?.packageDescription || ''
+                      : '';
+              obj.qty = ele.qty;
+              obj.consumeQty = consumeQty;
+              obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicket?.qty || 0 : 0;
+              obj.assetNumber = element?.productDetail?.productName;
+              obj.productName = element?.productDetail?.productName;
+              obj.productId = element?.productDetail?._id;
+              obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
+              obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
+              obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
+              obj.parentId = element?.parentId;
+              obj.parentName = element?.parentName;
+              obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
+                ? ele.qty === consumeQty
+                  ? RENTAL_INTERNAL_ASSET_STATUS.consumed
+                  : consumeQty < ele.qty && consumeQty > 0
+                    ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
+                    : ele.qty === (returnTicket?.qty || 0)
+                      ? 'Returned'
+                      : element?.status
+                : element?.status;
+              obj.startDate = element?.actualStartDate;
+              obj.endDate = element?.actualEndDate;
+              obj.manualStartDate = element?.manualStartDate;
+              obj.manualEndDate = element?.manualEndDate;
+              obj.productSerialNumbers = productSerialNumbers?.filter((p) => p?._id === element?._id)?.map(_p => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber }));
+              obj.loadingTicket = ele?.loadingTicket;
+              obj.loadingTicketId = ele?.loadingTicketId;
+              obj.loadingTicketStatus = ele?.loadingTicketStatus;
+              obj.currentLocation =
                 element?.currentLocation?.optionValue ||
                 rentalManagementData?.shippingAddress?.optionValue ||
-                rentalManagementData?.billingAddress?.optionValue
+                rentalManagementData?.billingAddress?.optionValue;
+
+              if (returnTicket) {
+                returnTicket.isCount = true;
+                obj.returnTicket = returnTicket?.returnTicket;
+                obj.returnTicketId = returnTicket?.returnTicketId;
+                obj.returnTicketStatus = returnTicket?.returnTicketStatus;
+              }
+              if (receiveTicket) {
+                receiveTicket.isCount = true;
+                obj.receivingTicketId = receiveTicket?.receivingTicketId;
+                obj.receivingTicket = receiveTicket?.receivingTicket;
+                obj.receivingTicketStatus = receiveTicket?.receivingTicketStatus;
+              }
+              productAssets.push(obj);
+              qty = qty - ele.qty;
             });
+
+            if (qty > 0) {
+              productAssets.push({
+                _id: element?._id,
+                materialId: element?.materialId,
+                uniqueId: element?.uniqueId,
+                type: 'Product',
+                displayType: 'Product (Serialized)',
+                qty: qty,
+                description: element?.productDetail?.productDescription || '',
+                parentId: element?.parentId,
+                parentName: element?.parentName,
+                consumeQty: 0,
+                returnQty: 0,
+                assetNumber: element?.productDetail?.productName,
+                productName: element?.productDetail?.productName,
+                productId: element?.productDetail?._id,
+                warehouse: rentalManagementData?.warehouse?.optionLabel,
+                warehouseId: rentalManagementData?.warehouse?.optionValue,
+                productSerialNumbers: productSerialNumbers?.filter((p) => p?._id === element?._id)?.map(_p => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber })),
+                status: element?.productDetail?.serializedProduct === true ? element?.status : 'N/A',
+                rentalAssetStatus: element?.productDetail?.serializedProduct ? element?.status : '',
+                currentLocation:
+                  element?.currentLocation?.optionValue ||
+                  rentalManagementData?.shippingAddress?.optionValue ||
+                  rentalManagementData?.billingAddress?.optionValue
+              });
+            }
           }
         });
       }

@@ -301,7 +301,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     if (child?.some((e) => e?.type === 'product')) {
       return true;
     }
-    if(child?.filter(e => e?.type === 'package')?.some(ele => checkProductInside(ele, material))){
+    if (child?.filter(e => e?.type === 'package')?.some(ele => checkProductInside(ele, material))) {
       return true
     }
     return false
@@ -903,24 +903,22 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             {`Create ${routes.sublease.title}`}
           </MenuItem>
         )}
-        <MenuItem
-          disabled={selectedRecords.length === 0 || nonSerializedAssetProduct?.length === 0}
-          onClick={() => {
-            setAddNonSerializedAssetDialog(true);
-          }}
-        >
-          {`Assign Serial Number`}
-        </MenuItem>
-        {user?.user?.brandPolicy?.productInventorySerialNumberRequired && (
+        {selectedRecords.length && assetAssignedProduct?.length && user?.user?.brandPolicy?.productInventorySerialNumberRequired ?
           <MenuItem
-            disabled={selectedRecords.length === 0 || assetAssignedProduct?.length === 0}
             onClick={() => {
               setAssignSerialNumbersDialog(true)
             }}
           >
             {`Assign Serial Numbers`}
-          </MenuItem>
-        )}
+          </MenuItem> :
+          selectedRecords.length && nonSerializedAssetProduct?.length ?
+            <MenuItem
+              onClick={() => {
+                setAddNonSerializedAssetDialog(true);
+              }}
+            >
+              {`Assign Serial Numbers`}
+            </MenuItem> : null}
         <MenuItem
           disabled={flattenArray(selectedRecords)?.filter((d) => ['asset', 'serialNumber']?.includes(d.type) && d.canRemove)?.length === 0}
           onClick={() => {

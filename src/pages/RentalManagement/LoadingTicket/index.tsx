@@ -38,6 +38,7 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   INVENTORY_OWNER_TYPE,
+  MATERIAL_TYPE,
   RENTAL_INTERNAL_ASSET_STATUS,
   deliveryTicket,
   gridLoadingTimeout,
@@ -297,77 +298,76 @@ const LoadingTicket = ({
       });
 
       if (productSerialNumbers?.length) {
-        material?.filter((e) => e?.productDetail?.serializedProduct && e.type === 'product').forEach((element) => {
-          var qty = element.qty;
-          const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+        material?.filter((e) => e?.productDetail?.serializedProduct && e.type === MATERIAL_TYPE.product).forEach((element) => {
+          var qty = productSerialNumbers?.filter((e) => e?._id === element?._id)?.length;
+          if (qty) {
+            const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
 
-          ticketProduct?.forEach((ele) => {
+            ticketProduct?.forEach((ele) => {
 
-            var consumeQty = 0;
-            consumeProducts?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)?.forEach((e) => {
-              consumeQty = consumeQty + e.qty;
+              var consumeQty = 0;
+              consumeProducts?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)?.forEach((e) => {
+                consumeQty = consumeQty + e.qty;
+              });
+
+              const obj: any = {};
+              obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
+              obj.type = 'Product';
+              obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
+              obj.qty = ele.qty;
+              obj.description =
+                element.type === 'service'
+                  ? element?.serviceDetail?.serviceDescription || ''
+                  : element.type === 'product'
+                    ? element?.productDetail?.productDescription || ''
+                    : element.type === 'package'
+                      ? element?.packageDetail?.packageDescription || ''
+                      : '';
+              obj.assetNumber = element?.productDetail?.productName;
+              obj.productName = element?.productDetail?.productName;
+              obj.productId = element?.productDetail?._id;
+              obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
+              obj.parentId = element?.parentId;
+              obj.parentName = element?.parentName;
+              obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
+              obj.status = 'N/A';
+              obj.rentalAssetStatus = element?.status;
+              obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
+                ? ele.qty === consumeQty
+                  ? RENTAL_INTERNAL_ASSET_STATUS.consumed
+                  : consumeQty < ele.qty && consumeQty > 0
+                    ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
+                    : element?.status
+                : element?.status;
+              obj.loadingTicket = ele?.loadingTicket;
+              obj.loadingTicketId = ele?.loadingTicketId;
+              obj.loadingTicketStatus = ele?.loadingTicketStatus;
+              obj.startDate = element?.actualStartDate;
+              obj.productSerialNumbers = productSerialNumbers?.filter((e) => e?._id === element?._id)?.
+                map((e) => ({ ...e, assetNumber: e?.productSerialNumberDetail?.serialNumber }));
+              productAssets.push(obj);
+              qty = qty - ele.qty;
             });
 
-            const obj: any = {};
-            obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
-            obj.type = 'Product';
-            obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
-            obj.qty = ele.qty;
-            obj.description =
-              element.type === 'service'
-                ? element?.serviceDetail?.serviceDescription || ''
-                : element.type === 'product'
-                  ? element?.productDetail?.productDescription || ''
-                  : element.type === 'package'
-                    ? element?.packageDetail?.packageDescription || ''
-                    : '';
-            obj.assetNumber = element?.productDetail?.productName;
-            obj.productName = element?.productDetail?.productName;
-            obj.productId = element?.productDetail?._id;
-            obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
-            obj.parentId = element?.parentId;
-            obj.parentName = element?.parentName;
-            obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-            obj.status =
-              element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true
-                ? element?.status
-                : 'N/A';
-            obj.rentalAssetStatus = element?.status;
-            obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
-              ? ele.qty === consumeQty
-                ? RENTAL_INTERNAL_ASSET_STATUS.consumed
-                : consumeQty < ele.qty && consumeQty > 0
-                  ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
-                  : element?.status
-              : element?.status;
-            obj.loadingTicket = ele?.loadingTicket;
-            obj.loadingTicketId = ele?.loadingTicketId;
-            obj.loadingTicketStatus = ele?.loadingTicketStatus;
-            obj.startDate = element?.actualStartDate;
-            obj.productSerialNumbers = productSerialNumbers?.filter((e) => e?._id === element?._id)?.
-              map((e) => ({ ...e, assetNumber: e?.productSerialNumberDetail?.serialNumber }));
-            productAssets.push(obj);
-            qty = qty - ele.qty;
-          });
-
-          if (qty > 0 && productSerialNumbers?.map((p) => p?._id)?.includes(element?._id)) {
-            productAssets.push({
-              _id: element.materialId,
-              uniqueId: element?._id,
-              type: 'Product',
-              displayType: 'Product (Serialized)',
-              qty: element?.qty,
-              description: element?.productDetail?.productDescription || '',
-              parentId: element?.parentId,
-              parentName: element?.parentName,
-              assetNumber: element?.productDetail?.productName,
-              productName: element?.productDetail?.productName,
-              productId: element?.productDetail?._id,
-              warehouse: rentalManagementData?.warehouse?.optionLabel,
-              warehouseId: rentalManagementData?.warehouse?.optionValue,
-              productSerialNumbers: productSerialNumbers?.filter((p) => p?._id === element?._id)
-                ?.map((_p) => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber }))
-            });
+            if (qty > 0) {
+              productAssets.push({
+                _id: element.materialId,
+                uniqueId: element?._id,
+                type: 'Product',
+                displayType: 'Product (Serialized)',
+                qty: qty,
+                description: element?.productDetail?.productDescription || '',
+                parentId: element?.parentId,
+                parentName: element?.parentName,
+                assetNumber: element?.productDetail?.productName,
+                productName: element?.productDetail?.productName,
+                productId: element?.productDetail?._id,
+                warehouse: rentalManagementData?.warehouse?.optionLabel,
+                warehouseId: rentalManagementData?.warehouse?.optionValue,
+                productSerialNumbers: productSerialNumbers?.filter((p) => p?._id === element?._id)
+                  ?.map((_p) => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber }))
+              });
+            }
           }
         });
       }

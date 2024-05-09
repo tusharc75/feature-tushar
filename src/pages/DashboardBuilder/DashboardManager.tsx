@@ -1,22 +1,20 @@
-import React, { Fragment } from 'react';
-import { Grid, Box, Button, TextField, CircularProgress, Typography, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import { MdDashboardCustomize } from 'react-icons/md';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import queryString from 'query-string';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
+import { Box, Button, CircularProgress, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@material-ui/core';
 import { saveAs } from 'file-saver';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import Builder from './Builder';
-import { IFormDataType, baseURL } from './builderHelpers';
-import DashboardView from './DashboardView';
-import axiosInstance from 'src/axios/axiosInstance';
+import { Form, Formik } from 'formik';
+import queryString from 'query-string';
+import React, { Fragment } from 'react';
+import { MdDashboardCustomize } from 'react-icons/md';
+import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { ImportIcon, ExportIcon } from 'src/assets/svg/svgIcons';
-import { TouchBackend } from 'react-dnd-touch-backend';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Form, Formik } from 'formik';
+import { ExportIcon, ImportIcon } from 'src/assets/svg/svgIcons';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import Builder from './Builder';
+import DashboardView from './DashboardView';
+import { IFormDataType, baseURL } from './builderHelpers';
+import update from 'immutability-helper';
 
 const DashboardBuilder = () => {
   const history = useHistory();
@@ -182,6 +180,25 @@ const DashboardBuilder = () => {
     return errors;
   };
 
+  const moveCard = React.useCallback(
+    (result: DropResult) => {
+      if (!result.destination) return;
+      const dragIndex = result.source.index;
+      const dropIndex = result.destination?.index;
+
+      const card = formData[dragIndex];
+      setFormData(
+        update(formData, {
+          $splice: [
+            [dragIndex, 1],
+            [dropIndex, 0, card]
+          ]
+        })
+      );
+    },
+    [formData, setFormData]
+  );
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -189,7 +206,7 @@ const DashboardBuilder = () => {
           <CustomBreadCrumbs
             routes={[
               { title: 'Dashboard Master', path: '/dashboard-master' },
-              { title: type && type === 'clone' ? 'Clone' : !isNew ? name : 'New', path: '' }
+              { title: type && type === 'clone' ? 'Clone' : !isNew ? values.name : 'New', path: '' }
             ]}
           />
         </Box>
@@ -213,64 +230,64 @@ const DashboardBuilder = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <Box p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>
-            <Formik initialValues={values} enableReinitialize={true} onSubmit={handleClickSave} validate={validate}>
-              {({ values, errors, touched, setFieldValue, submitForm, setValues }) => (
-                <Fragment>
-                  <Box display="flex">
-                    <Form autoComplete="off" autoCorrect="off" noValidate>
-                      <Box display="flex">
-                        <TextField
-                          disabled={isLoading}
-                          style={{ width: 300 }}
-                          variant="outlined"
-                          required
-                          value={values.name}
-                          onChange={(e) => setFieldValue('name', e.target.value)}
-                          size="small"
-                          label="Dashboard Name"
-                          error={touched['name'] && Boolean(errors['name'])}
-                          helperText={touched['name'] && errors['name']}
-                        />
-                        <Box pl={2}>
-                          <FormControl fullWidth size="small" variant="outlined">
-                            <InputLabel id="duration">Select Duration</InputLabel>
-                            <Select
-                              labelId="duration"
-                              id="time-duration"
-                              style={{ width: 300 }}
-                              value={values.defaultDuration}
-                              onChange={(e) => setFieldValue('defaultDuration', e.target.value)}
-                              label="Select Duration"
-                            >
-                              <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                              <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                              <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                              <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                              <MenuItem value={'current-year'}>Current Year</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Box>
-                      </Box>
-                    </Form>
-                  </Box>
-                  {permissions?.dashboardMaster?.isUpdate && (
-                    <Box py={'6px'}>
-                      <Button
-                        color="primary"
-                        variant="contained"
+          <Formik initialValues={values} enableReinitialize={true} onSubmit={handleClickSave} validate={validate}>
+            {({ values, errors, touched, setFieldValue, submitForm, setValues }) => (
+              <Fragment>
+                <Box display="flex">
+                  <Form autoComplete="off" autoCorrect="off" noValidate>
+                    <Box display="flex">
+                      <TextField
+                        disabled={isLoading}
+                        style={{ width: 300 }}
+                        variant="outlined"
+                        required
+                        value={values.name}
+                        onChange={(e) => setFieldValue('name', e.target.value)}
                         size="small"
-                        disableRipple
-                        disabled={!Boolean(values.name) || formData.length === 0 || isSubmitting}
-                        onClick={submitForm}
-                        startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
-                      >
-                        Save
-                      </Button>
+                        label="Dashboard Name"
+                        error={touched['name'] && Boolean(errors['name'])}
+                        helperText={touched['name'] && errors['name']}
+                      />
+                      <Box pl={2}>
+                        <FormControl fullWidth size="small" variant="outlined">
+                          <InputLabel id="duration">Select Duration</InputLabel>
+                          <Select
+                            labelId="duration"
+                            id="time-duration"
+                            style={{ width: 300 }}
+                            value={values.defaultDuration}
+                            onChange={(e) => setFieldValue('defaultDuration', e.target.value)}
+                            label="Select Duration"
+                          >
+                            <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                            <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                            <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                            <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                            <MenuItem value={'current-year'}>Current Year</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
                     </Box>
-                  )}
-                </Fragment>
-              )}
-            </Formik>
+                  </Form>
+                </Box>
+                {permissions?.dashboardMaster?.isUpdate && (
+                  <Box py={'6px'}>
+                    <Button
+                      color="primary"
+                      variant="contained"
+                      size="small"
+                      disableRipple
+                      disabled={!Boolean(values.name) || formData.length === 0 || isSubmitting}
+                      onClick={submitForm}
+                      startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+                    >
+                      Save
+                    </Button>
+                  </Box>
+                )}
+              </Fragment>
+            )}
+          </Formik>
         </Box>
         <Box p={1}>
           <Grid container spacing={2}>
@@ -293,7 +310,7 @@ const DashboardBuilder = () => {
                     )}
                   </Box>
                 )}
-                <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
+                <DragDropContext onDragEnd={moveCard}>
                   <DashboardView
                     selectedData={selectedData}
                     formData={formData}
@@ -301,7 +318,7 @@ const DashboardBuilder = () => {
                     handleEdit={handleEdit}
                     handleRemove={handleRemove}
                   />
-                </DndProvider>
+                </DragDropContext>
               </Box>
             </Grid>
           </Grid>
