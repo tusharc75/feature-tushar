@@ -3188,7 +3188,7 @@ export const checkIsAllowedToEdit = (user, resource, data) => {
 };
 
 export function changeItemIndex<T>(array: T[], item: T, sourceIndex: number, destinationIndex: number) {
-  const newArray = [...array];
+  const newArray = Array.from(array);
   newArray.splice(sourceIndex, 1); // remove the item at index
   newArray.splice(destinationIndex, 0, item);
   return newArray;
@@ -3204,4 +3204,26 @@ export function removeItemAtIndex<T>(array: T[], index: number) {
   const newArray = [...array];
   newArray.splice(index, 1);
   return newArray;
+}
+
+export function reorder<T>(list: T[], startIndex: number, endIndex: number) {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+}
+
+export function groupByKey<T>(arr: T[] = [], keyGetter: ((d: T) => string) | string) {
+  let result = [];
+  result = arr.reduce((r, a) => {
+    const key = typeof keyGetter === 'string' ? keyGetter : keyGetter(a);
+    if (r[key]) {
+      r[key].push(a);
+    } else {
+      r[key] = [];
+    }
+    return r;
+  }, Object.create(null));
+  return result;
 }
