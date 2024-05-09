@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import queryString from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -11,6 +11,8 @@ import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 import CalendarView from './Calendar';
 import ListView from './List';
+import { CalendarToday, FormatListNumbered } from '@material-ui/icons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const PLANNING_RESOURCE = [
   {
@@ -120,6 +122,15 @@ const PLANNING_RESOURCE = [
     fieldName: 'assetNumber',
     start: 'estimateStartDate',
     end: 'estimateEndDate'
+  },
+  {
+    key: 'product',
+    resource: sidebarResource.product,
+    title: routes.product.title,
+    path: routes.product.path,
+    fieldName: 'productName',
+    start: 'estimateStartDate',
+    end: 'estimateEndDate'
   }
 ];
 
@@ -135,6 +146,8 @@ function PlanningView() {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [resourceList, setResourceList] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null);
+
+  const [view, setView] = useState('calendar');
 
   useEffect(() => {
     const options: any = [];
@@ -167,7 +180,7 @@ function PlanningView() {
           </Box>
         </Box>
         <Box className={`detail-container-v1`}>
-          <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          {/* <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             <CustomTab value={0}>
               <FaWpforms className="mr-1" fontSize="inherit" /> Calendar
             </CustomTab>
@@ -180,7 +193,28 @@ function PlanningView() {
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
             <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
-          </TabPanel>
+          </TabPanel> */}
+          <div className="flex justify-end gap-1 absolute top-[25px] right-[25px] max-md:top-[15px] max-md:right-[15px] ">
+            <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
+              <span>
+                <IconButton size="small" onClick={() => setView('calendar')} disabled={view === 'calendar'}>
+                  <CalendarToday color="primary" className={`${view === 'calendar' ? ' opacity-45' : ''}`} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+            <HtmlTooltip title={'List View'} placement="top" arrow enterTouchDelay={0}>
+              <span>
+                <IconButton size="small" onClick={() => setView('table')} disabled={view === 'table'}>
+                  <FormatListNumbered color="primary" className={`${view === 'table' ? ' opacity-45' : ''}`} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </div>
+          {view === 'calendar' ? (
+            <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
+          ) : (
+            <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
+          )}
         </Box>
       </Box>
     </>

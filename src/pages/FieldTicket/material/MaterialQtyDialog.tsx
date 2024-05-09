@@ -155,7 +155,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       setPriceMethodListConst(pricingMethodOptions);
-      if(!isOffline) await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      if (!isOffline) {
+        await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      }
       data.forEach((element) => {
         if (rowData?.type === MATERIAL_TYPE.serializedAsset) {
           if (element.fieldName === 'qty') {
@@ -189,7 +191,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
           }
         }
       });
-
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(rowData, data)

@@ -2760,7 +2760,7 @@ const FormTypes = (props) => {
         setFieldValue={setFieldValue}
       />
     ) : type === 'counter' ? (
-      <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} />
+      <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} touched={touched} errors={errors} />
     ) : null
   ) : null;
 };

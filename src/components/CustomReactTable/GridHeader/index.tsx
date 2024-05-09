@@ -87,29 +87,25 @@ const GridHeader = ({
     if (!resource || !showFilters) return;
     const applyDefaultFilter = async () => {
       try {
-        const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
-        if (columns.length === 0) return;
-        axiosInstance()
-          .get(`/user-resource-filter?resource=${resource}`)
-          .then(({ data: { data } }) => {
-            const defaultFilter = data.filter((d) => d.default)[0];
-            setSelectedFilter(defaultFilter);
-            let deepFilter;
-            if (defaultFilter?.filterValue) deepFilter = createFilterModel(defaultFilter?.filterValue, columns);
-            if (defaultFilter && deepFilter) {
-              dispatch({ type: 'filter', filters: deepFilter });
-              if (defaultFilter.sortBy) {
-                dispatch({
-                  type: 'sort',
-                  sorting: [{ colId: defaultFilter.sortBy, sort: defaultFilter.orderBy ?? 'asc' }],
-                  loading: isClientSideGrid ? false : true
-                });
-              }
+        const responce: any = axiosInstance().get(`/user-resource-filter?resource=${resource}`)
+        const defaultFilter = responce?.data?.data.find((d) => d.default);
+        if (defaultFilter) {
+          const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
+          if (columns.length === 0) return;
+          setSelectedFilter(defaultFilter);
+          let deepFilter;
+          if (defaultFilter?.filterValue) deepFilter = createFilterModel(defaultFilter?.filterValue, columns);
+          if (defaultFilter && deepFilter) {
+            dispatch({ type: 'filter', filters: deepFilter });
+            if (defaultFilter.sortBy) {
+              dispatch({
+                type: 'sort',
+                sorting: [{ colId: defaultFilter.sortBy, sort: defaultFilter.orderBy ?? 'asc' }],
+                loading: isClientSideGrid ? false : true
+              });
             }
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
+          }
+        }
       } catch (error) {
         toastConfig.setToastConfig(error);
       }

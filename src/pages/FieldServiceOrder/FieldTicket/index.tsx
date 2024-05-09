@@ -58,7 +58,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.fieldTicket);
+        data = await findOne(objectStore.resource, sidebarResource.fieldTicket);
       } else {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`, { cancelToken: cancelToken?.token });
         data = response?.data?.data;
@@ -81,7 +81,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
                   <IconButton
                     size="small"
                     onClick={() => {
-                        window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
+                      window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
                     }}
                   >
                     <OpenInNewIcon fontSize="small" color="primary" />
