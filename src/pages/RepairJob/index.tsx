@@ -84,12 +84,12 @@ const RepairJob = () => {
   const fetchGridColumns = async () => {
     let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.repairJob);
+      data = await findOne(objectStore.resource, sidebarResource.repairJob);
     } else {
       const response = await axiosInstance().get(`/field?resource=Repair Job`);
       data = response?.data?.data;
       try {
-        insertUpdate(objectStore.resource, objectStore.repairJob, data);
+        insertUpdate(objectStore.resource, sidebarResource.repairJob, data);
       } catch (ex) {
         console.error(`Repair Job: Error while storing data for Offline context. Error: ${ex.message}`);
       }
@@ -385,7 +385,7 @@ const RepairJob = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
+            showFilters={!isOffline}
             resource={sidebarResource.repairJob}
           />
         ) : (
@@ -403,9 +403,8 @@ const RepairJob = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${
-              deleteRecord.repairJobName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${deleteRecord.repairJobName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
