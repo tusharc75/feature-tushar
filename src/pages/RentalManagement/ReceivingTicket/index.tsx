@@ -572,6 +572,7 @@ const ReceivingTicket = ({
         d['hideSelection'] = [ASSET_STATUS.lost].includes(d.status) || d?.manualStatus === ASSET_STATUS.reserved ? true : false;
 
         const invoiceMaterial = invoiceData?.find((obj) => obj?._id === d?._id || obj?._id === d?.uniqueId);
+        d['isInvoiceCreated'] = invoiceMaterial ? true : false;
         d['isAllowedStartDate'] = d?.manualStartDate && !invoiceMaterial ? true : false;
         d['isAllowedEndDate'] = d?.manualEndDate ? true : false;
         if (d['isAllowedEndDate'] && invoiceMaterial) {
@@ -975,8 +976,9 @@ const ReceivingTicket = ({
         allowedToEdit ? (
           <HtmlTooltip
             title={
+             row?.original?.isInvoiceCreated && !row?.original?.isAllowedEndDate ? 'Invoice Created - Cannot change Start Date' :
               row?.original?.isAllowedStartDate === false && row?.original?.isAllowedEndDate === false
-                ? `Invoice Created - Cannot change Start Date`
+                ? `Can change the Date after delivered`
                 : row?.original?.isAllowedEndDate === false && row?.original?.isAllowedStartDate !== true
                   ? `Can change the End Date after received`
                   : 'Update - Start Date/End Date'
