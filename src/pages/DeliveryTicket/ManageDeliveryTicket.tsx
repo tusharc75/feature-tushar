@@ -50,7 +50,6 @@ const ManageDeliveryTicket = ({
   referenceData = null,
   assets = null,
   products = null,
-  serialNumber = null
 }) => {
   const {
     state: { user }
@@ -333,10 +332,6 @@ const ManageDeliveryTicket = ({
             }
             tempInitialData['products'].push(obj);
           });
-          tempInitialData['serialNumber'] = [];
-          if (serialNumber) {
-            tempInitialData['serialNumber'] = serialNumber;
-          }
           if (fieldsDataForUpdate.find((d) => d.fieldName === 'wellName') && referenceData?.wellName) {
             tempInitialData['wellName'] = referenceData?.wellName;
           }
