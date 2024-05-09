@@ -241,8 +241,9 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
           res.technicianId = u?.technician['_id'];
           res.competencyType = u?.technician['competencyType']?.optionLabel;
+          res.competenciesWithIds = u?.technician['competencies'];
           res.competencies = u?.technician['competencies']?.map((e) => e?.optionLabel)?.toString();
-          res.competencyDetail = u?.competencyDetail
+
           return res;
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -291,6 +292,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       element.uniqueId = selectedService?._id || '';
       element.materialId = d?.competenciesId;
       element.type = 'competency';
+      element.competence = d?.competenciesId;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
       element.status = 'Assigned';
@@ -450,7 +452,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
             setTechnicianEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
             setIsBulkEdit(false);
           }}
-          technicianData={{ ...technicianEdit.data, pricingCondition: technicianEdit.data?.pricingConditionId }}
+          technicianData={{ ...technicianEdit.data, pricingCondition: technicianEdit.data?.pricingConditionId, competence: technicianEdit.data?.competenceId }}
           rentalManagementData={rentalManagementData}
           handleUpdate={handleSaveData}
           loadingEdit={isUpdating}
