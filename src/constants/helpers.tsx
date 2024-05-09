@@ -975,6 +975,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'counter') {
       obj[key.fieldName] = [];
+    } else if (key.type === 'description') {
+
     } else {
       obj[key.fieldName] = value;
     }
@@ -1076,6 +1078,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = new Date();
       }
     } else if (key.type === 'lookUpDisplay') {
+    } else if (key.type === 'description') {
+
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
