@@ -63,7 +63,7 @@ const PRODUCT_FILTERS = [
   {
     label: 'Products',
     value: 'Product',
-    key: 'productIds'
+    key: 'product'
   }
 ];
 
@@ -219,6 +219,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     axiosInstance()
       .get(`/planning-view${queryString}`)
       .then(({ data: { data } }) => {
+        const otherData = [];
         const rows = data?.map((d: any) => {
           if (selectedResource.resource === sidebarResource.serializedAsset) {
             return {
@@ -227,9 +228,37 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
               start: new Date(d['estimateStartDate'] || d['startDate']),
               end: new Date(d['estimateEndDate'] || d['endDate']),
               allDay: true,
-              type: d.resource,
               resource: d.resource,
               fulfillStatus: d?.fulfillStatus
+            };
+          }
+          if (selectedResource.resource === sidebarResource.product) {
+            if (d?.credit?.length) {
+              otherData.push({
+                title: `↑ Credit ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                start: new Date(d['date']),
+                end: new Date(d['date']),
+                allDay: true,
+                resource: selectedResource.resource,
+                isCredit: true,
+              })
+            }
+            if (d?.debit?.length) {
+              otherData.push({
+                title: `↓ Debit ${d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                start: new Date(d['date']),
+                end: new Date(d['date']),
+                allDay: true,
+                resource: selectedResource.resource,
+                isDebit: true,
+              })
+            }
+            return {
+              title: `Inventory ${d?.inventory}`,
+              start: new Date(d['date']),
+              end: new Date(d['date']),
+              allDay: true,
+              resource: selectedResource.resource,
             };
           }
           return {
@@ -238,14 +267,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
             start: new Date(d[selectedResource.start]),
             end: new Date(d[selectedResource.end]),
             allDay: true,
-            type: selectedResource.resource,
+            resource: selectedResource.resource,
             fulfillStatus: d?.fulfillStatus
           };
         });
-        setEvents(rows);
-        setStaticEvents(rows);
+        setEvents([...rows, ...otherData]);
+        setStaticEvents([...rows, ...otherData]);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -327,24 +356,21 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
   }, [view]);
 
   const updateData = (event, start, end) => {
-    axiosInstance()
-      .put(`/planning-view/change-date`, {
-        _id: event.id,
-        startDate: start.toISOString(),
-        endDate: end.toISOString(),
-        resource: event.type
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    axiosInstance().put(`/planning-view/change-date`, {
+      _id: event.id,
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+      resource: event.resource
+    }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+      fetchData();
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const moveEvent = ({ event, start, end }) => {
@@ -389,7 +415,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
     let color = '#000';
 
-    if (obj?.type === sidebarResource.planning) {
+    if (obj?.resource === sidebarResource.planning) {
       if (obj?.fulfillStatus === 'Yes') {
         backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#048e0a';
         color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
@@ -401,6 +427,16 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
         color = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
       }
     }
+    if (obj?.resource === sidebarResource.product) {
+      if (obj?.isCredit) {
+        backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#DBF8DB';
+        color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
+      } else if (obj?.isDebit) {
+        backgroundColor = themeMode === 'light' ? 'rgb(255, 204, 204)' : '#FAEAE9';
+        color = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
+      }
+    }
+
     return {
       backgroundColor,
       color,
@@ -412,43 +448,42 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
 
   const renderFilter = (filtered) => {
     return (
-      <Grid item xs={12} sm={6} md={4} lg={4} key={filtered?.value}>
-        <Autocomplete
-          options={lookupResource ? lookupResource[filtered?.value] : []}
-          multiple
-          disableCloseOnSelect
-          getOptionLabel={(option: any) => option?.optionLabel}
-          value={selectedLookUpResourceData && selectedLookUpResourceData[filtered.key] ? selectedLookUpResourceData[filtered.key] : []}
-          onChange={(event, newValue) => {
-            if (newValue?.length > 0) {
-              setSelectedLookUpResourceData((preVal) => ({
-                ...preVal,
-                [filtered.key]: newValue
-              }));
-            } else {
-              const { [filtered.key]: _, ...remainObj } = selectedLookUpResourceData;
-              setSelectedLookUpResourceData(remainObj);
-            }
-          }}
-          size="small"
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label={`Select ${filtered?.label}`}
-              variant="outlined"
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </>
-                )
-              }}
-            />
-          )}
-        />
-      </Grid>
+      <Autocomplete
+        options={lookupResource ? lookupResource[filtered?.value] : []}
+        multiple
+        disableCloseOnSelect
+        style={{ width: '300px' }}
+        getOptionLabel={(option: any) => option?.optionLabel}
+        value={selectedLookUpResourceData && selectedLookUpResourceData[filtered.key] ? selectedLookUpResourceData[filtered.key] : []}
+        onChange={(event, newValue) => {
+          if (newValue?.length > 0) {
+            setSelectedLookUpResourceData((preVal) => ({
+              ...preVal,
+              [filtered.key]: newValue
+            }));
+          } else {
+            const { [filtered.key]: _, ...remainObj } = selectedLookUpResourceData;
+            setSelectedLookUpResourceData(remainObj);
+          }
+        }}
+        size="small"
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={`Select ${filtered?.label}`}
+            variant="outlined"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }}
+          />
+        )}
+      />
     );
   };
 
@@ -460,7 +495,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
             <Autocomplete
               options={resourceList}
               getOptionLabel={(option) => (option && option?.title) || ''}
-              style={{ width: '350px' }}
+              style={{ width: '300px' }}
               value={selectedResource}
               onChange={(event, newValue) => {
                 setSelectedResource(newValue);
@@ -470,10 +505,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
             />
             {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) && (
               <Autocomplete
-                style={{ width: '350px' }}
                 multiple
                 options={filters}
                 disableCloseOnSelect
+                style={{ width: '300px' }}
                 getOptionLabel={(option) => option?.label}
                 renderOption={(option: any) => (
                   <React.Fragment>
@@ -494,13 +529,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 return renderFilter(filtered);
               })}
           </div>
-          <Box display="flex" flexDirection="row" ml={1} mt={2}>
-            <Grid container spacing={2}>
-              {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
-                selectedFilters?.map((filtered) => {
-                  return renderFilter(filtered);
-                })}
-            </Grid>
+          <Box display="flex" flexDirection="row" className="gap-1" ml={1} mt={2}>
+            {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
+              selectedFilters?.map((filtered) => {
+                return renderFilter(filtered);
+              })}
           </Box>
         </Box>
         {selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning ? (
@@ -548,20 +581,23 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
             onView={onView}
             view={view}
             eventPropGetter={(obj: any) => {
-              const style = setEventStyle(obj.type);
+              const style = setEventStyle(obj);
               return {
                 style
               };
             }}
+
             onNavigate={(date) => {
               onNavigate(date);
             }}
             onSelectEvent={(event: any) => {
-              if (event.resource) {
-                const resource = resourceList?.find((r) => r.resource === event.resource);
-                window.open(`${resource.path}/${event.id}`);
-              } else {
-                window.open(`${selectedResource.path}/${event.id}`);
+              if (selectedResource.resource !== sidebarResource.product) {
+                if (event.resource) {
+                  const resource = resourceList?.find((r) => r.resource === event.resource);
+                  window.open(`${resource.path}/${event.id}`);
+                } else {
+                  window.open(`${selectedResource.path}/${event.id}`);
+                }
               }
             }}
           />

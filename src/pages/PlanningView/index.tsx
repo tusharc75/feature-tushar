@@ -1,18 +1,16 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@material-ui/core';
 import queryString from 'query-string';
-import React, { useEffect, useState } from 'react';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
+import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 import CalendarView from './Calendar';
 import ListView from './List';
-import { CalendarToday, FormatListNumbered } from '@material-ui/icons';
+import { FormatListNumbered } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DateRangeIcon from '@material-ui/icons/DateRange';
 
 const PLANNING_RESOURCE = [
   {
@@ -141,9 +139,8 @@ function PlanningView() {
 
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { tab }: any = parsed;
+  const { }: any = parsed;
 
-  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [resourceList, setResourceList] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null);
 
@@ -152,7 +149,7 @@ function PlanningView() {
   useEffect(() => {
     const options: any = [];
     PLANNING_RESOURCE?.forEach((item) => {
-      if (permissions[item.key] && permissions[item.key]?.isRead === true) {
+      if (permissions[item.key] && permissions[item.key]?.isRead) {
         options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title });
       }
     });
@@ -166,11 +163,6 @@ function PlanningView() {
     }
   }, [resourceList, history?.location?.state?.resource]);
 
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
-    history.push(`?tab=${newValue}`);
-  };
-
   return (
     <>
       <Box className="main-container-v1">
@@ -180,25 +172,11 @@ function PlanningView() {
           </Box>
         </Box>
         <Box className={`detail-container-v1`}>
-          {/* <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-            <CustomTab value={0}>
-              <FaWpforms className="mr-1" fontSize="inherit" /> Calendar
-            </CustomTab>
-            <CustomTab value={1}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> List
-            </CustomTab>
-          </CustomTabs>
-          <TabPanel value={tabValue} index={0}>
-            <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
-          </TabPanel> */}
           <div className="flex justify-end gap-1 absolute top-[25px] right-[25px] max-md:top-[15px] max-md:right-[15px] ">
             <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
               <span>
                 <IconButton size="small" onClick={() => setView('calendar')} disabled={view === 'calendar'}>
-                  <CalendarToday color="primary" className={`${view === 'calendar' ? ' opacity-45' : ''}`} />
+                  <DateRangeIcon color="primary" className={`${view === 'calendar' ? ' opacity-45' : ''}`} />
                 </IconButton>
               </span>
             </HtmlTooltip>
@@ -211,9 +189,15 @@ function PlanningView() {
             </HtmlTooltip>
           </div>
           {view === 'calendar' ? (
-            <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
+            <CalendarView
+              resourceList={resourceList}
+              selectedResource={selectedResource}
+              setSelectedResource={setSelectedResource} />
           ) : (
-            <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
+            <ListView
+              resourceList={resourceList}
+              selectedResource={selectedResource}
+              setSelectedResource={setSelectedResource} />
           )}
         </Box>
       </Box>
