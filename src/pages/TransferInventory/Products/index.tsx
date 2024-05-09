@@ -17,7 +17,8 @@ import {
   TRANSFER_INVENTORY_STATUS,
   deliveryTicket,
   gridLoadingTimeout,
-  prepareDataForGrid
+  prepareDataForGrid,
+  transferInventory
 } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
@@ -25,6 +26,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddInventory from './AddInventory';
 import AssignSerialNumber from './AssignSerialNumber';
 import ProductQtyDialog from './ProductQtyDialog';
+import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 
 const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,8 +46,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const [isAdding, setIsAdding] = useState(false);
   const [columns, setColumns] = useState(null);
   const [viewProductEditDialog, setProductEditDialog] = useState({ open: false, productData: null });
+  const [assignSerialNumbersDialog, setAssignSerialNumbersDialog] = useState({ open: false, data: null });
+  const [isAssigning, setIsAssigning] = useState(false);
 
-  const [assignNumber, setAssignNumber] = useState({ open: false, serialNumber: [], qty: 0, product: '' });
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -160,12 +163,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
             <span>
               <IconButton
                 onClick={() => {
-                  setAssignNumber({
-                    open: true,
-                    serialNumber: row.original?.serialNumber,
-                    qty: parseInt(row.original?.qty),
-                    product: row.original?.productId
-                  });
+                  setAssignSerialNumbersDialog({ open: true, data: [row?.original] });
                 }}
                 size="small"
                 color="primary"
@@ -236,7 +234,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           };
         });
         if (rows?.length) {
-          setNextStep(true);
+          if (rows?.every((r) => r?.qty === r?.serialNumber?.length)) {
+            setNextStep(true);
+          }
         }
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         setTimeout(() => {
@@ -404,6 +404,25 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       });
   };
 
+  const handleAssignSerialNumbers = (rows) => {
+    const data = rows?.map((e) => e?.serialNumber);
+    setIsAssigning(true);
+    axiosInstance()
+      .post(`${transferInventory.api}/${transferInventoryData._id}/serial-number`, {
+        serialNumber: data,
+        product: assignSerialNumbersDialog?.data[0]?.product
+      })
+      .then(() => {
+        setIsAssigning(false);
+        setAssignSerialNumbersDialog({ open: false, data: null });
+        fetchData();
+      })
+      .catch((error) => {
+        setIsAssigning(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const addButtonMenuItems = () => {
     return (
       <>
@@ -499,7 +518,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           onOk={handleRemoveAssets}
         />
       )}
-      {assignNumber.open && (
+      {/* {assignNumber.open && (
         <AssignSerialNumber
           handleClose={() => {
             setAssignNumber({ open: false, serialNumber: [], qty: 0, product: '' });
@@ -513,6 +532,20 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           qty={assignNumber.qty}
           warehouse={transferInventoryData?.transferFromPlant?.optionValue}
           transferInventoryData={transferInventoryData}
+        />
+      )} */}
+      {assignSerialNumbersDialog.open && (
+        <AssignSerialNumbersDialog
+          selectedProducts={assignSerialNumbersDialog?.data?.map((s) => ({ ...s, id: s?.product, qty: s?.qty }))}
+          handleClose={() => {
+            setAssignSerialNumbersDialog({ open: false, data: null });
+          }}
+          handleSucess={(rows) => {
+            handleAssignSerialNumbers(rows);
+          }}
+          isAssigning={isAssigning}
+          warehouse={transferInventoryData?.transferFromPlant?.optionValue}
+          ids={[]}
         />
       )}
     </React.Fragment>
