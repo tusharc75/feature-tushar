@@ -70,10 +70,10 @@ const DeliveryTicket = () => {
   const fetchGridColumns = async () => {
     let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.deliveryTicket);
+      data = await findOne(objectStore.resource, sidebarResource.deliveryTicket);
     } else {
       const response = await axiosInstance().get(
-        `/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`
+        `/field?resource=${sidebarResource.deliveryTicket}&entity=${selectedEntity}&view=true&showHiddenFields=true`
       );
       data = response?.data?.data;
     }
@@ -95,8 +95,8 @@ const DeliveryTicket = () => {
                 row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.pickupFromId}`
                   : row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.customer
-                  ? `${routes.customerAccountDetail.path}/${row.original?.pickupFromId}`
-                  : `${routes.supplierAccountDetail.path}/${row.original?.pickupFromId}`
+                    ? `${routes.customerAccountDetail.path}/${row.original?.pickupFromId}`
+                    : `${routes.supplierAccountDetail.path}/${row.original?.pickupFromId}`
               }
             >
               {row.original[column.accessor]}
@@ -115,8 +115,8 @@ const DeliveryTicket = () => {
                 row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.deliveryToId}`
                   : row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer
-                  ? `${routes.customerAccountDetail.path}/${row.original?.deliveryToId}`
-                  : `${routes.supplierAccountDetail.path}/${row.original?.deliveryToId}`
+                    ? `${routes.customerAccountDetail.path}/${row.original?.deliveryToId}`
+                    : `${routes.supplierAccountDetail.path}/${row.original?.deliveryToId}`
               }
             >
               {row.original[column.accessor]}
@@ -366,7 +366,7 @@ const DeliveryTicket = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
+              showFilters={!isOffline}
               resource={sidebarResource.deliveryTicket}
             />
           ) : (
@@ -384,9 +384,8 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}   ${
-                deleteRecord.ticketName || ''
-              } ?`}
+              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}   ${deleteRecord.ticketName || ''
+                } ?`}
               onClose={() => {
                 setDeleteRecord(null);
                 setIsConformDialogVisible(false);

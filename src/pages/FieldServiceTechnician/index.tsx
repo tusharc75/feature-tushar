@@ -7,7 +7,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomContainer from 'src/components/CustomContainer';
 import {
-  CHILD_RESOURCE,
   GenerateResourceLineNumber,
   SERVICE_ORDER_STATUS,
   checkIsAllowedToEdit,
@@ -16,7 +15,8 @@ import {
   getObjKeys,
   gridLoadingTimeout,
   prepareDataForGrid,
-  sidebarResource
+  sidebarResource,
+  restoreObjKeysWithValues
 } from 'src/constants/helpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
@@ -28,12 +28,12 @@ import { cloneDisable } from 'src/constants/messageHelpers';
 import ViewFieldTicketDialog from './ViewFieldTicketDialog';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { clearAll, deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
-import { fieldServiceOfflineUpdate } from '../FieldServiceOrder/Services/OfflineHelper';
+import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
+import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from '../FieldServiceOrder/Services/OfflineHelper';
 import axios, { CancelTokenSource } from 'axios';
 import { Apps, FormatListNumbered } from '@material-ui/icons';
 import FieldTicket from '../FieldServiceOrder/FieldTicket';
-import { restoreObjKeysWithValues } from '../FieldTicket/ManageFieldTicket';
+import { useHistory } from 'react-router-dom';
 
 type Views = 'card' | 'table';
 
@@ -111,6 +111,7 @@ const FieldServiceTechnician = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     setColumns((prev) => {
@@ -124,22 +125,24 @@ const FieldServiceTechnician = () => {
   }, [isOffline]);
 
   useEffect(() => {
-    const cancelToken = axios.CancelToken.source();
-    fetchColumns(cancelToken);
-    return () => cancelToken.cancel();
-  }, []);
+    setUpindexDB();
+    fetchColumns();
+  }, [isOffline]);
 
-  const fetchColumns = async (cancelToken?: CancelTokenSource) => {
+  const fetchColumns = async () => {
     let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.fieldServiceOrder);
-    } else {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`, { cancelToken: cancelToken?.token });
-      data = response?.data?.data;
+      data = await findOne(objectStore.resource, sidebarResource.fieldServiceOrder);
     }
-    try {
-      insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
-    } catch (e) {}
+    else {
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
+      data = response?.data?.data;
+      try {
+        insertUpdate(objectStore.resource, sidebarResource.fieldServiceOrder, data);
+      } catch (e) {
+        console.error(`Field Service Order : ${e.message}`);
+      }
+    }
     setColData(data);
     const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
     newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }));
@@ -148,11 +151,16 @@ const FieldServiceTechnician = () => {
 
   const handleCreateFieldTicket = async (data, fieldServiceOrderFields) => {
     setIsSubmitting(true);
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'success',
+      message: 'Field Ticket Creation In-Progress...'
+    });
     var fieldTicketField: any = [];
     if (isOffline) {
-      fieldTicketField = await findOne(objectStore.resource, objectStore.fieldTicket);
+      fieldTicketField = await findOne(objectStore.resource, sidebarResource.fieldTicket);
     } else {
-      const response = await axiosInstance().get('/field?resource=Field Ticket');
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
       fieldTicketField = response?.data?.data;
     }
     fieldTicketField = fieldTicketField?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -170,28 +178,30 @@ const FieldServiceTechnician = () => {
 
     if (isOffline) {
       const _id: any = Math.floor(Math.random() * 1000000).toString();
-      const formattedValue: any = restoreObjKeysWithValues(tempInitialData, fieldTicketField);
-      formattedValue['_id'] = _id;
-      await insertUpdate(objectStore.fieldTicket, _id, formattedValue);
+      const data: any = restoreObjKeysWithValues(tempInitialData, fieldTicketField);
+      data['_id'] = _id;
+      await insertUpdate(objectStore.fieldTicket, _id, data);
       await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...tempInitialData, _id, offlineSyncStatus: 'new' } });
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Field Ticket Created Successfully'
+      });
+      history.push(`${routes.fieldTicketDetail.path}/${_id}`);
       setIsSubmitting(false);
-      window.location.href = `${routes.fieldTicketDetail.path}/${_id}`;
     } else {
-      axiosInstance()
-        .post(`${routes.fieldTicket?.path}`, tempInitialData)
-        .then(({ data }) => {
-          window.open(`${routes.fieldTicket.path}/detail/${data?.data?._id}`);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          setIsSubmitting(false);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsSubmitting(false);
+      axiosInstance().post(`${routes.fieldTicket?.path}`, tempInitialData).then(({ data }) => {
+        window.open(`${routes.fieldTicketDetail.path}/${data?.data?._id}`);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+        setIsSubmitting(false);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
     }
   };
 
@@ -199,8 +209,7 @@ const FieldServiceTechnician = () => {
     const cancelToken = axios.CancelToken.source();
     fetchData(cancelToken);
     return () => cancelToken.cancel();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit, filters, sorting, showFilteredRecordsOnly, search]);
+  }, [page, limit, filters, sorting, showFilteredRecordsOnly, search, isOffline]);
 
   const fetchData = async (cancelToken?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
@@ -266,31 +275,12 @@ const FieldServiceTechnician = () => {
     selectedRecords.forEach((element) => {
       data.push(element._id);
     });
-    await fieldServiceOfflineUpdate(data);
-    axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
-        insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
-    });
-    axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}&view=true`).then(({ data: { data } }) => {
-      insertUpdate(objectStore.resource, objectStore.serviceMaster, data);
-    });
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketMateial}`).then(({ data: { data } }) => {
-      insertUpdate(objectStore.resource, objectStore.fieldTicketMaterial, data);
-    });
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`).then(({ data: { data } }) => {
-      insertUpdate(objectStore.resource, 'fieldTicketCost', data);
-    });
-    axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`).then(({ data: { data } }) => {
-      insertUpdate(objectStore.resource, objectStore.product, data);
-    });
-    axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription']}]}).then(({data : {data}}) => {
-      insertUpdate(objectStore.resource, 'fieldTicketMaterialProduct', data);
-    });
+    await fieldServiceOrderAddOffline(data);
     dispatch({ type: 'selection', selectedRecords: [] });
   };
 
   const handleRemoveoffline = async () => {
-    await clearAll(objectStore.fieldServiceOrder);
-    await clearAll(objectStore.fieldTicket);
+    await fieldServiceOrderClearOffline()
   };
 
   const ActionMenuItems = () => {
@@ -306,7 +296,7 @@ const FieldServiceTechnician = () => {
 
   const onRowClick = (row) => {
     if (!selectedData || row._id !== selectedData._id) {
-      setSelectedData(row); 
+      setSelectedData(row);
       setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) && ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status));
     } else {
       setSelectedData(null);
@@ -325,8 +315,9 @@ const FieldServiceTechnician = () => {
   );
 
   useEffect(() => {
-    if (isMobileView && view === 'card') handleViewChange('table');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (isMobileView && view === 'card') {
+      handleViewChange('table');
+    }
   }, [isMobileView, view, handleViewChange]);
 
   return (
@@ -357,7 +348,6 @@ const FieldServiceTechnician = () => {
                   refreshGrid={fetchData}
                   resource={sidebarResource.fieldServiceOrder}
                   showOnlyShowFilteredRecordSwitch={false}
-                  showFilters={true}
                   hideSelection={true}
                   setWholeRowsCellColor={(row) =>
                     row._id === selectedData?._id
@@ -365,15 +355,16 @@ const FieldServiceTechnician = () => {
                       : ' transition-bg duration-300'
                   }
                   onRowClick={onRowClick}
+                  showFilters={!isOffline}
                 />
               </div>
               <div className="container-with-border p-[20px]">
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => {}}
+                    setNextStep={() => { }}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => {}}
+                    handleChangeStatus={() => { }}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
                   />
@@ -396,7 +387,8 @@ const FieldServiceTechnician = () => {
                 refreshGrid={fetchData}
                 resource={sidebarResource.fieldServiceOrder}
                 showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
+                showFilters={!isOffline}
+                isClientSideGrid={isOffline ? true : false}
               />
             </>
           )

@@ -231,7 +231,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     let data;
     if (isOffline) {
       data = await findAll(objectStore.fieldTicketMaterial);
-      data = data?.filter((d: any) => d?.fieldTicketId === fieldTicketData?._id && (d?.type === MATERIAL_TYPE.service || d?.isRental || !d?.type || d?.type === MATERIAL_TYPE.manualEntry)); //d?.type === MATERIAL_TYPE.manualEntry for offline added material
+      data = data?.filter((d: any) => d?.fieldTicketId === fieldTicketData?._id && [MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(d?.type));
     } else {
       const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=${MATERIAL_TYPE.service}`);
       const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
@@ -330,8 +330,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       let updatedData;
       const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
       if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...(result?.data || []), ...material];
-      else updatedData = {...result?.data, material: [...(result?.data?.material || []), ...material]};
-      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, {...result, data: updatedData});
+      else updatedData = { ...result?.data, material: [...(result?.data?.material || []), ...material] };
+      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
     } else {
       const isRental = assignRentalDataDialog.open;
       var taxCodeData: any = null;
@@ -459,8 +459,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
       let updatedData;
       if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...(result?.data || []), ...rows];
-      else updatedData = {...result?.data, cost: [...(result?.data?.cost || []), ...rows]}; 
-      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, {...result, data: updatedData });  
+      else updatedData = { ...result?.data, cost: [...(result?.data?.cost || []), ...rows] };
+      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
     } else {
       axiosInstance()
         .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [...rows])
@@ -496,7 +496,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         }
         let updatedData;
         if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows];
-        else updatedData = {...result?.data, cost: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows]}; 
+        else updatedData = { ...result?.data, cost: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows] };
         await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       } else {
         await axiosInstance().put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [...rows]);
@@ -554,13 +554,13 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           const alreadyOfflineDataSyncStoredRows = result?.data || [];
           updatedData = alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id));
           updatedData = updatedData?.filter((d: any) => !cost.includes(d._id));
-          
+
         } else {
           const material = result?.data?.material || [];
           const costs = result?.data?.cost || [];
           const updatedMaterial = material.filter((d: any) => !materialIdsToDelete.includes(d._id));
           const updatedCost = costs.filter((d: any) => !cost.includes(d._id));
-          updatedData = {...result?.data, material: updatedMaterial, cost: updatedCost};
+          updatedData = { ...result?.data, material: updatedMaterial, cost: updatedCost };
           await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
         }
         //for onlineSync
@@ -610,7 +610,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         }
         let updatedData;
         if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows];
-        else updatedData = {...result?.data, material: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows]}; 
+        else updatedData = { ...result?.data, material: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows] };
         await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       } else {
         await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });

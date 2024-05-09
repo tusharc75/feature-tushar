@@ -105,14 +105,14 @@ const RentalManagement = () => {
   const fetchGridColumns = async () => {
     let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.rentalManagement);
+      data = await findOne(objectStore.resource, sidebarResource.rentalManagement);
     } else {
-      const response = await axiosInstance().get(`/field?resource=Rental Management&entity=${selectedEntity}&view=true`);
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource.rentalManagement}&entity=${selectedEntity}&view=true`);
       data = response?.data?.data;
       try {
-        insertUpdate(objectStore.resource, objectStore.rentalManagement, data);
-      } catch (ex) {
-        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`);
+        insertUpdate(objectStore.resource, sidebarResource.rentalManagement, data);
+      } catch (e) {
+        console.error(`Rental Offline: ${e.message}`);
       }
     }
 
@@ -294,27 +294,27 @@ const RentalManagement = () => {
     axiosInstance()
       .get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`)
       .then(({ data: { data } }) => {
-        insertUpdate(objectStore.resource, 'rentalManagementProduct', data);
+        insertUpdate(objectStore.resource, CHILD_RESOURCE.rentalManagementProduct, data);
       });
     axiosInstance()
       .get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`)
       .then(({ data: { data } }) => {
-        insertUpdate(objectStore.resource, 'rentalManagementCost', data);
+        insertUpdate(objectStore.resource, CHILD_RESOURCE.rentalManagementCost, data);
       });
     axiosInstance()
-      .get(`/field?resource=${sidebarResource['deliveryTicket']}&showHiddenFields=true`)
+      .get(`/field?resource=${sidebarResource.deliveryTicket}&showHiddenFields=true`)
       .then(({ data: { data } }) => {
-        insertUpdate(objectStore.resource, objectStore.deliveryTicket, data);
+        insertUpdate(objectStore.resource, sidebarResource.deliveryTicket, data);
       });
     axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}&view=true`)
+      .get(`/field?resource=${sidebarResource.serializedAsset}&view=true`)
       .then(({ data: { data } }) => {
-        insertUpdate(objectStore.resource, 'serializedAsset', data);
+        insertUpdate(objectStore.resource, sidebarResource.serializedAsset, data);
       });
     axiosInstance()
-      .get(`/field?resource=Product&view=true`)
+      .get(`/field?resource=${sidebarResource.product}&view=true`)
       .then(({ data: { data } }) => {
-        insertUpdate(objectStore.resource, 'Product', data);
+        insertUpdate(objectStore.resource, sidebarResource.product, data);
       });
 
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -500,7 +500,7 @@ const RentalManagement = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
+            showFilters={!isOffline}
             resource={sidebarResource.rentalManagement}
           />
         ) : (
@@ -533,9 +533,8 @@ const RentalManagement = () => {
         {singleRentalManagementDelete.show && (
           <ConfirmationDialog
             open={singleRentalManagementDelete.show}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
-              singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-            }?`}
+            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+              }?`}
             onClose={() =>
               setSingleRentalManagementDelete({
                 id: null,

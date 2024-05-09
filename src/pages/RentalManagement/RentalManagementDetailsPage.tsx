@@ -279,7 +279,7 @@ const RentalManagementDetailsPage = () => {
         });
         setRentalManagementFields(response?.data?.data);
       } else {
-        const response: any = await findOne(objectStore.resource, objectStore.rentalManagement);
+        const response: any = await findOne(objectStore.resource, sidebarResource.rentalManagement);
         setRentalManagementFields(response);
       }
     } catch (error) {

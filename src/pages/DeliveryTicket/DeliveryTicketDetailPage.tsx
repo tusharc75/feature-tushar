@@ -124,7 +124,7 @@ export default function DeliveryTicketDetail(props) {
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.deliveryTicket);
+        data = await findOne(objectStore.resource, sidebarResource.deliveryTicket);
       } else {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&showHiddenFields=true`);
         data = response?.data?.data;
@@ -350,11 +350,11 @@ export default function DeliveryTicketDetail(props) {
     try {
       let assetData, productData;
       if (isOffline) {
-        assetData = await findOne(objectStore.resource, 'serializedAsset');
-        productData = await findOne(objectStore.resource, 'Product');
+        assetData = await findOne(objectStore.resource, sidebarResource.serializedAsset);
+        productData = await findOne(objectStore.resource, sidebarResource.product);
       } else {
-        const assetResponse = await axiosInstance().get(`/field?resource=${serializedAsset.resource}&view=true`);
-        const productResponse = await axiosInstance().get('/field?resource=Product&view=true');
+        const assetResponse = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}&view=true`);
+        const productResponse = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
         assetData = assetResponse?.data?.data;
         productData = productResponse?.data?.data;
       }

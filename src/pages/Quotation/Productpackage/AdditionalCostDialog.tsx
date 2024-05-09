@@ -15,7 +15,6 @@ import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
-import { fetchFieldOptions } from 'src/components/CustomReactTable';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 interface AdditionalCostDialogProps {
