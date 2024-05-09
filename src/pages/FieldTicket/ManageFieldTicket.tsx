@@ -19,7 +19,8 @@ import {
   fieldServiceOrder,
   serviceMaster,
   setFieldsInAscendingOrder,
-  sidebarResource
+  sidebarResource,
+  restoreObjKeysWithValues
 } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -31,37 +32,6 @@ import { findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper'
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
-
-export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
-  const obj = { ...dataObj };
-  fields.forEach((field) => {
-    if (field.type === 'dropDown' && field.lookup) {
-      let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
-      if (filter.length) {
-        obj[field.fieldName] = {
-          optionLabel: filter[0].optionLabel,
-          optionValue: filter[0].optionValue
-        };
-      }
-    } else if (field.type === 'multiSelect') {
-      if (dataObj[field.fieldName] && dataObj[field.fieldName].length) {
-        let option = [];
-        dataObj[field.fieldName].forEach((e: any) => {
-          option.push({
-            optionLabel: e,
-            optionValue: e
-          });
-        });
-        obj[field.fieldName] = option;
-      }
-    } else if (field.type === 'date') {
-      obj[field.fieldName] = moment(dataObj[field.fieldName]).format("YYYY-MM-DDTHH:mm:ss.SSSZ");;
-    } else {
-      obj[field.fieldName] = dataObj[field.fieldName];
-    }
-  });
-  return obj;
-};
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
@@ -106,12 +76,11 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.fieldTicket);
+        data = await findOne(objectStore.resource, sidebarResource.fieldTicket);
       } else {
-        const response = await axiosInstance().get('/field?resource=Field Ticket');
+        const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
         data = response?.data?.data;
       }
-
       const allFields = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
 
       const fieldsDataForCreate = data.filter((obj) => obj.isCreate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
@@ -186,15 +155,14 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     if (isOffline) {
       setSubmitting(true);
       const _id: any = id || Math.floor(Math.random() * 1000000).toString();
-      const formattedValue: any = restoreObjKeysWithValues(values, initialData.fields);
-      formattedValue._id = _id;
-      await insertUpdate(objectStore.fieldTicket, _id, formattedValue);
+      const data: any = restoreObjKeysWithValues(values, initialData.fields);
+      data._id = _id;
+      await insertUpdate(objectStore.fieldTicket, _id, data);
       if (id) {
         await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...values, _id, offlineSyncStatus: 'update' } });
       } else {
         await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...values, _id, offlineSyncStatus: 'new' } });
       }
-
       onSuccess();
       setSubmitting(false);
     } else if (id && !isClone) {

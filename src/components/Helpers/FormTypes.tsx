@@ -65,6 +65,7 @@ import Dropdown from './FormTypes/Dropdown';
 import RichTextEditor from './FormTypes/RichTextEditor';
 import Signature from './FormTypes/Signature';
 import { LOGIC } from '../FormBuilder/helper';
+import Description from './FormTypes/Description';
 
 type MultiFileType = {
   fileName: string;
@@ -2760,7 +2761,9 @@ const FormTypes = (props) => {
         setFieldValue={setFieldValue}
       />
     ) : type === 'counter' ? (
-      <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} />
+      <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} touched={touched} errors={errors} />
+    ) : type === 'description' ? (
+      <Description label={label} fieldData={fieldData}/>
     ) : null
   ) : null;
 };

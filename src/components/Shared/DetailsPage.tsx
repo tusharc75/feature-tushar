@@ -217,6 +217,8 @@ const Details = (props: DetailProps) => {
       text = values[input.fieldName] ? displayDateTime(values[input.fieldName]) : '-';
     } else if (input.type === 'lookUpDisplay') {
       text = values[input.fieldName] ? values[input.fieldName]?.optionLabel : '-';
+    } else if (input.type === 'counter') {
+      text = '-';
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : '-';
     }

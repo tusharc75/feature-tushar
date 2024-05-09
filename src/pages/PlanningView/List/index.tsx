@@ -26,7 +26,7 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
     axiosInstance()
       .get(`/field?resource=${selectedResource.resource}`)
       .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, selectedResource.path);      
+        const newColumns = generateColumns(renderedFrom, data, selectedResource.path);
         setColumns([...newColumns, ...getStaticFields()]);
       });
   };
@@ -74,7 +74,6 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     try {
       let data: any = [],
         count;
@@ -97,8 +96,8 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
   };
 
   return (
-    <Box display="flex" flexDirection="column">
-      <Box ml={1}>
+    <>
+      <div className="pr-[66px] flex">
         <Autocomplete
           options={resourceList}
           getOptionLabel={(option) => (option && option?.title) || ''}
@@ -110,7 +109,7 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
           size="small"
           renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
         />
-      </Box>
+      </div>
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 300px)'}
@@ -125,11 +124,11 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
           resource={selectedResource?.resource}
         />
       ) : selectedResource ? (
-        <Box p={2} height={500}>
+        <Box height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      ) : null}
-    </Box>
+      ) : <Box mt={2}><span>Please Select Resource</span></Box>}
+    </>
   );
 }
 
