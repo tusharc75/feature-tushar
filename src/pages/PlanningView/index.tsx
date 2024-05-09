@@ -180,7 +180,7 @@ function PlanningView() {
           </Box>
         </Box>
         <Box className={`detail-container-v1`}>
-        {/* <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          {/* <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             <CustomTab value={0}>
               <FaWpforms className="mr-1" fontSize="inherit" /> Calendar
             </CustomTab>
@@ -194,7 +194,7 @@ function PlanningView() {
           <TabPanel value={tabValue} index={1}>
             <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
           </TabPanel> */}
-          <Grid container justifyContent="flex-end">
+          <div className="flex justify-end gap-1 absolute top-[25px] right-[25px] max-md:top-[15px] max-md:right-[15px] ">
             <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
               <span>
                 <IconButton size="small" onClick={() => setView('calendar')} disabled={view === 'calendar'}>
@@ -209,7 +209,7 @@ function PlanningView() {
                 </IconButton>
               </span>
             </HtmlTooltip>
-          </Grid>
+          </div>
           {view === 'calendar' ? (
             <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
           ) : (
