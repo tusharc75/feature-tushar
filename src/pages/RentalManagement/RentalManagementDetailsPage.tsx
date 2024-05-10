@@ -702,7 +702,7 @@ const RentalManagementDetailsPage = () => {
           <TabPanel value={tabValue} index={3}>
             <Box>
               {displayProgressiveBillingTab ? (
-                <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={true} />
+                <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={allowedToEdit} />
               ) : (
                 <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
               )}
