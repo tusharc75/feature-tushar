@@ -1193,6 +1193,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           isAssigning={isAssigning}
           warehouse={rentalManagementData?.warehouse?.optionValue}
           ids={productSerialNumbers?.map(e => e?.serialNumber)}
+          showWarehouseFilter={true}
         />
       )}
     </Fragment>

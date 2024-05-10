@@ -14,6 +14,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
+  MATERIAL_TYPE,
   TRANSFER_INVENTORY_STATUS,
   deliveryTicket,
   gridLoadingTimeout,
@@ -26,6 +27,8 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddInventory from './AddInventory';
 import ProductQtyDialog from './ProductQtyDialog';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
+import { isMobile, isTablet } from 'react-device-detect';
+import { startCase } from 'lodash';
 
 const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -38,8 +41,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     }
   } = useData();
   const [isRemovingInventory, setRemovingInventory] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [removeData, setRemoveData] = useState([]);
+  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: [] });
   const [openAddNewInventory, setAddInventoryDialog] = useState(false);
 
   const [isAdding, setIsAdding] = useState(false);
@@ -48,12 +50,39 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const [assignSerialNumbersDialog, setAssignSerialNumbersDialog] = useState({ open: false, data: null });
   const [isAssigning, setIsAssigning] = useState(false);
 
+  const [productSerialNumbers, setProductSerialNumbers] = useState([]);
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   const fetchGridColumns = async () => {
-    const column = [];
+    const column: any = [{
+      accessor: 'index',
+      Header: 'Index',
+      width: 70,
+      sticky: 'left',
+      Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+      Footer: () => {
+        return <>Total</>;
+      }
+    },
+    {
+      accessor: 'type',
+      Header: 'Type',
+      disableFilters: true,
+      disabled: true,
+      sticky: isMobile || isTablet ? 'none' : 'left',
+      width: 100,
+      Cell: ({ row }) =>
+        row.original['type'] ? (
+          <p>
+            {`${startCase(row.original?.type)} `}
+          </p>
+        ) : (
+          <NoDataCell />
+        )
+    },];
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -70,12 +99,10 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         column.push({
           accessor: 'productName',
           primaryField: true,
-          Header: e?.fieldLabel,
-          show: true,
-          disabled: true,
+          Header: 'Details',
           Cell: ({ row }) => (
             <div>
-              {row.original?.canDelete ? (
+              {row.original?.canDelete && row.original.type === MATERIAL_TYPE.product ? (
                 <p
                   className="link text-truncate"
                   title={row.original?.productName}
@@ -88,31 +115,34 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               ) : (
                 <p className="text-truncate">{row.original?.productName}</p>
               )}
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`/product/detail/${row.original.product}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              {row.original.type === MATERIAL_TYPE.product &&
+                <Box ml={1}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`/product/detail/${row.original.product}`);
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </Box>
+              }
             </div>
           )
         });
-      } else if (e?.fieldName === 'serializedProduct') {
+      }
+      else if (e?.fieldName === 'serializedProduct') {
         column.push({
           accessor: 'serializedProductShow',
           Header: e?.fieldLabel,
           show: true,
           Cell: ({ row }) => (row.original?.serializedProductShow ? <div>{row.original?.serializedProductShow}</div> : <NoDataCell />)
         });
-      } else {
+      }
+      else {
         column.push({
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
-          show: true,
           Cell: ({ row }) => (row.original[e?.fieldName] ? <div>{row.original[e?.fieldName]}</div> : <NoDataCell />)
         });
       }
@@ -120,7 +150,6 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     column.push({
       accessor: 'qty',
       Header: 'Quantity',
-      show: true,
       disabled: false,
       Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />),
       cellEditor: 'numericCellEditor',
@@ -131,17 +160,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     column.push({
       accessor: 'inventory',
       Header: 'Inventory',
-      show: true,
-      filter: false,
-      sortable: false,
       Cell: ({ row }) => (row.original?.inventory ? <div>{row.original?.inventory}</div> : <NoDataCell />)
-    });
-    column.push({
-      accessor: 'serialNumber',
-      Header: 'Serial Number',
-      show: true,
-      Cell: ({ row }) =>
-        row.original?.serialNumber?.length ? <div>{row.original?.serialNumber?.map((e) => e.serialNumber)?.toString()}</div> : <NoDataCell />
     });
     setColumns([...column, ActionRenderer]);
   };
@@ -157,27 +176,11 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {row.original?.serializedProduct && (
-          <HtmlTooltip title={`Assign Serial Number`}>
-            <span>
-              <IconButton
-                onClick={() => {
-                  setAssignSerialNumbersDialog({ open: true, data: [row?.original] });
-                }}
-                size="small"
-                color="primary"
-              >
-                <AddBoxOutlinedIcon color="primary" fontSize="small" />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        )}
         <HtmlTooltip title={row.original?.canDelete ? 'Delete' : deleteDisable}>
           <IconButton
             disabled={!row.original?.canDelete}
             onClick={() => {
-              setShowConfirmBox(true);
-              setRemoveData([row.original?.productId]);
+              setShowConfirmBox({ open: true, data: [row.original] });
             }}
             size="small"
             color="primary"
@@ -208,40 +211,56 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         deliveryTicketProduct = [...deliveryTicketProduct, ...e?.products];
       }
     });
+    axiosInstance().get(`${routes.transferInventory.path}/${transferInventoryData?._id}/product`).then(({ data: { data } }) => {
+      let rows = data?.products?.map((u: any, index: any) => {
+        let finalObject: any = prepareDataForGrid(u);
+        finalObject['index'] = index + 1;
+        finalObject['type'] = MATERIAL_TYPE.product;
+        finalObject['productId'] = u?.product;
+        finalObject['productName'] = u?.productDetail?.productName;
+        finalObject['productNumber'] = u?.productDetail?.productNumber;
+        finalObject['productDescription'] = u?.productDetail?.productDescription;
+        finalObject['serializedProduct'] = u?.productDetail?.serializedProduct;
+        finalObject['serializedProductShow'] = u?.productDetail?.serializedProduct ? 'Yes' : 'No';
+        finalObject['qty'] = u.qty;
+        finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
+        finalObject['isChecked'] = false;
+        finalObject['allowedToEdit'] = false;
+        finalObject['canDelete'] = !data?.assets?.some((e) => e._id === u._id) && !deliveryTicketProduct?.some((e) => e.product === u?.product);
+        finalObject['hideSelection'] = !finalObject['canDelete'];
+        finalObject['serialNumber'] = data?.serialNumber?.filter((e) => e.product === u?.product);
 
-    axiosInstance()
-      .get(`${routes.transferInventory.path}/${transferInventoryData?._id}/product`)
-      .then(({ data: { data } }) => {
-        dispatch({ type: 'loading', loading: true });
-        let rows = data?.products?.map((u: any) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['productId'] = u?.product;
-          finalObject['productName'] = u?.productDetail?.productName;
-          finalObject['productNumber'] = u?.productDetail?.productNumber;
-          finalObject['productDescription'] = u?.productDetail?.productDescription;
-          finalObject['serializedProduct'] = u?.productDetail?.serializedProduct;
-          finalObject['serializedProductShow'] = u?.productDetail?.serializedProduct ? 'Yes' : 'No';
-          finalObject['qty'] = u.qty;
-          finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
-          finalObject['isChecked'] = false;
-          finalObject['allowedToEdit'] = false;
-          finalObject['canDelete'] = !data?.assets?.some((e) => e._id === u._id) && !deliveryTicketProduct?.some((e) => e.product === u?.product);
-          finalObject['hideSelection'] = !finalObject['canDelete'];
-          finalObject['serialNumber'] = data?.serialNumber?.filter((e) => e.product === u?.product);
-          return {
-            ...finalObject
-          };
-        });
-        if (rows?.length) {
+        finalObject.subRows = []
+        data?.serialNumber?.filter((e) => e.product === u?.product)?.forEach((e, i) => {
+          finalObject.subRows.push({
+            _id: e._id,
+            index: `${finalObject?.index}.${(i + 1)}`,
+            type: 'serialNumber',
+            productName: e?.serialNumber,
+            canDelete: finalObject?.canDelete,
+            qty: 1
+          })
+        })
+        return {
+          ...finalObject
+        };
+      });
+      if (rows?.length) {
+        if (user?.brandPolicy?.productInventorySerialNumberRequired) {
           if (rows?.every((r) => r?.qty === r?.serialNumber?.length)) {
             setNextStep(true);
           }
         }
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
+        else {
+          setNextStep(true);
+        }
+      }
+      setProductSerialNumbers(data?.serialNumber)
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -273,29 +292,34 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       });
   };
 
-  const handleRemoveAssets = async () => {
-    if (removeData.length > 0) {
+  const handleRemove = async () => {
+    if (showConfirmBox.data.length > 0) {
       setRemovingInventory(true);
       try {
-        await axiosInstance().put(`${routes.transferInventory.path}/${transferInventoryData?._id}/product/remove`, {
-          ids: removeData
-        });
-        setRemoveData([]);
-        setShowConfirmBox(false);
+        if (showConfirmBox.data?.filter((e) => e.type === 'serialNumber')?.length) {
+          await axiosInstance().put(`${routes.transferInventory.path}/${transferInventoryData?._id}/serial-number/remove`, {
+            ids: showConfirmBox.data?.filter((e) => e.type === 'serialNumber')?.map((e) => e._id)
+          });
+        }
+        else {
+          await axiosInstance().put(`${routes.transferInventory.path}/${transferInventoryData?._id}/product/remove`, {
+            ids: showConfirmBox.data?.filter((e) => e.type === MATERIAL_TYPE.product)?.map((e) => e.productId)
+          });
+        }
+        setShowConfirmBox({ open: false, data: [] });
         setRemovingInventory(false);
         fetchData();
         fetchTransferInventoryData();
       } catch (error) {
-        setShowConfirmBox(false);
+        setShowConfirmBox({ open: false, data: [] });
         setRemovingInventory(false);
-        setRemoveData([]);
         toastConfig.setToastConfig(error);
       }
     }
   };
 
   const onSaveEdit = (data, row) => {
-    if (!data || !data?.qty) return;
+    if (!data || !data?.qty || data?.type !== MATERIAL_TYPE.product) return;
     if (row.canDelete === false) {
       toastConfig.setToastConfig({
         type: 'error',
@@ -327,7 +351,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     if (row?.serialNumber?.length && Number(row.qty) < row?.serialNumber?.length) {
       toastConfig.setToastConfig({
         type: 'error',
-        message: "Qty can't be less then serial number assigned",
+        message: "Qty can't be less then serial numbers assigned",
         open: true
       });
       fetchData();
@@ -374,7 +398,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     if (data?.serialNumber?.length && Number(data.qty) < data?.serialNumber?.length) {
       toastConfig.setToastConfig({
         type: 'error',
-        message: "Qty can't be less then serial number assigned",
+        message: "Qty can't be less then serial numbers assigned",
         open: true
       });
       fetchData();
@@ -439,10 +463,18 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const actionButtonMenuItems = () => {
     return (
       <>
+        {selectedRecords?.filter((e) => e?.serializedProduct && e?.qty - e?.serialNumber?.length > 0)?.length > 0 &&
+          <MenuItem
+            onClick={() => {
+              setAssignSerialNumbersDialog({ open: true, data: selectedRecords });
+            }}
+          >
+            {`Assign Serial Numbers`}
+          </MenuItem>
+        }
         <MenuItem
           onClick={() => {
-            setShowConfirmBox(true);
-            setRemoveData(selectedRecords?.filter((e) => !e?.hideSelection)?.map((inv: any) => inv?.productId));
+            setShowConfirmBox({ open: true, data: selectedRecords });
           }}
         >
           {`Delete`}
@@ -458,7 +490,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           <DetailsPageHeader
             isAddButtonVisible
             addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
+            isActionButtonVisible={allowedToEdit}
             actionButtonMenuItems={actionButtonMenuItems()}
             actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e?.hideSelection)?.length ? false : true }}
             hasXpadding
@@ -478,6 +510,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
             hideAction={!allowedToEdit}
             hideSelection={!allowedToEdit}
             isClientSideGrid={true}
+            expander={true}
           />
         ) : (
           <Box p={2} height={500}>
@@ -506,20 +539,20 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           ignoreIds={dataRows?.map((e) => e.productId)}
         />
       )}
-      {showConfirmBox && (
+      {showConfirmBox.open && (
         <ConfirmationDialog
           okBtnLoading={isRemovingInventory}
-          open={showConfirmBox}
-          message={`Are you sure you want to remove product(s)?`}
+          open={showConfirmBox.open}
+          message={`Are you sure you want to remove ?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowConfirmBox({ open: false, data: [] });
           }}
-          onOk={handleRemoveAssets}
+          onOk={handleRemove}
         />
       )}
       {assignSerialNumbersDialog.open && (
         <AssignSerialNumbersDialog
-          selectedProducts={assignSerialNumbersDialog?.data?.map((s) => ({ ...s, id: s?.product, qty: s?.qty }))}
+          selectedProducts={assignSerialNumbersDialog?.data?.map((s) => ({ ...s, id: s?.product, qty: s?.qty - s?.serialNumber?.length }))}
           handleClose={() => {
             setAssignSerialNumbersDialog({ open: false, data: null });
           }}
@@ -528,7 +561,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           }}
           isAssigning={isAssigning}
           warehouse={transferInventoryData?.transferFromPlant?.optionValue}
-          ids={[]}
+          ids={productSerialNumbers?.map((e) => e._id)}
         />
       )}
     </React.Fragment>
