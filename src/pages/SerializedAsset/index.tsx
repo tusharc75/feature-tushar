@@ -8,7 +8,7 @@ import WarningIcon from '@material-ui/icons/Warning';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { Autocomplete } from '@material-ui/lab';
 
-import { camelCase, isEmpty } from 'lodash';
+import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
@@ -40,7 +40,6 @@ import {
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
-import { FiltersContext } from '../../StateProvider/FiltersContext/FiltersContext';
 
 
 const SerializedAsset = () => {
@@ -51,7 +50,6 @@ const SerializedAsset = () => {
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
-  const { savedFilters, setSavedFilters } = useContext(FiltersContext);
 
   const {
     state: { permissions, selectedEntity }
