@@ -86,15 +86,8 @@ const SerializedAsset = () => {
   }, []);
 
   useEffect(() => {
-    if(!isEmpty(savedFilters[sidebarResource.serializedAsset])) {
-      dispatch({ type: 'filter', filters: savedFilters[sidebarResource.serializedAsset] });
-    }
-  }, []);
-
-  useEffect(() => {
     const cancelToken = axios.CancelToken.source();
     fetchData(cancelToken);
-    if(!isEmpty(filters)) setSavedFilters(prev => ({ ...prev, [sidebarResource.serializedAsset]: filters }));
     return () => cancelToken.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
