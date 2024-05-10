@@ -65,7 +65,12 @@ const PRODUCT_FILTERS = [
     label: 'Products',
     value: 'Product',
     key: 'product'
-  }
+  },
+  {
+    label: 'Plant',
+    value: 'Warehouse',
+    key: 'warehouse'
+  },
 ];
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
@@ -236,35 +241,68 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
             };
           }
           if (selectedResource.resource === sidebarResource.product) {
-            if (d?.credit?.length) {
+            if (d?.inventory) {
               otherData.push({
-                title: `↑ Credit ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                title: `Inventory ${d?.inventory}`,
                 start: new Date(d['date']),
                 end: new Date(d['date']),
                 allDay: true,
                 resource: selectedResource.resource,
-                isCredit: true,
-                credit: d?.credit,
+              })
+            }
+            if (d?.available) {
+              otherData.push({
+                title: `Available ${d?.available}`,
+                start: new Date(d['date']),
+                end: new Date(d['date']),
+                allDay: true,
+                resource: selectedResource.resource,
+              })
+            }
+            if (d?.reserved?.length) {
+              otherData.push({
+                title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                start: new Date(d['date']),
+                end: new Date(d['date']),
+                allDay: true,
+                resource: selectedResource.resource,
+                type: 'reserved',
+                data: d?.reserved,
               })
             }
             if (d?.debit?.length) {
+              const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
               otherData.push({
-                title: `↓ Debit ${d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                title: `↓ Planned ${debitQty}`,
                 start: new Date(d['date']),
                 end: new Date(d['date']),
                 allDay: true,
                 resource: selectedResource.resource,
-                isDebit: true,
-                debit: d?.debit,
+                type: 'debit',
+                data: d?.debit,
+                isRedAlert: debitQty > d?.available ? true : false
               })
             }
-            return {
-              title: `Inventory ${d?.inventory}`,
-              start: new Date(d['date']),
-              end: new Date(d['date']),
-              allDay: true,
-              resource: selectedResource.resource,
-            };
+            if (d?.credit?.length) {
+              otherData.push({
+                title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                start: new Date(d['date']),
+                end: new Date(d['date']),
+                allDay: true,
+                resource: selectedResource.resource,
+                type: 'credit',
+                data: d?.credit,
+              })
+            }
+            if (d?.repair) {
+              otherData.push({
+                title: `Repair/Review ${d?.repair}`,
+                start: new Date(d['date']),
+                end: new Date(d['date']),
+                allDay: true,
+                resource: selectedResource.resource,
+              })
+            }
           }
           return {
             id: d._id,
@@ -433,12 +471,18 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
       }
     }
     if (obj?.resource === sidebarResource.product) {
-      if (obj?.isCredit) {
-        backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#DBF8DB';
-        color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
-      } else if (obj?.isDebit) {
-        backgroundColor = themeMode === 'light' ? 'rgb(255, 204, 204)' : '#FAEAE9';
-        color = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
+      if (obj?.type === 'credit') {
+        backgroundColor = 'var(--success-light) ';
+      }
+      else if (obj?.type === 'reserved') {
+        backgroundColor = 'var(--warning-light)';
+      }
+      else if (obj?.type === 'debit' && obj?.isRedAlert) {
+        backgroundColor = 'var(--danger-light)';
+        color = 'white';
+      }
+      else if (obj?.type === 'debit') {
+        backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
       }
     }
 
@@ -598,11 +642,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
             onSelectEvent={(data: any, event: any) => {
               if (selectedResource.resource === sidebarResource.product) {
                 setAnchor(event.nativeEvent.target);
-                if (data?.isCredit) {
-                  setOpen({ open: true, data: data.credit, type: "Credit" })
-                }
-                else if (data?.isDebit) {
-                  setOpen({ open: true, data: data.debit, type: "Debit" })
+                if (data?.type) {
+                  setOpen({ open: true, data: data.data, type: data?.type })
                 }
               }
               else {
