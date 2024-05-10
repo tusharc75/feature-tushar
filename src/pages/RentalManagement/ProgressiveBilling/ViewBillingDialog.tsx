@@ -7,7 +7,7 @@ import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, dateFormat, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, checkIsAllowedToEdit, dateFormat, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -24,6 +24,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import moment from 'moment';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { useData } from 'src/StateProvider/Provider';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess }) => {
 
@@ -42,6 +43,11 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   const { generateColumns } = useColumns();
   const [allFields, setAllFields] = useState([]);
 
+  const {
+    state: { user, permissions }
+  }: any = useData();
+
+  const [allowedToEdit, setAllowedToEdit] = useState(checkIsAllowedToEdit(user, sidebarResource.invoice, invoiceData?.orignalData) && permissions?.invoice?.isUpdate);
 
   useEffect(() => {
     fetchFields();
@@ -56,7 +62,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   const fetchFields = async () => {
     try {
       let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
-
       setAllFields(JSON.parse(JSON.stringify(data)));
       const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, invoiceData?.currency);
       var column: any = [
@@ -395,8 +400,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                 state={state}
                 dispatch={dispatch}
                 refreshGrid={fetchData}
-                hideSelection={false}
-                hideAction={false}
+                hideSelection={!allowedToEdit}
+                hideAction={!allowedToEdit}
                 renderedFrom={renderedFrom}
                 isClientSideGrid={true}
                 expander={true}

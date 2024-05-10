@@ -124,7 +124,6 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                 <Grid container>
                   <Grid item xs={6}>
                     <ListRelatedTo relatedTo={_event.relatedTo} originRelatedTo={relatedTo} />
-                    {/* <Chip label={_event.status} size="small" color="primary" /> */}
                   </Grid>
                 </Grid>
               </Box>

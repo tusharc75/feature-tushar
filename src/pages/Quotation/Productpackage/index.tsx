@@ -140,7 +140,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original.type === MATERIAL_TYPE.serializedAsset ? (
+            {row.original.type === MATERIAL_TYPE.serializedAsset || !allowedToEdit ? (
               <p>{row.original?.detail}</p>
             ) : (
               <p
@@ -158,7 +158,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 <span>({row.original?.subRows?.length})</span>
               </Box>
             ) : null}
-            {![MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.manualEntry]?.includes(row.original.type) && (
+            {allowedToEdit && ![MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.manualEntry]?.includes(row.original.type) && (
               quotationData?.type === QUOTATION_TYPE.fieldJob &&
                 row.original.type === MATERIAL_TYPE.product ? null :
                 <Box ml={1}>
@@ -845,14 +845,13 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   return (
     <Fragment>
       <DetailsPageHeader
-        isAddButtonVisible={true}
+        isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={true}
+        isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: dataRows?.length > 0 ? false : true }}
         hasXpadding
       />
-
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -866,6 +865,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
             hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
             expander={true}
           />
         </Box>
