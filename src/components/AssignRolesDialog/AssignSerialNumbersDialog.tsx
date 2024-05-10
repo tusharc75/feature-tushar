@@ -14,7 +14,7 @@ import { dateFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constant
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 
-const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleSucess, isAssigning, warehouse = null, ids }) => {
+const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleSucess, isAssigning, warehouse = null, ids, showWarehouseFilter = false }) => {
 
   const renderedFrom = `serialNumbers_Assign`;
   const toastConfig = useContext(CustomToastContext);
@@ -241,35 +241,37 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
             ))
             : null}
         </Box>
-        <Box pt={1} width={'40%'}>
-          <Autocomplete
-            fullWidth
-            options={warehouseOption}
-            getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option.optionValue === val}
-            value={
-              warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
-                ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
-                : ''
-            }
-            disableClearable={true}
-            onChange={(e, val) => {
-              setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
-              dispatch({ type: 'selection', selectedRecords: [] });
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                margin="dense"
-                name="plant"
-                placeholder={routes.warehouse.title}
-                label={routes.warehouse.title}
-                variant="outlined"
-                fullWidth
-              />
-            )}
-          />
-        </Box>
+        {showWarehouseFilter &&
+          <Box pt={1} width={'40%'}>
+            <Autocomplete
+              fullWidth
+              options={warehouseOption}
+              getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+              getOptionSelected={(option: any, val) => option.optionValue === val}
+              value={
+                warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
+                  ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
+                  : ''
+              }
+              disableClearable={true}
+              onChange={(e, val) => {
+                setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+                dispatch({ type: 'selection', selectedRecords: [] });
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  margin="dense"
+                  name="plant"
+                  placeholder={routes.warehouse.title}
+                  label={routes.warehouse.title}
+                  variant="outlined"
+                  fullWidth
+                />
+              )}
+            />
+          </Box>
+        }
       </Box>
     );
   };
