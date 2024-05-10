@@ -87,7 +87,7 @@ const GridHeader = ({
     if (!resource || !showFilters) return;
     const applyDefaultFilter = async () => {
       try {
-        const responce: any = axiosInstance().get(`/user-resource-filter?resource=${resource}`)
+        const responce: any = await axiosInstance().get(`/user-resource-filter?resource=${resource}`)
         const defaultFilter = responce?.data?.data.find((d) => d.default);
         if (defaultFilter) {
           const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
