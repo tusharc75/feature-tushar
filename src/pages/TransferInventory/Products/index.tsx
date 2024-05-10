@@ -24,7 +24,6 @@ import { deleteDisable } from 'src/constants/messageHelpers';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddInventory from './AddInventory';
-import AssignSerialNumber from './AssignSerialNumber';
 import ProductQtyDialog from './ProductQtyDialog';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 
