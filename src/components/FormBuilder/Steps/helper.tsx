@@ -60,5 +60,25 @@ export const resourcePolicy = [
                 type: "checkBox"
             }
         ]
+    },
+    {
+        resource: sidebarResource.serializedAsset,
+        policy: [
+            {
+                fieldName: "statusChangeFields",
+                fieldLabel: "Status Change Fields",
+                type: "multipleFields",
+                fields: [{
+                    fieldName: "status",
+                    fieldLabel: "Status",
+                    type: "dropdown"
+                },
+                {
+                    fieldName: "fields",
+                    fieldLabel: "Fields",
+                    type: "multiselect"
+                }]
+            },
+        ]
     }
 ]
