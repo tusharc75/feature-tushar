@@ -1,10 +1,10 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Box, Button, CircularProgress, Dialog, FormControlLabel, Checkbox, TextField, IconButton } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
-import { FieldArray, Form, Formik, getIn } from 'formik';
+import { CustomDialogTransition } from 'src/constants/helpers';
+import { FieldArray, Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -12,8 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { resourcePolicy } from './helper';
 import { Autocomplete } from '@material-ui/lab';
 import { AddCircleOutline, Clear } from '@material-ui/icons';
-import { flatMap, isArray, isEmpty, map } from 'lodash';
-import React from 'react';
+import { isArray, isEmpty } from 'lodash';
 
 const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -40,14 +39,12 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
 
   const updateData = (values) => {
     setIsSubmitting(true);
-    console.log(values)
     let updatedPolicy = values.data.reduce((acc, { fieldName, data }) => {
       return { ...acc, [fieldName]: data };
     }, {});
     let data = {
       policy: { ...updatedPolicy }
     };
-console.log(data)
     axiosInstance()
       .put(`/sa-formbuilder/steps/policy/${resource}`, data)
       .then(({ data }) => {
@@ -87,9 +84,8 @@ console.log(data)
             return error;
           }}
         >
-          {({ values, submitForm }) => (
+          {({ values, submitForm, touched }) => (
             <>
-            {console.log(values)}
               <CustomDialogHeader
                 onClose={onClose}
                 title={'Policy'}
@@ -115,6 +111,7 @@ console.log(data)
                               setError={setError}
                               resource={resource}
                               onChange={(e, val) => {
+                                console.log(val)
                                 arrayHelpers.replace(index, {
                                   ...values?.data[index],
                                   ['data']: val
@@ -169,22 +166,19 @@ const CheckBoxField = ({ data, onChange }) => {
   return <FormControlLabel control={<Checkbox name={data?.fieldName} checked={data?.checked} onChange={onChange} />} label={data?.fieldLabel} />;
 };
 
-const DropDownField = React.memo(({ onChange, value, options, multiple = false, error, required = true, fieldLabel, fieldName }: any) => {
-  // if(multiple){
-  //   console.log(options)
-  //   console.log(options.filter((option) =>
-  //     value.find((selectedOption) => selectedOption === option.optionValue)))
-  // }
+const DropDownField = ({ onChange, value, options, multiple = false, error, required = true, fieldLabel, fieldName }) => {
   return (
     <Autocomplete
       fullWidth
       className="max-w-[300px]"
       size="small"
       multiple={multiple}
+      limitTags={1}
+      disableCloseOnSelect={multiple}
       options={options}
       getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
       getOptionSelected={(option: any, val) => {
-        return option.optionValue === val.optionValue;
+        return option?.optionValue === val?.optionValue;
       }}
       value={value}
       onChange={onChange}
@@ -193,22 +187,20 @@ const DropDownField = React.memo(({ onChange, value, options, multiple = false, 
           {...params}
           margin="dense"
           name={fieldName}
-          placeholder={`Enter ${fieldLabel}`}
           label={fieldLabel}
           error={Boolean(error)}
           helperText={error}
           variant="outlined"
           required={required}
-          fullWidth
-          className="m-0"
+          size="small"
+          style={{ whiteSpace: 'nowrap' }}
         />
       )}
     />
   );
-});
+};
 
 const RenderFormFields = ({ data, type, onChange, setError, resource }: any) => {
-  console.log(data)
   if (type === 'checkBox') {
     return <CheckBoxField data={data} onChange={onChange} />;
   } else if (type === 'multipleFields') {
@@ -219,7 +211,7 @@ const RenderFormFields = ({ data, type, onChange, setError, resource }: any) => 
 const MultipleFormFields = ({ data: Data, onChange, setError, resource }) => {
   const [fieldOptions, setFieldOptions] = useState([]);
   const [statusOptions, setStatusOptions] = useState([]);
-  const [initialData, setInitialData] = useState(null);
+  const [initialData, setInitialData] = useState({ fieldsData: [...Data?.data] });
 
   useEffect(() => {
     fetchOptions();
@@ -235,31 +227,15 @@ const MultipleFormFields = ({ data: Data, onChange, setError, resource }) => {
         return {
           optionLabel: e?.fieldData?.fieldLabel,
           optionValue: e?.fieldData?.fieldName,
-          order: e?.fieldData?.order,
+          order: e?.fieldData?.order
         };
       });
     setFieldOptions(fieldsData);
-    let data = [...Data?.data] || []
-    data = data?.map((ele)=> {
-      let status = statusOptions?.find((e)=> e.optionValue===ele.status);
-      let fields = fieldsData?.filter((e)=> ele?.fields?.some((field)=> field===e.optionValue))
-      return {
-        status,
-        fields
-      }
-    })
-    console.log(statusOptions)
-    console.log(fieldsData)
-    setInitialData({ fieldsData: ([...data] || []) });
   };
 
   const getStatusOptions = (data) => {
-    const options = statusOptions?.filter((ele) => !data?.some((e) => e?.status?.optionValue === ele.optionValue));
-    return options ?? statusOptions;
-  };
-  const getFieldOptions = (data) => {
-    const options = fieldOptions.filter((ele) => !data?.some((e) => e?.optionValue === ele.optionValue));
-    return options ?? fieldOptions;
+    const options = statusOptions?.filter((ele) => !data?.some((e) => e?.status === ele.optionValue));
+    return options ? options : statusOptions;
   };
 
   const validate = (values) => {
@@ -282,14 +258,13 @@ const MultipleFormFields = ({ data: Data, onChange, setError, resource }) => {
 
     return errors;
   };
-console.log(initialData)
+
   return (
     <>
       {statusOptions?.length > 0 && fieldOptions?.length && initialData ? (
         <Formik initialValues={initialData} validateOnMount onSubmit={() => {}} validate={validate}>
           {({ values, setFieldValue, errors }) => (
             <div className="flex flex-col gap-2">
-              {console.log(values)}
               <Form>
                 <FieldArray
                   name="fieldsData"
@@ -313,28 +288,23 @@ console.log(initialData)
                           <div className="flex items-center justify-center gap-1 p-2" key={index}>
                             {Data?.fields?.map((field) => (
                               <DropDownField
-                                options={field?.fieldName === 'status' ? getStatusOptions(values?.fieldsData) : getFieldOptions(value?.fields)}
+                                options={field?.fieldName === 'status' ? getStatusOptions(values?.fieldsData) : fieldOptions}
                                 error={errors[`fieldsData.${index}.${field.fieldName}`]}
                                 onChange={(e, val) => {
-                                  setFieldValue(`fieldsData.${index}.${field.fieldName}`, val);
-                                  console.log(values?.fieldsData);
+                                  const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
+                                  setFieldValue(`fieldsData.${index}.${field.fieldName}`, updatedVal);
                                   let updatedData = [...values?.fieldsData];
-                                  updatedData[index][field.fieldName] = val;
-                                  updatedData = updatedData?.map((ele) => {
-                                    const status = ele?.status?.optionValue;
-                                    const fields = ele?.fields?.map((e) => e.optionValue);
-                                    return {
-                                      status,
-                                      fields
-                                    };
-                                  });
-                                  console.log(updatedData);
+                                  updatedData[index][field.fieldName] = updatedVal;
                                   onChange(null, updatedData);
                                 }}
-                                value={value[`${field.fieldName}`]}
+                                value={
+                                  field?.type === 'multiselect'
+                                    ? fieldOptions.filter((opt) => value[`${field.fieldName}`].some((val) => val === opt.optionValue))
+                                    : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                                }
                                 multiple={field?.type === 'multiselect'}
                                 fieldLabel={field?.fieldLabel}
-                                fieldName={field?.fieldName}
+                                fieldName={`fieldsData`}
                               />
                             ))}
 
@@ -344,6 +314,9 @@ console.log(initialData)
                               aria-label="delete"
                               onClick={() => {
                                 arrayHelpers.remove(index);
+                                const updatedData = [...values.fieldsData];
+                                updatedData.splice(index, 1);
+                                onChange(null,updatedData)
                               }}
                             >
                               <Clear fontSize="small" />
@@ -359,7 +332,7 @@ console.log(initialData)
           )}
         </Formik>
       ) : (
-        <Box p={2} height={100}>
+        <Box className="h-fit" p={2}>
           <CommonSkeleton lenArray={[...Array(5).keys()]} />
         </Box>
       )}
