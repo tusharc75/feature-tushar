@@ -326,6 +326,8 @@ export default function useColumns() {
       } else if (field?.lookup) {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
+          ...(Boolean(field?.isColumnEditable) ? {option: field?.option} : {}),
           accessorFn: (original) => {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
@@ -367,6 +369,7 @@ export default function useColumns() {
       } else if (field?.type === 'date') {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
           cell: ({ row }) => (
             <div>
               {row?.original?.[field?.fieldName] ? (
@@ -477,6 +480,7 @@ export default function useColumns() {
       } else {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
           cell: ({ row }) => (
             <div>
               {row?.original?.[field?.fieldName] ? (
