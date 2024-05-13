@@ -268,13 +268,13 @@ const CustomReport = () => {
     let queryString = getQueryString(true);
     axiosInstance()
       .get(
-        `${
+        `/report/${
           camelCase(resource) === 'quotes'
             ? 'quote-builder'
             : routes[camelCase(resource)]
             ? routes[camelCase(resource)]?.path
             : `${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
-        }/report/export?exportColumn=${JSON.stringify(exportColumns)}&export=1&${queryString}`,
+        }/export?exportColumn=${JSON.stringify(exportColumns)}&export=1&${queryString}`,
         {
           responseType: 'arraybuffer'
         }
