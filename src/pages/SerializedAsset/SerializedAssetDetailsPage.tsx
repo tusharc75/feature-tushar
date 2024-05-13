@@ -44,6 +44,7 @@ import CertificationHistory from './CertificationHistory';
 import DepreciationHistory from './DepreciationHistory';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
+import StatusChangeFieldDialog from './StatusChangeFieldDialog';
 // import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {
@@ -81,6 +82,7 @@ const SerializedAssetDetailsPage = () => {
   const [deviceTemplate, setDeviceTemplate] = useState(null);
   const [dataPoints, setDataPoints] = useState([]);
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
+  const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({open:false, fields: []});
 
   useEffect(() => {
     if (id) {
@@ -256,15 +258,25 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
+    const {policy} = resourceData;
+    const matchedStatus = policy?.statusChangeFields?.find((ele)=> ele.status===o.optionValue);
+    setStatus(o.optionValue);
     if (
       (o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap) ||
       o.optionValue === ASSET_STATUS.scrap ||
       o.optionValue === ASSET_STATUS.lost
     ) {
-      setStatus(o.optionValue);
-      setShowReasonDialog(true);
+      if(matchedStatus){
+        setOpenStatusChangeFieldDialog({open:true,fields: matchedStatus?.fields})
+      }else{
+        setShowReasonDialog(true);
+      }
     } else {
-      handleStatusUpdate({ status: o.optionValue });
+      if(matchedStatus){
+        setOpenStatusChangeFieldDialog({open:true,fields: matchedStatus?.fields})
+      }else{
+        handleStatusUpdate({ status: o.optionValue });
+      }
     }
   };
 
@@ -297,7 +309,8 @@ const SerializedAssetDetailsPage = () => {
         ],
         status: obj?.status,
         comment: obj?.reason ? obj?.reason : '',
-        reference: { _id: assetDetails._id, type: INVENTORY_HISTORY_TYPE.serializedAssets }
+        reference: { _id: assetDetails._id, type: INVENTORY_HISTORY_TYPE.serializedAssets },
+        statusChangeFieldData: obj?.statusChangeFieldData
       })
       .then(({ data }) => {
         setUpdateLoading(false);
@@ -539,7 +552,7 @@ const SerializedAssetDetailsPage = () => {
           />
         </TabPanel>
         <TabPanel value={tabValue} index={6}>
-          <AssetHistory id={id} status={assetDetails?.status} />
+          <AssetHistory id={id} status={assetDetails?.status} resourceData={resourceData} fields={fields} />
         </TabPanel>
         <TabPanel value={tabValue} index={7}>
           <CertificationHistory
@@ -605,6 +618,19 @@ const SerializedAssetDetailsPage = () => {
           onClose={() => {
             setManageSendOutBoundMessageDialog(false);
           }}
+        />
+      )}
+      {openStatusChangeFieldDialog.open && (
+        <StatusChangeFieldDialog 
+           fields={fields} 
+           statusFields={openStatusChangeFieldDialog.fields} 
+           serializedAssetData={assetDetails} 
+           productInventoryId={id}
+           onClose={()=> setOpenStatusChangeFieldDialog({open:false,fields:[]})} 
+           onSuccess={(values)=>{ 
+            handleStatusUpdate({ status: status, statusChangeFieldData: values });
+            setOpenStatusChangeFieldDialog({open:false,fields:[]})
+          }}  
         />
       )}
       {/* {openDataSimulationDialog && <DataSimulationDialog onClose={() => setOpenDataSimulationDialog(false)} />} */}
