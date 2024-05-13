@@ -75,7 +75,7 @@ const QuotationViews = (props) => {
       const additionalCost = await axiosInstance().get(`${quotation.api}/additionalcost/${quoteId}/${versionId}`);
       let parent = viewsData.data.data.material?.filter((item) => item?.parentId === null);
       let additionalData = additionalCost?.data?.data || [];
-      parent = [...parent,...additionalData]
+      parent = [...parent, ...additionalData]
 
       const parentIds = parent?.map((item) => `${item?.id}`);
       const child = viewsData.data.data.material?.filter((item) => item?.parentId !== null);
@@ -143,12 +143,17 @@ const QuotationViews = (props) => {
       if (child?.length) xPosition += 300;
       let maxXPosition = xPosition;
       let maxYAssetPosition = 1;
+      const childData = {};
+      const removeEdge = [];
       child?.map((item: any, cIdx) => {
-        const xPositionView = item.type === 'serializedAsset' ? xPosition + 300 : xPosition;
+        const xPositionView = item.type === 'serializedAsset' ? xPosition + 300 : childData[item.parentId.toString()] ? childData[item.parentId.toString()] + 300 : xPosition;
+        if (childData[item.parentId.toString()]) {
+          removeEdge.push(item.parentId.toString())
+        }
         if (xPositionView > maxXPosition) maxXPosition = xPositionView;
         const yPositionView = item.type === 'serializedAsset' ? maxYAssetPosition : cIdx;
         if (item.type === 'serializedAsset') maxYAssetPosition += 1;
-
+        childData[item._id.toString()] = xPositionView;
         flow.push({
           id: `${item._id}`,
           sourcePosition: 'right',
@@ -168,7 +173,6 @@ const QuotationViews = (props) => {
               </HtmlTooltip>
             )
           },
-
           position: {
             x: xPositionView,
             y: yPositionView * 80
@@ -220,12 +224,14 @@ const QuotationViews = (props) => {
           });
         });
         child?.map((item: any, cIdx) => {
-          flowEdge.push({
-            id: `${item._id}-ouput-line`,
-            source: `${item._id}`,
-            arrowHeadType: 'arrow',
-            target: `${quoteId}-output`
-          });
+          if (!removeEdge.includes(item._id.toString())) {
+            flowEdge.push({
+              id: `${item._id}-ouput-line`,
+              source: `${item._id}`,
+              arrowHeadType: 'arrow',
+              target: `${quoteId}-output`
+            });
+           }
         });
       }
 
