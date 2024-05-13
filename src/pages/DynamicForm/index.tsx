@@ -172,6 +172,31 @@ const DynamicForm = () => {
       });
   };
 
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const values: any = {};
+    Object.keys(inputField)?.map((_key) => {
+      values[_key] = updatedData[_key] ? updatedData[_key] : '';
+    });
+
+    axiosInstance()
+      .put(`/dynamic-form/${updatedData?._id}`, values, {
+        headers: {
+          Resource: resource
+        }
+      })
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -263,6 +288,7 @@ const DynamicForm = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
+            onSaveEdit={onSaveInlineEdit}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={resource}
