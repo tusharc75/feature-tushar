@@ -6,22 +6,24 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { dateTimeFormat, isObjectEmpty, sidebarResource } from 'src/constants/helpers';
+import { dateTimeFormat, isObjectEmpty, serializedAsset, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import moment from 'moment';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { camelCase } from 'lodash';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { camelCase, uniq } from 'lodash';
 
-const AssetHistory = ({ id, status }) => {
+const AssetHistory = ({ id, status, resourceData, fields }) => {
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assetHistory`;
 
   const toastConfig = useContext(CustomToastContext);
+  const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
   const [duration, setDuration] = useState({
     from: new Date(moment().subtract('1', 'year').calendar()),
     to: new Date()
   });
+  const [column,setColumn] = useState([])
 
   const {
     state: { permissions }
@@ -285,6 +287,14 @@ const AssetHistory = ({ id, status }) => {
     }
   ];
 
+  useEffect(()=>{
+    let statusChangeFieldColumns = []
+    statusChangeFieldColumns  = uniq(resourceData?.policy?.statusChangeFields?.flatMap(ele => ele.fields))
+    let statusChangeFields = fields?.filter((ele)=>[...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName))
+    let extraColumns = generateColumns(renderedFrom, statusChangeFields, routes.serializedAssetDetail.path, true);
+    setColumn([...columns,...extraColumns])
+  },[])
+
   useEffect(() => {
     if (id) {
       fetchData();
@@ -328,7 +338,8 @@ const AssetHistory = ({ id, status }) => {
       .get(`/history/inventory/${id}${queryString}`)
       .then(({ data: { data, count } }) => {
         data = data?.map((u, index) => ({
-          ...u,
+          ...((({ statusChangeFieldData, ...rest }) => rest)(u)), 
+          ...u?.statusChangeFieldData,
           _id: index + 1,
           id: index + 1,
           reference: u?.reference?.optionLabel,
@@ -353,7 +364,7 @@ const AssetHistory = ({ id, status }) => {
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 250px)'}
-          columns={columns}
+          columns={column}
           state={state}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
@@ -371,3 +382,7 @@ const AssetHistory = ({ id, status }) => {
 };
 
 export default AssetHistory;
+function generateColumns(renderedFrom: string, data: any, path: string, arg3: boolean) {
+  throw new Error('Function not implemented.');
+}
+
