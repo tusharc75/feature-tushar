@@ -7,42 +7,50 @@ export const resourcePolicy = [
             {
                 fieldName: "hideAddExistingServices",
                 fieldLabel: "Hide Add Existing Services",
-                type: "checkBox"
+                type: "checkBox",
+                defaultValue: false
             },
             {
                 fieldName: "hideAddNewService",
                 fieldLabel: "Hide Add New Service",
-                type: "checkBox"
+                type: "checkBox",
+                defaultValue: false
             },
             {
                 fieldName: "hideAssignTechnician",
                 fieldLabel: "Hide Assign Technician",
-                type: "checkBox"
+                type: "checkBox",
+                defaultValue: false
             },
             {
                 fieldName: "hideAssignWorkstation",
                 fieldLabel: "Hide Assign Work Station",
-                type: "checkBox"
+                type: "checkBox",
+                defaultValue: false
             },
             {
                 fieldName: "hideAddConsumables",
                 fieldLabel: "Hide Add Consumables",
-                type: "checkBox"
+                type: "checkBox",
+                defaultValue: false
             },
             {
                 fieldName: "hideArrangeServices",
                 fieldLabel: "Hide Arrange Services",
-                type: "checkBox"
+                type: "checkBox",
+                defaultValue: false
             },
             {
                 fieldName: "hideAutoCompleteWorkOrder",
                 fieldLabel: "Hide Auto Complete Work Order",
-                type: "checkBox"
+                type: "checkBox",
+                defaultValue: false
             },
             {
                 fieldName: "hideCompleteSkipRevertService",
                 fieldLabel: "Hide Complete/Skip/Revert Service",
-                type: "checkBox"
+                type: "checkBox",
+                defaultValue: false
             }
         ]
     },
@@ -52,12 +60,14 @@ export const resourcePolicy = [
             {
                 fieldName: "showAddPackages",
                 fieldLabel: "Show Add Packages",
-                type: "checkBox"
+                type: "checkBox",
+                defaultValue: false
             },
             {
                 fieldName: "showRentalAddMaterial",
                 fieldLabel: "Show Rental Add Material",
-                type: "checkBox"
+                type: "checkBox",
+                defaultValue: false
             }
         ]
     },
@@ -77,7 +87,8 @@ export const resourcePolicy = [
                     fieldName: "fields",
                     fieldLabel: "Fields",
                     type: "multiselect"
-                }]
+                }],
+                defaultValue: []
             },
         ]
     }

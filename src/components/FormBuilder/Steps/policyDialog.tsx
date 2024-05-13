@@ -3,7 +3,7 @@ import { Box, Button, CircularProgress, Dialog, FormControlLabel, Checkbox, Text
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { FieldArray, Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -12,14 +12,13 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { resourcePolicy } from './helper';
 import { Autocomplete } from '@material-ui/lab';
 import { AddCircleOutline, Clear } from '@material-ui/icons';
-import { isArray, isEmpty } from 'lodash';
+import { isArray } from 'lodash';
 
 const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const [initialValues, setInitialValues] = useState({ data: [] });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState({});
 
   useEffect(() => {
     let currentPolicy = resourceData?.policy || {};
@@ -30,7 +29,7 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
           fieldName: e.fieldName,
           fieldLabel: e.fieldLabel,
           type: e.type,
-          data: currentPolicy[e.fieldName] || [],
+          data: currentPolicy[e.fieldName] || e.defaultValue,
           fields: e?.fields || []
         };
       })
@@ -62,6 +61,23 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
       });
   };
 
+  const validate = (values) => {
+    const errors = {};
+    if (resource === sidebarResource.serializedAsset) {
+      values.data.forEach((value, index) => {
+        value?.data?.forEach((ele, idx) => {
+          if (!ele['fields'] || !ele['fields'].length) {
+            errors[`data.${index}.data.${idx}.fields`] = `Fields are required`;
+          }
+          if (!ele['status']) {
+            errors[`data.${index}.data.${idx}.status`] = `Status is required`;
+          }
+        });
+      });
+    }
+    return errors;
+  };
+
   return (
     <Dialog
       maxWidth="sm"
@@ -77,14 +93,8 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
       }}
     >
       {initialValues?.data?.length ? (
-        <Formik
-          initialValues={initialValues}
-          onSubmit={updateData}
-          validate={() => {
-            return error;
-          }}
-        >
-          {({ values, submitForm, touched }) => (
+        <Formik initialValues={initialValues} onSubmit={updateData} validate={validate}>
+          {({ values, submitForm, setFieldValue, errors, touched }) => (
             <>
               <CustomDialogHeader
                 onClose={onClose}
@@ -107,11 +117,13 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
                             <RenderFormFields
                               key={index}
                               data={data}
+                              idx={index}
                               type={data.type}
-                              setError={setError}
+                              errors={errors}
+                              touched={touched}
                               resource={resource}
+                              setFieldValue={setFieldValue}
                               onChange={(e, val) => {
-                                console.log(val)
                                 arrayHelpers.replace(index, {
                                   ...values?.data[index],
                                   ['data']: val
@@ -162,11 +174,30 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
 
 export default PolicyDialog;
 
-const CheckBoxField = ({ data, onChange }) => {
-  return <FormControlLabel control={<Checkbox name={data?.fieldName} checked={data?.checked} onChange={onChange} />} label={data?.fieldLabel} />;
+const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource, setFieldValue }) => {
+  if (type === 'checkBox') {
+    return <CheckBoxField data={data} onChange={onChange} />;
+  } else if (type === 'multipleFields') {
+    return (
+      <MultipleFormFields
+        idx={idx}
+        data={data}
+        onChange={onChange}
+        resource={resource}
+        errors={errors}
+        touched={touched}
+        setFieldValue={setFieldValue}
+      />
+    );
+  }
+  return null;
 };
 
-const DropDownField = ({ onChange, value, options, multiple = false, error, required = true, fieldLabel, fieldName }) => {
+const CheckBoxField = ({ data, onChange }) => {
+  return <FormControlLabel control={<Checkbox name={data?.fieldName} checked={data?.data} onChange={onChange} />} label={data?.fieldLabel} />;
+};
+
+const DropDownField = ({ onChange, value, options, multiple = false, error, touched, required = true, fieldLabel, fieldName }) => {
   return (
     <Autocomplete
       fullWidth
@@ -188,8 +219,8 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, requ
           margin="dense"
           name={fieldName}
           label={fieldLabel}
-          error={Boolean(error)}
-          helperText={error}
+          error={touched && Boolean(error)}
+          helperText={touched && error}
           variant="outlined"
           required={required}
           size="small"
@@ -200,15 +231,7 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, requ
   );
 };
 
-const RenderFormFields = ({ data, type, onChange, setError, resource }: any) => {
-  if (type === 'checkBox') {
-    return <CheckBoxField data={data} onChange={onChange} />;
-  } else if (type === 'multipleFields') {
-    return <MultipleFormFields data={data} onChange={onChange} resource={resource} setError={setError} />;
-  }
-};
-
-const MultipleFormFields = ({ data: Data, onChange, setError, resource }) => {
+const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resource, setFieldValue }) => {
   const [fieldOptions, setFieldOptions] = useState([]);
   const [statusOptions, setStatusOptions] = useState([]);
   const [initialData, setInitialData] = useState({ fieldsData: [...Data?.data] });
@@ -238,99 +261,69 @@ const MultipleFormFields = ({ data: Data, onChange, setError, resource }) => {
     return options ? options : statusOptions;
   };
 
-  const validate = (values) => {
-    const errors: any = {};
-    const touched: any = {};
-    values.fieldsData.forEach((value, index) => {
-      if (!value.status) {
-        errors[`fieldsData.${index}.status`] = 'Status is required';
-      }
-
-      if (!value.fields.length) {
-        errors[`fieldsData.${index}.fields`] = 'Fields is required';
-      }
-    });
-    if (!isEmpty(errors)) {
-      setError({ [Data?.fieldName]: `${Data?.fieldLabel} is required` });
-    } else {
-      setError({});
-    }
-
-    return errors;
-  };
-
   return (
     <>
       {statusOptions?.length > 0 && fieldOptions?.length && initialData ? (
-        <Formik initialValues={initialData} validateOnMount onSubmit={() => {}} validate={validate}>
-          {({ values, setFieldValue, errors }) => (
-            <div className="flex flex-col gap-2">
-              <Form>
-                <FieldArray
-                  name="fieldsData"
-                  render={(arrayHelpers) => (
-                    <>
-                      <div className="flex flex-col gap-2">
-                        <div className="flex justify-end">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            aria-label="delete"
-                            onClick={() => {
-                              arrayHelpers.push({ status: '', fields: [] });
-                            }}
-                          >
-                            <AddCircleOutline fontSize="small" />
-                          </IconButton>
-                        </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-end">
+            <IconButton
+              size="small"
+              color="primary"
+              aria-label="delete"
+              onClick={() => {
+                const data = [...initialData?.fieldsData];
+                data.push({ status: '', fields: [] });
+                setInitialData({ fieldsData: [...data] });
+                onChange(null, data);
+              }}
+            >
+              <AddCircleOutline fontSize="small" />
+            </IconButton>
+          </div>
 
-                        {values?.fieldsData?.map((value, index) => (
-                          <div className="flex items-center justify-center gap-1 p-2" key={index}>
-                            {Data?.fields?.map((field) => (
-                              <DropDownField
-                                options={field?.fieldName === 'status' ? getStatusOptions(values?.fieldsData) : fieldOptions}
-                                error={errors[`fieldsData.${index}.${field.fieldName}`]}
-                                onChange={(e, val) => {
-                                  const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
-                                  setFieldValue(`fieldsData.${index}.${field.fieldName}`, updatedVal);
-                                  let updatedData = [...values?.fieldsData];
-                                  updatedData[index][field.fieldName] = updatedVal;
-                                  onChange(null, updatedData);
-                                }}
-                                value={
-                                  field?.type === 'multiselect'
-                                    ? fieldOptions.filter((opt) => value[`${field.fieldName}`].some((val) => val === opt.optionValue))
-                                    : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
-                                }
-                                multiple={field?.type === 'multiselect'}
-                                fieldLabel={field?.fieldLabel}
-                                fieldName={`fieldsData`}
-                              />
-                            ))}
-
-                            <IconButton
-                              size="small"
-                              color="primary"
-                              aria-label="delete"
-                              onClick={() => {
-                                arrayHelpers.remove(index);
-                                const updatedData = [...values.fieldsData];
-                                updatedData.splice(index, 1);
-                                onChange(null,updatedData)
-                              }}
-                            >
-                              <Clear fontSize="small" />
-                            </IconButton>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
+          {initialData?.fieldsData?.map((value, index) => (
+            <div className="flex items-center justify-center gap-1 p-2" key={index}>
+              {Data?.fields?.map((field) => (
+                <DropDownField
+                  key={field.fieldName}
+                  options={field?.fieldName === 'status' ? getStatusOptions(initialData?.fieldsData) : fieldOptions}
+                  error={errors[`data.${idx}.data.${index}.${field.fieldName}`]}
+                  touched={touched?.data && touched.data[idx].data[index][field.fieldName]}
+                  onChange={(e, val) => {
+                    const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
+                    setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
+                    let updatedData = [...initialData?.fieldsData];
+                    updatedData[index][field.fieldName] = updatedVal;
+                    setInitialData({ fieldsData: updatedData });
+                    onChange(null, updatedData);
+                  }}
+                  value={
+                    field?.type === 'multiselect'
+                      ? fieldOptions.filter((opt) => value[`${field.fieldName}`].some((val) => val === opt.optionValue))
+                      : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                  }
+                  multiple={field?.type === 'multiselect'}
+                  fieldLabel={field?.fieldLabel}
+                  fieldName={field?.fieldLabel}
                 />
-              </Form>
+              ))}
+
+              <IconButton
+                size="small"
+                color="primary"
+                aria-label="delete"
+                onClick={() => {
+                  const updatedData = [...initialData.fieldsData];
+                  updatedData.splice(index, 1);
+                  setInitialData({ fieldsData: [...updatedData] });
+                  onChange(null, updatedData);
+                }}
+              >
+                <Clear fontSize="small" />
+              </IconButton>
             </div>
-          )}
-        </Formik>
+          ))}
+        </div>
       ) : (
         <Box className="h-fit" p={2}>
           <CommonSkeleton lenArray={[...Array(5).keys()]} />
