@@ -200,7 +200,7 @@ const ServiceTable = ({ packageId, packageData }) => {
   };
 
   const rightSideContents = () => {
-    return (
+    return permissions?.packages?.isCreate || permissions?.packages?.isUpdate &&
       <>
         <ImportExportMenu
           permissions={permissions?.packages}
@@ -213,14 +213,11 @@ const ServiceTable = ({ packageId, packageData }) => {
           ids={[]}
           additionalParams={`refrenceId=${packageId}`}
         />
-        {permissions?.packages?.isUpdate ? (
-          <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-            <GrDrag fontSize="small" color="primary" className="mr-1" />
-            Arrange
-          </Button>
-        ) : null}
+        <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+          <GrDrag fontSize="small" color="primary" className="mr-1" />
+          Arrange
+        </Button>
       </>
-    );
   };
 
   return (
@@ -234,7 +231,6 @@ const ServiceTable = ({ packageId, packageData }) => {
         rightSideContents={rightSideContents()}
         hasXpadding
       />
-
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 393px)'}
@@ -245,6 +241,7 @@ const ServiceTable = ({ packageId, packageData }) => {
           isClientSideGrid={true}
           refreshGrid={fetchData}
           onSaveEdit={handleUpdateQuantity}
+          hideSelection={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
         />
       ) : (
         <Box p={2} height={500}>

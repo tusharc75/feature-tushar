@@ -295,7 +295,7 @@ const QuoteBuilder = ({
       _subRow.hideSelection = _subRow?.fieldTicketCreated ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
-    for(const _subRow of subRows) {
+    for (const _subRow of subRows) {
       let assetStatus = _subRow?.serializedAssetDetail?.status;
       if (quotationData?.type === QUOTATION_TYPE.rentalJob && _subRow.type === MATERIAL_TYPE.serializedAsset && assetStatus !== ASSET_STATUS.new && assetStatus !== ASSET_STATUS.available && assetStatus !== ASSET_STATUS.underReview) {
         setReserveAssetWarning(true);
@@ -344,24 +344,23 @@ const QuoteBuilder = ({
   const rightSideContents = () => {
     return (
       <>
-        {permissions?.quotation?.isUpdate &&
-          (user?.user?._id === quotationData?.owner?.optionValue || quotationData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
-            <ThemeButton
-              onClick={() => {
-                quotationData?.pdfTemplate?.optionValue &&
-                  history.push(
-                    `/quote-pdf-template/detail/${quotationData?.pdfTemplate?.optionValue}?quotation=${quotationData?._id}&version=${versionData?.version}`,
-                    '_blank'
-                  );
-              }}
-              hasMobileBorder
-              iconForMobile={<AiFillEdit />}
-              tooltip="Edit PDF Template"
-            >
-              <AiFillEdit size={20} className="mr-2" /> PDF Template
-            </ThemeButton>
-          )}
-        {currentStep === 'Quote Approval' && (
+        {allowedToEdit && (
+          <ThemeButton
+            onClick={() => {
+              quotationData?.pdfTemplate?.optionValue &&
+                history.push(
+                  `/quote-pdf-template/detail/${quotationData?.pdfTemplate?.optionValue}?quotation=${quotationData?._id}&version=${versionData?.version}`,
+                  '_blank'
+                );
+            }}
+            hasMobileBorder
+            iconForMobile={<AiFillEdit />}
+            tooltip="Edit PDF Template"
+          >
+            <AiFillEdit size={20} className="mr-2" /> PDF Template
+          </ThemeButton>
+        )}
+        {allowedToEdit && currentStep === 'Quote Approval' && (
           <>
             <ThemeButton
               iconForMobile={false}
@@ -388,7 +387,7 @@ const QuoteBuilder = ({
             </ThemeButton>
           </>
         )}
-        {currentStep === 'DOA' && DOAData?.length === 0 && (
+        {allowedToEdit && currentStep === 'DOA' && DOAData?.length === 0 && (
           <Button variant="contained" size="small" color="primary" onClick={handleSendForDOA}>
             Send for DOA
           </Button>
@@ -455,7 +454,7 @@ const QuoteBuilder = ({
         })
         await axiosInstance().post(`${fieldTicket.api}/${data?._id}/cost`, manualEntry);
       }
-      if(materialIds.length || costIds.length) await axiosInstance().post(`${quotation.api}/set-field-ticket-created/${versionData?._id}`, { material: materialIds, cost: costIds });
+      if (materialIds.length || costIds.length) await axiosInstance().post(`${quotation.api}/set-field-ticket-created/${versionData?._id}`, { material: materialIds, cost: costIds });
       setFieldTicketDialog({ open: false, data: null });
       fetchData()
     }

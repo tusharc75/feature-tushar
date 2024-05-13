@@ -14,7 +14,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -43,6 +43,8 @@ import {
   updateGridHiddenColumns,
   useSkipper
 } from './utils';
+import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
+import { isEmpty } from 'lodash';
 
 let exportTimeout;
 
@@ -129,6 +131,8 @@ const CustomReactTable = ({
   const [exportTableView, setExportTableView] = useState(false);
   const tableRef = useRef<HTMLTableElement | null>(null);
 
+  const { setSavedFilters } = useContext(FiltersContext);
+
   // initialize
   useEffect(() => {
     if (JSON.stringify(baseColumns) !== JSON.stringify(newColumns)) {
@@ -200,6 +204,7 @@ const CustomReactTable = ({
         }
       });
       dispatch({ type: 'filter', filters: tempResult, loading: isClientSideGrid ? false : true });
+      if(!isClientSideGrid) setSavedFilters(prev => ({ ...prev, [resource]: tempResult }));
     }
   };
 
@@ -497,6 +502,7 @@ const CustomReactTable = ({
             error={error}
             height={height}
             onRowClick={onRowClick}
+            resource={resource}
           />
         </div>
       )}
@@ -541,6 +547,7 @@ const CustomReactTable = ({
                 error={error}
                 height={height}
                 onRowClick={onRowClick}
+                resource={resource}
               />
             </div>
           )}

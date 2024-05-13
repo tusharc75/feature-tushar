@@ -191,7 +191,7 @@ const QuotationDetails = () => {
             [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status) &&
             quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
           ) {
-            
+
             setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quotation, quotationData));
             setCanConvert(true);
           } else if (!quotationData?.rentalJob && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
@@ -234,9 +234,7 @@ const QuotationDetails = () => {
         isAllowedToEdit = false;
       }
       setAllowedToEdit(isAllowedToEdit && permissions?.quotation?.isUpdate);
-
       setQuotationData(data);
-
       var tempStepList = quotationProcessSteps;
       if (!data?.doasetup) {
         tempStepList = quotationProcessSteps?.filter((e) => e.name !== 'DOA');
@@ -603,10 +601,10 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-            <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
-              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-            </Box>
-          )}
+              <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
+                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+              </Box>
+            )}
           <div>
             <Steps
               isNextStep={false}
@@ -623,8 +621,10 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
+                    if (allowedToEdit) {
                       setCustomerAcceptable(true);
                     }
+                  }
                   : null
               }
             />

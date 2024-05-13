@@ -16,6 +16,8 @@ import { ExportIcon } from 'src/assets/svg/svgIcons';
 import { createFilterModel, fetchFieldOptions, filtermodelToFormValue } from '../utils';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
+import { isEmpty } from 'lodash';
 
 type GridHeaderProps = {
   resource: any;
@@ -66,6 +68,8 @@ const GridHeader = ({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentFomValue, setCurrentFomValue] = useState({});
 
+  const { savedFilters } = useContext(FiltersContext);
+
   useEffect(() => {
     if (customFilters && !selectedFilter) {
       const newformValues = filtermodelToFormValue(customFilters);
@@ -87,7 +91,7 @@ const GridHeader = ({
     if (!resource || !showFilters) return;
     const applyDefaultFilter = async () => {
       try {
-        const responce: any = axiosInstance().get(`/user-resource-filter?resource=${resource}`)
+        const responce: any = await axiosInstance().get(`/user-resource-filter?resource=${resource}`)
         const defaultFilter = responce?.data?.data.find((d) => d.default);
         if (defaultFilter) {
           const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
@@ -105,6 +109,8 @@ const GridHeader = ({
               });
             }
           }
+        } else if (!isEmpty(savedFilters[resource]) && !isClientSideGrid) {
+          dispatch({ type: 'filter', filters: savedFilters[resource] });
         }
       } catch (error) {
         toastConfig.setToastConfig(error);
@@ -133,6 +139,7 @@ const GridHeader = ({
             setSelectedFilter={setSelectedFilter}
             currentFomValue={currentFomValue}
             setCurrentFomValue={setCurrentFomValue}
+            resource={resource}
           />
         </div>
         {isFilterOpen && (

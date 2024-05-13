@@ -1,7 +1,7 @@
 import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell, TextField } from '@material-ui/core';
 import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
@@ -11,6 +11,8 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import DateUtils from '@date-io/date-fns';
 import { dateFormatForInputControl } from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
+import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
+import { isEmpty } from 'lodash';
 
 let cellId = null;
 
@@ -265,6 +267,7 @@ interface DraggableHeaderProps {
   isClientSideGrid: boolean;
   reorder: (draggedColumn: string, column: string, columnOrder: string[]) => string[];
   virtualization: boolean;
+  resource: string;
 }
 export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   header,
@@ -273,7 +276,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   dispatch,
   isClientSideGrid,
   reorder,
-  virtualization
+  virtualization,
+  resource
 }) => {
   const { getState, setColumnOrder } = table;
   const { columnOrder } = getState();
@@ -288,6 +292,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
     ['action', 'selection', 'expand'].includes(column?.id);
 
   const [filters, setFilters] = useState([]);
+  const { savedFilters, setSavedFilters } = useContext(FiltersContext);
 
   // Use a useEffect to update filters when customFilters changes
   useEffect(() => {
@@ -339,6 +344,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           }
         });
         dispatch({ type: 'filter', filters: tempResult });
+        if(!isClientSideGrid) setSavedFilters({ ...savedFilters, [resource]: tempResult });
       }
     }, MINIMUM_SEARCH_DELAY);
 
