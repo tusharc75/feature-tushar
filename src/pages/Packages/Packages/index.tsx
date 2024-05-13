@@ -169,6 +169,7 @@ const PackagesTable = ({ packageId, packageData }) => {
 
   const rightSideContents = () => {
     return (
+      permissions?.packages?.isCreate || permissions?.packages?.isUpdate &&
       <>
         <ImportExportMenu
           permissions={permissions?.packages}
@@ -196,7 +197,6 @@ const PackagesTable = ({ packageId, packageData }) => {
         rightSideContents={rightSideContents()}
         hasXpadding
       />
-
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 393px)'}
@@ -207,6 +207,7 @@ const PackagesTable = ({ packageId, packageData }) => {
           isClientSideGrid={true}
           refreshGrid={fetchData}
           onSaveEdit={handleUpdateQuantity}
+          hideSelection={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
         />
       ) : (
         <Box p={2} height={500}>
