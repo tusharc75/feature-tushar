@@ -382,7 +382,5 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
 };
 
 export default AssetHistory;
-function generateColumns(renderedFrom: string, data: any, path: string, arg3: boolean) {
-  throw new Error('Function not implemented.');
-}
+
 
