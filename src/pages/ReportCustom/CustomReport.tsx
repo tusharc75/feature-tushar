@@ -189,7 +189,16 @@ const CustomReport = () => {
 
     axiosInstance()
       .get(api, { cancelToken: cancelTokenSource?.token })
-      .then(({ data: { data, count } }) => {
+      .then(({ data: { data, count, columns } }) => {
+        if(camelCase(resource) == 'numberOfAssetsByStatus') {
+          setLoadingColumns(true);
+          setResourceColumns(columns);
+          let col = [];
+          let newColumns = generateColumns(renderedFrom, columns, null, true);
+          col = [...newColumns, ...getStaticFields()];
+          setColumns([...col]);
+          setLoadingColumns(false);
+        }
         data = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           return finalObject;
