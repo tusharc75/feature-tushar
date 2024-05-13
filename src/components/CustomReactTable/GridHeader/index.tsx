@@ -139,6 +139,7 @@ const GridHeader = ({
             setSelectedFilter={setSelectedFilter}
             currentFomValue={currentFomValue}
             setCurrentFomValue={setCurrentFomValue}
+            resource={resource}
           />
         </div>
         {isFilterOpen && (

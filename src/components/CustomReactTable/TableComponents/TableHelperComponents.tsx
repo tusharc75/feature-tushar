@@ -334,7 +334,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           }
         });
         dispatch({ type: 'filter', filters: tempResult });
-        if(!isEmpty(tempResult) && !isClientSideGrid) setSavedFilters({ ...savedFilters, [resource]: tempResult });
+        if(!isClientSideGrid) setSavedFilters({ ...savedFilters, [resource]: tempResult });
       }
     }, MINIMUM_SEARCH_DELAY);
 
