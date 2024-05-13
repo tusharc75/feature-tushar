@@ -44,7 +44,7 @@ import CertificationHistory from './CertificationHistory';
 import DepreciationHistory from './DepreciationHistory';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
-import StatusChangeFieldDialog from './StatusChangeFields';
+import StatusChangeFieldDialog from './StatusChangeFieldDialog';
 // import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {
