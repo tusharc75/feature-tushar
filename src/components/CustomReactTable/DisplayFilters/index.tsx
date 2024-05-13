@@ -1,5 +1,6 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import DisplayChips from './ChipDataDisplay';
+import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
 
 function DisplayFilters({
     columns,
@@ -10,11 +11,13 @@ function DisplayFilters({
     selectedFilter,
     setSelectedFilter,
     currentFomValue,
-    setCurrentFomValue
+    setCurrentFomValue,
+    resource
 }) {
 
     const [chipData, setChipData] = useState([]);
     const [isFilterPresent, setIsFilterPresent] = useState<boolean>(false);
+    const { setSavedFilters } = useContext(FiltersContext);
 
     const clearSingleFilter = (name) => {
         // Create a copy of the customFilters object
@@ -28,11 +31,13 @@ function DisplayFilters({
         setCurrentFomValue(formValues);
         // Dispatch the updated filters and update the chipData
         dispatchTable({ type: 'filter', filters: newFilters });
+        setSavedFilters(prev => ({...prev, [resource] : newFilters}))
         setChipData((prev) => prev.filter((item) => item.name !== name));
     };
 
     const clearFilterAll = () => {
         dispatchTable({ type: 'filter', filters: {} });
+        setSavedFilters(prev => ({...prev, [resource] : {}}))
         setSelectedFilter(null);
         setChipData([]);
         setCurrentFomValue({});

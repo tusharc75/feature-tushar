@@ -204,7 +204,7 @@ const CustomReactTable = ({
         }
       });
       dispatch({ type: 'filter', filters: tempResult, loading: isClientSideGrid ? false : true });
-      if(!isEmpty(tempResult) && !isClientSideGrid) setSavedFilters(prev => ({ ...prev, [resource]: tempResult }));
+      if(!isClientSideGrid) setSavedFilters(prev => ({ ...prev, [resource]: tempResult }));
     }
   };
 
@@ -502,6 +502,7 @@ const CustomReactTable = ({
             error={error}
             height={height}
             onRowClick={onRowClick}
+            resource={resource}
           />
         </div>
       )}
