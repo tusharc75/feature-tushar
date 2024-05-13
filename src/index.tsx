@@ -26,6 +26,7 @@ import { CustomChatNotificationCountProvider } from './StateProvider/CustomChatN
 import { GlobalChatProvider } from './StateProvider/GlobalChatContext';
 import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineContext';
 import { version } from '../package.json';
+import { FiltersProvider } from './StateProvider/FiltersContext/FiltersContext';
 
 // @ts-ignore
 if (import.meta.env.VITE_APP_ENV !== 'local' && navigator.onLine) {
@@ -54,7 +55,9 @@ ReactDOM.render(
                   <GlobalChatProvider>
                     <CustomOfflineProvider>
                       <NewAddressOptionListProvider>
-                        <App />
+                        <FiltersProvider>
+                          <App />
+                        </FiltersProvider>
                       </NewAddressOptionListProvider>
                     </CustomOfflineProvider>
                   </GlobalChatProvider>

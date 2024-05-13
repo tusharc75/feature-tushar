@@ -11,7 +11,17 @@ import { DragBox } from './DragBox';
 import { DropMaster } from './DropMaster';
 import FieldList from './FieldList';
 
-const subForms = [
+import {
+  DragDropContext,
+  Draggable,
+  DraggableProvided,
+  DraggableProvidedDragHandleProps,
+  DraggableStateSnapshot,
+  DropResult,
+  Droppable
+} from '@hello-pangea/dnd';
+
+export const subForms = [
   CHILD_RESOURCE.rentalManagementProduct,
   CHILD_RESOURCE.rentalManagementCost,
   CHILD_RESOURCE.salesOrderProduct,
@@ -99,9 +109,30 @@ export const FormBuilder = ({
     isCalculativeField = true;
   }
 
+  // const handleDragEnd = (result: DropResult) => {
+  //   const { destination, source } = result;
+  //   if (!destination) {
+  //     return;
+  //   }
+  //   if (destination.droppableId === source.droppableId && destination.index === source.index) {
+  //     return;
+  //   }
+  //   let data = [...section];
+  //   let field = [...data[source.droppableId].field];
+  //   field.splice(source.index, 1);
+  //   data[source.droppableId].field = field;
+  //   let field1 = [...data[destination.droppableId].field];
+  //   field1.splice(destination.index, 0, field[0]);
+  //   data[destination.droppableId].field = field1;
+  //   setSection(data);
+  // };
+
   const classes = useStyles();
   return (
     <Box>
+      {/* <DragDropContext onDragEnd={handleDragEnd}>
+        <div></div>
+      </DragDropContext> */}
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
         <Grid container spacing={1}>
           <Grid item xs={12} md={3} sm={4}>

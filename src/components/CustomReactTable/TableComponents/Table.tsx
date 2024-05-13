@@ -27,6 +27,7 @@ type TTableProps = {
   exportTableView?: boolean;
   virtualization: boolean;
   onRowClick: (row: Row<any>) => void;
+  resource: string;
 };
 
 const TableComponent = forwardRef(function (
@@ -46,7 +47,8 @@ const TableComponent = forwardRef(function (
     height,
     exportTableView = false,
     virtualization = false,
-    onRowClick
+    onRowClick,
+    resource
   }: TTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -267,6 +269,7 @@ const TableComponent = forwardRef(function (
                       reorder={reorder}
                       header={header}
                       key={header.id}
+                      resource={resource}
                     />
                   );
                 })}
