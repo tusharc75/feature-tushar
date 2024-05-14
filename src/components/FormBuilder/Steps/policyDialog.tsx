@@ -12,7 +12,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { resourcePolicy } from './helper';
 import { Autocomplete } from '@material-ui/lab';
 import { AddCircleOutline, Clear } from '@material-ui/icons';
-import { isArray } from 'lodash';
+import { capitalize, isArray } from 'lodash';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -265,7 +266,9 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     <>
       {statusOptions?.length > 0 && fieldOptions?.length && initialData ? (
         <div className="flex flex-col gap-2">
-          <div className="flex justify-end">
+          <div className="flex justify-between items-center mx-2">
+            <p className="text-md font-medium text-transform: uppercase">{Data?.fieldLabel}</p>
+            <HtmlTooltip title={'Add Status and Fields'}>
             <IconButton
               size="small"
               color="primary"
@@ -279,6 +282,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
             >
               <AddCircleOutline fontSize="small" />
             </IconButton>
+            </HtmlTooltip>
           </div>
 
           {initialData?.fieldsData?.map((value, index) => (

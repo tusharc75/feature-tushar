@@ -88,7 +88,7 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusFiel
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`Edit Status Change Fields`}
+                title={`Status Change Fields`}
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
