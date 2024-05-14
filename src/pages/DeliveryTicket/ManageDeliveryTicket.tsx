@@ -317,6 +317,9 @@ const ManageDeliveryTicket = ({
             if (ele?.uniqueId) {
               obj.uniqueId = ele.uniqueId;
             }
+            if(ele?.assetData){
+              obj.assetData = ele.assetData;
+            }
             tempInitialData['assets'].push(obj);
           });
           tempInitialData['products'] = [];

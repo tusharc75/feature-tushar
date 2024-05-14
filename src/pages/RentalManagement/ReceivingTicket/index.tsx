@@ -67,6 +67,7 @@ import { getRentalDeliveryTicket, getRentalProductAssets, uniqueProduct } from '
 import ChangeActualDateDialog from './ChangeActualDateDialog';
 import ExistingRentalJob from './ExistingRentalJob';
 import ReturnTicketDialog from './ReturnTicketDialog';
+import StatusChangeFieldDialog from './StatusAssetChangeDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -131,6 +132,9 @@ const ReceivingTicket = ({
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
 
   const [columns, setColumns] = useState(null);
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({open:false, fields:[], referenceData: {}});
+  const [assetsData,setAssetsData] = useState([])
 
   const {
     state: { user, permissions, selectedEntity }
@@ -155,6 +159,7 @@ const ReceivingTicket = ({
   useEffect(() => {
     getColumn();
     fetchRecords();
+    fetchPolicy();
   }, [currentStep]);
 
   const OpenInNewWindow = (url) => {
@@ -165,7 +170,7 @@ const ReceivingTicket = ({
     try {
       setNextStep(false);
       setNextStepToolTip(null);
-
+      setAssetsData([]);
       dispatch({ type: 'selection', selectedRecords: [] });
       dispatch({ type: 'loading', loading: true });
 
@@ -1001,8 +1006,22 @@ const ReceivingTicket = ({
     setColumns(column);
   };
 
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setAssetPolicyData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+ 
   const handleTicketDialog = (ticketType, deliveryToType, open = true) => {
     const data = {};
+    const matchedStatus = assetPolicyData?.policy?.statusChangeFields?.find((ele)=> ele.status===ASSET_STATUS.underReview);
     data['ticketName'] = rentalManagementData.rentalJobName;
     data['referenceId'] = rentalManagementData._id;
     data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
@@ -1038,8 +1057,11 @@ const ReceivingTicket = ({
       data['processor'] = rentalManagementData?.processor?.optionValue;
     }
     //data['status'] = DELIVERY_TICKET_STATUS.inTransit;
-
-    setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
+    if(matchedStatus){
+     setOpenAssetDataDialog({open:true, fields: matchedStatus?.fields, referenceData:data})
+    }else{
+      setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
+    }  
   };
 
   const handleAddAssetToRepairJob = (repairJobId) => {
@@ -1748,7 +1770,18 @@ const ReceivingTicket = ({
           ticketType={showTicketDialog.ticketType}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           referenceData={showTicketDialog.data}
-          assets={selectedRecords?.filter((e) => e.type === 'Asset')}
+          assets={assetsData?.length ? selectedRecords?.filter((e) => e.type === 'Asset')?.map((ele)=> {
+            const matchedAsset = assetsData.find(asset => asset._id === ele._id);
+            if(matchedAsset){
+              const { _id, assetNumber, ...assetData } = matchedAsset;
+              return {
+                ...ele,
+                assetData: {...assetData}
+              };
+            }
+            return ele
+            })
+            : selectedRecords?.filter((e) => e.type === 'Asset')}
           products={
             showTicketDialog.ticketType === DELIVERY_TICKET_TYPE.return ?
               showQtyDialog?.data && showQtyDialog?.data?.length > 0
@@ -1775,6 +1808,21 @@ const ReceivingTicket = ({
             fetchRecords();
             fetchRentalData();
           }}
+        />
+      )}
+      {openAssetDataDialog.open && (
+        <StatusChangeFieldDialog
+          assetData={selectedRecords?.filter((e) => e.type === 'Asset')}
+          statusFields={openAssetDataDialog.fields}
+          referenceData={openAssetDataDialog.referenceData}
+          setAssetsData={setAssetsData}
+          onClose={()=> setOpenAssetDataDialog({open:false,fields:null,referenceData:null})}
+          onSuccess={(referenceData)=>{
+            setOpenAssetDataDialog({open:false,fields:null,referenceData:null})
+            setShowTicketDialog({ open: true, ticketType: DELIVERY_TICKET_TYPE.receiving, data: referenceData });
+
+          }}
+
         />
       )}
       {showQtyDialog.open && (

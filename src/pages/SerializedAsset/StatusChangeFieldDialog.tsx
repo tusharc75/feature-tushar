@@ -88,7 +88,7 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusFiel
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`Status Change Fields`}
+                title={`${serializedAssetData?.assetNumber}`}
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
