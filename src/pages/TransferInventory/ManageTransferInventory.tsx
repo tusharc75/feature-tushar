@@ -30,7 +30,7 @@ interface Props {
 }
 
 const ManageTransferInventory: FC<Props> = (props) => {
-  const { isClone = false, transferInventoryId = null, onClose, onSuccess } = props;
+  const { isClone = false, transferInventoryId = null, onClose, onSuccess, referenceType = null, referenceId = null, referenceData = null } = props;
 
   const {
     state: { selectedEntity, permissions, user }
@@ -116,6 +116,19 @@ const ManageTransferInventory: FC<Props> = (props) => {
           setAllFields(fieldsDataForCreate);
           createValues.transferNumber = GenerateResourceLineNumber(fieldsDataForCreate);
           createValues.status = 'New';
+          if (referenceType === 'Rental Job' && referenceData) {
+            for (const key in referenceData) {
+              if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+                createValues[key] = referenceData[key];
+              }
+            }
+            fieldsDataForCreate?.forEach((e) => {
+              if (['transferFromPlant', 'transfertoPlant']?.includes(e.fieldName)) {
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
+            });
+          }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
             values: createValues

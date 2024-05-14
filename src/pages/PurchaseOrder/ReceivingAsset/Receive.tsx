@@ -191,7 +191,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
   const handleExportField = (data: any) => {
     const qty = parseInt(data?.inventoryQuantity) || 0;
     let json_data = [...Array(qty).keys()].map((item) => ({
-      Product: data?.product || '',
+      Product: data?.detail || '',
       'Serial Number': ''
     }));
     const header = ['Product', 'Serial Number'];
