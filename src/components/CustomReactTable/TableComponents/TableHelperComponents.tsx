@@ -599,42 +599,6 @@ export const CellRenderer = ({
                 )}
               />
             ) : columnDef?.type === 'date' ? (
-              // <MuiPickersUtilsProvider utils={DateUtils}>
-              //   <KeyboardDatePicker
-              //     fullWidth
-              //     size="small"
-              //     clearable
-              //     autoOk
-              //     variant="inline"
-              //     margin="dense"
-              //     autoFocus
-              //     onBlur={() => {
-              //       console.log('bluredddddddddd', eq(getCellValue(cell), cellValue), cellId);
-              //       if (eq(getCellValue(cell), cellValue)) {
-              //         // resetField();
-              //       } else {
-              //         submitInput();
-              //         cellId = null;
-              //       }
-              //     }}
-              //     onKeyDown={(e) => {
-              //       const target = e.target as HTMLInputElement;
-              //       if (!currentEditingCellPosition) return;
-              //       if (e.key === 'Enter') {
-              //         e.preventDefault();
-              //         target.blur();
-              //       }
-              //     }}
-              //     value={cellValue || null}
-              //     onChange={(date) => {
-              //       setCellValue(date || '');
-              //     }}
-              //     format={dateFormatForInputControl}
-              //     InputLabelProps={{
-              //       shrink: true
-              //     }}
-              //   />
-              // </MuiPickersUtilsProvider>
               <input
                 type="date"
                 className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
