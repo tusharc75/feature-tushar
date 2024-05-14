@@ -1190,8 +1190,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           handleSucess={(rows) => {
             handleAssignSerialNumbers(rows)
           }}
+          referenceType={'Rental Job'}
           isAssigning={isAssigning}
-          warehouse={rentalManagementData?.warehouse?.optionValue}
+          filterByPlant={rentalManagementData?.warehouse}
           ids={productSerialNumbers?.map(e => e?.serialNumber)}
           showWarehouseFilter={true}
         />
