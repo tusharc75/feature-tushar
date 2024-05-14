@@ -303,14 +303,13 @@ const AddSerializedAsset = ({
 
   const handleAddAssetToTransferAsset = (transferAssetId) => {
     axiosInstance()
-      .put(`${transferAsset.api}/add-asset/${transferAssetId}`, {
+      .put(`${transferAsset.api}/add-asset-complete-transfer-asset/${transferAssetId}`, {
         assets: selectedRecords?.map((s) => {
           return {
             _id: s._id,
             currentStatus: s.status
           };
-        }),
-        manualStatus: ASSET_STATUS.reserved
+        })
       })
       .then(({ data }) => {
         fetchAssets();
