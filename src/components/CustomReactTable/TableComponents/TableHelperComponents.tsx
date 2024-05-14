@@ -7,12 +7,9 @@ import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateUtils from '@date-io/date-fns';
-import { dateFormatForInputControl } from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
-import { isEmpty } from 'lodash';
+import { eq, isEqual } from 'lodash';
 
 let cellId = null;
 
@@ -344,7 +341,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           }
         });
         dispatch({ type: 'filter', filters: tempResult });
-        if(!isClientSideGrid) setSavedFilters({ ...savedFilters, [resource]: tempResult });
+        if (!isClientSideGrid) setSavedFilters({ ...savedFilters, [resource]: tempResult });
       }
     }, MINIMUM_SEARCH_DELAY);
 
@@ -533,7 +530,6 @@ export const CellRenderer = ({
                     target.blur();
                   }
                 }}
-                disableClearable
                 options={columnDef?.option || []}
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                 getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -545,7 +541,21 @@ export const CellRenderer = ({
                 onChange={(e, val) => {
                   setCellValue(val?.optionValue || '');
                 }}
-                renderInput={(params) => <TextField {...params} variant="standard" />}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    autoFocus
+                    onBlur={() => {
+                      if (getCellValue(cell) !== cellValue) {
+                        submitInput();
+                      } else {
+                        resetField();
+                      }
+                      cellId = null;
+                    }}
+                  />
+                )}
               />
             ) : columnDef?.type === 'multiSelect' ? (
               <Autocomplete
@@ -562,7 +572,6 @@ export const CellRenderer = ({
                   }
                 }}
                 selectOnFocus
-                disableClearable
                 options={columnDef?.option || []}
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                 value={
@@ -571,28 +580,88 @@ export const CellRenderer = ({
                     : []
                 }
                 onChange={(e, val) => {
-                  setCellValue(val ? val?.map(v => v?.optionValue) : []);
+                  setCellValue(val ? val?.map((v) => v?.optionValue) : []);
                 }}
-                renderInput={(params) => <TextField {...params} variant="standard" />}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    autoFocus
+                    onBlur={() => {
+                      if (!isEqual(getCellValue(cell), cellValue)) {
+                        submitInput();
+                      } else {
+                        resetField();
+                      }
+                      cellId = null;
+                    }}
+                  />
+                )}
               />
             ) : columnDef?.type === 'date' ? (
-              <MuiPickersUtilsProvider utils={DateUtils}>
-                <KeyboardDatePicker
-                  fullWidth
-                  size="small"
-                  clearable
-                  autoOk
-                  variant="inline"
-                  value={cellValue || null}
-                  onChange={(date) => {
-                    setCellValue(date || '');
-                  }}
-                  format={dateFormatForInputControl}
-                  InputLabelProps={{
-                    shrink: true
-                  }}
-                />
-              </MuiPickersUtilsProvider>
+              // <MuiPickersUtilsProvider utils={DateUtils}>
+              //   <KeyboardDatePicker
+              //     fullWidth
+              //     size="small"
+              //     clearable
+              //     autoOk
+              //     variant="inline"
+              //     margin="dense"
+              //     autoFocus
+              //     onBlur={() => {
+              //       console.log('bluredddddddddd', eq(getCellValue(cell), cellValue), cellId);
+              //       if (eq(getCellValue(cell), cellValue)) {
+              //         // resetField();
+              //       } else {
+              //         submitInput();
+              //         cellId = null;
+              //       }
+              //     }}
+              //     onKeyDown={(e) => {
+              //       const target = e.target as HTMLInputElement;
+              //       if (!currentEditingCellPosition) return;
+              //       if (e.key === 'Enter') {
+              //         e.preventDefault();
+              //         target.blur();
+              //       }
+              //     }}
+              //     value={cellValue || null}
+              //     onChange={(date) => {
+              //       setCellValue(date || '');
+              //     }}
+              //     format={dateFormatForInputControl}
+              //     InputLabelProps={{
+              //       shrink: true
+              //     }}
+              //   />
+              // </MuiPickersUtilsProvider>
+              <input
+                type="date"
+                className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+                value={cellValue ? new Date(cellValue).toISOString().split('T')[0] : ''}
+                onKeyDown={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (!currentEditingCellPosition) return;
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    target.blur();
+                  }
+                }}
+                autoFocus
+                onBlur={() => {
+                  if (!eq(getCellValue(cell), cellValue)) {
+                    submitInput();
+                  } else {
+                    resetField();
+                  }
+                  cellId = null;
+                }}
+                onChange={(e) => {
+                  const date = new Date();
+                  const time = date.toTimeString().split(' ')[0];
+                  setCellValue(`${e.target.value}T${time}.000Z`);
+                }}
+              />
             ) : columnDef?.type === 'number' ? (
               <input
                 autoFocus
