@@ -361,7 +361,7 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
       <Box className="max-w-[800px]">
         <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
       </Box>
-      {columns ? (
+      {column ? (
         <CustomReactTable
           height={'calc(100vh - 250px)'}
           columns={column}
