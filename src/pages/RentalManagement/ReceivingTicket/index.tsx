@@ -1818,9 +1818,8 @@ const ReceivingTicket = ({
           setAssetsData={setAssetsData}
           onClose={()=> setOpenAssetDataDialog({open:false,fields:null,referenceData:null})}
           onSuccess={(referenceData)=>{
-            setOpenAssetDataDialog({open:false,fields:null,referenceData:null})
+            setOpenAssetDataDialog({open:false,fields:[],referenceData:{}})
             setShowTicketDialog({ open: true, ticketType: DELIVERY_TICKET_TYPE.receiving, data: referenceData });
-
           }}
 
         />
