@@ -1793,7 +1793,12 @@ const ReceivingTicket = ({
                 uniqueId: d?.uniqueId,
                 productSerialNumbers: d?.productSerialNumbers
               }))}
-          onClose={() => setShowTicketDialog({ open: false, ticketType: '', data: {} })}
+          onClose={() =>{ 
+            setShowTicketDialog({ open: false, ticketType: '', data: {} })
+            if(assetsData?.length){
+              setAssetsData([]);
+            }
+          }}
           onSuccess={() => {
             setShowTicketDialog({ open: false, ticketType: '', data: {} });
             if (showTicketDialog.ticketType === DELIVERY_TICKET_TYPE.return) {
