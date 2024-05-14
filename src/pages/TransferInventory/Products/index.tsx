@@ -246,8 +246,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         };
       });
       if (rows?.length) {
-        if (user?.brandPolicy?.productInventorySerialNumberRequired) {
-          if (rows?.every((r) => r?.qty === r?.serialNumber?.length)) {
+        const serializedProduct = rows?.filter((e) => e?.serializedProduct)
+        if (serializedProduct?.length) {
+          if (serializedProduct?.every((r) => r?.qty === r?.serialNumber?.length)) {
             setNextStep(true);
           }
         }
