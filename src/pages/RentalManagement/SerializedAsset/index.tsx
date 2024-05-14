@@ -903,7 +903,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             {`Create ${routes.sublease.title}`}
           </MenuItem>
         )}
-        {selectedRecords.length && assetAssignedProduct?.length && user?.user?.brandPolicy?.productInventorySerialNumberRequired ?
+        {selectedRecords.length && assetAssignedProduct?.length ?
           <MenuItem
             onClick={() => {
               setAssignSerialNumbersDialog(true)
