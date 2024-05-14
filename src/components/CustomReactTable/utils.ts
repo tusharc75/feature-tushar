@@ -253,6 +253,12 @@ export const getUniqueDataByKey = (rows: any[], key = '_id') => {
 
 export const getCellValue = (cell) => {
   const { row, column } = cell;
+  if(column?.columnDef?.editable && column?.columnDef?.type === 'dropDown'){
+    return row.original[`${column.id}Id`]
+  }
+  if(column?.columnDef?.editable && column?.columnDef?.type === 'multiSelect'){
+    return [...(row.original[`${column.id}Id`] ? [row.original[`${column.id}Id`]] : []), ...(row.original[`rest${column.id}`]?.map(o => o?.optionValue) || [])]
+  }
   return row.original[column.id];
 };
 
