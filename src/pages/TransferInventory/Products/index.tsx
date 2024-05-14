@@ -560,8 +560,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           handleSucess={(rows) => {
             handleAssignSerialNumbers(rows);
           }}
+          referenceType={'Transfer Inventory'}
           isAssigning={isAssigning}
-          warehouse={transferInventoryData?.transferFromPlant?.optionValue}
+          filterByPlant={transferInventoryData?.transferFromPlant}
           ids={productSerialNumbers?.map((e) => e._id)}
         />
       )}

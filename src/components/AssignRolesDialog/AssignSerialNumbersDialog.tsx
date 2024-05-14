@@ -1,4 +1,4 @@
-import { Box, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@material-ui/core';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import { ListingPageHeader } from '../PageHeaders';
@@ -10,12 +10,21 @@ import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from '../Helpers/NoDataCell';
 import routes from '../Helpers/Routes';
 import moment from 'moment';
-import { dateFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { dateFormat, gridLoadingTimeout, prepareDataForGrid, transferInventory } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
+import ManageTransferInventory from 'src/pages/TransferInventory/ManageTransferInventory';
 
-const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleSucess, isAssigning, warehouse = null, ids, showWarehouseFilter = false }) => {
-
+const AssignSerialNumbersDialog = ({
+  selectedProducts = [],
+  handleClose,
+  handleSucess,
+  referenceType,
+  isAssigning,
+  filterByPlant = null,
+  ids,
+  showWarehouseFilter = false
+}) => {
   const renderedFrom = `serialNumbers_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -29,7 +38,8 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [warehouseOption, setWarehouseOption] = useState([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant?.optionValue);
+  const [showTransferInventoryDialog, setShowTransferInventoryDialog] = useState(false);
 
   const columns = [
     {
@@ -214,34 +224,35 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
         <Box style={{ display: 'inline' }}>
           {products.length > 0
             ? products?.map((d) => (
-              <Box
-                m={0.5}
-                p={1}
-                border={1}
-                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+                <Box
+                  m={0.5}
+                  p={1}
+                  border={1}
+                  className={`cursor-pointer rounded-sm ${
+                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                   }`}
-                borderColor="var(--common-border-color)"
-                onClick={() => {
-                  if (selectedProduct === d.id) {
-                    setSelectedProduct(null);
-                  } else {
-                    setSelectedProduct(d.id);
-                  }
-                }}
-                style={{ display: 'inline-block' }}
-              >
-                {d?.qty < 0 ? (
-                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                ) : d?.qty === 0 ? (
-                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                ) : (
-                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                )}
-              </Box>
-            ))
+                  borderColor="var(--common-border-color)"
+                  onClick={() => {
+                    if (selectedProduct === d.id) {
+                      setSelectedProduct(null);
+                    } else {
+                      setSelectedProduct(d.id);
+                    }
+                  }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {d?.qty < 0 ? (
+                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                  ) : d?.qty === 0 ? (
+                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                  ) : (
+                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                  )}
+                </Box>
+              ))
             : null}
         </Box>
-        {showWarehouseFilter &&
+        {showWarehouseFilter && (
           <Box pt={1} width={'40%'}>
             <Autocomplete
               fullWidth
@@ -271,9 +282,48 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
               )}
             />
           </Box>
-        }
+        )}
       </Box>
     );
+  };
+
+  const rightSideContents = () => {
+    return selectedWarehouse != filterByPlant?.optionValue && referenceType === 'Rental Job' ? (
+      <>
+        <Button
+          style={{ minWidth: 'max-content' }}
+          size="small"
+          color="primary"
+          onClick={() => {
+            setShowTransferInventoryDialog(true);
+          }}
+          variant={'contained'}
+          disabled={selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0)}
+        >
+          {`Transfer to ${filterByPlant?.optionLabel}`}
+          {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
+        </Button>
+      </>
+    ) : null;
+  };
+
+  const handleTransferSerialNumber = (transferInventoryId) => {
+    axiosInstance()
+      .put(`${transferInventory.api}/add-product-complete-transfer-product/${transferInventoryId}`, {
+        products: products?.map((product) => ({
+          product: product?.id,
+          qty: selectedProducts?.find((p) => p?.materialId === product?.id)?.qty || 0,
+          serialNumber: selectedRecords?.filter((r) => r?.product === product?.id)?.map((s) => s?._id)
+        }))
+      })
+      .then(({ data }) => {
+        fetchData();
+        setShowTransferInventoryDialog(false);
+        handleAdd()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -285,6 +335,7 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
           onSearch={handleSearch}
           isActionButtonVisible={false}
           leftSideContents={leftSideContents()}
+          rightSideContents={rightSideContents()}
           addButtonProps={{
             iconsEnabled: false,
             disabled: isAssigning || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0),
@@ -292,7 +343,7 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
             text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
           }}
           addButtonOnclick={handleAdd}
-          isAddButtonVisible
+          isAddButtonVisible={selectedWarehouse === filterByPlant?.optionValue && referenceType === 'Rental Job'}
           setQueryString={false}
         />
         {products.length > 0 && products.some((s) => s.qty < 0) ? (
@@ -312,6 +363,21 @@ const AssignSerialNumbersDialog = ({ selectedProducts = [], handleClose, handleS
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
+        )}
+        {showTransferInventoryDialog && (
+          <ManageTransferInventory
+            onClose={() => {
+              setShowTransferInventoryDialog(false);
+            }}
+            onSuccess={(data) => {
+              handleTransferSerialNumber(data?._id);
+            }}
+            referenceType={referenceType}
+            referenceData={{
+              transferFromPlant: selectedWarehouse,
+              transfertoPlant: filterByPlant?.optionValue
+            }}
+          />
         )}
       </CustomDialogContent>
     </Dialog>
