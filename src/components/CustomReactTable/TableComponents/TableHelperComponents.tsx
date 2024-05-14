@@ -626,7 +626,7 @@ export const CellRenderer = ({
                   setCellValue(`${e.target.value}T${time}.000Z`);
                 }}
               />
-            ) : columnDef?.type === 'number' ? (
+            ) : (
               <input
                 autoFocus
                 type="number"
@@ -648,7 +648,7 @@ export const CellRenderer = ({
                   setCellValue(value);
                 }}
               />
-            ) : null}
+            )}
           </div>
         </CellShell>
       );
