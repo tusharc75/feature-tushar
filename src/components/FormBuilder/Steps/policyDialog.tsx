@@ -204,7 +204,6 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
       fullWidth
       size="small"
       multiple={multiple}
-      limitTags={1}
       disableCloseOnSelect={multiple}
       options={options}
       getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
@@ -245,7 +244,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     let statusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'status')?.fieldData?.option;
     setStatusOptions(statusOptions);
     fieldsData = fieldsData
-      ?.filter((ele) => ele.fieldData?.fieldName !== 'status')
+      ?.filter((ele) => ele.fieldData?.fieldName !== 'status' && ['singleLine', 'multiLine', 'number', 'decimal', 'date']?.includes(ele.fieldData?.type))
       ?.map((e) => {
         return {
           optionLabel: e?.fieldData?.fieldLabel,
