@@ -182,21 +182,20 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
       let rows = data.material.filter((e) => !e.parentId);
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = `${
-          parent.type === 'service'
+        parent.detail = `${parent.type === 'service'
             ? parent?.serviceDetail?.serviceName
             : parent.type === 'product'
-            ? parent?.productDetail?.productName
-            : parent?.packageDetail?.packageName
-        }`;
+              ? parent?.productDetail?.productName
+              : parent?.packageDetail?.packageName
+          }`;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription || ''
-            : '';
+              ? parent?.productDetail?.productDescription || ''
+              : parent.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct ? data.inventory?.filter((e) => e._id === parent._id).length : 0;
@@ -207,21 +206,21 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
           parent.subRows.filter((d) => d.type !== 'asset').length === 0
             ? parent.assetQty
             : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
-              (parent.type === 'product' ? parent.assetQty : 0);
+            (parent.type === 'product' ? parent.assetQty : 0);
         parent.assetAssignedQty =
           parent.subRows.filter((d) => d.type !== 'asset').length === 0
             ? parent.assetAssignedQty
             : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0) +
-              (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
+            (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
         parent.isValid = parent.serializedProduct
           ? parent.assetAssignedQty === parent.assetQty
             ? true
             : false
           : parent.subRows.length !== 0
-          ? parent.assetAssignedQty ===
-              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+            ? parent.assetAssignedQty ===
+            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
             parent.subRows.every((d) => d.isValid)
-          : true;
+            : true;
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
             parent.isValid = true;
@@ -274,16 +273,16 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.productDetail?.productName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       _subRow.assetQty =
         _subRow.type === 'product' || _subRow.type === 'package'
@@ -300,17 +299,17 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         tempSubRows.filter((d) => d.type !== 'asset').length === 0
           ? _subRow.assetQty
           : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
-            (_subRow.type === 'product' ? _subRow.assetQty : 0);
+          (_subRow.type === 'product' ? _subRow.assetQty : 0);
       _subRow.isValid = _subRow.serializedProduct
         ? _subRow.assetAssignedQty === _subRow.assetQty
           ? true
           : false
         : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
-        ? true
-        : _subRow.assetAssignedQty ===
-          tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
-        ? true
-        : false;
+          ? true
+          : _subRow.assetAssignedQty ===
+            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+            ? true
+            : false;
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
@@ -379,7 +378,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         <MenuItem
           disabled={
             selectedRecords?.length &&
-            selectedRecords?.filter((e) => e.type === 'asset' && e.canDelete)?.length === selectedRecords?.filter((e) => e.type === 'asset')?.length
+              selectedRecords?.filter((e) => e.type === 'asset' && e.canDelete)?.length === selectedRecords?.filter((e) => e.type === 'asset')?.length
               ? false
               : true
           }
@@ -469,7 +468,8 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             handleAssignAssets(rows);
           }}
           referenceData={{
-            warehouse: subleaseData?.fromWarehouse?.optionValue
+            warehouse: subleaseData?.fromWarehouse?.optionValue,
+            _id: subleaseData?._id
           }}
           isAssigning={isAdding}
           selectedProducts={assetAssignedProduct?.map((i) => {

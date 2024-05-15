@@ -125,7 +125,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       deepFilter = `${deepFilter}&subleaseAsset=0`;
     }
     if (reference === 'sublease') {
-      deepFilter = `${deepFilter}&masterSubleaseAsset=true&subleaseAsset=0`;
+      deepFilter = `${deepFilter}&masterSubleaseAsset=true&subleaseAsset=0&subleaseId=${referenceData?._id}`;
       if (referenceData?.warehouse) {
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
       }
