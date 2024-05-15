@@ -67,7 +67,7 @@ import { getRentalDeliveryTicket, getRentalProductAssets, uniqueProduct } from '
 import ChangeActualDateDialog from './ChangeActualDateDialog';
 import ExistingRentalJob from './ExistingRentalJob';
 import ReturnTicketDialog from './ReturnTicketDialog';
-import StatusChangeFieldDialog from './StatusAssetChangeDialog';
+import AssetDetailsChangeDialog from './AssetDetailsChangeDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -133,8 +133,8 @@ const ReceivingTicket = ({
 
   const [columns, setColumns] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({open:false, fields:[], referenceData: {}});
-  const [assetsData,setAssetsData] = useState([])
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, fields: [], referenceData: {} });
+  const [assetsData, setAssetsData] = useState([])
 
   const {
     state: { user, permissions, selectedEntity }
@@ -981,12 +981,12 @@ const ReceivingTicket = ({
         allowedToEdit ? (
           <HtmlTooltip
             title={
-             row?.original?.isInvoiceCreated && !row?.original?.isAllowedEndDate ? 'Invoice Created - Cannot change Start Date' :
-              row?.original?.isAllowedStartDate === false && row?.original?.isAllowedEndDate === false
-                ? `Can change the Date after delivered`
-                : row?.original?.isAllowedEndDate === false && row?.original?.isAllowedStartDate !== true
-                  ? `Can change the End Date after received`
-                  : 'Update - Start Date/End Date'
+              row?.original?.isInvoiceCreated && !row?.original?.isAllowedEndDate ? 'Invoice Created - Cannot change Start Date' :
+                row?.original?.isAllowedStartDate === false && row?.original?.isAllowedEndDate === false
+                  ? `Can change the Date after delivered`
+                  : row?.original?.isAllowedEndDate === false && row?.original?.isAllowedStartDate !== true
+                    ? `Can change the End Date after received`
+                    : 'Update - Start Date/End Date'
             }
           >
             <span>
@@ -1018,10 +1018,9 @@ const ReceivingTicket = ({
       toastConfig.setToastConfig(error);
     }
   };
- 
+
   const handleTicketDialog = (ticketType, deliveryToType, open = true) => {
     const data = {};
-    const matchedStatus = assetPolicyData?.policy?.statusChangeFields?.find((ele)=> ele.status===ASSET_STATUS.underReview);
     data['ticketName'] = rentalManagementData.rentalJobName;
     data['referenceId'] = rentalManagementData._id;
     data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
@@ -1057,11 +1056,13 @@ const ReceivingTicket = ({
       data['processor'] = rentalManagementData?.processor?.optionValue;
     }
     //data['status'] = DELIVERY_TICKET_STATUS.inTransit;
-    if(matchedStatus){
-     setOpenAssetDataDialog({open:true, fields: matchedStatus?.fields, referenceData:data})
-    }else{
+
+    const matchedStatus = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
+    if (matchedStatus) {
+      setOpenAssetDataDialog({ open: true, fields: matchedStatus?.fields, referenceData: data })
+    } else {
       setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
-    }  
+    }
   };
 
   const handleAddAssetToRepairJob = (repairJobId) => {
@@ -1770,17 +1771,17 @@ const ReceivingTicket = ({
           ticketType={showTicketDialog.ticketType}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           referenceData={showTicketDialog.data}
-          assets={assetsData?.length ? selectedRecords?.filter((e) => e.type === 'Asset')?.map((ele)=> {
+          assets={assetsData?.length ? selectedRecords?.filter((e) => e.type === 'Asset')?.map((ele) => {
             const matchedAsset = assetsData.find(asset => asset._id === ele._id);
-            if(matchedAsset){
+            if (matchedAsset) {
               const { _id, assetNumber, ...assetData } = matchedAsset;
               return {
                 ...ele,
-                assetData: {...assetData}
+                assetData: { ...assetData }
               };
             }
             return ele
-            })
+          })
             : selectedRecords?.filter((e) => e.type === 'Asset')}
           products={
             showTicketDialog.ticketType === DELIVERY_TICKET_TYPE.return ?
@@ -1793,9 +1794,9 @@ const ReceivingTicket = ({
                 uniqueId: d?.uniqueId,
                 productSerialNumbers: d?.productSerialNumbers
               }))}
-          onClose={() =>{ 
+          onClose={() => {
             setShowTicketDialog({ open: false, ticketType: '', data: {} })
-            if(assetsData?.length){
+            if (assetsData?.length) {
               setAssetsData([]);
             }
           }}
@@ -1816,17 +1817,16 @@ const ReceivingTicket = ({
         />
       )}
       {openAssetDataDialog.open && (
-        <StatusChangeFieldDialog
+        <AssetDetailsChangeDialog
           assetData={selectedRecords?.filter((e) => e.type === 'Asset')}
           statusFields={openAssetDataDialog.fields}
           referenceData={openAssetDataDialog.referenceData}
           setAssetsData={setAssetsData}
-          onClose={()=> setOpenAssetDataDialog({open:false,fields:null,referenceData:null})}
-          onSuccess={(referenceData)=>{
-            setOpenAssetDataDialog({open:false,fields:[],referenceData:{}})
+          onClose={() => setOpenAssetDataDialog({ open: false, fields: null, referenceData: null })}
+          onSuccess={(referenceData) => {
+            setOpenAssetDataDialog({ open: false, fields: [], referenceData: {} })
             setShowTicketDialog({ open: true, ticketType: DELIVERY_TICKET_TYPE.receiving, data: referenceData });
           }}
-
         />
       )}
       {showQtyDialog.open && (
