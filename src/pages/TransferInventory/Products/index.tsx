@@ -320,7 +320,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   };
 
   const onSaveEdit = (data, row) => {
-    if (!data || !data?.qty || data?.type !== MATERIAL_TYPE.product) return;
+    if (!data || !data?.qty || row?.type !== MATERIAL_TYPE.product) return;
     if (row.canDelete === false) {
       toastConfig.setToastConfig({
         type: 'error',
