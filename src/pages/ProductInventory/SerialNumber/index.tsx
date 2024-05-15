@@ -11,23 +11,31 @@ import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { Autocomplete } from '@material-ui/lab';
+import { TextField } from '@material-ui/core';
 
 const SerialNumber = ({ product, warehouse }) => {
   
   const { state, dispatch } = useTableReducer();
   const { page, limit, filters, sorting } = state;
   const [renderCount, setRenderCount] = useState(0);
+  const [warehouseOptions, setWarehouseOptions] = useState(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(',')?.length === 1 ? warehouse : 'All');
   const {
     state: { user }
   }: any = useData();
 
   useEffect(() => {
-    if (renderCount > 0) {
+    getWarehouse();
+  }, []);
+
+  useEffect(() => {
+    if (warehouseOptions && renderCount > 0) {
       fetchRecords();
     } else {
       setRenderCount(renderCount + 1);
     }
-  }, [page, limit, filters, sorting]);
+  }, [page, limit, filters, sorting, warehouseOptions, selectedWarehouse]);
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -35,11 +43,18 @@ const SerialNumber = ({ product, warehouse }) => {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    if (warehouse) {
-      deepFilter = `${deepFilter}&warehouse=${warehouse}&isAll=true`;
-    } else {
-      deepFilter = `${deepFilter}&isAll=true`;
+    if (selectedWarehouse) {
+      let tempWarehouse =
+        selectedWarehouse === 'All'
+          ? warehouseOptions
+            ?.filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
+          : selectedWarehouse;
+
+      deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`;
     }
+
     if (product) {
       deepFilter = `${deepFilter}&products=${product}`;
     }
@@ -58,6 +73,14 @@ const SerialNumber = ({ product, warehouse }) => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     return deepFilter;
+  };
+
+  const getWarehouse = () => {
+    axiosInstance()
+      .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Storage Location')
+      .then(({ data: { data } }) => {
+        setWarehouseOptions([{ optionLabel: 'All', optionValue: 'All' }, ...data.Warehouse]);
+      });
   };
 
   const fetchRecords = async () => {
@@ -100,6 +123,7 @@ const SerialNumber = ({ product, warehouse }) => {
     {
       accessor: 'warehouse',
       Header: routes.warehouse.title,
+      disableFilters: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.warehouse ? (
@@ -143,6 +167,35 @@ const SerialNumber = ({ product, warehouse }) => {
 
   return (
     <>
+      { warehouseOptions ? (
+        <div className="md:pr-[82px]">
+        <Grid container spacing={2} justifyContent="space-between">
+          <Grid item md={3} sm={6} xs={12}>
+            <Autocomplete
+              options={warehouseOptions}
+              getOptionLabel={(option: any) => option.optionLabel}
+              disableClearable
+              getOptionSelected={(option: any, val) => option.optionValue === val}
+              value={
+                warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                  ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                  : ''
+              }
+              onChange={(e, val) => {
+                if (val !== null) {
+                  setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+                }
+              }}
+              renderInput={(params) => (
+                <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+              )}
+            />
+          </Grid>
+        </Grid>
+        </div>
+        ): (
+        <div className="min-h-[50px]" />
+      )}
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ? (
           <CustomReactTable
