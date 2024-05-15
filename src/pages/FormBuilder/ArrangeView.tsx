@@ -89,7 +89,6 @@ const ArrangeView = (props) => {
 
   const handleDragEnd = useCallback(
     (result: DropResult) => {
-      console.log(result);
       if (!result.destination) {
         return;
       }

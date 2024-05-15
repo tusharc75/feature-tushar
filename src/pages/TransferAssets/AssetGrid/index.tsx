@@ -323,6 +323,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog(false);
           }}
+          referenceData={transferAssetData}
           referenceType="Transfer Asset"
           isAdding={isAdding}
           selectedProducts={[]}
