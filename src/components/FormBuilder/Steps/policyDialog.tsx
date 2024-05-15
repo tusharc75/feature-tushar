@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, FormControlLabel, Checkbox, TextField, IconButton } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, FormControlLabel, Checkbox, TextField, IconButton, Typography } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -11,8 +11,8 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { resourcePolicy } from './helper';
 import { Autocomplete } from '@material-ui/lab';
-import { AddCircleOutline, Clear } from '@material-ui/icons';
-import { capitalize, isArray } from 'lodash';
+import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
+import { isArray } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
@@ -202,7 +202,6 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
   return (
     <Autocomplete
       fullWidth
-      className="max-w-[300px]"
       size="small"
       multiple={multiple}
       limitTags={1}
@@ -267,8 +266,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
       {statusOptions?.length > 0 && fieldOptions?.length && initialData ? (
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center mx-2">
-            <p className="text-md font-medium text-transform: uppercase">{Data?.fieldLabel}</p>
-            <HtmlTooltip title={'Add Status and Fields'}>
+          <Typography variant="subtitle2">{Data.fieldLabel}</Typography>
+            <HtmlTooltip title={'Add'}>
             <IconButton
               size="small"
               color="primary"
@@ -311,7 +310,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                   fieldName={field?.fieldLabel}
                 />
               ))}
-
+              <HtmlTooltip title='Remove'>
               <IconButton
                 size="small"
                 color="primary"
@@ -323,8 +322,9 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                   onChange(null, updatedData);
                 }}
               >
-                <Clear fontSize="small" />
+                <RemoveCircleOutline fontSize="small" />
               </IconButton>
+              </HtmlTooltip>
             </div>
           ))}
         </div>

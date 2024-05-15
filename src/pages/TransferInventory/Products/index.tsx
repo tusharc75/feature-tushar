@@ -320,7 +320,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   };
 
   const onSaveEdit = (data, row) => {
-    if (!data || !data?.qty || data?.type !== MATERIAL_TYPE.product) return;
+    if (!data || !data?.qty || row?.type !== MATERIAL_TYPE.product) return;
     if (row.canDelete === false) {
       toastConfig.setToastConfig({
         type: 'error',
@@ -560,8 +560,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           handleSucess={(rows) => {
             handleAssignSerialNumbers(rows);
           }}
+          referenceType={'Transfer Inventory'}
           isAssigning={isAssigning}
-          warehouse={transferInventoryData?.transferFromPlant?.optionValue}
+          filterByPlant={transferInventoryData?.transferFromPlant}
           ids={productSerialNumbers?.map((e) => e._id)}
         />
       )}
