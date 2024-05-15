@@ -633,9 +633,9 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   return (
     <Fragment>
       <DetailsPageHeader
-        isAddButtonVisible={true}
+        isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={true}
+        isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{
           disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length),
@@ -643,7 +643,6 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         }}
         hasXpadding
       />
-
       {columns ? (
         <>
           <Box zIndex={5} width={'100%'}>
@@ -658,6 +657,8 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               onSaveEdit={onSaveInlineEdit}
+              hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
             />
           </Box>
         </>
