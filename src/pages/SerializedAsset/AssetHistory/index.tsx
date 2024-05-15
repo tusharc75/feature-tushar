@@ -23,7 +23,7 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     from: new Date(moment().subtract('1', 'year').calendar()),
     to: new Date()
   });
-  const [column, setColumn] = useState([])
+  const [column,setColumn] = useState([])
 
   const {
     state: { permissions }
@@ -287,13 +287,13 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     }
   ];
 
-  useEffect(() => {
+  useEffect(()=>{
     let statusChangeFieldColumns = []
-    statusChangeFieldColumns = uniq(resourceData?.policy?.statusChangeFields?.flatMap(ele => ele.fields))
-    let statusChangeFields = fields?.filter((ele) => [...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName))
+    statusChangeFieldColumns  = uniq(resourceData?.policy?.statusChangeFields?.flatMap(ele => ele.fields))
+    let statusChangeFields = fields?.filter((ele)=>[...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName))
     let extraColumns = generateColumns(renderedFrom, statusChangeFields, routes.serializedAssetDetail.path, true);
-    setColumn([...columns, ...extraColumns])
-  }, [])
+    setColumn([...columns,...extraColumns])
+  },[])
 
   useEffect(() => {
     if (id) {
@@ -338,8 +338,10 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
       .get(`/history/inventory/${id}${queryString}`)
       .then(({ data: { data, count } }) => {
         data = data?.map((u, index) => ({
-          ...u,
+          ...((({ assetData, ...rest }) => rest)(u)), 
+          ...u?.assetData,
           _id: index + 1,
+          id: index + 1,
           reference: u?.reference?.optionLabel,
           referenceId: u?.reference?.optionValue,
           warehouse: u?.warehouse?.optionLabel,
