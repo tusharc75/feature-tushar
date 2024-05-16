@@ -198,7 +198,7 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
 
   const fetchData = async () => {
     setNextStep(false);
-    setNextStepToolTip(transferInventoryMessage.assignSerialNumbers);
+    setNextStepToolTip(null);
     dispatch({ type: 'selection', selectedRecords: [] });
     dispatch({ type: 'loading', loading: true });
     const {
@@ -251,11 +251,17 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
         if (serializedProduct?.length) {
           if (serializedProduct?.every((r) => r?.qty === r?.serialNumber?.length)) {
             setNextStep(true);
+            setNextStepToolTip(null);
+          } else {
+            setNextStepToolTip(transferInventoryMessage.assignSerialNumbers);
           }
         }
         else {
           setNextStep(true);
+          setNextStepToolTip(null);
         }
+      } else {
+        setNextStepToolTip(transferInventoryMessage.assignSerialNumbers);
       }
       setProductSerialNumbers(data?.serialNumber)
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
