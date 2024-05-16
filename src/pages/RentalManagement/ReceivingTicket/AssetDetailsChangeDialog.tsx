@@ -93,13 +93,11 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
           assetErrors[fieldName] = `${field.fieldLabel} is required`;
         }
       });
-
       if (Object.keys(assetErrors).length > 0) {
-        errors.assetData.push({...assetErrors});
-      }
-      
+        errors.assetData[index] = { ...assetErrors };
+      }   
     });
-    return errors;
+    return errors?.assetData?.length ? errors : {};
   };
 
   return (
