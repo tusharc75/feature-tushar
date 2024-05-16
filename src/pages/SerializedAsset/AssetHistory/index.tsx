@@ -338,8 +338,8 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
       .get(`/history/inventory/${id}${queryString}`)
       .then(({ data: { data, count } }) => {
         data = data?.map((u, index) => ({
-          ...((({ statusChangeFieldData, ...rest }) => rest)(u)), 
-          ...u?.statusChangeFieldData,
+          ...((({ assetData, ...rest }) => rest)(u)), 
+          ...u?.assetData,
           _id: index + 1,
           id: index + 1,
           reference: u?.reference?.optionLabel,

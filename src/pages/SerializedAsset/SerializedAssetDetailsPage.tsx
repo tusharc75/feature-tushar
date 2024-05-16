@@ -310,7 +310,7 @@ const SerializedAssetDetailsPage = () => {
         status: obj?.status,
         comment: obj?.reason ? obj?.reason : '',
         reference: { _id: assetDetails._id, type: INVENTORY_HISTORY_TYPE.serializedAssets },
-        statusChangeFieldData: obj?.statusChangeFieldData
+        assetData: obj?.assetData
       })
       .then(({ data }) => {
         setUpdateLoading(false);
@@ -628,7 +628,7 @@ const SerializedAssetDetailsPage = () => {
            productInventoryId={id}
            onClose={()=> setOpenStatusChangeFieldDialog({open:false,fields:[]})} 
            onSuccess={(values)=>{ 
-            handleStatusUpdate({ status: status, statusChangeFieldData: values });
+            handleStatusUpdate({ status: status, assetData: values });
             setOpenStatusChangeFieldDialog({open:false,fields:[]})
           }}  
         />
