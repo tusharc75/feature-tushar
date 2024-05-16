@@ -59,7 +59,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                   title={data?.oldValue?.label}
                                   onClick={() => {
                                     if(data?.lookupResource!=='Brand')
-                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)
+                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)
                                     }}
                                 >
                                   {data?.oldValue?.label}
@@ -159,7 +159,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                                   title={data?.oldValue?.label}
                                                   onClick={() => {
                                                     if(data?.lookupResource!=='Brand')
-                                                    window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}}
+                                                    window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)}}
                                                 >
                                                   {data?.oldValue?.label}
                                                 </p>
