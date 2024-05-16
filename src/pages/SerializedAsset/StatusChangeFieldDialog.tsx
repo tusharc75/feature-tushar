@@ -6,59 +6,59 @@ import {
   CustomDialogTransition,
   getObjKeysWithValues,
   yupSchema,
-  serializedAsset
 } from '../../constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import axiosInstance from 'src/axios/axiosInstance';
 import { Form, Formik } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CircularProgress } from '@material-ui/core';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-export default function StatusChangeFieldDialog({ onClose, onSuccess, statusFields, fields, serializedAssetData, productInventoryId }) {
-  const toastConfig = useContext(CustomToastContext);
+export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPolicy, fields, serializedAssetData, productInventoryId }) {
+
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [decimalFields, setDecimalFields] = useState([]);
 
   useEffect(() => {
-    let fieldsData = fields.filter((d) => [...statusFields].includes(d.fieldData.fieldName));
+    let fieldsData = fields.filter((d) => statusPolicy?.fields.includes(d.fieldData.fieldName));
     let fieldsDataForUpdate = fieldsData.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+    let initialValues = getObjKeysWithValues(serializedAssetData, fieldsDataForUpdate);
+    const decimalField = [];
+    if (statusPolicy?.sumDecimalField) {
+      fieldsDataForUpdate?.forEach((e) => {
+        if (e?.type === 'decimal') {
+          decimalField.push(e.fieldName)
+          initialValues[`${e.fieldName}_orignal`] = initialValues[e.fieldName];
+          initialValues[e.fieldName] = 0;
+        }
+      })
+    }
+    setDecimalFields(decimalField)
     setInitialData({
       fields: fieldsDataForUpdate,
-      values: getObjKeysWithValues(serializedAssetData, fieldsDataForUpdate)
+      values: initialValues
     });
   }, []);
 
   const handleSubmit = (values) => {
     setSubmitting(true);
-    let updatedValues = {
-        ...values,
-        _id: productInventoryId,
-        productCategory: serializedAssetData.productCategory.optionValue,
-        product: serializedAssetData.product.optionValue,
-        warehouse: serializedAssetData.warehouse.optionValue,
-        assetNumberType: serializedAssetData.assetNumberType,
-        assetNumber: serializedAssetData.assetNumber,
-        status: serializedAssetData.status,
-    }
-    
-    axiosInstance()
-      .put(`${serializedAsset.api}`, updatedValues)
-      .then(({ data: { data } }) => {
-        setSubmitting(false);
-        onSuccess(values);
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
+    const data: any = {}
+    statusPolicy?.fields?.forEach((fieldName) => {
+      if (statusPolicy?.sumDecimalField && decimalFields?.includes(fieldName)) {
+        data[fieldName] = parseFloat(values[fieldName] || 0) + parseFloat(values[`${fieldName}_orignal`] || 0)
+      }
+      else {
+        data[fieldName] = values[fieldName]
+      }
+    })
+    onSuccess(data);
+    setSubmitting(false);
   };
 
 

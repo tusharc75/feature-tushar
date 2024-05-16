@@ -81,7 +81,7 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
 
   return (
     <Dialog
-      maxWidth="sm"
+      maxWidth="md"
       fullScreen={fullScreen}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
@@ -231,6 +231,7 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
 };
 
 const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resource, setFieldValue }) => {
+
   const [fieldOptions, setFieldOptions] = useState([]);
   const [statusOptions, setStatusOptions] = useState([]);
   const [initialData, setInitialData] = useState({ fieldsData: [...Data?.data] });
@@ -238,20 +239,19 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   useEffect(() => {
     fetchOptions();
   }, []);
+
   const fetchOptions = async () => {
     const fields = await axiosInstance().get(`/field?resource=${resource}`);
     let fieldsData = fields?.data?.data;
     let statusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'status')?.fieldData?.option;
     setStatusOptions(statusOptions);
-    fieldsData = fieldsData
-      ?.filter((ele) => ele.fieldData?.fieldName !== 'status' && ['singleLine', 'multiLine', 'number', 'decimal', 'date']?.includes(ele.fieldData?.type))
-      ?.map((e) => {
-        return {
-          optionLabel: e?.fieldData?.fieldLabel,
-          optionValue: e?.fieldData?.fieldName,
-          order: e?.fieldData?.order
-        };
-      });
+    fieldsData = fieldsData?.filter((ele) => ['singleLine', 'multiLine', 'number', 'decimal', 'date']?.includes(ele.fieldData?.type))?.map((e) => {
+      return {
+        optionLabel: e?.fieldData?.fieldLabel,
+        optionValue: e?.fieldData?.fieldName,
+        order: e?.fieldData?.order
+      };
+    });
     setFieldOptions(fieldsData);
   };
 
@@ -265,64 +265,76 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
       {statusOptions?.length > 0 && fieldOptions?.length && initialData ? (
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center mx-2">
-          <Typography variant="subtitle2">{Data.fieldLabel}</Typography>
+            <Typography variant="subtitle2">{Data.fieldLabel}</Typography>
             <HtmlTooltip title={'Add'}>
-            <IconButton
-              size="small"
-              color="primary"
-              aria-label="delete"
-              onClick={() => {
-                const data = [...initialData?.fieldsData];
-                data.push({ status: '', fields: [] });
-                setInitialData({ fieldsData: [...data] });
-                onChange(null, data);
-              }}
-            >
-              <AddCircleOutline fontSize="small" />
-            </IconButton>
-            </HtmlTooltip>
-          </div>
-
-          {initialData?.fieldsData?.map((value, index) => (
-            <div className="flex items-center justify-center gap-1 p-2" key={index}>
-              {Data?.fields?.map((field) => (
-                <DropDownField
-                  key={field.fieldName}
-                  options={field?.fieldName === 'status' ? getStatusOptions(initialData?.fieldsData) : fieldOptions}
-                  error={errors[`data.${idx}.data.${index}.${field.fieldName}`]}
-                  touched={touched?.data && touched.data[idx].data[index][field.fieldName]}
-                  onChange={(e, val) => {
-                    const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
-                    setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
-                    let updatedData = [...initialData?.fieldsData];
-                    updatedData[index][field.fieldName] = updatedVal;
-                    setInitialData({ fieldsData: updatedData });
-                    onChange(null, updatedData);
-                  }}
-                  value={
-                    field?.type === 'multiselect'
-                      ? fieldOptions.filter((opt) => value[`${field.fieldName}`].some((val) => val === opt.optionValue))
-                      : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
-                  }
-                  multiple={field?.type === 'multiselect'}
-                  fieldLabel={field?.fieldLabel}
-                  fieldName={field?.fieldLabel}
-                />
-              ))}
-              <HtmlTooltip title='Remove'>
               <IconButton
                 size="small"
                 color="primary"
                 aria-label="delete"
                 onClick={() => {
-                  const updatedData = [...initialData.fieldsData];
-                  updatedData.splice(index, 1);
-                  setInitialData({ fieldsData: [...updatedData] });
-                  onChange(null, updatedData);
+                  const data = [...initialData?.fieldsData];
+                  data.push({ status: '', fields: [] });
+                  setInitialData({ fieldsData: [...data] });
+                  onChange(null, data);
                 }}
               >
-                <RemoveCircleOutline fontSize="small" />
+                <AddCircleOutline fontSize="small" />
               </IconButton>
+            </HtmlTooltip>
+          </div>
+          {initialData?.fieldsData?.map((value, index) => (
+            <div className="flex items-center justify-center gap-1 p-2" key={index}>
+              {Data?.fields?.map((field) => (
+                field?.type === 'checkBox' ?
+                  <FormControlLabel
+                    control={<Checkbox name={field.fieldName} checked={value[field.fieldName]}
+                      onChange={(e) => {
+                        const updatedVal = e.target.checked;
+                        setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
+                        let updatedData = [...initialData?.fieldsData];
+                        updatedData[index][field.fieldName] = updatedVal;
+                        setInitialData({ fieldsData: updatedData });
+                        onChange(null, updatedData);
+                      }}
+                    />} label={field?.fieldLabel} />
+                  :
+                  <DropDownField
+                    key={field.fieldName}
+                    options={field?.fieldName === 'status' ? getStatusOptions(initialData?.fieldsData) : fieldOptions}
+                    error={errors[`data.${idx}.data.${index}.${field.fieldName}`]}
+                    touched={touched?.data && touched.data[idx].data[index][field.fieldName]}
+                    onChange={(e, val) => {
+                      const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
+                      setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
+                      let updatedData = [...initialData?.fieldsData];
+                      updatedData[index][field.fieldName] = updatedVal;
+                      setInitialData({ fieldsData: updatedData });
+                      onChange(null, updatedData);
+                    }}
+                    value={
+                      field?.type === 'multiselect'
+                        ? fieldOptions.filter((opt) => value[`${field.fieldName}`].some((val) => val === opt.optionValue))
+                        : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                    }
+                    multiple={field?.type === 'multiselect'}
+                    fieldLabel={field?.fieldLabel}
+                    fieldName={field?.fieldLabel}
+                  />
+              ))}
+              <HtmlTooltip title='Remove'>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  aria-label="delete"
+                  onClick={() => {
+                    const updatedData = [...initialData.fieldsData];
+                    updatedData.splice(index, 1);
+                    setInitialData({ fieldsData: [...updatedData] });
+                    onChange(null, updatedData);
+                  }}
+                >
+                  <RemoveCircleOutline fontSize="small" />
+                </IconButton>
               </HtmlTooltip>
             </div>
           ))}
