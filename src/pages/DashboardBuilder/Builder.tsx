@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextField, Box, Paper, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button } from '@material-ui/core';
+import { TextField, Box, Paper, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase, startCase } from 'lodash';
@@ -48,7 +48,7 @@ const Builder = (props: Props) => {
       .then(({ data: { data } }) => {
         setKpiLists(data);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   React.useEffect(fetchKpis, []);
@@ -142,7 +142,6 @@ const Builder = (props: Props) => {
             error={errors && !Boolean(formValues.chartTitle) && Boolean(errors?.chartTitle)}
           />
         </Box>
-
         <Box mt={2}>
           <Autocomplete
             size="small"
@@ -164,7 +163,6 @@ const Builder = (props: Props) => {
             )}
           />
         </Box>
-
         <Box mt={2}>
           <Autocomplete
             size="small"
@@ -186,7 +184,6 @@ const Builder = (props: Props) => {
             )}
           />
         </Box>
-
         {formValues.chartType === 'Bar' && (
           <Box mt={2}>
             <Autocomplete
@@ -200,12 +197,6 @@ const Builder = (props: Props) => {
             />
           </Box>
         )}
-        {/* {isNaN(formValues.column) && (
-          <Box mt={2}>
-            <TextField required size="small" fullWidth variant="outlined" label={`Custom Column`} />
-          </Box>
-        )} */}
-
         <Box mt={2}>
           <FormGroup row>
             <FormControlLabel
@@ -246,7 +237,6 @@ const Builder = (props: Props) => {
             )}
           </FormGroup>
         </Box>
-
         {formValues.hasFilters && (
           <Box mt={2}>
             <Autocomplete
@@ -291,21 +281,47 @@ const Builder = (props: Props) => {
               <FormControlLabel value={3} control={<Radio />} label="Col 3" />
               <FormControlLabel value={6} control={<Radio />} label="Col 6" />
               <FormControlLabel value={12} control={<Radio />} label="Col 12" />
-              {/* <FormControlLabel value={'custom'} control={<Radio />} label="Custom" /> */}
             </RadioGroup>
           </FormControl>
         </Box>
         <Box mt={2}>
-          <FormGroup row>
-            <FormControlLabel
-              control={<Checkbox checked={formValues.currency} onChange={(e) => handleChange('currency', e.target.checked)} />}
-              label="Currency"
-            />
-          </FormGroup>
+          <Grid container>
+            <Grid item>
+              <FormGroup row>
+                <FormControlLabel
+                  control={<Checkbox
+                    checked={formValues.currency}
+                    onChange={(e) => {
+                      handleChange('currency', e.target.checked)
+                      if (e.target.checked) {
+                        handleChange('percentage', false)
+                      }
+                    }}
+                  />}
+                  label="Currency"
+                />
+              </FormGroup>
+            </Grid>
+            <Grid item>
+              <FormGroup row>
+                <FormControlLabel
+                  control={<Checkbox
+                    checked={formValues.percentage}
+                    onChange={(e) => {
+                      handleChange('percentage', e.target.checked)
+                      if (e.target.checked) {
+                        handleChange('currency', false)
+                      }
+                    }}
+                  />}
+                  label="Percentage"
+                />
+              </FormGroup>
+            </Grid>
+          </Grid>
         </Box>
       </div>
-
-      <Box>
+      <Box mt={2}>
         <Button disableRipple fullWidth color="primary" onClick={addFormConfigs} variant="contained">
           {Boolean(selectedData) ? 'Apply Changes' : 'Add Chart'}
         </Button>
