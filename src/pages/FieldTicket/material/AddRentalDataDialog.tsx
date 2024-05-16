@@ -110,6 +110,27 @@ const AddRentalDataDialog = ({
     setColumns(column);
   };
 
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
+              : _subRow.type === MATERIAL_TYPE.manualEntry ? _subRow?.detail || ''
+                : '';
+      _subRow.description = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || ''
+        : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
+            : _subRow.description || '';
+      _subRow.qtyDisplay = _subRow.qty * parent.qtyDisplay;
+      _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.hideSelection = true;
+    });
+    return subRows;
+  };
+
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -145,13 +166,15 @@ const AddRentalDataDialog = ({
         rows.push(obj);
       });
     } else if (type === MATERIAL_TYPE.package) {
-      rows = data?.material?.filter((e) => e.type === MATERIAL_TYPE.package && !ids?.some((ele) => ele === e.materialId));
+      let material = data?.material?.filter((e) => e.type === MATERIAL_TYPE.package && !ids?.some((ele) => ele === e.materialId));
+      rows = material?.filter((e) => !e?.parentId);
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.type = MATERIAL_TYPE.package;
         parent.detail = parent?.packageDetail?.packageName;
         parent.description = parent?.packageDetail?.packageDescription;
         parent.qtyDisplay = parent.qty;
+        parent.subRows = generateNestedData(material, parent);
       });
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -202,6 +225,7 @@ const AddRentalDataDialog = ({
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               isClientSideGrid={true}
+              expander={true}
             />
           ) : (
             <Box p={2} height={500}>

@@ -834,7 +834,10 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           handleClose={() => {
             setMaterialDialog({ open: false, type: '', parentId: null });
           }}
-          ids={dataRows?.map((row) => row?.materialId)}
+          ids={dataRows?.flatMap((row) => [
+            row?.materialId,
+            ...(row?.subRows?.map(subRow => subRow.materialId) || [])
+          ])}
           isSubmitting={isSubmitting}
         />
       )}
