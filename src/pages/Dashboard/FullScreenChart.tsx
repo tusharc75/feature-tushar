@@ -5,7 +5,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ChartTypes from './ChartTypes';
 
-const FullScreenChart = ({ close, chart, filterData, globalFilters, selectedDashboardId, fetchDashboards }) => {
+const FullScreenChart = ({ close, chart, filterData, globalFilters, selectedDashboardId, fetchDashboards, kpiFilters, fetchKpiFilters }) => {
   return (
     <Dialog open onClose={close} fullScreen>
       <CustomDialogHeader title={'Full Screen Chart'} onClose={close} showRequiredLabel={false} />
@@ -17,6 +17,8 @@ const FullScreenChart = ({ close, chart, filterData, globalFilters, selectedDash
           chart={chart}
           filterData={filterData}
           globalFilters={globalFilters}
+          kpiFilters={kpiFilters}
+          fetchKpiFilters={fetchKpiFilters}
         />
       </CustomDialogContent>
     </Dialog>
