@@ -199,6 +199,8 @@ const Dashboard = () => {
             }}
             selectedDashboardId={selectedDashboardId}
             fetchDashboards={fetchDashboards}
+            kpiFilters={kpiFilters?.filter((k: any) => k.kpi === camelCase(selectedChart.kpi.name))}
+            fetchKpiFilters={fetchKpiFilters}
           />
         )}
       </MuiPickersUtilsProvider>
