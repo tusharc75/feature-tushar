@@ -21,7 +21,7 @@ import {
   prepareDataForGrid,
   transferInventory
 } from 'src/constants/helpers';
-import { deleteDisable } from 'src/constants/messageHelpers';
+import { deleteDisable, transferInventoryMessage } from 'src/constants/messageHelpers';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddInventory from './AddInventory';
@@ -30,7 +30,7 @@ import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSe
 import { isMobile, isTablet } from 'react-device-detect';
 import { startCase } from 'lodash';
 
-const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus, stepFullScreen }) => {
+const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -198,6 +198,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
 
   const fetchData = async () => {
     setNextStep(false);
+    setNextStepToolTip(transferInventoryMessage.assignSerialNumbers);
     dispatch({ type: 'selection', selectedRecords: [] });
     dispatch({ type: 'loading', loading: true });
     const {

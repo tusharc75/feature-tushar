@@ -112,3 +112,7 @@ export const subleaseMessage = {
     sameWarehouse: `Selected Assets must be in same ${routes.warehouse.title} to perform this action`,
     pickupDeliveryDifferent: 'Pickup and Delivery must be different',
 };
+
+export const transferInventoryMessage = {
+    assignSerialNumbers: 'Assign Serial Numbers to proceed',
+}
