@@ -8,9 +8,13 @@ import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { camelCase, capitalize } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
   const [fullScreen, setFullScreen] = useState(true);
+  const {
+    state: { permissions }
+  }: any = useData();
 
   return (
     <Dialog
@@ -55,9 +59,12 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 moment(data?.oldValue).format(dateFormat)
                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                 <p
-                                  className="link text-truncate"
+                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' :''}text-truncate`}
                                   title={data?.oldValue?.label}
-                                  onClick={() => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)}
+                                  onClick={() => {
+                                    if(permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
+                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)
+                                    }}
                                 >
                                   {data?.oldValue?.label}
                                 </p>
@@ -74,9 +81,12 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 moment(data?.newValue).format(dateFormat)
                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                 <p
-                                  className="link text-truncate"
+                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' :''} text-truncate`}
                                   title={data?.newValue?.label}
-                                  onClick={() => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}
+                                  onClick={() => {
+                                    
+                                    if(permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
+                                    window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}}
                                 >
                                   {data?.newValue?.label}
                                 </p>
@@ -150,13 +160,11 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                                 moment(data?.oldValue).format(dateFormat)
                                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                                 <p
-                                                  className="link text-truncate"
+                                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' :''} text-truncate`}
                                                   title={data?.oldValue?.label}
-                                                  onClick={() =>
-                                                    window.open(
-                                                      `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`
-                                                    )
-                                                  }
+                                                  onClick={() => {
+                                                    if(permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
+                                                    window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)}}
                                                 >
                                                   {data?.oldValue?.label}
                                                 </p>
@@ -173,13 +181,11 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                                 moment(data?.newValue).format(dateFormat)
                                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                                 <p
-                                                  className="link text-truncate"
+                                                className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' :''} text-truncate`}
                                                   title={data?.newValue?.label}
-                                                  onClick={() =>
-                                                    window.open(
-                                                      `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`
-                                                    )
-                                                  }
+                                                  onClick={() => {
+                                                    if(permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
+                                                    window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}}
                                                 >
                                                   {data?.newValue?.label}
                                                 </p>
