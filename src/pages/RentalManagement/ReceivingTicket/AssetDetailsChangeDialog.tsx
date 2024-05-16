@@ -81,6 +81,27 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
     setSubmitting(false);
   };
 
+  const validate = (values) => {
+    const errors = {
+      assetData: []
+    };
+    values.assetData.forEach((value, index) => {
+      const assetErrors = {};
+      initialData.fields.forEach((field) => {
+        const fieldName = field.fieldName;
+        if (!value[fieldName] && field.required) {
+          assetErrors[fieldName] = `${field.fieldLabel} is required`;
+        }
+      });
+
+      if (Object.keys(assetErrors).length > 0) {
+        errors.assetData.push({...assetErrors});
+      }
+      
+    });
+    return errors;
+  };
+
   return (
     <Dialog
       TransitionComponent={CustomDialogTransition}
@@ -95,7 +116,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} enableReinitialize={true} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
+        <Formik initialValues={initialData.values} enableReinitialize={true} validate={validate} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
@@ -133,8 +154,8 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
                                       {...field}
                                       fieldData={field}
                                       values={data}
-                                      errors={errors}
-                                      touched={touched}
+                                      errors={(errors['assetData'] && errors['assetData'][index]) ?? {}}
+                                      touched={(touched['assetData'] && touched['assetData'][index]) ?? {}}
                                       disabled={field?.disableOnEdit || field?.isUneditable}
                                       label={field.fieldLabel}
                                       name={field.fieldName}
